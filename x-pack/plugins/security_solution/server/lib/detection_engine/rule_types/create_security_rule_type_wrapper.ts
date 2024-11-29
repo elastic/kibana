@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash';
+import { isEmpty, partition } from 'lodash';
 import agent from 'elastic-apm-node';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { TIMESTAMP } from '@kbn/rule-data-utils';
 import { createPersistenceRuleTypeWrapper } from '@kbn/rule-registry-plugin/server';
-import type { DataViewFieldBase } from '@kbn/es-query';
 import { buildExceptionFilter } from '@kbn/lists-plugin/server/services/exception_lists';
 import { technicalRuleFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/technical_rule_field_map';
 import type { FieldMap } from '@kbn/alerts-as-data-utils';
@@ -26,6 +25,7 @@ import {
   hasTimestampFields,
   isMachineLearningParams,
   isEsqlParams,
+  getDisabledActionsWarningText,
 } from './utils/utils';
 import { DEFAULT_MAX_SIGNALS, DEFAULT_SEARCH_AFTER_PAGE_SIZE } from '../../../../common/constants';
 import type { CreateSecurityRuleTypeWrapper } from './types';
@@ -44,8 +44,8 @@ import { withSecuritySpan } from '../../../utils/with_security_span';
 import { getInputIndex, DataViewError } from './utils/get_input_output_index';
 import { TIMESTAMP_RUNTIME_FIELD } from './constants';
 import { buildTimestampRuntimeMapping } from './utils/build_timestamp_runtime_mapping';
-import { getFieldsForWildcard } from './utils/get_fields_for_wildcard';
 import { alertsFieldMap, rulesFieldMap } from '../../../../common/field_maps';
+import { sendAlertSuppressionTelemetryEvent } from './utils/telemetry/send_alert_suppression_telemetry_event';
 
 const aliasesFieldMap: FieldMap = {};
 Object.entries(aadFieldConversion).forEach(([key, value]) => {
@@ -67,6 +67,7 @@ export const securityRuleTypeFieldMap = {
 export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
   ({
     lists,
+    actions,
     logger,
     config,
     publicBaseUrl,
@@ -75,6 +76,8 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
     version,
     isPreview,
     experimentalFeatures,
+    alerting,
+    analytics,
   }) =>
   (type) => {
     const { alertIgnoreFields: ignoreFields, alertMergeStrategy: mergeStrategy } = config;
@@ -125,6 +128,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             params,
             previousStartedAt,
             startedAt,
+            startedAtOverridden,
             services,
             spaceId,
             state,
@@ -132,7 +136,6 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
           } = options;
           let runState = state;
           let inputIndex: string[] = [];
-          let inputIndexFields: DataViewFieldBase[] = [];
           let runtimeMappings: estypes.MappingRuntimeFields | undefined;
           const { from, maxSignals, timestampOverride, timestampOverrideFallbackDisabled, to } =
             params;
@@ -183,9 +186,9 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
           });
 
           let result = createResultObject(state);
-          let wroteWarningStatus = false;
-          let warningMessage;
-          let hasError = false;
+
+          const wrapperWarnings = [];
+          const wrapperErrors = [];
 
           const primaryTimestamp = timestampOverride ?? TIMESTAMP;
           const secondaryTimestamp =
@@ -256,56 +259,56 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             if (!isMachineLearningParams(params)) {
               const privileges = await checkPrivilegesFromEsClient(esClient, inputIndex);
 
-              const { wroteWarningMessage, warningStatusMessage: readIndexWarningMessage } =
-                await hasReadIndexPrivileges({
-                  privileges,
-                  ruleExecutionLogger,
-                  uiSettingsClient,
-                });
+              const readIndexWarningMessage = await hasReadIndexPrivileges({
+                privileges,
+                ruleExecutionLogger,
+                uiSettingsClient,
+              });
 
-              wroteWarningStatus = wroteWarningMessage;
-              warningMessage = readIndexWarningMessage;
+              if (readIndexWarningMessage != null) {
+                wrapperWarnings.push(readIndexWarningMessage);
+              }
 
-              if (!wroteWarningStatus) {
-                const timestampFieldCaps = await withSecuritySpan('fieldCaps', () =>
-                  services.scopedClusterClient.asCurrentUser.fieldCaps(
-                    {
-                      index: inputIndex,
-                      fields: secondaryTimestamp
-                        ? [primaryTimestamp, secondaryTimestamp]
-                        : [primaryTimestamp],
-                      include_unmapped: true,
-                      runtime_mappings: runtimeMappings,
-                      ignore_unavailable: true,
-                    },
-                    { meta: true }
-                  )
-                );
+              const timestampFieldCaps = await withSecuritySpan('fieldCaps', () =>
+                services.scopedClusterClient.asCurrentUser.fieldCaps(
+                  {
+                    index: inputIndex,
+                    fields: secondaryTimestamp
+                      ? [primaryTimestamp, secondaryTimestamp]
+                      : [primaryTimestamp],
+                    include_unmapped: true,
+                    runtime_mappings: runtimeMappings,
+                    ignore_unavailable: true,
+                  },
+                  { meta: true }
+                )
+              );
 
-                const {
-                  wroteWarningStatus: wroteWarningStatusResult,
-                  foundNoIndices,
-                  warningMessage: warningMissingTimestampFieldsMessage,
-                } = await hasTimestampFields({
+              const { foundNoIndices, warningMessage: warningMissingTimestampFieldsMessage } =
+                await hasTimestampFields({
                   timestampField: primaryTimestamp,
                   timestampFieldCapsResponse: timestampFieldCaps,
                   inputIndices: inputIndex,
                   ruleExecutionLogger,
                 });
-                wroteWarningStatus = wroteWarningStatusResult;
-                warningMessage = warningMissingTimestampFieldsMessage;
-                skipExecution = foundNoIndices;
+              if (warningMissingTimestampFieldsMessage != null) {
+                wrapperWarnings.push(warningMissingTimestampFieldsMessage);
               }
+              skipExecution = foundNoIndices;
             }
           } catch (exc) {
             await ruleExecutionLogger.logStatusChange({
               newStatus: RuleExecutionStatusEnum['partial failure'],
               message: `Check privileges failed to execute ${exc}`,
             });
-            wroteWarningStatus = true;
+            wrapperWarnings.push(`Check privileges failed to execute ${exc}`);
           }
 
-          const { tuples, remainingGap } = getRuleRangeTuples({
+          const {
+            tuples,
+            remainingGap,
+            warningStatusMessage: rangeTuplesWarningMessage,
+          } = await getRuleRangeTuples({
             startedAt,
             previousStartedAt,
             from,
@@ -313,26 +316,20 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             interval,
             maxSignals: maxSignals ?? DEFAULT_MAX_SIGNALS,
             ruleExecutionLogger,
+            alerting,
           });
-
-          if (remainingGap.asMilliseconds() > 0) {
-            hasError = true;
-
-            const gapDuration = `${remainingGap.humanize()} (${remainingGap.asMilliseconds()}ms)`;
-
-            await ruleExecutionLogger.logStatusChange({
-              newStatus: RuleExecutionStatusEnum.failed,
-              message: `${gapDuration} were not queried between this rule execution and the last execution, so signals may have been missed. Consider increasing your look behind time or adding more Kibana instances`,
-              metrics: { executionGap: remainingGap },
-            });
+          if (rangeTuplesWarningMessage != null) {
+            wrapperWarnings.push(rangeTuplesWarningMessage);
           }
 
-          if (!isMachineLearningParams(params) && !isEsqlParams(params)) {
-            inputIndexFields = await getFieldsForWildcard({
-              index: inputIndex,
-              dataViews: services.dataViews,
-              language: params.language,
-              ruleExecutionLogger,
+          if (remainingGap.asMilliseconds() > 0) {
+            const gapDuration = `${remainingGap.humanize()} (${remainingGap.asMilliseconds()}ms)`;
+            const gapErrorMessage = `${gapDuration} were not queried between this rule execution and the last execution, so signals may have been missed. Consider increasing your look behind time or adding more Kibana instances`;
+            wrapperErrors.push(gapErrorMessage);
+            await ruleExecutionLogger.logStatusChange({
+              newStatus: RuleExecutionStatusEnum.failed,
+              message: gapErrorMessage,
+              metrics: { executionGap: remainingGap },
             });
           }
 
@@ -350,6 +347,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               lists: params.exceptionsList,
             });
 
+            const alertTimestampOverride = isPreview ? startedAt : undefined;
             const bulkCreate = bulkCreateFactory(
               alertWithPersistence,
               refresh,
@@ -357,10 +355,19 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               experimentalFeatures
             );
 
-            const alertTimestampOverride = isPreview ? startedAt : undefined;
             const legacySignalFields: string[] = Object.keys(aadFieldConversion);
+            const [ignoreFieldsRegexes, ignoreFieldsStandard] = partition(
+              [...ignoreFields, ...legacySignalFields],
+              (field: string) => field.startsWith('/') && field.endsWith('/')
+            );
+            const ignoreFieldsObject: Record<string, boolean> = {};
+            ignoreFieldsStandard.forEach((field) => {
+              ignoreFieldsObject[field] = true;
+            });
+            const intendedTimestamp = startedAtOverridden ? startedAt : undefined;
             const wrapHits = wrapHitsFactory({
-              ignoreFields: [...ignoreFields, ...legacySignalFields],
+              ignoreFields: ignoreFieldsObject,
+              ignoreFieldsRegexes,
               mergeStrategy,
               completeRule,
               spaceId,
@@ -368,6 +375,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               alertTimestampOverride,
               publicBaseUrl,
               ruleExecutionLogger,
+              intendedTimestamp,
             });
 
             const wrapSequences = wrapSequencesFactory({
@@ -379,6 +387,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               publicBaseUrl,
               indicesToQuery: inputIndex,
               alertTimestampOverride,
+              intendedTimestamp,
             });
 
             const { filter: exceptionFilter, unprocessedExceptions } = await buildExceptionFilter({
@@ -401,7 +410,6 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                     inputIndex,
                     exceptionFilter,
                     unprocessedExceptions,
-                    inputIndexFields,
                     runtimeMappings: {
                       ...runtimeMappings,
                       ...timestampRuntimeMappings,
@@ -423,6 +431,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                     refreshOnIndexingAlerts: refresh,
                     publicBaseUrl,
                     experimentalFeatures,
+                    intendedTimestamp,
                   },
                 });
 
@@ -433,6 +442,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   enrichmentTimes: result.enrichmentTimes.concat(runResult.enrichmentTimes),
                   createdSignals,
                   createdSignalsCount: createdSignals.length,
+                  suppressedAlertsCount: runResult.suppressedAlertsCount,
                   errors: result.errors.concat(runResult.errors),
                   lastLookbackDate: runResult.lastLookBackDate,
                   searchAfterTimes: result.searchAfterTimes.concat(runResult.searchAfterTimes),
@@ -440,6 +450,8 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   success: result.success && runResult.success,
                   warning: warningMessages.length > 0,
                   warningMessages,
+                  userError: runResult.userError,
+                  ...(runResult.loggedRequests ? { loggedRequests: runResult.loggedRequests } : {}),
                 };
                 runState = runResult.state;
               }
@@ -449,6 +461,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 enrichmentTimes: [],
                 createdSignals: [],
                 createdSignalsCount: 0,
+                suppressedAlertsCount: 0,
                 errors: [],
                 searchAfterTimes: [],
                 state,
@@ -458,10 +471,27 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               };
             }
 
-            if (result.warningMessages.length) {
+            const disabledActions = rule.actions.filter(
+              (action) => !actions.isActionTypeEnabled(action.actionTypeId)
+            );
+
+            const createdSignalsCount = result.createdSignals.length;
+
+            if (disabledActions.length > 0) {
+              const disabledActionsWarning = getDisabledActionsWarningText({
+                alertsCreated: createdSignalsCount > 0,
+                disabledActions,
+              });
+              wrapperWarnings.push(disabledActionsWarning);
+            }
+
+            if (result.warningMessages.length > 0 || wrapperWarnings.length > 0) {
+              // write warning messages first because if we have still have an error to write
+              // we want to write the error messages last, so that the errors are set
+              // as the current status of the rule.
               await ruleExecutionLogger.logStatusChange({
                 newStatus: RuleExecutionStatusEnum['partial failure'],
-                message: truncateList(result.warningMessages).join(),
+                message: truncateList(result.warningMessages.concat(wrapperWarnings)).join(', '),
                 metrics: {
                   searchDurations: result.searchAfterTimes,
                   indexingDurations: result.bulkCreateTimes,
@@ -469,10 +499,19 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 },
               });
             }
-
-            const createdSignalsCount = result.createdSignals.length;
-
-            if (result.success) {
+            if (wrapperErrors.length > 0 || result.errors.length > 0) {
+              await ruleExecutionLogger.logStatusChange({
+                newStatus: RuleExecutionStatusEnum.failed,
+                message: truncateList(result.errors.concat(wrapperErrors)).join(', '),
+                metrics: {
+                  searchDurations: result.searchAfterTimes,
+                  indexingDurations: result.bulkCreateTimes,
+                  enrichmentDurations: result.enrichmentTimes,
+                  executionGap: remainingGap,
+                },
+                userError: result.userError,
+              });
+            } else if (!(result.warningMessages.length > 0) && !(wrapperWarnings.length > 0)) {
               ruleExecutionLogger.debug('Security Rule execution completed');
               ruleExecutionLogger.debug(
                 `Finished indexing ${createdSignalsCount} alerts into ${ruleDataClient.indexNameWithNamespace(
@@ -483,34 +522,9 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                     : ''
                 }`
               );
-
-              if (!hasError && !wroteWarningStatus && !result.warning) {
-                await ruleExecutionLogger.logStatusChange({
-                  newStatus: RuleExecutionStatusEnum.succeeded,
-                  message: 'Rule execution completed successfully',
-                  metrics: {
-                    searchDurations: result.searchAfterTimes,
-                    indexingDurations: result.bulkCreateTimes,
-                    enrichmentDurations: result.enrichmentTimes,
-                  },
-                });
-              } else if (wroteWarningStatus && !hasError && !result.warning) {
-                await ruleExecutionLogger.logStatusChange({
-                  newStatus: RuleExecutionStatusEnum['partial failure'],
-                  message: warningMessage,
-                  metrics: {
-                    searchDurations: result.searchAfterTimes,
-                    indexingDurations: result.bulkCreateTimes,
-                    enrichmentDurations: result.enrichmentTimes,
-                  },
-                });
-              }
-            } else {
               await ruleExecutionLogger.logStatusChange({
-                newStatus: RuleExecutionStatusEnum.failed,
-                message: `An error occurred during rule execution: message: "${truncateList(
-                  result.errors
-                ).join()}"`,
+                newStatus: RuleExecutionStatusEnum.succeeded,
+                message: 'Rule execution completed successfully',
                 metrics: {
                   searchDurations: result.searchAfterTimes,
                   indexingDurations: result.bulkCreateTimes,
@@ -532,7 +546,20 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             });
           }
 
-          return { state: result.state };
+          if (!isPreview && analytics) {
+            sendAlertSuppressionTelemetryEvent({
+              analytics,
+              suppressedAlertsCount: result.suppressedAlertsCount ?? 0,
+              createdAlertsCount: result.createdSignalsCount,
+              ruleAttributes: rule,
+              ruleParams: params,
+            });
+          }
+
+          return {
+            state: result.state,
+            ...(result.loggedRequests ? { loggedRequests: result.loggedRequests } : {}),
+          };
         });
       },
       alerts: {

@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { GroupOption } from '@kbn/securitysolution-grouping';
+import { GroupOption } from '@kbn/grouping';
 import { FINDINGS_GROUPING_OPTIONS } from '../../../common/constants';
 import { FindingsBaseURLQuery } from '../../../common/types';
 import { CloudSecurityDefaultColumn } from '../../../components/cloud_security_data_table';
@@ -126,5 +126,6 @@ export const defaultColumns: CloudSecurityDefaultColumn[] = [
   { id: 'rule.benchmark.rule_number' },
   { id: 'rule.name' },
   { id: 'rule.section' },
+  { id: 'observer.vendor' },
   { id: '@timestamp' },
 ];

@@ -15,7 +15,7 @@ import {
   EuiSwitchEvent,
 } from '@elastic/eui';
 import { createReactOverlays } from '@kbn/kibana-react-plugin/public';
-import { mapEmbeddablesSingleton } from '../../embeddable/map_embeddables_singleton';
+import { mapEmbeddablesSingleton } from '../../react_embeddable/map_embeddables_singleton';
 import { getCore } from '../../kibana_services';
 
 export function openModal(title: string) {
@@ -34,7 +34,7 @@ class FilterByMapExtentModal extends Component<Props> {
   _renderSwitches() {
     return mapEmbeddablesSingleton.getMapPanels().map((mapPanel) => {
       return (
-        <EuiFormRow display="columnCompressedSwitch" key={mapPanel.id}>
+        <EuiFormRow display="columnCompressed" key={mapPanel.id}>
           <EuiSwitch
             label={mapPanel.getTitle()}
             checked={mapPanel.getIsFilterByMapExtent()}

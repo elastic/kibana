@@ -18,10 +18,9 @@ import {
 } from '@elastic/charts';
 import React from 'react';
 import { EuiLoadingChart, useEuiTheme } from '@elastic/eui';
-import { EUI_SPARKLINE_THEME_PARTIAL } from '@elastic/eui/dist/eui_charts_theme';
 
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '../../../utils/kibana_react';
+import { useKibana } from '../../../hooks/use_kibana';
 
 interface Data {
   key: number;
@@ -42,6 +41,7 @@ export interface Props {
 export function SloSparkline({ chart, data, id, isLoading, size, state }: Props) {
   const charts = useKibana().services.charts;
   const baseTheme = charts.theme.useChartsBaseTheme();
+  const sparklineTheme = charts.theme.useSparklineOverrides();
 
   const { euiTheme } = useEuiTheme();
 
@@ -60,7 +60,7 @@ export function SloSparkline({ chart, data, id, isLoading, size, state }: Props)
       <Settings
         baseTheme={baseTheme}
         showLegend={false}
-        theme={[EUI_SPARKLINE_THEME_PARTIAL]}
+        theme={sparklineTheme}
         locale={i18n.getLocale()}
       />
       <Tooltip type={TooltipType.None} />
@@ -82,7 +82,7 @@ export function SloSparkline({ chart, data, id, isLoading, size, state }: Props)
         fit={Fit.Nearest}
         id={id}
         lineSeriesStyle={{
-          point: { visible: false },
+          point: { visible: 'never' },
         }}
         xAccessor={'key'}
         xScaleType={ScaleType.Time}

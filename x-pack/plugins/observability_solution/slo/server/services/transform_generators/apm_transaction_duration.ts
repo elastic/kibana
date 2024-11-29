@@ -5,27 +5,32 @@
  * 2.0.
  */
 
+import { estypes } from '@elastic/elasticsearch';
 import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
+import { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { DataViewsService } from '@kbn/data-views-plugin/common';
 import {
   ALL_VALUE,
   apmTransactionDurationIndicatorSchema,
   timeslicesBudgetingMethodSchema,
 } from '@kbn/slo-schema';
-import { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { estypes } from '@elastic/elasticsearch';
-import { getElasticsearchQueryOrThrow, TransformGenerator } from '.';
+import { TransformGenerator, getElasticsearchQueryOrThrow } from '.';
 import {
-  getSLOTransformId,
   SLO_DESTINATION_INDEX_NAME,
-  SLO_INGEST_PIPELINE_NAME,
+  getSLOPipelineId,
+  getSLOTransformId,
 } from '../../../common/constants';
 import { getSLOTransformTemplate } from '../../assets/transform_templates/slo_transform_template';
-import { APMTransactionDurationIndicator, SLO } from '../../domain/models';
+import { APMTransactionDurationIndicator, SLODefinition } from '../../domain/models';
 import { InvalidTransformError } from '../../errors';
-import { parseIndex } from './common';
+import { getFilterRange, getTimesliceTargetComparator, parseIndex } from './common';
 
 export class ApmTransactionDurationTransformGenerator extends TransformGenerator {
-  public getTransformParams(slo: SLO): TransformPutTransformRequest {
+  constructor(spaceId: string, dataViewService: DataViewsService) {
+    super(spaceId, dataViewService);
+  }
+
+  public async getTransformParams(slo: SLODefinition): Promise<TransformPutTransformRequest> {
     if (!apmTransactionDurationIndicatorSchema.is(slo.indicator)) {
       throw new InvalidTransformError(`Cannot handle SLO of indicator type: ${slo.indicator.type}`);
     }
@@ -33,19 +38,20 @@ export class ApmTransactionDurationTransformGenerator extends TransformGenerator
     return getSLOTransformTemplate(
       this.buildTransformId(slo),
       this.buildDescription(slo),
-      this.buildSource(slo, slo.indicator),
-      this.buildDestination(),
+      await this.buildSource(slo, slo.indicator),
+      this.buildDestination(slo),
       this.buildGroupBy(slo, slo.indicator),
       this.buildAggregations(slo, slo.indicator),
-      this.buildSettings(slo)
+      this.buildSettings(slo),
+      slo
     );
   }
 
-  private buildTransformId(slo: SLO): string {
+  private buildTransformId(slo: SLODefinition): string {
     return getSLOTransformId(slo.id, slo.revision);
   }
 
-  private buildGroupBy(slo: SLO, indicator: APMTransactionDurationIndicator) {
+  private buildGroupBy(slo: SLODefinition, indicator: APMTransactionDurationIndicator) {
     // These groupBy fields must match the fields from the source query, otherwise
     // the transform will create permutations for each value present in the source.
     // E.g. if environment is not specified in the source query, but we include it in the groupBy,
@@ -68,16 +74,8 @@ export class ApmTransactionDurationTransformGenerator extends TransformGenerator
     return this.buildCommonGroupBy(slo, '@timestamp', extraGroupByFields);
   }
 
-  private buildSource(slo: SLO, indicator: APMTransactionDurationIndicator) {
-    const queryFilter: estypes.QueryDslQueryContainer[] = [
-      {
-        range: {
-          '@timestamp': {
-            gte: `now-${slo.timeWindow.duration.format()}/d`,
-          },
-        },
-      },
-    ];
+  private async buildSource(slo: SLODefinition, indicator: APMTransactionDurationIndicator) {
+    const queryFilter: estypes.QueryDslQueryContainer[] = [getFilterRange(slo, '@timestamp')];
 
     if (indicator.params.service !== ALL_VALUE) {
       queryFilter.push({
@@ -110,14 +108,15 @@ export class ApmTransactionDurationTransformGenerator extends TransformGenerator
         },
       });
     }
+    const dataView = await this.getIndicatorDataView(indicator.params.dataViewId);
 
     if (!!indicator.params.filter) {
-      queryFilter.push(getElasticsearchQueryOrThrow(indicator.params.filter));
+      queryFilter.push(getElasticsearchQueryOrThrow(indicator.params.filter, dataView));
     }
 
     return {
       index: parseIndex(indicator.params.index),
-      runtime_mappings: this.buildCommonRuntimeMappings(slo),
+      runtime_mappings: this.buildCommonRuntimeMappings(dataView),
       query: {
         bool: {
           filter: [
@@ -131,15 +130,15 @@ export class ApmTransactionDurationTransformGenerator extends TransformGenerator
     };
   }
 
-  private buildDestination() {
+  private buildDestination(slo: SLODefinition) {
     return {
-      pipeline: SLO_INGEST_PIPELINE_NAME,
+      pipeline: getSLOPipelineId(slo.id, slo.revision),
       index: SLO_DESTINATION_INDEX_NAME,
     };
   }
 
   private buildAggregations(
-    slo: SLO,
+    slo: SLODefinition,
     indicator: APMTransactionDurationIndicator
   ): Record<string, AggregationsAggregationContainer> {
     // threshold is in ms (milliseconds), but apm data is stored in us (microseconds)
@@ -178,7 +177,9 @@ export class ApmTransactionDurationTransformGenerator extends TransformGenerator
               goodEvents: 'slo.numerator.value',
               totalEvents: 'slo.denominator.value',
             },
-            script: `params.goodEvents / params.totalEvents >= ${slo.objective.timesliceTarget} ? 1 : 0`,
+            script: `if (params.totalEvents == 0) { return 1 } else { return params.goodEvents / params.totalEvents ${getTimesliceTargetComparator(
+              slo.objective.timesliceTarget!
+            )} ${slo.objective.timesliceTarget} ? 1 : 0 }`,
           },
         },
       }),

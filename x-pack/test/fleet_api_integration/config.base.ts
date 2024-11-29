@@ -22,10 +22,12 @@ export const dockerImage = 'docker.elastic.co/package-registry/distribution:lite
 
 export const BUNDLED_PACKAGE_DIR = '/tmp/fleet_bundled_packages';
 
-export default async function ({ readConfigFile }: FtrConfigProviderContext) {
+export default async function ({ readConfigFile, log }: FtrConfigProviderContext) {
   const xPackAPITestsConfig = await readConfigFile(require.resolve('../api_integration/config.ts'));
 
   const registryPort: string | undefined = process.env.FLEET_PACKAGE_REGISTRY_PORT;
+  const skipRunningDockerRegistry =
+    process.env.FLEET_SKIP_RUNNING_PACKAGE_REGISTRY === 'true' ? true : false;
 
   // mount the config file for the package registry as well as
   // the directories containing additional packages into the container
@@ -40,21 +42,33 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     `${getFullPath(src)}:${dest}`,
   ]);
 
+  const dockerServers = !skipRunningDockerRegistry
+    ? defineDockerServersConfig({
+        registry: {
+          enabled: !!registryPort,
+          image: dockerImage,
+          portInContainer: 8080,
+          port: registryPort,
+          args: dockerArgs,
+          waitForLogLine: 'package manifests loaded',
+          waitForLogLineTimeoutMs: 60 * 2 * 10000, // 2 minutes
+        },
+      })
+    : undefined;
+
+  if (skipRunningDockerRegistry) {
+    const cmd = `docker run ${dockerArgs.join(' ')} -p ${registryPort}:8080 ${dockerImage}`;
+    log.warning(`Not running docker registry, you can run it with the following command: ${cmd}`);
+  }
+
   return {
     servers: xPackAPITestsConfig.get('servers'),
-    dockerServers: defineDockerServersConfig({
-      registry: {
-        enabled: !!registryPort,
-        image: dockerImage,
-        portInContainer: 8080,
-        port: registryPort,
-        args: dockerArgs,
-        waitForLogLine: 'package manifests loaded',
-        waitForLogLineTimeoutMs: 60 * 2 * 10000, // 2 minutes
-      },
-    }),
+    dockerServers,
     services: xPackAPITestsConfig.get('services'),
-    esTestCluster: xPackAPITestsConfig.get('esTestCluster'),
+    esTestCluster: {
+      ...xPackAPITestsConfig.get('esTestCluster'),
+      serverArgs: [...xPackAPITestsConfig.get('esTestCluster.serverArgs'), 'http.host=0.0.0.0'],
+    },
     kbnTestServer: {
       ...xPackAPITestsConfig.get('kbnTestServer'),
       serverArgs: [
@@ -77,6 +91,12 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
           'enableStrictKQLValidation',
           'subfeaturePrivileges',
         ])}`,
+        `--xpack.cloud.id='123456789'`,
+        `--xpack.fleet.agentless.enabled=true`,
+        `--xpack.fleet.agentless.api.url=https://api.agentless.url/api/v1/ess`,
+        `--xpack.fleet.agentless.api.tls.certificate=./config/node.crt`,
+        `--xpack.fleet.agentless.api.tls.key=./config/node.key`,
+        `--xpack.fleet.agentless.api.tls.ca=./config/ca.crt`,
         `--logging.loggers=${JSON.stringify([
           ...getKibanaCliLoggers(xPackAPITestsConfig.get('kbnTestServer.serverArgs')),
 

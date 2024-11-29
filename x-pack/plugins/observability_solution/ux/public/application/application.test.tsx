@@ -17,6 +17,8 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { merge } from 'lodash';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
+import { BehaviorSubject } from 'rxjs';
+import { ChromeStyle } from '@kbn/core-chrome-browser';
 
 jest.mock('../services/rest/data_view', () => ({
   createStaticDataView: () => Promise.resolve(undefined),
@@ -37,8 +39,7 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
   };
 });
 
-const mockAIAssistantPlugin =
-  observabilityAIAssistantPluginMock.createStartContract();
+const mockAIAssistantPlugin = observabilityAIAssistantPluginMock.createStartContract();
 
 const mockPlugin = {
   data: {
@@ -123,6 +124,10 @@ const mockCore = merge({}, coreStart, {
       return uiSettings[key];
     },
   },
+  chrome: {
+    ...coreStart.chrome,
+    getChromeStyle$: () => new BehaviorSubject<ChromeStyle>('classic').asObservable(),
+  },
 });
 
 export const mockApmPluginContextValue = {
@@ -137,18 +142,12 @@ export const mockApmPluginContextValue = {
 
 describe('renderUxApp', () => {
   it('has an error boundary for the UXAppRoot', async () => {
-    const wrapper = mount(
-      <UXAppRoot {...(mockApmPluginContextValue as any)} />
-    );
+    const wrapper = mount(<UXAppRoot {...(mockApmPluginContextValue as any)} />);
 
-    wrapper
-      .find(RumHome)
-      .simulateError(new Error('Oh no, an unexpected error!'));
+    wrapper.find(RumHome).simulateError(new Error('Oh no, an unexpected error!'));
 
     expect(wrapper.find(RumHome)).toHaveLength(0);
     expect(wrapper.find(EuiErrorBoundary)).toHaveLength(1);
-    expect(wrapper.find(EuiErrorBoundary).text()).toMatch(
-      /Error: Oh no, an unexpected error!/
-    );
+    expect(wrapper.find(EuiErrorBoundary).text()).toMatch(/Error: Oh no, an unexpected error!/);
   });
 });

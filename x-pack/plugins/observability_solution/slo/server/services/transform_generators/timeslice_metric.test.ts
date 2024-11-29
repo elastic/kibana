@@ -5,14 +5,17 @@
  * 2.0.
  */
 
+import { dataViewsService } from '@kbn/data-views-plugin/server/mocks';
+import { twoMinute } from '../fixtures/duration';
 import {
-  createTimesliceMetricIndicator,
-  createSLOWithTimeslicesBudgetingMethod,
   createSLO,
+  createSLOWithTimeslicesBudgetingMethod,
+  createTimesliceMetricIndicator,
 } from '../fixtures/slo';
 import { TimesliceMetricTransformGenerator } from './timeslice_metric';
 
-const generator = new TimesliceMetricTransformGenerator();
+const SPACE_ID = 'custom-space';
+const generator = new TimesliceMetricTransformGenerator(SPACE_ID, dataViewsService);
 const everythingIndicator = createTimesliceMetricIndicator(
   [
     { name: 'A', aggregation: 'avg', field: 'test.field', filter: 'test.category: "test"' },
@@ -27,36 +30,36 @@ const everythingIndicator = createTimesliceMetricIndicator(
 
 describe('Timeslice Metric Transform Generator', () => {
   describe('validation', () => {
-    it('throws when the budgeting method is occurrences', () => {
+    it('throws when the budgeting method is occurrences', async () => {
       const anSLO = createSLO({
         indicator: createTimesliceMetricIndicator(
           [{ name: 'A', aggregation: 'avg', field: 'test.field' }],
           '(A / 200) + A'
         ),
       });
-      expect(() => generator.getTransformParams(anSLO)).toThrow(
+      await expect(generator.getTransformParams(anSLO)).rejects.toThrow(
         'The sli.metric.timeslice indicator MUST have a timeslice budgeting method.'
       );
     });
-    it('throws when the metric equation is invalid', () => {
+    it('throws when the metric equation is invalid', async () => {
       const anSLO = createSLOWithTimeslicesBudgetingMethod({
         indicator: createTimesliceMetricIndicator(
           [{ name: 'A', aggregation: 'avg', field: 'test.field' }],
           '(a / 200) + A'
         ),
       });
-      expect(() => generator.getTransformParams(anSLO)).toThrow(/Invalid equation/);
+      await expect(generator.getTransformParams(anSLO)).rejects.toThrow(/Invalid equation/);
     });
-    it('throws when the metric filter is invalid', () => {
+    it('throws when the metric filter is invalid', async () => {
       const anSLO = createSLOWithTimeslicesBudgetingMethod({
         indicator: createTimesliceMetricIndicator(
           [{ name: 'A', aggregation: 'avg', field: 'test.field', filter: 'test:' }],
           '(A / 200) + A'
         ),
       });
-      expect(() => generator.getTransformParams(anSLO)).toThrow(/Invalid KQL: test:/);
+      await expect(generator.getTransformParams(anSLO)).rejects.toThrow(/Invalid KQL: test:/);
     });
-    it('throws when the query_filter is invalid', () => {
+    it('throws when the query_filter is invalid', async () => {
       const anSLO = createSLOWithTimeslicesBudgetingMethod({
         indicator: createTimesliceMetricIndicator(
           [{ name: 'A', aggregation: 'avg', field: 'test.field', filter: 'test.category: "test"' }],
@@ -64,7 +67,7 @@ describe('Timeslice Metric Transform Generator', () => {
           'test:'
         ),
       });
-      expect(() => generator.getTransformParams(anSLO)).toThrow(/Invalid KQL/);
+      await expect(generator.getTransformParams(anSLO)).rejects.toThrow(/Invalid KQL/);
     });
   });
 
@@ -73,7 +76,7 @@ describe('Timeslice Metric Transform Generator', () => {
       id: 'irrelevant',
       indicator: everythingIndicator,
     });
-    const transform = generator.getTransformParams(anSLO);
+    const transform = await generator.getTransformParams(anSLO);
 
     expect(transform).toMatchSnapshot();
   });
@@ -83,7 +86,7 @@ describe('Timeslice Metric Transform Generator', () => {
       id: 'irrelevant',
       indicator: everythingIndicator,
     });
-    const transform = generator.getTransformParams(anSLO);
+    const transform = await generator.getTransformParams(anSLO);
 
     expect(transform).toMatchSnapshot();
   });
@@ -92,7 +95,7 @@ describe('Timeslice Metric Transform Generator', () => {
     const anSLO = createSLOWithTimeslicesBudgetingMethod({
       indicator: everythingIndicator,
     });
-    const transform = generator.getTransformParams(anSLO);
+    const transform = await generator.getTransformParams(anSLO);
 
     expect(transform.source.query).toMatchSnapshot();
   });
@@ -104,7 +107,7 @@ describe('Timeslice Metric Transform Generator', () => {
         params: { ...everythingIndicator.params, index: 'my-own-index*' },
       },
     });
-    const transform = generator.getTransformParams(anSLO);
+    const transform = await generator.getTransformParams(anSLO);
 
     expect(transform.source.index).toBe('my-own-index*');
   });
@@ -116,7 +119,7 @@ describe('Timeslice Metric Transform Generator', () => {
         params: { ...everythingIndicator.params, timestampField: 'my-date-field' },
       },
     });
-    const transform = generator.getTransformParams(anSLO);
+    const transform = await generator.getTransformParams(anSLO);
 
     expect(transform.sync?.time?.field).toBe('my-date-field');
     // @ts-ignore
@@ -127,7 +130,7 @@ describe('Timeslice Metric Transform Generator', () => {
     const anSLO = createSLOWithTimeslicesBudgetingMethod({
       indicator: everythingIndicator,
     });
-    const transform = generator.getTransformParams(anSLO);
+    const transform = await generator.getTransformParams(anSLO);
 
     expect(transform.pivot!.aggregations!._metric).toEqual({
       bucket_script: {
@@ -161,6 +164,30 @@ describe('Timeslice Metric Transform Generator', () => {
       bucket_script: {
         buckets_path: {},
         script: '1',
+      },
+    });
+  });
+
+  it("overrides the range filter when 'preventInitialBackfill' is true", async () => {
+    const slo = createSLOWithTimeslicesBudgetingMethod({
+      indicator: everythingIndicator,
+      settings: {
+        frequency: twoMinute(),
+        syncDelay: twoMinute(),
+        preventInitialBackfill: true,
+      },
+    });
+
+    const transform = await generator.getTransformParams(slo);
+
+    // @ts-ignore
+    const rangeFilter = transform.source.query.bool.filter.find((f) => 'range' in f);
+
+    expect(rangeFilter).toEqual({
+      range: {
+        '@timestamp': {
+          gte: 'now-360s/m', // 2m + 2m + 2m slice window
+        },
       },
     });
   });

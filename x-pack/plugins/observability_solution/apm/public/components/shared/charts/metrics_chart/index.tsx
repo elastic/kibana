@@ -18,10 +18,7 @@ import {
 import { Maybe } from '../../../../../typings/common';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { TimeseriesChartWithContext } from '../timeseries_chart_with_context';
-import {
-  getMaxY,
-  getResponseTimeTickFormatter,
-} from '../transaction_charts/helper';
+import { getMaxY, getResponseTimeTickFormatter } from '../transaction_charts/helper';
 
 type MetricChartApiResponse =
   APIReturnType<'GET /internal/apm/services/{serviceName}/metrics/charts'>;
@@ -68,11 +65,7 @@ export function MetricsChart({ chart, fetchStatus }: Props) {
         </EuiFlexItem>
         {chart.description && (
           <EuiFlexItem grow={false}>
-            <EuiIconTip
-              content={chart.description}
-              position="top"
-              type="questionInCircle"
-            />
+            <EuiIconTip content={chart.description} position="top" type="questionInCircle" />
           </EuiFlexItem>
         )}
       </EuiFlexGroup>

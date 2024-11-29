@@ -9,13 +9,14 @@ import { i18n } from '@kbn/i18n';
 import type { LinkId } from '@kbn/deeplinks-ml';
 
 import { type AppDeepLink } from '@kbn/core/public';
+import type { MlCapabilities } from '../../../common/types/capabilities';
 import { ML_PAGES } from '../../../common/constants/locator';
-import type { MlCapabilities } from '../../shared';
 
 function createDeepLinks(
   mlCapabilities: MlCapabilities,
   isFullLicense: boolean,
-  isServerless: boolean
+  isServerless: boolean,
+  esqlEnabled?: boolean
 ) {
   return {
     getOverviewLinkDeepLink: (): AppDeepLink<LinkId> | null => {
@@ -53,6 +54,13 @@ function createDeepLinks(
               defaultMessage: 'Single metric viewer',
             }),
             path: `/${ML_PAGES.SINGLE_METRIC_VIEWER}`,
+          },
+          {
+            id: 'suppliedConfigurations',
+            title: i18n.translate('xpack.ml.deepLink.suppliedConfigurations', {
+              defaultMessage: 'Supplied configurations',
+            }),
+            path: `/${ML_PAGES.SUPPLIED_CONFIGURATIONS}`,
           },
         ],
       };
@@ -238,9 +246,10 @@ function createDeepLinks(
       };
     },
 
-    getESQLDataVisualizerDeepLink: (): AppDeepLink<LinkId> => {
+    getESQLDataVisualizerDeepLink: (): AppDeepLink<LinkId> | null => {
+      if (!esqlEnabled) return null;
       return {
-        id: 'indexDataVisualizer',
+        id: 'esqlDataVisualizer',
         title: i18n.translate('xpack.ml.deepLink.esqlDataVisualizer', {
           defaultMessage: 'ES|QL Data Visualizer',
         }),
@@ -263,9 +272,10 @@ function createDeepLinks(
 export function getDeepLinks(
   isFullLicense: boolean,
   mlCapabilities: MlCapabilities,
-  isServerless: boolean
+  isServerless: boolean,
+  esqlEnabled?: boolean
 ): Array<AppDeepLink<LinkId>> {
-  const links = createDeepLinks(mlCapabilities, isFullLicense, isServerless);
+  const links = createDeepLinks(mlCapabilities, isFullLicense, isServerless, esqlEnabled);
   return Object.values(links)
     .map((link) => link())
     .filter((link): link is AppDeepLink<LinkId> => link !== null);

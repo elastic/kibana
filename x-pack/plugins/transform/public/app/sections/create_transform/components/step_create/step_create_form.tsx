@@ -28,6 +28,10 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 
 import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
 
+import type {
+  PutTransformsLatestRequestSchema,
+  PutTransformsPivotRequestSchema,
+} from '../../../../../../server/routes/api_schemas/transforms';
 import { PROGRESS_REFRESH_INTERVAL_MS } from '../../../../../../common/constants';
 
 import { getErrorMessage } from '../../../../../../common/utils/errors';
@@ -37,10 +41,6 @@ import { useCreateTransform, useGetTransformStats, useStartTransforms } from '..
 import { useAppDependencies, useToastNotifications } from '../../../../app_dependencies';
 import { RedirectToTransformManagement } from '../../../../common/navigation';
 import { ToastNotificationText } from '../../../../components';
-import type {
-  PutTransformsLatestRequestSchema,
-  PutTransformsPivotRequestSchema,
-} from '../../../../../../common/api_schemas/transforms';
 import { isContinuousTransform } from '../../../../../../common/types/transform';
 import { TransformAlertFlyout } from '../../../../../alerting/transform_alerting_flyout';
 
@@ -84,7 +84,7 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
     const [discoverLink, setDiscoverLink] = useState<string>();
 
     const toastNotifications = useToastNotifications();
-    const { application, i18n: i18nStart, share, theme } = useAppDependencies();
+    const { application, share, ...startServices } = useAppDependencies();
     const isDiscoverAvailable = application.capabilities.discover?.show ?? false;
 
     useEffect(() => {
@@ -174,6 +174,7 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
 
     const { data: stats } = useGetTransformStats(
       transformId,
+      false,
       progressBarRefetchEnabled,
       progressBarRefetchInterval
     );
@@ -199,13 +200,13 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
           title: i18n.translate('xpack.transform.stepCreateForm.progressErrorMessage', {
             defaultMessage: 'An error occurred getting the progress percentage:',
           }),
-          text: toMountPoint(<ToastNotificationText text={getErrorMessage(stats)} />, {
-            theme,
-            i18n: i18nStart,
-          }),
+          text: toMountPoint(
+            <ToastNotificationText text={getErrorMessage(stats)} />,
+            startServices
+          ),
         });
       }
-    }, [i18nStart, stats, theme, toastNotifications, transformConfig, transformId]);
+    }, [stats, toastNotifications, transformConfig, transformId, startServices]);
 
     function getTransformConfigDevConsoleStatement() {
       return `PUT _transform/${transformId}\n${JSON.stringify(transformConfig, null, 2)}\n\n`;

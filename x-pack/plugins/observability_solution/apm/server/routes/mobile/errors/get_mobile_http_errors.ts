@@ -6,18 +6,11 @@
  */
 
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import {
-  kqlQuery,
-  rangeQuery,
-  termQuery,
-} from '@kbn/observability-plugin/server';
+import { kqlQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { getOffsetInMs } from '../../../../common/utils/get_offset_in_ms';
 import { environmentQuery } from '../../../../common/utils/environment_query';
-import {
-  SERVICE_NAME,
-  HTTP_RESPONSE_STATUS_CODE,
-} from '../../../../common/es_fields/apm';
+import { SERVICE_NAME, HTTP_RESPONSE_STATUS_CODE } from '../../../../common/es_fields/apm';
 import { offsetPreviousPeriodCoordinates } from '../../../../common/utils/offset_previous_period_coordinate';
 import { Coordinate } from '../../../../typings/timeseries';
 import { BUCKET_TARGET_COUNT } from '../../transactions/constants';
@@ -87,12 +80,10 @@ async function getMobileHttpErrorsTimeseries({
     },
   });
 
-  const timeseries = (response?.aggregations?.timeseries.buckets || []).map(
-    (bucket) => ({
-      x: bucket.key,
-      y: bucket.doc_count,
-    })
-  );
+  const timeseries = (response?.aggregations?.timeseries.buckets || []).map((bucket) => ({
+    x: bucket.key,
+    y: bucket.doc_count,
+  }));
   return { timeseries };
 }
 

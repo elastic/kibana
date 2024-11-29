@@ -11,23 +11,20 @@ import type { BreadcrumbsNav } from './common/breadcrumbs';
 import type { NavigationLink } from './common/links/types';
 import { allowedExperimentalValues } from '../common/experimental_features';
 import type { PluginStart, PluginSetup, ContractStartServices } from './types';
-import { OnboardingPageService } from './app/components/onboarding/onboarding_page_service';
+import { OnboardingService } from './onboarding/service';
 
 const upselling = new UpsellingService();
-const onboardingPageService = new OnboardingPageService();
+const onboardingService = new OnboardingService();
 
 export const contractStartServicesMock: ContractStartServices = {
-  extraRoutes$: of([]),
   getComponents$: jest.fn(() => of({})),
   upselling,
-  onboarding: onboardingPageService,
+  onboarding: onboardingService,
 };
 
 const setupMock = (): PluginSetup => ({
   resolver: jest.fn(),
   experimentalFeatures: allowedExperimentalValues, // default values
-  setAppLinksSwitcher: jest.fn(),
-  setDeepLinksFormatter: jest.fn(),
 });
 
 const startMock = (): PluginStart => ({
@@ -36,9 +33,13 @@ const startMock = (): PluginStart => ({
   getBreadcrumbsNav$: jest.fn(
     () => new BehaviorSubject<BreadcrumbsNav>({ leading: [], trailing: [] })
   ),
-  setExtraRoutes: jest.fn(),
   getUpselling: () => upselling,
-  setOnboardingPageSettings: onboardingPageService,
+  setOnboardingSettings: onboardingService.setSettings.bind(onboardingService),
+  setIsSolutionNavigationEnabled: jest.fn(),
+  getSolutionNavigation: jest.fn(async () => ({
+    navigationTree$: of({ body: [], footer: [] }),
+    panelContentProvider: jest.fn(),
+  })),
 });
 
 export const securitySolutionMock = {

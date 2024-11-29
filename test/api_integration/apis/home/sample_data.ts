@@ -1,14 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
 import type { Response } from 'superagent';
 import differenceInMilliseconds from 'date-fns/differenceInMilliseconds';
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -22,12 +24,6 @@ export default function ({ getService }: FtrProviderContext) {
    * @see {@link src/plugins/home/server/services/sample_data/data_sets/flights/index.ts}
    */
   const FLIGHTS_OVERVIEW_DASHBOARD_ID = '7adfa750-4c81-11e8-b3d7-01146121b73d';
-  const FLIGHTS_CANVAS_APPLINK_PATH =
-    '/app/canvas#/workpad/workpad-a474e74b-aedc-47c3-894a-db77e62c41e0'; // includes default ID of the flights canvas applink path
-
-  const includesPathInAppLinks = (appLinks: Array<{ path: string }>, path: string): boolean => {
-    return appLinks.some((item) => item.path === path);
-  };
 
   describe('sample data apis', () => {
     before(async () => {
@@ -42,33 +38,37 @@ export default function ({ getService }: FtrProviderContext) {
 
       describe(`list in the ${space} space (before install)`, () => {
         it('should return list of sample data sets with installed status', async () => {
-          const resp = await supertest.get(apiPath).set('kbn-xsrf', 'kibana').expect(200);
+          const resp = await supertest
+            .get(apiPath)
+            .set('kbn-xsrf', 'kibana')
+            .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+            .expect(200);
 
           const flightsData = findFlightsData(resp);
           expect(flightsData.status).to.be('not_installed');
-          // Check and make sure the sample dataset reflects the default object IDs, because no sample data objects exist.
-          // Instead of checking each object ID, we check the dashboard and canvas app link as representatives.
           expect(flightsData.overviewDashboard).to.be(FLIGHTS_OVERVIEW_DASHBOARD_ID);
-          expect(includesPathInAppLinks(flightsData.appLinks, FLIGHTS_CANVAS_APPLINK_PATH)).to.be(
-            true
-          );
         });
       });
 
       describe(`install in the ${space} space`, () => {
         it('should return 404 if id does not match any sample data sets', async () => {
-          await supertest.post(`${apiPath}/xxxx`).set('kbn-xsrf', 'kibana').expect(404);
+          await supertest
+            .post(`${apiPath}/xxxx`)
+            .set('kbn-xsrf', 'kibana')
+            .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+            .expect(404);
         });
 
         it('should return 200 if success', async () => {
           const resp = await supertest
             .post(`${apiPath}/flights`)
             .set('kbn-xsrf', 'kibana')
+            .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
             .expect(200);
 
           expect(resp.body).to.eql({
             elasticsearchIndicesCreated: { kibana_sample_data_flights: 13014 },
-            kibanaSavedObjectsLoaded: 8,
+            kibanaSavedObjectsLoaded: 7,
           });
         });
 
@@ -96,7 +96,10 @@ export default function ({ getService }: FtrProviderContext) {
 
           it('should load elasticsearch index containing sample data with dates relative to now parameter', async () => {
             const nowString = `2000-01-01T00:00:00`;
-            await supertest.post(`${apiPath}/flights?now=${nowString}`).set('kbn-xsrf', 'kibana');
+            await supertest
+              .post(`${apiPath}/flights?now=${nowString}`)
+              .set('kbn-xsrf', 'kibana')
+              .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
 
             const resp = await es.search<{ timestamp: string }>({
               index: 'kibana_sample_data_flights',
@@ -114,23 +117,19 @@ export default function ({ getService }: FtrProviderContext) {
 
       describe(`list in the ${space} space (after install)`, () => {
         it('should return list of sample data sets with installed status', async () => {
-          const resp = await supertest.get(apiPath).set('kbn-xsrf', 'kibana').expect(200);
+          const resp = await supertest
+            .get(apiPath)
+            .set('kbn-xsrf', 'kibana')
+            .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+            .expect(200);
 
           const flightsData = findFlightsData(resp);
           expect(flightsData.status).to.be('installed');
-          // Check and make sure the sample dataset reflects the existing object IDs in each space.
-          // Instead of checking each object ID, we check the dashboard and canvas app link as representatives.
           if (space === 'default') {
             expect(flightsData.overviewDashboard).to.be(FLIGHTS_OVERVIEW_DASHBOARD_ID);
-            expect(includesPathInAppLinks(flightsData.appLinks, FLIGHTS_CANVAS_APPLINK_PATH)).to.be(
-              true
-            );
           } else {
             // the sample data objects installed in the 'other' space had their IDs regenerated upon import
             expect(flightsData.overviewDashboard).not.to.be(FLIGHTS_OVERVIEW_DASHBOARD_ID);
-            expect(includesPathInAppLinks(flightsData.appLinks, FLIGHTS_CANVAS_APPLINK_PATH)).to.be(
-              false
-            );
           }
         });
       });
@@ -142,7 +141,12 @@ export default function ({ getService }: FtrProviderContext) {
       describe(`uninstall in the ${space} space`, () => {
         it('should uninstall sample data', async () => {
           // Note: the second time this happens, the index has already been removed, but the uninstall works anyway
-          await supertest.delete(`${apiPath}/flights`).set('kbn-xsrf', 'kibana').expect(204);
+          await supertest
+            .delete(`${apiPath}/flights`)
+            .set('kbn-xsrf', 'kibana')
+            .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+            .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+            .expect(204);
         });
 
         it('should remove elasticsearch index containing sample data', async () => {
@@ -155,16 +159,15 @@ export default function ({ getService }: FtrProviderContext) {
 
       describe(`list in the ${space} space (after uninstall)`, () => {
         it('should return list of sample data sets with installed status', async () => {
-          const resp = await supertest.get(apiPath).set('kbn-xsrf', 'kibana').expect(200);
+          const resp = await supertest
+            .get(apiPath)
+            .set('kbn-xsrf', 'kibana')
+            .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+            .expect(200);
 
           const flightsData = findFlightsData(resp);
           expect(flightsData.status).to.be('not_installed');
-          // Check and make sure the sample dataset reflects the default object IDs, because no sample data objects exist.
-          // Instead of checking each object ID, we check the dashboard and canvas app link as representatives.
           expect(flightsData.overviewDashboard).to.be(FLIGHTS_OVERVIEW_DASHBOARD_ID);
-          expect(includesPathInAppLinks(flightsData.appLinks, FLIGHTS_CANVAS_APPLINK_PATH)).to.be(
-            true
-          );
         });
       });
     }

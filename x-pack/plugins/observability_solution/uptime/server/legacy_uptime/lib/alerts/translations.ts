@@ -24,6 +24,15 @@ export const commonMonitorStateI18 = [
     ),
   },
   {
+    name: 'configId',
+    description: i18n.translate(
+      'xpack.uptime.alerts.monitorStatus.actionVariables.state.configId',
+      {
+        defaultMessage: 'Config ID of the monitor.',
+      }
+    ),
+  },
+  {
     name: 'monitorUrl',
     description: i18n.translate(
       'xpack.uptime.alerts.monitorStatus.actionVariables.state.monitorUrl',
@@ -38,6 +47,15 @@ export const commonMonitorStateI18 = [
       'xpack.uptime.alerts.monitorStatus.actionVariables.state.monitorType',
       {
         defaultMessage: 'Type (e.g. HTTP/TCP) of the monitor.',
+      }
+    ),
+  },
+  {
+    name: 'monitorTags',
+    description: i18n.translate(
+      'xpack.uptime.alertRules.monitorStatus.actionVariables.state.monitorTags',
+      {
+        defaultMessage: 'Tags associated with the monitor.',
       }
     ),
   },

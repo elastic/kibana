@@ -208,6 +208,23 @@ describe('Fleet - isAgentUpgradeable', () => {
       isAgentUpgradeable(getAgent({ version: '7.9.0', upgradeable: true, minutesSinceUpgrade: 11 }))
     ).toBe(true);
   });
+  it('returns false if the agent reports upgradeable but is in watching state', () => {
+    expect(
+      isAgentUpgradeable(
+        getAgent({
+          version: '8.12.0',
+          upgradeable: true,
+          minutesSinceUpgrade: 11,
+          upgradeDetails: { state: 'UPG_WATCHING' } as any,
+        })
+      )
+    ).toBe(false);
+  });
+  it('returns true if agent watching state cleared and it was upgraded less than 10 minutes ago', () => {
+    expect(
+      isAgentUpgradeable(getAgent({ version: '8.12.1', upgradeable: true, minutesSinceUpgrade: 1 }))
+    ).toBe(true);
+  });
 });
 describe('Fleet - isAgentUpgradeableToVersion', () => {
   it('returns true if agent reports upgradeable, with upgrade to agent snapshot version newer than latest agent version', () => {
@@ -227,6 +244,65 @@ describe('Fleet - isAgentUpgradeableToVersion', () => {
     expect(
       isAgentUpgradeableToVersion(getAgent({ version: '7.9.0', upgradeable: true }), '7.9.0')
     ).toBe(false);
+  });
+
+  describe('+build versions', () => {
+    it('returns true with target version of a +build version on the same patch', () => {
+      expect(
+        isAgentUpgradeableToVersion(
+          getAgent({ version: '7.9.0', upgradeable: true }),
+          '7.9.0+build202408011234'
+        )
+      ).toBe(true);
+    });
+    it('returns true with target version of a +build version on a newer patch', () => {
+      expect(
+        isAgentUpgradeableToVersion(
+          getAgent({ version: '7.9.0', upgradeable: true }),
+          '7.9.1+build202408011234'
+        )
+      ).toBe(true);
+    });
+    it('returns true with target version of a +build version on a newer minor', () => {
+      expect(
+        isAgentUpgradeableToVersion(
+          getAgent({ version: '7.9.0', upgradeable: true }),
+          '7.10.0+build202408011234'
+        )
+      ).toBe(true);
+    });
+    it('returns true with current version on a +build version', () => {
+      expect(
+        isAgentUpgradeableToVersion(
+          getAgent({ version: '7.9.0+build202408011234', upgradeable: true }),
+          '7.9.1'
+        )
+      ).toBe(true);
+    });
+    it('returns true when upgrade build is newer than current build', () => {
+      expect(
+        isAgentUpgradeableToVersion(
+          getAgent({ version: '8.12.0+build202408011234', upgradeable: true }),
+          '8.12.0+build202408061235'
+        )
+      ).toBe(true);
+    });
+    it('returns false when upgrade build is older than current build', () => {
+      expect(
+        isAgentUpgradeableToVersion(
+          getAgent({ version: '8.12.0+build202408061234' }),
+          '8.12.0+build202408011234'
+        )
+      ).toBe(false);
+    });
+    it('returns false with target version of a +build version on an older patch', () => {
+      expect(
+        isAgentUpgradeableToVersion(
+          getAgent({ version: '7.9.0', upgradeable: true }),
+          '7.8.9+build202408011234'
+        )
+      ).toBe(false);
+    });
   });
 });
 
@@ -396,6 +472,13 @@ describe('hasAgentBeenUpgradedRecently', () => {
   it('returns false if the agent does not have an upgrade_at field', () => {
     expect(
       getRecentUpgradeInfoForAgent(getAgent({ version: '7.9.0' })).hasBeenUpgradedRecently
+    ).toBe(false);
+  });
+
+  it('returns false if the agent was upgraded more less 10 minutes ago, but supports upgrade details', () => {
+    expect(
+      getRecentUpgradeInfoForAgent(getAgent({ version: '8.12.0', minutesSinceUpgrade: 1 }))
+        .hasBeenUpgradedRecently
     ).toBe(false);
   });
 });

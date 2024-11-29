@@ -1,0 +1,21 @@
+type: object
+properties:
+  excludeExportDetails:
+    description: Do not add export details entry at the end of the stream.
+    type: boolean
+    default: false
+  includeReferencesDeep:
+    description: Includes all of the referenced objects in the exported objects.
+    type: boolean
+  objects:
+    description: A list of objects to export.
+    type: array
+    items:
+      type: object
+  type:
+    description: The saved object types to include in the export. Use `*` to export all the types.
+    oneOf:
+      - type: string
+      - type: array
+        items:
+          type: string

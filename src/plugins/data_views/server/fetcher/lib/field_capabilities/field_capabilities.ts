@@ -1,23 +1,27 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { defaults, keyBy, sortBy } from 'lodash';
 
 import { ExpandWildcard } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ElasticsearchClient } from '@kbn/core/server';
+import { ElasticsearchClient, IUiSettingsClient } from '@kbn/core/server';
 import { callFieldCapsApi } from '../es_api';
 import { readFieldCapsResponse } from './field_caps_response';
 import { mergeOverrides } from './overrides';
 import { FieldDescriptor } from '../../index_patterns_fetcher';
 import { QueryDslQueryContainer } from '../../../../common/types';
+import { DATA_VIEWS_FIELDS_EXCLUDED_TIERS } from '../../../../common/constants';
+import { getIndexFilterDsl } from '../../../utils';
 
 interface FieldCapabilitiesParams {
   callCluster: ElasticsearchClient;
+  uiSettingsClient?: IUiSettingsClient;
   indices: string | string[];
   metaFields: string[];
   fieldCapsOptions?: { allow_no_indices: boolean; include_unmapped?: boolean };
@@ -41,6 +45,7 @@ interface FieldCapabilitiesParams {
 export async function getFieldCapabilities(params: FieldCapabilitiesParams) {
   const {
     callCluster,
+    uiSettingsClient,
     indices = [],
     fieldCapsOptions,
     indexFilter,
@@ -50,11 +55,13 @@ export async function getFieldCapabilities(params: FieldCapabilitiesParams) {
     fieldTypes,
     includeEmptyFields,
   } = params;
+
+  const excludedTiers = await uiSettingsClient?.get<string>(DATA_VIEWS_FIELDS_EXCLUDED_TIERS);
   const esFieldCaps = await callFieldCapsApi({
     callCluster,
     indices,
     fieldCapsOptions,
-    indexFilter,
+    indexFilter: getIndexFilterDsl({ indexFilter, excludedTiers }),
     fields,
     expandWildcards,
     fieldTypes,

@@ -54,6 +54,8 @@ export const cli = () => {
         )
         .boolean('inspect');
 
+      const USE_CHROME_BETA = process.env.USE_CHROME_BETA?.match(/(1|true)/i);
+
       _cliLogger.info(`
 ----------------------------------------------
 Script arguments:
@@ -87,8 +89,10 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
       const specConfig = cypressConfigFile.e2e.specPattern;
       const specArg = argv.spec;
       const specPattern = specArg ?? specConfig;
+      const excludeSpecPattern = cypressConfigFile.e2e.excludeSpecPattern;
 
       log.info('Config spec pattern:', specConfig);
+      log.info('Exclude spec pattern:', excludeSpecPattern);
       log.info('Arguments spec pattern:', specArg);
       log.info('Resulting spec pattern:', specPattern);
 
@@ -121,7 +125,14 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
 
       const concreteFilePaths = isGrepReturnedFilePaths
         ? grepSpecPattern // use the returned concrete file paths
-        : globby.sync(specPattern); // convert the glob pattern to concrete file paths
+        : globby.sync(
+            specPattern,
+            excludeSpecPattern
+              ? {
+                  ignore: excludeSpecPattern,
+                }
+              : undefined
+          ); // convert the glob pattern to concrete file paths
 
       let files = retrieveIntegrations(concreteFilePaths);
 
@@ -204,69 +215,83 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
         _.pull(fleetServerPorts, fleetServerPort);
       };
 
-      await pMap(
-        files,
-        async (filePath) => {
-          let result:
-            | CypressCommandLine.CypressRunResult
-            | CypressCommandLine.CypressFailedRunResult
-            | undefined;
-          await withProcRunner(log, async (procs) => {
-            const abortCtrl = new AbortController();
+      const failedSpecFilePaths: string[] = [];
 
-            const onEarlyExit = (msg: string) => {
-              log.error(msg);
-              abortCtrl.abort();
-            };
+      const runSpecs = async (filePaths: string[]) =>
+        pMap<
+          string,
+          | CypressCommandLine.CypressRunResult
+          | CypressCommandLine.CypressFailedRunResult
+          | undefined
+        >(
+          filePaths,
+          async (filePath) => {
+            let result:
+              | CypressCommandLine.CypressRunResult
+              | CypressCommandLine.CypressFailedRunResult
+              | undefined;
+            failedSpecFilePaths.push(filePath);
 
-            const esPort: number = getEsPort();
-            const kibanaPort: number = getKibanaPort();
-            const fleetServerPort: number = getFleetServerPort();
-            const specFileFTRConfig = parseTestFileConfig(filePath);
-            const ftrConfigFilePath = path.resolve(
-              _.isArray(argv.ftrConfigFile) ? _.last(argv.ftrConfigFile) : argv.ftrConfigFile
-            );
+            await withProcRunner<
+              | CypressCommandLine.CypressRunResult
+              | CypressCommandLine.CypressFailedRunResult
+              | undefined
+            >(log, async (procs) => {
+              const abortCtrl = new AbortController();
 
-            const config = await getFTRConfig({
-              log,
-              esPort,
-              kibanaPort,
-              fleetServerPort,
-              ftrConfigFilePath,
-              specFilePath: filePath,
-              specFileFTRConfig,
-              isOpen,
-            });
-
-            const createUrlFromFtrConfig = (
-              type: 'elasticsearch' | 'kibana' | 'fleetserver',
-              withAuth: boolean = false
-            ): string => {
-              const getKeyPath = (keyPath: string = ''): string => {
-                return `servers.${type}${keyPath ? `.${keyPath}` : ''}`;
+              const onEarlyExit = (msg: string) => {
+                log.error(msg);
+                abortCtrl.abort();
               };
 
-              if (!config.get(getKeyPath())) {
-                throw new Error(`Unable to create URL for ${type}. Not found in FTR config at `);
-              }
+              const esPort: number = getEsPort();
+              const kibanaPort: number = getKibanaPort();
+              const fleetServerPort: number = getFleetServerPort();
+              const specFileFTRConfig = parseTestFileConfig(filePath);
+              const ftrConfigFilePath = path.resolve(
+                _.isArray(argv.ftrConfigFile) ? _.last(argv.ftrConfigFile) : argv.ftrConfigFile
+              );
 
-              const url = new URL('http://localhost');
+              const config = await getFTRConfig({
+                log,
+                esPort,
+                kibanaPort,
+                fleetServerPort,
+                ftrConfigFilePath,
+                specFilePath: filePath,
+                specFileFTRConfig,
+                isOpen,
+              });
 
-              url.port = config.get(getKeyPath('port'));
-              url.protocol = config.get(getKeyPath('protocol'));
-              url.hostname = config.get(getKeyPath('hostname'));
+              const createUrlFromFtrConfig = (
+                type: 'elasticsearch' | 'kibana' | 'fleetserver',
+                withAuth: boolean = false
+              ): string => {
+                const getKeyPath = (keyPath: string = ''): string => {
+                  return `servers.${type}${keyPath ? `.${keyPath}` : ''}`;
+                };
 
-              if (withAuth) {
-                url.username = config.get(getKeyPath('username'));
-                url.password = config.get(getKeyPath('password'));
-              }
+                if (!config.get(getKeyPath())) {
+                  throw new Error(`Unable to create URL for ${type}. Not found in FTR config at `);
+                }
 
-              return url.toString().replace(/\/$/, '');
-            };
+                const url = new URL('http://localhost');
 
-            const baseUrl = createUrlFromFtrConfig('kibana');
+                url.port = config.get(getKeyPath('port'));
+                url.protocol = config.get(getKeyPath('protocol'));
+                url.hostname = config.get(getKeyPath('hostname'));
 
-            log.info(`
+                if (withAuth) {
+                  url.username = config.get(getKeyPath('username'));
+                  url.password = config.get(getKeyPath('password'));
+                }
+
+                return url.toString().replace(/\/$/, '');
+              };
+
+              const baseUrl = createUrlFromFtrConfig('kibana');
+
+              log.info(`
 ----------------------------------------------
 Cypress FTR setup for file: ${filePath}:
 ----------------------------------------------
@@ -286,116 +311,123 @@ ${JSON.stringify(
 ----------------------------------------------
 `);
 
-            const lifecycle = new Lifecycle(log);
+              const lifecycle = new Lifecycle(log);
 
-            const providers = new ProviderCollection(log, [
-              ...readProviderSpec('Service', {
-                lifecycle: () => lifecycle,
-                log: () => log,
-                config: () => config,
-              }),
-              ...readProviderSpec('Service', config.get('services')),
-            ]);
-
-            const options = {
-              installDir: process.env.KIBANA_INSTALL_DIR,
-              ci: process.env.CI,
-            };
-
-            const shutdownEs = await pRetry(
-              async () =>
-                runElasticsearch({
-                  config,
-                  log,
-                  name: `ftr-${esPort}`,
-                  esFrom: config.get('esTestCluster')?.from || 'snapshot',
-                  onEarlyExit,
+              const providers = new ProviderCollection(log, [
+                ...readProviderSpec('Service', {
+                  lifecycle: () => lifecycle,
+                  log: () => log,
+                  config: () => config,
                 }),
-              { retries: 2, forever: false }
-            );
+                ...readProviderSpec('Service', config.get('services')),
+              ]);
 
-            await runKibanaServer({
-              procs,
-              config,
-              installDir: options?.installDir,
-              extraKbnOpts:
-                options?.installDir || options?.ci || !isOpen
-                  ? []
-                  : ['--dev', '--no-dev-config', '--no-dev-credentials'],
-              onEarlyExit,
-              inspect: argv.inspect,
-            });
+              const options = {
+                installDir: process.env.KIBANA_INSTALL_DIR,
+                ci: process.env.CI,
+              };
 
-            // Setup fleet if Cypress config requires it
-            let fleetServer: void | StartedFleetServer;
-            if (cypressConfigFile.env?.WITH_FLEET_SERVER) {
-              log.info(`Setting up fleet-server for this Cypress config`);
+              // Setup fleet if Cypress config requires it
+              let fleetServer: StartedFleetServer | undefined;
+              let shutdownEs;
 
-              const kbnClient = createKbnClient({
-                url: baseUrl,
-                username: config.get('servers.kibana.username'),
-                password: config.get('servers.kibana.password'),
-                log,
-              });
+              try {
+                shutdownEs = await pRetry(
+                  async () =>
+                    runElasticsearch({
+                      config,
+                      log,
+                      name: `ftr-${esPort}`,
+                      esFrom: config.get('esTestCluster')?.from || 'snapshot',
+                      onEarlyExit,
+                    }),
+                  { retries: 2, forever: false }
+                );
 
-              fleetServer = await startFleetServer({
-                kbnClient,
-                logger: log,
-                port:
-                  fleetServerPort ?? config.has('servers.fleetserver.port')
-                    ? (config.get('servers.fleetserver.port') as number)
-                    : undefined,
-                // `force` is needed to ensure that any currently running fleet server (perhaps left
-                // over from an interrupted run) is killed and a new one restarted
-                force: true,
-              });
-            }
+                await runKibanaServer({
+                  procs,
+                  config,
+                  installDir: options?.installDir,
+                  extraKbnOpts:
+                    options?.installDir || options?.ci || !isOpen
+                      ? []
+                      : ['--dev', '--no-dev-config', '--no-dev-credentials'],
+                  onEarlyExit,
+                  inspect: argv.inspect,
+                });
 
-            await providers.loadAll();
+                if (cypressConfigFile.env?.WITH_FLEET_SERVER) {
+                  log.info(`Setting up fleet-server for this Cypress config`);
 
-            const functionalTestRunner = new FunctionalTestRunner(
-              log,
-              config,
-              EsVersion.getDefault()
-            );
+                  const kbnClient = createKbnClient({
+                    url: baseUrl,
+                    username: config.get('servers.kibana.username'),
+                    password: config.get('servers.kibana.password'),
+                    log,
+                  });
 
-            const ftrEnv = await pRetry(() => functionalTestRunner.run(abortCtrl.signal), {
-              retries: 1,
-            });
+                  fleetServer = await pRetry(
+                    async () =>
+                      startFleetServer({
+                        kbnClient,
+                        logger: log,
+                        port:
+                          fleetServerPort ?? config.has('servers.fleetserver.port')
+                            ? (config.get('servers.fleetserver.port') as number)
+                            : undefined,
+                        // `force` is needed to ensure that any currently running fleet server (perhaps left
+                        // over from an interrupted run) is killed and a new one restarted
+                        force: true,
+                      }),
+                    { retries: 2, forever: false }
+                  );
+                }
 
-            log.debug(
-              `Env. variables returned by [functionalTestRunner.run()]:\n`,
-              JSON.stringify(ftrEnv, null, 2)
-            );
+                await providers.loadAll();
 
-            // Normalized the set of available env vars in cypress
-            const cyCustomEnv = {
-              ...ftrEnv,
+                const functionalTestRunner = new FunctionalTestRunner(
+                  log,
+                  config,
+                  EsVersion.getDefault()
+                );
 
-              // NOTE:
-              // ELASTICSEARCH_URL needs to be created here with auth because SIEM cypress setup depends on it. At some
-              // points we should probably try to refactor that code to use `ELASTICSEARCH_URL_WITH_AUTH` instead
-              ELASTICSEARCH_URL:
-                ftrEnv.ELASTICSEARCH_URL ?? createUrlFromFtrConfig('elasticsearch', true),
-              ELASTICSEARCH_URL_WITH_AUTH: createUrlFromFtrConfig('elasticsearch', true),
-              ELASTICSEARCH_USERNAME:
-                ftrEnv.ELASTICSEARCH_USERNAME ?? config.get('servers.elasticsearch.username'),
-              ELASTICSEARCH_PASSWORD:
-                ftrEnv.ELASTICSEARCH_PASSWORD ?? config.get('servers.elasticsearch.password'),
+                const ftrEnv = await pRetry(() => functionalTestRunner.run(abortCtrl.signal), {
+                  retries: 1,
+                });
 
-              FLEET_SERVER_URL: createUrlFromFtrConfig('fleetserver'),
+                log.debug(
+                  `Env. variables returned by [functionalTestRunner.run()]:\n`,
+                  JSON.stringify(ftrEnv, null, 2)
+                );
 
-              KIBANA_URL: baseUrl,
-              KIBANA_URL_WITH_AUTH: createUrlFromFtrConfig('kibana', true),
-              KIBANA_USERNAME: config.get('servers.kibana.username'),
-              KIBANA_PASSWORD: config.get('servers.kibana.password'),
+                // Normalized the set of available env vars in cypress
+                const cyCustomEnv = {
+                  ...ftrEnv,
 
-              IS_SERVERLESS: config.get('serverless'),
+                  // NOTE:
+                  // ELASTICSEARCH_URL needs to be created here with auth because SIEM cypress setup depends on it. At some
+                  // points we should probably try to refactor that code to use `ELASTICSEARCH_URL_WITH_AUTH` instead
+                  ELASTICSEARCH_URL:
+                    ftrEnv.ELASTICSEARCH_URL ?? createUrlFromFtrConfig('elasticsearch', true),
+                  ELASTICSEARCH_URL_WITH_AUTH: createUrlFromFtrConfig('elasticsearch', true),
+                  ELASTICSEARCH_USERNAME:
+                    ftrEnv.ELASTICSEARCH_USERNAME ?? config.get('servers.elasticsearch.username'),
+                  ELASTICSEARCH_PASSWORD:
+                    ftrEnv.ELASTICSEARCH_PASSWORD ?? config.get('servers.elasticsearch.password'),
 
-              ...argv.env,
-            };
+                  FLEET_SERVER_URL: createUrlFromFtrConfig('fleetserver'),
 
-            log.info(`
+                  KIBANA_URL: baseUrl,
+                  KIBANA_URL_WITH_AUTH: createUrlFromFtrConfig('kibana', true),
+                  KIBANA_USERNAME: config.get('servers.kibana.username'),
+                  KIBANA_PASSWORD: config.get('servers.kibana.password'),
+
+                  IS_SERVERLESS: config.get('serverless'),
+
+                  ...argv.env,
+                };
+
+                log.info(`
 ----------------------------------------------
 Cypress run ENV for file: ${filePath}:
 ----------------------------------------------
@@ -405,65 +437,108 @@ ${JSON.stringify(cyCustomEnv, null, 2)}
 ----------------------------------------------
 `);
 
-            if (isOpen) {
-              await cypress.open({
-                configFile: cypressConfigFilePath,
-                config: {
-                  e2e: {
-                    baseUrl,
-                  },
-                  env: cyCustomEnv,
-                },
-              });
-            } else {
-              try {
-                result = await cypress.run({
-                  browser: 'electron',
-                  spec: filePath,
-                  configFile: cypressConfigFilePath,
-                  reporter: argv.reporter as string,
-                  reporterOptions: argv.reporterOptions,
-                  headed: argv.headed as boolean,
-                  config: {
-                    e2e: {
-                      baseUrl,
+                if (isOpen) {
+                  await cypress.open({
+                    configFile: cypressConfigFilePath,
+                    config: {
+                      e2e: {
+                        baseUrl,
+                      },
+                      env: cyCustomEnv,
                     },
-                    numTestsKeptInMemory: 0,
-                    env: cyCustomEnv,
-                  },
-                });
+                  });
+                } else {
+                  result = await cypress.run({
+                    browser: USE_CHROME_BETA ? 'chrome:beta' : 'chrome',
+                    spec: filePath,
+                    configFile: cypressConfigFilePath,
+                    reporter: argv.reporter as string,
+                    reporterOptions: argv.reporterOptions,
+                    headed: argv.headed as boolean,
+                    config: {
+                      e2e: {
+                        baseUrl,
+                      },
+                      numTestsKeptInMemory: 0,
+                      env: cyCustomEnv,
+                    },
+                    runnerUi: !process.env.CI,
+                  });
+                  if (!(result as CypressCommandLine.CypressRunResult)?.totalFailed) {
+                    _.pull(failedSpecFilePaths, filePath);
+                  }
+                }
               } catch (error) {
-                result = error;
+                log.error(error);
               }
-            }
 
-            if (fleetServer) {
-              await fleetServer.stop();
-            }
+              if (fleetServer) {
+                await fleetServer.stop();
+              }
 
-            await procs.stop('kibana');
-            await shutdownEs();
-            cleanupServerPorts({ esPort, kibanaPort, fleetServerPort });
+              await procs.stop('kibana');
+              await shutdownEs?.();
+              cleanupServerPorts({ esPort, kibanaPort, fleetServerPort });
 
+              return result;
+            });
             return result;
-          });
-          return result;
-        },
-        {
-          concurrency: 1,
-        }
-      ).then((results) => {
-        renderSummaryTable(results as CypressCommandLine.CypressRunResult[]);
-        const hasFailedTests = _.some(
-          results,
-          (result) =>
-            (result as CypressCommandLine.CypressFailedRunResult)?.status === 'failed' ||
-            (result as CypressCommandLine.CypressRunResult)?.totalFailed
+          },
+          {
+            concurrency: 1,
+          }
         );
-        if (hasFailedTests) {
-          throw createFailError('Not all tests passed');
-        }
-      });
+
+      const initialResults = await runSpecs(files);
+      // If there are failed tests, retry them
+      const retryResults = await runSpecs([...failedSpecFilePaths]);
+
+      const finalResults = [
+        // Don't include failed specs from initial run in results
+        ..._.filter(
+          initialResults,
+          (initialResult: CypressCommandLine.CypressRunResult) =>
+            initialResult?.runs &&
+            _.some(
+              initialResult?.runs,
+              (runResult) => !failedSpecFilePaths.includes(runResult.spec.absolute)
+            )
+        ),
+        ..._.filter(retryResults, (retryResult) => !!retryResult),
+      ] as CypressCommandLine.CypressRunResult[];
+
+      try {
+        renderSummaryTable(finalResults);
+      } catch (e) {
+        log.error('Failed to render summary table');
+        log.error(e);
+      }
+
+      const hasFailedTests = (
+        runResults: Array<
+          | CypressCommandLine.CypressFailedRunResult
+          | CypressCommandLine.CypressRunResult
+          | undefined
+        >
+      ) =>
+        _.some(
+          // only fail the job if retry failed as well
+          runResults,
+          (runResult) =>
+            (runResult as CypressCommandLine.CypressFailedRunResult)?.status === 'failed' ||
+            (runResult as CypressCommandLine.CypressRunResult)?.totalFailed
+        );
+
+      const hasFailedInitialTests = hasFailedTests(initialResults);
+      const hasFailedRetryTests = hasFailedTests(retryResults);
+
+      // If the initialResults had failures and failedSpecFilePaths was not populated properly return errors
+      if (
+        (hasFailedRetryTests && failedSpecFilePaths.length) ||
+        (hasFailedInitialTests && !retryResults.length)
+      ) {
+        throw createFailError('Not all tests passed');
+      }
     },
     {
       flags: {

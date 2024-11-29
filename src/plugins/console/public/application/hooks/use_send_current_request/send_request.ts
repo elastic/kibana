@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { HttpSetup, IHttpFetchError } from '@kbn/core-http-browser';
@@ -17,7 +18,7 @@ const { collapseLiteralStrings } = XJson;
 
 export interface RequestArgs {
   http: HttpSetup;
-  requests: Array<{ url: string; method: string; data: string[] }>;
+  requests: Array<{ url: string; method: string; data: string[]; lineNumber?: number }>;
 }
 
 export interface ResponseObject<V = unknown> {
@@ -83,7 +84,13 @@ export function sendRequest(args: RequestArgs): Promise<RequestResult[]> {
       const req = requests.shift()!;
       const path = req.url;
       const method = req.method;
-      let data = collapseLiteralStrings(req.data.join('\n'));
+
+      // If the request data contains multiple data objects (e.g. bulk request)
+      // ES only accepts it if each object is on a single line
+      // Therefore, we need to remove all new line characters from each data object
+      const unformattedData = req.data.map((body) => body.replaceAll('\n', ''));
+
+      let data = collapseLiteralStrings(unformattedData.join('\n'));
       if (data) {
         data += '\n';
       } // append a new line for bulk requests.
@@ -122,7 +129,8 @@ export function sendRequest(args: RequestArgs): Promise<RequestResult[]> {
           }
 
           if (isMultiRequest) {
-            value = `# ${req.method} ${req.url} ${statusCode} ${statusText}\n${value}`;
+            const lineNumber = req.lineNumber ? `${req.lineNumber}: ` : '';
+            value = `# ${lineNumber}${req.method} ${req.url} [${statusCode} ${statusText}]\n${value}`;
           }
 
           results.push({
@@ -149,14 +157,23 @@ export function sendRequest(args: RequestArgs): Promise<RequestResult[]> {
 
         const { statusCode, statusText } = extractStatusCodeAndText(response, path);
 
-        if (body) {
-          value = JSON.stringify(body, null, 2);
+        // When the request is sent, the HTTP library tries to parse the response body as JSON.
+        // However, if the response body is empty or not in valid JSON format, it throws an error.
+        // To handle this, if the request resolves with a 200 status code but has an empty or invalid body,
+        // we should still display a success message to the user.
+        if (statusCode === 200 && body === null) {
+          value = 'OK';
         } else {
-          value = 'Request failed to get to the server (status code: ' + statusCode + ')';
+          if (body) {
+            value = JSON.stringify(body, null, 2);
+          } else {
+            value = 'Request failed to get to the server (status code: ' + statusCode + ')';
+          }
         }
 
         if (isMultiRequest) {
-          value = `# ${req.method} ${req.url} ${statusCode} ${statusText}\n${value}`;
+          const lineNumber = req.lineNumber ? `${req.lineNumber}: ` : '';
+          value = `# ${lineNumber}${req.method} ${req.url} [${statusCode} ${statusText}]\n${value}`;
         }
 
         const result = {

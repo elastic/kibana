@@ -5,16 +5,29 @@
  * 2.0.
  */
 
-import type { Observable, Subject, Subscription } from 'rxjs';
-import { ReplaySubject, timer } from 'rxjs';
+import {
+  map,
+  Observable,
+  Subject,
+  Subscription,
+  switchMap,
+  takeUntil,
+  filter,
+  throttleTime,
+  distinctUntilChanged,
+  ReplaySubject,
+  timer,
+  firstValueFrom,
+} from 'rxjs';
 import moment from 'moment';
 import type { MaybePromise } from '@kbn/utility-types';
-import type {
+import {
   CoreSetup,
   Logger,
   Plugin,
   PluginInitializerContext,
   IClusterClient,
+  ServiceStatusLevels,
 } from '@kbn/core/server';
 import { registerAnalyticsContextProvider } from '../common/register_analytics_context_provider';
 import type { ILicense } from '../common/types';
@@ -35,6 +48,7 @@ import { getLicenseFetcher } from './license_fetcher';
  */
 export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPluginStart, {}, {}> {
   private stop$: Subject<void> = new ReplaySubject<void>(1);
+  private readonly isElasticsearchAvailable$ = new ReplaySubject<boolean>(1);
   private readonly logger: Logger;
   private readonly config: LicenseConfigType;
   private loggingSubscription?: Subscription;
@@ -55,6 +69,10 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPl
     const clientPromise = core.getStartServices().then(([{ elasticsearch }]) => {
       return elasticsearch.client;
     });
+
+    core.status.core$
+      .pipe(map(({ elasticsearch }) => elasticsearch.level === ServiceStatusLevels.available))
+      .subscribe(this.isElasticsearchAvailable$);
 
     const { refresh, license$ } = this.createLicensePoller(
       clientPromise,
@@ -91,11 +109,23 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPl
   ) {
     this.logger.debug(`Polling Elasticsearch License API with frequency ${pollingFrequency}ms.`);
 
-    const intervalRefresh$ = timer(0, pollingFrequency);
+    const isElasticsearchNotAvailable$ = this.isElasticsearchAvailable$.pipe(
+      filter((isElasticsearchAvailable) => !isElasticsearchAvailable)
+    );
+
+    // Trigger whenever the timer ticks or ES becomes available
+    const intervalRefresh$ = this.isElasticsearchAvailable$.pipe(
+      distinctUntilChanged(),
+      filter((isElasticsearchAvailable) => isElasticsearchAvailable),
+      switchMap(() => timer(0, pollingFrequency).pipe(takeUntil(isElasticsearchNotAvailable$))),
+      throttleTime(pollingFrequency) // avoid triggering too often
+    );
+
     const licenseFetcher = getLicenseFetcher({
       clusterClient,
       logger: this.logger,
       cacheDurationMs: this.config.license_cache_duration.asMilliseconds(),
+      maxRetryDelay: pollingFrequency,
     });
 
     const { license$, refreshManually } = createLicenseUpdate(
@@ -106,7 +136,8 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPl
 
     this.loggingSubscription = license$.subscribe((license) =>
       this.logger.debug(
-        'Imported license information from Elasticsearch:' +
+        () =>
+          'Imported license information from Elasticsearch:' +
           [
             `type: ${license.type}`,
             `status: ${license.status}`,
@@ -130,6 +161,7 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPl
     }
     return {
       refresh: this.refresh,
+      getLicense: async () => await firstValueFrom(this.license$!),
       license$: this.license$,
       featureUsage: this.featureUsage.start(),
       createLicensePoller: this.createLicensePoller.bind(this),

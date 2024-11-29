@@ -6,7 +6,6 @@
  */
 
 import React, { useState, useEffect, useCallback, useMemo, memo } from 'react';
-import { omit } from 'lodash';
 import { useRouteMatch } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -19,6 +18,7 @@ import {
   EuiErrorBoundary,
 } from '@elastic/eui';
 
+import { useSetIsReadOnly } from '../../../../integrations/hooks/use_read_only_context';
 import {
   useLink,
   useBreadcrumbs,
@@ -46,26 +46,33 @@ import {
   StepConfigurePackagePolicy,
   StepDefinePackagePolicy,
 } from '../create_package_policy_page/components';
+import type { AgentPolicy, PackagePolicyEditExtensionComponentProps } from '../../../types';
+import { pkgKeyFromPackageInfo } from '../../../services';
 
 import {
-  AGENTLESS_POLICY_ID,
-  HIDDEN_API_REFERENCE_PACKAGES,
-} from '../../../../../../common/constants';
-import type { PackagePolicyEditExtensionComponentProps } from '../../../types';
-import { ExperimentalFeaturesService, pkgKeyFromPackageInfo } from '../../../services';
-import { generateUpdatePackagePolicyDevToolsRequest } from '../services';
+  getInheritedNamespace,
+  getRootPrivilegedDataStreams,
+  isRootPrivilegesRequired,
+} from '../../../../../../common/services';
+import { useMultipleAgentPolicies } from '../../../hooks';
+
+import { RootPrivilegesCallout } from '../create_package_policy_page/single_page_layout/root_callout';
+
+import { StepsWithLessPadding } from '../create_package_policy_page/single_page_layout';
+
+import { useAgentless } from '../create_package_policy_page/single_page_layout/hooks/setup_technology';
 
 import { UpgradeStatusCallout } from './components';
 import { usePackagePolicyWithRelatedData, useHistoryBlock } from './hooks';
 import { getNewSecrets } from './utils';
+import { usePackagePolicySteps } from './hooks';
 
 export const EditPackagePolicyPage = memo(() => {
   const {
-    params: { packagePolicyId },
+    params: { packagePolicyId, policyId },
   } = useRouteMatch<{ policyId: string; packagePolicyId: string }>();
 
   const packagePolicy = useGetOnePackagePolicy(packagePolicyId);
-
   const extensionView = useUIExtension(
     packagePolicy.data?.item?.package?.name ?? '',
     'package-policy-edit'
@@ -74,6 +81,7 @@ export const EditPackagePolicyPage = memo(() => {
   return (
     <EditPackagePolicyForm
       packagePolicyId={packagePolicyId}
+      policyId={policyId}
       // If an extension opts in to this `useLatestPackageVersion` flag, we want to display
       // the edit form in an "upgrade" state regardless of whether the user intended to
       // "edit" their policy or "upgrade" it. This ensures the new policy generated will be
@@ -87,16 +95,18 @@ export const EditPackagePolicyForm = memo<{
   packagePolicyId: string;
   forceUpgrade?: boolean;
   from?: EditPackagePolicyFrom;
-}>(({ packagePolicyId, forceUpgrade = false, from = 'edit' }) => {
+  policyId?: string;
+}>(({ packagePolicyId, policyId, forceUpgrade = false, from = 'edit' }) => {
   const { application, notifications } = useStartServices();
   const {
     agents: { enabled: isFleetEnabled },
   } = useConfig();
   const { getHref } = useLink();
-
+  const { canUseMultipleAgentPolicies } = useMultipleAgentPolicies();
+  const { isAgentlessAgentPolicy, isAgentlessIntegration } = useAgentless();
   const {
     // data
-    agentPolicy,
+    agentPolicies: existingAgentPolicies,
     isLoadingData,
     loadingError,
     packagePolicy,
@@ -117,8 +127,17 @@ export const EditPackagePolicyForm = memo<{
     forceUpgrade,
   });
 
-  const canWriteIntegrationPolicies = useAuthz().integrations.writeIntegrationPolicies;
+  const hasAgentlessAgentPolicy = useMemo(
+    () =>
+      existingAgentPolicies.length === 1
+        ? existingAgentPolicies.some((policy) => isAgentlessAgentPolicy(policy)) &&
+          isAgentlessIntegration(packageInfo)
+        : false,
+    [existingAgentPolicies, isAgentlessAgentPolicy, packageInfo, isAgentlessIntegration]
+  );
 
+  const canWriteIntegrationPolicies = useAuthz().integrations.writeIntegrationPolicies;
+  useSetIsReadOnly(!canWriteIntegrationPolicies);
   const newSecrets = useMemo(() => {
     if (!packageInfo) {
       return [];
@@ -127,22 +146,37 @@ export const EditPackagePolicyForm = memo<{
     return getNewSecrets({ packageInfo, packagePolicy });
   }, [packageInfo, packagePolicy]);
 
-  const policyId = agentPolicy?.id ?? '';
+  const [agentPolicies, setAgentPolicies] = useState<AgentPolicy[]>([]);
+  const [isFirstLoad, setIsFirstLoad] = useState<boolean>(true);
+  const [newAgentPolicyName, setNewAgentPolicyName] = useState<string | undefined>();
+
+  // make form dirty if new agent policy is selected
+  useEffect(() => {
+    if (newAgentPolicyName) {
+      setIsEdited(true);
+    }
+  }, [newAgentPolicyName, setIsEdited]);
+
+  const [hasAgentPolicyError, setHasAgentPolicyError] = useState<boolean>(false);
 
   // Retrieve agent count
   const [agentCount, setAgentCount] = useState<number>(0);
   useEffect(() => {
     const getAgentCount = async () => {
-      const { data } = await sendGetAgentStatus({ policyId });
-      if (data?.results.total) {
-        setAgentCount(data.results.total);
+      let count = 0;
+      for (const id of packagePolicy.policy_ids) {
+        const { data } = await sendGetAgentStatus({ policyId: id });
+        if (data?.results.active) {
+          count += data.results.active;
+        }
       }
+      setAgentCount(count);
     };
 
-    if (isFleetEnabled && policyId) {
+    if (isFleetEnabled && packagePolicy.policy_ids.length > 0) {
       getAgentCount();
     }
-  }, [policyId, isFleetEnabled]);
+  }, [packagePolicy.policy_ids, isFleetEnabled]);
 
   const handleExtensionViewOnChange = useCallback<
     PackagePolicyEditExtensionComponentProps['onChange']
@@ -163,56 +197,109 @@ export const EditPackagePolicyForm = memo<{
   //  if `from === 'edit'` then it links back to Policy Details
   //  if `from === 'package-edit'`, or `upgrade-from-integrations-policy-list` then it links back to the Integration Policy List
   const cancelUrl = useMemo((): string => {
-    if (packageInfo && policyId) {
-      return from === 'package-edit'
-        ? getHref('integration_details_policies', {
-            pkgkey: pkgKeyFromPackageInfo(packageInfo!),
-          })
-        : getHref('policy_details', { policyId });
-    }
-    return '/';
+    return from === 'package-edit' && packageInfo
+      ? getHref('integration_details_policies', {
+          pkgkey: pkgKeyFromPackageInfo(packageInfo!),
+        })
+      : policyId
+      ? getHref('policy_details', { policyId })
+      : getHref('agent_list');
   }, [from, getHref, packageInfo, policyId]);
   const successRedirectPath = useMemo(() => {
-    if (packageInfo && policyId) {
-      return from === 'package-edit' || from === 'upgrade-from-integrations-policy-list'
-        ? getHref('integration_details_policies', {
-            pkgkey: pkgKeyFromPackageInfo(packageInfo!),
-          })
-        : getHref('policy_details', { policyId });
-    }
-    return '/';
+    return (from === 'package-edit' || from === 'upgrade-from-integrations-policy-list') &&
+      packageInfo
+      ? getHref('integration_details_policies', {
+          pkgkey: pkgKeyFromPackageInfo(packageInfo!),
+        })
+      : policyId
+      ? getHref('policy_details', { policyId })
+      : getHref('agent_list');
   }, [from, getHref, packageInfo, policyId]);
 
   useHistoryBlock(isEdited);
+
+  useEffect(() => {
+    if (existingAgentPolicies.length > 0 && isFirstLoad) {
+      setIsFirstLoad(false);
+      setAgentPolicies(existingAgentPolicies);
+    }
+  }, [existingAgentPolicies, isFirstLoad]);
+
+  const agentPoliciesToAdd = useMemo(
+    () => [
+      ...agentPolicies
+        .filter(
+          (policy) =>
+            !existingAgentPolicies.find((existingPolicy) => existingPolicy.id === policy.id)
+        )
+        .map((policy) => policy.name),
+      ...(newAgentPolicyName ? [newAgentPolicyName] : []),
+    ],
+    [agentPolicies, existingAgentPolicies, newAgentPolicyName]
+  );
+  const agentPoliciesToRemove = useMemo(
+    () =>
+      existingAgentPolicies
+        .filter(
+          (existingPolicy) => !agentPolicies.find((policy) => policy.id === existingPolicy.id)
+        )
+        .map((policy) => policy.name),
+    [agentPolicies, existingAgentPolicies]
+  );
 
   const onSubmit = async () => {
     if (formState === 'VALID' && hasErrors) {
       setFormState('INVALID');
       return;
     }
-    if (agentCount !== 0 && policyId !== AGENTLESS_POLICY_ID && formState !== 'CONFIRM') {
+    if (
+      (agentCount !== 0 ||
+        agentPolicies.length === 0 ||
+        agentPoliciesToAdd.length > 0 ||
+        agentPoliciesToRemove.length > 0) &&
+      !hasAgentlessAgentPolicy &&
+      formState !== 'CONFIRM'
+    ) {
       setFormState('CONFIRM');
       return;
     }
 
-    const { error } = await savePackagePolicy();
+    let newPolicyId;
+    try {
+      setFormState('LOADING');
+      newPolicyId = await createAgentPolicyIfNeeded();
+    } catch (e) {
+      setFormState('VALID');
+      notifications.toasts.addError(e, {
+        title: i18n.translate('xpack.fleet.createAgentPolicy.errorNotificationTitle', {
+          defaultMessage: 'Unable to create agent policy',
+        }),
+      });
+      return;
+    }
+
+    const { error } = await savePackagePolicy({
+      policy_ids: newPolicyId
+        ? [...packagePolicy.policy_ids, newPolicyId]
+        : packagePolicy.policy_ids,
+    });
     if (!error) {
       setIsEdited(false);
       application.navigateToUrl(successRedirectPath);
       notifications.toasts.addSuccess({
         title: i18n.translate('xpack.fleet.editPackagePolicy.updatedNotificationTitle', {
-          defaultMessage: `Successfully updated '{packagePolicyName}'`,
+          defaultMessage: `Successfully updated ''{packagePolicyName}''`,
           values: {
             packagePolicyName: packagePolicy.name,
           },
         }),
         'data-test-subj': 'policyUpdateSuccessToast',
         text:
-          agentCount && agentPolicy
+          agentCount && agentPolicies.length > 0
             ? i18n.translate('xpack.fleet.editPackagePolicy.updatedNotificationMessage', {
-                defaultMessage: `Fleet will deploy updates to all agents that use the '{agentPolicyName}' policy`,
+                defaultMessage: `Fleet will deploy updates to all agents that use the ''{agentPolicyNames}'' policy`,
                 values: {
-                  agentPolicyName: agentPolicy.name,
+                  agentPolicyNames: agentPolicies.map((policy) => policy.name).join(', '),
                 },
               })
             : undefined,
@@ -221,7 +308,7 @@ export const EditPackagePolicyForm = memo<{
       if (error.statusCode === 409) {
         notifications.toasts.addError(error, {
           title: i18n.translate('xpack.fleet.editPackagePolicy.failedNotificationTitle', {
-            defaultMessage: `Error updating '{packagePolicyName}'`,
+            defaultMessage: `Error updating ''{packagePolicyName}''`,
             values: {
               packagePolicyName: packagePolicy.name,
             },
@@ -236,7 +323,7 @@ export const EditPackagePolicyForm = memo<{
       } else {
         notifications.toasts.addError(error, {
           title: i18n.translate('xpack.fleet.editPackagePolicy.failedNotificationTitle', {
-            defaultMessage: `Error updating '{packagePolicyName}'`,
+            defaultMessage: `Error updating ''{packagePolicyName}''`,
             values: {
               packagePolicyName: packagePolicy.name,
             },
@@ -269,7 +356,7 @@ export const EditPackagePolicyForm = memo<{
   const layoutProps = {
     from: extensionView?.useLatestPackageVersion && isUpgrade ? 'upgrade-from-extension' : from,
     cancelUrl,
-    agentPolicy,
+    agentPolicies,
     packageInfo,
     tabs: tabsViews?.length
       ? [
@@ -295,11 +382,11 @@ export const EditPackagePolicyForm = memo<{
 
   const configurePackage = useMemo(
     () =>
-      agentPolicy && packageInfo ? (
+      agentPolicies && packageInfo ? (
         <>
           {selectedTab === 0 && (
             <StepDefinePackagePolicy
-              agentPolicy={agentPolicy}
+              namespacePlaceholder={getInheritedNamespace(agentPolicies)}
               packageInfo={packageInfo}
               packagePolicy={packagePolicy}
               updatePackagePolicy={updatePackagePolicy}
@@ -322,7 +409,7 @@ export const EditPackagePolicyForm = memo<{
           )}
 
           {extensionView &&
-            packagePolicy.policy_id &&
+            packagePolicy.policy_ids[0] &&
             packagePolicy.package?.name &&
             originalPackagePolicy && (
               <ExtensionWrapper>
@@ -344,7 +431,7 @@ export const EditPackagePolicyForm = memo<{
         </>
       ) : null,
     [
-      agentPolicy,
+      agentPolicies,
       packageInfo,
       packagePolicy,
       updatePackagePolicy,
@@ -361,39 +448,50 @@ export const EditPackagePolicyForm = memo<{
   const replaceConfigurePackage = replaceDefineStepView && originalPackagePolicy && packageInfo && (
     <ExtensionWrapper>
       <replaceDefineStepView.Component
-        agentPolicy={agentPolicy}
+        agentPolicies={agentPolicies}
         packageInfo={packageInfo}
         policy={originalPackagePolicy}
         newPolicy={packagePolicy}
         onChange={handleExtensionViewOnChange}
         validationResults={validationResults}
         isEditPage={true}
+        isAgentlessEnabled={hasAgentlessAgentPolicy}
       />
     </ExtensionWrapper>
   );
 
-  const { showDevtoolsRequest: isShowDevtoolRequestExperimentEnabled } =
-    ExperimentalFeaturesService.get();
+  const rootPrivilegedDataStreams = packageInfo ? getRootPrivilegedDataStreams(packageInfo) : [];
 
-  const showDevtoolsRequest =
-    !HIDDEN_API_REFERENCE_PACKAGES.includes(packageInfo?.name ?? '') &&
-    isShowDevtoolRequestExperimentEnabled;
+  const agentPolicyBreadcrumb = useMemo(() => {
+    return existingAgentPolicies.length > 0
+      ? existingAgentPolicies.find((policy) => policy.id === policyId) ?? existingAgentPolicies[0]
+      : { name: '', id: '' };
+  }, [existingAgentPolicies, policyId]);
 
-  const devtoolRequest = useMemo(
-    () =>
-      generateUpdatePackagePolicyDevToolsRequest(
-        packagePolicyId,
-        omit(packagePolicy, 'elasticsearch')
-      ),
-    [packagePolicyId, packagePolicy]
-  );
+  const {
+    steps,
+    devToolsProps: { devtoolRequest, devtoolRequestDescription, showDevtoolsRequest },
+    createAgentPolicyIfNeeded,
+  } = usePackagePolicySteps({
+    configureStep: replaceConfigurePackage || configurePackage,
+    packageInfo,
+    existingAgentPolicies,
+    setHasAgentPolicyError,
+    updatePackagePolicy,
+    agentPolicies,
+    setAgentPolicies,
+    isLoadingData,
+    packagePolicy,
+    packagePolicyId,
+    setNewAgentPolicyName,
+  });
 
   return (
     <CreatePackagePolicySinglePageLayout {...layoutProps} data-test-subj="editPackagePolicy">
       <EuiErrorBoundary>
         {isLoadingData ? (
           <Loading />
-        ) : loadingError || !agentPolicy || !packageInfo ? (
+        ) : loadingError || !packageInfo ? (
           <ErrorComponent
             title={
               <FormattedMessage
@@ -411,35 +509,49 @@ export const EditPackagePolicyForm = memo<{
         ) : (
           <>
             <Breadcrumb
-              agentPolicyName={agentPolicy.name}
+              agentPolicyName={agentPolicyBreadcrumb.name}
               from={from}
               packagePolicyName={packagePolicy.name}
               pkgkey={pkgKeyFromPackageInfo(packageInfo)}
               pkgTitle={packageInfo.title}
-              policyId={policyId}
+              policyId={agentPolicyBreadcrumb.id}
             />
             {formState === 'CONFIRM' && (
               <ConfirmDeployAgentPolicyModal
                 agentCount={agentCount}
-                agentPolicy={agentPolicy}
+                agentPolicies={agentPolicies}
                 onConfirm={onSubmit}
                 onCancel={() => setFormState('VALID')}
+                agentPoliciesToAdd={agentPoliciesToAdd}
+                agentPoliciesToRemove={agentPoliciesToRemove}
               />
             )}
+            {packageInfo && isRootPrivilegesRequired(packageInfo) ? (
+              <>
+                <RootPrivilegesCallout dataStreams={rootPrivilegedDataStreams} />
+                <EuiSpacer size="m" />
+              </>
+            ) : null}
             {isUpgrade && upgradeDryRunData && (
               <>
                 <UpgradeStatusCallout dryRunData={upgradeDryRunData} newSecrets={newSecrets} />
                 <EuiSpacer size="xxl" />
               </>
             )}
-            {replaceConfigurePackage || configurePackage}
+            {canUseMultipleAgentPolicies && !hasAgentlessAgentPolicy ? (
+              <StepsWithLessPadding steps={steps} />
+            ) : (
+              replaceConfigurePackage || configurePackage
+            )}
             {/* Extra space to accomodate the EuiBottomBar height */}
             <EuiSpacer size="xxl" />
             <EuiSpacer size="xxl" />
             <EuiBottomBar>
               <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
                 <EuiFlexItem grow={false}>
-                  {agentPolicy && packageInfo && formState === 'INVALID' ? (
+                  {agentPolicies &&
+                  packageInfo &&
+                  (formState === 'INVALID' || hasAgentPolicyError) ? (
                     <FormattedMessage
                       id="xpack.fleet.createPackagePolicy.errorOnSaveText"
                       defaultMessage="Your integration policy has errors. Please fix them before saving."
@@ -463,13 +575,8 @@ export const EditPackagePolicyForm = memo<{
                           btnProps={{
                             color: 'text',
                           }}
-                          description={i18n.translate(
-                            'xpack.fleet.editPackagePolicy.devtoolsRequestDescription',
-                            {
-                              defaultMessage: 'This Kibana request updates a package policy.',
-                            }
-                          )}
                           request={devtoolRequest}
+                          description={devtoolRequestDescription}
                         />
                       </EuiFlexItem>
                     ) : null}
@@ -481,6 +588,8 @@ export const EditPackagePolicyForm = memo<{
                         isDisabled={
                           !canWriteIntegrationPolicies ||
                           formState !== 'VALID' ||
+                          hasAgentPolicyError ||
+                          !validationResults ||
                           (!isEdited && !isUpgrade)
                         }
                         tooltip={
@@ -489,7 +598,7 @@ export const EditPackagePolicyForm = memo<{
                                 content: (
                                   <FormattedMessage
                                     id="xpack.fleet.agentPolicy.saveIntegrationTooltip"
-                                    defaultMessage="To save the integration policy, you must have security enabled and have the All privilege for Integrations. Contact your administrator."
+                                    defaultMessage="To save the integration policy, you must have security enabled and have the All privilege for Integrations and Agent Policies. Contact your administrator."
                                   />
                                 ),
                               }

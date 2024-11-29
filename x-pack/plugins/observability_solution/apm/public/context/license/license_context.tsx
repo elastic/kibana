@@ -11,13 +11,10 @@ import { ILicense } from '@kbn/licensing-plugin/public';
 import { useApmPluginContext } from '../apm_plugin/use_apm_plugin_context';
 import { InvalidLicenseNotification } from './invalid_license_notification';
 
-export const LicenseContext = React.createContext<ILicense | undefined>(
-  undefined
-);
+export const LicenseContext = React.createContext<ILicense | undefined>(undefined);
 
 export function LicenseProvider({ children }: { children: React.ReactChild }) {
-  const { plugins } = useApmPluginContext();
-  const { licensing } = plugins;
+  const { licensing } = useApmPluginContext();
   const license = useObservable(licensing.license$);
   // if license is not loaded yet, consider it valid
   const hasInvalidLicense = license?.isActive === false;

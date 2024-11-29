@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { createHash } from 'crypto';
@@ -15,13 +16,12 @@ import type {
   DataViewsServerPluginStartDependencies,
 } from '../../types';
 import type { FieldDescriptorRestResponse } from '../route_types';
-import { FIELDS_PATH as path, DATA_VIEWS_FIELDS_EXCLUDED_TIERS } from '../../../common/constants';
+import { FIELDS_PATH as path } from '../../../common/constants';
 import { parseFields, IBody, IQuery, querySchema, validate } from './fields_for';
 import { DEFAULT_FIELD_CACHE_FRESHNESS } from '../../constants';
-import { getIndexFilterDsl } from './utils';
 
 export function calculateHash(srcBuffer: Buffer) {
-  const hash = createHash('sha1');
+  const hash = createHash('sha1'); // eslint-disable-line @kbn/eslint/no_unsafe_hash
   hash.update(srcBuffer);
   return hash.digest('hex');
 }
@@ -31,10 +31,11 @@ const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, I
     const core = await context.core;
     const uiSettings = core.uiSettings.client;
     const { asCurrentUser } = core.elasticsearch.client;
-    const indexPatterns = new IndexPatternsFetcher(asCurrentUser, undefined, isRollupsEnabled());
-    const excludedTiers = await core.uiSettings.client.get<string>(
-      DATA_VIEWS_FIELDS_EXCLUDED_TIERS
-    );
+    const indexPatterns = new IndexPatternsFetcher(asCurrentUser, {
+      uiSettingsClient: uiSettings,
+      rollupsEnabled: isRollupsEnabled(),
+    });
+
     const {
       pattern,
       meta_fields: metaFields,
@@ -67,7 +68,6 @@ const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, I
           includeUnmapped,
         },
         fieldTypes: parsedFieldTypes,
-        indexFilter: getIndexFilterDsl({ excludedTiers }),
         ...(parsedFields.length > 0 ? { fields: parsedFields } : {}),
       });
 
@@ -138,7 +138,7 @@ const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, I
     }
   };
 
-export const registerFields = async (
+export const registerFields = (
   router: IRouter,
   getStartServices: StartServicesAccessor<
     DataViewsServerPluginStartDependencies,

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -30,22 +31,13 @@ import HeatmapComponent from './heatmap_component';
 import { LegendSize } from '@kbn/visualizations-plugin/common';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
 
-jest.mock('@elastic/charts', () => {
-  const original = jest.requireActual('@elastic/charts');
-
-  return {
-    ...original,
-    getSpecId: jest.fn(() => {}),
-  };
-});
-
 const actWithTimeout = (action: Function, timer: number = 1) =>
   act(
     () =>
       new Promise((resolve) =>
         setTimeout(async () => {
           await action();
-          resolve();
+          resolve(void 0);
         }, timer)
       )
   );

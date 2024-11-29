@@ -1,41 +1,49 @@
 {
   "type": "plugin",
   "id": "@kbn/enterprise-search-plugin",
-  "owner": "@elastic/enterprise-search-frontend",
+  "owner": "@elastic/search-kibana",
+  // TODO this is currently used from Observability too, must be refactored before solution-specific builds
+  // see x-pack/plugins/observability_solution/observability_ai_assistant_management/public/routes/components/search_connector_tab.tsx
+  // cc sphilipse
+  "group": "search",
+  "visibility": "private",
   "description": "Adds dashboards for discovering and managing Enterprise Search products.",
   "plugin": {
     "id": "enterpriseSearch",
     "server": true,
     "browser": true,
-    "configPath": [
-      "enterpriseSearch"
-    ],
+    "configPath": ["enterpriseSearch"],
     "requiredPlugins": [
-      "features",
-      "security",
-      "licensing",
       "data",
-      "discover",
-      "charts",
+      "features",
+      "licensing",
       "logsShared",
-      "cloud",
+      "logsDataAccess",
       "esUiShared",
-      "lens",
-      "embeddable",
-      "share",
-      "console"
+      "navigation",
     ],
     "optionalPlugins": [
       "customIntegrations",
       "globalSearch",
       "home",
+      "indexManagement",
       "ml",
+      "security",
       "spaces",
       "usageCollection",
       "guidedOnboarding",
+      "console",
+      "searchConnectors",
+      "searchInferenceEndpoints",
+      "searchNavigation",
+      "searchPlayground",
+      "embeddable",
+      "discover",
+      "charts",
+      "cloud",
+      "lens",
+      "share"
     ],
-    "requiredBundles": [
-      "kibanaReact"
-    ]
+    "requiredBundles": ["kibanaReact"]
   }
 }

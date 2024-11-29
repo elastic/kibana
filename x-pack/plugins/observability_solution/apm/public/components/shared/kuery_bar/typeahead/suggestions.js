@@ -18,10 +18,7 @@ const List = euiStyled.ul`
   border: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
   border-radius: ${({ theme }) => theme.eui.euiBorderRadiusSmall};
   box-shadow: 0 ${({ theme }) =>
-    `${theme.eui.euiSizeXS} ${theme.eui.euiSizeXL} ${tint(
-      0.9,
-      theme.eui.euiColorFullShade
-    )}`};
+    `${theme.eui.euiSizeXS} ${theme.eui.euiSizeXL} ${tint(0.9, theme.eui.euiColorFullShade)}`};
   position: absolute;
   background: ${({ theme }) => theme.eui.euiColorEmptyShade};
   z-index: 10;
@@ -75,10 +72,7 @@ class Suggestions extends Component {
     });
 
     return (
-      <List
-        data-test-subj="suggestionContainer"
-        innerRef={(node) => (this.parentNode = node)}
-      >
+      <List data-test-subj="suggestionContainer" innerRef={(node) => (this.parentNode = node)}>
         {suggestions}
       </List>
     );

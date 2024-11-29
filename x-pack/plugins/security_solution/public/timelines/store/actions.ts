@@ -12,7 +12,6 @@ import type { SavedSearch } from '@kbn/saved-search-plugin/common';
 import type { SessionViewConfig } from '../../../common/types';
 import type {
   DataProvider,
-  DataProviderType,
   QueryOperator,
 } from '../components/timeline/data_providers/data_provider';
 
@@ -26,20 +25,22 @@ import type {
   TimelineTabs,
   TimelinePersistInput,
   SerializedFilterQuery,
-  ToggleDetailPanel,
   ColumnHeaderOptions,
   SortColumnTimeline,
 } from '../../../common/types/timeline';
-import type { RowRendererId } from '../../../common/api/timeline';
+import type { DataProviderType, RowRendererId } from '../../../common/api/timeline';
 import type { ResolveTimelineConfig } from '../components/open_timeline/types';
+import type { PrimitiveOrArrayOfPrimitives } from '../../common/lib/kuery';
 
 const actionCreator = actionCreatorFactory('x-pack/security_solution/local/timeline');
 
 export const addNote = actionCreator<{ id: string; noteId: string }>('ADD_NOTE');
 
-export const addNoteToEvent = actionCreator<{ id: string; noteId: string; eventId: string }>(
-  'ADD_NOTE_TO_EVENT'
-);
+export const addNoteToEvent = actionCreator<{
+  id: string;
+  noteId: string;
+  eventId: string;
+}>('ADD_NOTE_TO_EVENT');
 
 export const deleteNoteFromEvent = actionCreator<{ id: string; noteId: string; eventId: string }>(
   'DELETE_NOTE_FROM_EVENT'
@@ -115,7 +116,7 @@ export const dataProviderEdited = actionCreator<{
   id: string;
   operator: QueryOperator;
   providerId: string;
-  value: string | number | Array<string | number>;
+  value: PrimitiveOrArrayOfPrimitives;
 }>('DATA_PROVIDER_EDITED');
 
 export const updateDataProviderType = actionCreator<{
@@ -187,15 +188,8 @@ export const toggleModalSaveTimeline = actionCreator<{
 export const updateEqlOptions = actionCreator<{
   id: string;
   field: FieldsEqlOptions;
-  value: string | undefined;
+  value: string | number | undefined;
 }>('UPDATE_EQL_OPTIONS_TIMELINE');
-
-export const updateIsLoading = actionCreator<{
-  id: string;
-  isLoading: boolean;
-}>('UPDATE_LOADING');
-
-export const toggleDetailPanel = actionCreator<ToggleDetailPanel>('TOGGLE_DETAIL_PANEL');
 
 export const setEventsLoading = actionCreator<{
   id: string;
@@ -270,13 +264,8 @@ export const updateTotalCount = actionCreator<{ id: string; totalCount: number }
 
 export const updateSavedSearchId = actionCreator<{
   id: string;
-  savedSearchId: string;
+  savedSearchId: string | null;
 }>('UPDATE_DISCOVER_SAVED_SEARCH_ID');
-
-export const setIsDiscoverSavedSearchLoaded = actionCreator<{
-  id: string;
-  isDiscoverSavedSearchLoaded: boolean;
-}>('SET_IS_DISCOVER_SAVED_SEARCH_LOADED');
 
 export const initializeSavedSearch = actionCreator<{
   id: string;
@@ -294,6 +283,22 @@ export const setDataProviderVisibility = actionCreator<{
 }>('SET_DATA_PROVIDER_VISIBLITY');
 
 export const setChanged = actionCreator<{ id: string; changed: boolean }>('SET_CHANGED');
+
+export const updateColumnWidth = actionCreator<{
+  columnId: string;
+  id: string;
+  width?: number;
+}>('UPDATE_COLUMN_WIDTH');
+
+export const updateRowHeight = actionCreator<{
+  id: string;
+  rowHeight: number;
+}>('UPDATE_ROW_HEIGHT');
+
+export const updateSampleSize = actionCreator<{
+  id: string;
+  sampleSize: number;
+}>('UPDATE_SAMPLE_SIZE');
 
 export const setConfirmingNoteId = actionCreator<{
   id: string;

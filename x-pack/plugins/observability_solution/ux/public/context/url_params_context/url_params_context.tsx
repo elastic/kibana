@@ -6,18 +6,9 @@
  */
 
 import { mapValues } from 'lodash';
-import React, {
-  createContext,
-  useCallback,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
-import { withRouter } from 'react-router-dom';
-import {
-  UxLocalUIFilterName,
-  uxLocalUIFilterNames,
-} from '../../../common/ux_ui_filter';
+import React, { createContext, useCallback, useMemo, useRef, useState } from 'react';
+import { withRouter, RouteComponentProps } from 'react-router-dom';
+import { UxLocalUIFilterName, uxLocalUIFilterNames } from '../../../common/ux_ui_filter';
 import { pickKeys } from '../../../common/utils/pick_keys';
 import { UxUIFilters } from '../../../typings/ui_filters';
 import { getDateRange } from './helpers';
@@ -31,9 +22,8 @@ export interface TimeRange {
 }
 
 function useUxUiFilters(params: UrlParams): UxUIFilters {
-  const localUiFilters = mapValues(
-    pickKeys(params, ...uxLocalUIFilterNames),
-    (val) => (val ? val.split(',') : [])
+  const localUiFilters = mapValues(pickKeys(params, ...uxLocalUIFilterNames), (val) =>
+    val ? val.split(',') : []
   ) as Partial<Record<UxLocalUIFilterName, string[]>>;
 
   return useDeepObjectIdentity({
@@ -51,55 +41,53 @@ const UrlParamsContext = createContext({
   urlParams: {} as UrlParams,
 });
 
-const UrlParamsProvider: React.ComponentClass<{}> = withRouter(
-  ({ location, children }) => {
-    const refUrlParams = useRef(resolveUrlParams(location, {}));
+const UrlParamsProvider: React.ComponentClass = withRouter<
+  React.PropsWithChildren<RouteComponentProps>,
+  React.FC<React.PropsWithChildren<RouteComponentProps>>
+>(({ location, children }) => {
+  const refUrlParams = useRef(resolveUrlParams(location, {}));
 
-    const { start, end, rangeFrom, rangeTo, exactStart, exactEnd } =
-      refUrlParams.current;
+  const { start, end, rangeFrom, rangeTo, exactStart, exactEnd } = refUrlParams.current;
 
-    // Counter to force an update in useFetcher when the refresh button is clicked.
-    const [rangeId, setRangeId] = useState(0);
+  // Counter to force an update in useFetcher when the refresh button is clicked.
+  const [rangeId, setRangeId] = useState(0);
 
-    const urlParams = useMemo(
-      () =>
-        resolveUrlParams(location, {
-          start,
-          end,
-          rangeFrom,
-          rangeTo,
-          exactStart,
-          exactEnd,
-        }),
-      [location, start, end, rangeFrom, rangeTo, exactStart, exactEnd]
-    );
+  const urlParams = useMemo(
+    () =>
+      resolveUrlParams(location, {
+        start,
+        end,
+        rangeFrom,
+        rangeTo,
+        exactStart,
+        exactEnd,
+      }),
+    [location, start, end, rangeFrom, rangeTo, exactStart, exactEnd]
+  );
 
-    refUrlParams.current = urlParams;
+  refUrlParams.current = urlParams;
 
-    const refreshTimeRange = useCallback((timeRange: TimeRange) => {
-      refUrlParams.current = {
-        ...refUrlParams.current,
-        ...getDateRange({ state: {}, ...timeRange }),
-      };
+  const refreshTimeRange = useCallback((timeRange: TimeRange) => {
+    refUrlParams.current = {
+      ...refUrlParams.current,
+      ...getDateRange({ state: {}, ...timeRange }),
+    };
 
-      setRangeId((prevRangeId) => prevRangeId + 1);
-    }, []);
+    setRangeId((prevRangeId) => prevRangeId + 1);
+  }, []);
 
-    const uxUiFilters = useUxUiFilters(urlParams);
+  const uxUiFilters = useUxUiFilters(urlParams);
 
-    const contextValue = useMemo(() => {
-      return {
-        rangeId,
-        refreshTimeRange,
-        urlParams,
-        uxUiFilters,
-      };
-    }, [rangeId, refreshTimeRange, uxUiFilters, urlParams]);
+  const contextValue = useMemo(() => {
+    return {
+      rangeId,
+      refreshTimeRange,
+      urlParams,
+      uxUiFilters,
+    };
+  }, [rangeId, refreshTimeRange, uxUiFilters, urlParams]);
 
-    return (
-      <UrlParamsContext.Provider children={children} value={contextValue} />
-    );
-  }
-);
+  return <UrlParamsContext.Provider children={children} value={contextValue} />;
+});
 
 export { UrlParamsContext, UrlParamsProvider, useUxUiFilters };

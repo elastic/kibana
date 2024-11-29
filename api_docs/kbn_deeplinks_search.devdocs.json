@@ -24,13 +24,13 @@
     "misc": [
       {
         "parentPluginId": "@kbn/deeplinks-search",
-        "id": "def-common.AppId",
+        "id": "def-common.DeepLinkId",
         "type": "Type",
         "tags": [],
-        "label": "AppId",
+        "label": "DeepLinkId",
         "description": [],
         "signature": [
-          "\"serverlessElasticsearch\""
+          "\"appSearch\" | \"enterpriseSearch\" | \"enterpriseSearchContent\" | \"enterpriseSearchApplications\" | \"searchInferenceEndpoints\" | \"enterpriseSearchAnalytics\" | \"workplaceSearch\" | \"serverlessElasticsearch\" | \"serverlessConnectors\" | \"serverlessWebCrawlers\" | \"searchPlayground\" | \"searchHomepage\" | \"enterpriseSearchContent:connectors\" | \"enterpriseSearchContent:searchIndices\" | \"enterpriseSearchContent:webCrawlers\" | \"enterpriseSearchApplications:searchApplications\" | \"enterpriseSearchApplications:playground\" | \"appSearch:engines\" | \"searchInferenceEndpoints:inferenceEndpoints\" | \"elasticsearchStart\" | \"elasticsearchIndices\" | \"enterpriseSearchElasticsearch\" | \"enterpriseSearchVectorSearch\" | \"enterpriseSearchSemanticSearch\" | \"enterpriseSearchAISearch\" | \"elasticsearchIndices:createIndex\""
         ],
         "path": "packages/deeplinks/search/deep_links.ts",
         "deprecated": false,
@@ -39,15 +39,255 @@
       },
       {
         "parentPluginId": "@kbn/deeplinks-search",
-        "id": "def-common.DeepLinkId",
-        "type": "Type",
+        "id": "def-common.ENTERPRISE_SEARCH_ANALYTICS_APP_ID",
+        "type": "string",
         "tags": [],
-        "label": "DeepLinkId",
+        "label": "ENTERPRISE_SEARCH_ANALYTICS_APP_ID",
         "description": [],
         "signature": [
-          "\"serverlessElasticsearch\" | \"serverlessConnectors\""
+          "\"enterpriseSearchAnalytics\""
+        ],
+        "path": "packages/deeplinks/search/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-search",
+        "id": "def-common.ENTERPRISE_SEARCH_APP_ID",
+        "type": "string",
+        "tags": [],
+        "label": "ENTERPRISE_SEARCH_APP_ID",
+        "description": [],
+        "signature": [
+          "\"enterpriseSearch\""
+        ],
+        "path": "packages/deeplinks/search/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-search",
+        "id": "def-common.ENTERPRISE_SEARCH_APPLICATIONS_APP_ID",
+        "type": "string",
+        "tags": [],
+        "label": "ENTERPRISE_SEARCH_APPLICATIONS_APP_ID",
+        "description": [],
+        "signature": [
+          "\"enterpriseSearchApplications\""
+        ],
+        "path": "packages/deeplinks/search/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-search",
+        "id": "def-common.ENTERPRISE_SEARCH_APPSEARCH_APP_ID",
+        "type": "string",
+        "tags": [],
+        "label": "ENTERPRISE_SEARCH_APPSEARCH_APP_ID",
+        "description": [],
+        "signature": [
+          "\"appSearch\""
+        ],
+        "path": "packages/deeplinks/search/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-search",
+        "id": "def-common.ENTERPRISE_SEARCH_CONTENT_APP_ID",
+        "type": "string",
+        "tags": [],
+        "label": "ENTERPRISE_SEARCH_CONTENT_APP_ID",
+        "description": [],
+        "signature": [
+          "\"enterpriseSearchContent\""
+        ],
+        "path": "packages/deeplinks/search/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-search",
+        "id": "def-common.ENTERPRISE_SEARCH_RELEVANCE_APP_ID",
+        "type": "string",
+        "tags": [],
+        "label": "ENTERPRISE_SEARCH_RELEVANCE_APP_ID",
+        "description": [],
+        "signature": [
+          "\"searchInferenceEndpoints\""
+        ],
+        "path": "packages/deeplinks/search/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-search",
+        "id": "def-common.ENTERPRISE_SEARCH_WORKPLACESEARCH_APP_ID",
+        "type": "string",
+        "tags": [],
+        "label": "ENTERPRISE_SEARCH_WORKPLACESEARCH_APP_ID",
+        "description": [],
+        "signature": [
+          "\"workplaceSearch\""
+        ],
+        "path": "packages/deeplinks/search/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-search",
+        "id": "def-common.EnterpriseSearchAnalyticsApp",
+        "type": "Type",
+        "tags": [],
+        "label": "EnterpriseSearchAnalyticsApp",
+        "description": [],
+        "signature": [
+          "\"enterpriseSearchAnalytics\""
         ],
         "path": "packages/deeplinks/search/deep_links.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-search",
+        "id": "def-common.EnterpriseSearchApp",
+        "type": "Type",
+        "tags": [],
+        "label": "EnterpriseSearchApp",
+        "description": [],
+        "signature": [
+          "\"enterpriseSearch\""
+        ],
+        "path": "packages/deeplinks/search/deep_links.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-search",
+        "id": "def-common.EnterpriseSearchApplicationsApp",
+        "type": "Type",
+        "tags": [],
+        "label": "EnterpriseSearchApplicationsApp",
+        "description": [],
+        "signature": [
+          "\"enterpriseSearchApplications\""
+        ],
+        "path": "packages/deeplinks/search/deep_links.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-search",
+        "id": "def-common.EnterpriseSearchAppsearchApp",
+        "type": "Type",
+        "tags": [],
+        "label": "EnterpriseSearchAppsearchApp",
+        "description": [],
+        "signature": [
+          "\"appSearch\""
+        ],
+        "path": "packages/deeplinks/search/deep_links.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-search",
+        "id": "def-common.EnterpriseSearchContentApp",
+        "type": "Type",
+        "tags": [],
+        "label": "EnterpriseSearchContentApp",
+        "description": [],
+        "signature": [
+          "\"enterpriseSearchContent\""
+        ],
+        "path": "packages/deeplinks/search/deep_links.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-search",
+        "id": "def-common.EnterpriseSearchWorkplaceSearchApp",
+        "type": "Type",
+        "tags": [],
+        "label": "EnterpriseSearchWorkplaceSearchApp",
+        "description": [],
+        "signature": [
+          "\"workplaceSearch\""
+        ],
+        "path": "packages/deeplinks/search/deep_links.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-search",
+        "id": "def-common.SEARCH_AI_SEARCH",
+        "type": "string",
+        "tags": [],
+        "label": "SEARCH_AI_SEARCH",
+        "description": [],
+        "signature": [
+          "\"enterpriseSearchAISearch\""
+        ],
+        "path": "packages/deeplinks/search/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-search",
+        "id": "def-common.SEARCH_ELASTICSEARCH",
+        "type": "string",
+        "tags": [],
+        "label": "SEARCH_ELASTICSEARCH",
+        "description": [],
+        "signature": [
+          "\"enterpriseSearchElasticsearch\""
+        ],
+        "path": "packages/deeplinks/search/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-search",
+        "id": "def-common.SEARCH_SEMANTIC_SEARCH",
+        "type": "string",
+        "tags": [],
+        "label": "SEARCH_SEMANTIC_SEARCH",
+        "description": [],
+        "signature": [
+          "\"enterpriseSearchSemanticSearch\""
+        ],
+        "path": "packages/deeplinks/search/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-search",
+        "id": "def-common.SEARCH_VECTOR_SEARCH",
+        "type": "string",
+        "tags": [],
+        "label": "SEARCH_VECTOR_SEARCH",
+        "description": [],
+        "signature": [
+          "\"enterpriseSearchVectorSearch\""
+        ],
+        "path": "packages/deeplinks/search/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -78,6 +318,21 @@
           "\"serverlessConnectors\""
         ],
         "path": "packages/deeplinks/search/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-search",
+        "id": "def-common.ServerlessSearchApp",
+        "type": "Type",
+        "tags": [],
+        "label": "ServerlessSearchApp",
+        "description": [],
+        "signature": [
+          "\"serverlessElasticsearch\""
+        ],
+        "path": "packages/deeplinks/search/deep_links.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

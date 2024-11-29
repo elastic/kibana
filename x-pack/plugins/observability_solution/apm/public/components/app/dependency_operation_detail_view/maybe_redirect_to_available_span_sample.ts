@@ -24,7 +24,7 @@ export function maybeRedirectToAvailableSpanSample({
   page: number;
   replace: typeof urlHelpersReplace;
   history: History;
-  samples: Array<{ spanId: string; traceId: string; transactionId: string }>;
+  samples: Array<{ spanId: string; traceId: string; transactionId?: string }>;
 }) {
   if (spanFetchStatus !== FETCH_STATUS.SUCCESS) {
     // we're still loading, don't do anything
@@ -32,12 +32,9 @@ export function maybeRedirectToAvailableSpanSample({
   }
 
   const nextSpanId =
-    samples.find((sample) => sample.spanId === spanId)?.spanId ||
-    samples[0]?.spanId ||
-    '';
+    samples.find((sample) => sample.spanId === spanId)?.spanId || samples[0]?.spanId || '';
 
-  const indexOfNextSample =
-    samples.findIndex((sample) => sample.spanId === nextSpanId) ?? 0;
+  const indexOfNextSample = samples.findIndex((sample) => sample.spanId === nextSpanId) ?? 0;
 
   const nextPageIndex = Math.floor((indexOfNextSample + 1) / (pageSize ?? 10));
 

@@ -10,11 +10,11 @@ import React from 'react';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
 import userEvent from '@testing-library/user-event';
-import { screen, waitFor } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { SeverityFilter } from './severity_filter';
 
-// FLAKY: https://github.com/elastic/kibana/issues/176336
+// Failing: See https://github.com/elastic/kibana/issues/176336
 describe.skip('Severity form field', () => {
   const onChange = jest.fn();
   let appMockRender: AppMockRenderer;
@@ -29,25 +29,38 @@ describe.skip('Severity form field', () => {
 
   it('renders', async () => {
     appMockRender.render(<SeverityFilter {...props} />);
-    expect(await screen.findByTestId('options-filter-popover-button-severity')).toBeInTheDocument();
-    expect(await screen.findByTestId('options-filter-popover-button-severity')).not.toBeDisabled();
 
-    userEvent.click(await screen.findByRole('button', { name: 'Severity' }));
+    const popoverButton = await screen.findByTestId('options-filter-popover-button-severity');
+    expect(popoverButton).toBeInTheDocument();
+    expect(popoverButton).not.toBeDisabled();
+
+    await userEvent.click(popoverButton);
+
     await waitForEuiPopoverOpen();
 
-    expect(await screen.findByRole('option', { name: CaseSeverity.LOW })).toBeInTheDocument();
-    expect(await screen.findByRole('option', { name: CaseSeverity.MEDIUM })).toBeInTheDocument();
-    expect(await screen.findByRole('option', { name: CaseSeverity.HIGH })).toBeInTheDocument();
-    expect(await screen.findByRole('option', { name: CaseSeverity.CRITICAL })).toBeInTheDocument();
-    expect((await screen.findAllByRole('option')).length).toBe(4);
+    const allOptions = await within(await screen.findByTestId('euiSelectableList')).findAllByRole(
+      'option'
+    );
+
+    expect(allOptions.length).toBe(4);
+    expect(allOptions[0]).toHaveAttribute('title', CaseSeverity.LOW);
+    expect(allOptions[1]).toHaveAttribute('title', CaseSeverity.MEDIUM);
+    expect(allOptions[2]).toHaveAttribute('title', CaseSeverity.HIGH);
+    expect(allOptions[3]).toHaveAttribute('title', CaseSeverity.CRITICAL);
   });
 
   it('selects the correct value when changed', async () => {
     appMockRender.render(<SeverityFilter {...props} />);
 
-    userEvent.click(await screen.findByRole('button', { name: 'Severity' }));
+    await userEvent.click(await screen.findByRole('button', { name: 'Severity' }));
+
     await waitForEuiPopoverOpen();
-    userEvent.click(await screen.findByRole('option', { name: 'high' }));
+
+    await userEvent.click(
+      await within(await screen.findByTestId('euiSelectableList')).findByRole('option', {
+        name: 'high',
+      })
+    );
 
     await waitFor(() => {
       expect(onChange).toHaveBeenCalledWith({

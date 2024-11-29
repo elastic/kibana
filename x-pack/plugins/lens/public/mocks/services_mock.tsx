@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React from 'react';
 import { Subject } from 'rxjs';
 import { coreMock } from '@kbn/core/public/mocks';
 import { navigationPluginMock } from '@kbn/navigation-plugin/public/mocks';
@@ -14,54 +13,41 @@ import { indexPatternFieldEditorPluginMock } from '@kbn/data-view-field-editor-p
 import { indexPatternEditorPluginMock } from '@kbn/data-view-editor-plugin/public/mocks';
 import { inspectorPluginMock } from '@kbn/inspector-plugin/public/mocks';
 import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
-import { dashboardPluginMock } from '@kbn/dashboard-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { contentManagementMock } from '@kbn/content-management-plugin/public/mocks';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 
-import {
-  mockAttributeService,
-  createEmbeddableStateTransferMock,
-} from '@kbn/embeddable-plugin/public/mocks';
+import { createEmbeddableStateTransferMock } from '@kbn/embeddable-plugin/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import type { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 
 import { presentationUtilPluginMock } from '@kbn/presentation-util-plugin/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
-import { settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
-import type { LensAttributeService } from '../lens_attribute_service';
-import type {
-  LensByValueInput,
-  LensByReferenceInput,
-  LensSavedObjectAttributes,
-  LensUnwrapMetaInfo,
-} from '../embeddable/embeddable';
-import { DOC_TYPE } from '../../common/constants';
+
 import { LensAppServices } from '../app_plugin/types';
 import { mockDataPlugin } from './data_plugin_mock';
 import { getLensInspectorService } from '../lens_inspector_service';
-import { SavedObjectIndexStore } from '../persistence';
+import { LensDocument, SavedObjectIndexStore } from '../persistence';
+import { LensAttributesService } from '../lens_attribute_service';
+import { mockDatasourceStates } from './store_mocks';
 
 const startMock = coreMock.createStart();
 
-export const defaultDoc = {
+export const defaultDoc: LensDocument = {
   savedObjectId: '1234',
   title: 'An extremely cool default document!',
-  expression: 'definitely a valid expression',
   visualizationType: 'testVis',
   state: {
-    query: 'kuery',
+    query: { query: 'test', language: 'kuery' },
     filters: [{ query: { match_phrase: { src: 'test' } }, meta: { index: 'index-pattern-0' } }],
-    datasourceStates: {
-      testDatasource: 'datasource',
-    },
+    datasourceStates: mockDatasourceStates(),
     visualization: {},
   },
   references: [{ type: 'index-pattern', id: '1', name: 'index-pattern-0' }],
-} as unknown as Document;
+};
 
 export const exactMatchDoc = {
   attributes: {
@@ -71,6 +57,27 @@ export const exactMatchDoc = {
     outcome: 'exactMatch',
   },
 };
+
+export function makeAttributeService(doc: LensDocument): jest.Mocked<LensAttributesService> {
+  const attributeServiceMock: jest.Mocked<LensAttributesService> = {
+    loadFromLibrary: jest.fn().mockResolvedValue(exactMatchDoc),
+    saveToLibrary: jest.fn().mockResolvedValue(doc.savedObjectId),
+    checkForDuplicateTitle: jest.fn(),
+    injectReferences: jest.fn((_runtimeState, references) => ({
+      ..._runtimeState,
+      attributes: {
+        ..._runtimeState.attributes,
+        references: references?.length ? references : _runtimeState.attributes.references,
+      },
+    })),
+    extractReferences: jest.fn((_runtimeState) => ({
+      rawState: _runtimeState,
+      references: _runtimeState.attributes.references || [],
+    })),
+  };
+
+  return attributeServiceMock;
+}
 
 export function makeDefaultServices(
   sessionIdSubject = new Subject<string>(),
@@ -108,53 +115,18 @@ export function makeDefaultServices(
 
   const navigationStartMock = navigationPluginMock.createStartContract();
 
-  jest
-    .spyOn(navigationStartMock.ui.AggregateQueryTopNavMenu.prototype, 'constructor')
-    .mockImplementation(() => {
-      return <div className="topNavMenu" />;
-    });
-
-  function makeAttributeService(): LensAttributeService {
-    const attributeServiceMock = mockAttributeService<
-      LensSavedObjectAttributes,
-      LensByValueInput,
-      LensByReferenceInput,
-      LensUnwrapMetaInfo
-    >(
-      DOC_TYPE,
-      {
-        saveMethod: jest.fn(),
-        unwrapMethod: jest.fn(),
-        checkForDuplicateTitle: jest.fn(),
-      },
-      core
-    );
-    attributeServiceMock.unwrapAttributes = jest.fn().mockResolvedValue(exactMatchDoc);
-    attributeServiceMock.wrapAttributes = jest.fn().mockResolvedValue({
-      savedObjectId: (doc as unknown as LensByReferenceInput).savedObjectId,
-    });
-
-    return attributeServiceMock;
-  }
-
   return {
-    http: core.http,
+    ...startMock,
     chrome: core.chrome,
-    overlays: core.overlays,
-    uiSettings: core.uiSettings,
-    settings: settingsServiceMock.createStartContract(),
-    executionContext: core.executionContext,
     navigation: navigationStartMock,
-    notifications: core.notifications,
-    attributeService: makeAttributeService(),
+    attributeService: makeAttributeService(doc),
     inspector: {
-      adapters: getLensInspectorService(inspectorPluginMock.createStartContract()).adapters,
+      getInspectorAdapters: getLensInspectorService(inspectorPluginMock.createStartContract())
+        .getInspectorAdapters,
       inspect: jest.fn(),
-      close: jest.fn(),
+      closeInspector: jest.fn(),
     },
-    dashboard: dashboardPluginMock.createStartContract(),
-    presentationUtil: presentationUtilPluginMock.createStartContract(core),
-    dashboardFeatureFlag: { allowByValueEmbeddables: false },
+    presentationUtil: presentationUtilPluginMock.createStartContract(),
     savedObjectStore: {
       load: jest.fn(),
       search: jest.fn(),
@@ -167,6 +139,9 @@ export function makeDefaultServices(
       capabilities: {
         ...core.application.capabilities,
         visualize: { save: true, saveQuery: true, show: true, createShortUrl: true },
+        dashboard: {
+          showWriteControls: true,
+        },
       },
       getUrlForApp: jest.fn((appId: string) => `/testbasepath/app/${appId}#/`),
     },
@@ -185,7 +160,6 @@ export function makeDefaultServices(
     dataViewFieldEditor: indexPatternFieldEditorPluginMock.createStartContract(),
     dataViewEditor: indexPatternEditorPluginMock.createStartContract(),
     unifiedSearch: unifiedSearchPluginMock.createStartContract(),
-    docLinks: startMock.docLinks,
     contentManagement: contentManagementMock.createStartContract(),
     eventAnnotationService: {} as EventAnnotationServiceType,
   };

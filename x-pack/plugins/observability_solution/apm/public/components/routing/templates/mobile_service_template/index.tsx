@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPageHeaderProps,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPageHeaderProps, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { omit } from 'lodash';
 import React from 'react';
@@ -55,12 +50,7 @@ export function MobileServiceTemplate(props: Props) {
   );
 }
 
-function TemplateWithContext({
-  title,
-  children,
-  selectedTabKey,
-  searchBarOptions,
-}: Props) {
+function TemplateWithContext({ title, children, selectedTabKey, searchBarOptions }: Props) {
   const {
     path: { serviceName },
     query,
@@ -102,7 +92,10 @@ function TemplateWithContext({
           ]
         : []),
     ],
-    [query, router, selectedTab, serviceName, servicesLink]
+    [query, router, selectedTab, serviceName, servicesLink],
+    {
+      omitRootOnServerless: true,
+    }
   );
 
   return (
@@ -115,9 +108,7 @@ function TemplateWithContext({
               <EuiFlexGroup alignItems="center">
                 <EuiFlexItem grow={false}>
                   <EuiTitle size="l">
-                    <h1 data-test-subj="apmMainTemplateHeaderServiceName">
-                      {serviceName}
-                    </h1>
+                    <h1 data-test-subj="apmMainTemplateHeaderServiceName">{serviceName}</h1>
                   </EuiTitle>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
@@ -139,9 +130,7 @@ function TemplateWithContext({
       }}
     >
       <MobileSearchBar {...searchBarOptions} />
-      <ServiceAnomalyTimeseriesContextProvider>
-        {children}
-      </ServiceAnomalyTimeseriesContextProvider>
+      <ServiceAnomalyTimeseriesContextProvider>{children}</ServiceAnomalyTimeseriesContextProvider>
     </ApmMainTemplate>
   );
 }
@@ -149,10 +138,7 @@ function TemplateWithContext({
 function useTabs({ selectedTabKey }: { selectedTabKey: Tab['key'] }) {
   const { core, plugins } = useApmPluginContext();
   const { capabilities } = core.application;
-  const { isAlertingAvailable, canReadAlerts } = getAlertingCapabilities(
-    plugins,
-    capabilities
-  );
+  const { isAlertingAvailable, canReadAlerts } = getAlertingCapabilities(plugins, capabilities);
 
   const router = useApmRouter();
 
@@ -161,13 +147,7 @@ function useTabs({ selectedTabKey }: { selectedTabKey: Tab['key'] }) {
     query: queryFromUrl,
   } = useApmParams(`/mobile-services/{serviceName}/${selectedTabKey}` as const);
 
-  const query = omit(
-    queryFromUrl,
-    'page',
-    'pageSize',
-    'sortField',
-    'sortDirection'
-  );
+  const query = omit(queryFromUrl, 'page', 'pageSize', 'sortField', 'sortDirection');
 
   const tabs: Tab[] = [
     {
@@ -186,12 +166,9 @@ function useTabs({ selectedTabKey }: { selectedTabKey: Tab['key'] }) {
         path: { serviceName },
         query,
       }),
-      label: i18n.translate(
-        'xpack.apm.mobileServiceDetails.transactionsTabLabel',
-        {
-          defaultMessage: 'Transactions',
-        }
-      ),
+      label: i18n.translate('xpack.apm.mobileServiceDetails.transactionsTabLabel', {
+        defaultMessage: 'Transactions',
+      }),
     },
     {
       key: 'dependencies',
@@ -219,12 +196,9 @@ function useTabs({ selectedTabKey }: { selectedTabKey: Tab['key'] }) {
         path: { serviceName },
         query,
       }),
-      label: i18n.translate(
-        'xpack.apm.mobileServiceDetails.serviceMapTabLabel',
-        {
-          defaultMessage: 'Service Map',
-        }
-      ),
+      label: i18n.translate('xpack.apm.mobileServiceDetails.serviceMapTabLabel', {
+        defaultMessage: 'Service Map',
+      }),
     },
     {
       key: 'alerts',
@@ -244,12 +218,9 @@ function useTabs({ selectedTabKey }: { selectedTabKey: Tab['key'] }) {
         query,
       }),
       append: <TechnicalPreviewBadge icon="beaker" />,
-      label: i18n.translate(
-        'xpack.apm.mobileServiceDetails.dashboardsTabLabel',
-        {
-          defaultMessage: 'Dashboards',
-        }
-      ),
+      label: i18n.translate('xpack.apm.mobileServiceDetails.dashboardsTabLabel', {
+        defaultMessage: 'Dashboards',
+      }),
     },
   ];
 

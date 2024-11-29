@@ -20,6 +20,7 @@ describe('LeftPanel', () => {
         }}
         isRiskScoreExist
         user={{ name: 'test user', email: [] }}
+        scopeId={'scopeId'}
       />,
       {
         wrapper: TestProviders,
@@ -39,6 +40,7 @@ describe('LeftPanel', () => {
         }}
         isRiskScoreExist={false}
         user={{ name: 'test user', email: [] }}
+        scopeId={'scopeId'}
       />,
       {
         wrapper: TestProviders,
@@ -48,5 +50,47 @@ describe('LeftPanel', () => {
     const tabElement = queryByText('Risk Inputs');
 
     expect(tabElement).not.toBeInTheDocument();
+  });
+
+  it("doesn't render insights panel when there no misconfiguration findings", () => {
+    const { queryByText } = render(
+      <UserDetailsPanel
+        path={{
+          tab: EntityDetailsLeftPanelTab.RISK_INPUTS,
+        }}
+        isRiskScoreExist
+        user={{ name: 'test user', email: [] }}
+        scopeId={'scopeId'}
+        hasMisconfigurationFindings={false}
+      />,
+      {
+        wrapper: TestProviders,
+      }
+    );
+
+    const tabElement = queryByText('Insights');
+
+    expect(tabElement).not.toBeInTheDocument();
+  });
+
+  it('render insights panel when there are misconfiguration findings', () => {
+    const { queryByText } = render(
+      <UserDetailsPanel
+        path={{
+          tab: EntityDetailsLeftPanelTab.CSP_INSIGHTS,
+        }}
+        isRiskScoreExist
+        user={{ name: 'test user', email: [] }}
+        scopeId={'scopeId'}
+        hasMisconfigurationFindings={true}
+      />,
+      {
+        wrapper: TestProviders,
+      }
+    );
+
+    const tabElement = queryByText('Insights');
+
+    expect(tabElement).toBeInTheDocument();
   });
 });

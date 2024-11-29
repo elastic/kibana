@@ -9,6 +9,7 @@ import type {
   EuiBasicTableProps,
   EuiGlobalToastListToast as Toast,
   EuiTableRowCellProps,
+  EuiTitleSize,
 } from '@elastic/eui';
 import {
   EuiBasicTable,
@@ -26,6 +27,7 @@ import type { FC, ComponentType } from 'react';
 import React, { memo, useState, useMemo, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
 
+import type { EntitiesListColumns } from '../../../entity_analytics/components/entity_store/hooks/use_entities_list_columns';
 import type { Direction } from '../../../../common/search_strategy';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../common/constants';
 import type { HostsTableColumns } from '../../hosts/components/hosts_table';
@@ -40,7 +42,7 @@ import type {
   NetworkTopCountriesColumnsNetworkDetails,
 } from '../../network/components/network_top_countries_table/columns';
 import type { TlsColumns } from '../../network/components/tls_table/columns';
-import type { UncommonProcessTableColumns } from '../../hosts/components/uncommon_process_table';
+import type { UncommonProcessTableColumns } from '../../hosts/components/uncommon_process_table/columns';
 import type { HostRiskScoreColumns } from '../../../entity_analytics/components/host_risk_score_table';
 
 import type { UsersColumns } from '../../network/components/users_table/columns';
@@ -94,9 +96,10 @@ declare type BasicTableColumns =
   | TlsColumns
   | UncommonProcessTableColumns
   | UsersColumns
-  | UsersTableColumns;
+  | UsersTableColumns
+  | EntitiesListColumns;
 
-declare type SiemTables = BasicTableProps<BasicTableColumns>;
+export declare type SiemTables = BasicTableProps<BasicTableColumns>;
 
 // Using telescoping templates to remove 'any' that was polluting downstream column type checks
 export interface BasicTableProps<T> {
@@ -105,6 +108,7 @@ export interface BasicTableProps<T> {
   dataTestSubj?: string;
   headerCount: number;
   headerFilters?: string | React.ReactNode;
+  titleSize?: EuiTitleSize;
   headerSupplement?: React.ReactElement;
   headerTitle: string | React.ReactElement;
   headerTooltip?: string;
@@ -117,8 +121,7 @@ export interface BasicTableProps<T> {
   loading: boolean;
   loadPage: (activePage: number) => void;
   onChange?: (criteria: Criteria) => void;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  pageOfItems: any[];
+  pageOfItems: unknown[];
   setQuerySkip: (skip: boolean) => void;
   showMorePagesIndicator: boolean;
   sorting?: SortingBasicTable;
@@ -137,7 +140,7 @@ export interface Columns<T, U = T> {
   name: string | React.ReactNode;
   render?: (item: T, node: U) => React.ReactNode;
   sortable?: boolean | Func<T>;
-  truncateText?: boolean;
+  truncateText?: boolean | { lines: number };
   width?: string;
 }
 
@@ -147,6 +150,7 @@ const PaginatedTableComponent: FC<SiemTables> = ({
   dataTestSubj = DEFAULT_DATA_TEST_SUBJ,
   headerCount,
   headerFilters,
+  titleSize,
   headerSupplement,
   headerTitle,
   headerTooltip,
@@ -276,6 +280,7 @@ const PaginatedTableComponent: FC<SiemTables> = ({
     <InspectButtonContainer show={!loadingInitial}>
       <Panel data-test-subj={`${dataTestSubj}-loading-${loading}`} loading={loading}>
         <HeaderSection
+          titleSize={titleSize}
           toggleStatus={toggleStatus}
           toggleQuery={toggleQuery}
           headerFilters={headerFilters}
@@ -292,6 +297,7 @@ const PaginatedTableComponent: FC<SiemTables> = ({
           }
           title={headerTitle}
           tooltip={headerTooltip}
+          inspectMultiple
         >
           {!loadingInitial && headerSupplement}
         </HeaderSection>
@@ -307,8 +313,8 @@ const PaginatedTableComponent: FC<SiemTables> = ({
                 onChange={onChange}
                 sorting={tableSorting}
               />
-              <FooterAction>
-                <EuiFlexItem>
+              <FooterAction justifyContent="spaceBetween">
+                <EuiFlexItem grow={false}>
                   {itemsPerRow &&
                     itemsPerRow.length > 0 &&
                     totalCount >= itemsPerRow[0].numberOfRow && (
@@ -397,6 +403,6 @@ export const PaginationEuiFlexItem = styled(EuiFlexItem)`
       right: ${({ theme }) => theme.eui.euiSizeL};
     }
   }
-`;
+` as typeof EuiFlexItem;
 
 PaginationEuiFlexItem.displayName = 'PaginationEuiFlexItem';

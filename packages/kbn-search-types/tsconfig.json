@@ -1,0 +1,12 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": ["*.ts", "src/**/*", "__mocks__/**/*.ts"],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/data-views-plugin",
+  ],
+  "exclude": ["target/**/*"]
+}

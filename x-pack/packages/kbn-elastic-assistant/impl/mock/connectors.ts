@@ -29,12 +29,21 @@ export const mockActionTypes = [
     isSystemActionType: true,
     supportedFeatureIds: ['generativeAI'],
   } as ActionType,
+  {
+    id: '.gemini',
+    name: 'Gemini',
+    enabled: true,
+    enabledInConfig: true,
+    enabledInLicense: true,
+    minimumLicenseRequired: 'basic',
+    isSystemActionType: true,
+    supportedFeatureIds: ['generativeAI'],
+  } as ActionType,
 ];
 
 export const mockConnectors: AIConnector[] = [
   {
     id: 'connectorId',
-    connectorTypeTitle: 'OpenAI',
     name: 'Captain Connector',
     isMissingSecrets: false,
     actionTypeId: '.gen-ai',
@@ -48,7 +57,6 @@ export const mockConnectors: AIConnector[] = [
   },
   {
     id: 'c29c28a0-20fe-11ee-9306-a1f4d42ec542',
-    connectorTypeTitle: 'OpenAI',
     name: 'Professor Connector',
     isMissingSecrets: false,
     actionTypeId: '.gen-ai',

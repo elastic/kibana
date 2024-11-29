@@ -9,9 +9,15 @@ import React, { useCallback, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink, EuiLoadingSpinner, EuiSkeletonText, EuiText } from '@elastic/eui';
 import type { HttpSetup } from '@kbn/core/public';
+import {
+  CREATE_DETECTION_RULE_FROM_FLYOUT,
+  uiMetricService,
+} from '@kbn/cloud-security-posture-common/utils/ui_metrics';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { useHistory } from 'react-router-dom';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import { useQueryClient } from '@tanstack/react-query';
+import { i18n as kbnI18n } from '@kbn/i18n';
 import { useFetchDetectionRulesAlertsStatus } from '../common/api/use_fetch_detection_rules_alerts_status';
 import { useFetchDetectionRulesByTags } from '../common/api/use_fetch_detection_rules_by_tags';
 import { RuleResponse } from '../common/types';
@@ -31,19 +37,23 @@ interface DetectionRuleCounterProps {
 
 export const DetectionRuleCounter = ({ tags, createRuleFn }: DetectionRuleCounterProps) => {
   const { data: rulesData, isLoading: ruleIsLoading } = useFetchDetectionRulesByTags(tags);
-  const { data: alertsData, isLoading: alertsIsLoading } = useFetchDetectionRulesAlertsStatus(tags);
+  const {
+    data: alertsData,
+    isLoading: alertsIsLoading,
+    isError: alertsIsError,
+  } = useFetchDetectionRulesAlertsStatus(tags);
 
   const [isCreateRuleLoading, setIsCreateRuleLoading] = useState(false);
 
   const queryClient = useQueryClient();
-  const { http, notifications } = useKibana().services;
+  const { http, notifications, analytics, i18n, theme } = useKibana().services;
 
   const history = useHistory();
 
   const [, setRulesTable] = useSessionStorage(RULES_TABLE_SESSION_STORAGE_KEY);
 
   const rulePageNavigation = useCallback(async () => {
-    await setRulesTable({
+    setRulesTable({
       tags,
     });
     history.push({
@@ -58,14 +68,33 @@ export const DetectionRuleCounter = ({ tags, createRuleFn }: DetectionRuleCounte
   }, [history]);
 
   const createDetectionRuleOnClick = useCallback(async () => {
-    setIsCreateRuleLoading(true);
-    const ruleResponse = await createRuleFn(http);
-    setIsCreateRuleLoading(false);
-    showCreateDetectionRuleSuccessToast(notifications, http, ruleResponse);
-    // Triggering a refetch of rules and alerts to update the UI
-    queryClient.invalidateQueries([DETECTION_ENGINE_RULES_KEY]);
-    queryClient.invalidateQueries([DETECTION_ENGINE_ALERTS_KEY]);
-  }, [createRuleFn, http, notifications, queryClient]);
+    const startServices = { analytics, notifications, i18n, theme };
+
+    try {
+      setIsCreateRuleLoading(true);
+      uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, CREATE_DETECTION_RULE_FROM_FLYOUT);
+
+      const ruleResponse = await createRuleFn(http);
+
+      setIsCreateRuleLoading(false);
+      showCreateDetectionRuleSuccessToast(startServices, http, ruleResponse);
+
+      // Triggering a refetch of rules and alerts to update the UI
+      queryClient.invalidateQueries([DETECTION_ENGINE_RULES_KEY]);
+      queryClient.invalidateQueries([DETECTION_ENGINE_ALERTS_KEY]);
+    } catch (e) {
+      setIsCreateRuleLoading(false);
+
+      notifications.toasts.addWarning({
+        title: kbnI18n.translate('xpack.csp.detectionRuleCounter.alerts.createRuleErrorTitle', {
+          defaultMessage: 'Coming Soon',
+        }),
+        text: e.message,
+      });
+    }
+  }, [createRuleFn, http, analytics, notifications, i18n, theme, queryClient]);
+
+  if (alertsIsError) return <>{'-'}</>;
 
   return (
     <EuiSkeletonText

@@ -6,10 +6,9 @@
  */
 
 import type { AnalyticsServiceStart, HttpResponse } from '@kbn/core/public';
-import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import type { IncomingMessage } from 'http';
-import { pick } from 'lodash';
 import {
+  catchError,
   concatMap,
   delay,
   filter,
@@ -17,26 +16,36 @@ import {
   map,
   Observable,
   of,
+  OperatorFunction,
   scan,
   shareReplay,
   switchMap,
+  throwError,
   timestamp,
 } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
+import type { AssistantScope } from '@kbn/ai-assistant-common';
+import { ChatCompletionChunkEvent, Message, MessageRole } from '../../common';
 import {
-  type BufferFlushEvent,
   StreamingChatResponseEventType,
-  type StreamingChatResponseEventWithoutError,
+  type BufferFlushEvent,
   type StreamingChatResponseEvent,
+  type StreamingChatResponseEventWithoutError,
 } from '../../common/conversation_complete';
 import {
+  FunctionDefinition,
   FunctionRegistry,
   FunctionResponse,
-  FunctionVisibility,
 } from '../../common/functions/types';
 import { filterFunctionDefinitions } from '../../common/utils/filter_function_definitions';
 import { throwSerializedChatCompletionErrors } from '../../common/utils/throw_serialized_chat_completion_errors';
-import { sendEvent } from '../analytics';
-import type { ObservabilityAIAssistantAPIClient } from '../api';
+import { untilAborted } from '../../common/utils/until_aborted';
+import { TelemetryEventTypeWithPayload, sendEvent } from '../analytics';
+import type {
+  ObservabilityAIAssistantAPIClient,
+  ObservabilityAIAssistantAPIClientRequestParamsOf,
+  ObservabilityAIAssistantAPIEndpoint,
+} from '../api';
 import type {
   ChatRegistrationRenderFunction,
   ObservabilityAIAssistantChatService,
@@ -44,8 +53,9 @@ import type {
 } from '../types';
 import { readableStreamReaderIntoObservable } from '../utils/readable_stream_reader_into_observable';
 import { complete } from './complete';
+import { ChatActionClickHandler } from '../components/chat/types';
 
-const MIN_DELAY = 35;
+const MIN_DELAY = 10;
 
 function toObservable(response: HttpResponse<IncomingMessage>) {
   const status = response.response?.status;
@@ -90,177 +100,273 @@ function toObservable(response: HttpResponse<IncomingMessage>) {
   );
 }
 
+function serialize(
+  signal: AbortSignal
+): OperatorFunction<unknown, StreamingChatResponseEventWithoutError> {
+  return (source$) =>
+    source$.pipe(
+      catchError((error) => {
+        if (
+          'response' in error &&
+          'json' in error.response &&
+          typeof error.response.json === 'function'
+        ) {
+          const responseBodyPromise = (error.response as HttpResponse['response'])!.json();
+
+          return from(
+            responseBodyPromise.then((body: { message?: string }) => {
+              if (body) {
+                error.body = body;
+                if (body.message) {
+                  error.message = body.message;
+                }
+              }
+              throw error;
+            })
+          );
+        }
+        return throwError(() => error);
+      }),
+      switchMap((readable) => toObservable(readable as HttpResponse<IncomingMessage>)),
+      map((line) => JSON.parse(line) as StreamingChatResponseEvent | BufferFlushEvent),
+      filter(
+        (line): line is Exclude<StreamingChatResponseEvent, BufferFlushEvent> =>
+          line.type !== StreamingChatResponseEventType.BufferFlush
+      ),
+      throwSerializedChatCompletionErrors(),
+      untilAborted(signal),
+      shareReplay()
+    );
+}
+
+class ChatService {
+  private functionRegistry: FunctionRegistry;
+  private renderFunctionRegistry: Map<string, RenderFunction<unknown, FunctionResponse>>;
+  private abortSignal: AbortSignal;
+  private apiClient: ObservabilityAIAssistantAPIClient;
+  public scope$: BehaviorSubject<AssistantScope[]>;
+  private analytics: AnalyticsServiceStart;
+  private registrations: ChatRegistrationRenderFunction[];
+  private systemMessage: string;
+  public functions$: BehaviorSubject<FunctionDefinition[]>;
+
+  constructor({
+    abortSignal,
+    apiClient,
+    scope$,
+    analytics,
+    registrations,
+  }: {
+    abortSignal: AbortSignal;
+    apiClient: ObservabilityAIAssistantAPIClient;
+    scope$: BehaviorSubject<AssistantScope[]>;
+    analytics: AnalyticsServiceStart;
+    registrations: ChatRegistrationRenderFunction[];
+  }) {
+    this.functionRegistry = new Map();
+    this.renderFunctionRegistry = new Map();
+    this.abortSignal = abortSignal;
+    this.apiClient = apiClient;
+    this.scope$ = scope$;
+    this.analytics = analytics;
+    this.registrations = registrations;
+    this.systemMessage = '';
+    this.functions$ = new BehaviorSubject([] as FunctionDefinition[]);
+    scope$.subscribe(() => {
+      this.initialize();
+    });
+  }
+
+  private getClient = () => {
+    return {
+      chat: this.chat,
+      complete: this.complete,
+    };
+  };
+
+  async initialize() {
+    this.functionRegistry = new Map();
+    const systemMessages: string[] = [];
+    const scopePromise = this.apiClient('GET /internal/observability_ai_assistant/functions', {
+      signal: this.abortSignal,
+      params: {
+        query: {
+          scopes: this.getScopes(),
+        },
+      },
+    }).then(({ functionDefinitions, systemMessage }) => {
+      functionDefinitions.forEach((fn) => this.functionRegistry.set(fn.name, fn));
+      systemMessages.push(systemMessage);
+    });
+
+    await Promise.all([
+      scopePromise,
+      ...this.registrations.map((registration) => {
+        return registration({
+          registerRenderFunction: (name, renderFn) => {
+            this.renderFunctionRegistry.set(name, renderFn);
+          },
+        });
+      }),
+    ]);
+
+    this.systemMessage = systemMessages.join('\n');
+
+    this.functions$.next(this.getFunctions());
+  }
+
+  public sendAnalyticsEvent = (event: TelemetryEventTypeWithPayload) => {
+    sendEvent(this.analytics, event);
+  };
+
+  public renderFunction = (
+    name: string,
+    args: string | undefined,
+    response: { data?: string; content?: string },
+    onActionClick: ChatActionClickHandler
+  ) => {
+    const fn = this.renderFunctionRegistry.get(name);
+
+    if (!fn) {
+      throw new Error(`Function ${name} not found`);
+    }
+
+    const parsedArguments = args ? JSON.parse(args) : {};
+
+    const parsedResponse = {
+      content: JSON.parse(response.content ?? '{}'),
+      data: JSON.parse(response.data ?? '{}'),
+    };
+
+    return fn?.({
+      response: parsedResponse,
+      arguments: parsedArguments,
+      onActionClick,
+    });
+  };
+
+  public getFunctions = (options?: {
+    contexts?: string[];
+    filter?: string;
+  }): FunctionDefinition[] => {
+    return filterFunctionDefinitions({
+      ...options,
+      definitions: Array.from(this.functionRegistry.values()),
+    });
+  };
+
+  public callStreamingApi<TEndpoint extends ObservabilityAIAssistantAPIEndpoint>(
+    endpoint: TEndpoint,
+    options: {
+      signal: AbortSignal;
+    } & ObservabilityAIAssistantAPIClientRequestParamsOf<TEndpoint>
+  ): Observable<StreamingChatResponseEventWithoutError> {
+    return from(
+      this.apiClient(endpoint, {
+        ...options,
+        asResponse: true,
+        rawResponse: true,
+      })
+    ).pipe(serialize(options.signal));
+  }
+
+  public hasFunction = (name: string) => {
+    return this.functionRegistry.has(name);
+  };
+
+  public hasRenderFunction = (name: string) => {
+    return this.renderFunctionRegistry.has(name);
+  };
+
+  public getSystemMessage = (): Message => {
+    return {
+      '@timestamp': new Date().toISOString(),
+      message: {
+        role: MessageRole.System,
+        content: this.systemMessage,
+      },
+    };
+  };
+
+  public chat: ObservabilityAIAssistantChatService['chat'] = (
+    name: string,
+    { connectorId, messages, functionCall, functions, signal }
+  ) => {
+    return this.callStreamingApi('POST /internal/observability_ai_assistant/chat', {
+      params: {
+        body: {
+          name,
+          messages,
+          connectorId,
+          functionCall,
+          functions: functions ?? [],
+          scopes: this.getScopes(),
+        },
+      },
+      signal,
+    }).pipe(
+      filter(
+        (line): line is ChatCompletionChunkEvent =>
+          line.type === StreamingChatResponseEventType.ChatCompletionChunk
+      )
+    );
+  };
+
+  public complete: ObservabilityAIAssistantChatService['complete'] = ({
+    getScreenContexts,
+    connectorId,
+    conversationId,
+    messages,
+    persist,
+    disableFunctions,
+    signal,
+    instructions,
+  }) => {
+    return complete(
+      {
+        getScreenContexts,
+        connectorId,
+        conversationId,
+        messages,
+        persist,
+        disableFunctions,
+        signal,
+        client: this.getClient(),
+        instructions,
+        scopes: this.getScopes(),
+      },
+      ({ params }) => {
+        return this.callStreamingApi('POST /internal/observability_ai_assistant/chat/complete', {
+          params,
+          signal,
+        });
+      }
+    );
+  };
+
+  public getScopes() {
+    return this.scope$.value;
+  }
+}
+
 export async function createChatService({
   analytics,
   signal: setupAbortSignal,
   registrations,
   apiClient,
+  scope$,
 }: {
   analytics: AnalyticsServiceStart;
   signal: AbortSignal;
   registrations: ChatRegistrationRenderFunction[];
   apiClient: ObservabilityAIAssistantAPIClient;
+  scope$: BehaviorSubject<AssistantScope[]>;
 }): Promise<ObservabilityAIAssistantChatService> {
-  const functionRegistry: FunctionRegistry = new Map();
-
-  const renderFunctionRegistry: Map<string, RenderFunction<unknown, FunctionResponse>> = new Map();
-
-  const [{ functionDefinitions, contextDefinitions }] = await Promise.all([
-    apiClient('GET /internal/observability_ai_assistant/functions', {
-      signal: setupAbortSignal,
-    }),
-    ...registrations.map((registration) => {
-      return registration({
-        registerRenderFunction: (name, renderFn) => {
-          renderFunctionRegistry.set(name, renderFn);
-        },
-      });
-    }),
-  ]);
-
-  functionDefinitions.forEach((fn) => {
-    functionRegistry.set(fn.name, fn);
+  return new ChatService({
+    analytics,
+    apiClient,
+    scope$,
+    registrations,
+    abortSignal: setupAbortSignal,
   });
-
-  const getFunctions = (options?: { contexts?: string[]; filter?: string }) => {
-    return filterFunctionDefinitions({
-      ...options,
-      definitions: functionDefinitions,
-    });
-  };
-
-  const client: Pick<ObservabilityAIAssistantChatService, 'chat' | 'complete'> = {
-    chat(name: string, { connectorId, messages, function: callFunctions = 'auto', signal }) {
-      return new Observable<StreamingChatResponseEventWithoutError>((subscriber) => {
-        const contexts = ['core', 'apm'];
-
-        const functions = getFunctions({ contexts }).filter((fn) => {
-          const visibility = fn.visibility ?? FunctionVisibility.All;
-
-          return (
-            visibility === FunctionVisibility.All || visibility === FunctionVisibility.AssistantOnly
-          );
-        });
-
-        apiClient('POST /internal/observability_ai_assistant/chat', {
-          params: {
-            body: {
-              name,
-              messages,
-              connectorId,
-              functions:
-                callFunctions === 'none'
-                  ? []
-                  : functions.map((fn) => pick(fn, 'name', 'description', 'parameters')),
-            },
-          },
-          signal,
-          asResponse: true,
-          rawResponse: true,
-        })
-          .then((_response) => {
-            const response = _response as unknown as HttpResponse<IncomingMessage>;
-
-            const subscription = toObservable(response)
-              .pipe(
-                map((line) => JSON.parse(line) as StreamingChatResponseEvent | BufferFlushEvent),
-                filter(
-                  (line): line is StreamingChatResponseEvent =>
-                    line.type !== StreamingChatResponseEventType.BufferFlush
-                ),
-                throwSerializedChatCompletionErrors()
-              )
-              .subscribe(subscriber);
-
-            // if the request is aborted, convert that into state as well
-            signal.addEventListener('abort', () => {
-              subscriber.error(new AbortError());
-              subscription.unsubscribe();
-            });
-          })
-          .catch(async (err) => {
-            if ('response' in err) {
-              const body = await (err.response as HttpResponse['response'])?.json();
-              err.body = body;
-              if (body.message) {
-                err.message = body.message;
-              }
-            }
-            throw err;
-          })
-          .catch((err) => {
-            subscriber.error(err);
-          });
-
-        return subscriber;
-      }).pipe(
-        // make sure the request is only triggered once,
-        // even with multiple subscribers
-        shareReplay()
-      );
-    },
-    complete({ getScreenContexts, connectorId, conversationId, messages, persist, signal }) {
-      return complete(
-        {
-          getScreenContexts,
-          connectorId,
-          conversationId,
-          messages,
-          persist,
-          signal,
-          client,
-        },
-        ({ params }) => {
-          return from(
-            apiClient('POST /internal/observability_ai_assistant/chat/complete', {
-              params,
-              signal,
-              asResponse: true,
-              rawResponse: true,
-            })
-          ).pipe(
-            map((_response) => toObservable(_response as unknown as HttpResponse<IncomingMessage>)),
-            switchMap((response$) => response$),
-            map((line) => JSON.parse(line) as StreamingChatResponseEvent | BufferFlushEvent),
-            shareReplay()
-          );
-        }
-      );
-    },
-  };
-
-  return {
-    sendAnalyticsEvent: (event) => {
-      sendEvent(analytics, event);
-    },
-    renderFunction: (name, args, response, onActionClick) => {
-      const fn = renderFunctionRegistry.get(name);
-
-      if (!fn) {
-        throw new Error(`Function ${name} not found`);
-      }
-
-      const parsedArguments = args ? JSON.parse(args) : {};
-
-      const parsedResponse = {
-        content: JSON.parse(response.content ?? '{}'),
-        data: JSON.parse(response.data ?? '{}'),
-      };
-
-      return fn?.({
-        response: parsedResponse,
-        arguments: parsedArguments,
-        onActionClick,
-      });
-    },
-    getContexts: () => contextDefinitions,
-    getFunctions,
-    hasFunction: (name: string) => {
-      return functionRegistry.has(name);
-    },
-    hasRenderFunction: (name: string) => {
-      return renderFunctionRegistry.has(name);
-    },
-    ...client,
-  };
 }

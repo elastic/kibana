@@ -9,7 +9,7 @@ import type { Filter } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
 import { Direction } from '../../../../common/search_strategy';
 import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
-import { TimelineType, TimelineStatus } from '../../../../common/api/timeline';
+import { TimelineTypeEnum, TimelineStatusEnum } from '../../../../common/api/timeline';
 import { convertTimelineAsInput } from './timeline_save';
 import type { TimelineModel } from '../model';
 import { createMockStore, kibanaMock } from '../../../common/mock';
@@ -58,16 +58,8 @@ describe('Timeline save middleware', () => {
 
   it('should persist a timeline', async () => {
     (persistTimeline as jest.Mock).mockResolvedValue({
-      data: {
-        persistTimeline: {
-          code: 200,
-          message: 'success',
-          timeline: {
-            savedObjectId: 'soid',
-            version: 'newVersion',
-          },
-        },
-      },
+      savedObjectId: 'soid',
+      version: 'newVersion',
     });
     await store.dispatch(setChanged({ id: TimelineId.test, changed: true }));
     expect(selectTimelineById(store.getState(), TimelineId.test)).toEqual(
@@ -92,16 +84,8 @@ describe('Timeline save middleware', () => {
 
   it('should copy a timeline', async () => {
     (copyTimeline as jest.Mock).mockResolvedValue({
-      data: {
-        persistTimeline: {
-          code: 200,
-          message: 'success',
-          timeline: {
-            savedObjectId: 'soid',
-            version: 'newVersion',
-          },
-        },
-      },
+      savedObjectId: 'soid',
+      version: 'newVersion',
     });
     await store.dispatch(setChanged({ id: TimelineId.test, changed: true }));
     expect(selectTimelineById(store.getState(), TimelineId.test)).toEqual(
@@ -167,7 +151,7 @@ describe('Timeline save middleware', () => {
   });
 
   it('should show an error message when the call is unauthorized', async () => {
-    (persistTimeline as jest.Mock).mockResolvedValue({ data: { persistTimeline: { code: 403 } } });
+    (persistTimeline as jest.Mock).mockResolvedValue({ status_code: 403 });
     await store.dispatch(saveTimeline({ id: TimelineId.test, saveAsNew: false }));
 
     expect(refreshTimelines as unknown as jest.Mock).not.toHaveBeenCalled();
@@ -175,7 +159,7 @@ describe('Timeline save middleware', () => {
   });
 
   describe('#convertTimelineAsInput ', () => {
-    test('should return a TimelineInput instead of TimelineModel ', () => {
+    test('should return a SavedTimeline instead of TimelineModel ', () => {
       const columns: TimelineModel['columns'] = [
         {
           columnHeaderType: 'not-filtered',
@@ -262,7 +246,6 @@ describe('Timeline save middleware', () => {
         },
         eventIdToNoteIds: {},
         eventType: 'all',
-        expandedDetail: {},
         excludedRowRendererIds: [],
         highlightedDropAndProviderId: '',
         historyIds: [],
@@ -296,7 +279,6 @@ describe('Timeline save middleware', () => {
         isFavorite: false,
         isLive: false,
         isSelectAllChecked: false,
-        isLoading: false,
         isSaving: false,
         itemsPerPage: 25,
         itemsPerPageOptions: [10, 25, 50, 100],
@@ -311,7 +293,7 @@ describe('Timeline save middleware', () => {
         loadingEventIds: [],
         queryFields: [],
         title: 'saved',
-        timelineType: TimelineType.default,
+        timelineType: TimelineTypeEnum.default,
         templateTimelineId: null,
         templateTimelineVersion: null,
         noteIds: [],
@@ -331,13 +313,14 @@ describe('Timeline save middleware', () => {
             sortDirection: Direction.desc,
           },
         ],
-        status: TimelineStatus.active,
+        status: TimelineStatusEnum.active,
         version: 'WzM4LDFd',
         id: '11169110-fc22-11e9-8ca9-072f15ce2685',
         savedQueryId: 'my endgame timeline query',
         savedSearchId: null,
         savedSearch: null,
         isDataProviderVisible: true,
+        sampleSize: 500,
       };
 
       expect(
@@ -483,9 +466,9 @@ describe('Timeline save middleware', () => {
         ],
         templateTimelineId: null,
         templateTimelineVersion: null,
-        timelineType: TimelineType.default,
+        timelineType: TimelineTypeEnum.default,
         title: 'saved',
-        status: TimelineStatus.active,
+        status: TimelineStatusEnum.active,
       });
     });
   });

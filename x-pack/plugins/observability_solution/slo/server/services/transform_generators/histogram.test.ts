@@ -5,18 +5,21 @@
  * 2.0.
  */
 
+import { twoMinute } from '../fixtures/duration';
 import {
   createHistogramIndicator,
   createSLO,
   createSLOWithTimeslicesBudgetingMethod,
 } from '../fixtures/slo';
 import { HistogramTransformGenerator } from './histogram';
+import { dataViewsService } from '@kbn/data-views-plugin/server/mocks';
 
-const generator = new HistogramTransformGenerator();
+const SPACE_ID = 'custom-space';
+const generator = new HistogramTransformGenerator(SPACE_ID, dataViewsService);
 
 describe('Histogram Transform Generator', () => {
   describe('validation', () => {
-    it('throws when the good filter is invalid', () => {
+    it('throws when the good filter is invalid', async () => {
       const anSLO = createSLO({
         indicator: createHistogramIndicator({
           good: {
@@ -28,10 +31,11 @@ describe('Histogram Transform Generator', () => {
           },
         }),
       });
-      expect(() => generator.getTransformParams(anSLO)).toThrow(/Invalid KQL: foo:/);
+
+      await expect(generator.getTransformParams(anSLO)).rejects.toThrow(/Invalid KQL: foo:/);
     });
 
-    it('throws when the total filter is invalid', () => {
+    it('throws when the total filter is invalid', async () => {
       const anSLO = createSLO({
         indicator: createHistogramIndicator({
           good: {
@@ -41,20 +45,21 @@ describe('Histogram Transform Generator', () => {
           },
         }),
       });
-      expect(() => generator.getTransformParams(anSLO)).toThrow(/Invalid KQL: foo:/);
+
+      await expect(generator.getTransformParams(anSLO)).rejects.toThrow(/Invalid KQL: foo:/);
     });
 
-    it('throws when the query_filter is invalid', () => {
+    it('throws when the query_filter is invalid', async () => {
       const anSLO = createSLO({
         indicator: createHistogramIndicator({ filter: '{ kql.query: invalid' }),
       });
-      expect(() => generator.getTransformParams(anSLO)).toThrow(/Invalid KQL/);
+      await expect(generator.getTransformParams(anSLO)).rejects.toThrow(/Invalid KQL/);
     });
   });
 
   it('returns the expected transform params with every specified indicator params', async () => {
     const anSLO = createSLO({ id: 'irrelevant', indicator: createHistogramIndicator() });
-    const transform = generator.getTransformParams(anSLO);
+    const transform = await generator.getTransformParams(anSLO);
 
     expect(transform).toMatchSnapshot();
   });
@@ -64,7 +69,22 @@ describe('Histogram Transform Generator', () => {
       id: 'irrelevant',
       indicator: createHistogramIndicator(),
     });
-    const transform = generator.getTransformParams(anSLO);
+    const transform = await generator.getTransformParams(anSLO);
+
+    expect(transform).toMatchSnapshot();
+  });
+
+  it('returns the expected transform params for timeslices slo using timesliceTarget = 0', async () => {
+    const anSLO = createSLOWithTimeslicesBudgetingMethod({
+      id: 'irrelevant',
+      indicator: createHistogramIndicator(),
+      objective: {
+        target: 0.98,
+        timesliceTarget: 0,
+        timesliceWindow: twoMinute(),
+      },
+    });
+    const transform = await generator.getTransformParams(anSLO);
 
     expect(transform).toMatchSnapshot();
   });
@@ -73,7 +93,7 @@ describe('Histogram Transform Generator', () => {
     const anSLO = createSLO({
       indicator: createHistogramIndicator({ filter: 'labels.groupId: group-4' }),
     });
-    const transform = generator.getTransformParams(anSLO);
+    const transform = await generator.getTransformParams(anSLO);
 
     expect(transform.source.query).toMatchSnapshot();
   });
@@ -82,7 +102,7 @@ describe('Histogram Transform Generator', () => {
     const anSLO = createSLO({
       indicator: createHistogramIndicator({ index: 'my-own-index*' }),
     });
-    const transform = generator.getTransformParams(anSLO);
+    const transform = await generator.getTransformParams(anSLO);
 
     expect(transform.source.index).toBe('my-own-index*');
   });
@@ -93,7 +113,7 @@ describe('Histogram Transform Generator', () => {
         timestampField: 'my-date-field',
       }),
     });
-    const transform = generator.getTransformParams(anSLO);
+    const transform = await generator.getTransformParams(anSLO);
 
     expect(transform.sync?.time?.field).toBe('my-date-field');
     // @ts-ignore
@@ -104,7 +124,7 @@ describe('Histogram Transform Generator', () => {
     const anSLO = createSLO({
       indicator: createHistogramIndicator(),
     });
-    const transform = generator.getTransformParams(anSLO);
+    const transform = await generator.getTransformParams(anSLO);
 
     expect(transform.pivot!.aggregations!['slo.numerator']).toMatchSnapshot();
   });
@@ -121,7 +141,7 @@ describe('Histogram Transform Generator', () => {
         },
       }),
     });
-    const transform = generator.getTransformParams(anSLO);
+    const transform = await generator.getTransformParams(anSLO);
 
     expect(transform.pivot!.aggregations!['slo.numerator']).toMatchSnapshot();
   });
@@ -130,7 +150,7 @@ describe('Histogram Transform Generator', () => {
     const anSLO = createSLO({
       indicator: createHistogramIndicator(),
     });
-    const transform = generator.getTransformParams(anSLO);
+    const transform = await generator.getTransformParams(anSLO);
 
     expect(transform.pivot!.aggregations!['slo.denominator']).toMatchSnapshot();
   });
@@ -145,8 +165,32 @@ describe('Histogram Transform Generator', () => {
         },
       }),
     });
-    const transform = generator.getTransformParams(anSLO);
+    const transform = await generator.getTransformParams(anSLO);
 
     expect(transform.pivot!.aggregations!['slo.denominator']).toMatchSnapshot();
+  });
+
+  it("overrides the range filter when 'preventInitialBackfill' is true", async () => {
+    const slo = createSLO({
+      indicator: createHistogramIndicator(),
+      settings: {
+        frequency: twoMinute(),
+        syncDelay: twoMinute(),
+        preventInitialBackfill: true,
+      },
+    });
+
+    const transform = await generator.getTransformParams(slo);
+
+    // @ts-ignore
+    const rangeFilter = transform.source.query.bool.filter.find((f) => 'range' in f);
+
+    expect(rangeFilter).toEqual({
+      range: {
+        log_timestamp: {
+          gte: 'now-300s/m', // 2m + 2m + 60s
+        },
+      },
+    });
   });
 });

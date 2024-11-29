@@ -8,22 +8,18 @@
 import type { FunctionDefinition } from '../functions/types';
 
 export function filterFunctionDefinitions({
-  contexts,
   filter,
   definitions,
 }: {
-  contexts?: string[];
   filter?: string;
   definitions: FunctionDefinition[];
-}) {
-  return contexts || filter
+}): FunctionDefinition[] {
+  return filter
     ? definitions.filter((fn) => {
-        const matchesContext =
-          !contexts || fn.contexts.some((context) => contexts.includes(context));
         const matchesFilter =
           !filter || fn.name.includes(filter) || fn.description.includes(filter);
 
-        return matchesContext && matchesFilter;
+        return matchesFilter;
       })
     : definitions;
 }

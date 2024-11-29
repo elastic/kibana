@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiSelect } from '@elastic/eui';
+import { EuiSelect, EuiSelectProps } from '@elastic/eui';
 import { isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
 
@@ -21,16 +21,13 @@ const DEFAULT_PLACEHOLDER = i18n.translate('xpack.apm.selectPlaceholder', {
  * the first option as the initial, not selected option.
  */
 // eslint-disable-next-line react/function-component-definition
-export const SelectWithPlaceholder: typeof EuiSelect = (props) => {
+export const SelectWithPlaceholder = (props: EuiSelectProps & { placeholder?: string }) => {
   const placeholder = props.placeholder || DEFAULT_PLACEHOLDER;
   return (
     <EuiSelect
       data-test-subj="apmSelectWithPlaceholderSelect"
       {...props}
-      options={[
-        { text: placeholder, value: NO_SELECTION },
-        ...(props.options || []),
-      ]}
+      options={[{ text: placeholder, value: NO_SELECTION }, ...(props.options || [])]}
       value={isEmpty(props.value) ? NO_SELECTION : props.value}
       onChange={(e) => {
         if (props.onChange) {

@@ -10,17 +10,12 @@ export async function handleExceptions<T>(promise: Promise<T>) {
   try {
     return await promise;
   } catch (error) {
-    if (
-      error instanceof errors.ResponseError &&
-      error.meta.statusCode === 403
-    ) {
+    if (error instanceof errors.ResponseError && error.meta.statusCode === 403) {
       console.error(`Suppressed insufficient access error: ${error.message}}`);
       return;
     }
 
-    console.error(
-      `Unhandled error: ${error.message} ${JSON.stringify(error)}}`
-    );
+    console.error(`Unhandled error: ${error.message} ${JSON.stringify(error)}}`);
 
     return;
   }

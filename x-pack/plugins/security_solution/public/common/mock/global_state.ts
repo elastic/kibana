@@ -7,6 +7,8 @@
 
 import { TableId } from '@kbn/securitysolution-data-table';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
+import { AssociatedFilter } from '../../../common/notes/constants';
+import { ReqStatus } from '../../notes/store/notes.slice';
 import { HostsFields } from '../../../common/api/search_strategy/hosts/model/sort';
 import { InputsModelId } from '../store/inputs/constants';
 import {
@@ -33,17 +35,17 @@ import {
 } from '../../../common/constants';
 import { networkModel } from '../../explore/network/store';
 import { TimelineTabs, TimelineId } from '../../../common/types/timeline';
-import { TimelineType, TimelineStatus } from '../../../common/api/timeline';
+import { TimelineTypeEnum, TimelineStatusEnum } from '../../../common/api/timeline';
 import { mockManagementState } from '../../management/store/reducer';
 import type { ManagementState } from '../../management/types';
-import { initialSourcererState, SourcererScopeName } from '../store/sourcerer/model';
+import { initialSourcererState, SourcererScopeName } from '../../sourcerer/store/model';
 import { allowedExperimentalValues } from '../../../common/experimental_features';
-import { getScopePatternListSelection } from '../store/sourcerer/helpers';
-import { mockBrowserFields, mockIndexFields, mockRuntimeMappings } from '../containers/source/mock';
+import { getScopePatternListSelection } from '../../sourcerer/store/helpers';
+import { mockBrowserFields, mockIndexFields } from '../containers/source/mock';
 import { usersModel } from '../../explore/users/store';
 import { UsersFields } from '../../../common/search_strategy/security_solution/users/common';
 import { initialGroupingState } from '../store/grouping/reducer';
-import type { SourcererState } from '../store/sourcerer';
+import type { SourcererState } from '../../sourcerer/store';
 import { EMPTY_RESOLVER } from '../../resolver/store/helpers';
 import { getMockDiscoverInTimelineState } from './mock_discover_state';
 
@@ -58,18 +60,28 @@ export const mockSourcererState: SourcererState = {
     ...initialSourcererState.defaultDataView,
     browserFields: mockBrowserFields,
     id: DEFAULT_DATA_VIEW_ID,
-    indexFields: mockIndexFields,
     fields: mockFieldMap,
     loading: false,
     patternList: [...DEFAULT_INDEX_PATTERN, `${DEFAULT_SIGNALS_INDEX}-spacename`],
-    runtimeMappings: mockRuntimeMappings,
     title: [...DEFAULT_INDEX_PATTERN, `${DEFAULT_SIGNALS_INDEX}-spacename`].join(','),
   },
 };
 
 export const mockGlobalState: State = {
   app: {
-    notesById: {},
+    notesById: {
+      '1': {
+        created: new Date('2024-07-02T08:32:29.233Z'),
+        id: '1',
+        lastEdit: new Date('2024-07-02T08:32:29.233Z'),
+        note: 'New Note',
+        user: 'elastic',
+        saveObjectId: 'c1a44f63-eb20-4c65-a050-eb9e842d8492',
+        version: 'WzIyNDUsMV0=',
+        eventId: '1',
+        timelineId: 'some-timeline-id',
+      },
+    },
     errors: [
       { id: 'error-id-1', title: 'title-1', message: ['error-message-1'] },
       { id: 'error-id-2', title: 'title-2', message: ['error-message-2'] },
@@ -321,6 +333,7 @@ export const mockGlobalState: State = {
     timelineById: {
       [TimelineId.test]: {
         activeTab: TimelineTabs.query,
+        createdBy: 'elastic',
         prevActiveTab: TimelineTabs.notes,
         dataViewId: DEFAULT_DATA_VIEW_ID,
         deletedEventIds: [],
@@ -336,22 +349,19 @@ export const mockGlobalState: State = {
         description: '',
         eqlOptions: {
           eventCategoryField: 'event.category',
-          tiebreakerField: '',
           timestampField: '@timestamp',
         },
-        eventIdToNoteIds: {},
+        eventIdToNoteIds: { '1': ['1'] },
         excludedRowRendererIds: [],
-        expandedDetail: {},
         highlightedDropAndProviderId: '',
         historyIds: [],
         isFavorite: false,
         isLive: false,
-        isLoading: false,
         kqlMode: 'filter',
         kqlQuery: { filterQuery: null },
         loadingEventIds: [],
         title: '',
-        timelineType: TimelineType.default,
+        timelineType: TimelineTypeEnum.default,
         templateTimelineId: null,
         templateTimelineVersion: null,
         noteIds: [],
@@ -373,7 +383,7 @@ export const mockGlobalState: State = {
             sortDirection: 'desc',
           },
         ],
-        status: TimelineStatus.draft,
+        status: TimelineStatusEnum.draft,
         version: null,
         selectedEventIds: {},
         isSelectAllChecked: false,
@@ -381,9 +391,9 @@ export const mockGlobalState: State = {
         isSaving: false,
         itemsPerPageOptions: [10, 25, 50, 100],
         savedSearchId: null,
-        isDiscoverSavedSearchLoaded: false,
         savedSearch: null,
         isDataProviderVisible: true,
+        sampleSize: 500,
       },
     },
     insertTimeline: null,
@@ -395,7 +405,6 @@ export const mockGlobalState: State = {
         defaultColumns: defaultHeaders,
         dataViewId: 'security-solution-default',
         deletedEventIds: [],
-        expandedDetail: {},
         filters: [],
         indexNames: ['.alerts-security.alerts-default'],
         isSelectAllChecked: false,
@@ -435,7 +444,7 @@ export const mockGlobalState: State = {
     [TableId.test]: EMPTY_RESOLVER,
     [TimelineId.test]: EMPTY_RESOLVER,
     [TimelineId.active]: EMPTY_RESOLVER,
-    flyout: EMPTY_RESOLVER,
+    [`securitySolution-${TableId.test}`]: EMPTY_RESOLVER,
   },
   sourcerer: {
     ...mockSourcererState,
@@ -500,4 +509,49 @@ export const mockGlobalState: State = {
    */
   management: mockManagementState as ManagementState,
   discover: getMockDiscoverInTimelineState(),
+  notes: {
+    entities: {
+      '1': {
+        eventId: '1', // should be a valid id based on mockTimelineData
+        noteId: '1',
+        note: 'note-1',
+        timelineId: 'timeline-1',
+        created: 1663882629000,
+        createdBy: 'elastic',
+        updated: 1663882629000,
+        updatedBy: 'elastic',
+        version: 'version',
+      },
+    },
+    ids: ['1'],
+    status: {
+      fetchNotesByDocumentIds: ReqStatus.Idle,
+      fetchNotesBySavedObjectIds: ReqStatus.Idle,
+      createNote: ReqStatus.Idle,
+      deleteNotes: ReqStatus.Idle,
+      fetchNotes: ReqStatus.Idle,
+    },
+    error: {
+      fetchNotesByDocumentIds: null,
+      fetchNotesBySavedObjectIds: null,
+      createNote: null,
+      deleteNotes: null,
+      fetchNotes: null,
+    },
+    pagination: {
+      page: 1,
+      perPage: 10,
+      total: 0,
+    },
+    sort: {
+      field: 'created' as const,
+      direction: 'desc' as const,
+    },
+    filter: '',
+    createdByFilter: '',
+    associatedFilter: AssociatedFilter.all,
+    search: '',
+    selectedIds: [],
+    pendingDeleteIds: [],
+  },
 };

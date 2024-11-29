@@ -7,7 +7,7 @@
 
 import moment from 'moment';
 import type { ESFilter } from '@kbn/es-types';
-import type { SearchRequest } from '@kbn/data-plugin/common';
+import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { CursorPagination } from './types';
 import { CursorDirection, SortOrder } from '../../../../../common/runtime_types';
 import { UptimeEsClient } from '../../lib';
@@ -21,7 +21,6 @@ export class QueryContext {
   filterClause: any | null;
   size: number;
   statusFilter?: string;
-  hasTimespanCache?: boolean;
   query?: string;
 
   constructor(
@@ -48,13 +47,6 @@ export class QueryContext {
     return this.callES.search(params, operationName);
   }
 
-  async count(params: any): Promise<any> {
-    const {
-      result: { body },
-    } = await this.callES.count(params);
-    return body;
-  }
-
   async dateAndCustomFilters(): Promise<ESFilter[]> {
     const clauses = [await this.dateRangeFilter()];
     if (this.filterClause) {
@@ -67,10 +59,6 @@ export class QueryContext {
     const timestampClause = {
       range: { '@timestamp': { gte: this.dateRangeStart, lte: this.dateRangeEnd } },
     };
-
-    if (!(await this.hasTimespan())) {
-      return timestampClause;
-    }
 
     return {
       bool: {
@@ -126,28 +114,6 @@ export class QueryContext {
         },
       },
     };
-  }
-
-  async hasTimespan(): Promise<boolean> {
-    if (this.hasTimespanCache) {
-      return this.hasTimespanCache;
-    }
-
-    this.hasTimespanCache =
-      (
-        await this.count({
-          body: {
-            query: {
-              bool: {
-                filter: [this.timespanClause()],
-              },
-            },
-          },
-          terminate_after: 1,
-        })
-      ).count > 0;
-
-    return this.hasTimespanCache;
   }
 
   clone(): QueryContext {

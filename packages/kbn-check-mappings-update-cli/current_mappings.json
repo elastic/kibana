@@ -19,6 +19,33 @@
     "dynamic": false,
     "properties": {}
   },
+  "ad_hoc_run_params": {
+    "dynamic": false,
+    "properties": {
+      "apiKeyId": {
+        "type": "keyword"
+      },
+      "createdAt": {
+        "type": "date"
+      },
+      "end": {
+        "type": "date"
+      },
+      "rule": {
+        "properties": {
+          "alertTypeId": {
+            "type": "keyword"
+          },
+          "consumer": {
+            "type": "keyword"
+          }
+        }
+      },
+      "start": {
+        "type": "date"
+      }
+    }
+  },
   "alert": {
     "dynamic": false,
     "properties": {
@@ -320,6 +347,17 @@
   "application_usage_totals": {
     "dynamic": false,
     "properties": {}
+  },
+  "background-task-node": {
+    "dynamic": false,
+    "properties": {
+      "id": {
+        "type": "keyword"
+      },
+      "last_seen": {
+        "type": "date"
+      }
+    }
   },
   "canvas-element": {
     "dynamic": false,
@@ -669,6 +707,27 @@
       }
     }
   },
+  "cases-rules": {
+    "dynamic": false,
+    "properties": {
+      "counter": {
+        "type": "unsigned_long"
+      },
+      "createdAt": {
+        "type": "date"
+      },
+      "rules": {
+        "properties": {
+          "id": {
+            "type": "keyword"
+          }
+        }
+      },
+      "updatedAt": {
+        "type": "date"
+      }
+    }
+  },
   "cases-telemetry": {
     "dynamic": false,
     "properties": {}
@@ -728,6 +787,10 @@
         "type": "keyword"
       }
     }
+  },
+  "cloud": {
+    "dynamic": false,
+    "properties": {}
   },
   "cloud-security-posture-settings": {
     "dynamic": false,
@@ -916,6 +979,24 @@
       }
     }
   },
+  "dynamic-config-overrides": {
+    "dynamic": false,
+    "properties": {}
+  },
+  "endpoint:unified-user-artifact-manifest": {
+    "dynamic": false,
+    "properties": {
+      "artifactIds": {
+        "type": "keyword"
+      },
+      "policyId": {
+        "type": "keyword"
+      },
+      "semanticVersion": {
+        "type": "keyword"
+      }
+    }
+  },
   "endpoint:user-artifact-manifest": {
     "dynamic": false,
     "properties": {
@@ -931,8 +1012,82 @@
     "dynamic": false,
     "properties": {}
   },
+  "entity-definition": {
+    "dynamic": false,
+    "properties": {
+      "description": {
+        "type": "text"
+      },
+      "filter": {
+        "type": "keyword"
+      },
+      "id": {
+        "type": "keyword"
+      },
+      "identityFields": {
+        "type": "object"
+      },
+      "indexPatterns": {
+        "type": "keyword"
+      },
+      "managed": {
+        "type": "boolean"
+      },
+      "metadata": {
+        "type": "object"
+      },
+      "metrics": {
+        "type": "object"
+      },
+      "name": {
+        "type": "text"
+      },
+      "staticFields": {
+        "type": "object"
+      },
+      "type": {
+        "type": "keyword"
+      },
+      "version": {
+        "type": "keyword"
+      }
+    }
+  },
+  "entity-discovery-api-key": {
+    "dynamic": false,
+    "properties": {
+      "apiKey": {
+        "type": "binary"
+      }
+    }
+  },
+  "entity-engine-status": {
+    "dynamic": false,
+    "properties": {
+      "fieldHistoryLength": {
+        "index": false,
+        "type": "integer"
+      },
+      "filter": {
+        "type": "keyword"
+      },
+      "indexPattern": {
+        "type": "keyword"
+      },
+      "status": {
+        "type": "keyword"
+      },
+      "type": {
+        "type": "keyword"
+      }
+    }
+  },
   "epm-packages": {
     "properties": {
+      "additional_spaces_installed_kibana": {
+        "index": false,
+        "type": "flattened"
+      },
       "es_index_patterns": {
         "dynamic": false,
         "properties": {}
@@ -1002,6 +1157,10 @@
       "keep_policies_up_to_date": {
         "index": false,
         "type": "boolean"
+      },
+      "latest_executed_state": {
+        "enabled": false,
+        "type": "object"
       },
       "latest_install_failed_attempts": {
         "enabled": false,
@@ -1348,6 +1507,24 @@
       }
     }
   },
+  "favorites": {
+    "dynamic": false,
+    "properties": {
+      "favoriteIds": {
+        "type": "keyword"
+      },
+      "favoriteMetadata": {
+        "dynamic": false,
+        "type": "object"
+      },
+      "type": {
+        "type": "keyword"
+      },
+      "userId": {
+        "type": "keyword"
+      }
+    }
+  },
   "file": {
     "dynamic": false,
     "properties": {
@@ -1415,6 +1592,100 @@
       }
     }
   },
+  "fleet-agent-policies": {
+    "dynamic": false,
+    "properties": {
+      "advanced_settings": {
+        "index": false,
+        "type": "flattened"
+      },
+      "agent_features": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "keyword"
+          }
+        }
+      },
+      "data_output_id": {
+        "type": "keyword"
+      },
+      "description": {
+        "type": "text"
+      },
+      "download_source_id": {
+        "type": "keyword"
+      },
+      "fleet_server_host_id": {
+        "type": "keyword"
+      },
+      "global_data_tags": {
+        "index": false,
+        "type": "flattened"
+      },
+      "inactivity_timeout": {
+        "type": "integer"
+      },
+      "is_default": {
+        "type": "boolean"
+      },
+      "is_default_fleet_server": {
+        "type": "boolean"
+      },
+      "is_managed": {
+        "type": "boolean"
+      },
+      "is_preconfigured": {
+        "type": "keyword"
+      },
+      "is_protected": {
+        "type": "boolean"
+      },
+      "keep_monitoring_alive": {
+        "type": "boolean"
+      },
+      "monitoring_enabled": {
+        "index": false,
+        "type": "keyword"
+      },
+      "monitoring_output_id": {
+        "type": "keyword"
+      },
+      "name": {
+        "type": "keyword"
+      },
+      "namespace": {
+        "type": "keyword"
+      },
+      "overrides": {
+        "index": false,
+        "type": "flattened"
+      },
+      "revision": {
+        "type": "integer"
+      },
+      "schema_version": {
+        "type": "version"
+      },
+      "status": {
+        "type": "keyword"
+      },
+      "supports_agentless": {
+        "type": "boolean"
+      },
+      "unenroll_timeout": {
+        "type": "integer"
+      },
+      "updated_at": {
+        "type": "date"
+      },
+      "updated_by": {
+        "type": "keyword"
+      }
+    }
+  },
   "fleet-fleet-server-host": {
     "properties": {
       "host_urls": {
@@ -1442,6 +1713,93 @@
   "fleet-message-signing-keys": {
     "dynamic": false,
     "properties": {}
+  },
+  "fleet-package-policies": {
+    "properties": {
+      "bump_agent_policy_revision": {
+        "type": "boolean"
+      },
+      "created_at": {
+        "type": "date"
+      },
+      "created_by": {
+        "type": "keyword"
+      },
+      "description": {
+        "type": "text"
+      },
+      "elasticsearch": {
+        "dynamic": false,
+        "properties": {}
+      },
+      "enabled": {
+        "type": "boolean"
+      },
+      "inputs": {
+        "dynamic": false,
+        "properties": {}
+      },
+      "is_managed": {
+        "type": "boolean"
+      },
+      "name": {
+        "type": "keyword"
+      },
+      "namespace": {
+        "type": "keyword"
+      },
+      "output_id": {
+        "type": "keyword"
+      },
+      "overrides": {
+        "index": false,
+        "type": "flattened"
+      },
+      "package": {
+        "properties": {
+          "name": {
+            "type": "keyword"
+          },
+          "requires_root": {
+            "type": "boolean"
+          },
+          "title": {
+            "type": "keyword"
+          },
+          "version": {
+            "type": "keyword"
+          }
+        }
+      },
+      "policy_id": {
+        "type": "keyword"
+      },
+      "policy_ids": {
+        "type": "keyword"
+      },
+      "revision": {
+        "type": "integer"
+      },
+      "secret_references": {
+        "properties": {
+          "id": {
+            "type": "keyword"
+          }
+        }
+      },
+      "supports_agentless": {
+        "type": "boolean"
+      },
+      "updated_at": {
+        "type": "date"
+      },
+      "updated_by": {
+        "type": "keyword"
+      },
+      "vars": {
+        "type": "flattened"
+      }
+    }
   },
   "fleet-preconfiguration-deletion-record": {
     "properties": {
@@ -1480,9 +1838,29 @@
       }
     }
   },
+  "fleet-setup-lock": {
+    "properties": {
+      "started_at": {
+        "type": "date"
+      },
+      "status": {
+        "type": "keyword"
+      },
+      "uuid": {
+        "type": "text"
+      }
+    }
+  },
+  "fleet-space-settings": {
+    "dynamic": false,
+    "properties": {}
+  },
   "fleet-uninstall-tokens": {
     "dynamic": false,
     "properties": {
+      "namespaces": {
+        "type": "keyword"
+      },
       "policy_id": {
         "type": "keyword"
       },
@@ -1559,15 +1937,16 @@
     }
   },
   "infra-custom-dashboards": {
+    "dynamic": false,
     "properties": {
       "assetType": {
         "type": "keyword"
       },
-      "dashboardIdList": {
-        "type": "keyword"
+      "dashboardFilterAssetIdEnabled": {
+        "type": "boolean"
       },
-      "kuery": {
-        "type": "text"
+      "dashboardSavedObjectId": {
+        "type": "keyword"
       }
     }
   },
@@ -1584,7 +1963,12 @@
     "properties": {}
   },
   "ingest-agent-policies": {
+    "dynamic": false,
     "properties": {
+      "advanced_settings": {
+        "index": false,
+        "type": "flattened"
+      },
       "agent_features": {
         "properties": {
           "enabled": {
@@ -1607,6 +1991,10 @@
       "fleet_server_host_id": {
         "type": "keyword"
       },
+      "global_data_tags": {
+        "index": false,
+        "type": "flattened"
+      },
       "inactivity_timeout": {
         "type": "integer"
       },
@@ -1628,12 +2016,24 @@
       "keep_monitoring_alive": {
         "type": "boolean"
       },
+      "monitoring_diagnostics": {
+        "index": false,
+        "type": "flattened"
+      },
       "monitoring_enabled": {
         "index": false,
         "type": "keyword"
       },
+      "monitoring_http": {
+        "index": false,
+        "type": "flattened"
+      },
       "monitoring_output_id": {
         "type": "keyword"
+      },
+      "monitoring_pprof_enabled": {
+        "index": false,
+        "type": "boolean"
       },
       "name": {
         "type": "keyword"
@@ -1653,6 +2053,9 @@
       },
       "status": {
         "type": "keyword"
+      },
+      "supports_agentless": {
+        "type": "boolean"
       },
       "unenroll_timeout": {
         "type": "integer"
@@ -1905,6 +2308,9 @@
   },
   "ingest-package-policies": {
     "properties": {
+      "bump_agent_policy_revision": {
+        "type": "boolean"
+      },
       "created_at": {
         "type": "date"
       },
@@ -1934,10 +2340,20 @@
       "namespace": {
         "type": "keyword"
       },
+      "output_id": {
+        "type": "keyword"
+      },
+      "overrides": {
+        "index": false,
+        "type": "flattened"
+      },
       "package": {
         "properties": {
           "name": {
             "type": "keyword"
+          },
+          "requires_root": {
+            "type": "boolean"
           },
           "title": {
             "type": "keyword"
@@ -1950,6 +2366,9 @@
       "policy_id": {
         "type": "keyword"
       },
+      "policy_ids": {
+        "type": "keyword"
+      },
       "revision": {
         "type": "integer"
       },
@@ -1959,6 +2378,9 @@
             "type": "keyword"
           }
         }
+      },
+      "supports_agentless": {
+        "type": "boolean"
       },
       "updated_at": {
         "type": "date"
@@ -1973,6 +2395,18 @@
   },
   "ingest_manager_settings": {
     "properties": {
+      "delete_unenrolled_agents": {
+        "properties": {
+          "enabled": {
+            "index": false,
+            "type": "boolean"
+          },
+          "is_preconfigured": {
+            "index": false,
+            "type": "boolean"
+          }
+        }
+      },
       "fleet_server_hosts": {
         "type": "keyword"
       },
@@ -1988,6 +2422,14 @@
       },
       "secret_storage_requirements_met": {
         "type": "boolean"
+      },
+      "use_space_awareness_migration_started_at": {
+        "index": false,
+        "type": "date"
+      },
+      "use_space_awareness_migration_status": {
+        "index": false,
+        "type": "keyword"
       }
     }
   },
@@ -2417,6 +2859,26 @@
       }
     }
   },
+  "product-doc-install-status": {
+    "dynamic": false,
+    "properties": {
+      "index_name": {
+        "type": "keyword"
+      },
+      "installation_status": {
+        "type": "keyword"
+      },
+      "last_installation_date": {
+        "type": "date"
+      },
+      "product_name": {
+        "type": "keyword"
+      },
+      "product_version": {
+        "type": "keyword"
+      }
+    }
+  },
   "query": {
     "dynamic": false,
     "properties": {
@@ -2434,11 +2896,17 @@
   "risk-engine-configuration": {
     "dynamic": false,
     "properties": {
+      "alertSampleSizePerShard": {
+        "type": "integer"
+      },
       "dataViewId": {
         "type": "keyword"
       },
       "enabled": {
         "type": "boolean"
+      },
+      "excludeAlertStatuses": {
+        "type": "keyword"
       },
       "filter": {
         "dynamic": false,
@@ -2963,9 +3431,16 @@
       }
     }
   },
+  "slo-settings": {
+    "dynamic": false,
+    "properties": {}
+  },
   "space": {
     "dynamic": false,
     "properties": {
+      "disabledFeatures": {
+        "type": "keyword"
+      },
       "name": {
         "fields": {
           "keyword": {
@@ -2974,10 +3449,17 @@
           }
         },
         "type": "text"
+      },
+      "solution": {
+        "type": "keyword"
       }
     }
   },
   "spaces-usage-stats": {
+    "dynamic": false,
+    "properties": {}
+  },
+  "synthetics-dynamic-settings": {
     "dynamic": false,
     "properties": {}
   },
@@ -3001,6 +3483,9 @@
             }
           }
         }
+      },
+      "config_id": {
+        "type": "keyword"
       },
       "custom_heartbeat_id": {
         "type": "keyword"
@@ -3109,6 +3594,10 @@
     "dynamic": false,
     "properties": {}
   },
+  "synthetics-private-location": {
+    "dynamic": false,
+    "properties": {}
+  },
   "synthetics-privates-locations": {
     "dynamic": false,
     "properties": {}
@@ -3137,6 +3626,9 @@
       },
       "ownerId": {
         "type": "keyword"
+      },
+      "partition": {
+        "type": "integer"
       },
       "retryAt": {
         "type": "date"
@@ -3233,6 +3725,26 @@
           }
         },
         "type": "text"
+      }
+    }
+  },
+  "usage-counter": {
+    "dynamic": false,
+    "properties": {
+      "count": {
+        "type": "integer"
+      },
+      "counterName": {
+        "type": "keyword"
+      },
+      "counterType": {
+        "type": "keyword"
+      },
+      "domainId": {
+        "type": "keyword"
+      },
+      "source": {
+        "type": "keyword"
       }
     }
   },

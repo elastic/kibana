@@ -28,6 +28,9 @@ export interface FleetAuthz {
     allAgents: boolean;
     readSettings: boolean;
     allSettings: boolean;
+    // for UI
+    addAgents: boolean;
+    addFleetServers: boolean;
   };
 
   integrations: {
@@ -90,22 +93,43 @@ export const calculateAuthz = ({
   integrations,
   subfeatureEnabled,
 }: CalculateParams): FleetAuthz => {
+  // When subfeatures are enabled, treat fleet.all as combination of all subfeatures
+  const hasFleetAll = subfeatureEnabled
+    ? !!(fleet.agents?.all && fleet.agentPolicies?.all && fleet.settings?.all)
+    : fleet.all;
+
+  const writeIntegrationPolicies = subfeatureEnabled
+    ? (fleet.agentPolicies?.all && integrations.all) ?? false
+    : ((fleet.all || fleet.agentPolicies?.all) ?? false) && integrations.all;
+  const readIntegrationPolicies = subfeatureEnabled
+    ? (fleet.agentPolicies?.read && (integrations.all || integrations.read)) ?? false
+    : ((fleet.all || fleet.read || fleet.agentPolicies?.read) ?? false) &&
+      (integrations.all || integrations.read);
+
   // TODO remove fallback when the feature flag is removed
   const fleetAuthz: FleetAuthz['fleet'] = subfeatureEnabled
     ? {
-        all: fleet.all && (integrations.all || integrations.read),
+        all: hasFleetAll && (integrations.all || integrations.read),
 
         readAgents: (fleet.agents?.read || fleet.agents?.all) ?? false,
-        allAgents: (fleet.all || fleet.agents?.all) ?? false,
+        allAgents: fleet.agents?.all ?? false,
         readSettings: (fleet.settings?.read || fleet.settings?.all) ?? false,
         allSettings: fleet.settings?.all ?? false,
         allAgentPolicies: fleet.agentPolicies?.all ?? false,
-
+        addAgents: fleet.agents?.all ?? false,
+        addFleetServers:
+          (fleet.agents?.all && fleet.agentPolicies?.all && fleet.settings?.all) ?? false,
+        // Setup is needed to access the Fleet UI
+        setup:
+          hasFleetAll ||
+          fleet.read ||
+          fleet.agents?.read ||
+          fleet.agentPolicies?.read ||
+          fleet.settings?.read ||
+          fleet.setup,
         // These are currently used by Fleet Server setup
-        setup: fleet.all || fleet.setup,
-        readEnrollmentTokens: (fleet.all || fleet.setup || fleet.agents?.all) ?? false,
-        readAgentPolicies:
-          (fleet.all || fleet.read || fleet.setup || fleet.agentPolicies?.read) ?? false,
+        readEnrollmentTokens: (fleet.setup || fleet.agents?.all) ?? false,
+        readAgentPolicies: (fleet.setup || fleet.agentPolicies?.read) ?? false,
       }
     : {
         all: fleet.all && (integrations.all || integrations.read),
@@ -115,32 +139,30 @@ export const calculateAuthz = ({
         readSettings: fleet.all && (integrations.all || integrations.read),
         allSettings: fleet.all && (integrations.all || integrations.read),
         allAgentPolicies: fleet.all && (integrations.all || integrations.read),
+        addAgents: fleet.all && (integrations.all || integrations.read),
+        addFleetServers: fleet.all && (integrations.all || integrations.read),
 
         // These are currently used by Fleet Server setup
         setup: fleet.all || fleet.setup,
         readEnrollmentTokens: (fleet.all || fleet.setup || fleet.agents?.all) ?? false,
-        readAgentPolicies:
-          (fleet.all || fleet.read || fleet.setup || fleet.agentPolicies?.read) ?? false,
+        readAgentPolicies: (fleet.all || fleet.setup) ?? false,
       };
 
   return {
     fleet: fleetAuthz,
     integrations: {
-      readPackageInfo: fleet.all || fleet.setup || integrations.all || integrations.read,
+      readPackageInfo: hasFleetAll || fleet.setup || integrations.all || integrations.read,
       readInstalledPackages: integrations.all || integrations.read,
-      installPackages: fleet.all && integrations.all,
-      upgradePackages: fleet.all && integrations.all,
-      removePackages: fleet.all && integrations.all,
-      uploadPackages: fleet.all && integrations.all,
+      installPackages: writeIntegrationPolicies && integrations.all,
+      upgradePackages: writeIntegrationPolicies && integrations.all,
+      removePackages: writeIntegrationPolicies && integrations.all,
+      uploadPackages: writeIntegrationPolicies && integrations.all,
 
-      readPackageSettings: fleet.all && integrations.all,
-      writePackageSettings: fleet.all && integrations.all,
+      readPackageSettings: integrations.read,
+      writePackageSettings: writeIntegrationPolicies && integrations.all,
 
-      readIntegrationPolicies:
-        ((fleet.all || fleet.read || fleet.agentPolicies?.read) ?? false) &&
-        (integrations.all || integrations.read),
-      writeIntegrationPolicies:
-        ((fleet.all || fleet.agentPolicies?.all) ?? false) && integrations.all,
+      readIntegrationPolicies,
+      writeIntegrationPolicies,
     },
   };
 };

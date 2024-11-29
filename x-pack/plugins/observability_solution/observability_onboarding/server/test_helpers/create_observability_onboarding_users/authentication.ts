@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { cluster, indices } from '../../routes/logs/api_key/monitoring_config';
+import { MONITOR_CLUSTER, INDEX_LOGS_AND_METRICS } from '../../lib/api_key/privileges';
 
 export enum ObservabilityOnboardingUsername {
   noAccessUser = 'no_access_user',
@@ -21,8 +21,8 @@ export enum ObservabilityOnboardingCustomRolename {
 export const customRoles = {
   [ObservabilityOnboardingCustomRolename.logMonitoringUser]: {
     elasticsearch: {
-      cluster: [...cluster, 'manage_own_api_key'],
-      indices,
+      cluster: [MONITOR_CLUSTER, 'manage_own_api_key'],
+      indices: [INDEX_LOGS_AND_METRICS],
     },
   },
 };

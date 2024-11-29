@@ -76,8 +76,11 @@ export function DependencyDetailOperationsList() {
     urlComparisonEnabled,
   });
 
-  const { searchServiceDestinationMetrics } =
-    useSearchServiceDestinationMetrics({ start, end, kuery });
+  const { searchServiceDestinationMetrics } = useSearchServiceDestinationMetrics({
+    start,
+    end,
+    kuery,
+  });
 
   const primaryStatsFetch = useFetcher(
     (callApmApi) => {
@@ -94,14 +97,7 @@ export function DependencyDetailOperationsList() {
         },
       });
     },
-    [
-      dependencyName,
-      start,
-      end,
-      environment,
-      kuery,
-      searchServiceDestinationMetrics,
-    ]
+    [dependencyName, start, end, environment, kuery, searchServiceDestinationMetrics]
   );
 
   const comparisonStatsFetch = useFetcher(
@@ -139,10 +135,9 @@ export function DependencyDetailOperationsList() {
 
   const columns: Array<ITableColumn<OperationStatisticsItem>> = [
     {
-      name: i18n.translate(
-        'xpack.apm.dependencyDetailOperationsList.spanNameColumnLabel',
-        { defaultMessage: 'Span name' }
-      ),
+      name: i18n.translate('xpack.apm.dependencyDetailOperationsList.spanNameColumnLabel', {
+        defaultMessage: 'Span name',
+      }),
       field: 'spanName',
       sortable: true,
       render: (_, { spanName }) => <OperationLink spanName={spanName} />,
@@ -153,48 +148,41 @@ export function DependencyDetailOperationsList() {
     }),
   ];
 
-  const comparisonOperationsBySpanName = keyBy(
-    comparisonStatsFetch.data?.operations,
-    'spanName'
-  );
+  const comparisonOperationsBySpanName = keyBy(comparisonStatsFetch.data?.operations, 'spanName');
 
   const noItemsMessage = (
     <EmptyMessage
-      heading={i18n.translate(
-        'xpack.apm.dependencyDetailOperationsList.notFoundLabel',
-        { defaultMessage: 'No operations found' }
-      )}
+      heading={i18n.translate('xpack.apm.dependencyDetailOperationsList.notFoundLabel', {
+        defaultMessage: 'No operations found',
+      })}
     />
   );
 
   const items =
-    primaryStatsFetch.data?.operations.map(
-      (operation): OperationStatisticsItem => {
-        const comparisonOperation =
-          comparisonOperationsBySpanName[operation.spanName];
+    primaryStatsFetch.data?.operations.map((operation): OperationStatisticsItem => {
+      const comparisonOperation = comparisonOperationsBySpanName[operation.spanName];
 
-        return {
-          spanName: operation.spanName,
-          latency: operation.latency,
-          throughput: operation.throughput,
-          failureRate: operation.failureRate,
-          impact: operation.impact,
-          currentStats: {
-            latency: operation.timeseries.latency,
-            throughput: operation.timeseries.throughput,
-            failureRate: operation.timeseries.failureRate,
-          },
-          previousStats: comparisonOperation
-            ? {
-                latency: comparisonOperation.timeseries.latency,
-                throughput: comparisonOperation.timeseries.throughput,
-                failureRate: comparisonOperation.timeseries.failureRate,
-                impact: comparisonOperation.impact,
-              }
-            : undefined,
-        };
-      }
-    ) ?? [];
+      return {
+        spanName: operation.spanName,
+        latency: operation.latency,
+        throughput: operation.throughput,
+        failureRate: operation.failureRate,
+        impact: operation.impact,
+        currentStats: {
+          latency: operation.timeseries.latency,
+          throughput: operation.timeseries.throughput,
+          failureRate: operation.timeseries.failureRate,
+        },
+        previousStats: comparisonOperation
+          ? {
+              latency: comparisonOperation.timeseries.latency,
+              throughput: comparisonOperation.timeseries.throughput,
+              failureRate: comparisonOperation.timeseries.failureRate,
+              impact: comparisonOperation.impact,
+            }
+          : undefined,
+      };
+    }) ?? [];
 
   return (
     <ManagedTable

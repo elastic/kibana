@@ -11,11 +11,7 @@ import React from 'react';
 import { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
 import { useApmPluginContext } from '../../../../../../../context/apm_plugin/use_apm_plugin_context';
 
-export function DroppedSpansWarning({
-  transactionDoc,
-}: {
-  transactionDoc: Transaction;
-}) {
+export function DroppedSpansWarning({ transactionDoc }: { transactionDoc: Transaction }) {
   const { docLinks } = useApmPluginContext().core;
   const dropped = transactionDoc.transaction.span_count?.dropped;
   if (!dropped) {

@@ -8,6 +8,12 @@
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import {
+  AddMetricsCalloutEventParams,
+  AnomalyDetectionDateFieldChangeParams,
+  AnomalyDetectionFilterFieldChangeParams,
+  AnomalyDetectionPartitionFieldChangeParams,
+  AnomalyDetectionSetupParams,
+  AssetDashboardLoadedParams,
   AssetDetailsFlyoutViewedParams,
   AssetDetailsPageViewedParams,
   HostEntryClickedParams,
@@ -73,6 +79,10 @@ export class TelemetryClient implements ITelemetryClient {
     this.analytics.reportEvent(InfraTelemetryEventTypes.ASSET_DETAILS_PAGE_VIEWED, params);
   };
 
+  public reportAssetDashboardLoaded = (params: AssetDashboardLoadedParams) => {
+    this.analytics.reportEvent(InfraTelemetryEventTypes.ASSET_DASHBOARD_LOADED, params);
+  };
+
   public reportPerformanceMetricEvent = (
     eventName: string,
     duration: number,
@@ -85,5 +95,58 @@ export class TelemetryClient implements ITelemetryClient {
       meta,
       ...innerEvents,
     });
+  };
+
+  public reportAddMetricsCalloutAddMetricsClicked = (params: AddMetricsCalloutEventParams) => {
+    this.analytics.reportEvent(
+      InfraTelemetryEventTypes.ADD_METRICS_CALLOUT_ADD_METRICS_CLICKED,
+      params
+    );
+  };
+
+  public reportAddMetricsCalloutTryItClicked = (params: AddMetricsCalloutEventParams) => {
+    this.analytics.reportEvent(InfraTelemetryEventTypes.ADD_METRICS_CALLOUT_TRY_IT_CLICKED, params);
+  };
+
+  public reportAddMetricsCalloutLearnMoreClicked = (params: AddMetricsCalloutEventParams) => {
+    this.analytics.reportEvent(
+      InfraTelemetryEventTypes.ADD_METRICS_CALLOUT_LEARN_MORE_CLICKED,
+      params
+    );
+  };
+
+  public reportAddMetricsCalloutDismissed = (params: AddMetricsCalloutEventParams) => {
+    this.analytics.reportEvent(InfraTelemetryEventTypes.ADD_METRICS_CALLOUT_DISMISSED, params);
+  };
+
+  public reportAnomalyDetectionSetup = (params: AnomalyDetectionSetupParams) => {
+    this.analytics.reportEvent(InfraTelemetryEventTypes.ANOMALY_DETECTION_SETUP, params);
+  };
+
+  public reportAnomalyDetectionDateFieldChange = (
+    params: AnomalyDetectionDateFieldChangeParams
+  ) => {
+    this.analytics.reportEvent(
+      InfraTelemetryEventTypes.ANOMALY_DETECTION_DATE_FIELD_CHANGE,
+      params
+    );
+  };
+
+  public reportAnomalyDetectionPartitionFieldChange = (
+    params: AnomalyDetectionPartitionFieldChangeParams
+  ) => {
+    this.analytics.reportEvent(
+      InfraTelemetryEventTypes.ANOMALY_DETECTION_PARTITION_FIELD_CHANGE,
+      params
+    );
+  };
+
+  public reportAnomalyDetectionFilterFieldChange = (
+    params: AnomalyDetectionFilterFieldChangeParams
+  ) => {
+    this.analytics.reportEvent(
+      InfraTelemetryEventTypes.ANOMALY_DETECTION_FILTER_FIELD_CHANGE,
+      params
+    );
   };
 }

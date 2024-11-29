@@ -6,89 +6,64 @@
  */
 
 import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
+import { RESPONSE_ACTION_AGENT_TYPE } from '../../../../../common/endpoint/service/response_actions/constants';
 import React from 'react';
-import type { HostInfo } from '../../../../../common/endpoint/types';
 import { HostStatus } from '../../../../../common/endpoint/types';
 import type { AppContextTestRender } from '../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../common/mock/endpoint';
-import { useGetSentinelOneAgentStatus } from '../../../../detections/components/host_isolation/use_sentinelone_host_isolation';
-import { useGetEndpointDetails } from '../../../hooks/endpoint/use_get_endpoint_details';
-import { mockEndpointDetailsApiResult } from '../../../pages/endpoint_hosts/store/mock_endpoint_result_list';
 import { OfflineCallout } from './offline_callout';
-
-jest.mock('../../../hooks/endpoint/use_get_endpoint_details');
-jest.mock('../../../../detections/components/host_isolation/use_sentinelone_host_isolation');
-
-const getEndpointDetails = useGetEndpointDetails as jest.Mock;
-const getSentinelOneAgentStatus = useGetSentinelOneAgentStatus as jest.Mock;
+import { agentStatusGetHttpMock } from '../../../mocks';
+import { agentStatusMocks } from '../../../../../common/endpoint/service/response_actions/mocks/agent_status.mocks';
+import { waitFor } from '@testing-library/react';
 
 describe('Responder offline callout', () => {
   let render: (agentType?: ResponseActionAgentType) => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
   let mockedContext: AppContextTestRender;
-  let endpointDetails: HostInfo;
+  let apiMocks: ReturnType<typeof agentStatusGetHttpMock>;
 
   beforeEach(() => {
     mockedContext = createAppRootMockRenderer();
+    apiMocks = agentStatusGetHttpMock(mockedContext.coreStart.http);
     render = (agentType?: ResponseActionAgentType) =>
       (renderResult = mockedContext.render(
         <OfflineCallout
-          endpointId={'1234'}
+          endpointId={'abfe4a35-d5b4-42a0-a539-bd054c791769'}
           agentType={agentType || 'endpoint'}
           hostName="Host name"
         />
       ));
-    endpointDetails = mockEndpointDetailsApiResult();
-    getEndpointDetails.mockReturnValue({ data: endpointDetails });
-    getSentinelOneAgentStatus.mockReturnValue({ data: {} });
-    render();
   });
 
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it.each(['endpoint', 'sentinel_one'] as ResponseActionAgentType[])(
+  it.each(RESPONSE_ACTION_AGENT_TYPE)(
     'should be visible when agent type is %s and host is offline',
-    (agentType) => {
-      if (agentType === 'endpoint') {
-        getEndpointDetails.mockReturnValue({
-          data: { ...endpointDetails, host_status: HostStatus.OFFLINE },
-        });
-      } else if (agentType === 'sentinel_one') {
-        getSentinelOneAgentStatus.mockReturnValue({
-          data: {
-            '1234': {
-              status: HostStatus.OFFLINE,
-            },
-          },
-        });
-      }
+    async (agentType) => {
+      apiMocks.responseProvider.getAgentStatus.mockReturnValue({
+        data: {
+          'abfe4a35-d5b4-42a0-a539-bd054c791769': agentStatusMocks.generateAgentStatus({
+            agentType,
+            status: HostStatus.OFFLINE,
+          }),
+        },
+      });
       render(agentType);
-      const callout = renderResult.queryByTestId('offlineCallout');
-      expect(callout).toBeTruthy();
+      await waitFor(() => {
+        expect(apiMocks.responseProvider.getAgentStatus).toHaveBeenCalled();
+      });
+
+      expect(renderResult.getByTestId('offlineCallout')).toBeTruthy();
     }
   );
 
-  it.each(['endpoint', 'sentinel_one'] as ResponseActionAgentType[])(
-    'should not be visible when agent type is %s and host is online',
-    (agentType) => {
-      if (agentType === 'endpoint') {
-        getEndpointDetails.mockReturnValue({
-          data: { ...endpointDetails, host_status: HostStatus.HEALTHY },
-        });
-      } else if (agentType === 'sentinel_one') {
-        getSentinelOneAgentStatus.mockReturnValue({
-          data: {
-            '1234': {
-              status: HostStatus.HEALTHY,
-            },
-          },
-        });
-      }
+  it.each(RESPONSE_ACTION_AGENT_TYPE)(
+    'should NOT be visible when agent type is %s and host is online',
+    async (agentType) => {
       render(agentType);
-      const callout = renderResult.queryByTestId('offlineCallout');
-      expect(callout).toBeFalsy();
+      await waitFor(() => {
+        expect(apiMocks.responseProvider.getAgentStatus).toHaveBeenCalled();
+      });
+
+      expect(renderResult.queryByTestId('offlineCallout')).toBeNull();
     }
   );
 });

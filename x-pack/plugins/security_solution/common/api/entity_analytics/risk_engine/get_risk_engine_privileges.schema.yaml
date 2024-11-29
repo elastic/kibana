@@ -1,0 +1,26 @@
+openapi: 3.0.0
+info:
+  title: Get Risk Engine Privileges Schema
+  version: '1'
+paths:
+  /internal/risk_engine/privileges:
+    get:
+      x-labels: [ess, serverless]
+      x-internal: true
+      x-codegen-enabled: true
+      operationId: RiskEngineGetPrivileges
+      summary: Get Risk Engine Privileges
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '../common/common.schema.yaml#/components/schemas/EntityAnalyticsPrivileges'
+              example:
+                elasticsearch:
+                  index:
+                    'risk-score.risk-score-*':
+                      read: true
+                      write: false
+                has_all_required: false

@@ -1,13 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { DataView } from '@kbn/data-views-plugin/common';
-import { AggregateQuery, compareFilters, Filter, Query, TimeRange } from '@kbn/es-query';
+import {
+  AggregateQuery,
+  compareFilters,
+  COMPARE_ALL_OPTIONS,
+  Filter,
+  Query,
+  TimeRange,
+} from '@kbn/es-query';
 import type { ErrorLike } from '@kbn/expressions-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { PhaseEvent, PhaseEventType } from '@kbn/presentation-publishing';
@@ -69,12 +77,18 @@ export const legacyEmbeddableToApi = (
   /**
    * Shortcuts for creating publishing subjects from the input and output subjects
    */
-  const inputKeyToSubject = <T extends unknown = unknown>(
+  const inputKeyToSubject = <ValueType extends unknown = unknown>(
     key: keyof CommonLegacyInput,
     useExplicitInput?: boolean
-  ) => embeddableInputToSubject<T>(subscriptions, embeddable, key, useExplicitInput);
-  const outputKeyToSubject = <T extends unknown = unknown>(key: keyof CommonLegacyOutput) =>
-    embeddableOutputToSubject<T>(subscriptions, embeddable, key);
+  ) =>
+    embeddableInputToSubject<ValueType, CommonLegacyInput>(
+      subscriptions,
+      embeddable,
+      key,
+      useExplicitInput
+    );
+  const outputKeyToSubject = <ValueType extends unknown = unknown>(key: keyof CommonLegacyOutput) =>
+    embeddableOutputToSubject<ValueType, CommonLegacyOutput>(subscriptions, embeddable, key);
 
   /**
    * Support editing of legacy embeddables
@@ -90,7 +104,7 @@ export const legacyEmbeddableToApi = (
   /**
    * Performance tracking
    */
-  const onPhaseChange = new BehaviorSubject<PhaseEvent | undefined>(undefined);
+  const phase$ = new BehaviorSubject<PhaseEvent | undefined>(undefined);
 
   let loadingStartTime = 0;
   subscriptions.add(
@@ -119,7 +133,7 @@ export const legacyEmbeddableToApi = (
         })
       )
       .subscribe((statusOutput) => {
-        onPhaseChange.next(statusOutput);
+        phase$.next(statusOutput);
       })
   );
 
@@ -140,6 +154,7 @@ export const legacyEmbeddableToApi = (
   const panelDescription = inputKeyToSubject<string>('description');
 
   const defaultPanelTitle = outputKeyToSubject<string>('defaultTitle');
+  const defaultPanelDescription = outputKeyToSubject<string>('defaultDescription');
   const disabledActionIds = inputKeyToSubject<string[] | undefined>('disabledActions');
 
   function getSavedObjectId(input: { savedObjectId?: string }, output: { savedObjectId?: string }) {
@@ -185,6 +200,7 @@ export const legacyEmbeddableToApi = (
   const filters$: BehaviorSubject<Filter[] | undefined> = new BehaviorSubject<Filter[] | undefined>(
     undefined
   );
+
   const query$: BehaviorSubject<Query | AggregateQuery | undefined> = new BehaviorSubject<
     Query | AggregateQuery | undefined
   >(undefined);
@@ -196,7 +212,13 @@ export const legacyEmbeddableToApi = (
 
       subscriptions.add(
         embeddable.getInput$().subscribe(() => {
-          if (!compareFilters(embeddable.filters$.getValue() ?? [], embeddable.getFilters())) {
+          if (
+            !compareFilters(
+              embeddable.filters$.getValue() ?? [],
+              embeddable.getFilters(),
+              COMPARE_ALL_OPTIONS
+            )
+          ) {
             filters$.next(embeddable.getFilters());
           }
           if (!deepEqual(embeddable.query$.getValue() ?? [], embeddable.getQuery())) {
@@ -223,6 +245,8 @@ export const legacyEmbeddableToApi = (
     return !isInputControl && !isMarkdown && !isImage && !isLinks;
   };
 
+  const hasLockedHoverActions$ = new BehaviorSubject<boolean>(false);
+
   return {
     api: {
       parentApi: parentApi as LegacyEmbeddableAPI['parentApi'],
@@ -232,7 +256,7 @@ export const legacyEmbeddableToApi = (
       dataLoading,
       blockingError,
 
-      onPhaseChange,
+      phase$,
 
       onEdit,
       isEditingEnabled,
@@ -246,6 +270,10 @@ export const legacyEmbeddableToApi = (
 
       dataViews,
       disabledActionIds,
+      setDisabledActionIds: (ids) => disabledActionIds.next(ids),
+
+      hasLockedHoverActions$,
+      lockHoverActions: (lock: boolean) => hasLockedHoverActions$.next(lock),
 
       panelTitle,
       setPanelTitle,
@@ -256,6 +284,7 @@ export const legacyEmbeddableToApi = (
 
       setPanelDescription,
       panelDescription,
+      defaultPanelDescription,
 
       canLinkToLibrary: () => canLinkLegacyEmbeddable(embeddable),
       linkToLibrary: () => linkLegacyEmbeddable(embeddable),

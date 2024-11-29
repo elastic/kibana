@@ -5,29 +5,34 @@
  * 2.0.
  */
 
+import { v4 } from 'uuid';
 import type { FunctionRegistrationParameters } from '.';
 import { KnowledgeBaseEntryRole } from '../../common';
+
+export const SUMMARIZE_FUNCTION_NAME = 'summarize';
 
 export function registerSummarizationFunction({
   client,
   functions,
+  resources,
 }: FunctionRegistrationParameters) {
   functions.registerFunction(
     {
-      name: 'summarize',
-      contexts: ['core'],
-      description:
-        "Use this function to summarize things learned from the conversation. You can score the learnings with a confidence metric, whether it is a correction on a previous learning. An embedding will be created that you can recall later with a semantic search. There is no need to ask the user for permission to store something you have learned, unless you do not feel confident. When you create this summarisation, make sure you craft it in a way that can be recalled with a semantic search later, and that it would have answered the user's original request.",
+      name: SUMMARIZE_FUNCTION_NAME,
+      description: `Use this function to store facts in the knowledge database if the user requests it.
+        You can score the learnings with a confidence metric, whether it is a correction on a previous learning.
+        An embedding will be created that you can recall later with a semantic search.
+        When you create this summarisation, make sure you craft it in a way that can be recalled with a semantic
+        search later, and that it would have answered the user's original request.`,
       descriptionForUser:
         'This function allows the Elastic Assistant to summarize things from the conversation.',
       parameters: {
         type: 'object',
-        additionalProperties: false,
         properties: {
-          id: {
+          title: {
             type: 'string',
             description:
-              'An id for the document. This should be a short human-readable keyword field with only alphabetic characters and underscores, that allow you to update it later.',
+              'A human readable title that can be used to identify the document later. This should be no longer than 255 characters',
           },
           text: {
             type: 'string',
@@ -50,7 +55,7 @@ export function registerSummarizationFunction({
           },
         },
         required: [
-          'id' as const,
+          'title' as const,
           'text' as const,
           'is_correction' as const,
           'confidence' as const,
@@ -58,20 +63,23 @@ export function registerSummarizationFunction({
         ],
       },
     },
-    (
-      { arguments: { id, text, is_correction: isCorrection, confidence, public: isPublic } },
+    async (
+      { arguments: { title, text, is_correction: isCorrection, confidence, public: isPublic } },
       signal
     ) => {
+      const id = v4();
+      resources.logger.debug(`Creating new knowledge base entry with id: ${id}`);
+
       return client
-        .createKnowledgeBaseEntry({
+        .addKnowledgeBaseEntry({
           entry: {
-            doc_id: id,
-            role: KnowledgeBaseEntryRole.AssistantSummarization,
             id,
+            title,
             text,
-            is_correction: isCorrection,
-            confidence,
             public: isPublic,
+            role: KnowledgeBaseEntryRole.AssistantSummarization,
+            confidence,
+            is_correction: isCorrection,
             labels: {},
           },
           // signal,

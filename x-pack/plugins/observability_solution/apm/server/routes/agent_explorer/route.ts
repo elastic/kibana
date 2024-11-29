@@ -9,17 +9,9 @@ import * as t from 'io-ts';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { getRandomSampler } from '../../lib/helpers/get_random_sampler';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
-import {
-  environmentRt,
-  kueryRt,
-  probabilityRt,
-  rangeRt,
-} from '../default_api_types';
+import { environmentRt, kueryRt, probabilityRt, rangeRt } from '../default_api_types';
 import { AgentExplorerAgentsResponse, getAgents } from './get_agents';
-import {
-  AgentExplorerAgentInstancesResponse,
-  getAgentInstances,
-} from './get_agent_instances';
+import { AgentExplorerAgentInstancesResponse, getAgentInstances } from './get_agent_instances';
 import {
   AgentLatestVersionsResponse,
   fetchAgentsLatestVersion,
@@ -47,15 +39,8 @@ const agentExplorerRoute = createApmServerRoute({
       plugins: { security },
     } = resources;
 
-    const {
-      environment,
-      kuery,
-      start,
-      end,
-      probability,
-      serviceName,
-      agentLanguage,
-    } = params.query;
+    const { environment, kuery, start, end, probability, serviceName, agentLanguage } =
+      params.query;
 
     const [apmEventClient, randomSampler] = await Promise.all([
       getApmEventClient(resources),

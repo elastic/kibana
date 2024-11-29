@@ -13,10 +13,6 @@ import { suggestUsers } from './api';
 import { USER_PROFILES_FAILURE } from './translations';
 import { useAppToasts } from '../../hooks/use_app_toasts';
 
-export interface SuggestUserProfilesArgs {
-  searchTerm: string;
-}
-
 export const bulkGetUserProfiles = async ({
   searchTerm,
 }: {
@@ -25,7 +21,21 @@ export const bulkGetUserProfiles = async ({
   return suggestUsers({ searchTerm });
 };
 
-export const useSuggestUsers = ({ searchTerm }: { searchTerm: string }) => {
+export interface UseSuggestUsersParams {
+  /**
+   * Search term to filter user profiles
+   */
+  searchTerm: string;
+  /**
+   * Whether the query should be enabled
+   */
+  enabled?: boolean;
+}
+
+/**
+ * Fetches user profiles based on a search term
+ */
+export const useSuggestUsers = ({ enabled = true, searchTerm }: UseSuggestUsersParams) => {
   const { addError } = useAppToasts();
 
   return useQuery<UserProfileWithAvatar[]>(
@@ -36,6 +46,7 @@ export const useSuggestUsers = ({ searchTerm }: { searchTerm: string }) => {
     {
       retry: false,
       staleTime: Infinity,
+      enabled,
       onError: (e) => {
         addError(e, { title: USER_PROFILES_FAILURE });
       },

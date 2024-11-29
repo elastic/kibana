@@ -5,47 +5,130 @@
  * 2.0.
  */
 
-import { GetInfraMetricsResponsePayload } from '../../../../../common/http_api/infra';
-import { getFilteredHosts } from './get_filtered_hosts';
-import { mapToApiResponse } from '../mapper';
-import { hasFilters } from '../utils';
-import { GetHostsArgs } from '../types';
+import type { TimeRangeMetadata } from '@kbn/apm-data-access-plugin/common';
+import type { GetInfraMetricsResponsePayload } from '../../../../../common/http_api/infra';
+import { getFilteredHostNames, getHasDataFromSystemIntegration } from './get_filtered_hosts';
+import type { GetHostParameters } from '../types';
 import { getAllHosts } from './get_all_hosts';
 import { getHostsAlertsCount } from './get_hosts_alerts_count';
+import { assertQueryStructure } from '../utils';
+import { getApmHostNames } from './get_apm_hosts';
 
-export const getHosts = async (args: GetHostsArgs): Promise<GetInfraMetricsResponsePayload> => {
-  const runFilterQuery = hasFilters(args.params.query);
-  // filter first to prevent filter clauses from impacting the metrics aggregations.
-  const hostNamesShortList = runFilterQuery ? await getFilteredHostNames(args) : [];
-  if (runFilterQuery && hostNamesShortList.length === 0) {
+export const getHosts = async ({
+  metrics,
+  from,
+  to,
+  limit,
+  query,
+  alertsClient,
+  apmDataAccessServices,
+  infraMetricsClient,
+}: GetHostParameters): Promise<GetInfraMetricsResponsePayload> => {
+  const apmDocumentSources = await apmDataAccessServices?.getDocumentSources({
+    start: from,
+    end: to,
+  });
+
+  const hostNames = await getHostNames({
+    infraMetricsClient,
+    apmDataAccessServices,
+    apmDocumentSources,
+    from,
+    to,
+    limit,
+    query,
+  });
+
+  if (hostNames.length === 0) {
     return {
-      type: 'host',
+      assetType: 'host',
       nodes: [],
     };
   }
 
-  const {
-    range: { from, to },
-    limit,
-  } = args.params;
-
-  const [result, alertsCountResponse] = await Promise.all([
-    getAllHosts(args, hostNamesShortList),
-    getHostsAlertsCount({
-      alertsClient: args.alertsClient,
-      hostNamesShortList,
+  const [hostMetricsResponse, alertsCountResponse] = await Promise.all([
+    getAllHosts({
+      infraMetricsClient,
+      apmDataAccessServices,
+      apmDocumentSources,
       from,
       to,
-      maxNumHosts: limit,
+      limit,
+      metrics,
+      hostNames,
+    }),
+    getHostsAlertsCount({
+      alertsClient,
+      hostNames,
+      from,
+      to,
+      limit,
     }),
   ]);
 
-  return mapToApiResponse(args.params, result?.nodes.buckets, alertsCountResponse);
+  const alertsByHostName = alertsCountResponse.reduce((acc, { name, alertsCount }) => {
+    acc[name] = { alertsCount };
+    return acc;
+  }, {} as Record<string, { alertsCount: number }>);
+
+  const hosts = hostMetricsResponse.map((host) => {
+    const { alertsCount } = alertsByHostName[host.name] ?? {};
+    return {
+      ...host,
+      alertsCount,
+    };
+  });
+
+  return {
+    assetType: 'host',
+    nodes: hosts,
+  };
 };
 
-const getFilteredHostNames = async (args: GetHostsArgs) => {
-  const filteredHosts = await getFilteredHosts(args);
+const getHostNames = async ({
+  infraMetricsClient,
+  apmDataAccessServices,
+  apmDocumentSources,
+  from,
+  to,
+  limit,
+  query,
+}: Pick<
+  GetHostParameters,
+  'apmDataAccessServices' | 'infraMetricsClient' | 'from' | 'to' | 'limit' | 'query'
+> & {
+  apmDocumentSources?: TimeRangeMetadata['sources'];
+}) => {
+  assertQueryStructure(query);
 
-  const { nodes } = filteredHosts ?? {};
-  return nodes?.buckets.map((p) => p.key) ?? [];
+  const hasSystemIntegrationData = await getHasDataFromSystemIntegration({
+    infraMetricsClient,
+    from,
+    to,
+    query,
+  });
+
+  const [monitoredHosts, apmHosts] = await Promise.all([
+    hasSystemIntegrationData
+      ? getFilteredHostNames({
+          infraMetricsClient,
+          query,
+          from,
+          to,
+          limit,
+        })
+      : undefined,
+    apmDataAccessServices && apmDocumentSources
+      ? getApmHostNames({
+          apmDataAccessServices,
+          apmDocumentSources,
+          query,
+          from,
+          to,
+          limit,
+        })
+      : undefined,
+  ]);
+
+  return [...new Set([...(monitoredHosts ?? []), ...(apmHosts ?? [])])];
 };

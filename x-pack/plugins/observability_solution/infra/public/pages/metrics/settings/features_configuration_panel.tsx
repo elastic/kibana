@@ -11,8 +11,8 @@ import { EuiForm } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import {
-  enableInfrastructureHostsView,
   enableInfrastructureProfilingIntegration,
+  enableInfrastructureAssetCustomDashboards,
 } from '@kbn/observability-plugin/common';
 import { useEditableSettings } from '@kbn/observability-shared-plugin/public';
 import { withSuspense } from '@kbn/shared-ux-utility';
@@ -70,10 +70,10 @@ export function FeaturesConfigurationPanel({
         }}
       >
         <FieldRow
-          field={fields[enableInfrastructureHostsView]}
+          field={fields[enableInfrastructureAssetCustomDashboards]}
           isSavingEnabled={true}
           onFieldChange={handleFieldChange}
-          unsavedChange={unsavedChanges[enableInfrastructureHostsView]}
+          unsavedChange={unsavedChanges[enableInfrastructureAssetCustomDashboards]}
         />
         {featureFlags.profilingEnabled && (
           <FieldRow

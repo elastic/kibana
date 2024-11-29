@@ -36,9 +36,7 @@ export function createInfraMetricsClient(resources: APMRouteHandlerResources) {
         ...opts,
       };
 
-      return esClient.asCurrentUser.search<TDocument>(
-        searchParams
-      ) as Promise<any>;
+      return esClient.asCurrentUser.search<TDocument>(searchParams) as Promise<any>;
     },
   };
 }

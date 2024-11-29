@@ -119,7 +119,7 @@
               "\nGets Security Solution shared information like browerFields, indexPattern and selectedPatterns in DataView."
             ],
             "signature": [
-              "SourcererDataView"
+              "SelectedDataView"
             ],
             "path": "x-pack/plugins/threat_intelligence/public/types.ts",
             "deprecated": false,
@@ -275,7 +275,7 @@
                 "signature": [
                   "P"
                 ],
-                "path": "node_modules/@types/react/index.d.ts",
+                "path": "node_modules/@types/react/ts5.0/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -289,7 +289,7 @@
                 "signature": [
                   "any"
                 ],
-                "path": "node_modules/@types/react/index.d.ts",
+                "path": "node_modules/@types/react/ts5.0/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -418,11 +418,7 @@
               "\nAdd to blocklist feature"
             ],
             "signature": [
-              "{ canWriteBlocklist: boolean; exceptionListApiClient: unknown; useSetUrlParams: () => (params: Record<string, string | number | null | undefined>, replace?: boolean | undefined) => void; getFlyoutComponent: () => React.NamedExoticComponent<",
-              "BlockListFlyoutProps",
-              ">; getFormComponent: () => React.NamedExoticComponent<",
-              "BlockListFormProps",
-              ">; }"
+              "Blocking"
             ],
             "path": "x-pack/plugins/threat_intelligence/public/types.ts",
             "deprecated": false,

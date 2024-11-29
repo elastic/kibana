@@ -33,9 +33,7 @@ export function JavaAgentVersionInput({ isValid, version, onChange }: Props) {
 
   const isLoading = status === FETCH_STATUS.LOADING;
   const agentJavaVersions =
-    !isLoading && data?.versions
-      ? data.versions.map((label) => ({ label }))
-      : [];
+    !isLoading && data?.versions ? data.versions.map((label) => ({ label })) : [];
   const hasOptions = !!agentJavaVersions.length;
   const selectedOption = [{ label: version }];
 
@@ -52,10 +50,9 @@ export function JavaAgentVersionInput({ isValid, version, onChange }: Props) {
   return (
     <EuiFlexItem>
       <EuiFormRow
-        label={i18n.translate(
-          'xpack.apm.fleetIntegration.apmAgent.runtimeAttachment.version',
-          { defaultMessage: 'Version' }
-        )}
+        label={i18n.translate('xpack.apm.fleetIntegration.apmAgent.runtimeAttachment.version', {
+          defaultMessage: 'Version',
+        })}
         isInvalid={!isValid}
         error={i18n.translate(
           'xpack.apm.fleetIntegration.apmAgent.runtimeAttachment.version.invalid',

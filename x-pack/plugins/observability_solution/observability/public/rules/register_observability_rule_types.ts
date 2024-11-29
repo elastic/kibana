@@ -7,7 +7,6 @@
 
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
-import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import {
   ALERT_GROUP_FIELD,
   ALERT_GROUP_VALUE,
@@ -22,6 +21,7 @@ import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type {
   CustomMetricExpressionParams,
   CustomThresholdExpressionMetric,
+  CustomThresholdSearchSourceFields,
   SearchConfigurationWithExtractedReferenceType,
 } from '../../common/custom_threshold_rule/types';
 import type { MetricExpression } from '../components/custom_threshold/types';
@@ -33,20 +33,20 @@ import { validateCustomThreshold } from '../components/custom_threshold/componen
 const thresholdDefaultActionMessage = i18n.translate(
   'xpack.observability.customThreshold.rule.alerting.threshold.defaultActionMessage',
   {
-    defaultMessage: `\\{\\{context.reason\\}\\}
+    defaultMessage: `'{{context.reason}}'
 
-\\{\\{rule.name\\}\\} is active.
+'{{rule.name}}' is active.
 
-[View alert details](\\{\\{context.alertDetailsUrl\\}\\})
+[View alert details]('{{context.alertDetailsUrl}}')
 `,
   }
 );
 const thresholdDefaultRecoveryMessage = i18n.translate(
   'xpack.observability.customThreshold.rule.alerting.threshold.defaultRecoveryMessage',
   {
-    defaultMessage: `\\{\\{rule.name\\}\\} has recovered.
+    defaultMessage: `'{{rule.name}}' has recovered.
 
-[View alert details](\\{\\{context.alertDetailsUrl\\}\\})
+[View alert details]('{{context.alertDetailsUrl}}')
 `,
   }
 );
@@ -56,7 +56,7 @@ const getDataViewId = (searchConfiguration?: SearchConfigurationWithExtractedRef
     ? searchConfiguration.index
     : searchConfiguration?.index?.title;
 
-export const registerObservabilityRuleTypes = async (
+export const registerObservabilityRuleTypes = (
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry,
   uiSettings: IUiSettingsClient,
   logsExplorerLocator?: LocatorPublic<LogsExplorerLocatorParams>
@@ -66,7 +66,7 @@ export const registerObservabilityRuleTypes = async (
     searchConfiguration,
   }: {
     criteria: CustomMetricExpressionParams[];
-    searchConfiguration: SerializedSearchSourceFields;
+    searchConfiguration: CustomThresholdSearchSourceFields;
   }) => validateCustomThreshold({ criteria, searchConfiguration, uiSettings });
   observabilityRuleTypeRegistry.register({
     id: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
@@ -116,6 +116,6 @@ export const registerObservabilityRuleTypes = async (
           '../components/custom_threshold/components/alert_details_app_section/alert_details_app_section'
         )
     ),
-    priority: 5,
+    priority: 110,
   });
 };

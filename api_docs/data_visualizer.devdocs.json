@@ -320,14 +320,14 @@
           {
             "parentPluginId": "dataVisualizer",
             "id": "def-public.DataDriftSpec.$1",
-            "type": "CompoundType",
+            "type": "Uncategorized",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "P & { children?: React.ReactNode; }"
+              "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -341,7 +341,7 @@
             "signature": [
               "any"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -356,7 +356,9 @@
         "label": "FileDataVisualizerSpec",
         "description": [],
         "signature": [
-          "React.FunctionComponent<Props>"
+          "React.FunctionComponent<",
+          "Props",
+          ">"
         ],
         "path": "x-pack/plugins/data_visualizer/public/application/file_data_visualizer/file_data_visualizer.tsx",
         "deprecated": false,
@@ -366,14 +368,14 @@
           {
             "parentPluginId": "dataVisualizer",
             "id": "def-public.FileDataVisualizerSpec.$1",
-            "type": "CompoundType",
+            "type": "Uncategorized",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "P & { children?: React.ReactNode; }"
+              "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -387,7 +389,7 @@
             "signature": [
               "any"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -433,7 +435,9 @@
         "label": "IndexDataVisualizerSpec",
         "description": [],
         "signature": [
-          "React.FunctionComponent<Props>"
+          "React.FunctionComponent<",
+          "Props",
+          ">"
         ],
         "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/index_data_visualizer.tsx",
         "deprecated": false,
@@ -443,14 +447,14 @@
           {
             "parentPluginId": "dataVisualizer",
             "id": "def-public.IndexDataVisualizerSpec.$1",
-            "type": "CompoundType",
+            "type": "Uncategorized",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "P & { children?: React.ReactNode; }"
+              "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -464,7 +468,7 @@
             "signature": [
               "any"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -481,9 +485,17 @@
       "label": "DataVisualizerPluginStart",
       "description": [],
       "signature": [
-        "{ getFileDataVisualizerComponent: () => Promise<() => React.FC<Props>>; getIndexDataVisualizerComponent: () => Promise<() => React.FC<Props>>; getDataDriftComponent: () => Promise<() => React.FC<",
+        "{ getFileDataVisualizerComponent: () => Promise<() => ",
+        "SpecWithLinks",
+        "<React.FC<",
+        "Props",
+        ">>>; getIndexDataVisualizerComponent: () => Promise<() => React.FC<",
+        "Props",
+        ">>; getDataDriftComponent: () => Promise<() => React.FC<",
         "DataDriftDetectionAppStateProps",
-        ">>; getMaxBytesFormatted: () => string; }"
+        ">>; getMaxBytesFormatted: () => string; FieldStatsUnavailableMessage: React.ForwardRefExoticComponent<{ id?: string | undefined; title?: string | undefined; } & React.RefAttributes<{}>>; FieldStatisticsTable: React.ForwardRefExoticComponent<",
+        "FieldStatisticTableEmbeddableProps",
+        " & React.RefAttributes<{}>>; }"
       ],
       "path": "x-pack/plugins/data_visualizer/public/plugin.ts",
       "deprecated": false,

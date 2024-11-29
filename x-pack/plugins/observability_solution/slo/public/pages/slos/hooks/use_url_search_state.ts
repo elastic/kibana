@@ -5,17 +5,26 @@
  * 2.0.
  */
 
+import type { Filter } from '@kbn/es-query';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import deepmerge from 'deepmerge';
-import { useHistory } from 'react-router-dom';
-import { Filter } from '@kbn/es-query';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useHistory } from 'react-router-dom';
 import { DEFAULT_SLO_PAGE_SIZE } from '../../../../common/constants';
-import type { SortField, SortDirection } from '../components/slo_list_search_bar';
 import type { GroupByField } from '../components/slo_list_group_by';
 import type { SLOView } from '../components/toggle_slo_view';
 
 export const SLO_LIST_SEARCH_URL_STORAGE_KEY = 'search';
+export type SortField =
+  | 'sli_value'
+  | 'error_budget_consumed'
+  | 'error_budget_remaining'
+  | 'status'
+  | 'burn_rate_5m'
+  | 'burn_rate_1h'
+  | 'burn_rate_1d';
+
+export type SortDirection = 'asc' | 'desc';
 
 export interface SearchState {
   kqlQuery: string;

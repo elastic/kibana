@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import versionCompare from 'compare-versions';
 import valid from 'semver/functions/valid';
+import semVerCompare from 'semver/functions/compare';
+import semVerCoerce from 'semver/functions/coerce';
 import ipaddr, { type IPv4, type IPv6 } from 'ipaddr.js';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
 import moment from 'moment';
@@ -133,11 +135,17 @@ function getSafeIpAddress(ip: string | undefined, directionFactor: number) {
 }
 
 const versionComparison: CompareFn<string> = (v1, v2, direction) => {
-  const valueA = String(v1 ?? '');
-  const valueB = String(v2 ?? '');
+  const valueA = String(v1 == null ? '' : v1);
+  const valueB = String(v2 == null ? '' : v2);
   const aInvalid = !valueA || !valid(valueA);
   const bInvalid = !valueB || !valid(valueB);
   if (aInvalid && bInvalid) {
+    if (v1 == null && v1 !== v2) {
+      return direction * -1;
+    }
+    if (v2 == null && v1 !== v2) {
+      return direction * 1;
+    }
     return 0;
   }
   // need to fight the direction multiplication of the parent function
@@ -147,7 +155,9 @@ const versionComparison: CompareFn<string> = (v1, v2, direction) => {
   if (bInvalid) {
     return direction * -1;
   }
-  return versionCompare(valueA, valueB);
+  const semVerValueA = semVerCoerce(valueA) ?? '';
+  const semVerValueB = semVerCoerce(valueB) ?? '';
+  return semVerCompare(semVerValueA, semVerValueB);
 };
 
 const openRange = { gte: -Infinity, lt: Infinity };
@@ -164,30 +174,32 @@ const rangeComparison: CompareFn<Omit<Range, 'type'>> = (v1, v2) => {
 function createArrayValuesHandler(sortBy: string, formatter: FieldFormat) {
   return function <T>(criteriaFn: CompareFn<T>) {
     return (
-      rowA: Record<string, unknown>,
-      rowB: Record<string, unknown>,
+      rowA: Record<string, unknown> | undefined | null,
+      rowB: Record<string, unknown> | undefined | null,
       direction: 'asc' | 'desc'
     ) => {
       // handle the direction with a multiply factor.
       const directionFactor = direction === 'asc' ? 1 : -1;
+      // make it handle null/undefined values
+      // this masks null/undefined rows into null/undefined values so it can benefit from shared invalid logic
+      // and enable custom sorting for invalid values (like for version type)
+      const valueA = rowA == null ? rowA : rowA[sortBy];
+      const valueB = rowB == null ? rowB : rowB[sortBy];
       // if either side of the comparison is an array, make it also the other one become one
       // then perform an array comparison
-      if (Array.isArray(rowA[sortBy]) || Array.isArray(rowB[sortBy])) {
+      if (Array.isArray(valueA) || Array.isArray(valueB)) {
         return (
           directionFactor *
           compareArrays(
-            (Array.isArray(rowA[sortBy]) ? rowA[sortBy] : [rowA[sortBy]]) as T[],
-            (Array.isArray(rowB[sortBy]) ? rowB[sortBy] : [rowB[sortBy]]) as T[],
+            (Array.isArray(valueA) ? valueA : [valueA]) as T[],
+            (Array.isArray(valueB) ? valueB : [valueB]) as T[],
             directionFactor,
             formatter,
             criteriaFn
           )
         );
       }
-      return (
-        directionFactor *
-        criteriaFn(rowA[sortBy] as T, rowB[sortBy] as T, directionFactor, formatter)
-      );
+      return directionFactor * criteriaFn(valueA as T, valueB as T, directionFactor, formatter);
     };
   };
 }
@@ -201,12 +213,12 @@ function getUndefinedHandler(
   ) => number
 ) {
   return (
-    rowA: Record<string, unknown>,
-    rowB: Record<string, unknown>,
+    rowA: Record<string, unknown> | undefined | null,
+    rowB: Record<string, unknown> | undefined | null,
     direction: 'asc' | 'desc'
   ) => {
-    const valueA = rowA[sortBy];
-    const valueB = rowB[sortBy];
+    const valueA = rowA?.[sortBy];
+    const valueB = rowB?.[sortBy];
     // do not use the utility above as null at root level is handled differently
     // than null/undefined within an array type
     if (valueA == null || Number.isNaN(valueA)) {
@@ -218,7 +230,7 @@ function getUndefinedHandler(
     if (valueB == null || Number.isNaN(valueB)) {
       return -1;
     }
-    return sortingCriteria(rowA, rowB, direction);
+    return sortingCriteria(rowA!, rowB!, direction);
   };
 }
 
@@ -226,7 +238,11 @@ export function getSortingCriteria(
   type: string | undefined,
   sortBy: string,
   formatter: FieldFormat
-) {
+): (
+  rowA: Record<string, unknown> | undefined | null,
+  rowB: Record<string, unknown> | undefined | null,
+  direction: 'asc' | 'desc'
+) => number {
   const arrayValueHandler = createArrayValuesHandler(sortBy, formatter);
 
   if (type === 'date') {

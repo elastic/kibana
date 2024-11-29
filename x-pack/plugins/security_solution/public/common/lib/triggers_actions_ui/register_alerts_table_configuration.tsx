@@ -24,7 +24,7 @@ import { getDataTablesInStorageByIds } from '../../../timelines/containers/local
 import { getColumns } from '../../../detections/configurations/security_solution_detections';
 import { getRenderCellValueHook } from '../../../detections/configurations/security_solution_detections/render_cell_value';
 import { useFetchPageContext } from '../../../detections/configurations/security_solution_detections/fetch_page_context';
-import { SourcererScopeName } from '../../store/sourcerer/model';
+import { SourcererScopeName } from '../../../sourcerer/store/model';
 
 const registerAlertsTableConfiguration = (
   registry: AlertsTableConfigurationRegistryContract,

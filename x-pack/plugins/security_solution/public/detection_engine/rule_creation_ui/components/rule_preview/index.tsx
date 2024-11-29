@@ -17,9 +17,13 @@ import {
   EuiSuperUpdateButton,
   EuiText,
   EuiTitle,
+  EuiFormRow,
+  EuiCheckbox,
 } from '@elastic/eui';
 import moment from 'moment';
 import type { List } from '@kbn/securitysolution-io-ts-list-types';
+import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
+
 import { isEqual } from 'lodash';
 import * as i18n from './translations';
 import { usePreviewRoute } from './use_preview_route';
@@ -38,6 +42,8 @@ import type {
 import { usePreviewInvocationCount } from './use_preview_invocation_count';
 
 export const REASONABLE_INVOCATION_COUNT = 200;
+
+const RULE_TYPES_SUPPORTING_LOGGED_REQUESTS: Type[] = ['esql', 'eql'];
 
 const timeRanges = [
   { start: 'now/d', end: 'now', label: 'Today' },
@@ -63,6 +69,7 @@ interface RulePreviewState {
   aboutRuleData?: AboutStepRule;
   scheduleRuleData?: ScheduleStepRule;
   timeframeOptions: TimeframePreviewOptions;
+  enableLoggedRequests?: boolean;
 }
 
 const refreshedTimeframe = (startDate: string, endDate: string) => {
@@ -97,7 +104,11 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
   const [timeframeStart, setTimeframeStart] = useState(moment().subtract(1, 'hour'));
   const [timeframeEnd, setTimeframeEnd] = useState(moment());
 
+  const [showElasticsearchRequests, setShowElasticsearchRequests] = useState(false);
+
   const [isDateRangeInvalid, setIsDateRangeInvalid] = useState(false);
+
+  const isLoggedRequestsSupported = RULE_TYPES_SUPPORTING_LOGGED_REQUESTS.includes(ruleType);
 
   useEffect(() => {
     const { start, end } = refreshedTimeframe(startDate, endDate);
@@ -139,6 +150,7 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
     scheduleRuleData: previewData.scheduleRuleData,
     exceptionsList,
     timeframeOptions: previewData.timeframeOptions,
+    enableLoggedRequests: previewData.enableLoggedRequests,
   });
 
   const { startTransaction } = useStartTransaction();
@@ -184,9 +196,19 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
         interval: scheduleRuleData.interval,
         lookback: scheduleRuleData.from,
       },
+      enableLoggedRequests: showElasticsearchRequests && isLoggedRequestsSupported,
     });
     setIsRefreshing(true);
-  }, [aboutRuleData, defineRuleData, endDate, scheduleRuleData, startDate, startTransaction]);
+  }, [
+    aboutRuleData,
+    defineRuleData,
+    endDate,
+    scheduleRuleData,
+    startDate,
+    startTransaction,
+    showElasticsearchRequests,
+    isLoggedRequestsSupported,
+  ]);
 
   const isDirty = useMemo(
     () =>
@@ -210,7 +232,7 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
   );
 
   return (
-    <>
+    <div data-test-subj="rule-preview">
       <EuiTitle size="m">
         <h2>{i18n.RULE_PREVIEW_TITLE}</h2>
       </EuiTitle>
@@ -231,32 +253,52 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
           <EuiSpacer />
         </>
       )}
-      <EuiText size="xs" data-test-subj="rule-preview">
-        <h4>{i18n.QUERY_PREVIEW_LABEL}</h4>
-      </EuiText>
       <EuiSpacer size="xs" />
-      <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
-        <EuiSuperDatePicker
-          start={startDate}
-          end={endDate}
-          isDisabled={isDisabled}
-          onTimeChange={onTimeChange}
-          showUpdateButton={false}
-          commonlyUsedRanges={timeRanges}
-          onRefresh={onTimeframeRefresh}
-          data-test-subj="preview-time-frame"
-        />
-        <EuiFlexItem grow={false}>
-          <EuiSuperUpdateButton
-            isDisabled={isDateRangeInvalid || isDisabled}
-            iconType={isDirty ? 'kqlFunction' : 'refresh'}
-            onClick={onTimeframeRefresh}
-            color={isDirty ? 'success' : 'primary'}
-            fill={true}
-            data-test-subj="previewSubmitButton"
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <EuiFormRow label={i18n.QUERY_PREVIEW_LABEL}>
+        <EuiFlexGroup alignItems="center" gutterSize="s" responsive>
+          <EuiFlexItem grow>
+            <EuiSuperDatePicker
+              start={startDate}
+              end={endDate}
+              isDisabled={isDisabled}
+              onTimeChange={onTimeChange}
+              showUpdateButton={false}
+              commonlyUsedRanges={timeRanges}
+              onRefresh={onTimeframeRefresh}
+              data-test-subj="preview-time-frame"
+              width="full"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiSuperUpdateButton
+              isDisabled={isDateRangeInvalid || isDisabled}
+              iconType={isDirty ? 'kqlFunction' : 'refresh'}
+              onClick={onTimeframeRefresh}
+              color={isDirty ? 'success' : 'primary'}
+              fill={true}
+              data-test-subj="previewSubmitButton"
+              fullWidth={true}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFormRow>
+      {isLoggedRequestsSupported ? (
+        <EuiFormRow>
+          <EuiFlexGroup alignItems="center" gutterSize="s" responsive>
+            <EuiFlexItem grow>
+              <EuiCheckbox
+                data-test-subj="show-elasticsearch-requests"
+                id="showElasticsearchRequests"
+                label={i18n.ENABLED_LOGGED_REQUESTS_CHECKBOX}
+                checked={showElasticsearchRequests}
+                onChange={() => {
+                  setShowElasticsearchRequests(!showElasticsearchRequests);
+                }}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFormRow>
+      ) : null}
       <EuiSpacer size="l" />
       {isPreviewRequestInProgress && <LoadingHistogram />}
       {!isPreviewRequestInProgress && previewId && spaceId && (
@@ -269,8 +311,13 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
           timeframeOptions={previewData.timeframeOptions}
         />
       )}
-      <PreviewLogs logs={logs} hasNoiseWarning={hasNoiseWarning} isAborted={isAborted} />
-    </>
+      <PreviewLogs
+        logs={logs}
+        hasNoiseWarning={hasNoiseWarning}
+        isAborted={isAborted}
+        showElasticsearchRequests={showElasticsearchRequests && isLoggedRequestsSupported}
+      />
+    </div>
   );
 };
 

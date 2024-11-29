@@ -37,8 +37,8 @@ import { max, min } from 'lodash';
 import moment from 'moment';
 import React, { useState } from 'react';
 import { useFormContext } from 'react-hook-form';
-import { GoodBadEventsChart } from '../../../slos/components/common/good_bad_events_chart';
-import { useKibana } from '../../../../utils/kibana_react';
+import { useKibana } from '../../../../hooks/use_kibana';
+import { GoodBadEventsChart } from '../../../../components/good_bad_events_chart/good_bad_events_chart';
 import { useDebouncedGetPreviewData } from '../../hooks/use_preview';
 import { useSectionFormValidation } from '../../hooks/use_section_form_validation';
 import { CreateSLOForm } from '../../types';
@@ -53,12 +53,10 @@ interface DataPreviewChartProps {
   useGoodBadEventsChart?: boolean;
   label?: string;
   range?: {
-    start: number;
-    end: number;
+    from: Date;
+    to: Date;
   };
 }
-
-const ONE_HOUR_IN_MILLISECONDS = 1 * 60 * 60 * 1000;
 
 export function DataPreviewChart({
   formatPattern,
@@ -81,8 +79,8 @@ export function DataPreviewChart({
   });
 
   const [defaultRange, _] = useState({
-    start: new Date().getTime() - ONE_HOUR_IN_MILLISECONDS,
-    end: new Date().getTime(),
+    from: moment().subtract(1, 'hour').toDate(),
+    to: new Date(),
   });
 
   const indicator = watch('indicator');
@@ -92,9 +90,10 @@ export function DataPreviewChart({
     isLoading: isPreviewLoading,
     isSuccess,
     isError,
-  } = useDebouncedGetPreviewData(isIndicatorSectionValid, indicator, range || defaultRange);
+  } = useDebouncedGetPreviewData(isIndicatorSectionValid, indicator, range ?? defaultRange);
 
-  const isMoreThan100 = !ignoreMoreThan100 && previewData?.find((row) => row.sliValue > 1) != null;
+  const isMoreThan100 =
+    !ignoreMoreThan100 && previewData?.find((row) => row.sliValue && row.sliValue > 1) != null;
 
   const baseTheme = charts.theme.useChartsBaseTheme();
   const dateFormat = uiSettings.get('dateFormat');
@@ -103,6 +102,7 @@ export function DataPreviewChart({
       ? formatPattern
       : (uiSettings.get('format:percent:defaultPattern') as string);
 
+  // map values to row.sliValue and filter out no data values
   const values = (previewData || []).map((row) => row.sliValue);
   const maxValue = max(values);
   const minValue = min(values);
@@ -289,12 +289,19 @@ export function DataPreviewChart({
                 theme={[
                   {
                     lineSeriesStyle: {
-                      point: { visible: false },
+                      point: { visible: 'never' },
                     },
                   },
                 ]}
                 noResults={
-                  <EuiIcon type="visualizeApp" size="l" color="subdued" title="no results" />
+                  <EuiIcon
+                    type="visualizeApp"
+                    size="l"
+                    color="subdued"
+                    title={i18n.translate('xpack.slo.dataPreviewChart.noResultsLabel', {
+                      defaultMessage: 'no results',
+                    })}
+                  />
                 }
                 locale={i18n.getLocale()}
               />
@@ -339,7 +346,7 @@ export function DataPreviewChart({
                 yAccessors={['value']}
                 data={(previewData ?? []).map((datum) => ({
                   date: new Date(datum.date).getTime(),
-                  value: datum.sliValue >= 0 ? datum.sliValue : null,
+                  value: datum.sliValue && datum.sliValue >= 0 ? datum.sliValue : null,
                   events: datum.events,
                 }))}
               />

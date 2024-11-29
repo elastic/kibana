@@ -1,12 +1,16 @@
 {
   "type": "plugin",
   "id": "@kbn/reporting-plugin",
-  "owner": "@elastic/appex-sharedux",
+  "owner": [
+    "@elastic/appex-sharedux"
+  ],
+  "group": "platform",
+  "visibility": "private",
   "description": "Reporting Services enables applications to feature reports that the user can automate with Watcher and download later.",
   "plugin": {
     "id": "reporting",
-    "server": true,
     "browser": true,
+    "server": true,
     "configPath": [
       "xpack",
       "reporting"

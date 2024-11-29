@@ -5,17 +5,25 @@
  * 2.0.
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { fromKueryExpression } from '@kbn/es-query';
+import { getKqlFieldNamesFromExpression } from '@kbn/es-query';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { createHash } from 'crypto';
-import { flatten, merge, pickBy, sortBy, sum, uniq } from 'lodash';
+import { flatten, merge, pickBy, sortBy, sum, uniq, without } from 'lodash';
 import { SavedObjectsClient } from '@kbn/core/server';
 import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
-import { AGENT_NAMES, RUM_AGENT_NAMES } from '../../../../common/agent_name';
+import {
+  AGENT_NAMES,
+  OPEN_TELEMETRY_AGENT_NAMES,
+  OPEN_TELEMETRY_BASE_AGENT_NAMES,
+  RUM_AGENT_NAMES,
+  type OpenTelemetryAgentName,
+} from '@kbn/elastic-agent-utils/src/agent_names';
+import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
 import {
   AGENT_ACTIVATION_METHOD,
   AGENT_NAME,
   AGENT_VERSION,
+  AT_TIMESTAMP,
   CLIENT_GEO_COUNTRY_ISO_CODE,
   CLOUD_AVAILABILITY_ZONE,
   CLOUD_PROVIDER,
@@ -29,6 +37,7 @@ import {
   METRICSET_INTERVAL,
   METRICSET_NAME,
   OBSERVER_HOSTNAME,
+  OBSERVER_VERSION,
   PARENT_ID,
   PROCESSOR_EVENT,
   SERVICE_ENVIRONMENT,
@@ -54,11 +63,7 @@ import {
   SavedServiceGroup,
 } from '../../../../common/service_groups';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
-import { getKueryFields } from '../../../../common/utils/get_kuery_fields';
-import { APMError } from '../../../../typings/es_schemas/ui/apm_error';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
-import { Span } from '../../../../typings/es_schemas/ui/span';
-import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import {
   APMDataTelemetry,
   APMPerService,
@@ -78,7 +83,8 @@ import {
 
 type ISavedObjectsClient = Pick<SavedObjectsClient, 'find'>;
 const TIME_RANGES = ['1d', 'all'] as const;
-type TimeRange = typeof TIME_RANGES[number];
+const AGENT_NAMES_WITHOUT_OTEL = without(AGENT_NAMES, ...OPEN_TELEMETRY_AGENT_NAMES);
+type TimeRange = (typeof TIME_RANGES)[number];
 
 const range1d = { range: { '@timestamp': { gte: 'now-1d' } } };
 const timeout = '5m';
@@ -188,27 +194,25 @@ export const tasks: TelemetryTask[] = [
             timeout,
             query: {
               bool: {
-                filter: [
-                  { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
-                ],
+                filter: [{ term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } }],
               },
             },
             size: 1,
             track_total_hits: false,
             sort: {
-              '@timestamp': 'desc' as const,
+              [AT_TIMESTAMP]: 'desc' as const,
             },
+            fields: [AT_TIMESTAMP],
           },
         })
-      ).hits.hits[0] as { _source: { '@timestamp': string } };
+      ).hits.hits[0];
 
       if (!lastTransaction) {
         return {};
       }
 
       const end =
-        new Date(lastTransaction._source['@timestamp']).getTime() -
-        5 * 60 * 1000;
+        new Date(lastTransaction.fields[AT_TIMESTAMP]![0] as string).getTime() - 5 * 60 * 1000;
 
       const start = end - 60 * 1000;
 
@@ -234,10 +238,9 @@ export const tasks: TelemetryTask[] = [
         {
           terms: {
             script: `
-              if (doc['transaction.type'].value == 'page-load' && doc['user_agent.name'].size() > 0) {
-                return doc['user_agent.name'].value;
+              if ($('transaction.type', '') == 'page-load') {
+                return $('user_agent.name', null);
               }
-
               return null;
             `,
             missing_bucket: true,
@@ -246,7 +249,7 @@ export const tasks: TelemetryTask[] = [
         // transaction.root
         {
           terms: {
-            script: `return doc['parent.id'].size() == 0`,
+            script: `return $('parent.id', '') == ''`,
             missing_bucket: true,
           },
         },
@@ -263,8 +266,8 @@ export const tasks: TelemetryTask[] = [
           {
             terms: {
               script: `
-                if (doc['transaction.type'].value == 'page-load' && doc['client.geo.country_iso_code'].size() > 0) {
-                  return doc['client.geo.country_iso_code'].value;
+                if ($('transaction.type', '') == 'page-load') {
+                  return $('client.geo.country_iso_code', null);
                 }
                 return null;
               `,
@@ -299,12 +302,7 @@ export const tasks: TelemetryTask[] = [
       const provider = 'provider';
 
       const response = await telemetryClient.search({
-        index: [
-          indices.error,
-          indices.metric,
-          indices.span,
-          indices.transaction,
-        ],
+        index: [indices.error, indices.metric, indices.span, indices.transaction],
         body: {
           track_total_hits: false,
           size: 0,
@@ -357,12 +355,7 @@ export const tasks: TelemetryTask[] = [
       }
 
       const response = await telemetryClient.search({
-        index: [
-          indices.error,
-          indices.metric,
-          indices.span,
-          indices.transaction,
-        ],
+        index: [indices.error, indices.metric, indices.span, indices.transaction],
         body: {
           track_total_hits: false,
           size: 0,
@@ -438,9 +431,7 @@ export const tasks: TelemetryTask[] = [
       });
 
       const topEnvironments =
-        response.aggregations?.environments.buckets.map(
-          (bucket) => bucket.key
-        ) ?? [];
+        response.aggregations?.environments.buckets.map((bucket) => bucket.key) ?? [];
       const serviceEnvironments: Record<string, Array<string | null>> = {};
 
       const buckets = response.aggregations?.service_environments.buckets ?? [];
@@ -455,9 +446,7 @@ export const tasks: TelemetryTask[] = [
       });
 
       const servicesWithoutEnvironment = Object.keys(
-        pickBy(serviceEnvironments, (environments) =>
-          environments.includes(null)
-        )
+        pickBy(serviceEnvironments, (environments) => environments.includes(null))
       );
 
       const servicesWithMultipleEnvironments = Object.keys(
@@ -467,8 +456,7 @@ export const tasks: TelemetryTask[] = [
       return {
         environments: {
           services_without_environment: servicesWithoutEnvironment.length,
-          services_with_multiple_environments:
-            servicesWithMultipleEnvironments.length,
+          services_with_multiple_environments: servicesWithMultipleEnvironments.length,
           top_environments: topEnvironments as string[],
         },
       };
@@ -529,22 +517,20 @@ export const tasks: TelemetryTask[] = [
                     timeout,
                     query: {
                       bool: {
-                        filter: [
-                          { term: { [PROCESSOR_EVENT]: processorEvent } },
-                        ],
+                        filter: [{ term: { [PROCESSOR_EVENT]: processorEvent } }],
                       },
                     },
                     sort: {
-                      '@timestamp': 'asc',
+                      [AT_TIMESTAMP]: 'asc',
                     },
-                    _source: ['@timestamp'],
+                    fields: [AT_TIMESTAMP],
                   },
                 })
               : null;
 
-          const event = retainmentResponse?.hits.hits[0]?._source as
+          const event = retainmentResponse?.hits.hits[0]?.fields as
             | {
-                '@timestamp': number;
+                [AT_TIMESTAMP]: number[];
               }
             | undefined;
 
@@ -558,9 +544,7 @@ export const tasks: TelemetryTask[] = [
               ? {
                   retainment: {
                     [processorEvent]: {
-                      ms:
-                        new Date().getTime() -
-                        new Date(event['@timestamp']).getTime(),
+                      ms: new Date().getTime() - new Date(event[AT_TIMESTAMP][0]).getTime(),
                     },
                   },
                 }
@@ -617,9 +601,7 @@ export const tasks: TelemetryTask[] = [
       const globalLabelCount = Object.keys(response.fields).length;
 
       // Skip the top level Labels field which is sometimes present in the response
-      const count = response.fields?.labels
-        ? globalLabelCount - 1
-        : globalLabelCount;
+      const count = response.fields?.labels ? globalLabelCount - 1 : globalLabelCount;
 
       return {
         counts: {
@@ -633,16 +615,11 @@ export const tasks: TelemetryTask[] = [
   {
     name: 'services',
     executor: async ({ indices, telemetryClient }) => {
-      const servicesPerAgent = await AGENT_NAMES.reduce(
+      const servicesPerAgentExcludingOtel = await AGENT_NAMES_WITHOUT_OTEL.reduce(
         (prevJob, agentName) => {
           return prevJob.then(async (data) => {
             const response = await telemetryClient.search({
-              index: [
-                indices.error,
-                indices.span,
-                indices.metric,
-                indices.transaction,
-              ],
+              index: [indices.error, indices.span, indices.metric, indices.transaction],
               body: {
                 size: 0,
                 track_total_hits: false,
@@ -669,22 +646,69 @@ export const tasks: TelemetryTask[] = [
               },
             });
 
-            return {
-              ...data,
-              [agentName]: response.aggregations?.services.value || 0,
-            };
+            data[agentName] = response.aggregations?.services.value || 0;
+            return data;
           });
         },
         Promise.resolve({} as Record<AgentName, number>)
       );
 
+      const initOtelAgents = OPEN_TELEMETRY_AGENT_NAMES.reduce((acc, agent) => {
+        acc[agent] = 0;
+        return acc;
+      }, {} as Record<OpenTelemetryAgentName, number>);
+
+      const servicesPerOtelAgents = await OPEN_TELEMETRY_BASE_AGENT_NAMES.reduce(
+        (prevJob, agentName) => {
+          return prevJob.then(async (data) => {
+            const response = await telemetryClient.search({
+              index: [indices.error, indices.span, indices.metric, indices.transaction],
+              body: {
+                size: 0,
+                track_total_hits: false,
+                timeout,
+                query: {
+                  bool: {
+                    filter: [{ prefix: { [AGENT_NAME]: agentName } }, range1d],
+                  },
+                },
+                aggs: {
+                  agent_name: {
+                    terms: {
+                      field: AGENT_NAME,
+                      size: 1000,
+                    },
+                    aggs: {
+                      services: {
+                        cardinality: {
+                          field: SERVICE_NAME,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            });
+
+            const aggregatedServicesPerAgents = response.aggregations?.agent_name.buckets.reduce(
+              (acc, agent) => {
+                acc[agent.key as OpenTelemetryAgentName] = agent.services.value || 0;
+                return acc;
+              },
+              initOtelAgents
+            );
+
+            return {
+              ...data,
+              ...aggregatedServicesPerAgents,
+            };
+          });
+        },
+        Promise.resolve(initOtelAgents)
+      );
+
       const services = await telemetryClient.search({
-        index: [
-          indices.error,
-          indices.span,
-          indices.metric,
-          indices.transaction,
-        ],
+        index: [indices.error, indices.span, indices.metric, indices.transaction],
         body: {
           size: 0,
           track_total_hits: true,
@@ -705,11 +729,15 @@ export const tasks: TelemetryTask[] = [
         },
       });
 
+      const servicesPerAgents: Record<AgentName, number> = {
+        ...servicesPerAgentExcludingOtel,
+        ...servicesPerOtelAgents,
+      };
+
       return {
-        has_any_services_per_official_agent:
-          sum(Object.values(servicesPerAgent)) > 0,
+        has_any_services_per_official_agent: sum(Object.values(servicesPerAgents)) > 0,
         has_any_services: services?.hits?.total?.value > 0,
-        services_per_agent: servicesPerAgent,
+        services_per_agent: servicesPerAgents,
       };
     },
   },
@@ -731,21 +759,16 @@ export const tasks: TelemetryTask[] = [
           sort: {
             '@timestamp': 'desc',
           },
+          fields: asMutableArray([OBSERVER_VERSION] as const),
         },
       });
 
-      const hit = response.hits.hits[0]?._source as Pick<
-        Transaction | Span | APMError,
-        'observer'
-      >;
-
-      if (!hit || !hit.observer?.version) {
+      const event = unflattenKnownApmEventFields(response.hits.hits[0]?.fields);
+      if (!event || !event.observer?.version) {
         return {};
       }
 
-      const [major, minor, patch] = hit.observer.version
-        .split('.')
-        .map((part) => Number(part));
+      const [major, minor, patch] = event.observer.version.split('.').map((part) => Number(part));
 
       return {
         version: {
@@ -770,10 +793,7 @@ export const tasks: TelemetryTask[] = [
             track_total_hits: false,
             query: {
               bool: {
-                filter: [
-                  { term: { [PROCESSOR_EVENT]: ProcessorEvent.error } },
-                  range1d,
-                ],
+                filter: [{ term: { [PROCESSOR_EVENT]: ProcessorEvent.error } }, range1d],
               },
             },
             aggs: {
@@ -807,10 +827,7 @@ export const tasks: TelemetryTask[] = [
             timeout,
             query: {
               bool: {
-                filter: [
-                  { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
-                  range1d,
-                ],
+                filter: [{ term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } }, range1d],
               },
             },
             aggs: {
@@ -841,10 +858,7 @@ export const tasks: TelemetryTask[] = [
           body: {
             query: {
               bool: {
-                filter: [
-                  { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
-                  range1d,
-                ],
+                filter: [{ term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } }, range1d],
                 must_not: {
                   exists: { field: PARENT_ID },
                 },
@@ -892,10 +906,7 @@ export const tasks: TelemetryTask[] = [
             timeout,
             query: {
               bool: {
-                filter: [
-                  { term: { [PROCESSOR_EVENT]: ProcessorEvent.span } },
-                  range1d,
-                ],
+                filter: [{ term: { [PROCESSOR_EVENT]: ProcessorEvent.span } }, range1d],
               },
             },
           },
@@ -921,14 +932,10 @@ export const tasks: TelemetryTask[] = [
             '1d': tracesPerDayCount || 0,
           },
           services: {
-            '1d':
-              servicesAndEnvironmentsCount.aggregations?.service_name.value ||
-              0,
+            '1d': servicesAndEnvironmentsCount.aggregations?.service_name.value || 0,
           },
           environments: {
-            '1d':
-              servicesAndEnvironmentsCount.aggregations?.service_environments
-                .value || 0,
+            '1d': servicesAndEnvironmentsCount.aggregations?.service_environments.value || 0,
           },
           span_destination_service_resource: {
             '1d': spanDestinationServiceResourceCount || 0,
@@ -960,122 +967,117 @@ export const tasks: TelemetryTask[] = [
     name: 'agents',
     executor: async ({ indices, telemetryClient }) => {
       const size = 3;
-
-      const agentData = await AGENT_NAMES.reduce(async (prevJob, agentName) => {
-        const data = await prevJob;
-
-        const response = await telemetryClient.search({
-          index: [indices.error, indices.metric, indices.transaction],
-          body: {
-            track_total_hits: false,
-            size: 0,
-            timeout,
-            query: {
-              bool: {
-                filter: [{ term: { [AGENT_NAME]: agentName } }, range1d],
-              },
-            },
-            sort: {
-              '@timestamp': 'desc',
-            },
-            aggs: {
-              [AGENT_ACTIVATION_METHOD]: {
-                terms: {
-                  field: AGENT_ACTIVATION_METHOD,
-                  size,
-                },
-              },
-              [AGENT_VERSION]: {
-                terms: {
-                  field: AGENT_VERSION,
-                  size,
-                },
-              },
-              [SERVICE_FRAMEWORK_NAME]: {
-                terms: {
-                  field: SERVICE_FRAMEWORK_NAME,
-                  size,
-                },
-                aggs: {
-                  [SERVICE_FRAMEWORK_VERSION]: {
-                    terms: {
-                      field: SERVICE_FRAMEWORK_VERSION,
-                      size,
-                    },
-                  },
-                },
-              },
-              [SERVICE_FRAMEWORK_VERSION]: {
-                terms: {
-                  field: SERVICE_FRAMEWORK_VERSION,
-                  size,
-                },
-              },
-              [SERVICE_LANGUAGE_NAME]: {
-                terms: {
-                  field: SERVICE_LANGUAGE_NAME,
-                  size,
-                },
-                aggs: {
-                  [SERVICE_LANGUAGE_VERSION]: {
-                    terms: {
-                      field: SERVICE_LANGUAGE_VERSION,
-                      size,
-                    },
-                  },
-                },
-              },
-              [SERVICE_LANGUAGE_VERSION]: {
-                terms: {
-                  field: SERVICE_LANGUAGE_VERSION,
-                  size,
-                },
-              },
-              [SERVICE_RUNTIME_NAME]: {
-                terms: {
-                  field: SERVICE_RUNTIME_NAME,
-                  size,
-                },
-                aggs: {
-                  [SERVICE_RUNTIME_VERSION]: {
-                    terms: {
-                      field: SERVICE_RUNTIME_VERSION,
-                      size,
-                    },
-                  },
-                },
-              },
-              [SERVICE_RUNTIME_VERSION]: {
-                terms: {
-                  field: SERVICE_RUNTIME_VERSION,
-                  size,
-                },
+      const toComposite = (outerKey: string | number, innerKey: string | number) =>
+        `${outerKey}/${innerKey}`;
+      const agentNameAggs = {
+        [AGENT_ACTIVATION_METHOD]: {
+          terms: {
+            field: AGENT_ACTIVATION_METHOD,
+            size,
+          },
+        },
+        [AGENT_VERSION]: {
+          terms: {
+            field: AGENT_VERSION,
+            size,
+          },
+        },
+        [SERVICE_FRAMEWORK_NAME]: {
+          terms: {
+            field: SERVICE_FRAMEWORK_NAME,
+            size,
+          },
+          aggs: {
+            [SERVICE_FRAMEWORK_VERSION]: {
+              terms: {
+                field: SERVICE_FRAMEWORK_VERSION,
+                size,
               },
             },
           },
-        });
+        },
+        [SERVICE_FRAMEWORK_VERSION]: {
+          terms: {
+            field: SERVICE_FRAMEWORK_VERSION,
+            size,
+          },
+        },
+        [SERVICE_LANGUAGE_NAME]: {
+          terms: {
+            field: SERVICE_LANGUAGE_NAME,
+            size,
+          },
+          aggs: {
+            [SERVICE_LANGUAGE_VERSION]: {
+              terms: {
+                field: SERVICE_LANGUAGE_VERSION,
+                size,
+              },
+            },
+          },
+        },
+        [SERVICE_LANGUAGE_VERSION]: {
+          terms: {
+            field: SERVICE_LANGUAGE_VERSION,
+            size,
+          },
+        },
+        [SERVICE_RUNTIME_NAME]: {
+          terms: {
+            field: SERVICE_RUNTIME_NAME,
+            size,
+          },
+          aggs: {
+            [SERVICE_RUNTIME_VERSION]: {
+              terms: {
+                field: SERVICE_RUNTIME_VERSION,
+                size,
+              },
+            },
+          },
+        },
+        [SERVICE_RUNTIME_VERSION]: {
+          terms: {
+            field: SERVICE_RUNTIME_VERSION,
+            size,
+          },
+        },
+      };
 
-        const { aggregations } = response;
+      const agentDataWithoutOtel = await AGENT_NAMES_WITHOUT_OTEL.reduce(
+        async (prevJob, agentName) => {
+          const data = await prevJob;
 
-        if (!aggregations) {
-          return data;
-        }
+          const response = await telemetryClient.search({
+            index: [indices.error, indices.metric, indices.transaction],
+            body: {
+              track_total_hits: false,
+              size: 0,
+              timeout,
+              query: {
+                bool: {
+                  filter: [{ term: { [AGENT_NAME]: agentName } }, range1d],
+                },
+              },
+              sort: {
+                '@timestamp': 'desc',
+              },
+              aggs: agentNameAggs,
+            },
+          });
 
-        const toComposite = (
-          outerKey: string | number,
-          innerKey: string | number
-        ) => `${outerKey}/${innerKey}`;
+          const { aggregations } = response;
 
-        return {
-          ...data,
-          [agentName]: {
+          if (!aggregations) {
+            return data;
+          }
+
+          data[agentName] = {
             agent: {
               activation_method: aggregations[AGENT_ACTIVATION_METHOD].buckets
                 .map((bucket) => bucket.key as string)
                 .slice(0, size),
-              version: aggregations[AGENT_VERSION].buckets.map(
-                (bucket) => bucket.key as string
-              ),
+              version: aggregations[AGENT_VERSION].buckets.map((bucket) => bucket.key as string),
             },
             service: {
               framework: {
@@ -1088,12 +1090,10 @@ export const tasks: TelemetryTask[] = [
                 composite: sortBy(
                   flatten(
                     aggregations[SERVICE_FRAMEWORK_NAME].buckets.map((bucket) =>
-                      bucket[SERVICE_FRAMEWORK_VERSION].buckets.map(
-                        (versionBucket) => ({
-                          doc_count: versionBucket.doc_count,
-                          name: toComposite(bucket.key, versionBucket.key),
-                        })
-                      )
+                      bucket[SERVICE_FRAMEWORK_VERSION].buckets.map((versionBucket) => ({
+                        doc_count: versionBucket.doc_count,
+                        name: toComposite(bucket.key, versionBucket.key),
+                      }))
                     )
                   ),
                   'doc_count'
@@ -1112,12 +1112,10 @@ export const tasks: TelemetryTask[] = [
                 composite: sortBy(
                   flatten(
                     aggregations[SERVICE_LANGUAGE_NAME].buckets.map((bucket) =>
-                      bucket[SERVICE_LANGUAGE_VERSION].buckets.map(
-                        (versionBucket) => ({
-                          doc_count: versionBucket.doc_count,
-                          name: toComposite(bucket.key, versionBucket.key),
-                        })
-                      )
+                      bucket[SERVICE_LANGUAGE_VERSION].buckets.map((versionBucket) => ({
+                        doc_count: versionBucket.doc_count,
+                        name: toComposite(bucket.key, versionBucket.key),
+                      }))
                     )
                   ),
                   'doc_count'
@@ -1136,12 +1134,10 @@ export const tasks: TelemetryTask[] = [
                 composite: sortBy(
                   flatten(
                     aggregations[SERVICE_RUNTIME_NAME].buckets.map((bucket) =>
-                      bucket[SERVICE_RUNTIME_VERSION].buckets.map(
-                        (versionBucket) => ({
-                          doc_count: versionBucket.doc_count,
-                          name: toComposite(bucket.key, versionBucket.key),
-                        })
-                      )
+                      bucket[SERVICE_RUNTIME_VERSION].buckets.map((versionBucket) => ({
+                        doc_count: versionBucket.doc_count,
+                        name: toComposite(bucket.key, versionBucket.key),
+                      }))
                     )
                   ),
                   'doc_count'
@@ -1151,12 +1147,167 @@ export const tasks: TelemetryTask[] = [
                   .map((composite) => composite.name),
               },
             },
-          },
-        };
-      }, Promise.resolve({} as APMTelemetry['agents']));
+          };
+          return data;
+        },
+        Promise.resolve({} as NonNullable<APMTelemetry['agents']>)
+      );
+
+      const agentDataWithOtel = await OPEN_TELEMETRY_BASE_AGENT_NAMES.reduce(
+        async (prevJob, agentName) => {
+          const data = await prevJob;
+
+          const response = await telemetryClient.search({
+            index: [indices.error, indices.metric, indices.transaction],
+            body: {
+              track_total_hits: false,
+              size: 0,
+              timeout,
+              query: {
+                bool: {
+                  filter: [{ prefix: { [AGENT_NAME]: agentName } }, range1d],
+                },
+              },
+              sort: {
+                '@timestamp': 'desc',
+              },
+              aggs: {
+                agent_name: {
+                  terms: {
+                    field: AGENT_NAME,
+                    size: 1000,
+                  },
+                  aggs: agentNameAggs,
+                },
+              },
+            },
+          });
+
+          const { aggregations } = response;
+
+          if (!aggregations) {
+            return data;
+          }
+
+          const initAgentData = OPEN_TELEMETRY_AGENT_NAMES.reduce((acc, agent) => {
+            acc[agent] = {
+              agent: {
+                activation_method: [],
+                version: [],
+              },
+              service: {
+                framework: {
+                  name: [],
+                  version: [],
+                  composite: [],
+                },
+                language: {
+                  name: [],
+                  version: [],
+                  composite: [],
+                },
+                runtime: {
+                  name: [],
+                  version: [],
+                  composite: [],
+                },
+              },
+            };
+            return acc;
+          }, {} as NonNullable<APMTelemetry['agents']>);
+
+          const agentData = aggregations?.agent_name.buckets.reduce((acc, agentNamesAggs) => {
+            acc[agentNamesAggs.key as OpenTelemetryAgentName] = {
+              agent: {
+                activation_method: agentNamesAggs[AGENT_ACTIVATION_METHOD].buckets
+                  .map((bucket) => bucket.key as string)
+                  .slice(0, size),
+                version: agentNamesAggs[AGENT_VERSION].buckets.map(
+                  (bucket) => bucket.key as string
+                ),
+              },
+              service: {
+                framework: {
+                  name: agentNamesAggs[SERVICE_FRAMEWORK_NAME].buckets
+                    .map((bucket) => bucket.key as string)
+                    .slice(0, size),
+                  version: agentNamesAggs[SERVICE_FRAMEWORK_VERSION].buckets
+                    .map((bucket) => bucket.key as string)
+                    .slice(0, size),
+                  composite: sortBy(
+                    flatten(
+                      agentNamesAggs[SERVICE_FRAMEWORK_NAME].buckets.map((bucket) =>
+                        bucket[SERVICE_FRAMEWORK_VERSION].buckets.map((versionBucket) => ({
+                          doc_count: versionBucket.doc_count,
+                          name: toComposite(bucket.key, versionBucket.key),
+                        }))
+                      )
+                    ),
+                    'doc_count'
+                  )
+                    .reverse()
+                    .slice(0, size)
+                    .map((composite) => composite.name),
+                },
+                language: {
+                  name: agentNamesAggs[SERVICE_LANGUAGE_NAME].buckets
+                    .map((bucket) => bucket.key as string)
+                    .slice(0, size),
+                  version: agentNamesAggs[SERVICE_LANGUAGE_VERSION].buckets
+                    .map((bucket) => bucket.key as string)
+                    .slice(0, size),
+                  composite: sortBy(
+                    flatten(
+                      agentNamesAggs[SERVICE_LANGUAGE_NAME].buckets.map((bucket) =>
+                        bucket[SERVICE_LANGUAGE_VERSION].buckets.map((versionBucket) => ({
+                          doc_count: versionBucket.doc_count,
+                          name: toComposite(bucket.key, versionBucket.key),
+                        }))
+                      )
+                    ),
+                    'doc_count'
+                  )
+                    .reverse()
+                    .slice(0, size)
+                    .map((composite) => composite.name),
+                },
+                runtime: {
+                  name: agentNamesAggs[SERVICE_RUNTIME_NAME].buckets
+                    .map((bucket) => bucket.key as string)
+                    .slice(0, size),
+                  version: agentNamesAggs[SERVICE_RUNTIME_VERSION].buckets
+                    .map((bucket) => bucket.key as string)
+                    .slice(0, size),
+                  composite: sortBy(
+                    flatten(
+                      agentNamesAggs[SERVICE_RUNTIME_NAME].buckets.map((bucket) =>
+                        bucket[SERVICE_RUNTIME_VERSION].buckets.map((versionBucket) => ({
+                          doc_count: versionBucket.doc_count,
+                          name: toComposite(bucket.key, versionBucket.key),
+                        }))
+                      )
+                    ),
+                    'doc_count'
+                  )
+                    .reverse()
+                    .slice(0, size)
+                    .map((composite) => composite.name),
+                },
+              },
+            };
+            return acc;
+          }, initAgentData);
+
+          return {
+            ...data,
+            ...agentData,
+          };
+        },
+        Promise.resolve({} as APMTelemetry['agents'])
+      );
 
       return {
-        agents: agentData,
+        agents: { ...agentDataWithoutOtel, ...agentDataWithOtel },
       };
     },
   },
@@ -1173,9 +1324,7 @@ export const tasks: TelemetryTask[] = [
         'span_breakdown',
       ];
 
-      const metricSetsNotSupportingRollUps: MetricNotSupportingRollup[] = [
-        'app',
-      ];
+      const metricSetsNotSupportingRollUps: MetricNotSupportingRollup[] = ['app'];
 
       const rollUpIntervals: MetricRollupIntervals[] = [
         RollupInterval.OneMinute,
@@ -1196,8 +1345,7 @@ export const tasks: TelemetryTask[] = [
               count: response?._all?.primaries?.docs?.count ?? 0,
             },
             store: {
-              size_in_bytes:
-                response?._all?.primaries?.store?.size_in_bytes ?? 0,
+              size_in_bytes: response?._all?.primaries?.store?.size_in_bytes ?? 0,
             },
           },
         };
@@ -1215,11 +1363,7 @@ export const tasks: TelemetryTask[] = [
             const response = await telemetryClient.indicesStats({
               index: [datastream],
               expand_wildcards: 'all',
-              filter_path: [
-                '_all.primaries.docs',
-                '_all.primaries.store',
-                '_shards',
-              ],
+              filter_path: ['_all.primaries.docs', '_all.primaries.store', '_shards'],
             });
             populateDataStreamStatsDict(
               dataStreamStatsDictionary,
@@ -1236,17 +1380,9 @@ export const tasks: TelemetryTask[] = [
           const response = await telemetryClient.indicesStats({
             index: [datastream],
             expand_wildcards: 'all',
-            filter_path: [
-              '_all.primaries.docs',
-              '_all.primaries.store',
-              '_shards',
-            ],
+            filter_path: ['_all.primaries.docs', '_all.primaries.store', '_shards'],
           });
-          populateDataStreamStatsDict(
-            dataStreamStatsDictionary,
-            metricSet,
-            response
-          );
+          populateDataStreamStatsDict(dataStreamStatsDictionary, metricSet, response);
         }
       };
 
@@ -1286,10 +1422,9 @@ export const tasks: TelemetryTask[] = [
       });
 
       for (const metricSet of metricSetsSupportingRollUps) {
-        const metricSetData =
-          lastDayStatsResponse.aggregations?.metricsets?.buckets?.find(
-            (bucket) => bucket.key === metricSet
-          );
+        const metricSetData = lastDayStatsResponse.aggregations?.metricsets?.buckets?.find(
+          (bucket) => bucket.key === metricSet
+        );
 
         rollUpIntervals.forEach((interval) => {
           const key = `${metricSet}-${interval}`;
@@ -1310,10 +1445,9 @@ export const tasks: TelemetryTask[] = [
       }
 
       for (const metricSet of metricSetsNotSupportingRollUps) {
-        const metricSetData =
-          lastDayStatsResponse.aggregations?.metricsets?.buckets?.find(
-            (bucket) => bucket.key === metricSet
-          );
+        const metricSetData = lastDayStatsResponse.aggregations?.metricsets?.buckets?.find(
+          (bucket) => bucket.key === metricSet
+        );
 
         dataStreamStatsDictionary[metricSet]['1d'] = {
           doc_count: metricSetData?.doc_count || 0,
@@ -1351,9 +1485,7 @@ export const tasks: TelemetryTask[] = [
                   count: metricIndicesResponse._all?.total?.docs?.count ?? 0,
                 },
                 store: {
-                  size_in_bytes:
-                    metricIndicesResponse._all?.total?.store?.size_in_bytes ??
-                    0,
+                  size_in_bytes: metricIndicesResponse._all?.total?.store?.size_in_bytes ?? 0,
                 },
               },
             },
@@ -1371,9 +1503,7 @@ export const tasks: TelemetryTask[] = [
                   count: tracesIndicesResponse._all?.total?.docs?.count ?? 0,
                 },
                 store: {
-                  size_in_bytes:
-                    tracesIndicesResponse._all?.total?.store?.size_in_bytes ??
-                    0,
+                  size_in_bytes: tracesIndicesResponse._all?.total?.store?.size_in_bytes ?? 0,
                 },
               },
             },
@@ -1459,9 +1589,8 @@ export const tasks: TelemetryTask[] = [
             geo: {
               country_iso_code: {
                 rum: {
-                  '1d': rumAgentCardinalityResponse.aggregations?.[
-                    CLIENT_GEO_COUNTRY_ISO_CODE
-                  ].value,
+                  '1d': rumAgentCardinalityResponse.aggregations?.[CLIENT_GEO_COUNTRY_ISO_CODE]
+                    .value,
                 },
               },
             },
@@ -1469,28 +1598,20 @@ export const tasks: TelemetryTask[] = [
           transaction: {
             name: {
               all_agents: {
-                '1d': allAgentsCardinalityResponse.aggregations?.[
-                  TRANSACTION_NAME
-                ].value,
+                '1d': allAgentsCardinalityResponse.aggregations?.[TRANSACTION_NAME].value,
               },
               rum: {
-                '1d': rumAgentCardinalityResponse.aggregations?.[
-                  TRANSACTION_NAME
-                ].value,
+                '1d': rumAgentCardinalityResponse.aggregations?.[TRANSACTION_NAME].value,
               },
             },
           },
           user_agent: {
             original: {
               all_agents: {
-                '1d': allAgentsCardinalityResponse.aggregations?.[
-                  USER_AGENT_ORIGINAL
-                ].value,
+                '1d': allAgentsCardinalityResponse.aggregations?.[USER_AGENT_ORIGINAL].value,
               },
               rum: {
-                '1d': rumAgentCardinalityResponse.aggregations?.[
-                  USER_AGENT_ORIGINAL
-                ].value,
+                '1d': rumAgentCardinalityResponse.aggregations?.[USER_AGENT_ORIGINAL].value,
               },
             },
           },
@@ -1510,11 +1631,10 @@ export const tasks: TelemetryTask[] = [
         namespaces: ['*'],
       });
 
-      const kueryNodes = response.saved_objects.map(
-        ({ attributes: { kuery } }) => fromKueryExpression(kuery)
-      );
-
-      const kueryFields = getKueryFields(kueryNodes);
+      const kueryExpressions = response.saved_objects.map(({ attributes: { kuery } }) => kuery);
+      const kueryFields = kueryExpressions
+        .map(getKqlFieldNamesFromExpression)
+        .reduce((a, b) => a.concat(b), []);
 
       return {
         service_groups: {
@@ -1536,11 +1656,12 @@ export const tasks: TelemetryTask[] = [
         namespaces: ['*'],
       });
 
-      const kueryNodes = response.saved_objects.map(
-        ({ attributes: { kuery } }) => fromKueryExpression(kuery ?? '')
+      const kueryExpressions = response.saved_objects.map(
+        ({ attributes: { kuery } }) => kuery ?? ''
       );
-
-      const kueryFields = getKueryFields(kueryNodes);
+      const kueryFields = kueryExpressions
+        .map(getKqlFieldNamesFromExpression)
+        .reduce((a, b) => a.concat(b), []);
 
       return {
         custom_dashboards: {
@@ -1679,24 +1800,16 @@ export const tasks: TelemetryTask[] = [
             num_transaction_types: envBucket.transaction_types.value ?? 0,
             cloud: {
               availability_zones:
-                envBucket[CLOUD_AVAILABILITY_ZONE]?.buckets.map(
-                  (inner) => inner.key as string
-                ) ?? [],
-              regions:
-                envBucket[CLOUD_REGION]?.buckets.map(
-                  (inner) => inner.key as string
-                ) ?? [],
+                envBucket[CLOUD_AVAILABILITY_ZONE]?.buckets.map((inner) => inner.key as string) ??
+                [],
+              regions: envBucket[CLOUD_REGION]?.buckets.map((inner) => inner.key as string) ?? [],
               providers:
-                envBucket[CLOUD_PROVIDER]?.buckets.map(
-                  (inner) => inner.key as string
-                ) ?? [],
+                envBucket[CLOUD_PROVIDER]?.buckets.map((inner) => inner.key as string) ?? [],
             },
             faas: {
               trigger: {
                 type:
-                  envBucket[FAAS_TRIGGER_TYPE]?.buckets.map(
-                    (inner) => inner.key as string
-                  ) ?? [],
+                  envBucket[FAAS_TRIGGER_TYPE]?.buckets.map((inner) => inner.key as string) ?? [],
               },
             },
             agent: {
@@ -1704,41 +1817,25 @@ export const tasks: TelemetryTask[] = [
               activation_method: envBucket.top_metrics?.top[0].metrics[
                 AGENT_ACTIVATION_METHOD
               ] as string,
-              version: envBucket.top_metrics?.top[0].metrics[
-                AGENT_VERSION
-              ] as string,
+              version: envBucket.top_metrics?.top[0].metrics[AGENT_VERSION] as string,
             },
             service: {
               language: {
-                name: envBucket.top_metrics?.top[0].metrics[
-                  SERVICE_LANGUAGE_NAME
-                ] as string,
-                version: envBucket.top_metrics?.top[0].metrics[
-                  SERVICE_LANGUAGE_VERSION
-                ] as string,
+                name: envBucket.top_metrics?.top[0].metrics[SERVICE_LANGUAGE_NAME] as string,
+                version: envBucket.top_metrics?.top[0].metrics[SERVICE_LANGUAGE_VERSION] as string,
               },
               framework: {
-                name: envBucket.top_metrics?.top[0].metrics[
-                  SERVICE_FRAMEWORK_NAME
-                ] as string,
-                version: envBucket.top_metrics?.top[0].metrics[
-                  SERVICE_FRAMEWORK_VERSION
-                ] as string,
+                name: envBucket.top_metrics?.top[0].metrics[SERVICE_FRAMEWORK_NAME] as string,
+                version: envBucket.top_metrics?.top[0].metrics[SERVICE_FRAMEWORK_VERSION] as string,
               },
               runtime: {
-                name: envBucket.top_metrics?.top[0].metrics[
-                  SERVICE_RUNTIME_NAME
-                ] as string,
-                version: envBucket.top_metrics?.top[0].metrics[
-                  SERVICE_RUNTIME_VERSION
-                ] as string,
+                name: envBucket.top_metrics?.top[0].metrics[SERVICE_RUNTIME_NAME] as string,
+                version: envBucket.top_metrics?.top[0].metrics[SERVICE_RUNTIME_VERSION] as string,
               },
             },
             kubernetes: {
               pod: {
-                name: envBucket.top_metrics?.top[0].metrics[
-                  KUBERNETES_POD_NAME
-                ] as string,
+                name: envBucket.top_metrics?.top[0].metrics[KUBERNETES_POD_NAME] as string,
               },
             },
             container: {

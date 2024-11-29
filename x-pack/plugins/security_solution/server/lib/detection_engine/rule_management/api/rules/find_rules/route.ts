@@ -7,7 +7,7 @@
 
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
-
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { DETECTION_ENGINE_RULES_URL_FIND } from '../../../../../../../common/constants';
 import type { FindRulesResponse } from '../../../../../../../common/api/detection_engine/rule_management';
 import {
@@ -18,7 +18,6 @@ import {
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import { findRules } from '../../../logic/search/find_rules';
 import { buildSiemResponse } from '../../../../routes/utils';
-import { buildRouteValidationWithZod } from '../../../../../../utils/build_validation/route_validation';
 import { transformFindAlerts } from '../../../utils/utils';
 
 export const findRulesRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {
@@ -26,8 +25,10 @@ export const findRulesRoute = (router: SecuritySolutionPluginRouter, logger: Log
     .get({
       access: 'public',
       path: DETECTION_ENGINE_RULES_URL_FIND,
-      options: {
-        tags: ['access:securitySolution'],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
       },
     })
     .addVersion(

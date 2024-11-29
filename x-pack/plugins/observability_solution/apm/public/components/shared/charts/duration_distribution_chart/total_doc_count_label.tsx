@@ -32,26 +32,20 @@ export function TotalDocCountLabel({ eventType, totalDocCount }: Props) {
       `}
     >
       {eventType === ProcessorEvent.transaction
-        ? i18n.translate(
-            'xpack.apm.durationDistributionChart.totalTransactionsCount',
-            {
-              defaultMessage:
-                '{totalDocCount} total {totalDocCount, plural, one {transaction} other {transactions}}',
-              values: {
-                totalDocCount,
-              },
-            }
-          )
-        : i18n.translate(
-            'xpack.apm.durationDistributionChart.totalSpansCount',
-            {
-              defaultMessage:
-                '{totalDocCount} total {totalDocCount, plural, one {span} other {spans}}',
-              values: {
-                totalDocCount,
-              },
-            }
-          )}
+        ? i18n.translate('xpack.apm.durationDistributionChart.totalTransactionsCount', {
+            defaultMessage:
+              '{totalDocCount} total {totalDocCount, plural, one {transaction} other {transactions}}',
+            values: {
+              totalDocCount,
+            },
+          })
+        : i18n.translate('xpack.apm.durationDistributionChart.totalSpansCount', {
+            defaultMessage:
+              '{totalDocCount} total {totalDocCount, plural, one {span} other {spans}}',
+            values: {
+              totalDocCount,
+            },
+          })}
     </EuiText>
   );
 }

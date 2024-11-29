@@ -8,11 +8,10 @@
 import type { PropsWithChildren } from 'react';
 import React from 'react';
 import { Router } from '@kbn/shared-ux-router';
-import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 
-import { useIsDarkTheme } from '../../../common/use_is_dark_theme';
 import { SECURITY_SOLUTION_OWNER } from '../../../../common';
-import type { CasesUIActionProps } from './types';
+import type { CasesActionContextProps, Services } from './types';
 import { KibanaContextProvider, useKibana } from '../../../common/lib/kibana';
 import CasesProvider from '../../cases_context';
 import { getCaseOwnerByAppId } from '../../../../common/utils/owner';
@@ -21,17 +20,16 @@ import { canUseCases } from '../../../client/helpers/can_use_cases';
 export const DEFAULT_DARK_MODE = 'theme:darkMode' as const;
 
 interface Props {
-  caseContextProps: CasesUIActionProps['caseContextProps'];
+  casesActionContextProps: CasesActionContextProps;
   currentAppId?: string;
 }
 
 const ActionWrapperWithContext: React.FC<PropsWithChildren<Props>> = ({
   children,
-  caseContextProps,
+  casesActionContextProps,
   currentAppId,
 }) => {
-  const { application } = useKibana().services;
-  const isDarkTheme = useIsDarkTheme();
+  const { application, i18n, theme } = useKibana().services;
 
   const owner = getCaseOwnerByAppId(currentAppId);
   const casePermissions = canUseCases(application.capabilities)(owner ? [owner] : undefined);
@@ -39,10 +37,10 @@ const ActionWrapperWithContext: React.FC<PropsWithChildren<Props>> = ({
   const syncAlerts = owner === SECURITY_SOLUTION_OWNER;
 
   return (
-    <EuiThemeProvider darkMode={isDarkTheme}>
+    <KibanaRenderContextProvider i18n={i18n} theme={theme}>
       <CasesProvider
         value={{
-          ...caseContextProps,
+          ...casesActionContextProps,
           owner: owner ? [owner] : [],
           permissions: casePermissions,
           features: { alerts: { sync: syncAlerts } },
@@ -50,35 +48,37 @@ const ActionWrapperWithContext: React.FC<PropsWithChildren<Props>> = ({
       >
         {children}
       </CasesProvider>
-    </EuiThemeProvider>
+    </KibanaRenderContextProvider>
   );
 };
 
 ActionWrapperWithContext.displayName = 'ActionWrapperWithContext';
 
-type ActionWrapperComponentProps = PropsWithChildren<
-  CasesUIActionProps & { currentAppId?: string }
->;
+type ActionWrapperComponentProps = PropsWithChildren<{
+  casesActionContextProps: CasesActionContextProps;
+  currentAppId?: string;
+  services: Services;
+}>;
 
 const ActionWrapperComponent: React.FC<ActionWrapperComponentProps> = ({
-  core,
-  plugins,
-  storage,
-  history,
+  casesActionContextProps,
   children,
-  caseContextProps,
   currentAppId,
+  services,
 }) => {
   return (
     <KibanaContextProvider
       services={{
-        ...core,
-        ...plugins,
-        storage,
+        ...services.core,
+        ...services.plugins,
+        storage: services.storage,
       }}
     >
-      <Router history={history}>
-        <ActionWrapperWithContext caseContextProps={caseContextProps} currentAppId={currentAppId}>
+      <Router history={services.history}>
+        <ActionWrapperWithContext
+          casesActionContextProps={casesActionContextProps}
+          currentAppId={currentAppId}
+        >
           {children}
         </ActionWrapperWithContext>
       </Router>

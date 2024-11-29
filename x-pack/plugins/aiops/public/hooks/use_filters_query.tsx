@@ -5,13 +5,20 @@
  * 2.0.
  */
 
-import React, { type FC, createContext, useEffect, useState, useContext, useMemo } from 'react';
+import React, {
+  type FC,
+  type PropsWithChildren,
+  createContext,
+  useEffect,
+  useState,
+  useContext,
+  useMemo,
+} from 'react';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { useTimeRangeUpdates } from '@kbn/ml-date-picker';
 import { type AggregateQuery } from '@kbn/es-query';
 import type { TimeRangeBounds } from '@kbn/data-plugin/common';
-import { getBoundsRoundedToInterval } from '../../common/time_buckets';
-import { useTimeBuckets } from './use_time_buckets';
+import { getBoundsRoundedToInterval, useTimeBuckets } from '@kbn/ml-time-buckets';
 import { useAiopsAppContext } from './use_aiops_app_context';
 import { useReload } from './use_reload';
 
@@ -50,17 +57,19 @@ export const FilterQueryContext = createContext<{
  * @param children
  * @constructor
  */
-export const FilterQueryContextProvider: FC<{ timeRange?: TimeRange }> = ({
-  children,
-  timeRange,
-}) => {
+export const FilterQueryContextProvider: FC<
+  PropsWithChildren<{
+    timeRange?: TimeRange;
+  }>
+> = ({ children, timeRange }) => {
   const {
     data: {
       query: { filterManager, queryString, timefilter },
     },
+    uiSettings,
   } = useAiopsAppContext();
 
-  const timeBuckets = useTimeBuckets();
+  const timeBuckets = useTimeBuckets(uiSettings);
   const reload = useReload();
 
   const [resultFilters, setResultFilter] = useState<Filter[]>(filterManager.getFilters());

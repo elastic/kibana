@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { registerBundleRoutesMock } from './core_app.test.mocks';
@@ -34,6 +35,7 @@ describe('CoreApp', () => {
   let httpResourcesRegistrar: ReturnType<typeof httpResourcesMock.createRegistrar>;
 
   beforeEach(() => {
+    jest.useFakeTimers();
     coreContext = mockCoreContext.create();
 
     internalCorePreboot = coreInternalLifecycleMock.createInternalPreboot();
@@ -55,37 +57,70 @@ describe('CoreApp', () => {
 
   afterEach(() => {
     registerBundleRoutesMock.mockReset();
+    coreApp.stop();
+    jest.clearAllTimers();
   });
 
-  describe('`/internal/core/_settings` route', () => {
-    it('is not registered by default', async () => {
-      const routerMock = mockRouter.create();
-      internalCoreSetup.http.createRouter.mockReturnValue(routerMock);
+  describe('Dynamic Config feature', () => {
+    describe('`/internal/core/_settings` route', () => {
+      it('is not registered by default', async () => {
+        const routerMock = mockRouter.create();
+        internalCoreSetup.http.createRouter.mockReturnValue(routerMock);
 
-      const localCoreApp = new CoreAppsService(coreContext);
-      await localCoreApp.setup(internalCoreSetup, emptyPlugins());
+        const localCoreApp = new CoreAppsService(coreContext);
+        await localCoreApp.setup(internalCoreSetup, emptyPlugins());
 
-      expect(routerMock.versioned.put).not.toHaveBeenCalledWith(
-        expect.objectContaining({
+        expect(routerMock.versioned.put).not.toHaveBeenCalledWith(
+          expect.objectContaining({
+            path: '/internal/core/_settings',
+          })
+        );
+
+        // But the Saved Object is still registered
+        expect(internalCoreSetup.savedObjects.registerType).toHaveBeenCalledWith(
+          expect.objectContaining({ name: 'dynamic-config-overrides' })
+        );
+      });
+
+      it('is registered when enabled', async () => {
+        const routerMock = mockRouter.create();
+        internalCoreSetup.http.createRouter.mockReturnValue(routerMock);
+
+        coreContext.configService.atPath.mockReturnValue(of({ allowDynamicConfigOverrides: true }));
+        const localCoreApp = new CoreAppsService(coreContext);
+        await localCoreApp.setup(internalCoreSetup, emptyPlugins());
+
+        expect(routerMock.versioned.put).toHaveBeenCalledWith({
           path: '/internal/core/_settings',
-        })
-      );
-    });
+          access: 'internal',
+          options: {
+            tags: ['access:updateDynamicConfig'],
+          },
+        });
+      });
 
-    it('is registered when enabled', async () => {
-      const routerMock = mockRouter.create();
-      internalCoreSetup.http.createRouter.mockReturnValue(routerMock);
+      it('it fetches the persisted document when enabled', async () => {
+        const routerMock = mockRouter.create();
+        internalCoreSetup.http.createRouter.mockReturnValue(routerMock);
 
-      coreContext.configService.atPath.mockReturnValue(of({ allowDynamicConfigOverrides: true }));
-      const localCoreApp = new CoreAppsService(coreContext);
-      await localCoreApp.setup(internalCoreSetup, emptyPlugins());
+        coreContext.configService.atPath.mockReturnValue(of({ allowDynamicConfigOverrides: true }));
+        const localCoreApp = new CoreAppsService(coreContext);
+        await localCoreApp.setup(internalCoreSetup, emptyPlugins());
 
-      expect(routerMock.versioned.put).toHaveBeenCalledWith({
-        path: '/internal/core/_settings',
-        access: 'internal',
-        options: {
-          tags: ['access:updateDynamicConfig'],
-        },
+        const internalCoreStart = coreInternalLifecycleMock.createInternalStart();
+        localCoreApp.start(internalCoreStart);
+
+        expect(internalCoreStart.savedObjects.createInternalRepository).toHaveBeenCalledWith([
+          'dynamic-config-overrides',
+        ]);
+
+        const repository =
+          internalCoreStart.savedObjects.createInternalRepository.mock.results[0].value;
+        await jest.advanceTimersByTimeAsync(0); // "Advancing" 0ms is enough, but necessary to trigger the `timer` observable
+        expect(repository.get).toHaveBeenCalledWith(
+          'dynamic-config-overrides',
+          'dynamic-config-overrides'
+        );
       });
     });
   });
@@ -316,7 +351,7 @@ describe('CoreApp', () => {
     });
   });
 
-  it('registers expected static dirs if there are public plugins', async () => {
+  it('registers expected static dirs for all plugins with static dirs', async () => {
     const uiPlugins = emptyPlugins();
     uiPlugins.public.set('some-plugin', {
       type: PluginType.preboot,
@@ -348,6 +383,12 @@ describe('CoreApp', () => {
       requiredBundles: [],
       version: '1.0.0',
     });
+    uiPlugins.internal.set('some-plugin-3-internal', {
+      publicAssetsDir: '/foo-internal',
+      publicTargetDir: '/bar-internal',
+      requiredBundles: [],
+      version: '1.0.0',
+    });
 
     internalCoreSetup.http.staticAssets.prependServerPath.mockReturnValue('/static-assets-path');
     internalCoreSetup.http.staticAssets.getPluginServerPath.mockImplementation(
@@ -356,8 +397,8 @@ describe('CoreApp', () => {
     await coreApp.setup(internalCoreSetup, uiPlugins);
 
     expect(internalCoreSetup.http.registerStaticDir).toHaveBeenCalledTimes(
-      // Twice for all UI plugins + core's UI asset routes
-      uiPlugins.public.size * 2 + 2
+      // Twice for all _internal_ UI plugins + core's UI asset routes
+      uiPlugins.internal.size * 2 + 2
     );
     expect(internalCoreSetup.http.registerStaticDir).toHaveBeenCalledWith(
       '/static-assets-path',
@@ -381,6 +422,15 @@ describe('CoreApp', () => {
     );
     expect(internalCoreSetup.http.registerStaticDir).toHaveBeenCalledWith(
       '/plugins/some-plugin-2/assets/{path*}', // legacy
+      expect.any(String)
+    );
+
+    expect(internalCoreSetup.http.registerStaticDir).toHaveBeenCalledWith(
+      '/static-assets-path/some-plugin-3-internal/{path*}',
+      expect.any(String)
+    );
+    expect(internalCoreSetup.http.registerStaticDir).toHaveBeenCalledWith(
+      '/plugins/some-plugin-3-internal/assets/{path*}', // legacy
       expect.any(String)
     );
   });

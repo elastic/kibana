@@ -41,7 +41,7 @@ describe('Policy form SettingLockedCard component', () => {
           'To turn on this protection, you must upgrade your license to Platinum, start a free 30-day ' +
           'trial, or spin up a ' +
           'cloud deployment' +
-          'External link(opens in a new tab or window) ' +
+          '(external, opens in a new tab or window) ' +
           'on AWS, GCP, or Azure.Platinum'
       )
     );

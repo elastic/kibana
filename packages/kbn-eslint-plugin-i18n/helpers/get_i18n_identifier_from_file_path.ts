@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import fs from 'fs';
@@ -12,6 +13,7 @@ import { findKey } from 'lodash';
 
 export function getI18nIdentifierFromFilePath(fileName: string, cwd: string) {
   const { dir } = parse(fileName);
+
   const relativePathToFile = dir.replace(cwd, '');
 
   // We need to match the path of the file that is being worked in with the path
@@ -26,7 +28,7 @@ export function getI18nIdentifierFromFilePath(fileName: string, cwd: string) {
     (el) => el === 'public' || el === 'server' || el === 'common'
   );
 
-  const path = relativePathArray.slice(0, pluginNameIndex).join('/');
+  const path = relativePathArray.slice(0, pluginNameIndex).join('/').replace('x-pack/', '');
 
   const xpackRC = resolve(join(__dirname, '../../../'), 'x-pack/.i18nrc.json');
   const rootRC = resolve(join(__dirname, '../../../'), '.i18nrc.json');

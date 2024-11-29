@@ -30,7 +30,7 @@ interface Props {
 export function CustomLinkTable({ items = [], onCustomLinkSelected }: Props) {
   const [searchTerm, setSearchTerm] = useState('');
   const { core } = useApmPluginContext();
-  const canSave = core.application.capabilities.apm.save;
+  const canSave = core.application.capabilities.apm['settings:save'];
 
   const columns: Array<ITableColumn<CustomLink>> = [
     {
@@ -55,9 +55,7 @@ export function CustomLinkTable({ items = [], onCustomLinkSelected }: Props) {
         defaultMessage: 'Last updated',
       }),
       sortable: true,
-      render: (value: number) => (
-        <TimestampTooltip time={value} timeUnit="minutes" />
-      ),
+      render: (value: number) => <TimestampTooltip time={value} timeUnit="minutes" />,
     },
     {
       width: '48px',
@@ -66,10 +64,9 @@ export function CustomLinkTable({ items = [], onCustomLinkSelected }: Props) {
         ...(canSave
           ? [
               {
-                name: i18n.translate(
-                  'xpack.apm.settings.customLink.table.editButtonLabel',
-                  { defaultMessage: 'Edit' }
-                ),
+                name: i18n.translate('xpack.apm.settings.customLink.table.editButtonLabel', {
+                  defaultMessage: 'Edit',
+                }),
                 description: i18n.translate(
                   'xpack.apm.settings.customLink.table.editButtonDescription',
                   { defaultMessage: 'Edit this custom link' }
@@ -89,10 +86,7 @@ export function CustomLinkTable({ items = [], onCustomLinkSelected }: Props) {
   ];
 
   const filteredItems = items.filter(({ label, url }) => {
-    return (
-      label.toLowerCase().includes(searchTerm) ||
-      url.toLowerCase().includes(searchTerm)
-    );
+    return label.toLowerCase().includes(searchTerm) || url.toLowerCase().includes(searchTerm);
   });
 
   return (
@@ -102,21 +96,14 @@ export function CustomLinkTable({ items = [], onCustomLinkSelected }: Props) {
         data-test-subj="apmCustomLinkTableFieldSearch"
         fullWidth
         onChange={(e) => setSearchTerm(e.target.value)}
-        placeholder={i18n.translate(
-          'xpack.apm.settings.customLink.searchInput.filter',
-          {
-            defaultMessage: 'Filter links by Name and URL...',
-          }
-        )}
+        placeholder={i18n.translate('xpack.apm.settings.customLink.searchInput.filter', {
+          defaultMessage: 'Filter links by Name and URL...',
+        })}
       />
       <EuiSpacer size="s" />
       <ManagedTable
         noItemsMessage={
-          isEmpty(items) ? (
-            <LoadingStatePrompt />
-          ) : (
-            <NoResultFound value={searchTerm} />
-          )
+          isEmpty(items) ? <LoadingStatePrompt /> : <NoResultFound value={searchTerm} />
         }
         items={filteredItems}
         columns={columns}

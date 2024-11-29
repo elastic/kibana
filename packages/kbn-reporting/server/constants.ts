@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 export const PLUGIN_ID = 'reporting';
@@ -12,7 +13,16 @@ export const PLUGIN_ID = 'reporting';
  * Storage
  */
 
-export const REPORTING_SYSTEM_INDEX = '.reporting';
+// Used to index new documents
+export const REPORTING_DATA_STREAM_ALIAS = '.kibana-reporting';
+// Used to retrieve settings
+export const REPORTING_DATA_STREAM_WILDCARD = '.kibana-reporting*';
+// Index pattern of plain indices before Reporting used Data Stream storage
+export const REPORTING_LEGACY_INDICES = '.reporting-*';
+// Used to search for all reports and check for managing privileges
+export const REPORTING_DATA_STREAM_WILDCARD_WITH_LEGACY = '.reporting-*,.kibana-reporting*';
+// Name of component template which Kibana overrides for lifecycle settings
+export const REPORTING_DATA_STREAM_COMPONENT_TEMPLATE = 'kibana-reporting@custom';
 
 /*
  * Telemetry

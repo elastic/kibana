@@ -8,8 +8,42 @@
 import {
   flattenAndFormatObject,
   getNormalizeCommonFields,
+  getUrlsField,
+  isValidURL,
   NormalizedProjectProps,
 } from './common_fields';
+
+describe('isValidUrl', () => {
+  it('returns false for invalid URL', () => {
+    expect(isValidURL('invalid')).toBeFalsy();
+  });
+
+  it('returns true for valid URL', () => {
+    expect(isValidURL('https://elastic.co')).toBeTruthy();
+  });
+
+  it('returns skips validation vars', () => {
+    expect(isValidURL('${urlParam}')).toBeTruthy();
+  });
+
+  it('returns skips validation vars with http', () => {
+    expect(isValidURL('http://${urlParam}')).toBeTruthy();
+  });
+});
+
+describe('getUrlsField', () => {
+  it('supports a string value containing a comma', () => {
+    expect(getUrlsField('https://elastic.co?foo=bar,baz')).toEqual([
+      'https://elastic.co?foo=bar,baz',
+    ]);
+  });
+
+  it('supports lists containing exactly one entry, even with commas', () => {
+    expect(getUrlsField(['https://elastic.co?foo=bar,baz'])).toEqual([
+      'https://elastic.co?foo=bar,baz',
+    ]);
+  });
+});
 
 describe('normalizeYamlConfig', () => {
   it('does not continue flattening when encountering an array', () => {
@@ -137,6 +171,7 @@ describe('getNormalizeCommonFields', () => {
           timeout: '16',
           params: '',
           max_attempts: 2,
+          labels: {},
         },
       });
     }
@@ -202,6 +237,7 @@ describe('getNormalizeCommonFields', () => {
         timeout: '16',
         params: '',
         max_attempts: 2,
+        labels: {},
       },
     });
   });

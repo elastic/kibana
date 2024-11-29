@@ -9,6 +9,8 @@ import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { createContext } from 'react';
 import type { ObservabilityRuleTypeRegistry } from '@kbn/observability-plugin/public';
 import type { MapsStartApi } from '@kbn/maps-plugin/public';
+import type { LensPublicStart } from '@kbn/lens-plugin/public';
+import type { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/public';
 import type { ObservabilityPublicStart } from '@kbn/observability-plugin/public';
 import type { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -17,6 +19,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
 import { SharePluginSetup } from '@kbn/share-plugin/public';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { ApmPluginSetupDeps } from '../../plugin';
 import type { ConfigSchema } from '../..';
 import type { KibanaEnvContext } from '../kibana_environment_context/kibana_environment_context';
@@ -29,13 +32,16 @@ export interface ApmPluginContextValue {
   plugins: ApmPluginSetupDeps & { maps?: MapsStartApi };
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
   observability: ObservabilityPublicStart;
+  observabilityShared: ObservabilitySharedPluginStart;
   dataViews: DataViewsPublicPluginStart;
   data: DataPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   uiActions: UiActionsStart;
-  observabilityAIAssistant: ObservabilityAIAssistantPublicStart;
+  observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
   share: SharePluginSetup;
   kibanaEnvironment: KibanaEnvContext;
+  lens: LensPublicStart;
+  licensing: LicensingPluginStart;
 }
 
 export const ApmPluginContext = createContext({} as ApmPluginContextValue);

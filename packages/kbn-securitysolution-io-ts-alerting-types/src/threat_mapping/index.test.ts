@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { pipe } from 'fp-ts/lib/pipeable';
@@ -37,12 +38,11 @@ describe('threat_mapping', () => {
     });
 
     test('it should fail validation with an extra entry item', () => {
-      const payload: ThreatMappingEntries & Array<{ extra: string }> = [
+      const payload: Array<ThreatMappingEntries[0] & { extra: string }> = [
         {
           field: 'field.one',
           type: 'mapping',
           value: 'field.one',
-          // @ts-expect-error upgrade typescript v4.9.5
           extra: 'blah',
         },
       ];
@@ -112,7 +112,7 @@ describe('threat_mapping', () => {
   });
 
   test('it should fail validate with an extra key', () => {
-    const payload: ThreatMapping & Array<{ extra: string }> = [
+    const payload: Array<ThreatMapping[0] & { extra: string }> = [
       {
         entries: [
           {
@@ -121,7 +121,6 @@ describe('threat_mapping', () => {
             value: 'field.one',
           },
         ],
-        // @ts-expect-error upgrade typescript v4.9.5
         extra: 'invalid',
       },
     ];
@@ -135,14 +134,13 @@ describe('threat_mapping', () => {
   });
 
   test('it should fail validate with an extra inner entry', () => {
-    const payload: ThreatMapping & Array<{ entries: Array<{ extra: string }> }> = [
+    const payload: Array<ThreatMapping[0] & { entries: Array<{ extra: string }> }> = [
       {
         entries: [
           {
             field: 'field.one',
             type: 'mapping',
             value: 'field.one',
-            // @ts-expect-error upgrade typescript v4.9.5
             extra: 'blah',
           },
         ],

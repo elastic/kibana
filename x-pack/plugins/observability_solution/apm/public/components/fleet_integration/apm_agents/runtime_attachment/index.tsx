@@ -63,22 +63,15 @@ export function validateVersion(version: RuntimeAttachmentSettings['version']) {
 export function RuntimeAttachment(props: Props) {
   const { initialDiscoveryRules = [], onChange = () => {} } = props;
   const [isEnabled, setIsEnabled] = useState(Boolean(props.initialIsEnabled));
-  const [discoveryRuleList, setDiscoveryRuleList] =
-    useState<IDiscoveryRuleList>(
-      initialDiscoveryRules.map((discoveryRule) => ({
-        id: generateId(),
-        discoveryRule,
-      }))
-    );
-  const [editDiscoveryRuleId, setEditDiscoveryRuleId] = useState<null | string>(
-    null
+  const [discoveryRuleList, setDiscoveryRuleList] = useState<IDiscoveryRuleList>(
+    initialDiscoveryRules.map((discoveryRule) => ({
+      id: generateId(),
+      discoveryRule,
+    }))
   );
-  const [version, setVersion] = useState<RuntimeAttachmentSettings['version']>(
-    props.version
-  );
-  const [isValidVersion, setIsValidVersion] = useState(
-    validateVersion(props.version)
-  );
+  const [editDiscoveryRuleId, setEditDiscoveryRuleId] = useState<null | string>(null);
+  const [version, setVersion] = useState<RuntimeAttachmentSettings['version']>(props.version);
+  const [isValidVersion, setIsValidVersion] = useState(validateVersion(props.version));
 
   useEffect(
     () => {
@@ -113,9 +106,7 @@ export function RuntimeAttachment(props: Props) {
       setDiscoveryRuleList(filteredDiscoveryRuleList);
       onChange({
         enabled: isEnabled,
-        discoveryRules: filteredDiscoveryRuleList.map(
-          ({ discoveryRule }) => discoveryRule
-        ),
+        discoveryRules: filteredDiscoveryRuleList.map(({ discoveryRule }) => discoveryRule),
         version,
       });
     },
@@ -124,9 +115,7 @@ export function RuntimeAttachment(props: Props) {
 
   const onEdit = useCallback(
     (discoveryRuleId: string) => {
-      const editingDiscoveryRule = discoveryRuleList.find(
-        ({ id }) => id === discoveryRuleId
-      );
+      const editingDiscoveryRule = discoveryRuleList.find(({ id }) => id === discoveryRuleId);
       if (editingDiscoveryRule) {
         const {
           discoveryRule: { operation, type, probe },
@@ -186,10 +175,7 @@ export function RuntimeAttachment(props: Props) {
     const nextDiscoveryRuleList = [
       ...discoveryRuleList.slice(0, editDiscoveryRuleIndex),
       {
-        id:
-          editDiscoveryRule.id === STAGED_DISCOVERY_RULE_ID
-            ? generateId()
-            : editDiscoveryRule.id,
+        id: editDiscoveryRule.id === STAGED_DISCOVERY_RULE_ID ? generateId() : editDiscoveryRule.id,
         discoveryRule: {
           operation: stagedOperationText,
           type: stagedTypeText,
@@ -202,9 +188,7 @@ export function RuntimeAttachment(props: Props) {
     setEditDiscoveryRuleId(null);
     onChange({
       enabled: isEnabled,
-      discoveryRules: nextDiscoveryRuleList.map(
-        ({ discoveryRule }) => discoveryRule
-      ),
+      discoveryRules: nextDiscoveryRuleList.map(({ discoveryRule }) => discoveryRule),
       version,
     });
   }, [
@@ -252,9 +236,7 @@ export function RuntimeAttachment(props: Props) {
         setDiscoveryRuleList(nextDiscoveryRuleList);
         onChange({
           enabled: isEnabled,
-          discoveryRules: nextDiscoveryRuleList.map(
-            ({ discoveryRule }) => discoveryRule
-          ),
+          discoveryRules: nextDiscoveryRuleList.map(({ discoveryRule }) => discoveryRule),
           version,
         });
       }
@@ -272,9 +254,7 @@ export function RuntimeAttachment(props: Props) {
     }
     onChange({
       enabled: isEnabled,
-      discoveryRules: isEnabled
-        ? discoveryRuleList.map(({ discoveryRule }) => discoveryRule)
-        : [],
+      discoveryRules: isEnabled ? discoveryRuleList.map(({ discoveryRule }) => discoveryRule) : [],
       version: nextVersion,
     });
   }

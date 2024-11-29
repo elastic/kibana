@@ -7,6 +7,7 @@
 
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
+import { DocLinksServiceSetup } from '@kbn/core/server';
 import type { AlertingRouter } from '../../types';
 import { ILicenseState } from '../../lib/license_state';
 import { verifyApiAccess } from '../../lib/license_api_access';
@@ -18,12 +19,28 @@ export function healthRoute(
   router: AlertingRouter,
   licenseState: ILicenseState,
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup,
-  usageCounter?: UsageCounter
+  docLinks: DocLinksServiceSetup,
+  usageCounter?: UsageCounter,
+  isServerless?: boolean
 ) {
   router.get(
     {
       path: '/api/alerts/_health',
       validate: false,
+      options: {
+        access: isServerless ? 'internal' : 'public',
+        summary: 'Get the alerting framework health',
+        tags: ['oas-tag:alerting'],
+        deprecated: {
+          documentationUrl: docLinks.links.alerting.legacyRuleApiDeprecations,
+          severity: 'warning',
+          reason: {
+            type: 'migrate',
+            newApiMethod: 'GET',
+            newApiPath: '/api/alerting/rule/_health',
+          },
+        },
+      },
     },
     router.handleLegacyErrors(async function (context, req, res) {
       verifyApiAccess(licenseState);

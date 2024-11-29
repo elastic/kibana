@@ -6,19 +6,12 @@
  */
 
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
-import {
-  CoreKibanaRequest,
-  FakeRawRequest,
-  Headers,
-  SavedObject,
-  SavedObjectReference,
-  SavedObjectsErrorHelpers,
-} from '@kbn/core/server';
-import {
-  LoadedIndirectParams,
-  LoadIndirectParamsResult,
-} from '@kbn/task-manager-plugin/server/task';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
+import { type FakeRawRequest, type Headers } from '@kbn/core-http-server';
+import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
+import type { SavedObject, SavedObjectReference } from '@kbn/core-saved-objects-api-server';
+import type { Logger } from '@kbn/logging';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { RunRuleParams, TaskRunnerContext } from './types';
 import { ErrorWithReason, validateRuleTypeParams } from '../lib';
 import {
@@ -29,19 +22,19 @@ import {
 } from '../types';
 import { MONITORING_HISTORY_LIMIT, RuleTypeParams } from '../../common';
 import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
+import { getAlertFromRaw } from '../rules_client/lib';
 
-export interface RuleData extends LoadedIndirectParams<RawRule> {
-  indirectParams: RawRule;
+interface RuleData {
+  rawRule: RawRule;
   version: string | undefined;
   references: SavedObjectReference[];
 }
 
-export type RuleDataResult<T extends LoadedIndirectParams> = LoadIndirectParamsResult<T>;
-
 interface ValidateRuleAndCreateFakeRequestParams<Params extends RuleTypeParams> {
   context: TaskRunnerContext;
+  logger: Logger;
   paramValidator?: RuleTypeParamsValidator<Params>;
-  ruleData: RuleDataResult<RuleData>;
+  ruleData: RuleData;
   ruleId: string;
   ruleTypeRegistry: RuleTypeRegistry;
   spaceId: string;
@@ -56,23 +49,17 @@ interface ValidateRuleAndCreateFakeRequestParams<Params extends RuleTypeParams> 
 export function validateRuleAndCreateFakeRequest<Params extends RuleTypeParams>(
   params: ValidateRuleAndCreateFakeRequestParams<Params>
 ): RunRuleParams<Params> {
-  // If there was a prior error loading the decrypted rule SO, exit early
-  if (params.ruleData.error) {
-    throw params.ruleData.error;
-  }
-
   const {
     context,
+    logger,
     paramValidator,
-    ruleData: {
-      data: { indirectParams, references, version },
-    },
+    ruleData: { rawRule, references, version },
     ruleId,
     ruleTypeRegistry,
     spaceId,
   } = params;
 
-  const { enabled, apiKey, alertTypeId: ruleTypeId } = indirectParams;
+  const { enabled, apiKey, alertTypeId: ruleTypeId } = rawRule;
 
   if (!enabled) {
     throw createTaskRunError(
@@ -85,14 +72,16 @@ export function validateRuleAndCreateFakeRequest<Params extends RuleTypeParams>(
   }
 
   const fakeRequest = getFakeKibanaRequest(context, spaceId, apiKey);
-  const rulesClient = context.getRulesClientWithRequest(fakeRequest);
-  const rule = rulesClient.getAlertFromRaw({
+  const rule = getAlertFromRaw({
     id: ruleId,
-    ruleTypeId,
-    rawRule: indirectParams as RawRule,
-    references,
     includeLegacyId: false,
+    isSystemAction: (actionId: string) => context.actionsPlugin.isSystemActionConnector(actionId),
+    logger,
     omitGeneratedValues: false,
+    rawRule,
+    references,
+    ruleTypeId,
+    ruleTypeRegistry,
   });
 
   try {
@@ -125,7 +114,6 @@ export function validateRuleAndCreateFakeRequest<Params extends RuleTypeParams>(
     apiKey,
     fakeRequest,
     rule,
-    rulesClient,
     validatedParams,
     version,
   };
@@ -150,15 +138,16 @@ export async function getDecryptedRule(
       { namespace }
     );
   } catch (e) {
+    const error = new ErrorWithReason(RuleExecutionStatusErrorReasons.Decrypt, e);
     if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
-      throw createTaskRunError(e, TaskErrorSource.USER);
+      throw createTaskRunError(error, TaskErrorSource.USER);
     }
-    throw createTaskRunError(e, TaskErrorSource.FRAMEWORK);
+    throw createTaskRunError(error, TaskErrorSource.FRAMEWORK);
   }
 
   return {
     version: rawRule.version,
-    indirectParams: rawRule.attributes,
+    rawRule: rawRule.attributes,
     references: rawRule.references,
   };
 }
@@ -181,7 +170,7 @@ export function getFakeKibanaRequest(
     path: '/',
   };
 
-  const fakeRequest = CoreKibanaRequest.from(fakeRawRequest);
+  const fakeRequest = kibanaRequestFactory(fakeRawRequest);
   context.basePathService.set(fakeRequest, path);
 
   return fakeRequest;

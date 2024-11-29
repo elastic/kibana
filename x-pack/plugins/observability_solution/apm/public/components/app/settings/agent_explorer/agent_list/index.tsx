@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiToolTip } from '@elastic/eui';
 import { AgentIcon } from '@kbn/custom-icons';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
@@ -56,12 +50,9 @@ export function getAgentsColumns({
 
         return (
           <EuiToolTip
-            content={i18n.translate(
-              'xpack.apm.agentExplorerTable.viewAgentInstances',
-              {
-                defaultMessage: 'Toggle agent instances view',
-              }
-            )}
+            content={i18n.translate('xpack.apm.agentExplorerTable.viewAgentInstances', {
+              defaultMessage: 'Toggle agent instances view',
+            })}
             delay="long"
           >
             <EuiButtonIcon
@@ -83,12 +74,9 @@ export function getAgentsColumns({
     },
     {
       field: AgentExplorerFieldName.ServiceName,
-      name: i18n.translate(
-        'xpack.apm.agentExplorerTable.serviceNameColumnLabel',
-        {
-          defaultMessage: 'Service Name',
-        }
-      ),
+      name: i18n.translate('xpack.apm.agentExplorerTable.serviceNameColumnLabel', {
+        defaultMessage: 'Service Name',
+      }),
       sortable: true,
       width: '35%',
       truncateText: true,
@@ -99,7 +87,7 @@ export function getAgentsColumns({
           content={
             <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
               <EuiFlexItem grow={false}>
-                <AgentIcon agentName={agentName} size="l" />
+                <AgentIcon agentName={agentName} size="l" role="presentation" />
               </EuiFlexItem>
               <EuiFlexItem className="eui-textTruncate">
                 <span className="eui-textTruncate">{serviceName}</span>
@@ -111,45 +99,35 @@ export function getAgentsColumns({
     },
     {
       field: AgentExplorerFieldName.Environments,
-      name: i18n.translate(
-        'xpack.apm.agentExplorerTable.environmentColumnLabel',
-        {
-          defaultMessage: 'Environment',
-        }
-      ),
+      name: i18n.translate('xpack.apm.agentExplorerTable.environmentColumnLabel', {
+        defaultMessage: 'Environment',
+      }),
       width: '15%',
       truncateText: true,
       sortable: true,
-      render: (_, { environments }) => (
-        <EnvironmentBadge environments={environments} />
-      ),
+      render: (_, { environments }) => <EnvironmentBadge environments={environments} />,
     },
     {
       field: AgentExplorerFieldName.Instances,
-      name: i18n.translate(
-        'xpack.apm.agentExplorerTable.instancesColumnLabel',
-        {
-          defaultMessage: 'Instances',
-        }
-      ),
+      name: i18n.translate('xpack.apm.agentExplorerTable.instancesColumnLabel', {
+        defaultMessage: 'Instances',
+      }),
       width: '10%',
       sortable: true,
     },
     {
       field: AgentExplorerFieldName.AgentName,
       width: '15%',
-      name: i18n.translate(
-        'xpack.apm.agentExplorerTable.agentNameColumnLabel',
-        { defaultMessage: 'Agent Name' }
-      ),
+      name: i18n.translate('xpack.apm.agentExplorerTable.agentNameColumnLabel', {
+        defaultMessage: 'Agent Name',
+      }),
       sortable: true,
     },
     {
       field: AgentExplorerFieldName.AgentVersion,
-      name: i18n.translate(
-        'xpack.apm.agentExplorerTable.agentVersionColumnLabel',
-        { defaultMessage: 'Agent Version' }
-      ),
+      name: i18n.translate('xpack.apm.agentExplorerTable.agentVersionColumnLabel', {
+        defaultMessage: 'Agent Version',
+      }),
       width: '10%',
       truncateText: true,
       render: (_, { agentVersion }) => (
@@ -159,8 +137,7 @@ export function getAgentsColumns({
             'xpack.apm.agentExplorerTable.agentVersionColumnLabel.multipleVersions',
             {
               values: { versionsCount: agentVersion.length },
-              defaultMessage:
-                '{versionsCount, plural, one {1 version} other {# versions}}',
+              defaultMessage: '{versionsCount, plural, one {1 version} other {# versions}}',
             }
           )}
         />
@@ -180,10 +157,9 @@ export function getAgentsColumns({
                 )}
               >
                 <>
-                  {i18n.translate(
-                    'xpack.apm.agentExplorerTable.agentLatestVersionColumnLabel',
-                    { defaultMessage: 'Latest Agent Version' }
-                  )}
+                  {i18n.translate('xpack.apm.agentExplorerTable.agentLatestVersionColumnLabel', {
+                    defaultMessage: 'Latest Agent Version',
+                  })}
                   &nbsp;
                   <EuiIcon
                     size="s"
@@ -197,10 +173,7 @@ export function getAgentsColumns({
             width: '10%',
             align: 'center',
             truncateText: true,
-            render: (
-              _: any,
-              { agentName, latestVersion }: AgentExplorerItem
-            ) => (
+            render: (_: any, { agentName, latestVersion }: AgentExplorerItem) => (
               <AgentLatestVersion
                 agentName={agentName}
                 isLoading={isLatestVersionsLoading}
@@ -213,10 +186,9 @@ export function getAgentsColumns({
       : []),
     {
       field: AgentExplorerFieldName.AgentDocsPageUrl,
-      name: i18n.translate(
-        'xpack.apm.agentExplorerTable.agentDocsColumnLabel',
-        { defaultMessage: 'Agent Docs' }
-      ),
+      name: i18n.translate('xpack.apm.agentExplorerTable.agentDocsColumnLabel', {
+        defaultMessage: 'Agent Docs',
+      }),
       width: '10%',
       truncateText: true,
       render: (_, { agentName, agentDocsPageUrl }) => (
@@ -268,12 +240,7 @@ export function AgentList({
         latestVersionsFailed,
         onAgentSelected,
       }),
-    [
-      selectedAgent,
-      latestAgentVersionEnabled,
-      isLatestVersionsLoading,
-      latestVersionsFailed,
-    ]
+    [selectedAgent, latestAgentVersionEnabled, isLatestVersionsLoading, latestVersionsFailed]
   );
 
   return (

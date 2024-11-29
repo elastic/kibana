@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
+import { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
 import {
-  TelemetryEventTypes,
   ITelemetryClient,
   SearchQuerySubmittedParams,
+  TelemetryEventTypes,
+  EntityInventoryAddDataParams,
+  EmptyStateClickParams,
 } from './types';
 
 export class TelemetryClient implements ITelemetryClient {
@@ -25,5 +27,17 @@ export class TelemetryClient implements ITelemetryClient {
       timerange,
       action,
     });
+  };
+
+  public reportEntityInventoryAddData = (params: EntityInventoryAddDataParams) => {
+    this.analytics.reportEvent(TelemetryEventTypes.ENTITY_INVENTORY_ADD_DATA, params);
+  };
+
+  public reportTryItClick = (params: EmptyStateClickParams) => {
+    this.analytics.reportEvent(TelemetryEventTypes.TRY_IT_CLICK, params);
+  };
+
+  public reportLearnMoreClick = (params: EmptyStateClickParams) => {
+    this.analytics.reportEvent(TelemetryEventTypes.LEARN_MORE_CLICK, params);
   };
 }

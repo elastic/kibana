@@ -8,13 +8,17 @@ import type { CoreStart } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { LensPluginStartDependencies } from '../../../plugin';
 import { createMockStartDependencies } from '../../../editor_frame_service/mocks';
-import type { TypedLensByValueInput } from '../../../embeddable/embeddable_component';
 import { EditLensEmbeddableAction } from './in_app_embeddable_edit_action';
+import { TypedLensSerializedState } from '../../../react_embeddable/types';
+import { BehaviorSubject } from 'rxjs';
 
 describe('inapp editing of Lens embeddable', () => {
   const core = coreMock.createStart();
   const mockStartDependencies =
     createMockStartDependencies() as unknown as LensPluginStartDependencies;
+
+  const renderComplete$ = new BehaviorSubject(false);
+
   describe('compatibility check', () => {
     const attributes = {
       title: 'An extremely cool default document!',
@@ -29,7 +33,7 @@ describe('inapp editing of Lens embeddable', () => {
         visualization: {},
       },
       references: [{ type: 'index-pattern', id: '1', name: 'index-pattern-0' }],
-    } as unknown as TypedLensByValueInput['attributes'];
+    } as TypedLensSerializedState['attributes'];
     it('is incompatible for ESQL charts and if ui setting for ES|QL is off', async () => {
       const inAppEditAction = new EditLensEmbeddableAction(mockStartDependencies, core);
       const context = {
@@ -37,6 +41,7 @@ describe('inapp editing of Lens embeddable', () => {
         lensEvent: {
           adapters: {},
           embeddableOutput$: undefined,
+          renderComplete$,
         },
         onUpdate: jest.fn(),
       };
@@ -51,7 +56,7 @@ describe('inapp editing of Lens embeddable', () => {
         uiSettings: {
           ...core.uiSettings,
           get: (setting: string) => {
-            return setting === 'discover:enableESQL';
+            return setting === 'enableESQL';
           },
         },
       } as CoreStart;
@@ -61,6 +66,7 @@ describe('inapp editing of Lens embeddable', () => {
         lensEvent: {
           adapters: {},
           embeddableOutput$: undefined,
+          renderComplete$,
         },
         onUpdate: jest.fn(),
       };
@@ -86,6 +92,7 @@ describe('inapp editing of Lens embeddable', () => {
         lensEvent: {
           adapters: {},
           embeddableOutput$: undefined,
+          renderComplete$,
         },
         onUpdate: jest.fn(),
       };

@@ -6,16 +6,13 @@
  */
 
 import { EuiHeaderLink } from '@elastic/eui';
-import {
-  DatasetQualityLocatorParams,
-  DATASET_QUALITY_LOCATOR_ID,
-} from '@kbn/deeplinks-observability/locators';
 import { LogsExplorerPublicState } from '@kbn/logs-explorer-plugin/public';
 import { getRouterLinkProps } from '@kbn/router-utils';
-import { BrowserUrlService } from '@kbn/share-plugin/public';
+import { LocatorPublic } from '@kbn/share-plugin/public';
 import { MatchedStateFromActor } from '@kbn/xstate-utils';
 import { useActor } from '@xstate/react';
 import React from 'react';
+import { DataQualityLocatorParams, DATA_QUALITY_LOCATOR_ID } from '@kbn/deeplinks-observability';
 import { datasetQualityLinkTitle } from '../../common/translations';
 import {
   ObservabilityLogsExplorerService,
@@ -23,20 +20,28 @@ import {
 } from '../state_machines/observability_logs_explorer/src';
 import { useKibanaContextForPlugin } from '../utils/use_kibana';
 
-export const ConnectedDatasetQualityLink = React.memo(() => {
+export const ConnectedDatasetQualityLink = () => {
   const {
     services: {
       share: { url },
     },
   } = useKibanaContextForPlugin();
   const [pageState] = useActor(useObservabilityLogsExplorerPageStateContext());
+  const locator = url.locators.get<DataQualityLocatorParams>(DATA_QUALITY_LOCATOR_ID);
 
-  if (pageState.matches({ initialized: 'validLogsExplorerState' })) {
-    return <DatasetQualityLink urlService={url} pageState={pageState} />;
-  } else {
-    return <DatasetQualityLink urlService={url} />;
+  if (!locator) {
+    return null;
   }
-});
+
+  return (
+    <DatasetQualityLink
+      locator={locator}
+      pageState={
+        pageState.matches({ initialized: 'validLogsExplorerState' }) ? pageState : undefined
+      }
+    />
+  );
+};
 
 type InitializedPageState = MatchedStateFromActor<
   ObservabilityLogsExplorerService,
@@ -45,13 +50,17 @@ type InitializedPageState = MatchedStateFromActor<
 
 const constructLocatorParams = (
   logsExplorerState: LogsExplorerPublicState
-): DatasetQualityLocatorParams => {
+): DataQualityLocatorParams => {
   const { time, refreshInterval } = logsExplorerState;
-  const locatorParams: DatasetQualityLocatorParams = {
+  const locatorParams: DataQualityLocatorParams = {
     filters: {
       timeRange: {
-        ...(time ?? { from: 'now-24h', to: 'now' }),
-        refresh: refreshInterval ?? { pause: false, value: 60000 },
+        from: time?.from || 'now-24h',
+        to: time?.to || 'now',
+        refresh: {
+          pause: refreshInterval ? refreshInterval.pause : false,
+          value: refreshInterval ? refreshInterval.value : 60000,
+        },
       },
     },
   };
@@ -61,20 +70,17 @@ const constructLocatorParams = (
 
 export const DatasetQualityLink = React.memo(
   ({
-    urlService,
+    locator,
     pageState,
   }: {
-    urlService: BrowserUrlService;
+    locator: LocatorPublic<DataQualityLocatorParams>;
     pageState?: InitializedPageState;
   }) => {
-    const locator = urlService.locators.get<DatasetQualityLocatorParams>(
-      DATASET_QUALITY_LOCATOR_ID
-    );
-    const locatorParams: DatasetQualityLocatorParams = pageState
+    const locatorParams: DataQualityLocatorParams = pageState
       ? constructLocatorParams(pageState.context.logsExplorerState)
       : {};
 
-    const datasetQualityUrl = locator?.useUrl(locatorParams);
+    const datasetQualityUrl = locator?.getRedirectUrl(locatorParams);
 
     const navigateToDatasetQuality = () => {
       locator?.navigate(locatorParams);

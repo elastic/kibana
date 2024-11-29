@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { Either } from 'fp-ts/lib/Either';
@@ -21,11 +22,14 @@ export {
 export type { RetryableEsClientError };
 
 // actions/* imports
-export type { InitActionParams, IncompatibleClusterRoutingAllocation } from './initialize_action';
-export { initAction } from './initialize_action';
+export type { IncompatibleClusterRoutingAllocation } from './check_cluster_routing_allocation';
+export { checkClusterRoutingAllocationEnabled } from './check_cluster_routing_allocation';
 
 export type { FetchIndexResponse, FetchIndicesParams } from './fetch_indices';
 export { fetchIndices } from './fetch_indices';
+
+export type { SafeWriteBlockParams } from './safe_write_block';
+export { safeWriteBlock } from './safe_write_block';
 
 export type { SetWriteBlockParams } from './set_write_block';
 export { setWriteBlock } from './set_write_block';
@@ -87,7 +91,7 @@ export { synchronizeMigrators } from './synchronize_migrators';
 
 export { createIndex } from './create_index';
 
-export { checkTargetMappings } from './check_target_mappings';
+export { checkTargetTypesMappings } from './check_target_mappings';
 
 export const noop = async (): Promise<Either<never, 'noop'>> => right('noop' as const);
 
@@ -105,10 +109,10 @@ export {
 } from './update_source_mappings_properties';
 
 import type { UnknownDocsFound } from './check_for_unknown_docs';
-import type { IncompatibleClusterRoutingAllocation } from './initialize_action';
+import type { IncompatibleClusterRoutingAllocation } from './check_cluster_routing_allocation';
 import type { ClusterShardLimitExceeded } from './create_index';
 import type { SynchronizationFailed } from './synchronize_migrators';
-import type { ActualMappingsIncomplete, ComparedMappingsChanged } from './check_target_mappings';
+import type { IndexMappingsIncomplete, TypesAdded, TypesChanged } from './check_target_mappings';
 
 export type {
   CheckForUnknownDocsParams,
@@ -158,6 +162,11 @@ export interface EsResponseTooLargeError {
   contentLength: number;
 }
 
+export interface SourceEqualsTarget {
+  type: 'source_equals_target';
+  index: string;
+}
+
 /** @internal */
 export interface AcknowledgeResponse {
   acknowledged: boolean;
@@ -182,9 +191,11 @@ export interface ActionErrorTypeMap {
   cluster_shard_limit_exceeded: ClusterShardLimitExceeded;
   es_response_too_large: EsResponseTooLargeError;
   synchronization_failed: SynchronizationFailed;
-  actual_mappings_incomplete: ActualMappingsIncomplete;
-  compared_mappings_changed: ComparedMappingsChanged;
+  index_mappings_incomplete: IndexMappingsIncomplete;
+  types_changed: TypesChanged;
+  types_added: TypesAdded;
   operation_not_supported: OperationNotSupported;
+  source_equals_target: SourceEqualsTarget;
 }
 
 /**

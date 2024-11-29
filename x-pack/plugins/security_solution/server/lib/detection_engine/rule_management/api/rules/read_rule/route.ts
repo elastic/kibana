@@ -7,6 +7,7 @@
 
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import type { ReadRuleResponse } from '../../../../../../../common/api/detection_engine/rule_management';
 import {
   ReadRuleRequestQuery,
@@ -14,9 +15,8 @@ import {
 } from '../../../../../../../common/api/detection_engine/rule_management';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
-import { buildRouteValidationWithZod } from '../../../../../../utils/build_validation/route_validation';
 import { buildSiemResponse } from '../../../../routes/utils';
-import { readRules } from '../../../logic/crud/read_rules';
+import { readRules } from '../../../logic/detection_rules_client/read_rules';
 import { getIdError, transform } from '../../../utils/utils';
 
 export const readRuleRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {
@@ -24,8 +24,10 @@ export const readRuleRoute = (router: SecuritySolutionPluginRouter, logger: Logg
     .get({
       access: 'public',
       path: DETECTION_ENGINE_RULES_URL,
-      options: {
-        tags: ['access:securitySolution'],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
       },
     })
     .addVersion(

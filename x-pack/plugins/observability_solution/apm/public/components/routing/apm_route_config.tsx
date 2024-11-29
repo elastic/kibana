@@ -23,17 +23,42 @@ import { ApmMainTemplate } from './templates/apm_main_template';
 import { ServiceGroupsList } from '../app/service_groups';
 import { offsetRt } from '../../../common/comparison_rt';
 import { diagnosticsRoute } from '../app/diagnostics';
+import { TransactionDetailsByNameLink } from '../app/transaction_details_link';
+import { EntityLink } from '../app/entities/entity_link';
 
-const ServiceGroupsTitle = i18n.translate(
-  'xpack.apm.views.serviceGroups.title',
-  { defaultMessage: 'Services' }
-);
+const ServiceGroupsTitle = i18n.translate('xpack.apm.views.serviceGroups.title', {
+  defaultMessage: 'Services',
+});
 
 /**
  * The array of route definitions to be used when the application
  * creates the routes.
  */
 const apmRoutes = {
+  '/link-to/entity/{serviceName}': {
+    element: <EntityLink />,
+    params: t.type({
+      path: t.type({
+        serviceName: t.string,
+      }),
+      query: t.partial({
+        rangeFrom: t.string,
+        rangeTo: t.string,
+      }),
+    }),
+  },
+  '/link-to/transaction': {
+    element: <TransactionDetailsByNameLink />,
+    params: t.type({
+      query: t.intersection([
+        t.type({ transactionName: t.string, serviceName: t.string }),
+        t.partial({
+          rangeFrom: t.string,
+          rangeTo: t.string,
+        }),
+      ]),
+    }),
+  },
   '/link-to/transaction/{transactionId}': {
     element: <TransactionLink />,
     params: t.intersection([
@@ -69,7 +94,13 @@ const apmRoutes = {
   },
   '/': {
     element: (
-      <Breadcrumb title="APM" href="/">
+      <Breadcrumb
+        title={i18n.translate('xpack.apm..breadcrumb.apmLabel', {
+          defaultMessage: 'APM',
+        })}
+        href="/"
+        omitOnServerless
+      >
         <Outlet />
       </Breadcrumb>
     ),
@@ -77,12 +108,13 @@ const apmRoutes = {
       // this route fails on navigation unless it's defined before home
       '/service-groups': {
         element: (
-          <Breadcrumb title={ServiceGroupsTitle} href={'/service-groups'}>
+          <Breadcrumb title={ServiceGroupsTitle} href={'/service-groups'} omitOnServerless>
             <ApmMainTemplate
               pageTitle={ServiceGroupsTitle}
               environmentFilter={false}
               showServiceGroupSaveButton={false}
               showServiceGroupsNav
+              showEnablementCallout
               selectedNavButton="serviceGroups"
             >
               <ServiceGroupsList />

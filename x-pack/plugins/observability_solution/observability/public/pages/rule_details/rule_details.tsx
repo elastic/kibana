@@ -9,7 +9,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import { EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ALERTS_FEATURE_ID, RuleExecutionStatusErrorReasons } from '@kbn/alerting-plugin/common';
+import { ALERTING_FEATURE_ID, RuleExecutionStatusErrorReasons } from '@kbn/alerting-plugin/common';
 import type { BoolQuery } from '@kbn/es-query';
 import type { AlertConsumers } from '@kbn/rule-data-utils';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
@@ -18,7 +18,7 @@ import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
 import { useFetchRuleTypes } from '../../hooks/use_fetch_rule_types';
 import { useGetFilteredRuleTypes } from '../../hooks/use_get_filtered_rule_types';
-import { PageTitle } from './components/page_title';
+import { PageTitleContent } from './components/page_title_content';
 import { DeleteConfirmationModal } from './components/delete_confirmation_modal';
 import { CenterJustifiedSpinner } from '../../components/center_justified_spinner';
 import { NoRuleFoundPanel } from './components/no_rule_found_panel';
@@ -49,9 +49,6 @@ interface RuleDetailsPathParams {
 export function RuleDetailsPage() {
   const {
     application: { capabilities, navigateToUrl },
-    charts: {
-      theme: { useChartsBaseTheme },
-    },
     http: { basePath },
     share: {
       url: { locators },
@@ -64,38 +61,39 @@ export function RuleDetailsPage() {
       getRuleDefinition: RuleDefinition,
       getRuleStatusPanel: RuleStatusPanel,
     },
+    serverless,
   } = useKibana().services;
   const { ObservabilityPageTemplate } = usePluginContext();
 
   const { ruleId } = useParams<RuleDetailsPathParams>();
   const { search } = useLocation();
-
-  const baseTheme = useChartsBaseTheme();
-
   const { rule, isLoading, isError, refetch } = useFetchRule({ ruleId });
   const filteredRuleTypes = useGetFilteredRuleTypes();
   const { ruleTypes } = useFetchRuleTypes({
     filterByRuleTypeIds: filteredRuleTypes,
   });
 
-  useBreadcrumbs([
-    {
-      text: i18n.translate('xpack.observability.breadcrumbs.alertsLinkText', {
-        defaultMessage: 'Alerts',
-      }),
-      href: basePath.prepend(paths.observability.alerts),
-      deepLinkId: 'observability-overview:alerts',
-    },
-    {
-      href: basePath.prepend(paths.observability.rules),
-      text: i18n.translate('xpack.observability.breadcrumbs.rulesLinkText', {
-        defaultMessage: 'Rules',
-      }),
-    },
-    {
-      text: rule && rule.name,
-    },
-  ]);
+  useBreadcrumbs(
+    [
+      {
+        text: i18n.translate('xpack.observability.breadcrumbs.alertsLinkText', {
+          defaultMessage: 'Alerts',
+        }),
+        href: basePath.prepend(paths.observability.alerts),
+        deepLinkId: 'observability-overview:alerts',
+      },
+      {
+        href: basePath.prepend(paths.observability.rules),
+        text: i18n.translate('xpack.observability.breadcrumbs.rulesLinkText', {
+          defaultMessage: 'Rules',
+        }),
+      },
+      {
+        text: rule && rule.name,
+      },
+    ],
+    { serverless }
+  );
 
   const [activeTabId, setActiveTabId] = useState<TabId>(() => {
     const searchParams = new URLSearchParams(search);
@@ -186,7 +184,7 @@ export function RuleDetailsPage() {
   const isEditable = isRuleEditable({ capabilities, rule, ruleType, ruleTypeRegistry });
 
   const featureIds =
-    rule?.consumer === ALERTS_FEATURE_ID && ruleType?.producer
+    rule?.consumer === ALERTING_FEATURE_ID && ruleType?.producer
       ? [ruleType.producer as AlertConsumers]
       : rule
       ? [rule.consumer as AlertConsumers]
@@ -200,14 +198,17 @@ export function RuleDetailsPage() {
       : '';
 
   if (isLoading || isRuleDeleting) return <CenterJustifiedSpinner />;
-
   if (!rule || isError) return <NoRuleFoundPanel />;
 
   return (
     <ObservabilityPageTemplate
       data-test-subj="ruleDetails"
       pageHeader={{
-        pageTitle: <PageTitle rule={rule} />,
+        pageTitle: rule.name,
+        pageTitleProps: {
+          'data-test-subj': 'ruleName',
+        },
+        children: <PageTitleContent rule={rule} />,
         bottomBorder: false,
         rightSideItems: [
           <HeaderActions
@@ -233,7 +234,6 @@ export function RuleDetailsPage() {
 
         <EuiFlexItem style={{ minWidth: 350 }}>
           <AlertSummaryWidget
-            chartProps={{ baseTheme }}
             featureIds={featureIds}
             onClick={handleAlertSummaryWidgetClick}
             timeRange={alertSummaryWidgetTimeRange}

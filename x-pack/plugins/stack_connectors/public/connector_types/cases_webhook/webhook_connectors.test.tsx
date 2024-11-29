@@ -7,8 +7,9 @@
 
 import React from 'react';
 import CasesWebhookActionConnectorFields from './webhook_connectors';
-import { ConnectorFormTestProvider, waitForComponentToUpdate } from '../lib/test_utils';
-import { act, render } from '@testing-library/react';
+import { ConnectorFormTestProvider } from '../lib/test_utils';
+import { render, screen, waitFor } from '@testing-library/react';
+import { AuthType } from '../../../common/auth/constants';
 import userEvent from '@testing-library/user-event';
 import * as i18n from './translations';
 
@@ -27,6 +28,7 @@ jest.mock('@kbn/triggers-actions-ui-plugin/public', () => {
 const invalidJsonTitle = `{"fields":{"summary":"wrong","description":{{{case.description}}},"project":{"key":"ROC"},"issuetype":{"id":"10024"}}}`;
 const invalidJsonBoth = `{"fields":{"summary":"wrong","description":"wrong","project":{"key":"ROC"},"issuetype":{"id":"10024"}}}`;
 const config = {
+  authType: AuthType.Basic,
   createCommentJson: '{"body":{{{case.comment}}}}',
   createCommentMethod: 'post',
   createCommentUrl: 'https://coolsite.net/rest/api/2/issue/{{{external.system.id}}}/comment',
@@ -40,6 +42,7 @@ const config = {
   headers: [{ key: 'content-type', value: 'text' }],
   viewIncidentUrl: 'https://coolsite.net/browse/{{{external.system.title}}}',
   getIncidentUrl: 'https://coolsite.net/rest/api/2/issue/{{{external.system.id}}}',
+  getIncidentMethod: 'get',
   updateIncidentJson:
     '{"fields":{"summary":{{{case.title}}},"description":{{{case.description}}},"project":{"key":"ROC"},"issuetype":{"id":"10024"}}}',
   updateIncidentMethod: 'put',
@@ -59,8 +62,8 @@ const actionConnector = {
 };
 
 describe('CasesWebhookActionConnectorFields renders', () => {
-  test('All inputs are properly rendered', async () => {
-    const { getByTestId } = render(
+  it('All inputs are properly rendered', async () => {
+    render(
       <ConnectorFormTestProvider connector={actionConnector}>
         <CasesWebhookActionConnectorFields
           readOnly={false}
@@ -69,55 +72,113 @@ describe('CasesWebhookActionConnectorFields renders', () => {
         />
       </ConnectorFormTestProvider>
     );
-    await waitForComponentToUpdate();
-    expect(getByTestId('webhookUserInput')).toBeInTheDocument();
-    expect(getByTestId('webhookPasswordInput')).toBeInTheDocument();
-    expect(getByTestId('webhookHeadersKeyInput')).toBeInTheDocument();
-    expect(getByTestId('webhookHeadersValueInput')).toBeInTheDocument();
-    expect(getByTestId('webhookCreateMethodSelect')).toBeInTheDocument();
-    expect(getByTestId('webhookCreateUrlText')).toBeInTheDocument();
-    expect(getByTestId('webhookCreateIncidentJson')).toBeInTheDocument();
-    expect(getByTestId('createIncidentResponseKeyText')).toBeInTheDocument();
-    expect(getByTestId('getIncidentUrlInput')).toBeInTheDocument();
-    expect(getByTestId('getIncidentResponseExternalTitleKeyText')).toBeInTheDocument();
-    expect(getByTestId('viewIncidentUrlInput')).toBeInTheDocument();
-    expect(getByTestId('webhookUpdateMethodSelect')).toBeInTheDocument();
-    expect(getByTestId('updateIncidentUrlInput')).toBeInTheDocument();
-    expect(getByTestId('webhookUpdateIncidentJson')).toBeInTheDocument();
-    expect(getByTestId('webhookCreateCommentMethodSelect')).toBeInTheDocument();
-    expect(getByTestId('createCommentUrlInput')).toBeInTheDocument();
-    expect(getByTestId('webhookCreateCommentJson')).toBeInTheDocument();
-  });
-  test('Toggles work properly', async () => {
-    const { getByTestId, queryByTestId } = render(
-      <ConnectorFormTestProvider connector={actionConnector}>
-        <CasesWebhookActionConnectorFields
-          readOnly={false}
-          isEdit={false}
-          registerPreSubmitValidator={() => {}}
-        />
-      </ConnectorFormTestProvider>
-    );
-    await waitForComponentToUpdate();
-    expect(getByTestId('hasAuthToggle')).toHaveAttribute('aria-checked', 'true');
-    await act(async () => {
-      userEvent.click(getByTestId('hasAuthToggle'));
-    });
-    expect(getByTestId('hasAuthToggle')).toHaveAttribute('aria-checked', 'false');
-    expect(queryByTestId('webhookUserInput')).not.toBeInTheDocument();
-    expect(queryByTestId('webhookPasswordInput')).not.toBeInTheDocument();
 
-    expect(getByTestId('webhookViewHeadersSwitch')).toHaveAttribute('aria-checked', 'true');
-    await act(async () => {
-      userEvent.click(getByTestId('webhookViewHeadersSwitch'));
-    });
-    expect(getByTestId('webhookViewHeadersSwitch')).toHaveAttribute('aria-checked', 'false');
-    expect(queryByTestId('webhookHeadersKeyInput')).not.toBeInTheDocument();
-    expect(queryByTestId('webhookHeadersValueInput')).not.toBeInTheDocument();
+    expect(await screen.findByTestId('authNone')).toBeInTheDocument();
+    expect(await screen.findByTestId('authBasic')).toBeInTheDocument();
+    expect(await screen.findByTestId('authSSL')).toBeInTheDocument();
+    expect(await screen.findByTestId('webhookUserInput')).toBeInTheDocument();
+    expect(await screen.findByTestId('webhookPasswordInput')).toBeInTheDocument();
+    expect(await screen.findByTestId('webhookHeadersKeyInput')).toBeInTheDocument();
+    expect(await screen.findByTestId('webhookHeadersValueInput')).toBeInTheDocument();
+    expect(await screen.findByTestId('webhookCreateMethodSelect')).toBeInTheDocument();
+    expect(await screen.findByTestId('webhookCreateUrlText')).toBeInTheDocument();
+    expect(await screen.findByTestId('webhookCreateIncidentJson')).toBeInTheDocument();
+    expect(await screen.findByTestId('createIncidentResponseKeyText')).toBeInTheDocument();
+    expect(await screen.findByTestId('getIncidentUrlInput')).toBeInTheDocument();
+    expect(
+      await screen.findByTestId('getIncidentResponseExternalTitleKeyText')
+    ).toBeInTheDocument();
+    expect(await screen.findByTestId('viewIncidentUrlInput')).toBeInTheDocument();
+    expect(await screen.findByTestId('webhookUpdateMethodSelect')).toBeInTheDocument();
+    expect(await screen.findByTestId('updateIncidentUrlInput')).toBeInTheDocument();
+    expect(await screen.findByTestId('webhookUpdateIncidentJson')).toBeInTheDocument();
+    expect(await screen.findByTestId('webhookCreateCommentMethodSelect')).toBeInTheDocument();
+    expect(await screen.findByTestId('createCommentUrlInput')).toBeInTheDocument();
+    expect(await screen.findByTestId('webhookCreateCommentJson')).toBeInTheDocument();
   });
+
+  it('Add comment to case section is rendered only when the toggle button is on', async () => {
+    const incompleteActionConnector = {
+      ...actionConnector,
+      config: {
+        ...actionConnector.config,
+        createCommentUrl: undefined,
+        createCommentJson: undefined,
+      },
+    };
+    render(
+      <ConnectorFormTestProvider connector={incompleteActionConnector}>
+        <CasesWebhookActionConnectorFields
+          readOnly={false}
+          isEdit={false}
+          registerPreSubmitValidator={() => {}}
+        />
+      </ConnectorFormTestProvider>
+    );
+
+    await userEvent.click(await screen.findByTestId('webhookAddCommentToggle'));
+
+    expect(await screen.findByTestId('webhookCreateCommentMethodSelect')).toBeInTheDocument();
+    expect(await screen.findByTestId('createCommentUrlInput')).toBeInTheDocument();
+    expect(await screen.findByTestId('webhookCreateCommentJson')).toBeInTheDocument();
+  });
+
+  it('Toggle button is active when create comment section fields are populated', async () => {
+    render(
+      <ConnectorFormTestProvider connector={actionConnector}>
+        <CasesWebhookActionConnectorFields
+          readOnly={false}
+          isEdit={false}
+          registerPreSubmitValidator={() => {}}
+        />
+      </ConnectorFormTestProvider>
+    );
+
+    expect(await screen.findByTestId('webhookAddCommentToggle')).toHaveAttribute(
+      'aria-checked',
+      'true'
+    );
+  });
+
+  it('connector auth toggles work as expected', async () => {
+    render(
+      <ConnectorFormTestProvider connector={actionConnector}>
+        <CasesWebhookActionConnectorFields
+          readOnly={false}
+          isEdit={false}
+          registerPreSubmitValidator={() => {}}
+        />
+      </ConnectorFormTestProvider>
+    );
+
+    const authNoneToggle = await screen.findByTestId('authNone');
+
+    expect(authNoneToggle).toBeInTheDocument();
+    expect(await screen.findByTestId('authBasic')).toBeInTheDocument();
+    expect(await screen.findByTestId('webhookUserInput')).toBeInTheDocument();
+    expect(await screen.findByTestId('webhookPasswordInput')).toBeInTheDocument();
+
+    await userEvent.click(authNoneToggle);
+
+    expect(screen.queryByTestId('webhookUserInput')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('webhookPasswordInput')).not.toBeInTheDocument();
+
+    expect(await screen.findByTestId('webhookViewHeadersSwitch')).toHaveAttribute(
+      'aria-checked',
+      'true'
+    );
+    await userEvent.click(await screen.findByTestId('webhookViewHeadersSwitch'));
+    expect(await screen.findByTestId('webhookViewHeadersSwitch')).toHaveAttribute(
+      'aria-checked',
+      'false'
+    );
+    expect(screen.queryByTestId('webhookHeadersKeyInput')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('webhookHeadersValueInput')).not.toBeInTheDocument();
+  });
+
   describe('Step Validation', () => {
-    test('Steps work correctly when all fields valid', async () => {
-      const { queryByTestId, getByTestId } = render(
+    it('Steps work correctly when all fields valid', async () => {
+      render(
         <ConnectorFormTestProvider connector={actionConnector}>
           <CasesWebhookActionConnectorFields
             readOnly={false}
@@ -126,52 +187,52 @@ describe('CasesWebhookActionConnectorFields renders', () => {
           />
         </ConnectorFormTestProvider>
       );
-      await waitForComponentToUpdate();
-      expect(getByTestId('horizontalStep1-current')).toBeInTheDocument();
-      expect(getByTestId('horizontalStep2-incomplete')).toBeInTheDocument();
-      expect(getByTestId('horizontalStep3-incomplete')).toBeInTheDocument();
-      expect(getByTestId('horizontalStep4-incomplete')).toBeInTheDocument();
-      expect(getByTestId('authStep')).toHaveAttribute('style', 'display: block;');
-      expect(getByTestId('createStep')).toHaveAttribute('style', 'display: none;');
-      expect(getByTestId('getStep')).toHaveAttribute('style', 'display: none;');
-      expect(getByTestId('updateStep')).toHaveAttribute('style', 'display: none;');
-      expect(queryByTestId('casesWebhookBack')).not.toBeInTheDocument();
-      await act(async () => {
-        userEvent.click(getByTestId('casesWebhookNext'));
-      });
-      expect(getByTestId('horizontalStep1-complete')).toBeInTheDocument();
-      expect(getByTestId('horizontalStep2-current')).toBeInTheDocument();
-      expect(getByTestId('horizontalStep3-incomplete')).toBeInTheDocument();
-      expect(getByTestId('horizontalStep4-incomplete')).toBeInTheDocument();
-      expect(getByTestId('authStep')).toHaveAttribute('style', 'display: none;');
-      expect(getByTestId('createStep')).toHaveAttribute('style', 'display: block;');
-      expect(getByTestId('getStep')).toHaveAttribute('style', 'display: none;');
-      expect(getByTestId('updateStep')).toHaveAttribute('style', 'display: none;');
-      await act(async () => {
-        userEvent.click(getByTestId('casesWebhookNext'));
-      });
-      expect(getByTestId('horizontalStep1-complete')).toBeInTheDocument();
-      expect(getByTestId('horizontalStep2-complete')).toBeInTheDocument();
-      expect(getByTestId('horizontalStep3-current')).toBeInTheDocument();
-      expect(getByTestId('horizontalStep4-incomplete')).toBeInTheDocument();
-      expect(getByTestId('authStep')).toHaveAttribute('style', 'display: none;');
-      expect(getByTestId('createStep')).toHaveAttribute('style', 'display: none;');
-      expect(getByTestId('getStep')).toHaveAttribute('style', 'display: block;');
-      expect(getByTestId('updateStep')).toHaveAttribute('style', 'display: none;');
-      await act(async () => {
-        userEvent.click(getByTestId('casesWebhookNext'));
-      });
-      expect(getByTestId('horizontalStep1-complete')).toBeInTheDocument();
-      expect(getByTestId('horizontalStep2-complete')).toBeInTheDocument();
-      expect(getByTestId('horizontalStep3-complete')).toBeInTheDocument();
-      expect(getByTestId('horizontalStep4-current')).toBeInTheDocument();
-      expect(getByTestId('authStep')).toHaveAttribute('style', 'display: none;');
-      expect(getByTestId('createStep')).toHaveAttribute('style', 'display: none;');
-      expect(getByTestId('getStep')).toHaveAttribute('style', 'display: none;');
-      expect(getByTestId('updateStep')).toHaveAttribute('style', 'display: block;');
-      expect(queryByTestId('casesWebhookNext')).not.toBeInTheDocument();
+      expect(await screen.findByTestId('horizontalStep1-current')).toBeInTheDocument();
+      expect(await screen.findByTestId('horizontalStep2-incomplete')).toBeInTheDocument();
+      expect(await screen.findByTestId('horizontalStep3-incomplete')).toBeInTheDocument();
+      expect(await screen.findByTestId('horizontalStep4-incomplete')).toBeInTheDocument();
+      expect(await screen.findByTestId('authStep')).toHaveAttribute('style', 'display: block;');
+      expect(await screen.findByTestId('createStep')).toHaveAttribute('style', 'display: none;');
+      expect(await screen.findByTestId('getStep')).toHaveAttribute('style', 'display: none;');
+      expect(await screen.findByTestId('updateStep')).toHaveAttribute('style', 'display: none;');
+      expect(screen.queryByTestId('casesWebhookBack')).not.toBeInTheDocument();
+
+      await userEvent.click(await screen.findByTestId('casesWebhookNext'));
+
+      expect(await screen.findByTestId('horizontalStep1-complete')).toBeInTheDocument();
+      expect(await screen.findByTestId('horizontalStep2-current')).toBeInTheDocument();
+      expect(await screen.findByTestId('horizontalStep3-incomplete')).toBeInTheDocument();
+      expect(await screen.findByTestId('horizontalStep4-incomplete')).toBeInTheDocument();
+      expect(await screen.findByTestId('authStep')).toHaveAttribute('style', 'display: none;');
+      expect(await screen.findByTestId('createStep')).toHaveAttribute('style', 'display: block;');
+      expect(await screen.findByTestId('getStep')).toHaveAttribute('style', 'display: none;');
+      expect(await screen.findByTestId('updateStep')).toHaveAttribute('style', 'display: none;');
+
+      await userEvent.click(await screen.findByTestId('casesWebhookNext'));
+
+      expect(await screen.findByTestId('horizontalStep1-complete')).toBeInTheDocument();
+      expect(await screen.findByTestId('horizontalStep2-complete')).toBeInTheDocument();
+      expect(await screen.findByTestId('horizontalStep3-current')).toBeInTheDocument();
+      expect(await screen.findByTestId('horizontalStep4-incomplete')).toBeInTheDocument();
+      expect(await screen.findByTestId('authStep')).toHaveAttribute('style', 'display: none;');
+      expect(await screen.findByTestId('createStep')).toHaveAttribute('style', 'display: none;');
+      expect(await screen.findByTestId('getStep')).toHaveAttribute('style', 'display: block;');
+      expect(await screen.findByTestId('updateStep')).toHaveAttribute('style', 'display: none;');
+
+      await userEvent.click(await screen.findByTestId('casesWebhookNext'));
+
+      expect(await screen.findByTestId('horizontalStep1-complete')).toBeInTheDocument();
+      expect(await screen.findByTestId('horizontalStep2-complete')).toBeInTheDocument();
+      expect(await screen.findByTestId('horizontalStep3-complete')).toBeInTheDocument();
+      expect(await screen.findByTestId('horizontalStep4-current')).toBeInTheDocument();
+      expect(await screen.findByTestId('authStep')).toHaveAttribute('style', 'display: none;');
+      expect(await screen.findByTestId('createStep')).toHaveAttribute('style', 'display: none;');
+      expect(await screen.findByTestId('getStep')).toHaveAttribute('style', 'display: none;');
+      expect(await screen.findByTestId('updateStep')).toHaveAttribute('style', 'display: block;');
+      expect(screen.queryByTestId('casesWebhookNext')).not.toBeInTheDocument();
     });
-    test('Step 1 is properly validated', async () => {
+
+    it('Step 1 is properly validated', async () => {
       const incompleteActionConnector = {
         ...actionConnector,
         secrets: {
@@ -179,7 +240,7 @@ describe('CasesWebhookActionConnectorFields renders', () => {
           password: '',
         },
       };
-      const { getByTestId } = render(
+      render(
         <ConnectorFormTestProvider connector={incompleteActionConnector}>
           <CasesWebhookActionConnectorFields
             readOnly={false}
@@ -188,29 +249,22 @@ describe('CasesWebhookActionConnectorFields renders', () => {
           />
         </ConnectorFormTestProvider>
       );
-      await waitForComponentToUpdate();
 
-      expect(getByTestId('horizontalStep1-current')).toBeInTheDocument();
+      expect(await screen.findByTestId('horizontalStep1-current')).toBeInTheDocument();
 
-      await act(async () => {
-        userEvent.click(getByTestId('casesWebhookNext'));
-      });
-      await waitForComponentToUpdate();
+      await userEvent.click(await screen.findByTestId('casesWebhookNext'));
 
-      expect(getByTestId('horizontalStep1-danger')).toBeInTheDocument();
+      expect(await screen.findByTestId('horizontalStep1-danger')).toBeInTheDocument();
 
-      await act(async () => {
-        userEvent.click(getByTestId('hasAuthToggle'));
-        userEvent.click(getByTestId('webhookViewHeadersSwitch'));
-      });
-      await act(async () => {
-        userEvent.click(getByTestId('casesWebhookNext'));
-      });
+      await userEvent.click(await screen.findByTestId('authNone'));
+      await userEvent.click(await screen.findByTestId('webhookViewHeadersSwitch'));
+      await userEvent.click(await screen.findByTestId('casesWebhookNext'));
 
-      expect(getByTestId('horizontalStep1-complete')).toBeInTheDocument();
-      expect(getByTestId('horizontalStep2-current')).toBeInTheDocument();
+      expect(await screen.findByTestId('horizontalStep1-complete')).toBeInTheDocument();
+      expect(await screen.findByTestId('horizontalStep2-current')).toBeInTheDocument();
     });
-    test('Step 2 is properly validated', async () => {
+
+    it('Step 2 is properly validated', async () => {
       const incompleteActionConnector = {
         ...actionConnector,
         config: {
@@ -218,7 +272,7 @@ describe('CasesWebhookActionConnectorFields renders', () => {
           createIncidentUrl: undefined,
         },
       };
-      const { getByText, getByTestId } = render(
+      render(
         <ConnectorFormTestProvider connector={incompleteActionConnector}>
           <CasesWebhookActionConnectorFields
             readOnly={false}
@@ -227,37 +281,32 @@ describe('CasesWebhookActionConnectorFields renders', () => {
           />
         </ConnectorFormTestProvider>
       );
-      await waitForComponentToUpdate();
-      expect(getByTestId('horizontalStep2-incomplete')).toBeInTheDocument();
-      await act(async () => {
-        userEvent.click(getByTestId('casesWebhookNext'));
-      });
-      await act(async () => {
-        userEvent.click(getByTestId('casesWebhookNext'));
-      });
-      getByText(i18n.CREATE_URL_REQUIRED);
-      expect(getByTestId('horizontalStep2-danger')).toBeInTheDocument();
-      await act(async () => {
-        await userEvent.type(
-          getByTestId('webhookCreateUrlText'),
-          `{selectall}{backspace}${config.createIncidentUrl}`,
-          {
-            delay: 10,
-          }
-        );
-      });
-      await act(async () => {
-        userEvent.click(getByTestId('casesWebhookNext'));
-      });
-      expect(getByTestId('horizontalStep2-complete')).toBeInTheDocument();
-      expect(getByTestId('horizontalStep3-current')).toBeInTheDocument();
-      await act(async () => {
-        userEvent.click(getByTestId('horizontalStep2-complete'));
-      });
-      expect(getByTestId('horizontalStep2-current')).toBeInTheDocument();
-      expect(getByTestId('horizontalStep3-incomplete')).toBeInTheDocument();
+      expect(await screen.findByTestId('horizontalStep2-incomplete')).toBeInTheDocument();
+      await userEvent.click(await screen.findByTestId('casesWebhookNext'));
+      await userEvent.click(await screen.findByTestId('casesWebhookNext'));
+      expect(await screen.findByText(i18n.CREATE_URL_REQUIRED)).toBeInTheDocument();
+      expect(await screen.findByTestId('horizontalStep2-danger')).toBeInTheDocument();
+      await userEvent.clear(await screen.findByTestId('webhookCreateUrlText'));
+      await userEvent.type(
+        await screen.findByTestId('webhookCreateUrlText'),
+        config.createIncidentUrl,
+        {
+          delay: 10,
+        }
+      );
+
+      await userEvent.click(await screen.findByTestId('casesWebhookNext'));
+
+      expect(await screen.findByTestId('horizontalStep2-complete')).toBeInTheDocument();
+      expect(await screen.findByTestId('horizontalStep3-current')).toBeInTheDocument();
+
+      await userEvent.click(await screen.findByTestId('horizontalStep2-complete'));
+
+      expect(await screen.findByTestId('horizontalStep2-current')).toBeInTheDocument();
+      expect(await screen.findByTestId('horizontalStep3-incomplete')).toBeInTheDocument();
     });
-    test('Step 3 is properly validated', async () => {
+
+    it('Step 3 is properly validated', async () => {
       const incompleteActionConnector = {
         ...actionConnector,
         config: {
@@ -265,7 +314,7 @@ describe('CasesWebhookActionConnectorFields renders', () => {
           getIncidentResponseExternalTitleKey: undefined,
         },
       };
-      const { getByText, getByTestId } = render(
+      render(
         <ConnectorFormTestProvider connector={incompleteActionConnector}>
           <CasesWebhookActionConnectorFields
             readOnly={false}
@@ -274,38 +323,35 @@ describe('CasesWebhookActionConnectorFields renders', () => {
           />
         </ConnectorFormTestProvider>
       );
-      await waitForComponentToUpdate();
-      expect(getByTestId('horizontalStep2-incomplete')).toBeInTheDocument();
-      await act(async () => {
-        userEvent.click(getByTestId('casesWebhookNext'));
-      });
-      await act(async () => {
-        userEvent.click(getByTestId('casesWebhookNext'));
-      });
-      await act(async () => {
-        userEvent.click(getByTestId('casesWebhookNext'));
-      });
-      getByText(i18n.GET_RESPONSE_EXTERNAL_TITLE_KEY_REQUIRED);
-      expect(getByTestId('horizontalStep3-danger')).toBeInTheDocument();
-      await act(async () => {
-        await userEvent.type(
-          getByTestId('getIncidentResponseExternalTitleKeyText'),
-          `{selectall}{backspace}${config.getIncidentResponseExternalTitleKey}`,
-          {
-            delay: 10,
-          }
-        );
-      });
-      await act(async () => {
-        userEvent.click(getByTestId('casesWebhookNext'));
-      });
-      expect(getByTestId('horizontalStep3-complete')).toBeInTheDocument();
-      expect(getByTestId('horizontalStep4-current')).toBeInTheDocument();
-      await act(async () => {
-        userEvent.click(getByTestId('horizontalStep3-complete'));
-      });
-      expect(getByTestId('horizontalStep3-current')).toBeInTheDocument();
-      expect(getByTestId('horizontalStep4-incomplete')).toBeInTheDocument();
+      expect(await screen.findByTestId('horizontalStep2-incomplete')).toBeInTheDocument();
+
+      await userEvent.click(await screen.findByTestId('casesWebhookNext'));
+      await userEvent.click(await screen.findByTestId('casesWebhookNext'));
+      await userEvent.click(await screen.findByTestId('casesWebhookNext'));
+
+      expect(
+        await screen.findByText(i18n.GET_RESPONSE_EXTERNAL_TITLE_KEY_REQUIRED)
+      ).toBeInTheDocument();
+      expect(await screen.findByTestId('horizontalStep3-danger')).toBeInTheDocument();
+
+      await userEvent.clear(await screen.findByTestId('getIncidentResponseExternalTitleKeyText'));
+      await userEvent.type(
+        await screen.findByTestId('getIncidentResponseExternalTitleKeyText'),
+        config.getIncidentResponseExternalTitleKey,
+        {
+          delay: 10,
+        }
+      );
+
+      await userEvent.click(await screen.findByTestId('casesWebhookNext'));
+
+      expect(await screen.findByTestId('horizontalStep3-complete')).toBeInTheDocument();
+      expect(await screen.findByTestId('horizontalStep4-current')).toBeInTheDocument();
+
+      await userEvent.click(await screen.findByTestId('horizontalStep3-complete'));
+
+      expect(await screen.findByTestId('horizontalStep3-current')).toBeInTheDocument();
+      expect(await screen.findByTestId('horizontalStep4-incomplete')).toBeInTheDocument();
     });
 
     // step 4 is not validated like the others since it is the last step
@@ -346,7 +392,7 @@ describe('CasesWebhookActionConnectorFields renders', () => {
     ];
 
     it('connector validation succeeds when connector config is valid', async () => {
-      const { getByTestId } = render(
+      render(
         <ConnectorFormTestProvider connector={actionConnector} onSubmit={onSubmit}>
           <CasesWebhookActionConnectorFields
             readOnly={false}
@@ -356,20 +402,20 @@ describe('CasesWebhookActionConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await act(async () => {
-        userEvent.click(getByTestId('form-test-provide-submit'));
-      });
+      await userEvent.click(await screen.findByTestId('form-test-provide-submit'));
       const { isPreconfigured, ...rest } = actionConnector;
-
-      expect(onSubmit).toBeCalledWith({
-        data: {
-          ...rest,
-          __internal__: {
-            hasHeaders: true,
+      await waitFor(() =>
+        expect(onSubmit).toBeCalledWith({
+          data: {
+            ...rest,
+            __internal__: {
+              hasCA: false,
+              hasHeaders: true,
+            },
           },
-        },
-        isValid: true,
-      });
+          isValid: true,
+        })
+      );
     });
 
     it('connector validation succeeds when auth=false', async () => {
@@ -381,7 +427,7 @@ describe('CasesWebhookActionConnectorFields renders', () => {
         },
       };
 
-      const { getByTestId } = render(
+      render(
         <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit}>
           <CasesWebhookActionConnectorFields
             readOnly={false}
@@ -391,24 +437,26 @@ describe('CasesWebhookActionConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await act(async () => {
-        userEvent.click(getByTestId('form-test-provide-submit'));
-      });
+      await userEvent.click(await screen.findByTestId('form-test-provide-submit'));
 
       const { isPreconfigured, secrets, ...rest } = actionConnector;
-      expect(onSubmit).toBeCalledWith({
-        data: {
-          ...rest,
-          config: {
-            ...actionConnector.config,
-            hasAuth: false,
+      await waitFor(() =>
+        expect(onSubmit).toBeCalledWith({
+          data: {
+            ...rest,
+            config: {
+              ...actionConnector.config,
+              hasAuth: false,
+              authType: null,
+            },
+            __internal__: {
+              hasCA: false,
+              hasHeaders: true,
+            },
           },
-          __internal__: {
-            hasHeaders: true,
-          },
-        },
-        isValid: true,
-      });
+          isValid: true,
+        })
+      );
     });
 
     it('connector validation succeeds without headers', async () => {
@@ -420,7 +468,7 @@ describe('CasesWebhookActionConnectorFields renders', () => {
         },
       };
 
-      const { getByTestId } = render(
+      render(
         <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit}>
           <CasesWebhookActionConnectorFields
             readOnly={false}
@@ -430,22 +478,23 @@ describe('CasesWebhookActionConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await act(async () => {
-        userEvent.click(getByTestId('form-test-provide-submit'));
-      });
+      await userEvent.click(await screen.findByTestId('form-test-provide-submit'));
 
       const { isPreconfigured, ...rest } = actionConnector;
       const { headers, ...rest2 } = actionConnector.config;
-      expect(onSubmit).toBeCalledWith({
-        data: {
-          ...rest,
-          config: rest2,
-          __internal__: {
-            hasHeaders: false,
+      await waitFor(() =>
+        expect(onSubmit).toBeCalledWith({
+          data: {
+            ...rest,
+            config: rest2,
+            __internal__: {
+              hasCA: false,
+              hasHeaders: false,
+            },
           },
-        },
-        isValid: true,
-      });
+          isValid: true,
+        })
+      );
     });
 
     it('validates correctly if the method is empty', async () => {
@@ -457,7 +506,7 @@ describe('CasesWebhookActionConnectorFields renders', () => {
         },
       };
 
-      const res = render(
+      render(
         <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit}>
           <CasesWebhookActionConnectorFields
             readOnly={false}
@@ -467,11 +516,8 @@ describe('CasesWebhookActionConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await act(async () => {
-        userEvent.click(res.getByTestId('form-test-provide-submit'));
-      });
-
-      expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });
+      await userEvent.click(await screen.findByTestId('form-test-provide-submit'));
+      await waitFor(() => expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false }));
     });
 
     it.each(tests)('validates correctly %p', async (field, value) => {
@@ -483,7 +529,7 @@ describe('CasesWebhookActionConnectorFields renders', () => {
         },
       };
 
-      const res = render(
+      render(
         <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit}>
           <CasesWebhookActionConnectorFields
             readOnly={false}
@@ -493,17 +539,16 @@ describe('CasesWebhookActionConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await act(async () => {
-        await userEvent.type(res.getByTestId(field), `{selectall}{backspace}${value}`, {
+      await userEvent.clear(await screen.findByTestId(field));
+      if (value !== '') {
+        await userEvent.type(await screen.findByTestId(field), value, {
           delay: 10,
         });
-      });
+      }
 
-      await act(async () => {
-        userEvent.click(res.getByTestId('form-test-provide-submit'));
-      });
+      await userEvent.click(await screen.findByTestId('form-test-provide-submit'));
 
-      expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });
+      await waitFor(() => expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false }));
     });
 
     it.each(mustacheTests)(
@@ -518,7 +563,7 @@ describe('CasesWebhookActionConnectorFields renders', () => {
           },
         };
 
-        const res = render(
+        render(
           <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit}>
             <CasesWebhookActionConnectorFields
               readOnly={false}
@@ -528,13 +573,85 @@ describe('CasesWebhookActionConnectorFields renders', () => {
           </ConnectorFormTestProvider>
         );
 
-        await act(async () => {
-          userEvent.click(res.getByTestId('form-test-provide-submit'));
-        });
-
-        expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });
-        expect(res.getByText(i18n.MISSING_VARIABLES(missingVariables))).toBeInTheDocument();
+        await userEvent.click(await screen.findByTestId('form-test-provide-submit'));
+        await waitFor(() => expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false }));
+        expect(
+          await screen.findByText(i18n.MISSING_VARIABLES(missingVariables))
+        ).toBeInTheDocument();
       }
     );
+
+    it('validates get incident json required correctly', async () => {
+      const connector = {
+        ...actionConnector,
+        config: {
+          ...actionConnector.config,
+          getIncidentUrl: 'https://coolsite.net/rest/api/2/issue',
+          getIncidentMethod: 'post',
+          headers: [],
+        },
+      };
+
+      render(
+        <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit}>
+          <CasesWebhookActionConnectorFields
+            readOnly={false}
+            isEdit={false}
+            registerPreSubmitValidator={() => {}}
+          />
+        </ConnectorFormTestProvider>
+      );
+
+      await userEvent.click(await screen.findByTestId('form-test-provide-submit'));
+      await waitFor(() => expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false }));
+      expect(await screen.findByText(i18n.GET_INCIDENT_REQUIRED)).toBeInTheDocument();
+    });
+
+    it('validation succeeds get incident url with post correctly', async () => {
+      const connector = {
+        ...actionConnector,
+        config: {
+          ...actionConnector.config,
+          getIncidentUrl: 'https://coolsite.net/rest/api/2/issue/{{{external.system.id}}}',
+          getIncidentMethod: 'post',
+          getIncidentJson: '{"id": {{{external.system.id}}} }',
+          headers: [],
+        },
+      };
+
+      const { isPreconfigured, ...rest } = actionConnector;
+      const { headers, ...rest2 } = actionConnector.config;
+
+      render(
+        <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit}>
+          <CasesWebhookActionConnectorFields
+            readOnly={false}
+            isEdit={false}
+            registerPreSubmitValidator={() => {}}
+          />
+        </ConnectorFormTestProvider>
+      );
+
+      await userEvent.click(await screen.findByTestId('form-test-provide-submit'));
+
+      await waitFor(() =>
+        expect(onSubmit).toHaveBeenCalledWith({
+          data: {
+            __internal__: {
+              hasCA: false,
+              hasHeaders: true,
+            },
+            ...rest,
+            config: {
+              ...rest2,
+              getIncidentUrl: 'https://coolsite.net/rest/api/2/issue/{{{external.system.id}}}',
+              getIncidentMethod: 'post',
+              getIncidentJson: '{"id": {{{external.system.id}}} }',
+            },
+          },
+          isValid: true,
+        })
+      );
+    });
   });
 });

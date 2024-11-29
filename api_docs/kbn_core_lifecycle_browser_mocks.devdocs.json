@@ -6,26 +6,10 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
     "objects": [
       {
         "parentPluginId": "@kbn/core-lifecycle-browser-mocks",
-        "id": "def-common.coreLifecycleMock",
+        "id": "def-public.coreLifecycleMock",
         "type": "Object",
         "tags": [],
         "label": "coreLifecycleMock",
@@ -36,7 +20,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-lifecycle-browser-mocks",
-            "id": "def-common.coreLifecycleMock.createCoreSetup",
+            "id": "def-public.coreLifecycleMock.createCoreSetup",
             "type": "Function",
             "tags": [],
             "label": "createCoreSetup",
@@ -45,17 +29,17 @@
               "({ basePath, pluginStartDeps, pluginStartContract, }?: { basePath?: string | undefined; pluginStartDeps?: object | undefined; pluginStartContract?: any; }) => { analytics: jest.Mocked<",
               {
                 "pluginId": "@kbn/core-analytics-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreAnalyticsBrowserPluginApi",
-                "section": "def-common.AnalyticsServiceSetup",
+                "section": "def-public.AnalyticsServiceSetup",
                 "text": "AnalyticsServiceSetup"
               },
               ">; application: jest.Mocked<",
               {
                 "pluginId": "@kbn/core-application-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-common.ApplicationSetup",
+                "section": "def-public.ApplicationSetup",
                 "text": "ApplicationSetup"
               },
               ">; customBranding: { customBranding$: ",
@@ -73,33 +57,41 @@
               "<boolean>; }; docLinks: jest.Mock<any, any, any>; executionContext: jest.Mocked<",
               {
                 "pluginId": "@kbn/core-execution-context-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreExecutionContextBrowserPluginApi",
-                "section": "def-common.ExecutionContextSetup",
+                "section": "def-public.ExecutionContextSetup",
                 "text": "ExecutionContextSetup"
               },
               ">; fatalErrors: jest.Mocked<",
               {
                 "pluginId": "@kbn/core-fatal-errors-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreFatalErrorsBrowserPluginApi",
-                "section": "def-common.FatalErrorsSetup",
+                "section": "def-public.FatalErrorsSetup",
                 "text": "FatalErrorsSetup"
+              },
+              ">; featureFlags: jest.Mocked<",
+              {
+                "pluginId": "@kbn/core-feature-flags-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreFeatureFlagsBrowserPluginApi",
+                "section": "def-public.FeatureFlagsSetup",
+                "text": "FeatureFlagsSetup"
               },
               ">; getStartServices: jest.Mock<Promise<[{ analytics: jest.Mocked<",
               {
                 "pluginId": "@kbn/core-analytics-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreAnalyticsBrowserPluginApi",
-                "section": "def-common.AnalyticsServiceStart",
+                "section": "def-public.AnalyticsServiceStart",
                 "text": "AnalyticsServiceStart"
               },
               ">; application: jest.Mocked<",
               {
                 "pluginId": "@kbn/core-application-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-common.ApplicationStart",
+                "section": "def-public.ApplicationStart",
                 "text": "ApplicationStart"
               },
               ">; chrome: ",
@@ -127,33 +119,41 @@
               "<boolean>; }; docLinks: ",
               {
                 "pluginId": "@kbn/core-doc-links-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreDocLinksBrowserPluginApi",
-                "section": "def-common.DocLinksStart",
+                "section": "def-public.DocLinksStart",
                 "text": "DocLinksStart"
               },
               "; executionContext: jest.Mocked<",
               {
                 "pluginId": "@kbn/core-execution-context-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreExecutionContextBrowserPluginApi",
-                "section": "def-common.ExecutionContextSetup",
+                "section": "def-public.ExecutionContextSetup",
                 "text": "ExecutionContextSetup"
+              },
+              ">; featureFlags: jest.Mocked<",
+              {
+                "pluginId": "@kbn/core-feature-flags-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreFeatureFlagsBrowserPluginApi",
+                "section": "def-public.FeatureFlagsStart",
+                "text": "FeatureFlagsStart"
               },
               ">; http: ",
               {
                 "pluginId": "@kbn/core-http-browser-mocks",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreHttpBrowserMocksPluginApi",
-                "section": "def-common.HttpSetupMock",
+                "section": "def-public.HttpSetupMock",
                 "text": "HttpSetupMock"
               },
               "; i18n: jest.Mocked<",
               {
                 "pluginId": "@kbn/core-i18n-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreI18nBrowserPluginApi",
-                "section": "def-common.I18nStart",
+                "section": "def-public.I18nStart",
                 "text": "I18nStart"
               },
               ">; notifications: ",
@@ -167,9 +167,9 @@
               "<",
               {
                 "pluginId": "@kbn/core-notifications-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                "section": "def-common.NotificationsStart",
+                "section": "def-public.NotificationsStart",
                 "text": "NotificationsStart"
               },
               ">; overlays: ",
@@ -183,81 +183,89 @@
               "<",
               {
                 "pluginId": "@kbn/core-overlays-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreOverlaysBrowserPluginApi",
-                "section": "def-common.OverlayStart",
+                "section": "def-public.OverlayStart",
                 "text": "OverlayStart"
               },
               ">; uiSettings: jest.Mocked<",
               {
                 "pluginId": "@kbn/core-ui-settings-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-                "section": "def-common.IUiSettingsClient",
+                "section": "def-public.IUiSettingsClient",
                 "text": "IUiSettingsClient"
               },
               ">; settings: { client: jest.Mocked<",
               {
                 "pluginId": "@kbn/core-ui-settings-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-                "section": "def-common.IUiSettingsClient",
+                "section": "def-public.IUiSettingsClient",
                 "text": "IUiSettingsClient"
               },
               ">; globalClient: jest.Mocked<",
               {
                 "pluginId": "@kbn/core-ui-settings-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-                "section": "def-common.IUiSettingsClient",
+                "section": "def-public.IUiSettingsClient",
                 "text": "IUiSettingsClient"
               },
               ">; }; savedObjects: jest.Mocked<",
               {
                 "pluginId": "@kbn/core-saved-objects-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreSavedObjectsBrowserPluginApi",
-                "section": "def-common.SavedObjectsStart",
+                "section": "def-public.SavedObjectsStart",
                 "text": "SavedObjectsStart"
               },
               ">; deprecations: jest.Mocked<",
               {
                 "pluginId": "@kbn/core-deprecations-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreDeprecationsBrowserPluginApi",
-                "section": "def-common.DeprecationsServiceStart",
+                "section": "def-public.DeprecationsServiceStart",
                 "text": "DeprecationsServiceStart"
               },
               ">; theme: jest.Mocked<",
               {
                 "pluginId": "@kbn/core-theme-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreThemeBrowserPluginApi",
-                "section": "def-common.ThemeServiceSetup",
+                "section": "def-public.ThemeServiceSetup",
                 "text": "ThemeServiceSetup"
               },
               ">; fatalErrors: jest.Mocked<",
               {
                 "pluginId": "@kbn/core-fatal-errors-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreFatalErrorsBrowserPluginApi",
-                "section": "def-common.FatalErrorsSetup",
+                "section": "def-public.FatalErrorsSetup",
                 "text": "FatalErrorsSetup"
               },
               ">; security: jest.MockedObjectDeep<",
               {
                 "pluginId": "@kbn/core-security-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreSecurityBrowserPluginApi",
-                "section": "def-common.SecurityServiceStart",
+                "section": "def-public.SecurityServiceStart",
                 "text": "SecurityServiceStart"
+              },
+              ">; userProfile: jest.Mocked<",
+              {
+                "pluginId": "@kbn/core-user-profile-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreUserProfileBrowserPluginApi",
+                "section": "def-public.UserProfileService",
+                "text": "UserProfileService"
               },
               ">; plugins: { onStart: jest.Mock<any, any, any>; }; }, any, any]>, [], any>; http: ",
               {
                 "pluginId": "@kbn/core-http-browser-mocks",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreHttpBrowserMocksPluginApi",
-                "section": "def-common.HttpSetupMock",
+                "section": "def-public.HttpSetupMock",
                 "text": "HttpSetupMock"
               },
               "; notifications: ",
@@ -271,50 +279,58 @@
               "<",
               {
                 "pluginId": "@kbn/core-notifications-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                "section": "def-common.NotificationsSetup",
+                "section": "def-public.NotificationsSetup",
                 "text": "NotificationsSetup"
               },
               ">; uiSettings: jest.Mocked<",
               {
                 "pluginId": "@kbn/core-ui-settings-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-                "section": "def-common.IUiSettingsClient",
+                "section": "def-public.IUiSettingsClient",
                 "text": "IUiSettingsClient"
               },
               ">; settings: { client: jest.Mocked<",
               {
                 "pluginId": "@kbn/core-ui-settings-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-                "section": "def-common.IUiSettingsClient",
+                "section": "def-public.IUiSettingsClient",
                 "text": "IUiSettingsClient"
               },
               ">; globalClient: jest.Mocked<",
               {
                 "pluginId": "@kbn/core-ui-settings-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-                "section": "def-common.IUiSettingsClient",
+                "section": "def-public.IUiSettingsClient",
                 "text": "IUiSettingsClient"
               },
               ">; }; deprecations: undefined; theme: jest.Mocked<",
               {
                 "pluginId": "@kbn/core-theme-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreThemeBrowserPluginApi",
-                "section": "def-common.ThemeServiceSetup",
+                "section": "def-public.ThemeServiceSetup",
                 "text": "ThemeServiceSetup"
               },
               ">; security: jest.Mocked<",
               {
                 "pluginId": "@kbn/core-security-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreSecurityBrowserPluginApi",
-                "section": "def-common.SecurityServiceSetup",
+                "section": "def-public.SecurityServiceSetup",
                 "text": "SecurityServiceSetup"
+              },
+              ">; userProfile: jest.Mocked<",
+              {
+                "pluginId": "@kbn/core-user-profile-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreUserProfileBrowserPluginApi",
+                "section": "def-public.UserProfileServiceSetup",
+                "text": "UserProfileServiceSetup"
               },
               ">; plugins: { onSetup: jest.Mock<any, any, any>; onStart: jest.Mock<any, any, any>; }; }"
             ],
@@ -325,7 +341,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-lifecycle-browser-mocks",
-                "id": "def-common.coreLifecycleMock.createCoreSetup.$1",
+                "id": "def-public.coreLifecycleMock.createCoreSetup.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "__0",
@@ -341,7 +357,7 @@
           },
           {
             "parentPluginId": "@kbn/core-lifecycle-browser-mocks",
-            "id": "def-common.coreLifecycleMock.createCoreStart",
+            "id": "def-public.coreLifecycleMock.createCoreStart",
             "type": "Function",
             "tags": [],
             "label": "createCoreStart",
@@ -350,17 +366,17 @@
               "({ basePath }?: { basePath?: string | undefined; }) => { analytics: jest.Mocked<",
               {
                 "pluginId": "@kbn/core-analytics-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreAnalyticsBrowserPluginApi",
-                "section": "def-common.AnalyticsServiceStart",
+                "section": "def-public.AnalyticsServiceStart",
                 "text": "AnalyticsServiceStart"
               },
               ">; application: jest.Mocked<",
               {
                 "pluginId": "@kbn/core-application-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-common.ApplicationStart",
+                "section": "def-public.ApplicationStart",
                 "text": "ApplicationStart"
               },
               ">; chrome: ",
@@ -388,33 +404,41 @@
               "<boolean>; }; docLinks: ",
               {
                 "pluginId": "@kbn/core-doc-links-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreDocLinksBrowserPluginApi",
-                "section": "def-common.DocLinksStart",
+                "section": "def-public.DocLinksStart",
                 "text": "DocLinksStart"
               },
               "; executionContext: jest.Mocked<",
               {
                 "pluginId": "@kbn/core-execution-context-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreExecutionContextBrowserPluginApi",
-                "section": "def-common.ExecutionContextSetup",
+                "section": "def-public.ExecutionContextSetup",
                 "text": "ExecutionContextSetup"
+              },
+              ">; featureFlags: jest.Mocked<",
+              {
+                "pluginId": "@kbn/core-feature-flags-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreFeatureFlagsBrowserPluginApi",
+                "section": "def-public.FeatureFlagsStart",
+                "text": "FeatureFlagsStart"
               },
               ">; http: ",
               {
                 "pluginId": "@kbn/core-http-browser-mocks",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreHttpBrowserMocksPluginApi",
-                "section": "def-common.HttpSetupMock",
+                "section": "def-public.HttpSetupMock",
                 "text": "HttpSetupMock"
               },
               "; i18n: jest.Mocked<",
               {
                 "pluginId": "@kbn/core-i18n-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreI18nBrowserPluginApi",
-                "section": "def-common.I18nStart",
+                "section": "def-public.I18nStart",
                 "text": "I18nStart"
               },
               ">; notifications: ",
@@ -428,9 +452,9 @@
               "<",
               {
                 "pluginId": "@kbn/core-notifications-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                "section": "def-common.NotificationsStart",
+                "section": "def-public.NotificationsStart",
                 "text": "NotificationsStart"
               },
               ">; overlays: ",
@@ -444,74 +468,82 @@
               "<",
               {
                 "pluginId": "@kbn/core-overlays-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreOverlaysBrowserPluginApi",
-                "section": "def-common.OverlayStart",
+                "section": "def-public.OverlayStart",
                 "text": "OverlayStart"
               },
               ">; uiSettings: jest.Mocked<",
               {
                 "pluginId": "@kbn/core-ui-settings-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-                "section": "def-common.IUiSettingsClient",
+                "section": "def-public.IUiSettingsClient",
                 "text": "IUiSettingsClient"
               },
               ">; settings: { client: jest.Mocked<",
               {
                 "pluginId": "@kbn/core-ui-settings-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-                "section": "def-common.IUiSettingsClient",
+                "section": "def-public.IUiSettingsClient",
                 "text": "IUiSettingsClient"
               },
               ">; globalClient: jest.Mocked<",
               {
                 "pluginId": "@kbn/core-ui-settings-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-                "section": "def-common.IUiSettingsClient",
+                "section": "def-public.IUiSettingsClient",
                 "text": "IUiSettingsClient"
               },
               ">; }; savedObjects: jest.Mocked<",
               {
                 "pluginId": "@kbn/core-saved-objects-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreSavedObjectsBrowserPluginApi",
-                "section": "def-common.SavedObjectsStart",
+                "section": "def-public.SavedObjectsStart",
                 "text": "SavedObjectsStart"
               },
               ">; deprecations: jest.Mocked<",
               {
                 "pluginId": "@kbn/core-deprecations-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreDeprecationsBrowserPluginApi",
-                "section": "def-common.DeprecationsServiceStart",
+                "section": "def-public.DeprecationsServiceStart",
                 "text": "DeprecationsServiceStart"
               },
               ">; theme: jest.Mocked<",
               {
                 "pluginId": "@kbn/core-theme-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreThemeBrowserPluginApi",
-                "section": "def-common.ThemeServiceSetup",
+                "section": "def-public.ThemeServiceSetup",
                 "text": "ThemeServiceSetup"
               },
               ">; fatalErrors: jest.Mocked<",
               {
                 "pluginId": "@kbn/core-fatal-errors-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreFatalErrorsBrowserPluginApi",
-                "section": "def-common.FatalErrorsSetup",
+                "section": "def-public.FatalErrorsSetup",
                 "text": "FatalErrorsSetup"
               },
               ">; security: jest.MockedObjectDeep<",
               {
                 "pluginId": "@kbn/core-security-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreSecurityBrowserPluginApi",
-                "section": "def-common.SecurityServiceStart",
+                "section": "def-public.SecurityServiceStart",
                 "text": "SecurityServiceStart"
+              },
+              ">; userProfile: jest.Mocked<",
+              {
+                "pluginId": "@kbn/core-user-profile-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreUserProfileBrowserPluginApi",
+                "section": "def-public.UserProfileService",
+                "text": "UserProfileService"
               },
               ">; plugins: { onStart: jest.Mock<any, any, any>; }; }"
             ],
@@ -522,7 +554,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-lifecycle-browser-mocks",
-                "id": "def-common.coreLifecycleMock.createCoreStart.$1",
+                "id": "def-public.coreLifecycleMock.createCoreStart.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "__0",
@@ -540,5 +572,21 @@
         "initialIsOpen": false
       }
     ]
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
   }
 }

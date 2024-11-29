@@ -30,7 +30,10 @@ export const NoTiersAvailableUsingNodeAttributesNotice: FunctionComponent = () =
         )}
       </p>
 
-      <p>{nodeAllocationMigrationGuidance}</p>
+      {
+        // @ts-expect-error Type '({ docLinks }: Props) => React.JSX.Element' is not assignable to type 'ReactNode'.
+        nodeAllocationMigrationGuidance
+      }
     </EuiCallOut>
   );
 };

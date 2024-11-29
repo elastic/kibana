@@ -10,20 +10,23 @@ import type { PartialRuleDiff, RuleFieldsDiff } from '../../../../../common/api/
 import { getFormattedFieldDiffGroups } from './per_field_diff/get_formatted_field_diff';
 import { UPGRADE_FIELD_ORDER } from './constants';
 import { RuleDiffHeaderBar, RuleDiffSection } from './diff_components';
-import { getSectionedFieldDiffs } from './helpers';
+import { filterUnsupportedDiffOutcomes, getSectionedFieldDiffs } from './helpers';
 import type { FieldsGroupDiff } from '../../model/rule_details/rule_field_diff';
 import * as i18n from './translations';
 
 interface PerFieldRuleDiffTabProps {
   ruleDiff: PartialRuleDiff;
+  header?: React.ReactNode;
 }
 
-export const PerFieldRuleDiffTab = ({ ruleDiff }: PerFieldRuleDiffTabProps) => {
+export const PerFieldRuleDiffTab = ({ ruleDiff, header }: PerFieldRuleDiffTabProps) => {
   const fieldsToRender = useMemo(() => {
     const fields: FieldsGroupDiff[] = [];
-    for (const field of Object.keys(ruleDiff.fields)) {
+    // Filter out diff outcomes that we don't support displaying in the per-field diff flyout
+    const filteredFieldDiffs = filterUnsupportedDiffOutcomes(ruleDiff.fields);
+    for (const field of Object.keys(filteredFieldDiffs)) {
       const typedField = field as keyof RuleFieldsDiff;
-      const formattedDiffs = getFormattedFieldDiffGroups(typedField, ruleDiff.fields);
+      const formattedDiffs = getFormattedFieldDiffGroups(typedField, filteredFieldDiffs);
       fields.push({ formattedDiffs, fieldsGroupName: typedField });
     }
     const sortedFields = fields.sort(
@@ -42,6 +45,7 @@ export const PerFieldRuleDiffTab = ({ ruleDiff }: PerFieldRuleDiffTabProps) => {
   return (
     <>
       <RuleDiffHeaderBar />
+      {header}
       {aboutFields.length !== 0 && (
         <RuleDiffSection
           title={i18n.ABOUT_SECTION_LABEL}

@@ -7,7 +7,6 @@
 
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import { isEmpty } from 'lodash/fp';
-import { ENABLE_ASSET_CRITICALITY_SETTING } from '../../../../common/constants';
 import type { AssetCriticalityRecord } from '../../../../common/api/entity_analytics';
 import type { AssetCriticalityDataClient } from './asset_criticality_data_client';
 
@@ -24,7 +23,6 @@ export interface AssetCriticalityService {
   getCriticalitiesByIdentifiers: (
     identifiers: CriticalityIdentifier[]
   ) => Promise<AssetCriticalityRecord[]>;
-  isEnabled: () => Promise<boolean>;
 }
 
 const isCriticalityIdentifierValid = (identifier: CriticalityIdentifier): boolean =>
@@ -94,9 +92,7 @@ interface AssetCriticalityServiceFactoryOptions {
 
 export const assetCriticalityServiceFactory = ({
   assetCriticalityDataClient,
-  uiSettingsClient,
 }: AssetCriticalityServiceFactoryOptions): AssetCriticalityService => ({
   getCriticalitiesByIdentifiers: (identifiers: CriticalityIdentifier[]) =>
     getCriticalitiesByIdentifiers({ assetCriticalityDataClient, identifiers }),
-  isEnabled: () => uiSettingsClient.get<boolean>(ENABLE_ASSET_CRITICALITY_SETTING),
 });

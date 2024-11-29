@@ -6,78 +6,84 @@
  */
 import {
   EuiButtonIcon,
+  EuiButtonIconProps,
   EuiContextMenuItem,
   EuiContextMenuPanel,
-  EuiPopover,
-  EuiButtonIconProps,
-  useEuiShadow,
+  EuiIcon,
   EuiPanel,
+  EuiPopover,
+  useEuiShadow,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import React from 'react';
-import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
-import styled from 'styled-components';
-import { RulesParams } from '@kbn/observability-plugin/public';
-import { rulesLocatorID } from '@kbn/observability-plugin/common';
-import { useKibana } from '../../../utils/kibana_react';
 import { useCloneSlo } from '../../../hooks/use_clone_slo';
-import { useCapabilities } from '../../../hooks/use_capabilities';
-import { paths } from '../../../../common/locators/paths';
+import { useKibana } from '../../../hooks/use_kibana';
+import { usePermissions } from '../../../hooks/use_permissions';
+import { BurnRateRuleParams } from '../../../typings';
+import { useSloActions } from '../../slo_details/hooks/use_slo_actions';
 
 interface Props {
   slo: SLOWithSummaryResponse;
   isActionsPopoverOpen: boolean;
   setIsActionsPopoverOpen: (value: boolean) => void;
   setDeleteConfirmationModalOpen: (value: boolean) => void;
+  setResetConfirmationModalOpen: (value: boolean) => void;
   setIsAddRuleFlyoutOpen: (value: boolean) => void;
+  setIsEditRuleFlyoutOpen: (value: boolean) => void;
   setDashboardAttachmentReady?: (value: boolean) => void;
   btnProps?: Partial<EuiButtonIconProps>;
+  rules?: Array<Rule<BurnRateRuleParams>>;
 }
-const CustomShadowPanel = styled(EuiPanel)<{ shadow: string }>`
-  ${(props) => props.shadow}
-`;
 
-function IconPanel({ children, hasPanel }: { children: JSX.Element; hasPanel: boolean }) {
+function IconPanel({ children }: { children: JSX.Element }) {
   const shadow = useEuiShadow('s');
-  if (!hasPanel) return children;
   return (
-    <CustomShadowPanel
+    <EuiPanel
       color="plain"
       element="button"
       grow={false}
       paddingSize="none"
       hasShadow={false}
-      shadow={shadow}
+      css={css`
+        ${shadow}
+      `}
     >
       {children}
-    </CustomShadowPanel>
+    </EuiPanel>
   );
 }
 
 export function SloItemActions({
   slo,
+  rules,
   isActionsPopoverOpen,
   setIsActionsPopoverOpen,
   setIsAddRuleFlyoutOpen,
+  setIsEditRuleFlyoutOpen,
   setDeleteConfirmationModalOpen,
+  setResetConfirmationModalOpen,
   setDashboardAttachmentReady,
   btnProps,
 }: Props) {
   const {
     application: { navigateToUrl },
-    http: { basePath },
-    share: {
-      url: { locators },
-    },
+    executionContext,
   } = useKibana().services;
-  const { hasWriteCapabilities } = useCapabilities();
+  const executionContextName = executionContext.get().name;
+  const isDashboardContext = executionContextName === 'dashboards';
+  const { data: permissions } = usePermissions();
+  const navigateToClone = useCloneSlo();
 
-  const sloDetailsUrl = basePath.prepend(
-    paths.sloDetails(
-      slo.id,
-      ![slo.groupBy].flat().includes(ALL_VALUE) && slo.instanceId ? slo.instanceId : undefined
-    )
-  );
+  const { handleNavigateToRules, sloEditUrl, remoteDeleteUrl, remoteResetUrl, sloDetailsUrl } =
+    useSloActions({
+      slo,
+      rules,
+      setIsEditRuleFlyoutOpen,
+      setIsActionsPopoverOpen,
+    });
 
   const handleClickActions = () => {
     setIsActionsPopoverOpen(!isActionsPopoverOpen);
@@ -87,24 +93,26 @@ export function SloItemActions({
     navigateToUrl(sloDetailsUrl);
   };
 
-  const handleEdit = () => {
-    navigateToUrl(basePath.prepend(paths.sloEdit(slo.id)));
-  };
-
-  const navigateToClone = useCloneSlo();
-
   const handleClone = () => {
     navigateToClone(slo);
   };
 
-  const handleNavigateToRules = async () => {
-    const locator = locators.get<RulesParams>(rulesLocatorID);
-    locator?.navigate({ params: { sloId: slo.id } }, { replace: false });
+  const handleDelete = () => {
+    if (!!remoteDeleteUrl) {
+      window.open(remoteDeleteUrl, '_blank');
+    } else {
+      setDeleteConfirmationModalOpen(true);
+      setIsActionsPopoverOpen(false);
+    }
   };
 
-  const handleDelete = () => {
-    setDeleteConfirmationModalOpen(true);
-    setIsActionsPopoverOpen(false);
+  const handleReset = () => {
+    if (!!remoteResetUrl) {
+      window.open(remoteResetUrl, '_blank');
+    } else {
+      setResetConfirmationModalOpen(true);
+      setIsActionsPopoverOpen(false);
+    }
   };
 
   const handleCreateRule = () => {
@@ -135,10 +143,23 @@ export function SloItemActions({
     />
   );
 
+  const isRemote = !!slo.remote;
+  const hasUndefinedRemoteKibanaUrl = !!slo.remote && slo.remote.kibanaUrl === '';
+
+  const showRemoteLinkIcon = isRemote ? (
+    <EuiIcon
+      type="popout"
+      size="s"
+      css={{
+        marginLeft: '10px',
+      }}
+    />
+  ) : null;
+
   return (
     <EuiPopover
       anchorPosition="downLeft"
-      button={btnProps ? <IconPanel hasPanel={true}>{btn}</IconPanel> : btn}
+      button={btnProps ? <IconPanel>{btn}</IconPanel> : btn}
       panelPaddingSize="m"
       closePopover={handleClickActions}
       isOpen={isActionsPopoverOpen}
@@ -159,20 +180,26 @@ export function SloItemActions({
           <EuiContextMenuItem
             key="edit"
             icon="pencil"
-            disabled={!hasWriteCapabilities}
-            onClick={handleEdit}
+            disabled={!permissions?.hasAllWriteRequested || hasUndefinedRemoteKibanaUrl}
+            href={sloEditUrl}
+            target={isRemote ? '_blank' : undefined}
+            toolTipContent={
+              hasUndefinedRemoteKibanaUrl ? NOT_AVAILABLE_FOR_UNDEFINED_REMOTE_KIBANA_URL : ''
+            }
             data-test-subj="sloActionsEdit"
           >
             {i18n.translate('xpack.slo.item.actions.edit', {
               defaultMessage: 'Edit',
             })}
+            {showRemoteLinkIcon}
           </EuiContextMenuItem>,
           <EuiContextMenuItem
             key="createRule"
             icon="bell"
-            disabled={!hasWriteCapabilities}
+            disabled={!permissions?.hasAllWriteRequested || isRemote}
             onClick={handleCreateRule}
             data-test-subj="sloActionsCreateRule"
+            toolTipContent={isRemote ? NOT_AVAILABLE_FOR_REMOTE : ''}
           >
             {i18n.translate('xpack.slo.item.actions.createRule', {
               defaultMessage: 'Create new alert rule',
@@ -181,44 +208,86 @@ export function SloItemActions({
           <EuiContextMenuItem
             key="manageRules"
             icon="gear"
-            disabled={!hasWriteCapabilities}
+            disabled={!permissions?.hasAllWriteRequested || hasUndefinedRemoteKibanaUrl}
             onClick={handleNavigateToRules}
             data-test-subj="sloActionsManageRules"
+            toolTipContent={
+              hasUndefinedRemoteKibanaUrl ? NOT_AVAILABLE_FOR_UNDEFINED_REMOTE_KIBANA_URL : ''
+            }
           >
-            {i18n.translate('xpack.slo.item.actions.manageRules', {
-              defaultMessage: 'Manage rules',
+            {i18n.translate('xpack.slo.item.actions.manageBurnRateRules', {
+              defaultMessage: 'Manage burn rate {count, plural, one {rule} other {rules}}',
+              values: { count: rules?.length ?? 0 },
             })}
+            {showRemoteLinkIcon}
           </EuiContextMenuItem>,
           <EuiContextMenuItem
             key="clone"
-            disabled={!hasWriteCapabilities}
+            disabled={!permissions?.hasAllWriteRequested || hasUndefinedRemoteKibanaUrl}
             icon="copy"
             onClick={handleClone}
             data-test-subj="sloActionsClone"
+            toolTipContent={
+              hasUndefinedRemoteKibanaUrl ? NOT_AVAILABLE_FOR_UNDEFINED_REMOTE_KIBANA_URL : ''
+            }
           >
             {i18n.translate('xpack.slo.item.actions.clone', { defaultMessage: 'Clone' })}
+            {showRemoteLinkIcon}
           </EuiContextMenuItem>,
           <EuiContextMenuItem
             key="delete"
             icon="trash"
-            disabled={!hasWriteCapabilities}
+            disabled={!permissions?.hasAllWriteRequested || hasUndefinedRemoteKibanaUrl}
             onClick={handleDelete}
+            toolTipContent={
+              hasUndefinedRemoteKibanaUrl ? NOT_AVAILABLE_FOR_UNDEFINED_REMOTE_KIBANA_URL : ''
+            }
             data-test-subj="sloActionsDelete"
           >
             {i18n.translate('xpack.slo.item.actions.delete', { defaultMessage: 'Delete' })}
+            {showRemoteLinkIcon}
           </EuiContextMenuItem>,
           <EuiContextMenuItem
-            icon="dashboardApp"
-            key="addToDashboard"
-            onClick={handleAddToDashboard}
-            data-test-subj="sloActionsAddToDashboard"
+            key="reset"
+            icon="refresh"
+            disabled={!permissions?.hasAllWriteRequested || hasUndefinedRemoteKibanaUrl}
+            onClick={handleReset}
+            toolTipContent={
+              hasUndefinedRemoteKibanaUrl ? NOT_AVAILABLE_FOR_UNDEFINED_REMOTE_KIBANA_URL : ''
+            }
+            data-test-subj="sloActionsReset"
           >
-            {i18n.translate('xpack.slo.item.actions.addToDashboard', {
-              defaultMessage: 'Add to Dashboard',
-            })}
+            {i18n.translate('xpack.slo.item.actions.reset', { defaultMessage: 'Reset' })}
+            {showRemoteLinkIcon}
           </EuiContextMenuItem>,
-        ]}
+        ].concat(
+          !isDashboardContext ? (
+            <EuiContextMenuItem
+              icon="dashboardApp"
+              key="addToDashboard"
+              onClick={handleAddToDashboard}
+              data-test-subj="sloActionsAddToDashboard"
+            >
+              {i18n.translate('xpack.slo.item.actions.addToDashboard', {
+                defaultMessage: 'Add to Dashboard',
+              })}
+            </EuiContextMenuItem>
+          ) : (
+            []
+          )
+        )}
       />
     </EuiPopover>
   );
 }
+
+const NOT_AVAILABLE_FOR_REMOTE = i18n.translate('xpack.slo.item.actions.notAvailable', {
+  defaultMessage: 'This action is not available for remote SLOs',
+});
+
+const NOT_AVAILABLE_FOR_UNDEFINED_REMOTE_KIBANA_URL = i18n.translate(
+  'xpack.slo.item.actions.remoteKibanaUrlUndefined',
+  {
+    defaultMessage: 'This action is not available for remote SLOs with undefined kibanaUrl',
+  }
+);

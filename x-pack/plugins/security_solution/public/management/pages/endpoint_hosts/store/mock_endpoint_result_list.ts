@@ -29,13 +29,13 @@ import {
   INGEST_API_PACKAGE_POLICIES,
 } from '../../../services/policies/ingest';
 import type { GetPolicyListResponse } from '../../policy/types';
-import { pendingActionsResponseMock } from '../../../../common/lib/endpoint_pending_actions/mocks';
+import { pendingActionsResponseMock } from '../../../../common/lib/endpoint/endpoint_pending_actions/mocks';
 import {
   ACTION_STATUS_ROUTE,
   ENDPOINT_DEFAULT_SORT_DIRECTION,
   ENDPOINT_DEFAULT_SORT_FIELD,
   HOST_METADATA_LIST_ROUTE,
-  METADATA_TRANSFORMS_STATUS_ROUTE,
+  METADATA_TRANSFORMS_STATUS_INTERNAL_ROUTE,
 } from '../../../../../common/endpoint/constants';
 import type { TransformStats, TransformStatsResponse } from '../types';
 
@@ -178,7 +178,7 @@ const endpointListApiPathHandlerMocks = ({
       return pendingActionsResponseMock();
     },
 
-    [METADATA_TRANSFORMS_STATUS_ROUTE]: (): TransformStatsResponse => ({
+    [METADATA_TRANSFORMS_STATUS_INTERNAL_ROUTE]: (): TransformStatsResponse => ({
       count: transforms.length,
       transforms,
     }),

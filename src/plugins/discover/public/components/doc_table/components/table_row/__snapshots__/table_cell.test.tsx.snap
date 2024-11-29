@@ -40,11 +40,13 @@ exports[`Doc table cell component renders a cell with filter buttons if it is fi
             isVisible={false}
             onBlur={[Function]}
             onFocus={[Function]}
+            onKeyDown={[Function]}
             onMouseOut={[Function]}
             onMouseOver={[Function]}
           >
             <span
               css="unknown styles"
+              onKeyDown={[Function]}
               onMouseOut={[Function]}
               onMouseOver={[Function]}
             >
@@ -65,11 +67,11 @@ exports[`Doc table cell component renders a cell with filter buttons if it is fi
                       "container": <head>
                         <style
                           data-styled="active"
-                          data-styled-version="5.1.0"
+                          data-styled-version="5.3.11"
                         />
                         <style
                           data-styled="active"
-                          data-styled-version="5.1.0"
+                          data-styled-version="5.3.11"
                         />
                         <style
                           data-emotion="css"
@@ -124,6 +126,7 @@ exports[`Doc table cell component renders a cell with filter buttons if it is fi
               />
               <span
                 className="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                onKeyDown={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
               >
@@ -164,11 +167,13 @@ exports[`Doc table cell component renders a cell with filter buttons if it is fi
             isVisible={false}
             onBlur={[Function]}
             onFocus={[Function]}
+            onKeyDown={[Function]}
             onMouseOut={[Function]}
             onMouseOver={[Function]}
           >
             <span
               css="unknown styles"
+              onKeyDown={[Function]}
               onMouseOut={[Function]}
               onMouseOver={[Function]}
             >
@@ -189,11 +194,11 @@ exports[`Doc table cell component renders a cell with filter buttons if it is fi
                       "container": <head>
                         <style
                           data-styled="active"
-                          data-styled-version="5.1.0"
+                          data-styled-version="5.3.11"
                         />
                         <style
                           data-styled="active"
-                          data-styled-version="5.1.0"
+                          data-styled-version="5.3.11"
                         />
                         <style
                           data-emotion="css"
@@ -248,6 +253,7 @@ exports[`Doc table cell component renders a cell with filter buttons if it is fi
               />
               <span
                 className="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                onKeyDown={[Function]}
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
               >

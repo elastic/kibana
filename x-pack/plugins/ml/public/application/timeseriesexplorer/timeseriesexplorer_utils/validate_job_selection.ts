@@ -11,10 +11,10 @@ import { i18n } from '@kbn/i18n';
 
 import type { ToastsStart } from '@kbn/core/public';
 import type { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_jobs';
+import { isTimeSeriesViewJob } from '../../../../common/util/job_utils';
 
-import { mlJobService } from '../../services/job_service';
+import type { MlJobService } from '../../services/job_service';
 
-import { createTimeSeriesJobData } from './timeseriesexplorer_utils';
 import type { GetJobSelection } from '../../contexts/ml/use_job_selection_flyout';
 
 /**
@@ -26,11 +26,12 @@ export function validateJobSelection(
   jobsWithTimeRange: MlJobWithTimeRange[],
   selectedJobIds: string[],
   setGlobalState: (...args: any) => void,
+  mlJobService: MlJobService,
   toastNotifications: ToastsStart,
   getJobSelection: GetJobSelection
 ): boolean | string {
-  const jobs = createTimeSeriesJobData(mlJobService.jobs);
-  const timeSeriesJobIds: string[] = jobs.map((j: any) => j.id);
+  const jobs = mlJobService.jobs.filter(isTimeSeriesViewJob);
+  const timeSeriesJobIds: string[] = jobs.map((j: any) => j.job_id);
 
   // Check if any of the jobs set in the URL are not time series jobs
   // (e.g. if switching to this view straight from the Anomaly Explorer).

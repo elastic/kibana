@@ -46,6 +46,7 @@ export const commonFormatters: CommonFormatMap = {
   [ConfigKey.ORIGINAL_SPACE]: null,
   [ConfigKey.CONFIG_HASH]: null,
   [ConfigKey.MONITOR_QUERY_ID]: null,
+  retest_on_failure: null,
   [ConfigKey.MAX_ATTEMPTS]: maxAttemptsFormatter,
   [ConfigKey.TIMEOUT]: secondsToCronFormatter,
   [ConfigKey.MONITOR_SOURCE_TYPE]: (fields) =>
@@ -54,4 +55,5 @@ export const commonFormatters: CommonFormatMap = {
   [ConfigKey.SCHEDULE]: (fields) =>
     `@every ${fields[ConfigKey.SCHEDULE]?.number}${fields[ConfigKey.SCHEDULE]?.unit}`,
   [ConfigKey.TAGS]: arrayFormatter,
+  [ConfigKey.LABELS]: null,
 };

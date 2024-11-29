@@ -6,7 +6,7 @@
  */
 
 import { ResourceInstaller } from '../resource_installer';
-import { SLIClient } from '../sli_client';
+import { BurnRatesClient } from '../burn_rates_client';
 import { SLORepository } from '../slo_repository';
 import { SummaryClient } from '../summary_client';
 import { SummarySearchClient } from '../summary_search_client';
@@ -42,11 +42,13 @@ const createSummaryTransformManagerMock = (): jest.Mocked<TransformManager> => {
 
 const createSLORepositoryMock = (): jest.Mocked<SLORepository> => {
   return {
-    save: jest.fn(),
+    create: jest.fn(),
+    update: jest.fn(),
     findById: jest.fn(),
     findAllByIds: jest.fn(),
     deleteById: jest.fn(),
     search: jest.fn(),
+    exists: jest.fn(),
   };
 };
 
@@ -62,9 +64,9 @@ const createSummarySearchClientMock = (): jest.Mocked<SummarySearchClient> => {
   };
 };
 
-const createSLIClientMock = (): jest.Mocked<SLIClient> => {
+const createBurnRatesClientMock = (): jest.Mocked<BurnRatesClient> => {
   return {
-    fetchSLIDataFrom: jest.fn(),
+    calculate: jest.fn(),
   };
 };
 
@@ -75,5 +77,5 @@ export {
   createSLORepositoryMock,
   createSummaryClientMock,
   createSummarySearchClientMock,
-  createSLIClientMock,
+  createBurnRatesClientMock,
 };

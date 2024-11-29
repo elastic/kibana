@@ -5,15 +5,8 @@
  * 2.0.
  */
 
-import {
-  kqlQuery,
-  rangeQuery,
-  termQuery,
-} from '@kbn/observability-plugin/server';
-import {
-  SPAN_DESTINATION_SERVICE_RESOURCE,
-  SPAN_NAME,
-} from '../../../common/es_fields/apm';
+import { kqlQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
+import { SPAN_DESTINATION_SERVICE_RESOURCE, SPAN_NAME } from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { getMetricsDateHistogramParams } from '../../lib/helpers/metrics';
 import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
@@ -56,11 +49,7 @@ async function getLatencyChartsForDependencyForTimeRange({
 
   const response = await apmEventClient.search('get_latency_for_dependency', {
     apm: {
-      events: [
-        getProcessorEventForServiceDestinationStatistics(
-          searchServiceDestinationMetrics
-        ),
-      ],
+      events: [getProcessorEventForServiceDestinationStatistics(searchServiceDestinationMetrics)],
     },
     body: {
       track_total_hits: false,
@@ -115,9 +104,7 @@ async function getLatencyChartsForDependencyForTimeRange({
     response.aggregations?.timeseries.buckets.map((bucket) => {
       return {
         x: bucket.key + offsetInMs,
-        y:
-          (bucket.latency_sum.value ?? 0) /
-          (bucket.latency_count?.value ?? bucket.doc_count),
+        y: (bucket.latency_sum.value ?? 0) / (bucket.latency_count?.value ?? bucket.doc_count),
       };
     }) ?? []
   );

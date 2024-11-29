@@ -8,11 +8,11 @@
 import { produce } from 'immer';
 import { satisfies } from 'semver';
 import { set } from '@kbn/safer-lodash-set';
-import { filter, reduce, mapKeys, each, unset, uniq, map, has } from 'lodash';
+import { filter, reduce, mapKeys, each, unset, uniq, map, has, flatMap } from 'lodash';
 import type { PackagePolicyInputStream } from '@kbn/fleet-plugin/common';
 import {
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-  AGENT_POLICY_SAVED_OBJECT_TYPE,
+  LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
 } from '@kbn/fleet-plugin/common';
 import type { IRouter } from '@kbn/core/server';
 import { API_VERSIONS } from '../../../common/constants';
@@ -27,7 +27,11 @@ export const createStatusRoute = (router: IRouter, osqueryContext: OsqueryAppCon
     .get({
       access: 'internal',
       path: '/internal/osquery/status',
-      options: { tags: [`access:${PLUGIN_ID}-read`] },
+      security: {
+        authz: {
+          requiredPrivileges: [`${PLUGIN_ID}-read`],
+        },
+      },
     })
     .addVersion(
       {
@@ -57,10 +61,12 @@ export const createStatusRoute = (router: IRouter, osqueryContext: OsqueryAppCon
             const migrationObject = reduce(
               policyPackages?.items,
               (acc, policy) => {
-                if (acc.agentPolicyToPackage[policy.policy_id]) {
+                if (policy.policy_ids.every((policyId) => acc.agentPolicyToPackage[policyId])) {
                   acc.packagePoliciesToDelete.push(policy.id);
                 } else {
-                  acc.agentPolicyToPackage[policy.policy_id] = policy.id;
+                  for (const policyId of policy.policy_ids) {
+                    acc.agentPolicyToPackage[policyId] = policy.id;
+                  }
                 }
 
                 const packagePolicyName = policy.name;
@@ -76,7 +82,7 @@ export const createStatusRoute = (router: IRouter, osqueryContext: OsqueryAppCon
                 if (has(policy, 'inputs[0].streams[0]')) {
                   if (!acc.packs[packName]) {
                     acc.packs[packName] = {
-                      policy_ids: [policy.policy_id],
+                      policy_ids: policy.policy_ids,
                       enabled: !packName.startsWith(OSQUERY_INTEGRATION_NAME),
                       name: packName,
                       description: policy.description,
@@ -94,7 +100,7 @@ export const createStatusRoute = (router: IRouter, osqueryContext: OsqueryAppCon
                       ),
                     };
                   } else {
-                    acc.packs[packName].policy_ids.push(policy.policy_id);
+                    acc.packs[packName].policy_ids.push(...policy.policy_ids);
                   }
                 }
 
@@ -120,7 +126,7 @@ export const createStatusRoute = (router: IRouter, osqueryContext: OsqueryAppCon
               pkgName: OSQUERY_INTEGRATION_NAME,
             });
 
-            const agentPolicyIds = uniq(map(policyPackages?.items, 'policy_id'));
+            const agentPolicyIds = uniq(flatMap(policyPackages?.items, 'policy_ids'));
             const agentPolicies = mapKeys(
               await agentPolicyService?.getByIds(internalSavedObjectsClient, agentPolicyIds),
               'id'
@@ -144,7 +150,7 @@ export const createStatusRoute = (router: IRouter, osqueryContext: OsqueryAppCon
                     references: packObject.policy_ids.map((policyId: string) => ({
                       id: policyId,
                       name: agentPolicies[policyId].name,
-                      type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+                      type: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
                     })),
                     refresh: 'wait_for',
                   }

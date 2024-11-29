@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
@@ -43,6 +44,7 @@ export class CommonPageObject extends FtrService {
     const NEW_FEATURES_TOUR_STORAGE_KEYS = {
       RULE_MANAGEMENT_PAGE: 'securitySolution.rulesManagementPage.newFeaturesTour.v8.9',
       TIMELINE: 'securitySolution.timeline.newFeaturesTour.v8.12',
+      FLYOUT: 'securitySolution.documentDetails.newFeaturesTour.v8.14',
     };
 
     const tourStorageKeys = Object.values(NEW_FEATURES_TOUR_STORAGE_KEYS);

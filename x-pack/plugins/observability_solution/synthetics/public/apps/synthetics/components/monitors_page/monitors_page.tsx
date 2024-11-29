@@ -13,7 +13,6 @@ import { DisabledCallout } from './management/disabled_callout';
 import { useOverviewStatus } from './hooks/use_overview_status';
 import { GETTING_STARTED_ROUTE } from '../../../../../common/constants';
 
-import { ServiceAllowedWrapper } from '../common/wrappers/service_allowed_wrapper';
 import { useLocations } from '../../hooks';
 
 import { Loader } from './management/loader/loader';
@@ -25,17 +24,13 @@ import { useMonitorListBreadcrumbs } from './hooks/use_breadcrumbs';
 import { useMonitorList } from './hooks/use_monitor_list';
 import * as labels from './management/labels';
 
-const MonitorManagementPage: React.FC = () => {
+export const MonitorManagementPage: React.FC = () => {
   useTrackPageview({ app: 'synthetics', path: 'monitors' });
   useTrackPageview({ app: 'synthetics', path: 'monitors', delay: 15000 });
 
   useMonitorListBreadcrumbs();
 
-  const {
-    error: enablementError,
-    enablement: { isEnabled },
-    loading: enablementLoading,
-  } = useEnablement();
+  const { error: enablementError, isEnabled, loading: enablementLoading } = useEnablement();
 
   useOverviewStatus({ scopeStatusByLocation: false });
 
@@ -65,9 +60,3 @@ const MonitorManagementPage: React.FC = () => {
     </>
   );
 };
-
-export const MonitorsPageWithServiceAllowed = React.memo(() => (
-  <ServiceAllowedWrapper>
-    <MonitorManagementPage />
-  </ServiceAllowedWrapper>
-));

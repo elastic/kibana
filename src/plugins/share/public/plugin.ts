@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import './index.scss';
@@ -23,7 +24,7 @@ import { AnonymousAccessServiceContract } from '../common';
 import { LegacyShortUrlLocatorDefinition } from '../common/url_service/locators/legacy_short_url_locator';
 import { ShortUrlRedirectLocatorDefinition } from '../common/url_service/locators/short_url_redirect_locator';
 import { registrations } from './lib/registrations';
-import type { BrowserUrlService, ClientConfigType } from './types';
+import type { BrowserUrlService } from './types';
 
 /** @public */
 export type SharePublicSetup = ShareMenuRegistrySetup & {
@@ -73,16 +74,13 @@ export class SharePlugin
       SharePublicStartDependencies
     >
 {
-  private config: ClientConfigType;
-  private readonly shareMenuRegistry = new ShareMenuRegistry();
+  private readonly shareMenuRegistry?: ShareMenuRegistry = new ShareMenuRegistry();
   private readonly shareContextMenu = new ShareMenuManager();
   private redirectManager?: RedirectManager;
   private url?: BrowserUrlService;
   private anonymousAccessServiceProvider?: () => AnonymousAccessServiceContract;
 
-  constructor(private readonly initializerContext: PluginInitializerContext) {
-    this.config = initializerContext.config.get<ClientConfigType>();
-  }
+  constructor(private readonly initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup): SharePublicSetup {
     const { analytics, http } = core;
@@ -126,7 +124,7 @@ export class SharePlugin
     registrations.setup({ analytics });
 
     return {
-      ...this.shareMenuRegistry.setup(),
+      ...this.shareMenuRegistry!.setup(),
       url: this.url,
       navigate: (options: RedirectOptions) => this.redirectManager!.navigate(options),
       setAnonymousAccessServiceProvider: (provider: () => AnonymousAccessServiceContract) => {
@@ -143,9 +141,8 @@ export class SharePlugin
     const sharingContextMenuStart = this.shareContextMenu.start(
       core,
       this.url!,
-      this.shareMenuRegistry.start(),
+      this.shareMenuRegistry!.start(),
       disableEmbed,
-      this.config.new_version.enabled ?? false,
       this.anonymousAccessServiceProvider
     );
 

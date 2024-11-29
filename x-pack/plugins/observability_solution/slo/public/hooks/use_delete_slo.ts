@@ -7,36 +7,33 @@
 
 import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { FindSLOResponse } from '@kbn/slo-schema';
-import { QueryKey, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useKibana } from '../utils/kibana_react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useKibana } from './use_kibana';
 import { sloKeys } from './query_key_factory';
+import { usePluginContext } from './use_plugin_context';
 
 type ServerError = IHttpFetchError<ResponseErrorBody>;
 
 export function useDeleteSlo() {
   const {
-    http,
     notifications: { toasts },
   } = useKibana().services;
+  const { sloClient } = usePluginContext();
   const queryClient = useQueryClient();
 
-  return useMutation<
-    string,
-    ServerError,
-    { id: string; name: string },
-    { previousData?: FindSLOResponse; queryKey?: QueryKey }
-  >(
+  return useMutation<void, ServerError, { id: string; name: string }>(
     ['deleteSlo'],
     ({ id }) => {
       try {
-        return http.delete<string>(`/api/observability/slos/${id}`);
+        return sloClient.fetch(`DELETE /api/observability/slos/{id} 2023-10-31`, {
+          params: { path: { id } },
+        });
       } catch (error) {
         return Promise.reject(`Something went wrong: ${String(error)}`);
       }
     },
     {
-      onError: (error, { name }, context) => {
+      onError: (error, { name }) => {
         toasts.addError(new Error(error.body?.message ?? error.message), {
           title: i18n.translate('xpack.slo.slo.delete.errorNotification', {
             defaultMessage: 'Failed to delete {name}',

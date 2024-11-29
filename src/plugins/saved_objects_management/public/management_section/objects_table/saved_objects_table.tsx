@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { Component } from 'react';
@@ -528,7 +529,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     const deleteStatus = await bulkDeleteObjects(
       http,
       selectedSavedObjects
-        .filter((object) => !object.meta.hiddenType && !object.managed)
+        .filter((object) => !object.meta.hiddenType)
         .map(({ id, type }) => ({ id, type }))
     );
 
@@ -687,7 +688,10 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       onSelectionChange: this.onSelectionChanged,
     };
 
-    const filterOptions = allowedTypes.map((type) => ({
+    const filtersWithoutTags = allowedTypes.filter((t) => t.name !== 'tag');
+    const itemsWithoutTags = savedObjects.filter((t) => t.type !== 'tag');
+
+    const filterOptions = filtersWithoutTags.map((type) => ({
       value: type.displayName,
       name: type.displayName,
       view: `${type.displayName} (${savedObjectCounts[type.name] || 0})`,
@@ -732,7 +736,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
             pageIndex={page}
             pageSize={perPage}
             sort={sort}
-            items={savedObjects}
+            items={itemsWithoutTags}
             totalItemCount={filteredItemCount}
             isSearching={isSearching}
             onShowRelationships={this.onShowRelationships}

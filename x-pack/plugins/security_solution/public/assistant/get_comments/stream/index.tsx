@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { ContentMessage } from '..';
 import { useStream } from './use_stream';
@@ -15,21 +15,22 @@ import { MessagePanel } from './message_panel';
 import { MessageText } from './message_text';
 
 interface Props {
+  abortStream: () => void;
   content?: string;
   isError?: boolean;
   isFetching?: boolean;
   isControlsEnabled?: boolean;
   index: number;
-  connectorTypeTitle: string;
   reader?: ReadableStreamDefaultReader<Uint8Array>;
-  refetchCurrentConversation: () => void;
+  refetchCurrentConversation: ({ isStreamRefetch }: { isStreamRefetch?: boolean }) => void;
   regenerateMessage: () => void;
+  setIsStreaming: (isStreaming: boolean) => void;
   transformMessage: (message: string) => ContentMessage;
 }
 
 export const StreamComment = ({
+  abortStream,
   content,
-  connectorTypeTitle,
   index,
   isControlsEnabled = false,
   isError = false,
@@ -37,27 +38,37 @@ export const StreamComment = ({
   reader,
   refetchCurrentConversation,
   regenerateMessage,
+  setIsStreaming,
   transformMessage,
 }: Props) => {
   const { error, isLoading, isStreaming, pendingMessage, setComplete } = useStream({
     refetchCurrentConversation,
     content,
-    connectorTypeTitle,
     reader,
     isError,
   });
+  useEffect(() => {
+    setIsStreaming(isStreaming);
+  }, [isStreaming, setIsStreaming]);
+  const stopStream = useCallback(() => {
+    setComplete({ complete: true, didAbort: true });
+    abortStream();
+  }, [abortStream, setComplete]);
 
-  const currentState = useRef({ isStreaming, pendingMessage, refetchCurrentConversation });
+  const currentState = useRef({
+    isStreaming,
+    stopStream,
+  });
 
   useEffect(() => {
-    currentState.current = { isStreaming, pendingMessage, refetchCurrentConversation };
-  }, [refetchCurrentConversation, isStreaming, pendingMessage]);
+    currentState.current = { isStreaming, stopStream };
+  }, [stopStream, isStreaming]);
 
   useEffect(
     () => () => {
-      // if the component is unmounted while streaming, fetch the convo to get the completed stream
+      // if the component is unmounted while streaming, stop the stream
       if (currentState.current.isStreaming) {
-        currentState.current.refetchCurrentConversation();
+        currentState.current.stopStream();
       }
     },
     // store values in currentState to detect true unmount
@@ -78,13 +89,7 @@ export const StreamComment = ({
       return;
     }
     if (isAnythingLoading && reader) {
-      return (
-        <StopGeneratingButton
-          onClick={() => {
-            setComplete(true);
-          }}
-        />
-      );
+      return <StopGeneratingButton onClick={stopStream} />;
     }
     return (
       <EuiFlexGroup direction="row" justifyContent="flexEnd">
@@ -93,11 +98,18 @@ export const StreamComment = ({
         </EuiFlexItem>
       </EuiFlexGroup>
     );
-  }, [isAnythingLoading, isControlsEnabled, reader, regenerateMessage, setComplete]);
+  }, [isAnythingLoading, isControlsEnabled, reader, regenerateMessage, stopStream]);
 
   return (
     <MessagePanel
-      body={<MessageText content={message} index={index} loading={isAnythingLoading} />}
+      body={
+        <MessageText
+          data-test-subj={isError ? 'errorComment' : undefined}
+          content={message}
+          index={index}
+          loading={isAnythingLoading}
+        />
+      }
       error={error ? new Error(error) : undefined}
       controls={controls}
     />

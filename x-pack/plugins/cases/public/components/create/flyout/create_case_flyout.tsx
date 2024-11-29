@@ -40,12 +40,11 @@ export const CreateCaseFlyout = React.memo<CreateCaseFlyoutProps>(
       <>
         <ReactQueryDevtools initialIsOpen={false} />
         <EuiFlyout
-          css={css`
-            z-index: ${euiTheme.levels.flyout};
-          `}
           onClose={handleCancel}
           tour-step="create-case-flyout"
           data-test-subj="create-case-flyout"
+          // EUI TODO: This z-index override of EuiOverlayMask is a workaround, and ideally should be resolved with a cleaner UI/UX flow long-term
+          maskProps={{ style: `z-index: ${(euiTheme.levels.flyout as number) + 3}` }} // we need this flyout to be above the timeline flyout (which has a z-index of 1002)
         >
           <EuiFlyoutHeader data-test-subj="create-case-flyout-header" hasBorder>
             <EuiTitle size="m">

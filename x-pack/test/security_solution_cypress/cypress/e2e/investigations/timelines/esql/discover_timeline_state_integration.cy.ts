@@ -18,6 +18,7 @@ import {
 import {
   addDiscoverEsqlQuery,
   addFieldToTable,
+  assertFieldsAreLoaded,
   verifyDiscoverEsqlQuery,
 } from '../../../../tasks/discover';
 import {
@@ -52,35 +53,35 @@ const INITIAL_END_DATE = 'Jan 19, 2024 @ 20:33:29.186';
 const TIMELINE_REQ_WITH_SAVED_SEARCH = 'TIMELINE_REQ_WITH_SAVED_SEARCH';
 const TIMELINE_PATCH_REQ = 'TIMELINE_PATCH_REQ';
 
-const TIMELINE_RESPONSE_SAVED_OBJECT_ID_PATH =
-  'response.body.data.persistTimeline.timeline.savedObjectId';
+const TIMELINE_RESPONSE_SAVED_OBJECT_ID_PATH = 'response.body.savedObjectId';
 const esqlQuery = 'from auditbeat-* | where ecs.version == "8.0.0"';
 
 const handleIntercepts = () => {
   cy.intercept('PATCH', '/api/timeline', (req) => {
-    if (req.body.hasOwnProperty('timeline') && req.body.timeline.savedSearchId === null) {
+    if (Object.hasOwn(req.body, 'timeline') && req.body.timeline.savedSearchId === null) {
       req.alias = TIMELINE_PATCH_REQ;
     }
   });
   cy.intercept('PATCH', '/api/timeline', (req) => {
-    if (req.body.hasOwnProperty('timeline') && req.body.timeline.savedSearchId !== null) {
+    if (Object.hasOwn(req.body, 'timeline') && req.body.timeline.savedSearchId !== null) {
       req.alias = TIMELINE_REQ_WITH_SAVED_SEARCH;
     }
   });
 };
 
-describe(
+// Failing: See https://github.com/elastic/kibana/issues/198066
+describe.skip(
   'Discover Timeline State Integration',
   {
-    tags: ['@ess', '@brokenInServerless'],
+    tags: ['@ess', '@skipInServerless'],
   },
-
   () => {
     beforeEach(() => {
       login();
       visitWithTimeRange(ALERTS_URL);
       createTimelineFromBottomBar();
       goToEsqlTab();
+      addDiscoverEsqlQuery(esqlQuery);
       updateDateRangeInLocalDatePickers(DISCOVER_CONTAINER, INITIAL_START_DATE, INITIAL_END_DATE);
       handleIntercepts();
     });
@@ -90,17 +91,14 @@ describe(
         addNameToTimelineAndSave('Timerange timeline');
         createNewTimeline();
         goToEsqlTab();
-        cy.get(GET_LOCAL_SHOW_DATES_BUTTON(DISCOVER_CONTAINER)).should(
-          'contain.text',
-          `Last 15 minutes`
-        );
+        cy.get(GET_LOCAL_SHOW_DATES_BUTTON(DISCOVER_CONTAINER)).should('be.disabled'); // default state
       });
       it('should save/restore esql tab dataview/timerange/filter/query/columns when saving/resoring timeline', () => {
         const timelineSuffix = Date.now();
         const timelineName = `DataView timeline-${timelineSuffix}`;
         const column1 = 'event.category';
         const column2 = 'ecs.version';
-        addDiscoverEsqlQuery(esqlQuery);
+        assertFieldsAreLoaded();
         addFieldToTable(column1);
         addFieldToTable(column2);
 
@@ -114,17 +112,16 @@ describe(
             createNewTimeline();
             // switch to old timeline
             openTimelineFromSettings();
-            openTimelineById(timelineId).then(() => {
-              cy.get(LOADING_INDICATOR).should('not.exist');
-              goToEsqlTab();
-              verifyDiscoverEsqlQuery(esqlQuery);
-              cy.get(GET_DISCOVER_DATA_GRID_CELL_HEADER(column1)).should('exist');
-              cy.get(GET_DISCOVER_DATA_GRID_CELL_HEADER(column2)).should('exist');
-              cy.get(GET_LOCAL_DATE_PICKER_START_DATE_POPOVER_BUTTON(DISCOVER_CONTAINER)).should(
-                'have.text',
-                INITIAL_START_DATE
-              );
-            });
+            openTimelineById(timelineId);
+            goToEsqlTab();
+            cy.get(LOADING_INDICATOR).should('not.exist');
+            verifyDiscoverEsqlQuery(esqlQuery);
+            cy.get(GET_DISCOVER_DATA_GRID_CELL_HEADER(column1)).should('exist');
+            cy.get(GET_DISCOVER_DATA_GRID_CELL_HEADER(column2)).should('exist');
+            cy.get(GET_LOCAL_DATE_PICKER_START_DATE_POPOVER_BUTTON(DISCOVER_CONTAINER)).should(
+              'have.text',
+              INITIAL_START_DATE
+            );
           });
       });
       it('should save/restore esql tab dataview/timerange/filter/query/columns when timeline is opened via url', () => {
@@ -133,6 +130,7 @@ describe(
         const column1 = 'event.category';
         const column2 = 'ecs.version';
         addDiscoverEsqlQuery(esqlQuery);
+        assertFieldsAreLoaded();
         addFieldToTable(column1);
         addFieldToTable(column2);
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import React, { useState, useCallback } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 
@@ -31,12 +31,13 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 import type { TimeRange } from '@kbn/es-query';
+import { JOB_ID_MAX_LENGTH } from '@kbn/ml-validators';
+
 import type { QuickLensJobCreator } from '../../../application/jobs/new_job/job_from_lens';
 import type { LayerResult } from '../../../application/jobs/new_job/job_from_lens';
 import type { CreateState } from '../../../application/jobs/new_job/job_from_dashboard';
 import { JOB_TYPE, DEFAULT_BUCKET_SPAN } from '../../../../common/constants/new_job';
 import { basicJobValidation } from '../../../../common/util/job_utils';
-import { JOB_ID_MAX_LENGTH } from '../../../../common/constants/validation';
 import { invalidTimeIntervalMessage } from '../../../application/jobs/new_job/common/job_validator/util';
 import { ML_APP_LOCATOR, ML_PAGES } from '../../../../common/constants/locator';
 import { useMlFromLensKibanaContext } from './context';
@@ -49,7 +50,6 @@ export interface CreateADJobParams {
 }
 
 interface Props {
-  children?: React.ReactElement;
   createADJobInWizard: () => void;
   createADJob: (args: CreateADJobParams) => Promise<CreateState>;
   layer?: LayerResult;
@@ -67,7 +67,7 @@ enum STATE {
   SAVE_FAILED,
 }
 
-export const JobDetails: FC<Props> = ({
+export const JobDetails: FC<PropsWithChildren<Props>> = ({
   children,
   createADJobInWizard,
   createADJob,
@@ -81,7 +81,7 @@ export const JobDetails: FC<Props> = ({
     services: {
       share,
       application,
-      mlServices: { mlApiServices },
+      mlServices: { mlApi },
     },
   } = useMlFromLensKibanaContext();
 
@@ -186,7 +186,7 @@ export const JobDetails: FC<Props> = ({
           })
         );
       } else {
-        mlApiServices.jobs
+        mlApi.jobs
           .jobsExist([jobId])
           .then((resp) => {
             if (resp[jobId].exists) {
@@ -206,6 +206,12 @@ export const JobDetails: FC<Props> = ({
 
       if (validationResults.contains('bucket_span_invalid')) {
         setBucketSpanValidationError(invalidTimeIntervalMessage(bucketSpan));
+      } else if (validationResults.contains('bucket_span_empty')) {
+        setBucketSpanValidationError(
+          i18n.translate('xpack.ml.newJob.wizard.validateJob.bucketSpanMustBeSetErrorMessage', {
+            defaultMessage: 'Bucket span must be set',
+          })
+        );
       }
       setState(STATE.DEFAULT);
     },
@@ -314,7 +320,7 @@ export const JobDetails: FC<Props> = ({
                   bucketSpanValidationError !== '' ||
                   outerFormComplete === false
                 }
-                onClick={createJob.bind(null, layerIndex)}
+                onClick={createJob}
                 size="s"
                 data-test-subj={`mlLensLayerCreateJobButton_${layerIndex}`}
               >
@@ -327,7 +333,7 @@ export const JobDetails: FC<Props> = ({
 
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                onClick={createADJobInWizard.bind(null, layerIndex)}
+                onClick={createADJobInWizard}
                 size="s"
                 iconType="popout"
                 iconSide="right"

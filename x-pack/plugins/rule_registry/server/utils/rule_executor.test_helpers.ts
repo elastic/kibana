@@ -39,7 +39,6 @@ export const createDefaultAlertExecutorOptions = <
   startedAt = new Date(),
   updatedAt = new Date(),
   shouldWriteAlerts = true,
-  maintenanceWindowIds,
 }: {
   alertId?: string;
   ruleName?: string;
@@ -50,9 +49,9 @@ export const createDefaultAlertExecutorOptions = <
   startedAt?: Date;
   updatedAt?: Date;
   shouldWriteAlerts?: boolean;
-  maintenanceWindowIds?: string[];
 }): RuleExecutorOptions<Params, State, InstanceState, InstanceContext, ActionGroupIds> => ({
   startedAt,
+  startedAtOverridden: false,
   rule: {
     id: alertId,
     updatedBy: null,
@@ -77,17 +76,18 @@ export const createDefaultAlertExecutorOptions = <
   params,
   spaceId: 'SPACE_ID',
   services: {
-    alertsClient: null,
     alertFactory: alertsMock.createRuleExecutorServices<InstanceState, InstanceContext>()
       .alertFactory,
+    alertsClient: null,
+    getDataViews: async () => dataViewPluginMocks.createStartContract(),
+    getMaintenanceWindowIds: async () => ['test-id-1', 'test-id-2'],
+    getSearchSourceClient: async () => searchSourceCommonMock,
     savedObjectsClient: savedObjectsClientMock.create(),
-    uiSettingsClient: uiSettingsServiceMock.createClient(),
     scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
-    shouldWriteAlerts: () => shouldWriteAlerts,
-    shouldStopExecution: () => false,
-    searchSourceClient: searchSourceCommonMock,
     share: {} as SharePluginStart,
-    dataViews: dataViewPluginMocks.createStartContract(),
+    shouldStopExecution: () => false,
+    shouldWriteAlerts: () => shouldWriteAlerts,
+    uiSettingsClient: uiSettingsServiceMock.createClient(),
   },
   state,
   previousStartedAt: null,
@@ -95,9 +95,9 @@ export const createDefaultAlertExecutorOptions = <
   executionId: 'b33f65d7-6e8b-4aae-8d20-c93613deb33f',
   logger,
   flappingSettings: DEFAULT_FLAPPING_SETTINGS,
-  ...(maintenanceWindowIds ? { maintenanceWindowIds } : {}),
   getTimeRange: () => {
     const date = new Date(Date.now()).toISOString();
     return { dateStart: date, dateEnd: date };
   },
+  isServerless: false,
 });

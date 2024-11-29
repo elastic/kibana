@@ -6,15 +6,14 @@
  */
 
 import type { Rule } from '@kbn/alerting-plugin/common';
-import type {
-  TopAlert,
-  AlertSummaryField,
-} from '@kbn/observability-plugin/public';
+import type { TopAlert } from '@kbn/observability-plugin/public';
 import type { TIME_UNITS } from '@kbn/triggers-actions-ui-plugin/public';
-import type { SERVICE_ENVIRONMENT } from '../../../../../common/es_fields/apm';
-
-export const SERVICE_NAME = 'service.name' as const;
-export const TRANSACTION_TYPE = 'transaction.type' as const;
+import type {
+  SERVICE_NAME,
+  TRANSACTION_TYPE,
+  SERVICE_ENVIRONMENT,
+  TRANSACTION_NAME,
+} from '../../../../../common/es_fields/apm';
 export interface AlertDetailsAppSectionProps {
   rule: Rule<{
     environment: string;
@@ -25,10 +24,8 @@ export interface AlertDetailsAppSectionProps {
   alert: TopAlert<{
     [SERVICE_NAME]: string;
     [TRANSACTION_TYPE]: string;
+    [TRANSACTION_NAME]?: string;
     [SERVICE_ENVIRONMENT]: string;
   }>;
   timeZone: string;
-  setAlertSummaryFields: React.Dispatch<
-    React.SetStateAction<AlertSummaryField[] | undefined>
-  >;
 }

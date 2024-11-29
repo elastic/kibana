@@ -5,39 +5,36 @@
  * 2.0.
  */
 
-import { useEffect, useState } from 'react';
-import { DataView } from '@kbn/data-views-plugin/common';
-import { useKibana } from '../utils/kibana_react';
+import { useFetcher } from '@kbn/observability-shared-plugin/public';
+import { useKibana } from './use_kibana';
 
 interface UseCreateDataViewProps {
-  indexPatternString: string | undefined;
+  indexPatternString?: string;
+  dataViewId?: string;
 }
 
-export function useCreateDataView({ indexPatternString }: UseCreateDataViewProps) {
+export function useCreateDataView({ indexPatternString, dataViewId }: UseCreateDataViewProps) {
   const { dataViews } = useKibana().services;
 
-  const [stateDataView, setStateDataView] = useState<DataView | undefined>();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-
-  useEffect(() => {
-    const createDataView = () =>
-      dataViews.create({
+  const { data: dataView, loading } = useFetcher(async () => {
+    if (dataViewId) {
+      try {
+        return await dataViews.get(dataViewId);
+      } catch (e) {
+        return dataViews.create({
+          id: `${indexPatternString}-id`,
+          title: indexPatternString,
+          allowNoIndex: true,
+        });
+      }
+    } else if (indexPatternString) {
+      return dataViews.create({
         id: `${indexPatternString}-id`,
         title: indexPatternString,
         allowNoIndex: true,
       });
-
-    if (indexPatternString) {
-      setIsLoading(true);
-      createDataView()
-        .then((value) => {
-          setStateDataView(value);
-        })
-        .finally(() => {
-          setIsLoading(false);
-        });
     }
-  }, [indexPatternString, dataViews]);
+  }, [dataViewId, dataViews, indexPatternString]);
 
-  return { dataView: stateDataView, loading: isLoading };
+  return { dataView, loading: Boolean(loading) };
 }

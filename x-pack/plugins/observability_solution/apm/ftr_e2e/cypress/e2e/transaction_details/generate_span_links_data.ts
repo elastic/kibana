@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
-import { SpanLink } from '../../../../typings/es_schemas/raw/fields/span_links';
+import { SpanLink } from '@kbn/apm-plugin/typings/es_schemas/raw/fields/span_links';
 import { synthtrace } from '../../../synthtrace';
 
 function getProducerInternalOnly() {
@@ -18,10 +18,7 @@ function getProducerInternalOnly() {
     .instance('instance a');
 
   const events = Array.from(
-    timerange(
-      new Date('2022-01-01T00:00:00.000Z'),
-      new Date('2022-01-01T00:01:00.000Z')
-    )
+    timerange(new Date('2022-01-01T00:00:00.000Z'), new Date('2022-01-01T00:01:00.000Z'))
       .interval('1m')
       .rate(1)
       .generator((timestamp) => {
@@ -45,9 +42,7 @@ function getProducerInternalOnly() {
   );
 
   const apmFields = events.flatMap((event) => event.serialize());
-  const transactionA = apmFields.find(
-    (item) => item['processor.event'] === 'transaction'
-  );
+  const transactionA = apmFields.find((item) => item['processor.event'] === 'transaction');
   const spanA = apmFields.find((item) => item['processor.event'] === 'span');
 
   const ids =
@@ -79,10 +74,7 @@ function getProducerExternalOnly() {
     .instance('instance b');
 
   const events = Array.from(
-    timerange(
-      new Date('2022-01-01T00:02:00.000Z'),
-      new Date('2022-01-01T00:03:00.000Z')
-    )
+    timerange(new Date('2022-01-01T00:02:00.000Z'), new Date('2022-01-01T00:03:00.000Z'))
       .interval('1m')
       .rate(1)
       .generator((timestamp) => {
@@ -99,9 +91,7 @@ function getProducerExternalOnly() {
                 spanSubtype: 'http',
               })
               .defaults({
-                'span.links': [
-                  { trace: { id: 'trace#1' }, span: { id: 'span#1' } },
-                ],
+                'span.links': [{ trace: { id: 'trace#1' }, span: { id: 'span#1' } }],
               })
               .timestamp(timestamp + 50)
               .duration(100)
@@ -120,12 +110,9 @@ function getProducerExternalOnly() {
   );
 
   const apmFields = events.flatMap((event) => event.serialize());
-  const transactionB = apmFields.find(
-    (item) => item['processor.event'] === 'transaction'
-  );
+  const transactionB = apmFields.find((item) => item['processor.event'] === 'transaction');
   const spanB = apmFields.find(
-    (item) =>
-      item['processor.event'] === 'span' && item['span.name'] === 'Span B'
+    (item) => item['processor.event'] === 'span' && item['span.name'] === 'Span B'
   );
   const ids =
     spanB && transactionB
@@ -164,10 +151,7 @@ function getProducerConsumer({
     .instance('instance c');
 
   const events = Array.from(
-    timerange(
-      new Date('2022-01-01T00:04:00.000Z'),
-      new Date('2022-01-01T00:05:00.000Z')
-    )
+    timerange(new Date('2022-01-01T00:04:00.000Z'), new Date('2022-01-01T00:05:00.000Z'))
       .interval('1m')
       .rate(1)
       .generator((timestamp) => {
@@ -196,9 +180,7 @@ function getProducerConsumer({
   );
 
   const apmFields = events.flatMap((event) => event.serialize());
-  const transactionC = apmFields.find(
-    (item) => item['processor.event'] === 'transaction'
-  );
+  const transactionC = apmFields.find((item) => item['processor.event'] === 'transaction');
   const transactionCSpanLink = transactionC
     ? {
         trace: { id: transactionC['trace.id']! },
@@ -206,8 +188,7 @@ function getProducerConsumer({
       }
     : undefined;
   const spanC = apmFields.find(
-    (item) =>
-      item['processor.event'] === 'span' || item['span.name'] === 'Span C'
+    (item) => item['processor.event'] === 'span' || item['span.name'] === 'Span C'
   );
   const spanCSpanLink = spanC
     ? {
@@ -251,10 +232,7 @@ function getConsumerMultiple({
     .instance('instance d');
 
   const events = Array.from(
-    timerange(
-      new Date('2022-01-01T00:06:00.000Z'),
-      new Date('2022-01-01T00:07:00.000Z')
-    )
+    timerange(new Date('2022-01-01T00:06:00.000Z'), new Date('2022-01-01T00:07:00.000Z'))
       .interval('1m')
       .rate(1)
       .generator((timestamp) => {
@@ -263,10 +241,7 @@ function getConsumerMultiple({
           .defaults({
             'span.links':
               producerInternalOnlySpanASpanLink && producerConsumerSpanCSpanLink
-                ? [
-                    producerInternalOnlySpanASpanLink,
-                    producerConsumerSpanCSpanLink,
-                  ]
+                ? [producerInternalOnlySpanASpanLink, producerConsumerSpanCSpanLink]
                 : [],
           })
           .timestamp(timestamp)
@@ -281,12 +256,8 @@ function getConsumerMultiple({
               })
               .defaults({
                 'span.links':
-                  producerExternalOnlySpanBSpanLink &&
-                  producerConsumerTransactionCSpanLink
-                    ? [
-                        producerExternalOnlySpanBSpanLink,
-                        producerConsumerTransactionCSpanLink,
-                      ]
+                  producerExternalOnlySpanBSpanLink && producerConsumerTransactionCSpanLink
+                    ? [producerExternalOnlySpanBSpanLink, producerConsumerTransactionCSpanLink]
                     : [],
               })
               .timestamp(timestamp + 50)
@@ -297,9 +268,7 @@ function getConsumerMultiple({
   );
 
   const apmFields = events.flatMap((event) => event.serialize());
-  const transactionD = apmFields.find(
-    (item) => item['processor.event'] === 'transaction'
-  );
+  const transactionD = apmFields.find((item) => item['processor.event'] === 'transaction');
   const spanE = apmFields.find((item) => item['processor.event'] === 'span');
 
   const ids =

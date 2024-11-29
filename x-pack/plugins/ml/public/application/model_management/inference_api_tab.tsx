@@ -16,7 +16,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { InferenceAPIConfigResponse } from '../../../common/types/trained_models';
+import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 
 export interface InferenceAPITabProps {
   inferenceApis: InferenceAPIConfigResponse[];
@@ -28,7 +28,7 @@ export const InferenceApi: FC<InferenceAPITabProps> = ({ inferenceApis }) => {
       {inferenceApis.map((inferenceApi, i) => {
         const initialIsOpen = i <= 2;
 
-        const modelId = inferenceApi.model_id;
+        const modelId = inferenceApi.inference_id;
 
         return (
           <React.Fragment key={modelId}>

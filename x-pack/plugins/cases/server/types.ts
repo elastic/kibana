@@ -18,11 +18,8 @@ import type {
   PluginSetupContract as ActionsPluginSetup,
   PluginStartContract as ActionsPluginStart,
 } from '@kbn/actions-plugin/server';
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import type {
-  PluginStartContract as FeaturesPluginStart,
-  PluginSetupContract as FeaturesPluginSetup,
-} from '@kbn/features-plugin/server';
+import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { FeaturesPluginStart, FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
 import type {
   TaskManagerSetupContract,
@@ -32,12 +29,15 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { NotificationsPluginStart } from '@kbn/notifications-plugin/server';
 import type { RuleRegistryPluginStartContract } from '@kbn/rule-registry-plugin/server';
+import type { PluginSetupContract as AlertingPluginSetup } from '@kbn/alerting-plugin/server';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { CasesClient } from './client';
 import type { AttachmentFramework } from './attachment_framework/types';
 import type { ExternalReferenceAttachmentTypeRegistry } from './attachment_framework/external_reference_registry';
 import type { PersistableStateAttachmentTypeRegistry } from './attachment_framework/persistable_state_registry';
 
 export interface CasesServerSetupDependencies {
+  alerting: AlertingPluginSetup;
   actions: ActionsPluginSetup;
   lens: LensServerPluginSetup;
   features: FeaturesPluginSetup;
@@ -46,6 +46,8 @@ export interface CasesServerSetupDependencies {
   licensing: LicensingPluginSetup;
   taskManager: TaskManagerSetupContract;
   usageCollection?: UsageCollectionSetup;
+  spaces?: SpacesPluginSetup;
+  cloud?: CloudSetup;
 }
 
 export interface CasesServerStartDependencies {

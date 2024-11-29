@@ -11,6 +11,8 @@ import { pick } from 'lodash';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { LogRateAnalysis } from '@kbn/aiops-plugin/public';
+import { AIOPS_EMBEDDABLE_ORIGIN } from '@kbn/aiops-common/constants';
+
 import { useDataSource } from '../contexts/ml/data_source_context';
 import { useMlKibana } from '../contexts/kibana';
 import { HelpMenu } from '../components/help_menu';
@@ -19,7 +21,7 @@ import { useEnabledFeatures } from '../contexts/ml';
 
 export const LogRateAnalysisPage: FC = () => {
   const { services } = useMlKibana();
-  const { showNodeInfo } = useEnabledFeatures();
+  const { showContextualInsights, showNodeInfo } = useEnabledFeatures();
 
   const { selectedDataView: dataView, selectedSavedSearch: savedSearch } = useDataSource();
 
@@ -33,29 +35,33 @@ export const LogRateAnalysisPage: FC = () => {
       </MlPageHeader>
       {dataView && (
         <LogRateAnalysis
-          // Default to false for now, until page restructure work to enable smooth sticky histogram is done
-          stickyHistogram={false}
           dataView={dataView}
           savedSearch={savedSearch}
+          showContextualInsights={showContextualInsights}
           showFrozenDataTierChoice={showNodeInfo}
-          appDependencies={pick(services, [
-            'analytics',
-            'application',
-            'charts',
-            'data',
-            'executionContext',
-            'fieldFormats',
-            'http',
-            'i18n',
-            'lens',
-            'notifications',
-            'share',
-            'storage',
-            'theme',
-            'uiActions',
-            'uiSettings',
-            'unifiedSearch',
-          ])}
+          appContextValue={{
+            embeddingOrigin: AIOPS_EMBEDDABLE_ORIGIN.ML_AIOPS_LABS,
+            ...pick(services, [
+              'analytics',
+              'application',
+              'charts',
+              'data',
+              'executionContext',
+              'fieldFormats',
+              'http',
+              'i18n',
+              'lens',
+              'notifications',
+              'share',
+              'storage',
+              'theme',
+              'uiActions',
+              'uiSettings',
+              'unifiedSearch',
+              'observabilityAIAssistant',
+              'embeddable',
+            ]),
+          }}
         />
       )}
       <HelpMenu docLink={services.docLinks.links.ml.guide} />

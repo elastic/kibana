@@ -16,5 +16,6 @@
   "kbn_references": [
     "@kbn/core-security-common",
     "@kbn/core-http-server",
+    "@kbn/logging",
   ]
 }

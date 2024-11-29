@@ -64,7 +64,7 @@ export const NativePopover: React.FC<NativePopoverProps> = ({
             'xpack.enterpriseSearch.content.newIndex.selectConnectore.nativePopover.description',
             {
               defaultMessage:
-                'Native connectors are hosted on Elastic Cloud. Get started with a free 14-day trial.',
+                'Elastic managed connectors are hosted on Elastic Cloud. Get started with a free 14-day trial.',
             }
           )}
         </p>
@@ -73,6 +73,8 @@ export const NativePopover: React.FC<NativePopoverProps> = ({
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiButton
+              data-test-subj="entSearchContent-connectors-nativePopover-trialButton"
+              data-telemetry-id="entSearchContent-connectors-nativePopover-trialButton"
               iconType="popout"
               target="_blank"
               href="https://www.elastic.co/cloud/cloud-trial-overview"

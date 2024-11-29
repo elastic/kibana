@@ -40,11 +40,7 @@ const Panel = euiStyled(EuiPanel)`
 
 const steps = 5;
 
-function doZoom(
-  cy: cytoscape.Core | undefined,
-  increment: number,
-  duration: number
-) {
+function doZoom(cy: cytoscape.Core | undefined, increment: number, duration: number) {
   if (cy) {
     const level = cy.zoom() + increment;
     // @ts-expect-error `.position()` _does_ work on a NodeCollection. It returns the position of the first element in the collection.
@@ -222,10 +218,7 @@ export function Controls() {
       </Panel>
       {showViewFullMapButton && (
         <Panel hasShadow={true} paddingSize="none">
-          <EuiToolTip
-            anchorClassName="eui-displayInline"
-            content={viewFullMapLabel}
-          >
+          <EuiToolTip anchorClassName="eui-displayInline" content={viewFullMapLabel}>
             <Button
               aria-label={viewFullMapLabel}
               color="text"
@@ -238,10 +231,7 @@ export function Controls() {
       )}
       {downloadUrl && (
         <Panel hasShadow={true} paddingSize="none">
-          <EuiToolTip
-            anchorClassName="eui-displayInline"
-            content={downloadLabel}
-          >
+          <EuiToolTip anchorClassName="eui-displayInline" content={downloadLabel}>
             <Button
               aria-label={downloadLabel}
               color="text"

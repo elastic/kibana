@@ -11,12 +11,14 @@ import useObservable from 'react-use/lib/useObservable';
 
 import type { Observable } from 'rxjs';
 import { forkJoin, of, Subject } from 'rxjs';
-import { switchMap, map } from 'rxjs/operators';
+import { switchMap, map } from 'rxjs';
 
 import { useCallback, useMemo } from 'react';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import { useTimefilter } from '@kbn/ml-date-picker';
 import type { InfluencersFilterQuery } from '@kbn/ml-anomaly-utils';
+import type { TimeBucketsInterval, TimeRangeBounds } from '@kbn/ml-time-buckets';
+import type { IUiSettingsClient } from '@kbn/core/public';
 import type { AppStateSelectedCells, ExplorerJob } from '../explorer_utils';
 import {
   getDateFormatTz,
@@ -30,12 +32,13 @@ import {
   loadOverallAnnotations,
 } from '../explorer_utils';
 import type { ExplorerState } from '../reducers';
-import { useMlKibana } from '../../contexts/kibana';
+import { useMlApi, useUiSettings } from '../../contexts/kibana';
 import type { MlResultsService } from '../../services/results_service';
 import { mlResultsServiceProvider } from '../../services/results_service';
 import type { AnomalyExplorerChartsService } from '../../services/anomaly_explorer_charts_service';
-import type { TimeBucketsInterval, TimeRangeBounds } from '../../util/time_buckets';
 import { useAnomalyExplorerContext } from '../anomaly_explorer_context';
+import type { MlApi } from '../../services/ml_api_service';
+import { useMlJobService, type MlJobService } from '../../services/job_service';
 
 // Memoize the data fetching methods.
 // wrapWithLastRefreshArg() wraps any given function and preprends a `lastRefresh` argument
@@ -93,6 +96,9 @@ export const isLoadExplorerDataConfig = (arg: any): arg is LoadExplorerDataConfi
  * Fetches the data necessary for the Anomaly Explorer using observables.
  */
 const loadExplorerDataProvider = (
+  uiSettings: IUiSettingsClient,
+  mlApi: MlApi,
+  mlJobService: MlJobService,
   mlResultsService: MlResultsService,
   anomalyExplorerChartsService: AnomalyExplorerChartsService,
   timefilter: TimefilterContract
@@ -120,14 +126,15 @@ const loadExplorerDataProvider = (
 
     const timerange = getSelectionTimeRange(selectedCells, bounds);
 
-    const dateFormatTz = getDateFormatTz();
+    const dateFormatTz = getDateFormatTz(uiSettings);
 
     // First get the data where we have all necessary args at hand using forkJoin:
     // annotationsData, anomalyChartRecords, influencers, overallState, tableData
     return forkJoin({
-      overallAnnotations: memoizedLoadOverallAnnotations(lastRefresh, selectedJobs, bounds),
+      overallAnnotations: memoizedLoadOverallAnnotations(lastRefresh, mlApi, selectedJobs, bounds),
       annotationsData: memoizedLoadAnnotationsTableData(
         lastRefresh,
+        mlApi,
         selectedCells,
         selectedJobs,
         bounds
@@ -155,6 +162,8 @@ const loadExplorerDataProvider = (
           : Promise.resolve({}),
       tableData: memoizedLoadAnomaliesTableData(
         lastRefresh,
+        mlApi,
+        mlJobService,
         selectedCells,
         selectedJobs,
         dateFormatTz,
@@ -202,20 +211,23 @@ const loadExplorerDataProvider = (
 };
 
 export const useExplorerData = (): [Partial<ExplorerState> | undefined, (d: any) => void] => {
+  const uiSettings = useUiSettings();
   const timefilter = useTimefilter();
-
-  const {
-    services: {
-      mlServices: { mlApiServices },
-    },
-  } = useMlKibana();
-
+  const mlApi = useMlApi();
+  const mlJobService = useMlJobService();
   const { anomalyExplorerChartsService } = useAnomalyExplorerContext();
 
   const loadExplorerData = useMemo(() => {
-    const mlResultsService = mlResultsServiceProvider(mlApiServices);
+    const mlResultsService = mlResultsServiceProvider(mlApi);
 
-    return loadExplorerDataProvider(mlResultsService, anomalyExplorerChartsService, timefilter);
+    return loadExplorerDataProvider(
+      uiSettings,
+      mlApi,
+      mlJobService,
+      mlResultsService,
+      anomalyExplorerChartsService,
+      timefilter
+    );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -224,7 +236,7 @@ export const useExplorerData = (): [Partial<ExplorerState> | undefined, (d: any)
   const explorerData$ = useMemo(() => loadExplorerData$.pipe(switchMap(loadExplorerData)), []);
   const explorerData = useObservable(explorerData$);
 
-  const update = useCallback((c) => {
+  const update = useCallback((c: any) => {
     loadExplorerData$.next(c);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

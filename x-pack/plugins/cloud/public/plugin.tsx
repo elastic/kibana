@@ -5,21 +5,26 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import type { Logger } from '@kbn/logging';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+
 import { registerCloudDeploymentMetadataAnalyticsContext } from '../common/register_cloud_deployment_id_analytics_context';
 import { getIsCloudEnabled } from '../common/is_cloud_enabled';
 import { parseDeploymentIdFromDeploymentUrl } from '../common/parse_deployment_id_from_deployment_url';
-import { CLOUD_SNAPSHOTS_PATH } from '../common/constants';
+import { CLOUD_SNAPSHOTS_PATH, ELASTICSEARCH_CONFIG_ROUTE } from '../common/constants';
 import { decodeCloudId, type DecodedCloudId } from '../common/decode_cloud_id';
-import type { CloudSetup, CloudStart } from './types';
 import { getFullCloudUrl } from '../common/utils';
+import { parseOnboardingSolution } from '../common/parse_onboarding_default_solution';
+import type { CloudSetup, CloudStart, PublicElasticsearchConfigType } from './types';
 import { getSupportUrl } from './utils';
+import { ElasticsearchConfigType } from '../common/types';
 
 export interface CloudConfigType {
   id?: string;
+  organization_id?: string;
   cname?: string;
+  csp?: string;
   base_url?: string;
   profile_url?: string;
   deployments_url?: string;
@@ -31,10 +36,14 @@ export interface CloudConfigType {
   performance_url?: string;
   trial_end_date?: string;
   is_elastic_staff_owned?: boolean;
+  onboarding?: {
+    default_solution?: string;
+  };
   serverless?: {
     project_id: string;
     project_name?: string;
     project_type?: string;
+    orchestrator_target?: string;
   };
 }
 
@@ -56,14 +65,16 @@ export class CloudPlugin implements Plugin<CloudSetup> {
   private readonly config: CloudConfigType;
   private readonly isCloudEnabled: boolean;
   private readonly isServerlessEnabled: boolean;
-  private readonly contextProviders: FC[] = [];
+  private readonly contextProviders: Array<FC<PropsWithChildren<unknown>>> = [];
   private readonly logger: Logger;
+  private elasticsearchConfig?: PublicElasticsearchConfigType;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<CloudConfigType>();
     this.isCloudEnabled = getIsCloudEnabled(this.config.id);
     this.isServerlessEnabled = !!this.config.serverless?.project_id;
     this.logger = initializerContext.logger.get();
+    this.elasticsearchConfig = undefined;
   }
 
   public setup(core: CoreSetup): CloudSetup {
@@ -75,6 +86,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       base_url: baseUrl,
       trial_end_date: trialEndDate,
       is_elastic_staff_owned: isElasticStaffOwned,
+      csp,
     } = this.config;
 
     let decodedId: DecodedCloudId | undefined;
@@ -84,26 +96,32 @@ export class CloudPlugin implements Plugin<CloudSetup> {
 
     return {
       cloudId: id,
+      organizationId: this.config.organization_id,
       deploymentId: parseDeploymentIdFromDeploymentUrl(this.config.deployment_url),
       cname,
+      csp,
       baseUrl,
       ...this.getCloudUrls(),
-      elasticsearchUrl: decodedId?.elasticsearchUrl,
       kibanaUrl: decodedId?.kibanaUrl,
       cloudHost: decodedId?.host,
       cloudDefaultPort: decodedId?.defaultPort,
       trialEndDate: trialEndDate ? new Date(trialEndDate) : undefined,
       isElasticStaffOwned,
       isCloudEnabled: this.isCloudEnabled,
+      onboarding: {
+        defaultSolution: parseOnboardingSolution(this.config.onboarding?.default_solution),
+      },
       isServerlessEnabled: this.isServerlessEnabled,
       serverless: {
         projectId: this.config.serverless?.project_id,
         projectName: this.config.serverless?.project_name,
         projectType: this.config.serverless?.project_type,
+        orchestratorTarget: this.config.serverless?.orchestrator_target,
       },
       registerCloudService: (contextProvider) => {
         this.contextProviders.push(contextProvider);
       },
+      fetchElasticsearchConfig: this.fetchElasticsearchConfig.bind(this, core.http),
     };
   }
 
@@ -112,7 +130,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
 
     // Nest all the registered context providers under the Cloud Services Provider.
     // This way, plugins only need to require Cloud's context provider to have all the enriched Cloud services.
-    const CloudContextProvider: FC = ({ children }) => {
+    const CloudContextProvider: FC<PropsWithChildren<unknown>> = ({ children }) => {
       return (
         <>
           {this.contextProviders.reduce(
@@ -151,7 +169,6 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       profileUrl,
       organizationUrl,
       projectsUrl,
-      elasticsearchUrl: decodedId?.elasticsearchUrl,
       kibanaUrl: decodedId?.kibanaUrl,
       isServerlessEnabled: this.isServerlessEnabled,
       serverless: {
@@ -161,6 +178,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       },
       performanceUrl,
       usersAndRolesUrl,
+      fetchElasticsearchConfig: this.fetchElasticsearchConfig.bind(this, coreStart.http),
     };
   }
 
@@ -200,5 +218,27 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       usersAndRolesUrl: fullCloudUsersAndRolesUrl,
       projectsUrl: fullCloudProjectsUrl,
     };
+  }
+
+  private async fetchElasticsearchConfig(
+    http: CoreStart['http']
+  ): Promise<PublicElasticsearchConfigType> {
+    if (this.elasticsearchConfig !== undefined) {
+      // This config should be fully populated on first fetch, so we should avoid refetching from server
+      return this.elasticsearchConfig;
+    }
+    try {
+      const result = await http.get<ElasticsearchConfigType>(ELASTICSEARCH_CONFIG_ROUTE, {
+        version: '1',
+      });
+
+      this.elasticsearchConfig = { elasticsearchUrl: result.elasticsearch_url || undefined };
+      return this.elasticsearchConfig;
+    } catch {
+      this.logger.error('Failed to fetch Elasticsearch config');
+      return {
+        elasticsearchUrl: undefined,
+      };
+    }
   }
 }

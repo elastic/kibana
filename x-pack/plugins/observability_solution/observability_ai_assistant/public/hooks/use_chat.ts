@@ -10,6 +10,7 @@ import { merge } from 'lodash';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import type { NotificationsStart } from '@kbn/core/public';
+import type { AssistantScope } from '@kbn/ai-assistant-common';
 import {
   MessageRole,
   type Message,
@@ -18,14 +19,9 @@ import {
   isTokenLimitReachedError,
   StreamingChatResponseEventType,
 } from '../../common';
-import {
-  getAssistantSystemMessage,
-  type ObservabilityAIAssistantChatService,
-  type ObservabilityAIAssistantService,
-} from '..';
+import type { ObservabilityAIAssistantChatService, ObservabilityAIAssistantService } from '..';
 import { useKibana } from './use_kibana';
 import { useOnce } from './use_once';
-import { useUserPreferredLanguage } from './use_user_preferred_language';
 
 export enum ChatState {
   Ready = 'ready',
@@ -57,8 +53,10 @@ interface UseChatPropsWithoutContext {
   chatService: ObservabilityAIAssistantChatService;
   connectorId?: string;
   persist: boolean;
+  disableFunctions?: boolean;
   onConversationUpdate?: (event: ConversationCreateEvent | ConversationUpdateEvent) => void;
   onChatComplete?: (messages: Message[]) => void;
+  scopes: AssistantScope[];
 }
 
 export type UseChatProps = Omit<UseChatPropsWithoutContext, 'notifications'>;
@@ -73,15 +71,15 @@ function useChatWithoutContext({
   onConversationUpdate,
   onChatComplete,
   persist,
+  disableFunctions,
+  scopes,
 }: UseChatPropsWithoutContext): UseChatResult {
   const [chatState, setChatState] = useState(ChatState.Ready);
-
   const systemMessage = useMemo(() => {
-    return getAssistantSystemMessage({ contexts: chatService.getContexts() });
+    return chatService.getSystemMessage();
   }, [chatService]);
 
   useOnce(initialMessages);
-
   useOnce(initialConversationId);
 
   const [conversationId, setConversationId] = useState(initialConversationId);
@@ -91,8 +89,6 @@ function useChatWithoutContext({
   const [pendingMessages, setPendingMessages] = useState<Message[]>();
 
   const abortControllerRef = useRef(new AbortController());
-
-  const { getPreferredLanguage } = useUserPreferredLanguage();
 
   const onChatCompleteRef = useRef(onChatComplete);
   onChatCompleteRef.current = onChatComplete;
@@ -108,9 +104,10 @@ function useChatWithoutContext({
     (error: Error) => {
       if (error instanceof AbortError) {
         setChatState(ChatState.Aborted);
-      } else {
-        setChatState(ChatState.Error);
+        return;
       }
+
+      setChatState(ChatState.Error);
 
       if (isTokenLimitReachedError(error)) {
         setMessages((msgs) => [
@@ -165,9 +162,10 @@ function useChatWithoutContext({
         connectorId,
         messages: getWithSystemMessage(nextMessages, systemMessage),
         persist,
+        disableFunctions: disableFunctions ?? false,
         signal: abortControllerRef.current.signal,
         conversationId,
-        responseLanguage: getPreferredLanguage(),
+        scopes,
       });
 
       function getPendingMessages() {
@@ -263,9 +261,10 @@ function useChatWithoutContext({
       handleError,
       handleSignalAbort,
       persist,
+      disableFunctions,
       service,
       systemMessage,
-      getPreferredLanguage,
+      scopes,
     ]
   );
 

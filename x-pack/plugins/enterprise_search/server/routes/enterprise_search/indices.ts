@@ -14,7 +14,12 @@ import { schema } from '@kbn/config-schema';
 
 import { i18n } from '@kbn/i18n';
 
-import { deleteConnectorById, deleteConnectorSecret } from '@kbn/search-connectors';
+import {
+  CRAWLER_SERVICE_TYPE,
+  deleteConnectorSecret,
+  deleteConnectorById,
+  updateConnectorIndexName,
+} from '@kbn/search-connectors';
 import {
   fetchConnectorByIndexName,
   fetchConnectors,
@@ -207,12 +212,17 @@ export function registerIndexRoutes({
         }
 
         if (connector) {
-          await deleteConnectorById(client.asCurrentUser, connector.id);
-          if (connector.api_key_id) {
-            await client.asCurrentUser.security.invalidateApiKey({ ids: [connector.api_key_id] });
-          }
-          if (connector.api_key_secret_id) {
-            await deleteConnectorSecret(client.asCurrentUser, connector.api_key_secret_id);
+          if (connector.service_type === CRAWLER_SERVICE_TYPE) {
+            await deleteConnectorById(client.asCurrentUser, connector.id);
+          } else {
+            // detach the deleted index without removing the connector
+            await updateConnectorIndexName(client.asCurrentUser, connector.id, null);
+            if (connector.api_key_id) {
+              await client.asCurrentUser.security.invalidateApiKey({ ids: [connector.api_key_id] });
+            }
+            if (connector.api_key_secret_id) {
+              await deleteConnectorSecret(client.asCurrentUser, connector.api_key_secret_id);
+            }
           }
         }
 
@@ -467,7 +477,6 @@ export function registerIndexRoutes({
         const createPipelineResult = await preparePipelineAndIndexForMlInference(
           indexName,
           pipelineName,
-          // @ts-expect-error pipeline._meta defined as mandatory
           pipelineDefinition,
           modelId,
           fieldMappings,
@@ -664,7 +673,6 @@ export function registerIndexRoutes({
 
       const simulateRequest: IngestSimulateRequest = {
         docs,
-        // @ts-expect-error pipeline._meta defined as mandatory
         pipeline: { description: defaultDescription, ...pipeline },
       };
 
@@ -897,7 +905,7 @@ export function registerIndexRoutes({
               'xpack.enterpriseSearch.server.routes.indices.mlInference.pipelineProcessors.pipelineIsInUseError',
               {
                 defaultMessage:
-                  "Inference pipeline is used in managed pipeline '{pipelineName}' of a different index",
+                  "Inference pipeline is used in managed pipeline ''{pipelineName}'' of a different index",
                 values: {
                   pipelineName: error.pipelineName,
                 },

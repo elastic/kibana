@@ -13,7 +13,7 @@ export type ExperimentalFeatures = { [K in keyof typeof allowedExperimentalValue
  */
 export const allowedExperimentalValues = Object.freeze({
   rulesListDatagrid: true,
-  globalAlertsPage: false,
+  stackAlertsPage: true,
   ruleTagFilter: true,
   ruleStatusFilter: true,
   rulesDetailLogs: true,
@@ -21,7 +21,10 @@ export const allowedExperimentalValues = Object.freeze({
   ruleKqlBar: false,
   isMustacheAutocompleteOn: false,
   showMustacheAutocompleteSwitch: false,
+  isUsingRuleCreateFlyout: false,
 });
+
+const deprecatedExperimentalValues = new Set(['ruleFormV2']);
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
 type Mutable<T> = { -readonly [P in keyof T]: T[P] };
@@ -55,7 +58,10 @@ export const parseExperimentalConfigValue = (configValue: string[]): Experimenta
 };
 
 export const isValidExperimentalValue = (value: string): boolean => {
-  return allowedKeys.includes(value as keyof ExperimentalFeatures);
+  return (
+    allowedKeys.includes(value as keyof ExperimentalFeatures) ||
+    deprecatedExperimentalValues.has(value)
+  );
 };
 
 export const getExperimentalAllowedValues = (): string[] => [...allowedKeys];

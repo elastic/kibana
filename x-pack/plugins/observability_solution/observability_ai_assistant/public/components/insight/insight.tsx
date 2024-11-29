@@ -13,10 +13,13 @@ import {
   EuiSpacer,
   EuiText,
   EuiTextArea,
+  EuiCallOut,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { cloneDeep, last } from 'lodash';
-import React, { useEffect, useRef, useState } from 'react';
+import { cloneDeep, isArray, isEmpty, last, once } from 'lodash';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import useObservable from 'react-use/lib/useObservable';
+import { ILicense } from '@kbn/licensing-plugin/public';
 import { MessageRole, type Message } from '../../../common/types';
 import { ObservabilityAIAssistantChatServiceContext } from '../../context/observability_ai_assistant_chat_service_context';
 import { useAbortableAsync } from '../../hooks/use_abortable_async';
@@ -53,6 +56,7 @@ function ChatContent({
 }) {
   const service = useObservabilityAIAssistant();
   const chatService = useObservabilityAIAssistantChatService();
+  const scopes = chatService.getScopes();
 
   const initialMessagesRef = useRef(initialMessages);
 
@@ -64,6 +68,8 @@ function ChatContent({
     connectorId,
     initialMessages,
     persist: false,
+    disableFunctions: true,
+    scopes,
   });
 
   const lastAssistantResponse = getLastMessageOfType(
@@ -122,6 +128,7 @@ function ChatContent({
                     service.conversations.openNewConversation({
                       messages,
                       title: defaultTitle,
+                      hideConversationList: true,
                     });
                   }}
                 />
@@ -192,20 +199,75 @@ function PromptEdit({
 }
 
 export interface InsightProps {
-  messages: Message[];
+  messages: Message[] | (() => Promise<Message[] | undefined>);
   title: string;
   dataTestSubj?: string;
 }
 
-export function Insight({ messages, title, dataTestSubj }: InsightProps) {
-  const [initialMessages, setInitialMessages] = useState(messages);
+enum FETCH_STATUS {
+  LOADING = 'loading',
+  SUCCESS = 'success',
+  FAILURE = 'failure',
+  NOT_INITIATED = 'not_initiated',
+}
+
+export function Insight({
+  messages: initialMessagesOrCallback,
+  title,
+  dataTestSubj,
+}: InsightProps) {
+  const [messages, setMessages] = useState<{ messages: Message[]; status: FETCH_STATUS }>({
+    messages: [],
+    status: FETCH_STATUS.NOT_INITIATED,
+  });
   const [isEditingPrompt, setEditingPrompt] = useState(false);
   const [isInsightOpen, setInsightOpen] = useState(false);
   const [hasOpened, setHasOpened] = useState(false);
   const [isPromptUpdated, setIsPromptUpdated] = useState(false);
 
-  const connectors = useGenAIConnectors();
+  const updateInitialMessages = useCallback(async () => {
+    if (isArray(initialMessagesOrCallback)) {
+      setMessages({
+        messages: initialMessagesOrCallback,
+        status: FETCH_STATUS.SUCCESS,
+      });
+      return;
+    }
 
+    setMessages({
+      messages: [],
+      status: FETCH_STATUS.LOADING,
+    });
+
+    try {
+      const data = await initialMessagesOrCallback();
+      setMessages({
+        messages: data ?? [],
+        status: FETCH_STATUS.SUCCESS,
+      });
+    } catch (e) {
+      setMessages({
+        messages: [],
+        status: FETCH_STATUS.FAILURE,
+      });
+
+      // eslint-disable-next-line no-console
+      console.log('could not load insight messages', e);
+    }
+  }, [initialMessagesOrCallback]);
+
+  const updateInitialMessagesOnce = useMemo(
+    () => once(updateInitialMessages),
+    [updateInitialMessages]
+  );
+
+  useEffect(() => {
+    if (isInsightOpen) {
+      updateInitialMessagesOnce();
+    }
+  }, [updateInitialMessagesOnce, isInsightOpen]);
+
+  const connectors = useGenAIConnectors();
   const service = useObservabilityAIAssistant();
 
   const chatService = useAbortableAsync(
@@ -215,14 +277,14 @@ export function Insight({ messages, title, dataTestSubj }: InsightProps) {
     [service]
   );
 
-  const handleSend = (newPrompt: string) => {
-    const clonedMessages = cloneDeep(messages);
+  const onEditPrompt = (newPrompt: string) => {
+    const clonedMessages = cloneDeep(messages.messages);
     const userMessage = getLastMessageOfType(clonedMessages, MessageRole.User);
     if (!userMessage) return false;
 
     userMessage.message.content = newPrompt;
     setIsPromptUpdated(true);
-    setInitialMessages(clonedMessages);
+    setMessages({ messages: clonedMessages, status: FETCH_STATUS.SUCCESS });
     setEditingPrompt(false);
     return true;
   };
@@ -234,14 +296,26 @@ export function Insight({ messages, title, dataTestSubj }: InsightProps) {
   };
 
   const {
-    services: { http },
+    services: {
+      http,
+      plugins: {
+        start: { licensing },
+      },
+    },
   } = useKibana();
+
+  const license = useObservable<ILicense | null>(licensing.license$);
+  const hasEnterpriseLicense = license?.hasAtLeast('enterprise');
+  if (isEmpty(connectors.connectors) || !hasEnterpriseLicense) {
+    return null;
+  }
 
   let children: React.ReactNode = null;
 
   if (
     connectors.selectedConnector &&
-    ((!isInsightOpen && hasOpened) || (isInsightOpen && !isEditingPrompt))
+    ((!isInsightOpen && hasOpened) ||
+      (isInsightOpen && !isEditingPrompt && messages.status === FETCH_STATUS.SUCCESS))
   ) {
     children = (
       <>
@@ -262,7 +336,7 @@ export function Insight({ messages, title, dataTestSubj }: InsightProps) {
                     setIsPromptUpdated(false);
                     setHasOpened(false);
                     setInsightOpen(false);
-                    setInitialMessages(messages);
+                    updateInitialMessages();
                   }}
                 >
                   <EuiText size="xs">
@@ -281,7 +355,7 @@ export function Insight({ messages, title, dataTestSubj }: InsightProps) {
 
         <ChatContent
           title={title}
-          initialMessages={initialMessages}
+          initialMessages={messages.messages}
           connectorId={connectors.selectedConnector}
         />
       </>
@@ -290,15 +364,29 @@ export function Insight({ messages, title, dataTestSubj }: InsightProps) {
     children = (
       <PromptEdit
         initialPrompt={
-          getLastMessageOfType(initialMessages, MessageRole.User)?.message.content || ''
+          getLastMessageOfType(messages.messages, MessageRole.User)?.message.content || ''
         }
-        onSend={handleSend}
+        onSend={onEditPrompt}
         onCancel={handleCancel}
       />
     );
   } else if (!connectors.loading && !connectors.connectors?.length) {
     children = (
       <MissingCredentialsCallout connectorsManagementHref={getConnectorsManagementHref(http!)} />
+    );
+  } else if (messages.status === FETCH_STATUS.FAILURE) {
+    children = (
+      <EuiCallOut
+        size="s"
+        title={i18n.translate(
+          'xpack.observabilityAiAssistant.insight.div.errorFetchingMessagesLabel',
+          {
+            defaultMessage: 'Could not fetch prompt messages',
+          }
+        )}
+        color="danger"
+        iconType="error"
+      />
     );
   }
 

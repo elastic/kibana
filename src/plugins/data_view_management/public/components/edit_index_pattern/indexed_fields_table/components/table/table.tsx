@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { PureComponent } from 'react';
-import { OverlayModalStart, ThemeServiceStart } from '@kbn/core/public';
+import { OverlayModalStart } from '@kbn/core/public';
 import { FieldDescription } from '@kbn/field-utils';
 import {
   EuiIcon,
@@ -29,9 +30,14 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import {
+  withEuiTablePersist,
+  type EuiTablePersistInjectedProps,
+} from '@kbn/shared-ux-table-persist';
 
 import { DataView } from '@kbn/data-views-plugin/public';
+import { StartServices } from '../../../../../types';
 import { IndexedFieldItem } from '../../types';
 
 export const showDelete = (field: IndexedFieldItem) =>
@@ -205,7 +211,7 @@ interface IndexedFieldProps {
   editField: (field: IndexedFieldItem) => void;
   deleteField: (fieldName: string[]) => void;
   openModal: OverlayModalStart['open'];
-  theme: ThemeServiceStart;
+  startServices: StartServices;
 }
 
 const getItems = (conflictDescriptions: IndexedFieldItem['conflictDescriptions']) => {
@@ -343,7 +349,7 @@ const getConflictBtn = (
   fieldName: string,
   conflictDescriptions: IndexedFieldItem['conflictDescriptions'],
   openModal: IndexedFieldProps['openModal'],
-  theme: ThemeServiceStart
+  startServices: StartServices
 ) => {
   const onClick = () => {
     const overlayRef = openModal(
@@ -355,7 +361,7 @@ const getConflictBtn = (
           fieldName,
           conflictDescriptions,
         }),
-        { theme$: theme.theme$ }
+        startServices
       )
     );
   };
@@ -377,7 +383,11 @@ const getConflictBtn = (
   );
 };
 
-export class Table extends PureComponent<IndexedFieldProps> {
+const PAGE_SIZE_OPTIONS = [5, 10, 25, 50];
+
+class TableClass extends PureComponent<
+  IndexedFieldProps & EuiTablePersistInjectedProps<IndexedFieldItem>
+> {
   renderBooleanTemplate(value: string, arialLabel: string) {
     return value ? <EuiIcon type="dot" color="success" aria-label={arialLabel} /> : <span />;
   }
@@ -393,7 +403,7 @@ export class Table extends PureComponent<IndexedFieldProps> {
               field.name,
               field.conflictDescriptions,
               this.props.openModal,
-              this.props.theme
+              this.props.startServices
             )
           : ''}
       </span>
@@ -401,11 +411,17 @@ export class Table extends PureComponent<IndexedFieldProps> {
   }
 
   render() {
-    const { items, editField, deleteField, indexPattern } = this.props;
+    const {
+      items,
+      editField,
+      deleteField,
+      indexPattern,
+      euiTablePersist: { pageSize, sorting, onTableChange },
+    } = this.props;
 
     const pagination = {
-      initialPageSize: 10,
-      pageSizeOptions: [5, 10, 25, 50],
+      pageSize,
+      pageSizeOptions: PAGE_SIZE_OPTIONS,
     };
 
     const columns: Array<EuiBasicTableColumn<IndexedFieldItem>> = [
@@ -414,7 +430,7 @@ export class Table extends PureComponent<IndexedFieldProps> {
         name: nameHeader,
         dataType: 'string',
         sortable: true,
-        render: (value: string, field: IndexedFieldItem) => {
+        render: (_value: string, field: IndexedFieldItem) => {
           return renderFieldName(field, indexPattern.timeFieldName);
         },
         width: '38%',
@@ -506,8 +522,18 @@ export class Table extends PureComponent<IndexedFieldProps> {
         items={items}
         columns={columns}
         pagination={pagination}
-        sorting={{ sort: { field: 'displayName', direction: 'asc' } }}
+        sorting={sorting}
+        onTableChange={onTableChange}
       />
     );
   }
 }
+
+export const TableWithoutPersist = TableClass; // For testing purposes
+
+export const Table = withEuiTablePersist(TableClass, {
+  tableId: 'dataViewsIndexedFields',
+  pageSizeOptions: PAGE_SIZE_OPTIONS,
+  initialSort: { field: 'displayName', direction: 'asc' },
+  initialPageSize: 10,
+});

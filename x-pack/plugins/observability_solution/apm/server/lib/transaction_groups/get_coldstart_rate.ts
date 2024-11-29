@@ -103,10 +103,7 @@ export async function getColdstartRate({
     },
   };
 
-  const resp = await apmEventClient.search(
-    'get_transaction_group_coldstart_rate',
-    params
-  );
+  const resp = await apmEventClient.search('get_transaction_group_coldstart_rate', params);
 
   if (!resp.aggregations) {
     return { transactionColdstartRate: [], average: null };
@@ -116,9 +113,7 @@ export async function getColdstartRate({
     resp.aggregations.timeseries.buckets
   );
 
-  const average = calculateTransactionColdstartRate(
-    resp.aggregations.coldstartStates
-  );
+  const average = calculateTransactionColdstartRate(resp.aggregations.coldstartStates);
 
   return { transactionColdstartRate, average };
 }

@@ -6,19 +6,12 @@
  */
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { AIAssistantDataClient, AIAssistantDataClientParams } from '.';
-import { AuthenticatedUser } from '@kbn/security-plugin/server';
-
+import { authenticatedUser } from '../__mocks__/user';
 const date = '2023-03-28T22:27:28.159Z';
-let logger: ReturnType<typeof loggingSystemMock['createLogger']>;
+let logger: ReturnType<(typeof loggingSystemMock)['createLogger']>;
 const clusterClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
-const mockUser1 = {
-  username: 'my_username',
-  authentication_realm: {
-    type: 'my_realm_type',
-    name: 'my_realm_name',
-  },
-} as AuthenticatedUser;
+const mockUser1 = authenticatedUser;
 
 describe('AIAssistantDataClient', () => {
   let assistantDataClientParams: AIAssistantDataClientParams;
@@ -30,7 +23,7 @@ describe('AIAssistantDataClient', () => {
       logger,
       elasticsearchClientPromise: Promise.resolve(clusterClient),
       spaceId: 'default',
-      indexPatternsResorceName: '.kibana-elastic-ai-assistant-conversations',
+      indexPatternsResourceName: '.kibana-elastic-ai-assistant-conversations',
       currentUser: mockUser1,
       kibanaVersion: '8.8.0',
     };
@@ -134,7 +127,6 @@ describe('AIAssistantDataClient', () => {
               api_config: {
                 connector_id: 'bedbf764-b991-4115-a9fc-1cfeaef21046',
                 model: 'anthropic.claude-v2',
-                connector_type_title: 'Amazon Bedrock',
               },
               namespace: 'hghjghjghghjghg33',
               created_at: '2024-01-25T01:32:37.649Z',
@@ -194,7 +186,6 @@ describe('AIAssistantDataClient', () => {
                 '@timestamp': '2024-01-25T01:32:37.649Z',
                 api_config: {
                   connector_id: 'bedbf764-b991-4115-a9fc-1cfeaef21046',
-                  connector_type_title: 'Amazon Bedrock',
                   model: 'anthropic.claude-v2',
                 },
                 created_at: '2024-01-25T01:32:37.649Z',

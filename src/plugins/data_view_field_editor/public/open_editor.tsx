@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -15,13 +16,13 @@ import { euiFlyoutClassname } from './constants';
 import type { ApiService } from './lib/api';
 import type {
   DataPublicPluginStart,
-  DataView,
   UsageCollectionStart,
   RuntimeType,
   DataViewsPublicPluginStart,
   FieldFormatsStart,
   DataViewField,
 } from './shared_imports';
+import { DataView, DataViewLazy } from './shared_imports';
 import { createKibanaReactContext } from './shared_imports';
 import type { CloseEditor, Field, InternalFieldType, PluginStart } from './types';
 
@@ -34,7 +35,7 @@ export interface OpenFieldEditorOptions {
    * context containing the data view the field belongs to
    */
   ctx: {
-    dataView: DataView;
+    dataView: DataView | DataViewLazy;
   };
   /**
    * action to take after field is saved
@@ -72,7 +73,7 @@ export const getFieldEditorOpener =
     usageCollection,
     apiService,
   }: Dependencies) =>
-  (options: OpenFieldEditorOptions): CloseEditor => {
+  async (options: OpenFieldEditorOptions): Promise<CloseEditor> => {
     const { uiSettings, overlays, docLinks, notifications, settings, theme } = core;
     const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
       uiSettings,
@@ -91,12 +92,12 @@ export const getFieldEditorOpener =
       canCloseValidator.current = args.canCloseValidator;
     };
 
-    const openEditor = ({
+    const openEditor = async ({
       onSave,
       fieldName: fieldNameToEdit,
       fieldToCreate,
-      ctx: { dataView },
-    }: OpenFieldEditorOptions): CloseEditor => {
+      ctx: { dataView: dataViewLazyOrNot },
+    }: OpenFieldEditorOptions): Promise<CloseEditor> => {
       const closeEditor = () => {
         if (overlayRef) {
           overlayRef.close();
@@ -113,7 +114,7 @@ export const getFieldEditorOpener =
       };
 
       const getRuntimeField = (name: string) => {
-        const fld = dataView.getAllRuntimeFields()[name];
+        const fld = dataViewLazyOrNot.getAllRuntimeFields()[name];
         return {
           name,
           runtimeField: fld,
@@ -129,13 +130,19 @@ export const getFieldEditorOpener =
         };
       };
 
+      const dataViewLazy =
+        dataViewLazyOrNot instanceof DataViewLazy
+          ? dataViewLazyOrNot
+          : await dataViews.toDataViewLazy(dataViewLazyOrNot);
+
       const dataViewField = fieldNameToEdit
-        ? dataView.getFieldByName(fieldNameToEdit) || getRuntimeField(fieldNameToEdit)
+        ? (await dataViewLazy.getFieldByName(fieldNameToEdit, true)) ||
+          getRuntimeField(fieldNameToEdit)
         : undefined;
 
       if (fieldNameToEdit && !dataViewField) {
         const err = i18n.translate('indexPatternFieldEditor.noSuchFieldName', {
-          defaultMessage: "Field named '{fieldName}' not found on index pattern",
+          defaultMessage: "Field named ''{fieldName}'' not found on index pattern",
           values: { fieldName: fieldNameToEdit },
         });
         notifications.toasts.addDanger(err);
@@ -162,8 +169,8 @@ export const getFieldEditorOpener =
             customLabel: dataViewField.customLabel,
             customDescription: dataViewField.customDescription,
             popularity: dataViewField.count,
-            format: dataView.getFormatterForFieldNoDefault(fieldNameToEdit!)?.toJSON(),
-            ...dataView.getRuntimeField(fieldNameToEdit!)!,
+            format: dataViewLazy.getFormatterForFieldNoDefault(fieldNameToEdit!)?.toJSON(),
+            ...dataViewLazy.getRuntimeField(fieldNameToEdit!)!,
           };
         } else {
           // Concrete field
@@ -173,7 +180,7 @@ export const getFieldEditorOpener =
             customLabel: dataViewField.customLabel,
             customDescription: dataViewField.customDescription,
             popularity: dataViewField.count,
-            format: dataView.getFormatterForFieldNoDefault(fieldNameToEdit!)?.toJSON(),
+            format: dataViewLazy.getFormatterForFieldNoDefault(fieldNameToEdit!)?.toJSON(),
             parentName: dataViewField.spec.parentName,
           };
         }
@@ -189,7 +196,11 @@ export const getFieldEditorOpener =
               fieldToEdit={field}
               fieldToCreate={fieldToCreate}
               fieldTypeToProcess={fieldTypeToProcess}
-              dataView={dataView}
+              // currently using two dataView versions since API consumer is still potentially using legacy dataView
+              // this is what is used internally
+              dataView={dataViewLazy}
+              // this is what has been passed by API consumer
+              dataViewToUpdate={dataViewLazyOrNot}
               search={search}
               dataViews={dataViews}
               notifications={notifications}
@@ -200,7 +211,7 @@ export const getFieldEditorOpener =
               uiSettings={uiSettings}
             />
           </KibanaReactContextProvider>,
-          { theme: core.theme, i18n: core.i18n }
+          core
         ),
         {
           className: euiFlyoutClassname,
@@ -226,6 +237,8 @@ export const getFieldEditorOpener =
           },
           maskProps: {
             className: 'indexPatternFieldEditorMaskOverlay',
+            // // EUI TODO: This z-index override of EuiOverlayMask is a workaround, and ideally should be resolved with a cleaner UI/UX flow long-term
+            style: 'z-index: 1003', // we need this flyout to be above the timeline flyout (which has a z-index of 1002)
           },
         }
       );

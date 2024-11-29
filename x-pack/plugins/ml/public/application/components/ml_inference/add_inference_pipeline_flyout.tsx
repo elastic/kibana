@@ -31,7 +31,7 @@ import { ProcessorConfiguration } from './components/processor_configuration';
 import { OnFailureConfiguration } from '../shared';
 import { TestPipeline } from './components/test_pipeline';
 import { ReviewAndCreatePipeline } from '../shared';
-import { useMlApiContext } from '../../contexts/kibana';
+import { useMlApi } from '../../contexts/kibana';
 import { getPipelineConfig } from './get_pipeline_config';
 import { validateInferencePipelineConfigurationStep } from './validation';
 import { type MlInferenceState, type InferenceModelTypes, TEST_PIPELINE_MODE } from './types';
@@ -54,14 +54,13 @@ export const AddInferencePipelineFlyout: FC<AddInferencePipelineFlyoutProps> = (
 
   const {
     trainedModels: { createInferencePipeline },
-  } = useMlApiContext();
+  } = useMlApi();
 
   const modelType = getModelType(model);
 
   const createPipeline = async () => {
     setFormState({ ...formState, creatingPipeline: true });
     try {
-      // @ts-expect-error pipeline._meta is defined as mandatory
       await createInferencePipeline(formState.pipelineName, getPipelineConfig(formState));
       setFormState({
         ...formState,
@@ -169,7 +168,6 @@ export const AddInferencePipelineFlyout: FC<AddInferencePipelineFlyoutProps> = (
         )}
         {step === ADD_INFERENCE_PIPELINE_STEPS.CREATE && (
           <ReviewAndCreatePipeline
-            // @ts-expect-error pipeline._meta is defined as mandatory
             inferencePipeline={getPipelineConfig(formState)}
             modelType={modelType}
             pipelineName={formState.pipelineName}

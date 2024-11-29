@@ -19,7 +19,7 @@ Array [
     </div>
   </span>,
   <hr
-    class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge emotion-euiHorizontalRule-half-l"
+    class="euiHorizontalRule emotion-euiHorizontalRule-half-l"
   />,
   <div
     class="euiText emotion-euiText-m"
@@ -86,7 +86,7 @@ Array [
     </div>
   </span>,
   <hr
-    class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge emotion-euiHorizontalRule-half-l"
+    class="euiHorizontalRule emotion-euiHorizontalRule-half-l"
   />,
   <div
     class="euiText eui-textLeft emotion-euiText-m"
@@ -156,13 +156,12 @@ Array [
           <span
             class="emotion-EuiExternalLinkIcon"
             data-euiicon-type="popout"
-          >
-            External link
-          </span>
+            role="presentation"
+          />
           <span
             class="emotion-euiScreenReaderOnly"
           >
-            (opens in a new tab or window)
+            (external, opens in a new tab or window)
           </span>
         </a>
          Go to 
@@ -176,13 +175,12 @@ Array [
           <span
             class="emotion-EuiExternalLinkIcon"
             data-euiicon-type="popout"
-          >
-            External link
-          </span>
+            role="presentation"
+          />
           <span
             class="emotion-euiScreenReaderOnly"
           >
-            (opens in a new tab or window)
+            (external, opens in a new tab or window)
           </span>
         </a>
          section for a deployment to configure monitoring. For more information visit 
@@ -196,20 +194,19 @@ Array [
           <span
             class="emotion-EuiExternalLinkIcon"
             data-euiicon-type="popout"
-          >
-            External link
-          </span>
+            role="presentation"
+          />
           <span
             class="emotion-euiScreenReaderOnly"
           >
-            (opens in a new tab or window)
+            (external, opens in a new tab or window)
           </span>
         </a>
       </p>
     </div>
   </span>,
   <hr
-    class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge emotion-euiHorizontalRule-half-l"
+    class="euiHorizontalRule emotion-euiHorizontalRule-half-l"
   />,
   <div
     class="euiText eui-textLeft emotion-euiText-m"
@@ -240,7 +237,7 @@ Array [
     </div>
   </span>,
   <hr
-    class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge emotion-euiHorizontalRule-half-l"
+    class="euiHorizontalRule emotion-euiHorizontalRule-half-l"
   />,
   <div
     class="euiText emotion-euiText-m"

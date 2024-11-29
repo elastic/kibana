@@ -9,15 +9,11 @@ import {
   FindCspBenchmarkRuleRequest,
   FindCspBenchmarkRuleResponse,
   findCspBenchmarkRuleRequestSchema,
-} from '../../../../common/types/latest';
-import {
-  FindCspBenchmarkRuleRequest as FindCspBenchmarkRuleRequestV1,
-  findCspBenchmarkRuleRequestSchema as findCspBenchmarkRuleRequestSchemaV1,
-} from '../../../../common/types/rules/v3';
-import {
-  FindCspBenchmarkRuleRequest as FindCspBenchmarkRuleRequestV2,
-  findCspBenchmarkRuleRequestSchema as findCspBenchmarkRuleRequestSchemaV2,
-} from '../../../../common/types/rules/v4';
+} from '@kbn/cloud-security-posture-common/schema/rules/latest';
+import { findCspBenchmarkRuleRequestSchema as findCspBenchmarkRuleRequestSchemaV1 } from '@kbn/cloud-security-posture-common/schema/rules/v3';
+import type { FindCspBenchmarkRuleRequest as FindCspBenchmarkRuleRequestV1 } from '@kbn/cloud-security-posture-common/schema/rules/v3';
+import { findCspBenchmarkRuleRequestSchema as findCspBenchmarkRuleRequestSchemaV2 } from '@kbn/cloud-security-posture-common/schema/rules/v4';
+import type { FindCspBenchmarkRuleRequest as FindCspBenchmarkRuleRequestV2 } from '@kbn/cloud-security-posture-common/schema/rules/v4';
 import { FIND_CSP_BENCHMARK_RULE_ROUTE_PATH } from '../../../../common/constants';
 import { CspRouter } from '../../../types';
 import { findBenchmarkRuleHandler as findRuleHandlerV1 } from './v1';
@@ -29,6 +25,11 @@ export const defineFindCspBenchmarkRuleRoute = (router: CspRouter) =>
     .get({
       access: 'internal',
       path: FIND_CSP_BENCHMARK_RULE_ROUTE_PATH,
+      security: {
+        authz: {
+          requiredPrivileges: ['cloud-security-posture-read'],
+        },
+      },
     })
     .addVersion(
       {
@@ -40,10 +41,6 @@ export const defineFindCspBenchmarkRuleRoute = (router: CspRouter) =>
         },
       },
       async (context, request, response) => {
-        if (!(await context.fleet).authz.fleet.all) {
-          return response.forbidden();
-        }
-
         const requestBody: FindCspBenchmarkRuleRequestV1 = request.query;
         const cspContext = await context.csp;
 
@@ -73,10 +70,6 @@ export const defineFindCspBenchmarkRuleRoute = (router: CspRouter) =>
         },
       },
       async (context, request, response) => {
-        if (!(await context.fleet).authz.fleet.all) {
-          return response.forbidden();
-        }
-
         const requestBody: FindCspBenchmarkRuleRequestV2 = request.query;
         const cspContext = await context.csp;
 
@@ -107,10 +100,6 @@ export const defineFindCspBenchmarkRuleRoute = (router: CspRouter) =>
         },
       },
       async (context, request, response) => {
-        if (!(await context.fleet).authz.fleet.all) {
-          return response.forbidden();
-        }
-
         const requestBody: FindCspBenchmarkRuleRequest = request.query;
         const cspContext = await context.csp;
 

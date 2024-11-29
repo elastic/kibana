@@ -12,7 +12,7 @@ import { sortBy } from 'lodash';
 import type { EuiThemeComputed } from '@elastic/eui';
 import {
   EuiButtonIcon,
-  EuiText,
+  EuiTitle,
   EuiHorizontalRule,
   EuiFlexGroup,
   EuiFlexItem,
@@ -103,19 +103,19 @@ export const UserList: React.FC<UserListProps> = React.memo(
     }
 
     return (
-      <EuiFlexItem grow={false}>
-        <EuiText data-test-subj={dataTestSubj}>
-          <h4>{headline}</h4>
-          <EuiHorizontalRule margin="xs" />
-          {loading && (
-            <EuiFlexGroup>
-              <EuiFlexItem>
-                <EuiLoadingSpinner data-test-subj="users-list-loading-spinner" />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          )}
-          {renderUsers(orderedUsers, handleSendEmail, euiTheme)}
-        </EuiText>
+      <EuiFlexItem grow={false} data-test-subj={dataTestSubj}>
+        <EuiTitle size="xs">
+          <h3>{headline}</h3>
+        </EuiTitle>
+        <EuiHorizontalRule margin="xs" />
+        {loading && (
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiLoadingSpinner data-test-subj="users-list-loading-spinner" />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        )}
+        {renderUsers(orderedUsers, handleSendEmail, euiTheme)}
       </EuiFlexItem>
     );
   }

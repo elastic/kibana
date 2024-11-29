@@ -2,6 +2,9 @@
   flex: auto;
   display: flex;
   flex-direction: column;
+  &--defaultBg {
+    background: $euiColorEmptyShade;
+  }
 }
 
 .dshDashboardViewport {
@@ -15,9 +18,14 @@
 .dshDashboardViewport-controls {
   margin: 0 $euiSizeS 0 $euiSizeS;
   padding-top: $euiSizeS;
-  padding-bottom: $euiSizeXS;
 }
 
 .dashboardViewport--screenshotMode  .controlsWrapper--empty {
   display:none
+}
+
+.dshDashboardViewportWrapper--isFullscreen {
+  .dshDashboardGrid__item--expanded {
+    padding: $euiSizeS;
+  }
 }

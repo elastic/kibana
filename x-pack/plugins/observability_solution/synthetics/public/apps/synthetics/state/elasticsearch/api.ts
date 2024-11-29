@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { IKibanaSearchResponse, isRunningResponse } from '@kbn/data-plugin/common';
+import type { IKibanaSearchResponse } from '@kbn/search-types';
+import { isRunningResponse } from '@kbn/data-plugin/common';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ESSearchResponse } from '@kbn/es-types';
 import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
@@ -50,7 +50,7 @@ export const executeEsQueryAPI = async ({
                       operationName: name,
                       kibanaRequest: {
                         route: {
-                          path: '/internal/bsearch',
+                          path: '/internal/search',
                           method: 'POST',
                         },
                       } as any,
@@ -82,7 +82,7 @@ export const executeEsQueryAPI = async ({
                     operationName: name,
                     kibanaRequest: {
                       route: {
-                        path: '/internal/bsearch',
+                        path: '/internal/search',
                         method: 'POST',
                       },
                     } as any,

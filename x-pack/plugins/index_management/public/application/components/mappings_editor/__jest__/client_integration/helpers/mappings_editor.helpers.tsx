@@ -376,13 +376,22 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
   };
 };
 
-export const setup = (props: any = { onUpdate() {} }): MappingsEditorTestBed => {
-  const setupTestBed = registerTestBed<TestSubjects>(WithAppDependencies(MappingsEditor), {
-    memoryRouter: {
-      wrapComponent: false,
-    },
-    defaultProps: props,
-  });
+export const setup = (
+  props: any = { onUpdate() {} },
+  appDependencies?: any
+): MappingsEditorTestBed => {
+  const defaultAppDependencies = {
+    plugins: {},
+  };
+  const setupTestBed = registerTestBed<TestSubjects>(
+    WithAppDependencies(MappingsEditor, appDependencies ?? defaultAppDependencies),
+    {
+      memoryRouter: {
+        wrapComponent: false,
+      },
+      defaultProps: props,
+    }
+  );
 
   const testBed = setupTestBed() as MappingsEditorTestBed;
 
@@ -450,6 +459,7 @@ export type TestSubjects =
   | 'advancedConfiguration.dynamicMappingsToggle.input'
   | 'advancedConfiguration.metaField'
   | 'advancedConfiguration.routingRequiredToggle.input'
+  | 'sourceValueField'
   | 'sourceField.includesField'
   | 'sourceField.excludesField'
   | 'dynamicTemplatesEditor'

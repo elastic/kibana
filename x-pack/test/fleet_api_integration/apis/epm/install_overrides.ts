@@ -7,28 +7,29 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { skipIfNoDockerRegistry } from '../../helpers';
-import { setupFleetAndAgents } from '../agents/services';
+import { skipIfNoDockerRegistry, isDockerRegistryEnabledOrSkipped } from '../../helpers';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
   const es = getService('es');
-  const dockerServers = getService('dockerServers');
+  const fleetAndAgents = getService('fleetAndAgents');
 
   const mappingsPackage = 'overrides';
   const mappingsPackageVersion = '0.1.0';
-  const server = dockerServers.get('registry');
 
   const deletePackage = async (pkg: string, version: string) =>
     supertest.delete(`/api/fleet/epm/packages/${pkg}/${version}`).set('kbn-xsrf', 'xxxx');
 
-  describe('installs packages that include settings and mappings overrides', async () => {
+  describe('installs packages that include settings and mappings overrides', () => {
     skipIfNoDockerRegistry(providerContext);
-    setupFleetAndAgents(providerContext);
+
+    before(async () => {
+      await fleetAndAgents.setup();
+    });
 
     after(async () => {
-      if (server.enabled) {
+      if (isDockerRegistryEnabledOrSkipped(providerContext)) {
         // remove the package just in case it being installed will affect other tests
         await deletePackage(mappingsPackage, mappingsPackageVersion);
       }
@@ -57,8 +58,10 @@ export default function (providerContext: FtrProviderContext) {
       // the index template composed_of has the correct component templates in the correct order
       const indexTemplate = indexTemplateResponse.index_templates[0].index_template;
       expect(indexTemplate.composed_of).to.eql([
+        `logs@mappings`,
         `logs@settings`,
         `${templateName}@package`,
+        'logs@custom',
         `${templateName}@custom`,
         `ecs@mappings`,
         '.fleet_globals-1',
@@ -117,52 +120,63 @@ export default function (providerContext: FtrProviderContext) {
       // omit routings
       delete body.template.settings.index.routing;
 
-      expect(body).to.eql({
-        template: {
-          settings: {
-            index: {
-              default_pipeline: 'logs-overrides.test-0.1.0',
-              lifecycle: {
-                name: 'overridden by user',
-              },
-              mapping: {
-                total_fields: {
-                  limit: '1000',
-                },
-              },
-              number_of_shards: '3',
+      expect(Object.keys(body)).to.eql(['template', 'overlapping']);
+      expect(body.template).to.eql({
+        settings: {
+          index: {
+            default_pipeline: 'logs-overrides.test-0.1.0',
+            lifecycle: {
+              name: 'overridden by user',
             },
-          },
-          mappings: {
-            dynamic: 'false',
-            properties: {
-              '@timestamp': {
-                type: 'date',
-              },
-              data_stream: {
-                properties: {
-                  dataset: {
-                    type: 'constant_keyword',
-                  },
-                  namespace: {
-                    type: 'constant_keyword',
-                  },
-                  type: {
-                    type: 'constant_keyword',
-                  },
-                },
+            mapping: {
+              total_fields: {
+                limit: '1000',
               },
             },
+            number_of_shards: '3',
           },
-          aliases: {},
         },
-        overlapping: [
-          {
-            name: 'logs',
-            index_patterns: ['logs-*-*'],
+        mappings: {
+          dynamic: 'false',
+          properties: {
+            '@timestamp': {
+              type: 'date',
+            },
+            data_stream: {
+              properties: {
+                dataset: {
+                  type: 'constant_keyword',
+                },
+                namespace: {
+                  type: 'constant_keyword',
+                },
+                type: {
+                  type: 'constant_keyword',
+                },
+              },
+            },
           },
-        ],
+        },
+        aliases: {},
       });
+
+      // otel logs templates were added in 8.16 but these tests also run against
+      // previous versions, so we conditionally test based on the ES version
+      const esVersion = getService('esVersion');
+      expect(body.overlapping).to.eql([
+        {
+          name: 'logs',
+          index_patterns: ['logs-*-*'],
+        },
+        ...(esVersion.matchRange('>=8.16.0')
+          ? [
+              {
+                index_patterns: ['logs-*.otel-*'],
+                name: 'logs-otel@template',
+              },
+            ]
+          : []),
+      ]);
     });
   });
 }

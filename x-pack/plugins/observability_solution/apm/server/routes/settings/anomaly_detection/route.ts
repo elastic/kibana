@@ -60,7 +60,7 @@ const anomalyDetectionJobsRoute = createApmServerRoute({
 const createAnomalyDetectionJobsRoute = createApmServerRoute({
   endpoint: 'POST /internal/apm/settings/anomaly-detection/jobs',
   options: {
-    tags: ['access:apm', 'access:apm_write', 'access:ml:canCreateJob'],
+    tags: ['access:apm', 'access:apm_settings_write', 'access:ml:canCreateJob'],
   },
   params: t.type({
     body: t.type({
@@ -75,10 +75,7 @@ const createAnomalyDetectionJobsRoute = createApmServerRoute({
 
     const esCapabilities = await getESCapabilities(resources);
 
-    const [mlClient, indices] = await Promise.all([
-      getMlClient(resources),
-      getApmIndices(),
-    ]);
+    const [mlClient, indices] = await Promise.all([getMlClient(resources), getApmIndices()]);
 
     if (!isActivePlatinumLicense(licensingContext.license)) {
       throw Boom.forbidden(ML_ERRORS.INVALID_LICENSE);
@@ -115,9 +112,7 @@ const anomalyDetectionEnvironmentsRoute = createApmServerRoute({
       config: resources.config,
       kuery: '',
     });
-    const size = await coreContext.uiSettings.client.get<number>(
-      maxSuggestions
-    );
+    const size = await coreContext.uiSettings.client.get<number>(maxSuggestions);
     const environments = await getAllEnvironments({
       includeMissing: true,
       searchAggregatedTransactions,
@@ -134,7 +129,7 @@ const anomalyDetectionUpdateToV3Route = createApmServerRoute({
   options: {
     tags: [
       'access:apm',
-      'access:apm_write',
+      'access:apm_settings_write',
       'access:ml:canCreateJob',
       'access:ml:canGetJobs',
       'access:ml:canCloseJob',
@@ -147,10 +142,7 @@ const anomalyDetectionUpdateToV3Route = createApmServerRoute({
       getMlClient(resources),
       resources.core
         .start()
-        .then(
-          (start): ElasticsearchClient =>
-            start.elasticsearch.client.asInternalUser
-        ),
+        .then((start): ElasticsearchClient => start.elasticsearch.client.asInternalUser),
     ]);
 
     const esCapabilities = await getESCapabilities(resources);

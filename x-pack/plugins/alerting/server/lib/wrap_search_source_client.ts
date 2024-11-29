@@ -6,8 +6,8 @@
  */
 
 import { Logger } from '@kbn/core/server';
+import { ISearchOptions } from '@kbn/search-types';
 import {
-  ISearchOptions,
   ISearchSource,
   ISearchStartSearchSource,
   SearchSource,
@@ -153,11 +153,12 @@ function wrapFetch$({
     const start = Date.now();
 
     logger.debug(
-      `executing query for rule ${rule.alertTypeId}:${rule.id} in space ${
-        rule.spaceId
-      } - with options ${JSON.stringify(searchOptions)}${
-        requestTimeout ? ` and ${requestTimeout}ms requestTimeout` : ''
-      }`
+      () =>
+        `executing query for rule ${rule.alertTypeId}:${rule.id} in space ${
+          rule.spaceId
+        } - with options ${JSON.stringify(searchOptions)}${
+          requestTimeout ? ` and ${requestTimeout}ms requestTimeout` : ''
+        }`
     );
 
     return pureSearchSource

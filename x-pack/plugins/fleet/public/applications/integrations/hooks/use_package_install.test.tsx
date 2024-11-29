@@ -6,15 +6,23 @@
  */
 
 import React from 'react';
-import { act, type WrapperComponent } from '@testing-library/react-hooks';
+import { act } from '@testing-library/react';
+import { coreMock } from '@kbn/core/public/mocks';
 
 import { createIntegrationsTestRendererMock } from '../../../mock';
 
 import { useInstallPackage, PackageInstallProvider } from './use_package_install';
 
 describe('usePackageInstall', () => {
+  const coreStart = coreMock.createStart();
+
+  const addErrorSpy = jest.spyOn(coreStart.notifications.toasts, 'addError');
+  const addSuccessSpy = jest.spyOn(coreStart.notifications.toasts, 'addSuccess');
+
   beforeEach(() => {
     createIntegrationsTestRendererMock();
+    addErrorSpy.mockReset();
+    addSuccessSpy.mockReset();
   });
 
   describe('useInstallPackage', () => {
@@ -40,27 +48,21 @@ describe('usePackageInstall', () => {
         throw error;
       }) as any);
 
-      const notifications = renderer.startServices.notifications;
-      const wrapper: WrapperComponent<any> = ({ children }) => (
-        <PackageInstallProvider
-          notifications={notifications}
-          theme$={renderer.startServices.theme.theme$}
-        >
-          {children}
-        </PackageInstallProvider>
+      const wrapper = ({ children }: React.PropsWithChildren<unknown>) => (
+        <PackageInstallProvider startServices={coreStart}>{children}</PackageInstallProvider>
       );
+
       const { result } = renderer.renderHook(() => useInstallPackage(), wrapper);
 
       const installPackage = result.current;
 
       return {
         installPackage,
-        notifications,
       };
     }
 
     it('should work for install', async () => {
-      const { notifications, installPackage } = createRenderer();
+      const { installPackage } = createRenderer();
       let res: boolean | undefined;
       await act(async () => {
         res = await installPackage({
@@ -70,14 +72,14 @@ describe('usePackageInstall', () => {
         });
       });
 
-      expect(notifications.toasts.addError).not.toBeCalled();
-      expect(notifications.toasts.addSuccess).toBeCalled();
+      expect(addErrorSpy).not.toBeCalled();
+      expect(addSuccessSpy).toBeCalled();
 
       expect(res).toBeTruthy();
     });
 
     it('should work for upgrade', async () => {
-      const { notifications, installPackage } = createRenderer();
+      const { installPackage } = createRenderer();
       let res: boolean | undefined;
       await act(async () => {
         res = await installPackage({
@@ -88,14 +90,14 @@ describe('usePackageInstall', () => {
         });
       });
 
-      expect(notifications.toasts.addError).not.toBeCalled();
-      expect(notifications.toasts.addSuccess).toBeCalled();
+      expect(addErrorSpy).not.toBeCalled();
+      expect(addSuccessSpy).toBeCalled();
 
       expect(res).toBeTruthy();
     });
 
     it('should handle install error', async () => {
-      const { notifications, installPackage } = createRenderer();
+      const { installPackage } = createRenderer();
 
       let res: boolean | undefined;
       await act(async () => {
@@ -106,8 +108,8 @@ describe('usePackageInstall', () => {
         });
       });
 
-      expect(notifications.toasts.addSuccess).not.toBeCalled();
-      expect(notifications.toasts.addError).toBeCalled();
+      expect(addSuccessSpy).not.toBeCalled();
+      expect(addErrorSpy).toBeCalled();
 
       expect(res).toBeFalsy();
     });

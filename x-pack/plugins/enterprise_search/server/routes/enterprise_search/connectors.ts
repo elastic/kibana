@@ -11,6 +11,7 @@ import { ElasticsearchErrorDetails } from '@kbn/es-errors';
 import { i18n } from '@kbn/i18n';
 import {
   CONNECTORS_INDEX,
+  cancelSync,
   deleteConnectorById,
   deleteConnectorSecret,
   fetchConnectorById,
@@ -28,10 +29,15 @@ import {
 
 import { ConnectorStatus, FilteringRule, SyncJobType } from '@kbn/search-connectors';
 import { cancelSyncs } from '@kbn/search-connectors/lib/cancel_syncs';
-import { isResourceNotFoundException } from '@kbn/search-connectors/utils/identify_exceptions';
+import {
+  isResourceNotFoundException,
+  isStatusTransitionException,
+} from '@kbn/search-connectors/utils/identify_exceptions';
 
 import { ErrorCode } from '../../../common/types/error_codes';
 import { addConnector } from '../../lib/connectors/add_connector';
+import { generateConfig } from '../../lib/connectors/generate_config';
+import { generateConnectorName } from '../../lib/connectors/generate_connector_name';
 import { startSync } from '../../lib/connectors/start_sync';
 import { deleteAccessControlIndex } from '../../lib/indices/delete_access_control_index';
 import { fetchIndexCounts } from '../../lib/indices/fetch_index_counts';
@@ -113,6 +119,40 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
       await cancelSyncs(client.asCurrentUser, request.params.connectorId);
+      return response.ok();
+    })
+  );
+
+  router.put(
+    {
+      path: '/internal/enterprise_search/connectors/{syncJobId}/cancel_sync',
+      validate: {
+        params: schema.object({
+          syncJobId: schema.string(),
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const { client } = (await context.core).elasticsearch;
+      try {
+        await cancelSync(client.asCurrentUser, request.params.syncJobId);
+      } catch (error) {
+        if (isStatusTransitionException(error)) {
+          return createError({
+            errorCode: ErrorCode.STATUS_TRANSITION_ERROR,
+            message: i18n.translate(
+              'xpack.enterpriseSearch.server.routes.connectors.statusTransitionError',
+              {
+                defaultMessage:
+                  'Connector sync job cannot be cancelled. Connector is already cancelled or not in a cancelable state.',
+              }
+            ),
+            response,
+            statusCode: 400,
+          });
+        }
+        throw error;
+      }
       return response.ok();
     })
   );
@@ -433,21 +473,23 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
     {
       path: '/internal/enterprise_search/connectors/{connectorId}/filtering',
       validate: {
-        body: schema.object({
-          advanced_snippet: schema.string(),
-          filtering_rules: schema.arrayOf(
-            schema.object({
-              created_at: schema.string(),
-              field: schema.string(),
-              id: schema.string(),
-              order: schema.number(),
-              policy: schema.string(),
-              rule: schema.string(),
-              updated_at: schema.string(),
-              value: schema.string(),
-            })
-          ),
-        }),
+        body: schema.maybe(
+          schema.object({
+            advanced_snippet: schema.string(),
+            filtering_rules: schema.arrayOf(
+              schema.object({
+                created_at: schema.string(),
+                field: schema.string(),
+                id: schema.string(),
+                order: schema.number(),
+                policy: schema.string(),
+                rule: schema.string(),
+                updated_at: schema.string(),
+                value: schema.string(),
+              })
+            ),
+          })
+        ),
         params: schema.object({
           connectorId: schema.string(),
         }),
@@ -456,13 +498,7 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
       const { connectorId } = request.params;
-      const { advanced_snippet, filtering_rules } = request.body;
-      const result = await updateFiltering(client.asCurrentUser, connectorId, {
-        advancedSnippet: advanced_snippet,
-        // Have to cast here because our API schema validator doesn't know how to deal with enums
-        // We're relying on the schema in the validator above to flag if something goes wrong
-        filteringRules: filtering_rules as FilteringRule[],
-      });
+      const result = await updateFiltering(client.asCurrentUser, connectorId);
       return result ? response.ok({ body: result }) : response.conflict();
     })
   );
@@ -733,6 +769,112 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
         },
         headers: { 'content-type': 'application/json' },
       });
+    })
+  );
+
+  router.post(
+    {
+      path: '/internal/enterprise_search/connectors/{connectorId}/generate_config',
+      validate: {
+        params: schema.object({
+          connectorId: schema.string(),
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const { client } = (await context.core).elasticsearch;
+      const { connectorId } = request.params;
+
+      let associatedIndex;
+      let apiKeyResponse;
+      try {
+        const connector = await fetchConnectorById(client.asCurrentUser, connectorId);
+
+        if (!connector) {
+          return createError({
+            errorCode: ErrorCode.RESOURCE_NOT_FOUND,
+            message: i18n.translate(
+              'xpack.enterpriseSearch.server.routes.connectors.resource_not_found_error',
+              {
+                defaultMessage: 'Connector with id {connectorId} is not found.',
+                values: { connectorId },
+              }
+            ),
+            response,
+            statusCode: 404,
+          });
+        }
+
+        const configResponse = await generateConfig(client, connector);
+        associatedIndex = configResponse.associatedIndex;
+        apiKeyResponse = configResponse.apiKeyResponse;
+      } catch (error) {
+        if (error.message === ErrorCode.GENERATE_INDEX_NAME_ERROR) {
+          createError({
+            errorCode: ErrorCode.GENERATE_INDEX_NAME_ERROR,
+            message: i18n.translate(
+              'xpack.enterpriseSearch.server.routes.connectors.generateConfiguration.indexAlreadyExistsError',
+              {
+                defaultMessage: 'Cannot find a unique index name to generate configuration',
+              }
+            ),
+            response,
+            statusCode: 409,
+          });
+          throw error;
+        }
+      }
+
+      return response.ok({
+        body: {
+          apiKey: apiKeyResponse,
+          connectorId,
+          indexName: associatedIndex,
+        },
+        headers: { 'content-type': 'application/json' },
+      });
+    })
+  );
+  router.post(
+    {
+      path: '/internal/enterprise_search/connectors/generate_connector_name',
+      validate: {
+        body: schema.object({
+          connectorName: schema.maybe(schema.string()),
+          connectorType: schema.string(),
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const { client } = (await context.core).elasticsearch;
+      const { connectorType, connectorName } = request.body;
+      try {
+        const generatedNames = await generateConnectorName(
+          client,
+          connectorType ?? 'custom',
+          connectorName
+        );
+        return response.ok({
+          body: generatedNames,
+          headers: { 'content-type': 'application/json' },
+        });
+      } catch (error) {
+        if (error.message === ErrorCode.GENERATE_INDEX_NAME_ERROR) {
+          return createError({
+            errorCode: ErrorCode.GENERATE_INDEX_NAME_ERROR,
+            message: i18n.translate(
+              'xpack.enterpriseSearch.server.routes.connectors.generateConfiguration.indexAlreadyExistsError',
+              {
+                defaultMessage: 'Cannot find a unique connector name',
+              }
+            ),
+            response,
+            statusCode: 409,
+          });
+        } else {
+          throw error;
+        }
+      }
     })
   );
 }

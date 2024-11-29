@@ -21,8 +21,8 @@ import {
   EuiBadge,
 } from '@elastic/eui';
 
-import type { WindowParameters } from '@kbn/aiops-utils';
-import type { Filter, Query } from '@kbn/es-query';
+import type { WindowParameters } from '@kbn/aiops-log-rate-analysis';
+import { buildEsQuery, type Filter, type Query } from '@kbn/es-query';
 import { useUrlState, usePageUrlState } from '@kbn/ml-url-state';
 import type { DataSeriesDatum } from '@elastic/charts/dist/chart_types/xy_chart/utils/series';
 import { useStorage } from '@kbn/ml-local-storage';
@@ -38,6 +38,7 @@ import { css } from '@emotion/react';
 import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
 import { i18n } from '@kbn/i18n';
 import { cloneDeep } from 'lodash';
+import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { SingleBrushWindowParameters } from './document_count_chart_single_brush/single_brush';
 import type { InitialSettings } from './use_data_drift_result';
 import { useDataDriftStateManagerContext } from './use_state_manager';
@@ -59,7 +60,11 @@ const dataViewTitleHeader = css({
   minWidth: '300px',
 });
 
-export const PageHeader: FC = () => {
+interface PageHeaderProps {
+  onRefresh: () => void;
+  needsUpdate: boolean;
+}
+export const PageHeader: FC<PageHeaderProps> = ({ onRefresh, needsUpdate }) => {
   const [, setGlobalState] = useUrlState('_g');
   const { dataView } = useDataSource();
 
@@ -77,7 +82,7 @@ export const PageHeader: FC = () => {
     autoRefreshSelector: true,
   });
 
-  const updateTimeState: FullTimeRangeSelectorProps['callback'] = useCallback(
+  const updateTimeState = useCallback<NonNullable<FullTimeRangeSelectorProps['callback']>>(
     (update) => {
       setGlobalState({
         time: {
@@ -101,29 +106,31 @@ export const PageHeader: FC = () => {
           {dataView.getName()}
         </div>
       }
+      rightSideGroupProps={{
+        gutterSize: 's',
+        'data-test-subj': 'dataComparisonTimeRangeSelectorSection',
+      }}
       rightSideItems={[
-        <EuiFlexGroup gutterSize="s" data-test-subj="dataComparisonTimeRangeSelectorSection">
-          {hasValidTimeField ? (
-            <EuiFlexItem grow={false}>
-              <FullTimeRangeSelector
-                frozenDataPreference={frozenDataPreference}
-                setFrozenDataPreference={setFrozenDataPreference}
-                dataView={dataView}
-                query={undefined}
-                disabled={false}
-                timefilter={timefilter}
-                callback={updateTimeState}
-              />
-            </EuiFlexItem>
-          ) : null}
-          <DatePickerWrapper
-            isAutoRefreshOnly={!hasValidTimeField}
-            showRefresh={!hasValidTimeField}
-            width="full"
-            flexGroup={false}
+        <DatePickerWrapper
+          isAutoRefreshOnly={!hasValidTimeField}
+          showRefresh={!hasValidTimeField}
+          width="full"
+          flexGroup={!hasValidTimeField}
+          onRefresh={onRefresh}
+          needsUpdate={needsUpdate}
+        />,
+        hasValidTimeField && (
+          <FullTimeRangeSelector
+            frozenDataPreference={frozenDataPreference}
+            setFrozenDataPreference={setFrozenDataPreference}
+            dataView={dataView}
+            query={undefined}
+            disabled={false}
+            timefilter={timefilter}
+            callback={updateTimeState}
           />
-        </EuiFlexGroup>,
-      ]}
+        ),
+      ].filter(Boolean)}
     />
   );
 };
@@ -147,7 +154,7 @@ const isBarBetween = (start: number, end: number, min: number, max: number) => {
 };
 export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
   const {
-    services: { data: dataService },
+    services: { data: dataService, uiSettings },
   } = useDataVisualizerKibana();
   const { dataView, savedSearch } = useDataSource();
 
@@ -173,6 +180,10 @@ export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
   const [globalState, setGlobalState] = useUrlState('_g');
 
   const [selectedSavedSearch, setSelectedSavedSearch] = useState(savedSearch);
+
+  const [localQueryString, setLocalQueryString] = useState<Query['query'] | undefined>(
+    dataComparisonListState.searchString
+  );
 
   useEffect(() => {
     if (savedSearch) {
@@ -352,9 +363,46 @@ export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
     ? getDataDriftDataLabel(COMPARISON_LABEL, initialSettings?.comparison)
     : getDataDriftDataLabel(COMPARISON_LABEL);
 
+  const onQueryChange = useCallback((query: Query['query'] | undefined) => {
+    setLocalQueryString(query);
+  }, []);
+
+  const queryNeedsUpdate = useMemo(
+    () => localQueryString !== dataComparisonListState.searchString,
+    [dataComparisonListState.searchString, localQueryString]
+  );
+
+  const handleRefresh = useCallback(() => {
+    if (queryNeedsUpdate) {
+      const newQuery = buildEsQuery(
+        dataView,
+        {
+          query: localQueryString || '',
+          language: searchQueryLanguage,
+        },
+        dataService?.query.filterManager.getFilters() ?? [],
+        uiSettings ? getEsQueryConfig(uiSettings) : undefined
+      );
+      setDataComparisonListState({
+        ...dataComparisonListState,
+        searchString: localQueryString,
+        searchQuery: newQuery,
+      });
+    }
+  }, [
+    queryNeedsUpdate,
+    dataView,
+    localQueryString,
+    searchQueryLanguage,
+    dataService?.query.filterManager,
+    uiSettings,
+    setDataComparisonListState,
+    dataComparisonListState,
+  ]);
+
   return (
     <EuiPageBody data-test-subj="dataComparisonDataDriftPage" paddingSize="none" panelled={false}>
-      <PageHeader />
+      <PageHeader onRefresh={handleRefresh} needsUpdate={queryNeedsUpdate} />
       <EuiSpacer size="m" />
       <EuiPageSection paddingSize="none">
         <EuiFlexGroup gutterSize="m" direction="column">
@@ -365,6 +413,7 @@ export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
               searchQuery={searchQuery}
               searchQueryLanguage={searchQueryLanguage}
               setSearchParams={setSearchParams}
+              onQueryChange={onQueryChange}
             />
           </EuiFlexItem>
           <EuiFlexItem>

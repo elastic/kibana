@@ -22,12 +22,13 @@ export interface AddToTimelineButtonProps {
 
 export const SECURITY_APP_NAME = 'Security';
 export const AddToTimelineButton = (props: AddToTimelineButtonProps) => {
-  const { timelines, appName } = useKibana().services;
+  const { timelines, appName, analytics, i18n, theme } = useKibana().services;
+  const startServices = { analytics, i18n, theme };
   const { field, value, isIcon, iconProps } = props;
 
   const queryIds = isArray(value) ? value : [value];
   const TimelineIconComponent = useCallback(
-    (timelineComponentProps) => (
+    (timelineComponentProps: any) => (
       <EuiButtonIcon iconType="timelines" {...timelineComponentProps} size="xs" {...iconProps} />
     ),
     [iconProps]
@@ -60,5 +61,6 @@ export const AddToTimelineButton = (props: AddToTimelineButtonProps) => {
     ...(isIcon
       ? { showTooltip: true, Component: TimelineIconComponent }
       : { Component: TimelineComponent }),
+    startServices,
   });
 };

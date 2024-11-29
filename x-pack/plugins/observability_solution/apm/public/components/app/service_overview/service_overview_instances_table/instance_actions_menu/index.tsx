@@ -20,6 +20,10 @@ import {
   ALL_DATASETS_LOCATOR_ID,
 } from '@kbn/deeplinks-observability/locators';
 import { getLogsLocatorsFromUrlService } from '@kbn/logs-shared-plugin/common';
+import {
+  ASSET_DETAILS_LOCATOR_ID,
+  type AssetDetailsLocatorParams,
+} from '@kbn/observability-shared-plugin/common';
 import { isJavaAgentName } from '../../../../../../common/agent_name';
 import { SERVICE_NODE_NAME } from '../../../../../../common/es_fields/apm';
 import { useApmPluginContext } from '../../../../../context/apm_plugin/use_apm_plugin_context';
@@ -39,12 +43,7 @@ interface Props {
 
 const POPOVER_WIDTH = '305px';
 
-export function InstanceActionsMenu({
-  serviceName,
-  serviceNodeName,
-  kuery,
-  onClose,
-}: Props) {
+export function InstanceActionsMenu({ serviceName, serviceNodeName, kuery, onClose }: Props) {
   const { core, share } = useApmPluginContext();
   const { data, status } = useInstanceDetailsFetcher({
     serviceName,
@@ -57,10 +56,11 @@ export function InstanceActionsMenu({
   const metricOverviewHref = useMetricOverviewHref(serviceName);
   const history = useHistory();
 
-  const allDatasetsLocator = share.url.locators.get<AllDatasetsLocatorParams>(
-    ALL_DATASETS_LOCATOR_ID
-  )!;
+  const allDatasetsLocator =
+    share.url.locators.get<AllDatasetsLocatorParams>(ALL_DATASETS_LOCATOR_ID)!;
   const { nodeLogsLocator } = getLogsLocatorsFromUrlService(share.url);
+  const assetDetailsLocator =
+    share.url.locators.get<AssetDetailsLocatorParams>(ASSET_DETAILS_LOCATOR_ID);
 
   if (isPending(status)) {
     return (
@@ -101,6 +101,7 @@ export function InstanceActionsMenu({
     metricsHref,
     allDatasetsLocator,
     nodeLogsLocator,
+    assetDetailsLocator,
   });
 
   return (
@@ -112,9 +113,7 @@ export function InstanceActionsMenu({
             {section.map((item) => (
               <Section key={item.key}>
                 {item.title && <SectionTitle>{item.title}</SectionTitle>}
-                {item.subtitle && (
-                  <SectionSubtitle>{item.subtitle}</SectionSubtitle>
-                )}
+                {item.subtitle && <SectionSubtitle>{item.subtitle}</SectionSubtitle>}
                 <SectionLinks>
                   {item.actions.map((action) => (
                     <SectionLink

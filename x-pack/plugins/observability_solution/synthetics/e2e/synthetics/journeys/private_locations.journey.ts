@@ -7,20 +7,14 @@
 
 import { journey, step, before, after, expect } from '@elastic/synthetics';
 import { waitForLoadingToFinish } from '@kbn/ux-plugin/e2e/journeys/utils';
+import { SyntheticsServices } from './services/synthetics_services';
 import { byTestId } from '../../helpers/utils';
-import { recordVideo } from '../../helpers/record_video';
-import {
-  addTestMonitor,
-  cleanPrivateLocations,
-  cleanTestMonitors,
-  getPrivateLocations,
-} from './services/add_monitor';
+import { addTestMonitor, cleanPrivateLocations, cleanTestMonitors } from './services/add_monitor';
 import { syntheticsAppPageProvider } from '../page_objects/synthetics_app';
 
 journey(`PrivateLocationsSettings`, async ({ page, params }) => {
-  recordVideo(page);
-
-  const syntheticsApp = syntheticsAppPageProvider({ page, kibanaUrl: params.kibanaUrl });
+  const syntheticsApp = syntheticsAppPageProvider({ page, kibanaUrl: params.kibanaUrl, params });
+  const services = new SyntheticsServices(params);
 
   page.setDefaultTimeout(2 * 30000);
 
@@ -81,16 +75,14 @@ journey(`PrivateLocationsSettings`, async ({ page, params }) => {
     await page.click('text=Private Locations');
     await page.click('h1:has-text("Settings")');
 
-    const privateLocations = await getPrivateLocations(params);
+    const privateLocations = await services.getPrivateLocations();
 
-    const locations = privateLocations.attributes.locations;
+    expect(privateLocations.length).toBe(1);
 
-    expect(locations.length).toBe(1);
-
-    locationId = locations[0].id;
+    locationId = privateLocations[0].id;
 
     await addTestMonitor(params.kibanaUrl, 'test-monitor', {
-      locations: [locations[0]],
+      locations: [privateLocations[0]],
       type: 'browser',
     });
   });
@@ -118,9 +110,9 @@ journey(`PrivateLocationsSettings`, async ({ page, params }) => {
     await page.click('[data-test-subj="settings-page-link"]');
     await page.click('h1:has-text("Settings")');
     await page.click('text=Private Locations');
-    await page.waitForSelector('td:has-text("Monitors"):has-text("1")');
-    await page.waitForSelector('td:has-text("Location nam"):has-text("Test private")');
-    await page.click('.euiTableCellContent__hoverItem .euiToolTipAnchor');
+    await page.waitForSelector('td:has-text("1")');
+    await page.waitForSelector('td:has-text("Test private")');
+    await page.click('.euiTableRowCell .euiToolTipAnchor');
     await page.click('button:has-text("Tags")');
     await page.click('[aria-label="Tags"] >> text=Area51');
     await page.click(
@@ -128,7 +120,7 @@ journey(`PrivateLocationsSettings`, async ({ page, params }) => {
     );
     await page.click('text=Test private');
 
-    await page.click('.euiTableCellContent__hoverItem .euiToolTipAnchor');
+    await page.click('.euiTableRowCell .euiToolTipAnchor');
 
     await page.locator(byTestId(`deleteLocation-${locationId}`)).isDisabled();
 

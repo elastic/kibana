@@ -4,31 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { resolve } from 'path';
 import type { FtrConfigProviderContext } from '@kbn/test';
+import { CLOUD_SECURITY_PLUGIN_VERSION } from '@kbn/cloud-security-posture-plugin/common/constants';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const xpackFunctionalConfig = await readConfigFile(
-    require.resolve('../functional/config.base.js')
-  );
+  const xPackAPITestsConfig = await readConfigFile(require.resolve('../api_integration/config.ts'));
 
   return {
-    ...xpackFunctionalConfig.getAll(),
-    testFiles: [
-      require.resolve('./telemetry/telemetry.ts'),
-      require.resolve('./routes/vulnerabilities_dashboard.ts'),
-      require.resolve('./routes/stats.ts'),
-      require.resolve('./routes/csp_benchmark_rules_bulk_update.ts'),
-      require.resolve('./routes/csp_benchmark_rules_get_states.ts'),
-      require.resolve('./routes/benchmarks.ts'),
-    ],
+    ...xPackAPITestsConfig.getAll(),
+    testFiles: [resolve(__dirname, './routes'), resolve(__dirname, './telemetry')],
     junit: {
       reportName: 'X-Pack Cloud Security Posture API Tests',
     },
     kbnTestServer: {
-      ...xpackFunctionalConfig.get('kbnTestServer'),
+      ...xPackAPITestsConfig.get('kbnTestServer'),
       serverArgs: [
-        ...xpackFunctionalConfig.get('kbnTestServer.serverArgs'),
+        ...xPackAPITestsConfig.get('kbnTestServer.serverArgs'),
         /**
          * Package version is fixed (not latest) so FTR won't suddenly break when package is changed.
          *
@@ -43,7 +35,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
          *   2. merge the updated version number change to kibana
          */
         `--xpack.fleet.packages.0.name=cloud_security_posture`,
-        `--xpack.fleet.packages.0.version=1.5.0`,
+        `--xpack.fleet.packages.0.version=${CLOUD_SECURITY_PLUGIN_VERSION}`,
         // `--xpack.fleet.registryUrl=https://localhost:8080`,
       ],
     },

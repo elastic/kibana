@@ -18,19 +18,20 @@ import { SiemSearchBar } from '../../common/components/search_bar';
 import { showGlobalFilters } from '../../timelines/components/timeline/helpers';
 import { inputsSelectors } from '../../common/store';
 import { useGlobalFullScreen } from '../../common/containers/use_full_screen';
-import { useSourcererDataView } from '../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../sourcerer/containers';
 import { useGlobalTime } from '../../common/containers/use_global_time';
 import { useDeepEqualSelector } from '../../common/hooks/use_selector';
 import { convertToBuildEsQuery } from '../../common/lib/kuery';
 import { useInvalidFilterQuery } from '../../common/hooks/use_invalid_filter_query';
 import { SessionsView } from '../../common/components/sessions_viewer';
 import { kubernetesSessionsHeaders } from './constants';
+import { dataViewSpecToIndexPattern } from './utils/data_view_spec_to_index_pattern';
 
 export const KubernetesContainer = React.memo(() => {
   const { kubernetesSecurity, uiSettings } = useKibana().services;
 
   const { globalFullScreen } = useGlobalFullScreen();
-  const { indexPattern, sourcererDataView, dataViewId } = useSourcererDataView();
+  const { sourcererDataView, dataViewId } = useSourcererDataView();
   const { from, to } = useGlobalTime();
 
   const getGlobalFiltersQuerySelector = useMemo(
@@ -45,11 +46,11 @@ export const KubernetesContainer = React.memo(() => {
     () =>
       convertToBuildEsQuery({
         config: getEsQueryConfig(uiSettings),
-        indexPattern,
+        dataViewSpec: sourcererDataView,
         queries: [query],
         filters,
       }),
-    [filters, indexPattern, uiSettings, query]
+    [filters, sourcererDataView, uiSettings, query]
   );
 
   useInvalidFilterQuery({
@@ -84,7 +85,7 @@ export const KubernetesContainer = React.memo(() => {
             <SiemSearchBar id={InputsModelId.global} sourcererDataView={sourcererDataView} />
           </FiltersGlobal>
         ),
-        indexPattern,
+        indexPattern: dataViewSpecToIndexPattern(sourcererDataView),
         globalFilter: {
           filterQuery,
           startDate: from,

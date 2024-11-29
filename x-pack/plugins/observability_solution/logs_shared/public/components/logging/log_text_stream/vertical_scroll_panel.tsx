@@ -248,6 +248,9 @@ export class VerticalScrollPanel<Child> extends React.PureComponent<
         scrollbarOffset={scrollbarOffset}
         onScroll={this.handleScroll}
         ref={this.scrollRef}
+        tabIndex={0}
+        className="eui-scrollBar"
+        role="rowgroup"
       >
         {typeof children === 'function' ? children(this.registerChild) : null}
       </ScrollPanelWrapper>

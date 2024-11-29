@@ -6,34 +6,25 @@
  */
 
 import { DoneInvokeEvent } from 'xstate';
-import { RefreshInterval, TimeRange } from '@kbn/data-plugin/common';
-import { Integration } from '../../../../common/data_streams_stats/integration';
-import { Direction, SortField } from '../../../hooks';
-import { DegradedDocsStat } from '../../../../common/data_streams_stats/malformed_docs_stat';
 import {
-  DataStreamDegradedDocsStatServiceResponse,
+  DataStreamDocsStat,
+  DatasetUserPrivileges,
+  NonAggregatableDatasets,
+} from '../../../../common/api_types';
+import {
   DataStreamDetails,
-  DataStreamStatServiceResponse,
-} from '../../../../common/data_streams_stats';
-import { DataStreamStat } from '../../../../common/data_streams_stats/data_stream_stat';
-
-export type FlyoutDataset = Omit<
   DataStreamStat,
-  'type' | 'size' | 'sizeBytes' | 'lastActivity' | 'degradedDocs'
-> & { type: string };
-
-interface TableCriteria {
-  page: number;
-  rowsPerPage: number;
-  sort: {
-    field: SortField;
-    direction: Direction;
-  };
-}
-
-export type TimeRangeConfig = Pick<TimeRange, 'from' | 'to'> & {
-  refresh: RefreshInterval;
-};
+  DataStreamStatServiceResponse,
+  DataStreamStatType,
+} from '../../../../common/data_streams_stats';
+import { Integration } from '../../../../common/data_streams_stats/integration';
+import {
+  DataStreamType,
+  QualityIndicators,
+  TableCriteria,
+  TimeRangeConfig,
+} from '../../../../common/types';
+import { DatasetTableSortField } from '../../../hooks';
 
 interface FiltersCriteria {
   inactive: boolean;
@@ -41,31 +32,36 @@ interface FiltersCriteria {
   timeRange: TimeRangeConfig;
   integrations: string[];
   namespaces: string[];
+  qualities: QualityIndicators[];
+  types: string[];
   query?: string;
 }
 
 export interface WithTableOptions {
-  table: TableCriteria;
-}
-
-export interface WithFlyoutOptions {
-  flyout: {
-    dataset?: FlyoutDataset;
-    datasetDetails?: DataStreamDetails;
-    insightsTimeRange?: TimeRangeConfig;
-  };
+  table: TableCriteria<DatasetTableSortField>;
 }
 
 export interface WithFilters {
   filters: FiltersCriteria;
 }
 
+export type DictionaryType<T> = Record<DataStreamType, T[]>;
+
 export interface WithDataStreamStats {
-  dataStreamStats: DataStreamStat[];
+  datasetUserPrivileges: DatasetUserPrivileges;
+  dataStreamStats: DataStreamStatType[];
+}
+
+export interface WithTotalDocs {
+  totalDocsStats: DictionaryType<DataStreamDocsStat>;
 }
 
 export interface WithDegradedDocs {
-  degradedDocStats: DegradedDocsStat[];
+  degradedDocStats: DataStreamDocsStat[];
+}
+
+export interface WithNonAggregatableDatasets {
+  nonAggregatableDatasets: string[];
 }
 
 export interface WithDatasets {
@@ -76,44 +72,40 @@ export interface WithIntegrations {
   integrations: Integration[];
 }
 
-export type DefaultDatasetQualityControllerState = { type: string } & WithTableOptions &
-  Partial<WithDataStreamStats> &
-  Partial<WithDegradedDocs> &
-  WithFlyoutOptions &
+export type DefaultDatasetQualityControllerState = WithTableOptions &
+  WithDataStreamStats &
+  WithTotalDocs &
+  WithDegradedDocs &
   WithDatasets &
   WithFilters &
-  WithIntegrations;
+  WithNonAggregatableDatasets &
+  Partial<WithIntegrations>;
 
-type DefaultDatasetQualityStateContext = DefaultDatasetQualityControllerState &
-  Partial<WithFlyoutOptions>;
+type DefaultDatasetQualityStateContext = DefaultDatasetQualityControllerState;
 
 export type DatasetQualityControllerTypeState =
   | {
-      value: 'datasets.fetching';
+      value: 'stats.datasets.fetching';
       context: DefaultDatasetQualityStateContext;
     }
   | {
-      value: 'datasets.loaded';
+      value: 'stats.datasets.loaded';
       context: DefaultDatasetQualityStateContext;
     }
   | {
-      value: 'datasets.loaded.idle';
+      value: 'stats.degradedDocs.fetching';
       context: DefaultDatasetQualityStateContext;
     }
   | {
-      value: 'datasets.loaded.flyoutOpen.fetching';
+      value: 'stats.nonAggregatableDatasets.fetching';
       context: DefaultDatasetQualityStateContext;
     }
   | {
-      value: 'datasets.loaded.flyoutOpen';
+      value: 'integrations.fetching';
       context: DefaultDatasetQualityStateContext;
     }
   | {
-      value: 'degradedDocs.fetching';
-      context: DefaultDatasetQualityStateContext;
-    }
-  | {
-      value: 'datasets.loaded';
+      value: 'nonAggregatableDatasets.fetching';
       context: DefaultDatasetQualityStateContext;
     };
 
@@ -122,22 +114,11 @@ export type DatasetQualityControllerContext = DatasetQualityControllerTypeState[
 export type DatasetQualityControllerEvent =
   | {
       type: 'UPDATE_TABLE_CRITERIA';
-      criteria: TableCriteria;
-    }
-  | {
-      type: 'OPEN_FLYOUT';
-      dataset: FlyoutDataset;
-    }
-  | {
-      type: 'SELECT_NEW_DATASET';
-      dataset: FlyoutDataset;
+      dataset_criteria: TableCriteria<DatasetTableSortField>;
     }
   | {
       type: 'UPDATE_INSIGHTS_TIME_RANGE';
       timeRange: TimeRangeConfig;
-    }
-  | {
-      type: 'CLOSE_FLYOUT';
     }
   | {
       type: 'TOGGLE_INACTIVE_DATASETS';
@@ -161,9 +142,21 @@ export type DatasetQualityControllerEvent =
       namespaces: string[];
     }
   | {
+      type: 'UPDATE_QUALITIES';
+      qualities: QualityIndicators[];
+    }
+  | {
       type: 'UPDATE_QUERY';
       query: string;
     }
-  | DoneInvokeEvent<DataStreamDegradedDocsStatServiceResponse>
+  | {
+      type: 'UPDATE_TYPES';
+      types: DataStreamType[];
+    }
+  | DoneInvokeEvent<DataStreamDocsStat[]>
+  | DoneInvokeEvent<NonAggregatableDatasets>
+  | DoneInvokeEvent<DataStreamDetails>
   | DoneInvokeEvent<DataStreamStatServiceResponse>
+  | DoneInvokeEvent<Integration>
+  | DoneInvokeEvent<boolean | null>
   | DoneInvokeEvent<Error>;

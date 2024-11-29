@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { get } from 'lodash/fp';
 import type { Action, Middleware } from 'redux';
 import type { CoreStart } from '@kbn/core/public';
 
@@ -19,12 +18,12 @@ import {
   endTimelineSaving,
   startTimelineSaving,
   showCallOutUnauthorizedMsg,
+  pinEvent,
 } from '../actions';
 import { persistNote } from '../../containers/notes/api';
-import type { ResponseNote } from '../../../../common/api/timeline';
 import { selectTimelineById } from '../selectors';
 import * as i18n from '../../pages/translations';
-import { refreshTimelines } from './helpers';
+import { ensureTimelineIsSaved, isHttpFetchError, refreshTimelines } from './helpers';
 
 type NoteAction = ReturnType<typeof addNote | typeof addNoteToEvent>;
 
@@ -34,37 +33,48 @@ function isNoteAction(action: Action): action is NoteAction {
   return timelineNoteActionsType.has(action.type);
 }
 
+function isAddNoteToEventAction(action: Action): action is ReturnType<typeof addNoteToEvent> {
+  return action.type === addNoteToEvent.type;
+}
+
 export const addNoteToTimelineMiddleware: (kibana: CoreStart) => Middleware<{}, State> =
   (kibana: CoreStart) => (store) => (next) => async (action: Action) => {
     // perform the action
     const ret = next(action);
 
     if (isNoteAction(action)) {
-      const { id, noteId: localNoteId } = action.payload;
-      const timeline = selectTimelineById(store.getState(), id);
+      const { id: localTimelineId, noteId: localNoteId } = action.payload;
       const notes = appSelectors.selectNotesByIdSelector(store.getState());
 
-      store.dispatch(startTimelineSaving({ id }));
+      store.dispatch(startTimelineSaving({ id: localTimelineId }));
 
       try {
-        const result = await persistNote({
+        // In case a note is being added to an unsaved timeline, we need to make sure
+        // the timeline has been saved or is in draft state. Otherwise, `timelineId` will be `null`
+        // and we're creating orphaned notes.
+        const timeline = await ensureTimelineIsSaved({
+          localTimelineId,
+          timeline: selectTimelineById(store.getState(), localTimelineId),
+          store,
+        });
+
+        if (!timeline.savedObjectId) {
+          throw new Error('Cannot create note without a timelineId');
+        }
+
+        const response = await persistNote({
           noteId: null,
           version: null,
           note: {
             eventId: 'eventId' in action.payload ? action.payload.eventId : undefined,
             note: getNoteText(localNoteId, notes),
-            timelineId: timeline.id,
+            timelineId: timeline.savedObjectId,
           },
         });
 
-        const response: ResponseNote = get('data.persistNote', result);
-        if (response.code === 403) {
-          store.dispatch(showCallOutUnauthorizedMsg());
-        }
-
         refreshTimelines(store.getState());
 
-        store.dispatch(
+        await store.dispatch(
           updateNote({
             note: {
               ...notes[localNoteId],
@@ -79,15 +89,34 @@ export const addNoteToTimelineMiddleware: (kibana: CoreStart) => Middleware<{}, 
             },
           })
         );
+
+        const currentTimeline = selectTimelineById(store.getState(), localTimelineId);
+
+        // Automatically pin an associated event if it's not pinned yet
+        if (isAddNoteToEventAction(action)) {
+          const isEventPinned = currentTimeline.pinnedEventIds[action.payload.eventId] === true;
+          if (!isEventPinned) {
+            await store.dispatch(
+              pinEvent({
+                id: localTimelineId,
+                eventId: action.payload.eventId,
+              })
+            );
+          }
+        }
       } catch (error) {
-        kibana.notifications.toasts.addDanger({
-          title: i18n.UPDATE_TIMELINE_ERROR_TITLE,
-          text: error?.message ?? i18n.UPDATE_TIMELINE_ERROR_TEXT,
-        });
+        if (isHttpFetchError(error) && error.body?.status_code === 403) {
+          store.dispatch(showCallOutUnauthorizedMsg());
+        } else {
+          kibana.notifications.toasts.addDanger({
+            title: i18n.UPDATE_TIMELINE_ERROR_TITLE,
+            text: error?.message ?? i18n.UPDATE_TIMELINE_ERROR_TEXT,
+          });
+        }
       } finally {
         store.dispatch(
           endTimelineSaving({
-            id,
+            id: localTimelineId,
           })
         );
       }

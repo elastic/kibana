@@ -7,20 +7,16 @@
 
 import { merge } from 'lodash/fp';
 
-import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+import type { IEsSearchResponse } from '@kbn/search-types';
 import { TimelineEventsQueries } from '../../../../../../common/api/search_strategy';
 import {
   EventHit,
   TimelineEventsDetailsStrategyResponse,
-  TimelineEventsDetailsItem,
 } from '../../../../../../common/search_strategy';
 import { inspectStringifyObject } from '../../../../../utils/build_query';
 import { TimelineFactory } from '../../types';
 import { buildTimelineDetailsQuery } from './query.events_details.dsl';
-import {
-  getDataFromFieldsHits,
-  getDataSafety,
-} from '../../../../../../common/utils/field_formatters';
+import { getDataFromFieldsHits } from '../../../../../../common/utils/field_formatters';
 import { buildEcsObjects } from '../../helpers/build_ecs_objects';
 
 export const timelineEventsDetails: TimelineFactory<TimelineEventsQueries.details> = {
@@ -39,7 +35,8 @@ export const timelineEventsDetails: TimelineFactory<TimelineEventsQueries.detail
     response: IEsSearchResponse<EventHit>
   ): Promise<TimelineEventsDetailsStrategyResponse> => {
     const { indexName, eventId, runtimeMappings = {} } = options;
-    const { fields, ...hitsData } = response.rawResponse.hits.hits[0] ?? {};
+    // _source is removed here as it's only needed in the rawEventData below
+    const { fields, _source, ...hitsData } = response.rawResponse.hits.hits[0] ?? {};
 
     const inspect = {
       dsl: [
@@ -56,10 +53,7 @@ export const timelineEventsDetails: TimelineFactory<TimelineEventsQueries.detail
       };
     }
 
-    const fieldsData = await getDataSafety<EventHit['fields'], TimelineEventsDetailsItem[]>(
-      getDataFromFieldsHits,
-      merge(fields, hitsData)
-    );
+    const fieldsData = getDataFromFieldsHits(merge(fields, hitsData));
 
     const rawEventData = response.rawResponse.hits.hits[0];
     const ecs = buildEcsObjects(rawEventData as EventHit);

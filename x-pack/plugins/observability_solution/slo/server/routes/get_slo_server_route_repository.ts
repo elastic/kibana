@@ -5,14 +5,10 @@
  * 2.0.
  */
 
-import { SloConfig } from '..';
-import { sloRouteRepository } from './slo/route';
+import { getSloRouteRepository } from './slo/route';
 
-export function getSloServerRouteRepository(config: SloConfig) {
-  const repository = {
-    ...sloRouteRepository,
-  };
-  return repository;
+export function getSloServerRouteRepository({ isServerless }: { isServerless?: boolean } = {}) {
+  return getSloRouteRepository(isServerless);
 }
 
-export type SloServerRouteRepository = ReturnType<typeof getSloServerRouteRepository>;
+export type SLORouteRepository = ReturnType<typeof getSloServerRouteRepository>;

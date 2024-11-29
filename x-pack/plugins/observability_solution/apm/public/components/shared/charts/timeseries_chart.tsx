@@ -23,6 +23,7 @@ import {
   XYBrushEvent,
   XYChartSeriesIdentifier,
   Tooltip,
+  SettingsSpec,
 } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -46,13 +47,13 @@ const END_ZONE_LABEL = i18n.translate('xpack.apm.timeseries.endzone', {
   defaultMessage:
     'The selected time range does not include this entire bucket. It might contain partial data.',
 });
+
 interface TimeseriesChartProps extends TimeseriesChartWithContextProps {
   comparisonEnabled: boolean;
   offset?: string;
   timeZone: string;
-  annotations?: Array<
-    ReactElement<typeof RectAnnotation | typeof LineAnnotation>
-  >;
+  annotations?: Array<ReactElement<typeof RectAnnotation | typeof LineAnnotation>>;
+  settings?: Partial<SettingsSpec>;
 }
 export function TimeseriesChart({
   id,
@@ -70,6 +71,7 @@ export function TimeseriesChart({
   offset,
   timeZone,
   annotations,
+  settings,
 }: TimeseriesChartProps) {
   const history = useHistory();
   const { chartRef, updatePointerEvent } = useChartPointerEventContext();
@@ -81,29 +83,22 @@ export function TimeseriesChart({
     anomalyTimeseriesColor: anomalyTimeseries?.color,
   });
   const isEmpty = isTimeseriesEmpty(timeseries);
-  const isComparingExpectedBounds =
-    comparisonEnabled && isExpectedBoundsComparison(offset);
+  const isComparingExpectedBounds = comparisonEnabled && isExpectedBoundsComparison(offset);
   const allSeries = [
     ...timeseries,
-    ...(isComparingExpectedBounds
-      ? anomalyChartTimeseries?.boundaries ?? []
-      : []),
+    ...(isComparingExpectedBounds ? anomalyChartTimeseries?.boundaries ?? [] : []),
     ...(anomalyChartTimeseries?.scores ?? []),
   ]
     // Sorting series so that area type series are before line series
     // This is a workaround so that the legendSort works correctly
     // Can be removed when https://github.com/elastic/elastic-charts/issues/1685 is resolved
     .sort(
-      isComparingExpectedBounds
-        ? (prev, curr) => prev.type.localeCompare(curr.type)
-        : undefined
+      isComparingExpectedBounds ? (prev, curr) => prev.type.localeCompare(curr.type) : undefined
     );
 
   const xValues = timeseries.flatMap(({ data }) => data.map(({ x }) => x));
   const xValuesExpectedBounds =
-    anomalyChartTimeseries?.boundaries?.flatMap(({ data }) =>
-      data.map(({ x }) => x)
-    ) ?? [];
+    anomalyChartTimeseries?.boundaries?.flatMap(({ data }) => data.map(({ x }) => x)) ?? [];
   const min = Math.min(...xValues);
   const max = Math.max(...xValues, ...xValuesExpectedBounds);
   const xFormatter = niceTimeFormatter([min, max]);
@@ -114,17 +109,13 @@ export function TimeseriesChart({
   // See https://github.com/elastic/elastic-charts/issues/1685
   const legendSort = isComparingExpectedBounds
     ? (a: SeriesIdentifier, b: SeriesIdentifier) => {
-        if ((a as XYChartSeriesIdentifier)?.specId === expectedBoundsTitle)
-          return -1;
-        if ((b as XYChartSeriesIdentifier)?.specId === expectedBoundsTitle)
-          return -1;
+        if ((a as XYChartSeriesIdentifier)?.specId === expectedBoundsTitle) return -1;
+        if ((b as XYChartSeriesIdentifier)?.specId === expectedBoundsTitle) return -1;
         return 1;
       }
     : undefined;
 
-  const endZoneColor = theme.darkMode
-    ? theme.eui.euiColorLightShade
-    : theme.eui.euiColorDarkShade;
+  const endZoneColor = theme.darkMode ? theme.eui.euiColorLightShade : theme.eui.euiColorDarkShade;
   const endZoneRectAnnotationStyle: Partial<RectAnnotationStyle> = {
     stroke: endZoneColor,
     fill: endZoneColor,
@@ -144,12 +135,7 @@ export function TimeseriesChart({
   }
 
   return (
-    <ChartContainer
-      hasData={!isEmpty}
-      height={height}
-      status={fetchStatus}
-      id={id}
-    >
+    <ChartContainer hasData={!isEmpty} height={height} status={fetchStatus} id={id}>
       <Chart ref={chartRef} id={id}>
         <Tooltip
           stickTo="top"
@@ -179,9 +165,7 @@ export function TimeseriesChart({
           }}
         />
         <Settings
-          onBrushEnd={(event) =>
-            onBrushEnd({ x: (event as XYBrushEvent).x, history })
-          }
+          onBrushEnd={(event) => onBrushEnd({ x: (event as XYBrushEvent).x, history })}
           theme={[
             customTheme,
             {
@@ -206,6 +190,7 @@ export function TimeseriesChart({
             }
           }}
           locale={i18n.getLocale()}
+          {...settings}
         />
         <Axis
           id="x-axis"
@@ -255,9 +240,7 @@ export function TimeseriesChart({
               curve={CurveType.CURVE_MONOTONE_X}
               hideInLegend={serie.hideLegend}
               fit={serie.fit ?? undefined}
-              filterSeriesInTooltip={
-                serie.hideTooltipValue ? () => false : undefined
-              }
+              filterSeriesInTooltip={serie.hideTooltipValue ? () => false : undefined}
               areaSeriesStyle={serie.areaSeriesStyle}
               lineSeriesStyle={serie.lineSeriesStyle}
             />

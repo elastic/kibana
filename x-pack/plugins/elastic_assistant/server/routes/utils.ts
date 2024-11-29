@@ -13,12 +13,18 @@ import type {
   KibanaResponseFactory,
   CustomHttpResponseOptions,
 } from '@kbn/core/server';
+import {
+  ActionsClientChatOpenAI,
+  ActionsClientChatBedrockConverse,
+  ActionsClientChatVertexAI,
+} from '@kbn/langchain/server';
+import { Connector } from '@kbn/actions-plugin/server/application/connector/types';
+import {
+  OPENAI_CHAT_URL,
+  OpenAiProviderType,
+} from '@kbn/stack-connectors-plugin/common/openai/constants';
 import { CustomHttpRequestError } from './custom_http_request_error';
 
-export interface OutputError {
-  message: string;
-  statusCode: number;
-}
 export interface BulkError {
   // Id can be single id or stringified ids.
   id?: string;
@@ -161,4 +167,57 @@ export const convertToSnakeCase = <T extends Record<string, unknown>>(
     const newKey = snakeCase(item);
     return { ...acc, [newKey]: obj[item] };
   }, {});
+};
+
+/**
+ * Returns the LangChain `llmType` for the given actionTypeId
+ */
+export const getLlmType = (actionTypeId: string): string | undefined => {
+  const llmTypeDictionary: Record<string, string> = {
+    [`.gen-ai`]: `openai`,
+    [`.bedrock`]: `bedrock`,
+    [`.gemini`]: `gemini`,
+  };
+  return llmTypeDictionary[actionTypeId];
+};
+
+export const getLlmClass = (llmType?: string) => {
+  switch (llmType) {
+    case 'bedrock':
+      return ActionsClientChatBedrockConverse;
+    case 'gemini':
+      return ActionsClientChatVertexAI;
+    case 'openai':
+    default:
+      return ActionsClientChatOpenAI;
+  }
+};
+
+export const isOpenSourceModel = (connector?: Connector): boolean => {
+  if (connector == null) {
+    return false;
+  }
+
+  const llmType = getLlmType(connector.actionTypeId);
+  const isOpenAiType = llmType === 'openai';
+
+  if (!isOpenAiType) {
+    return false;
+  }
+  const connectorApiProvider = connector.config?.apiProvider
+    ? (connector.config?.apiProvider as OpenAiProviderType)
+    : undefined;
+  if (connectorApiProvider === OpenAiProviderType.Other) {
+    return true;
+  }
+
+  const connectorApiUrl = connector.config?.apiUrl
+    ? (connector.config.apiUrl as string)
+    : undefined;
+
+  return (
+    !!connectorApiUrl &&
+    connectorApiUrl !== OPENAI_CHAT_URL &&
+    connectorApiProvider !== OpenAiProviderType.AzureAi
+  );
 };

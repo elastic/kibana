@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -20,6 +21,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FieldDescription } from '@kbn/field-utils';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
+import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { AddFieldFilterHandler } from '../../types';
 
 export interface FieldPopoverHeaderProps {
@@ -29,10 +31,14 @@ export interface FieldPopoverHeaderProps {
   buttonAddFilterProps?: Partial<EuiButtonIconProps>;
   buttonEditFieldProps?: Partial<EuiButtonIconProps>;
   buttonDeleteFieldProps?: Partial<EuiButtonIconProps>;
+  onAddBreakdownField?: (field: DataViewField | undefined) => void;
   onAddFieldToWorkspace?: (field: DataViewField) => unknown;
   onAddFilter?: AddFieldFilterHandler;
   onEditField?: (fieldName: string) => unknown;
   onDeleteField?: (fieldName: string) => unknown;
+  services?: {
+    fieldsMetadata?: FieldsMetadataPublicStart;
+  };
 }
 
 export const FieldPopoverHeader: React.FC<FieldPopoverHeaderProps> = ({
@@ -42,10 +48,12 @@ export const FieldPopoverHeader: React.FC<FieldPopoverHeaderProps> = ({
   buttonAddFilterProps,
   buttonEditFieldProps,
   buttonDeleteFieldProps,
+  onAddBreakdownField,
   onAddFieldToWorkspace,
   onAddFilter,
   onEditField,
   onDeleteField,
+  services,
 }) => {
   if (!field) {
     return null;
@@ -76,11 +84,18 @@ export const FieldPopoverHeader: React.FC<FieldPopoverHeaderProps> = ({
     defaultMessage: 'Delete data view field',
   });
 
+  const addBreakdownFieldTooltip = i18n.translate(
+    'unifiedFieldList.fieldPopover.addBreakdownFieldLabel',
+    {
+      defaultMessage: 'Add breakdown',
+    }
+  );
+
   return (
     <>
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={true}>
-          <EuiTitle size="xxs">
+          <EuiTitle size="xxs" data-test-subj="fieldPopoverHeader_fieldDisplayName">
             <h5 className="eui-textBreakWord">{field.displayName}</h5>
           </EuiTitle>
         </EuiFlexItem>
@@ -97,6 +112,21 @@ export const FieldPopoverHeader: React.FC<FieldPopoverHeaderProps> = ({
                 onClick={() => {
                   closePopover();
                   onAddFieldToWorkspace(field);
+                }}
+              />
+            </EuiToolTip>
+          </EuiFlexItem>
+        )}
+        {onAddBreakdownField && (
+          <EuiFlexItem grow={false} data-test-subj="fieldPopoverHeader_addBreakdownField">
+            <EuiToolTip content={addBreakdownFieldTooltip}>
+              <EuiButtonIcon
+                data-test-subj={`fieldPopoverHeader_addBreakdownField-${field.name}`}
+                aria-label={addBreakdownFieldTooltip}
+                iconType="visBarVerticalStacked"
+                onClick={() => {
+                  closePopover();
+                  onAddBreakdownField(field);
                 }}
               />
             </EuiToolTip>
@@ -153,12 +183,20 @@ export const FieldPopoverHeader: React.FC<FieldPopoverHeaderProps> = ({
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
-      {field.customDescription ? (
-        <>
-          <EuiSpacer size="xs" />
-          <FieldDescription field={field} />
-        </>
-      ) : null}
+      <FieldDescription
+        field={field}
+        Wrapper={FieldDescriptionWrapper}
+        fieldsMetadataService={services?.fieldsMetadata}
+      />
+    </>
+  );
+};
+
+const FieldDescriptionWrapper: React.FC<React.PropsWithChildren<{}>> = ({ children }) => {
+  return (
+    <>
+      <EuiSpacer size="xs" />
+      {children}
     </>
   );
 };

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { filter, firstValueFrom } from 'rxjs';
@@ -21,6 +22,7 @@ import { I18nService } from '@kbn/core-i18n-browser-internal';
 import { ExecutionContextService } from '@kbn/core-execution-context-browser-internal';
 import type { FatalErrorsSetup } from '@kbn/core-fatal-errors-browser';
 import { FatalErrorsService } from '@kbn/core-fatal-errors-browser-internal';
+import { FeatureFlagsService } from '@kbn/core-feature-flags-browser-internal';
 import { HttpService } from '@kbn/core-http-browser-internal';
 import { SettingsService, UiSettingsService } from '@kbn/core-ui-settings-browser-internal';
 import { DeprecationsService } from '@kbn/core-deprecations-browser-internal';
@@ -37,6 +39,7 @@ import type { InternalCoreSetup, InternalCoreStart } from '@kbn/core-lifecycle-b
 import { PluginsService } from '@kbn/core-plugins-browser-internal';
 import { CustomBrandingService } from '@kbn/core-custom-branding-browser-internal';
 import { SecurityService } from '@kbn/core-security-browser-internal';
+import { UserProfileService } from '@kbn/core-user-profile-browser-internal';
 import { KBN_LOAD_MARKS } from './events';
 import { fetchOptionalMemoryInfo } from './fetch_optional_memory_info';
 import {
@@ -83,6 +86,7 @@ export class CoreSystem {
   private readonly loggingSystem: BrowserLoggingSystem;
   private readonly analytics: AnalyticsService;
   private readonly fatalErrors: FatalErrorsService;
+  private readonly featureFlags: FeatureFlagsService;
   private readonly injectedMetadata: InjectedMetadataService;
   private readonly notifications: NotificationsService;
   private readonly http: HttpService;
@@ -105,6 +109,7 @@ export class CoreSystem {
   private readonly executionContext: ExecutionContextService;
   private readonly customBranding: CustomBrandingService;
   private readonly security: SecurityService;
+  private readonly userProfile: UserProfileService;
   private fatalErrorsSetup: FatalErrorsSetup | null = null;
 
   constructor(params: CoreSystemParams) {
@@ -129,7 +134,9 @@ export class CoreSystem {
       // Stop Core before rendering any fatal errors into the DOM
       this.stop();
     });
+    this.featureFlags = new FeatureFlagsService(this.coreContext);
     this.security = new SecurityService(this.coreContext);
+    this.userProfile = new UserProfileService(this.coreContext);
     this.theme = new ThemeService();
     this.notifications = new NotificationsService();
     this.http = new HttpService();
@@ -238,6 +245,7 @@ export class CoreSystem {
         executionContext,
       });
       const security = this.security.setup();
+      const userProfile = this.userProfile.setup();
       this.chrome.setup({ analytics });
       const uiSettings = this.uiSettings.setup({ http, injectedMetadata });
       const settings = this.settings.setup({ http, injectedMetadata });
@@ -246,11 +254,13 @@ export class CoreSystem {
 
       const application = this.application.setup({ http, analytics });
       this.coreApp.setup({ application, http, injectedMetadata, notifications });
+      const featureFlags = this.featureFlags.setup({ injectedMetadata });
 
       const core: InternalCoreSetup = {
         analytics,
         application,
         fatalErrors: this.fatalErrorsSetup,
+        featureFlags,
         http,
         injectedMetadata,
         notifications,
@@ -260,6 +270,7 @@ export class CoreSystem {
         executionContext,
         customBranding,
         security,
+        userProfile,
       };
 
       // Services that do not expose contracts at setup
@@ -285,14 +296,15 @@ export class CoreSystem {
     try {
       const analytics = this.analytics.start();
       const security = this.security.start();
-      const injectedMetadata = await this.injectedMetadata.start();
-      const uiSettings = await this.uiSettings.start();
-      const settings = await this.settings.start();
+      const userProfile = this.userProfile.start();
+      const injectedMetadata = this.injectedMetadata.start();
+      const uiSettings = this.uiSettings.start();
+      const settings = this.settings.start();
       const docLinks = this.docLinks.start({ injectedMetadata });
-      const http = await this.http.start();
+      const http = this.http.start();
       const savedObjects = await this.savedObjects.start({ http });
-      const i18n = await this.i18n.start();
-      const fatalErrors = await this.fatalErrors.start();
+      const i18n = this.i18n.start();
+      const fatalErrors = this.fatalErrors.start();
       const theme = this.theme.start();
       await this.integrations.start({ uiSettings });
 
@@ -339,7 +351,18 @@ export class CoreSystem {
       });
       const deprecations = this.deprecations.start({ http });
 
-      this.coreApp.start({ application, docLinks, http, notifications, uiSettings });
+      this.coreApp.start({
+        application,
+        docLinks,
+        http,
+        notifications,
+        uiSettings,
+        analytics,
+        i18n,
+        theme,
+      });
+
+      const featureFlags = await this.featureFlags.start();
 
       const core: InternalCoreStart = {
         analytics,
@@ -347,6 +370,7 @@ export class CoreSystem {
         chrome,
         docLinks,
         executionContext,
+        featureFlags,
         http,
         theme,
         savedObjects,
@@ -360,6 +384,7 @@ export class CoreSystem {
         deprecations,
         customBranding,
         security,
+        userProfile,
       };
 
       await this.plugins.start(core);
@@ -422,7 +447,9 @@ export class CoreSystem {
     this.deprecations.stop();
     this.theme.stop();
     this.analytics.stop();
+    this.featureFlags.stop();
     this.security.stop();
+    this.userProfile.stop();
     this.rootDomElement.textContent = '';
   }
 

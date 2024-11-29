@@ -14,10 +14,9 @@ Array [
         <p
           data-test-subj="expression-failure"
         >
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="An error occurred in the expression"
             id="xpack.lens.editorFrame.expressionFailure"
-            values={Object {}}
           />
         </p>
         <p>

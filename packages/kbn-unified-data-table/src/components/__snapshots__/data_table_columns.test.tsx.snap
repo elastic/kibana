@@ -11,10 +11,9 @@ Array [
             "size": "m",
           },
           "iconType": "copyClipboard",
-          "label": <FormattedMessage
+          "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy name"
             id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
-            values={Object {}}
           />,
           "onClick": [Function],
           "size": "xs",
@@ -25,10 +24,9 @@ Array [
             "size": "m",
           },
           "iconType": "copyClipboard",
-          "label": <FormattedMessage
+          "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy column"
             id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
-            values={Object {}}
           />,
           "onClick": [Function],
           "size": "xs",
@@ -50,6 +48,9 @@ Array [
       test
     </span>,
     "displayAsText": "extension",
+    "displayHeaderCellProps": Object {
+      "className": "unifiedDataTable__headerCell",
+    },
     "id": "extension",
     "isSortable": true,
     "schema": "string",
@@ -64,10 +65,9 @@ Array [
             "size": "m",
           },
           "iconType": "copyClipboard",
-          "label": <FormattedMessage
+          "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy name"
             id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
-            values={Object {}}
           />,
           "onClick": [Function],
           "size": "xs",
@@ -78,10 +78,9 @@ Array [
             "size": "m",
           },
           "iconType": "copyClipboard",
-          "label": <FormattedMessage
+          "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy column"
             id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
-            values={Object {}}
           />,
           "onClick": [Function],
           "size": "xs",
@@ -96,10 +95,23 @@ Array [
     },
     "cellActions": Array [
       [Function],
+      [Function],
+      [Function],
     ],
     "display": <Memo(DataTableColumnHeader)
       columnDisplayName="message"
       columnName="message"
+      columnsMeta={
+        Object {
+          "extension": Object {
+            "type": "string",
+          },
+          "message": Object {
+            "esType": "keyword",
+            "type": "string",
+          },
+        }
+      }
       dataView={
         Object {
           "docvalueFields": Array [],
@@ -150,6 +162,7 @@ Array [
               "type": "number",
             },
           ],
+          "getAllowHidden": [Function],
           "getComputedFields": [Function],
           "getFieldByName": [MockFunction] {
             "calls": Array [
@@ -170,39 +183,6 @@ Array [
               ],
               Array [
                 "timestamp",
-              ],
-              Array [
-                "extension",
-              ],
-              Array [
-                "message",
-              ],
-              Array [
-                "timestamp",
-              ],
-              Array [
-                "extension",
-              ],
-              Array [
-                "message",
-              ],
-              Array [
-                "extension",
-              ],
-              Array [
-                "message",
-              ],
-              Array [
-                "timestamp",
-              ],
-              Array [
-                "extension",
-              ],
-              Array [
-                "timestamp",
-              ],
-              Array [
-                "var_test",
               ],
               Array [
                 "extension",
@@ -309,120 +289,6 @@ Array [
                 "type": "return",
                 "value": Object {
                   "aggregatable": true,
-                  "displayName": "timestamp",
-                  "filterable": true,
-                  "name": "timestamp",
-                  "scripted": false,
-                  "sortable": true,
-                  "type": "date",
-                },
-              },
-              Object {
-                "type": "return",
-                "value": Object {
-                  "aggregatable": true,
-                  "displayName": "extension",
-                  "filterable": true,
-                  "name": "extension",
-                  "scripted": false,
-                  "type": "string",
-                },
-              },
-              Object {
-                "type": "return",
-                "value": Object {
-                  "displayName": "message",
-                  "filterable": false,
-                  "name": "message",
-                  "scripted": false,
-                  "type": "string",
-                },
-              },
-              Object {
-                "type": "return",
-                "value": Object {
-                  "aggregatable": true,
-                  "displayName": "extension",
-                  "filterable": true,
-                  "name": "extension",
-                  "scripted": false,
-                  "type": "string",
-                },
-              },
-              Object {
-                "type": "return",
-                "value": Object {
-                  "displayName": "message",
-                  "filterable": false,
-                  "name": "message",
-                  "scripted": false,
-                  "type": "string",
-                },
-              },
-              Object {
-                "type": "return",
-                "value": Object {
-                  "aggregatable": true,
-                  "displayName": "timestamp",
-                  "filterable": true,
-                  "name": "timestamp",
-                  "scripted": false,
-                  "sortable": true,
-                  "type": "date",
-                },
-              },
-              Object {
-                "type": "return",
-                "value": Object {
-                  "aggregatable": true,
-                  "displayName": "extension",
-                  "filterable": true,
-                  "name": "extension",
-                  "scripted": false,
-                  "type": "string",
-                },
-              },
-              Object {
-                "type": "return",
-                "value": Object {
-                  "aggregatable": true,
-                  "displayName": "timestamp",
-                  "filterable": true,
-                  "name": "timestamp",
-                  "scripted": false,
-                  "sortable": true,
-                  "type": "date",
-                },
-              },
-              Object {
-                "type": "return",
-                "value": undefined,
-              },
-              Object {
-                "type": "return",
-                "value": Object {
-                  "aggregatable": true,
-                  "displayName": "extension",
-                  "filterable": true,
-                  "name": "extension",
-                  "scripted": false,
-                  "type": "string",
-                },
-              },
-              Object {
-                "type": "return",
-                "value": Object {
-                  "displayName": "message",
-                  "filterable": false,
-                  "name": "message",
-                  "scripted": false,
-                  "type": "string",
-                },
-              },
-              Object {
-                "type": "return",
-                "value": Object {
-                  "aggregatable": true,
                   "displayName": "extension",
                   "filterable": true,
                   "name": "extension",
@@ -445,6 +311,8 @@ Array [
           "getFormatterForField": [MockFunction],
           "getIndexPattern": [Function],
           "getName": [Function],
+          "getRuntimeField": [Function],
+          "getScriptedField": [Function],
           "getSourceFiltering": [Function],
           "getTimeField": [Function],
           "id": "index-pattern-with-timefield-id",
@@ -456,6 +324,7 @@ Array [
             "_score",
           ],
           "name": "index-pattern-with-timefield",
+          "setFieldCount": [MockFunction],
           "timeFieldName": "timestamp",
           "title": "index-pattern-with-timefield-title",
           "toMinimalSpec": [Function],
@@ -466,6 +335,9 @@ Array [
       headerRowHeight={5}
     />,
     "displayAsText": "message",
+    "displayHeaderCellProps": Object {
+      "className": "unifiedDataTable__headerCell",
+    },
     "id": "message",
     "isSortable": true,
     "schema": "string",
@@ -485,10 +357,9 @@ Array [
             "size": "m",
           },
           "iconType": "copyClipboard",
-          "label": <FormattedMessage
+          "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy name"
             id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
-            values={Object {}}
           />,
           "onClick": [Function],
           "size": "xs",
@@ -499,10 +370,9 @@ Array [
             "size": "m",
           },
           "iconType": "copyClipboard",
-          "label": <FormattedMessage
+          "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy column"
             id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
-            values={Object {}}
           />,
           "onClick": [Function],
           "size": "xs",
@@ -568,18 +438,10 @@ Array [
               "type": "number",
             },
           ],
+          "getAllowHidden": [Function],
           "getComputedFields": [Function],
           "getFieldByName": [MockFunction] {
             "calls": Array [
-              Array [
-                "extension",
-              ],
-              Array [
-                "message",
-              ],
-              Array [
-                "timestamp",
-              ],
               Array [
                 "extension",
               ],
@@ -693,44 +555,13 @@ Array [
                   "type": "string",
                 },
               },
-              Object {
-                "type": "return",
-                "value": Object {
-                  "aggregatable": true,
-                  "displayName": "timestamp",
-                  "filterable": true,
-                  "name": "timestamp",
-                  "scripted": false,
-                  "sortable": true,
-                  "type": "date",
-                },
-              },
-              Object {
-                "type": "return",
-                "value": Object {
-                  "aggregatable": true,
-                  "displayName": "extension",
-                  "filterable": true,
-                  "name": "extension",
-                  "scripted": false,
-                  "type": "string",
-                },
-              },
-              Object {
-                "type": "return",
-                "value": Object {
-                  "displayName": "message",
-                  "filterable": false,
-                  "name": "message",
-                  "scripted": false,
-                  "type": "string",
-                },
-              },
             ],
           },
           "getFormatterForField": [MockFunction],
           "getIndexPattern": [Function],
           "getName": [Function],
+          "getRuntimeField": [Function],
+          "getScriptedField": [Function],
           "getSourceFiltering": [Function],
           "getTimeField": [Function],
           "id": "index-pattern-with-timefield-id",
@@ -742,6 +573,7 @@ Array [
             "_score",
           ],
           "name": "index-pattern-with-timefield",
+          "setFieldCount": [MockFunction],
           "timeFieldName": "timestamp",
           "title": "index-pattern-with-timefield-title",
           "toMinimalSpec": [Function],
@@ -763,6 +595,9 @@ Array [
       headerRowHeight={5}
     />,
     "displayAsText": "timestamp",
+    "displayHeaderCellProps": Object {
+      "className": "unifiedDataTable__headerCell",
+    },
     "id": "timestamp",
     "initialWidth": 212,
     "isSortable": true,
@@ -778,10 +613,9 @@ Array [
             "size": "m",
           },
           "iconType": "copyClipboard",
-          "label": <FormattedMessage
+          "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy name"
             id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
-            values={Object {}}
           />,
           "onClick": [Function],
           "size": "xs",
@@ -792,10 +626,9 @@ Array [
             "size": "m",
           },
           "iconType": "copyClipboard",
-          "label": <FormattedMessage
+          "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy column"
             id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
-            values={Object {}}
           />,
           "onClick": [Function],
           "size": "xs",
@@ -866,18 +699,10 @@ Array [
               "type": "number",
             },
           ],
+          "getAllowHidden": [Function],
           "getComputedFields": [Function],
           "getFieldByName": [MockFunction] {
             "calls": Array [
-              Array [
-                "extension",
-              ],
-              Array [
-                "message",
-              ],
-              Array [
-                "timestamp",
-              ],
               Array [
                 "extension",
               ],
@@ -991,44 +816,13 @@ Array [
                   "type": "string",
                 },
               },
-              Object {
-                "type": "return",
-                "value": Object {
-                  "aggregatable": true,
-                  "displayName": "timestamp",
-                  "filterable": true,
-                  "name": "timestamp",
-                  "scripted": false,
-                  "sortable": true,
-                  "type": "date",
-                },
-              },
-              Object {
-                "type": "return",
-                "value": Object {
-                  "aggregatable": true,
-                  "displayName": "extension",
-                  "filterable": true,
-                  "name": "extension",
-                  "scripted": false,
-                  "type": "string",
-                },
-              },
-              Object {
-                "type": "return",
-                "value": Object {
-                  "displayName": "message",
-                  "filterable": false,
-                  "name": "message",
-                  "scripted": false,
-                  "type": "string",
-                },
-              },
             ],
           },
           "getFormatterForField": [MockFunction],
           "getIndexPattern": [Function],
           "getName": [Function],
+          "getRuntimeField": [Function],
+          "getScriptedField": [Function],
           "getSourceFiltering": [Function],
           "getTimeField": [Function],
           "id": "index-pattern-with-timefield-id",
@@ -1040,6 +834,7 @@ Array [
             "_score",
           ],
           "name": "index-pattern-with-timefield",
+          "setFieldCount": [MockFunction],
           "timeFieldName": "timestamp",
           "title": "index-pattern-with-timefield-title",
           "toMinimalSpec": [Function],
@@ -1051,6 +846,9 @@ Array [
       showColumnTokens={true}
     />,
     "displayAsText": "extension",
+    "displayHeaderCellProps": Object {
+      "className": "unifiedDataTable__headerCell",
+    },
     "id": "extension",
     "isSortable": false,
     "schema": "string",
@@ -1065,10 +863,9 @@ Array [
             "size": "m",
           },
           "iconType": "copyClipboard",
-          "label": <FormattedMessage
+          "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy name"
             id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
-            values={Object {}}
           />,
           "onClick": [Function],
           "size": "xs",
@@ -1079,10 +876,9 @@ Array [
             "size": "m",
           },
           "iconType": "copyClipboard",
-          "label": <FormattedMessage
+          "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy column"
             id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
-            values={Object {}}
           />,
           "onClick": [Function],
           "size": "xs",
@@ -1151,18 +947,10 @@ Array [
               "type": "number",
             },
           ],
+          "getAllowHidden": [Function],
           "getComputedFields": [Function],
           "getFieldByName": [MockFunction] {
             "calls": Array [
-              Array [
-                "extension",
-              ],
-              Array [
-                "message",
-              ],
-              Array [
-                "timestamp",
-              ],
               Array [
                 "extension",
               ],
@@ -1276,44 +1064,13 @@ Array [
                   "type": "string",
                 },
               },
-              Object {
-                "type": "return",
-                "value": Object {
-                  "aggregatable": true,
-                  "displayName": "timestamp",
-                  "filterable": true,
-                  "name": "timestamp",
-                  "scripted": false,
-                  "sortable": true,
-                  "type": "date",
-                },
-              },
-              Object {
-                "type": "return",
-                "value": Object {
-                  "aggregatable": true,
-                  "displayName": "extension",
-                  "filterable": true,
-                  "name": "extension",
-                  "scripted": false,
-                  "type": "string",
-                },
-              },
-              Object {
-                "type": "return",
-                "value": Object {
-                  "displayName": "message",
-                  "filterable": false,
-                  "name": "message",
-                  "scripted": false,
-                  "type": "string",
-                },
-              },
             ],
           },
           "getFormatterForField": [MockFunction],
           "getIndexPattern": [Function],
           "getName": [Function],
+          "getRuntimeField": [Function],
+          "getScriptedField": [Function],
           "getSourceFiltering": [Function],
           "getTimeField": [Function],
           "id": "index-pattern-with-timefield-id",
@@ -1325,6 +1082,7 @@ Array [
             "_score",
           ],
           "name": "index-pattern-with-timefield",
+          "setFieldCount": [MockFunction],
           "timeFieldName": "timestamp",
           "title": "index-pattern-with-timefield-title",
           "toMinimalSpec": [Function],
@@ -1336,6 +1094,9 @@ Array [
       showColumnTokens={true}
     />,
     "displayAsText": "message",
+    "displayHeaderCellProps": Object {
+      "className": "unifiedDataTable__headerCell",
+    },
     "id": "message",
     "isSortable": false,
     "schema": "string",
@@ -1355,10 +1116,9 @@ Array [
             "size": "m",
           },
           "iconType": "copyClipboard",
-          "label": <FormattedMessage
+          "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy name"
             id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
-            values={Object {}}
           />,
           "onClick": [Function],
           "size": "xs",
@@ -1369,10 +1129,9 @@ Array [
             "size": "m",
           },
           "iconType": "copyClipboard",
-          "label": <FormattedMessage
+          "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy column"
             id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
-            values={Object {}}
           />,
           "onClick": [Function],
           "size": "xs",
@@ -1393,10 +1152,15 @@ Array [
     "display": <Memo(DataTableColumnHeader)
       columnDisplayName="extension"
       columnName="extension"
-      columnTypes={
+      columnsMeta={
         Object {
-          "extension": "number",
-          "message": "keyword",
+          "extension": Object {
+            "type": "string",
+          },
+          "message": Object {
+            "esType": "keyword",
+            "type": "string",
+          },
         }
       }
       dataView={
@@ -1449,18 +1213,10 @@ Array [
               "type": "number",
             },
           ],
+          "getAllowHidden": [Function],
           "getComputedFields": [Function],
           "getFieldByName": [MockFunction] {
             "calls": Array [
-              Array [
-                "extension",
-              ],
-              Array [
-                "message",
-              ],
-              Array [
-                "timestamp",
-              ],
               Array [
                 "extension",
               ],
@@ -1584,39 +1340,6 @@ Array [
                 "type": "return",
                 "value": Object {
                   "aggregatable": true,
-                  "displayName": "timestamp",
-                  "filterable": true,
-                  "name": "timestamp",
-                  "scripted": false,
-                  "sortable": true,
-                  "type": "date",
-                },
-              },
-              Object {
-                "type": "return",
-                "value": Object {
-                  "aggregatable": true,
-                  "displayName": "extension",
-                  "filterable": true,
-                  "name": "extension",
-                  "scripted": false,
-                  "type": "string",
-                },
-              },
-              Object {
-                "type": "return",
-                "value": Object {
-                  "displayName": "message",
-                  "filterable": false,
-                  "name": "message",
-                  "scripted": false,
-                  "type": "string",
-                },
-              },
-              Object {
-                "type": "return",
-                "value": Object {
-                  "aggregatable": true,
                   "displayName": "extension",
                   "filterable": true,
                   "name": "extension",
@@ -1639,6 +1362,8 @@ Array [
           "getFormatterForField": [MockFunction],
           "getIndexPattern": [Function],
           "getName": [Function],
+          "getRuntimeField": [Function],
+          "getScriptedField": [Function],
           "getSourceFiltering": [Function],
           "getTimeField": [Function],
           "id": "index-pattern-with-timefield-id",
@@ -1650,6 +1375,7 @@ Array [
             "_score",
           ],
           "name": "index-pattern-with-timefield",
+          "setFieldCount": [MockFunction],
           "timeFieldName": "timestamp",
           "title": "index-pattern-with-timefield-title",
           "toMinimalSpec": [Function],
@@ -1661,9 +1387,12 @@ Array [
       showColumnTokens={true}
     />,
     "displayAsText": "extension",
+    "displayHeaderCellProps": Object {
+      "className": "unifiedDataTable__headerCell",
+    },
     "id": "extension",
     "isSortable": false,
-    "schema": "numeric",
+    "schema": "string",
     "visibleCellActions": undefined,
   },
   Object {
@@ -1675,10 +1404,9 @@ Array [
             "size": "m",
           },
           "iconType": "copyClipboard",
-          "label": <FormattedMessage
+          "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy name"
             id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
-            values={Object {}}
           />,
           "onClick": [Function],
           "size": "xs",
@@ -1689,10 +1417,9 @@ Array [
             "size": "m",
           },
           "iconType": "copyClipboard",
-          "label": <FormattedMessage
+          "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy column"
             id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
-            values={Object {}}
           />,
           "onClick": [Function],
           "size": "xs",
@@ -1711,10 +1438,15 @@ Array [
     "display": <Memo(DataTableColumnHeader)
       columnDisplayName="message"
       columnName="message"
-      columnTypes={
+      columnsMeta={
         Object {
-          "extension": "number",
-          "message": "keyword",
+          "extension": Object {
+            "type": "string",
+          },
+          "message": Object {
+            "esType": "keyword",
+            "type": "string",
+          },
         }
       }
       dataView={
@@ -1767,18 +1499,10 @@ Array [
               "type": "number",
             },
           ],
+          "getAllowHidden": [Function],
           "getComputedFields": [Function],
           "getFieldByName": [MockFunction] {
             "calls": Array [
-              Array [
-                "extension",
-              ],
-              Array [
-                "message",
-              ],
-              Array [
-                "timestamp",
-              ],
               Array [
                 "extension",
               ],
@@ -1902,39 +1626,6 @@ Array [
                 "type": "return",
                 "value": Object {
                   "aggregatable": true,
-                  "displayName": "timestamp",
-                  "filterable": true,
-                  "name": "timestamp",
-                  "scripted": false,
-                  "sortable": true,
-                  "type": "date",
-                },
-              },
-              Object {
-                "type": "return",
-                "value": Object {
-                  "aggregatable": true,
-                  "displayName": "extension",
-                  "filterable": true,
-                  "name": "extension",
-                  "scripted": false,
-                  "type": "string",
-                },
-              },
-              Object {
-                "type": "return",
-                "value": Object {
-                  "displayName": "message",
-                  "filterable": false,
-                  "name": "message",
-                  "scripted": false,
-                  "type": "string",
-                },
-              },
-              Object {
-                "type": "return",
-                "value": Object {
-                  "aggregatable": true,
                   "displayName": "extension",
                   "filterable": true,
                   "name": "extension",
@@ -1957,6 +1648,8 @@ Array [
           "getFormatterForField": [MockFunction],
           "getIndexPattern": [Function],
           "getName": [Function],
+          "getRuntimeField": [Function],
+          "getScriptedField": [Function],
           "getSourceFiltering": [Function],
           "getTimeField": [Function],
           "id": "index-pattern-with-timefield-id",
@@ -1968,6 +1661,7 @@ Array [
             "_score",
           ],
           "name": "index-pattern-with-timefield",
+          "setFieldCount": [MockFunction],
           "timeFieldName": "timestamp",
           "title": "index-pattern-with-timefield-title",
           "toMinimalSpec": [Function],
@@ -1979,9 +1673,12 @@ Array [
       showColumnTokens={true}
     />,
     "displayAsText": "message",
+    "displayHeaderCellProps": Object {
+      "className": "unifiedDataTable__headerCell",
+    },
     "id": "message",
     "isSortable": false,
-    "schema": "kibana-json",
+    "schema": "string",
     "visibleCellActions": undefined,
   },
 ]
@@ -1998,10 +1695,9 @@ Array [
             "size": "m",
           },
           "iconType": "copyClipboard",
-          "label": <FormattedMessage
+          "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy name"
             id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
-            values={Object {}}
           />,
           "onClick": [Function],
           "size": "xs",
@@ -2012,10 +1708,9 @@ Array [
             "size": "m",
           },
           "iconType": "copyClipboard",
-          "label": <FormattedMessage
+          "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy column"
             id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
-            values={Object {}}
           />,
           "onClick": [Function],
           "size": "xs",
@@ -2083,6 +1778,7 @@ Array [
               "type": "number",
             },
           ],
+          "getAllowHidden": [Function],
           "getComputedFields": [Function],
           "getFieldByName": [MockFunction] {
             "calls": Array [
@@ -2120,6 +1816,8 @@ Array [
           "getFormatterForField": [MockFunction],
           "getIndexPattern": [Function],
           "getName": [Function],
+          "getRuntimeField": [Function],
+          "getScriptedField": [Function],
           "getSourceFiltering": [Function],
           "getTimeField": [Function],
           "id": "index-pattern-with-timefield-id",
@@ -2131,6 +1829,7 @@ Array [
             "_score",
           ],
           "name": "index-pattern-with-timefield",
+          "setFieldCount": [MockFunction],
           "timeFieldName": "timestamp",
           "title": "index-pattern-with-timefield-title",
           "toMinimalSpec": [Function],
@@ -2141,6 +1840,9 @@ Array [
       headerRowHeight={5}
     />,
     "displayAsText": "extension",
+    "displayHeaderCellProps": Object {
+      "className": "unifiedDataTable__headerCell",
+    },
     "id": "extension",
     "isSortable": false,
     "schema": "string",
@@ -2155,10 +1857,9 @@ Array [
             "size": "m",
           },
           "iconType": "copyClipboard",
-          "label": <FormattedMessage
+          "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy name"
             id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
-            values={Object {}}
           />,
           "onClick": [Function],
           "size": "xs",
@@ -2169,10 +1870,9 @@ Array [
             "size": "m",
           },
           "iconType": "copyClipboard",
-          "label": <FormattedMessage
+          "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy column"
             id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
-            values={Object {}}
           />,
           "onClick": [Function],
           "size": "xs",
@@ -2238,6 +1938,7 @@ Array [
               "type": "number",
             },
           ],
+          "getAllowHidden": [Function],
           "getComputedFields": [Function],
           "getFieldByName": [MockFunction] {
             "calls": Array [
@@ -2275,6 +1976,8 @@ Array [
           "getFormatterForField": [MockFunction],
           "getIndexPattern": [Function],
           "getName": [Function],
+          "getRuntimeField": [Function],
+          "getScriptedField": [Function],
           "getSourceFiltering": [Function],
           "getTimeField": [Function],
           "id": "index-pattern-with-timefield-id",
@@ -2286,6 +1989,7 @@ Array [
             "_score",
           ],
           "name": "index-pattern-with-timefield",
+          "setFieldCount": [MockFunction],
           "timeFieldName": "timestamp",
           "title": "index-pattern-with-timefield-title",
           "toMinimalSpec": [Function],
@@ -2296,6 +2000,9 @@ Array [
       headerRowHeight={5}
     />,
     "displayAsText": "message",
+    "displayHeaderCellProps": Object {
+      "className": "unifiedDataTable__headerCell",
+    },
     "id": "message",
     "isSortable": false,
     "schema": "string",
@@ -2315,10 +2022,9 @@ Array [
             "size": "m",
           },
           "iconType": "copyClipboard",
-          "label": <FormattedMessage
+          "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy name"
             id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
-            values={Object {}}
           />,
           "onClick": [Function],
           "size": "xs",
@@ -2329,10 +2035,9 @@ Array [
             "size": "m",
           },
           "iconType": "copyClipboard",
-          "label": <FormattedMessage
+          "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy column"
             id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
-            values={Object {}}
           />,
           "onClick": [Function],
           "size": "xs",
@@ -2398,6 +2103,7 @@ Array [
               "type": "number",
             },
           ],
+          "getAllowHidden": [Function],
           "getComputedFields": [Function],
           "getFieldByName": [MockFunction] {
             "calls": Array [
@@ -2477,6 +2183,8 @@ Array [
           "getFormatterForField": [MockFunction],
           "getIndexPattern": [Function],
           "getName": [Function],
+          "getRuntimeField": [Function],
+          "getScriptedField": [Function],
           "getSourceFiltering": [Function],
           "getTimeField": [Function],
           "id": "index-pattern-with-timefield-id",
@@ -2488,6 +2196,7 @@ Array [
             "_score",
           ],
           "name": "index-pattern-with-timefield",
+          "setFieldCount": [MockFunction],
           "timeFieldName": "timestamp",
           "title": "index-pattern-with-timefield-title",
           "toMinimalSpec": [Function],
@@ -2509,6 +2218,9 @@ Array [
       headerRowHeight={5}
     />,
     "displayAsText": "timestamp",
+    "displayHeaderCellProps": Object {
+      "className": "unifiedDataTable__headerCell",
+    },
     "id": "timestamp",
     "initialWidth": 212,
     "isSortable": true,
@@ -2524,10 +2236,9 @@ Array [
             "size": "m",
           },
           "iconType": "copyClipboard",
-          "label": <FormattedMessage
+          "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy name"
             id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
-            values={Object {}}
           />,
           "onClick": [Function],
           "size": "xs",
@@ -2538,10 +2249,9 @@ Array [
             "size": "m",
           },
           "iconType": "copyClipboard",
-          "label": <FormattedMessage
+          "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy column"
             id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
-            values={Object {}}
           />,
           "onClick": [Function],
           "size": "xs",
@@ -2612,6 +2322,7 @@ Array [
               "type": "number",
             },
           ],
+          "getAllowHidden": [Function],
           "getComputedFields": [Function],
           "getFieldByName": [MockFunction] {
             "calls": Array [
@@ -2691,6 +2402,8 @@ Array [
           "getFormatterForField": [MockFunction],
           "getIndexPattern": [Function],
           "getName": [Function],
+          "getRuntimeField": [Function],
+          "getScriptedField": [Function],
           "getSourceFiltering": [Function],
           "getTimeField": [Function],
           "id": "index-pattern-with-timefield-id",
@@ -2702,6 +2415,7 @@ Array [
             "_score",
           ],
           "name": "index-pattern-with-timefield",
+          "setFieldCount": [MockFunction],
           "timeFieldName": "timestamp",
           "title": "index-pattern-with-timefield-title",
           "toMinimalSpec": [Function],
@@ -2712,6 +2426,9 @@ Array [
       headerRowHeight={5}
     />,
     "displayAsText": "extension",
+    "displayHeaderCellProps": Object {
+      "className": "unifiedDataTable__headerCell",
+    },
     "id": "extension",
     "isSortable": false,
     "schema": "string",
@@ -2726,10 +2443,9 @@ Array [
             "size": "m",
           },
           "iconType": "copyClipboard",
-          "label": <FormattedMessage
+          "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy name"
             id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
-            values={Object {}}
           />,
           "onClick": [Function],
           "size": "xs",
@@ -2740,10 +2456,9 @@ Array [
             "size": "m",
           },
           "iconType": "copyClipboard",
-          "label": <FormattedMessage
+          "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy column"
             id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
-            values={Object {}}
           />,
           "onClick": [Function],
           "size": "xs",
@@ -2812,6 +2527,7 @@ Array [
               "type": "number",
             },
           ],
+          "getAllowHidden": [Function],
           "getComputedFields": [Function],
           "getFieldByName": [MockFunction] {
             "calls": Array [
@@ -2891,6 +2607,8 @@ Array [
           "getFormatterForField": [MockFunction],
           "getIndexPattern": [Function],
           "getName": [Function],
+          "getRuntimeField": [Function],
+          "getScriptedField": [Function],
           "getSourceFiltering": [Function],
           "getTimeField": [Function],
           "id": "index-pattern-with-timefield-id",
@@ -2902,6 +2620,7 @@ Array [
             "_score",
           ],
           "name": "index-pattern-with-timefield",
+          "setFieldCount": [MockFunction],
           "timeFieldName": "timestamp",
           "title": "index-pattern-with-timefield-title",
           "toMinimalSpec": [Function],
@@ -2912,6 +2631,9 @@ Array [
       headerRowHeight={5}
     />,
     "displayAsText": "message",
+    "displayHeaderCellProps": Object {
+      "className": "unifiedDataTable__headerCell",
+    },
     "id": "message",
     "isSortable": false,
     "schema": "string",
@@ -2931,10 +2653,9 @@ Array [
             "size": "m",
           },
           "iconType": "copyClipboard",
-          "label": <FormattedMessage
+          "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy name"
             id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
-            values={Object {}}
           />,
           "onClick": [Function],
           "size": "xs",
@@ -2945,10 +2666,9 @@ Array [
             "size": "m",
           },
           "iconType": "copyClipboard",
-          "label": <FormattedMessage
+          "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy column"
             id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
-            values={Object {}}
           />,
           "onClick": [Function],
           "size": "xs",
@@ -3014,18 +2734,10 @@ Array [
               "type": "number",
             },
           ],
+          "getAllowHidden": [Function],
           "getComputedFields": [Function],
           "getFieldByName": [MockFunction] {
             "calls": Array [
-              Array [
-                "extension",
-              ],
-              Array [
-                "message",
-              ],
-              Array [
-                "timestamp",
-              ],
               Array [
                 "extension",
               ],
@@ -3097,44 +2809,13 @@ Array [
                   "type": "string",
                 },
               },
-              Object {
-                "type": "return",
-                "value": Object {
-                  "aggregatable": true,
-                  "displayName": "timestamp",
-                  "filterable": true,
-                  "name": "timestamp",
-                  "scripted": false,
-                  "sortable": true,
-                  "type": "date",
-                },
-              },
-              Object {
-                "type": "return",
-                "value": Object {
-                  "aggregatable": true,
-                  "displayName": "extension",
-                  "filterable": true,
-                  "name": "extension",
-                  "scripted": false,
-                  "type": "string",
-                },
-              },
-              Object {
-                "type": "return",
-                "value": Object {
-                  "displayName": "message",
-                  "filterable": false,
-                  "name": "message",
-                  "scripted": false,
-                  "type": "string",
-                },
-              },
             ],
           },
           "getFormatterForField": [MockFunction],
           "getIndexPattern": [Function],
           "getName": [Function],
+          "getRuntimeField": [Function],
+          "getScriptedField": [Function],
           "getSourceFiltering": [Function],
           "getTimeField": [Function],
           "id": "index-pattern-with-timefield-id",
@@ -3146,6 +2827,7 @@ Array [
             "_score",
           ],
           "name": "index-pattern-with-timefield",
+          "setFieldCount": [MockFunction],
           "timeFieldName": "timestamp",
           "title": "index-pattern-with-timefield-title",
           "toMinimalSpec": [Function],
@@ -3155,18 +2837,31 @@ Array [
       }
       dataViewField={
         Object {
-          "aggregatable": true,
-          "displayName": "timestamp",
-          "filterable": true,
+          "aggregatable": false,
+          "conflictDescriptions": undefined,
+          "count": 0,
+          "customDescription": undefined,
+          "customLabel": undefined,
+          "defaultFormatter": undefined,
+          "esTypes": Array [
+            "dateTime",
+          ],
+          "lang": undefined,
           "name": "timestamp",
+          "readFromDocValues": false,
+          "script": undefined,
           "scripted": false,
-          "sortable": true,
+          "searchable": true,
+          "subType": undefined,
           "type": "date",
         }
       }
       headerRowHeight={5}
     />,
     "displayAsText": "timestamp",
+    "displayHeaderCellProps": Object {
+      "className": "unifiedDataTable__headerCell",
+    },
     "id": "timestamp",
     "initialWidth": 212,
     "isSortable": true,
@@ -3182,10 +2877,9 @@ Array [
             "size": "m",
           },
           "iconType": "copyClipboard",
-          "label": <FormattedMessage
+          "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy name"
             id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
-            values={Object {}}
           />,
           "onClick": [Function],
           "size": "xs",
@@ -3196,10 +2890,9 @@ Array [
             "size": "m",
           },
           "iconType": "copyClipboard",
-          "label": <FormattedMessage
+          "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy column"
             id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
-            values={Object {}}
           />,
           "onClick": [Function],
           "size": "xs",
@@ -3220,6 +2913,21 @@ Array [
     "display": <Memo(DataTableColumnHeader)
       columnDisplayName="extension"
       columnName="extension"
+      columnsMeta={
+        Object {
+          "extension": Object {
+            "type": "string",
+          },
+          "message": Object {
+            "esType": "keyword",
+            "type": "string",
+          },
+          "timestamp": Object {
+            "esType": "dateTime",
+            "type": "date",
+          },
+        }
+      }
       dataView={
         Object {
           "docvalueFields": Array [],
@@ -3270,18 +2978,10 @@ Array [
               "type": "number",
             },
           ],
+          "getAllowHidden": [Function],
           "getComputedFields": [Function],
           "getFieldByName": [MockFunction] {
             "calls": Array [
-              Array [
-                "extension",
-              ],
-              Array [
-                "message",
-              ],
-              Array [
-                "timestamp",
-              ],
               Array [
                 "extension",
               ],
@@ -3353,44 +3053,13 @@ Array [
                   "type": "string",
                 },
               },
-              Object {
-                "type": "return",
-                "value": Object {
-                  "aggregatable": true,
-                  "displayName": "timestamp",
-                  "filterable": true,
-                  "name": "timestamp",
-                  "scripted": false,
-                  "sortable": true,
-                  "type": "date",
-                },
-              },
-              Object {
-                "type": "return",
-                "value": Object {
-                  "aggregatable": true,
-                  "displayName": "extension",
-                  "filterable": true,
-                  "name": "extension",
-                  "scripted": false,
-                  "type": "string",
-                },
-              },
-              Object {
-                "type": "return",
-                "value": Object {
-                  "displayName": "message",
-                  "filterable": false,
-                  "name": "message",
-                  "scripted": false,
-                  "type": "string",
-                },
-              },
             ],
           },
           "getFormatterForField": [MockFunction],
           "getIndexPattern": [Function],
           "getName": [Function],
+          "getRuntimeField": [Function],
+          "getScriptedField": [Function],
           "getSourceFiltering": [Function],
           "getTimeField": [Function],
           "id": "index-pattern-with-timefield-id",
@@ -3402,6 +3071,7 @@ Array [
             "_score",
           ],
           "name": "index-pattern-with-timefield",
+          "setFieldCount": [MockFunction],
           "timeFieldName": "timestamp",
           "title": "index-pattern-with-timefield-title",
           "toMinimalSpec": [Function],
@@ -3412,6 +3082,9 @@ Array [
       headerRowHeight={5}
     />,
     "displayAsText": "extension",
+    "displayHeaderCellProps": Object {
+      "className": "unifiedDataTable__headerCell",
+    },
     "id": "extension",
     "isSortable": true,
     "schema": "string",
@@ -3426,10 +3099,9 @@ Array [
             "size": "m",
           },
           "iconType": "copyClipboard",
-          "label": <FormattedMessage
+          "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy name"
             id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
-            values={Object {}}
           />,
           "onClick": [Function],
           "size": "xs",
@@ -3440,10 +3112,9 @@ Array [
             "size": "m",
           },
           "iconType": "copyClipboard",
-          "label": <FormattedMessage
+          "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy column"
             id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
-            values={Object {}}
           />,
           "onClick": [Function],
           "size": "xs",
@@ -3458,10 +3129,27 @@ Array [
     },
     "cellActions": Array [
       [Function],
+      [Function],
+      [Function],
     ],
     "display": <Memo(DataTableColumnHeader)
       columnDisplayName="message"
       columnName="message"
+      columnsMeta={
+        Object {
+          "extension": Object {
+            "type": "string",
+          },
+          "message": Object {
+            "esType": "keyword",
+            "type": "string",
+          },
+          "timestamp": Object {
+            "esType": "dateTime",
+            "type": "date",
+          },
+        }
+      }
       dataView={
         Object {
           "docvalueFields": Array [],
@@ -3512,18 +3200,10 @@ Array [
               "type": "number",
             },
           ],
+          "getAllowHidden": [Function],
           "getComputedFields": [Function],
           "getFieldByName": [MockFunction] {
             "calls": Array [
-              Array [
-                "extension",
-              ],
-              Array [
-                "message",
-              ],
-              Array [
-                "timestamp",
-              ],
               Array [
                 "extension",
               ],
@@ -3595,44 +3275,13 @@ Array [
                   "type": "string",
                 },
               },
-              Object {
-                "type": "return",
-                "value": Object {
-                  "aggregatable": true,
-                  "displayName": "timestamp",
-                  "filterable": true,
-                  "name": "timestamp",
-                  "scripted": false,
-                  "sortable": true,
-                  "type": "date",
-                },
-              },
-              Object {
-                "type": "return",
-                "value": Object {
-                  "aggregatable": true,
-                  "displayName": "extension",
-                  "filterable": true,
-                  "name": "extension",
-                  "scripted": false,
-                  "type": "string",
-                },
-              },
-              Object {
-                "type": "return",
-                "value": Object {
-                  "displayName": "message",
-                  "filterable": false,
-                  "name": "message",
-                  "scripted": false,
-                  "type": "string",
-                },
-              },
             ],
           },
           "getFormatterForField": [MockFunction],
           "getIndexPattern": [Function],
           "getName": [Function],
+          "getRuntimeField": [Function],
+          "getScriptedField": [Function],
           "getSourceFiltering": [Function],
           "getTimeField": [Function],
           "id": "index-pattern-with-timefield-id",
@@ -3644,6 +3293,7 @@ Array [
             "_score",
           ],
           "name": "index-pattern-with-timefield",
+          "setFieldCount": [MockFunction],
           "timeFieldName": "timestamp",
           "title": "index-pattern-with-timefield-title",
           "toMinimalSpec": [Function],
@@ -3654,6 +3304,9 @@ Array [
       headerRowHeight={5}
     />,
     "displayAsText": "message",
+    "displayHeaderCellProps": Object {
+      "className": "unifiedDataTable__headerCell",
+    },
     "id": "message",
     "isSortable": true,
     "schema": "string",

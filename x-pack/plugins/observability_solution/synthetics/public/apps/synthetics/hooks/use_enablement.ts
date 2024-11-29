@@ -32,12 +32,11 @@ export function useEnablement() {
   }, [application, enablement, loading]);
 
   return {
-    enablement: {
-      areApiKeysEnabled: enablement?.areApiKeysEnabled,
-      canManageApiKeys: enablement?.canManageApiKeys,
-      canEnable: enablement?.canEnable,
-      isEnabled: enablement?.isEnabled,
-    },
+    areApiKeysEnabled: enablement?.areApiKeysEnabled,
+    canManageApiKeys: enablement?.canManageApiKeys,
+    canEnable: enablement?.canEnable,
+    isEnabled: enablement?.isEnabled,
+    isServiceAllowed: Boolean(enablement?.isServiceAllowed),
     invalidApiKeyError: enablement ? !Boolean(enablement?.isValidApiKey) : false,
     error,
     loading,

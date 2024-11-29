@@ -1,0 +1,306 @@
+{
+  "id": "@kbn/reporting-csv-share-panel",
+  "client": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/reporting-csv-share-panel",
+        "id": "def-public.ReportingCsvPanelAction",
+        "type": "Class",
+        "tags": [],
+        "label": "ReportingCsvPanelAction",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/reporting-csv-share-panel",
+            "scope": "public",
+            "docId": "kibKbnReportingCsvSharePanelPluginApi",
+            "section": "def-public.ReportingCsvPanelAction",
+            "text": "ReportingCsvPanelAction"
+          },
+          " implements ",
+          {
+            "pluginId": "uiActions",
+            "scope": "public",
+            "docId": "kibUiActionsPluginApi",
+            "section": "def-public.ActionDefinition",
+            "text": "ActionDefinition"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.EmbeddableApiContext",
+            "text": "EmbeddableApiContext"
+          },
+          ">"
+        ],
+        "path": "packages/kbn-reporting/get_csv_panel_actions/panel_actions/get_csv_panel_action.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/reporting-csv-share-panel",
+            "id": "def-public.ReportingCsvPanelAction.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"\""
+            ],
+            "path": "packages/kbn-reporting/get_csv_panel_actions/panel_actions/get_csv_panel_action.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-csv-share-panel",
+            "id": "def-public.ReportingCsvPanelAction.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              "\"generateCsvReport\""
+            ],
+            "path": "packages/kbn-reporting/get_csv_panel_actions/panel_actions/get_csv_panel_action.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-csv-share-panel",
+            "id": "def-public.ReportingCsvPanelAction.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-reporting/get_csv_panel_actions/panel_actions/get_csv_panel_action.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/reporting-csv-share-panel",
+                "id": "def-public.ReportingCsvPanelAction.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{ core, csvConfig, apiClient, startServices$, usesUiCapabilities }",
+                "description": [],
+                "signature": [
+                  "Params"
+                ],
+                "path": "packages/kbn-reporting/get_csv_panel_actions/panel_actions/get_csv_panel_action.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/reporting-csv-share-panel",
+            "id": "def-public.ReportingCsvPanelAction.getIconType",
+            "type": "Function",
+            "tags": [],
+            "label": "getIconType",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "packages/kbn-reporting/get_csv_panel_actions/panel_actions/get_csv_panel_action.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/reporting-csv-share-panel",
+            "id": "def-public.ReportingCsvPanelAction.getDisplayName",
+            "type": "Function",
+            "tags": [],
+            "label": "getDisplayName",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "packages/kbn-reporting/get_csv_panel_actions/panel_actions/get_csv_panel_action.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/reporting-csv-share-panel",
+            "id": "def-public.ReportingCsvPanelAction.getSharingData",
+            "type": "Function",
+            "tags": [],
+            "label": "getSharingData",
+            "description": [],
+            "signature": [
+              "(savedSearch: ",
+              {
+                "pluginId": "savedSearch",
+                "scope": "public",
+                "docId": "kibSavedSearchPluginApi",
+                "section": "def-public.SavedSearch",
+                "text": "SavedSearch"
+              },
+              ") => Promise<{ getSearchSource: ({ addGlobalTimeFilter, absoluteTime, }: { addGlobalTimeFilter?: boolean | undefined; absoluteTime?: boolean | undefined; }) => ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SerializedSearchSourceFields",
+                "text": "SerializedSearchSourceFields"
+              },
+              "; columns: string[]; }>"
+            ],
+            "path": "packages/kbn-reporting/get_csv_panel_actions/panel_actions/get_csv_panel_action.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/reporting-csv-share-panel",
+                "id": "def-public.ReportingCsvPanelAction.getSharingData.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "savedSearch",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "savedSearch",
+                    "scope": "public",
+                    "docId": "kibSavedSearchPluginApi",
+                    "section": "def-public.SavedSearch",
+                    "text": "SavedSearch"
+                  }
+                ],
+                "path": "packages/kbn-reporting/get_csv_panel_actions/panel_actions/get_csv_panel_action.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/reporting-csv-share-panel",
+            "id": "def-public.ReportingCsvPanelAction.isCompatible",
+            "type": "Function",
+            "tags": [],
+            "label": "isCompatible",
+            "description": [],
+            "signature": [
+              "(context: ",
+              {
+                "pluginId": "@kbn/presentation-publishing",
+                "scope": "public",
+                "docId": "kibKbnPresentationPublishingPluginApi",
+                "section": "def-public.EmbeddableApiContext",
+                "text": "EmbeddableApiContext"
+              },
+              ") => Promise<boolean>"
+            ],
+            "path": "packages/kbn-reporting/get_csv_panel_actions/panel_actions/get_csv_panel_action.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/reporting-csv-share-panel",
+                "id": "def-public.ReportingCsvPanelAction.isCompatible.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "context",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/presentation-publishing",
+                    "scope": "public",
+                    "docId": "kibKbnPresentationPublishingPluginApi",
+                    "section": "def-public.EmbeddableApiContext",
+                    "text": "EmbeddableApiContext"
+                  }
+                ],
+                "path": "packages/kbn-reporting/get_csv_panel_actions/panel_actions/get_csv_panel_action.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/reporting-csv-share-panel",
+            "id": "def-public.ReportingCsvPanelAction.execute",
+            "type": "Function",
+            "tags": [],
+            "label": "execute",
+            "description": [],
+            "signature": [
+              "(context: ",
+              {
+                "pluginId": "@kbn/presentation-publishing",
+                "scope": "public",
+                "docId": "kibKbnPresentationPublishingPluginApi",
+                "section": "def-public.EmbeddableApiContext",
+                "text": "EmbeddableApiContext"
+              },
+              ") => Promise<void>"
+            ],
+            "path": "packages/kbn-reporting/get_csv_panel_actions/panel_actions/get_csv_panel_action.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/reporting-csv-share-panel",
+                "id": "def-public.ReportingCsvPanelAction.execute.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "context",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/presentation-publishing",
+                    "scope": "public",
+                    "docId": "kibKbnPresentationPublishingPluginApi",
+                    "section": "def-public.EmbeddableApiContext",
+                    "text": "EmbeddableApiContext"
+                  }
+                ],
+                "path": "packages/kbn-reporting/get_csv_panel_actions/panel_actions/get_csv_panel_action.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

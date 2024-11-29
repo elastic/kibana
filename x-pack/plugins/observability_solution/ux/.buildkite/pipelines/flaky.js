@@ -64,8 +64,8 @@ console.log(JSON.stringify(pipeline, null, 2));
 function getBuildJob() {
   return {
     command: '.buildkite/scripts/steps/build_kibana.sh',
-    label: 'Build Kibana Distribution and Plugins',
-    agents: { queue: 'c2-8' },
+    label: 'Build Kibana Distribution',
+    agents: { queue: 'n2-8' },
     key: BUILD_UUID,
     if: `build.env('${KIBANA_BUILD_ID}') == null || build.env('${KIBANA_BUILD_ID}') == ''`,
   };
@@ -95,18 +95,14 @@ function getEnvFromMetadata() {
   env[E2E_ARTIFACTS_ID] = getStringValue(E2E_ARTIFACTS_ID);
 
   env[E2E_CONCURRENCY] =
-    env[E2E_CONCURRENCY] > maxConcurrency
-      ? maxConcurrency
-      : env[E2E_CONCURRENCY];
+    env[E2E_CONCURRENCY] > maxConcurrency ? maxConcurrency : env[E2E_CONCURRENCY];
 
   return env;
 }
 
 function getIntValue(key, defaultValue) {
   let value = defaultValue;
-  const cli = execSync(
-    `buildkite-agent meta-data get '${key}' --default ${defaultValue} `
-  )
+  const cli = execSync(`buildkite-agent meta-data get '${key}' --default ${defaultValue} `)
     .toString()
     .trim();
 
@@ -118,7 +114,5 @@ function getIntValue(key, defaultValue) {
 }
 
 function getStringValue(key) {
-  return execSync(`buildkite-agent meta-data get '${key}' --default ''`)
-    .toString()
-    .trim();
+  return execSync(`buildkite-agent meta-data get '${key}' --default ''`).toString().trim();
 }

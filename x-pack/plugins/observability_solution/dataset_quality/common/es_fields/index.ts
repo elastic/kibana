@@ -6,6 +6,8 @@
  */
 
 export const _IGNORED = '_ignored';
+export const TIMESTAMP = '@timestamp';
+export const INDEX = '_index';
 
 export const DATA_STREAM_DATASET = 'data_stream.dataset';
 export const DATA_STREAM_NAMESPACE = 'data_stream.namespace';

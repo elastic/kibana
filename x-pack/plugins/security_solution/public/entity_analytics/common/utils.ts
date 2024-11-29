@@ -11,19 +11,19 @@ import { SEVERITY_COLOR } from '../../overview/components/detection_response/uti
 export { RISK_LEVEL_RANGES as RISK_SCORE_RANGES } from '../../../common/entity_analytics/risk_engine';
 
 export const SEVERITY_UI_SORT_ORDER = [
-  RiskSeverity.unknown,
-  RiskSeverity.low,
-  RiskSeverity.moderate,
-  RiskSeverity.high,
-  RiskSeverity.critical,
+  RiskSeverity.Unknown,
+  RiskSeverity.Low,
+  RiskSeverity.Moderate,
+  RiskSeverity.High,
+  RiskSeverity.Critical,
 ];
 
 export const RISK_SEVERITY_COLOUR: { [k in RiskSeverity]: string } = {
-  [RiskSeverity.unknown]: euiLightVars.euiColorMediumShade,
-  [RiskSeverity.low]: SEVERITY_COLOR.low,
-  [RiskSeverity.moderate]: SEVERITY_COLOR.medium,
-  [RiskSeverity.high]: SEVERITY_COLOR.high,
-  [RiskSeverity.critical]: SEVERITY_COLOR.critical,
+  [RiskSeverity.Unknown]: euiLightVars.euiColorMediumShade,
+  [RiskSeverity.Low]: SEVERITY_COLOR.low,
+  [RiskSeverity.Moderate]: SEVERITY_COLOR.medium,
+  [RiskSeverity.High]: SEVERITY_COLOR.high,
+  [RiskSeverity.Critical]: SEVERITY_COLOR.critical,
 };
 
 type SnakeToCamelCaseString<S extends string> = S extends `${infer T}_${infer U}`
@@ -63,3 +63,8 @@ export enum HostRiskScoreQueryId {
  */
 export const formatRiskScore = (riskScore: number) =>
   (Math.round(riskScore * 100) / 100).toFixed(2);
+
+export const FIRST_RECORD_PAGINATION = {
+  cursorStart: 0,
+  querySize: 1,
+};

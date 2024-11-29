@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { Aggregators, Comparator } from '../../../../../../common/custom_threshold_rule/types';
+import { COMPARATORS } from '@kbn/alerting-comparators';
+import { ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
+import { Aggregators } from '../../../../../../common/custom_threshold_rule/types';
 import { CustomThresholdRuleTypeParams } from '../../../types';
 import { getLogRateAnalysisEQQuery } from './log_rate_analysis_query';
 
@@ -29,7 +31,7 @@ describe('buildEsQuery', () => {
         timeSize: 1,
         timeUnit: 'm',
         threshold: [90],
-        comparator: Comparator.GT,
+        comparator: COMPARATORS.GREATER_THAN,
       },
     ],
   };
@@ -49,74 +51,83 @@ describe('buildEsQuery', () => {
   };
   const testData: Array<{
     title: string;
-    params: CustomThresholdRuleTypeParams;
     alert: any;
   }> = [
     {
       title: 'rule with optional filer, count filter and group by',
-      params: mockedParams,
       alert: {
         fields: {
           'kibana.alert.group': [mockedAlertWithMultipleGroups.fields['kibana.alert.group'][0]],
+          [ALERT_RULE_PARAMETERS]: mockedParams,
         },
       },
     },
     {
       title: 'rule with optional filer, count filter and multiple group by',
-      params: mockedParams,
-      alert: mockedAlertWithMultipleGroups,
+      alert: {
+        fields: {
+          ...mockedAlertWithMultipleGroups.fields,
+          [ALERT_RULE_PARAMETERS]: mockedParams,
+        },
+      },
     },
     {
       title: 'rule with optional filer, count filter and WITHOUT group by',
-      params: mockedParams,
-      alert: {},
+      alert: {
+        fields: {
+          [ALERT_RULE_PARAMETERS]: mockedParams,
+        },
+      },
     },
     {
       title: 'rule without filter and with group by',
-      params: {
-        groupBy: ['host.hostname'],
-        searchConfiguration: {
-          index,
-          query: { query: '', language: 'kuery' },
-        },
-        criteria: [
-          {
-            metrics: [{ name: 'A', aggType: Aggregators.COUNT }],
-            timeSize: 1,
-            timeUnit: 'm',
-            threshold: [90],
-            comparator: Comparator.GT,
-          },
-        ],
-      },
       alert: {
         fields: {
           'kibana.alert.group': [mockedAlertWithMultipleGroups.fields['kibana.alert.group'][0]],
+          [ALERT_RULE_PARAMETERS]: {
+            groupBy: ['host.hostname'],
+            searchConfiguration: {
+              index,
+              query: { query: '', language: 'kuery' },
+            },
+            criteria: [
+              {
+                metrics: [{ name: 'A', aggType: Aggregators.COUNT }],
+                timeSize: 1,
+                timeUnit: 'm',
+                threshold: [90],
+                comparator: COMPARATORS.GREATER_THAN,
+              },
+            ],
+          },
         },
       },
     },
     {
       title: 'rule with multiple metrics',
-      params: {
-        ...mockedParams,
-        criteria: [
-          {
-            metrics: [
-              { name: 'A', aggType: Aggregators.COUNT, filter: 'host.name: host-1' },
-              { name: 'B', aggType: Aggregators.AVERAGE, field: 'system.load.1' },
+      alert: {
+        fields: {
+          [ALERT_RULE_PARAMETERS]: {
+            ...mockedParams,
+            criteria: [
+              {
+                metrics: [
+                  { name: 'A', aggType: Aggregators.COUNT, filter: 'host.name: host-1' },
+                  { name: 'B', aggType: Aggregators.AVERAGE, field: 'system.load.1' },
+                ],
+                timeSize: 1,
+                timeUnit: 'm',
+                threshold: [90],
+                comparator: COMPARATORS.GREATER_THAN,
+              },
             ],
-            timeSize: 1,
-            timeUnit: 'm',
-            threshold: [90],
-            comparator: Comparator.GT,
           },
-        ],
+        },
       },
-      alert: {},
     },
   ];
 
-  test.each(testData)('should generate correct es query for $title', ({ alert, params }) => {
-    expect(getLogRateAnalysisEQQuery(alert, params)).toMatchSnapshot();
+  test.each(testData)('should generate correct es query for $title', ({ alert }) => {
+    expect(getLogRateAnalysisEQQuery(alert)).toMatchSnapshot();
   });
 });

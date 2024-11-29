@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 // For a detailed explanation regarding each configuration property, visit:
@@ -66,6 +67,7 @@ module.exports = {
     '<rootDir>/packages/kbn-test/src/jest/setup/mocks.moment_timezone.js',
     '<rootDir>/packages/kbn-test/src/jest/setup/mocks.eui.js',
     '<rootDir>/packages/kbn-test/src/jest/setup/react_testing_library.js',
+    '<rootDir>/packages/kbn-test/src/jest/setup/mocks.kbn_i18n_react.js',
     process.env.CI ? '<rootDir>/packages/kbn-test/src/jest/setup/disable_console_logs.js' : [],
   ].flat(),
 
@@ -103,12 +105,12 @@ module.exports = {
 
   // An array of regexp pattern strings that are matched against all source file paths, matched files will skip transformation
   transformIgnorePatterns: [
-    // ignore all node_modules except monaco-editor, monaco-yaml and react-monaco-editor which requires babel transforms to handle dynamic import()
+    // ignore all node_modules except monaco-editor, monaco-yaml which requires babel transforms to handle dynamic import()
     // since ESM modules are not natively supported in Jest yet (https://github.com/facebook/jest/issues/4842)
-    '[/\\\\]node_modules(?![\\/\\\\](byte-size|monaco-editor|monaco-yaml|monaco-languageserver-types|monaco-marker-data-provider|monaco-worker-manager|vscode-languageserver-types|react-monaco-editor|d3-interpolate|d3-color|langchain|langsmith|@cfworker|gpt-tokenizer|flat))[/\\\\].+\\.js$',
+    '[/\\\\]node_modules(?![\\/\\\\](byte-size|monaco-editor|monaco-yaml|monaco-languageserver-types|monaco-marker-data-provider|monaco-worker-manager|vscode-languageserver-types|d3-interpolate|d3-color|langchain|langsmith|@cfworker|gpt-tokenizer|flat|@langchain))[/\\\\].+\\.js$',
     'packages/kbn-pm/dist/index.js',
-    '[/\\\\]node_modules(?![\\/\\\\](langchain|langsmith))/dist/[/\\\\].+\\.js$',
-    '[/\\\\]node_modules(?![\\/\\\\](langchain|langsmith))/dist/util/[/\\\\].+\\.js$',
+    '[/\\\\]node_modules(?![\\/\\\\](langchain|langsmith|@langchain))/dist/[/\\\\].+\\.js$',
+    '[/\\\\]node_modules(?![\\/\\\\](langchain|langsmith|@langchain))/dist/util/[/\\\\].+\\.js$',
   ],
 
   // An array of regexp pattern strings that are matched against all source file paths, matched files to include/exclude for code coverage

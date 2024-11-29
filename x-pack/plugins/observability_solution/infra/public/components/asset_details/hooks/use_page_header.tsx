@@ -12,16 +12,18 @@ import {
   type EuiPageHeaderProps,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useLinkProps } from '@kbn/observability-shared-plugin/public';
-import { capitalize } from 'lodash';
+import { useUiSetting } from '@kbn/kibana-react-plugin/public';
+import { enableInfrastructureAssetCustomDashboards } from '@kbn/observability-plugin/common';
+import type { RouteState } from '@kbn/metrics-data-access-plugin/public';
+import { capitalize, isEmpty } from 'lodash';
 import React, { useCallback, useMemo } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { usePluginConfig } from '../../../containers/plugin_config_context';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { useProfilingIntegrationSetting } from '../../../hooks/use_profiling_integration_setting';
-import { APM_HOST_FILTER_FIELD } from '../constants';
-import { LinkToAlertsRule, LinkToNodeDetails } from '../links';
-import { ContentTabIds, type LinkOptions, type RouteState, type Tab, type TabIds } from '../types';
+import { CreateAlertRuleButton } from '../../shared/alerts/links/create_alert_rule_button';
+import { LinkToNodeDetails } from '../links';
+import { ContentTabIds, type LinkOptions, type Tab, type TabIds } from '../types';
 import { useAssetDetailsRenderPropsContext } from './use_asset_details_render_props';
 import { useTabSwitcherContext } from './use_tab_switcher';
 
@@ -59,7 +61,7 @@ export const useTemplateHeaderBreadcrumbs = () => {
   const breadcrumbs: EuiBreadcrumbsProps['breadcrumbs'] =
     // If there is a state object in location, it's persisted in case the page is opened in a new tab or after page refresh
     // With that, we can show the return button. Otherwise, it will be hidden (ex: the user opened a shared URL or opened the page from their bookmarks)
-    location.state || history.length > 1
+    !isEmpty(location.state) || history.length > 1
       ? [
           {
             text: (
@@ -95,7 +97,9 @@ const useRightSideItems = (links?: LinkOptions[]) => {
       nodeDetails: (
         <LinkToNodeDetails assetId={asset.id} assetName={asset.name} assetType={asset.type} />
       ),
-      alertRule: <LinkToAlertsRule />,
+      alertRule: (
+        <CreateAlertRuleButton data-test-subj="infraAssetDetailsPageHeaderCreateAlertsRuleButton" />
+      ),
     }),
     [asset.id, asset.name, asset.type]
   );
@@ -111,13 +115,17 @@ const useRightSideItems = (links?: LinkOptions[]) => {
 const useFeatureFlagTabs = () => {
   const { featureFlags } = usePluginConfig();
   const isProfilingEnabled = useProfilingIntegrationSetting();
+  const isInfrastructureAssetCustomDashboardsEnabled = useUiSetting<boolean>(
+    enableInfrastructureAssetCustomDashboards
+  );
 
   const featureFlagControlledTabs: Partial<Record<ContentTabIds, boolean>> = useMemo(
     () => ({
       [ContentTabIds.OSQUERY]: featureFlags.osqueryEnabled,
       [ContentTabIds.PROFILING]: isProfilingEnabled,
+      [ContentTabIds.DASHBOARDS]: isInfrastructureAssetCustomDashboardsEnabled,
     }),
-    [featureFlags.osqueryEnabled, isProfilingEnabled]
+    [featureFlags.osqueryEnabled, isInfrastructureAssetCustomDashboardsEnabled, isProfilingEnabled]
   );
 
   const isTabEnabled = useCallback(
@@ -134,7 +142,6 @@ const useFeatureFlagTabs = () => {
 
 const useTabs = (tabs: Tab[]) => {
   const { showTab, activeTabId } = useTabSwitcherContext();
-  const { asset } = useAssetDetailsRenderPropsContext();
   const { isTabEnabled } = useFeatureFlagTabs();
 
   const onTabClick = useCallback(
@@ -144,37 +151,9 @@ const useTabs = (tabs: Tab[]) => {
     [showTab]
   );
 
-  const apmTracesMenuItemLinkProps = useLinkProps({
-    app: 'apm',
-    hash: 'traces',
-    search: {
-      kuery: `${APM_HOST_FILTER_FIELD}:"${asset.name}"`,
-    },
-  });
-
-  const getTabToApmTraces = useCallback(
-    (name: string) => ({
-      ...apmTracesMenuItemLinkProps,
-      'data-test-subj': 'infraAssetDetailsApmServicesLinkTab',
-      label: (
-        <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiIcon type="popout" />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>{name}</EuiFlexItem>
-        </EuiFlexGroup>
-      ),
-    }),
-    [apmTracesMenuItemLinkProps]
-  );
-
   const tabEntries: TabItem[] = useMemo(
     () =>
       tabs.filter(isTabEnabled).map(({ name, ...tab }) => {
-        if (tab.id === ContentTabIds.LINK_TO_APM) {
-          return getTabToApmTraces(name);
-        }
-
         return {
           ...tab,
           'data-test-subj': `infraAssetDetails${capitalize(tab.id)}Tab`,
@@ -183,7 +162,7 @@ const useTabs = (tabs: Tab[]) => {
           label: name,
         };
       }),
-    [activeTabId, isTabEnabled, getTabToApmTraces, onTabClick, tabs]
+    [activeTabId, isTabEnabled, onTabClick, tabs]
   );
 
   return { tabEntries };

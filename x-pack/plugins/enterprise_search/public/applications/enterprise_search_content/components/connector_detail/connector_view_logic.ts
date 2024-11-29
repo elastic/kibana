@@ -7,13 +7,7 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import {
-  Connector,
-  FeatureName,
-  IngestPipelineParams,
-  IngestionMethod,
-  IngestionStatus,
-} from '@kbn/search-connectors';
+import { Connector, IngestionMethod, IngestPipelineParams } from '@kbn/search-connectors';
 
 import { Status } from '../../../../../common/types/api';
 
@@ -24,29 +18,50 @@ import {
 } from '../../api/connector/cached_fetch_connector_by_id_api_logic';
 
 import {
+  GenerateConnectorApiKeyApiLogicActions,
+  GenerateConnectorApiKeyApiLogic,
+} from '../../api/connector/generate_connector_api_key_api_logic';
+import {
   ConnectorConfigurationApiLogic,
   PostConnectorConfigurationActions,
 } from '../../api/connector/update_connector_configuration_api_logic';
 import { FetchIndexActions, FetchIndexApiLogic } from '../../api/index/fetch_index_api_logic';
 import { ElasticsearchViewIndex } from '../../types';
 
+import {
+  hasAdvancedFilteringFeature,
+  hasBasicFilteringFeature,
+  hasDocumentLevelSecurityFeature,
+  hasIncrementalSyncFeature,
+} from '../../utils/connector_helpers';
+import { getConnectorLastSeenError, isLastSeenOld } from '../../utils/connector_status_helpers';
+
+import {
+  ConnectorNameAndDescriptionActions,
+  ConnectorNameAndDescriptionLogic,
+} from './connector_name_and_description_logic';
+import { DeploymentLogic, DeploymentLogicActions } from './deployment_logic';
+
 export interface ConnectorViewActions {
   fetchConnector: CachedFetchConnectorByIdApiLogicActions['makeRequest'];
   fetchConnectorApiError: CachedFetchConnectorByIdApiLogicActions['apiError'];
   fetchConnectorApiReset: CachedFetchConnectorByIdApiLogicActions['apiReset'];
   fetchConnectorApiSuccess: CachedFetchConnectorByIdApiLogicActions['apiSuccess'];
-  startConnectorPoll: CachedFetchConnectorByIdApiLogicActions['startPolling'];
-  stopConnectorPoll: CachedFetchConnectorByIdApiLogicActions['stopPolling'];
   fetchIndex: FetchIndexActions['makeRequest'];
   fetchIndexApiError: FetchIndexActions['apiError'];
   fetchIndexApiReset: FetchIndexActions['apiReset'];
   fetchIndexApiSuccess: FetchIndexActions['apiSuccess'];
+  generateApiKeySuccess: GenerateConnectorApiKeyApiLogicActions['apiSuccess'];
+  generateConfigurationSuccess: DeploymentLogicActions['generateConfigurationSuccess'];
+  nameAndDescriptionApiError: ConnectorNameAndDescriptionActions['apiError'];
+  nameAndDescriptionApiSuccess: ConnectorNameAndDescriptionActions['apiSuccess'];
+  startConnectorPoll: CachedFetchConnectorByIdApiLogicActions['startPolling'];
+  stopConnectorPoll: CachedFetchConnectorByIdApiLogicActions['stopPolling'];
   updateConnectorConfiguration: PostConnectorConfigurationActions['makeRequest'];
   updateConnectorConfigurationSuccess: PostConnectorConfigurationActions['apiSuccess'];
 }
 
 export interface ConnectorViewValues {
-  updateConnectorConfigurationStatus: Status;
   connector: Connector | undefined;
   connectorData: CachedFetchConnectorByIdApiLogicValues['connectorData'];
   connectorError: string | undefined;
@@ -64,16 +79,14 @@ export interface ConnectorViewValues {
   index: ElasticsearchViewIndex | undefined;
   indexName: string;
   ingestionMethod: IngestionMethod;
-  ingestionStatus: IngestionStatus;
   isCanceling: boolean;
   isHiddenIndex: boolean;
   isLoading: boolean;
-  isSyncing: boolean;
-  isWaitingForSync: boolean;
   lastUpdated: string | null;
   pipelineData: IngestPipelineParams | undefined;
   recheckIndexLoading: boolean;
   syncTriggeredLocally: boolean; // holds local value after update so UI updates correctly
+  updateConnectorConfigurationStatus: Status;
 }
 
 export const ConnectorViewLogic = kea<MakeLogicType<ConnectorViewValues, ConnectorViewActions>>({
@@ -101,6 +114,12 @@ export const ConnectorViewLogic = kea<MakeLogicType<ConnectorViewValues, Connect
         'makeRequest as updateConnectorConfiguration',
         'apiSuccess as updateConnectorConfigurationSuccess',
       ],
+      ConnectorNameAndDescriptionLogic,
+      ['apiSuccess as nameAndDescriptionApiSuccess', 'apiError as nameAndDescriptionApiError'],
+      DeploymentLogic,
+      ['generateConfigurationSuccess'],
+      GenerateConnectorApiKeyApiLogic,
+      ['apiSuccess as generateApiKeySuccess'],
     ],
     values: [
       CachedFetchConnectorByIdApiLogic,
@@ -118,6 +137,31 @@ export const ConnectorViewLogic = kea<MakeLogicType<ConnectorViewValues, Connect
     },
   }),
   listeners: ({ actions, values }) => ({
+    fetchConnectorApiSuccess: ({ connector }) => {
+      if (!values.index && connector?.index_name) {
+        actions.fetchIndex({ indexName: connector.index_name });
+      }
+    },
+    generateApiKeySuccess: () => {
+      if (values.connectorId) {
+        actions.fetchConnector({ connectorId: values.connectorId });
+      }
+    },
+    generateConfigurationSuccess: () => {
+      if (values.connectorId) {
+        actions.fetchConnector({ connectorId: values.connectorId });
+      }
+    },
+    nameAndDescriptionApiError: () => {
+      if (values.connectorId) {
+        actions.fetchConnector({ connectorId: values.connectorId });
+      }
+    },
+    nameAndDescriptionApiSuccess: () => {
+      if (values.connectorId) {
+        actions.fetchConnector({ connectorId: values.connectorId });
+      }
+    },
     updateConnectorConfigurationSuccess: () => {
       if (values.connectorId) {
         actions.fetchConnector({ connectorId: values.connectorId });
@@ -139,34 +183,24 @@ export const ConnectorViewLogic = kea<MakeLogicType<ConnectorViewValues, Connect
     connectorId: [() => [selectors.connector], (connector) => connector?.id],
     error: [
       () => [selectors.connector],
-      (connector: Connector | undefined) => connector?.error || connector?.last_sync_error || null,
-    ],
-    indexName: [
-      () => [selectors.connector],
-      (connector: Connector | undefined) => {
-        return connector?.index_name || undefined;
-      },
+      (connector: Connector | undefined) =>
+        connector?.error ||
+        connector?.last_sync_error ||
+        connector?.last_access_control_sync_error ||
+        (connector && isLastSeenOld(connector) && getConnectorLastSeenError(connector)) ||
+        null,
     ],
     hasAdvancedFilteringFeature: [
       () => [selectors.connector],
-      (connector?: Connector) =>
-        connector?.features
-          ? connector.features[FeatureName.SYNC_RULES]?.advanced?.enabled ??
-            connector.features[FeatureName.FILTERING_ADVANCED_CONFIG]
-          : false,
+      (connector?: Connector) => hasAdvancedFilteringFeature(connector),
     ],
     hasBasicFilteringFeature: [
       () => [selectors.connector],
-      (connector?: Connector) =>
-        connector?.features
-          ? connector.features[FeatureName.SYNC_RULES]?.basic?.enabled ??
-            connector.features[FeatureName.FILTERING_RULES]
-          : false,
+      (connector?: Connector) => hasBasicFilteringFeature(connector),
     ],
     hasDocumentLevelSecurityFeature: [
       () => [selectors.connector],
-      (connector?: Connector) =>
-        connector?.features?.[FeatureName.DOCUMENT_LEVEL_SECURITY]?.enabled || false,
+      (connector?: Connector) => hasDocumentLevelSecurityFeature(connector),
     ],
     hasFilteringFeature: [
       () => [selectors.hasAdvancedFilteringFeature, selectors.hasBasicFilteringFeature],
@@ -174,13 +208,18 @@ export const ConnectorViewLogic = kea<MakeLogicType<ConnectorViewValues, Connect
     ],
     hasIncrementalSyncFeature: [
       () => [selectors.connector],
-      (connector?: Connector) =>
-        connector?.features?.[FeatureName.INCREMENTAL_SYNC]?.enabled || false,
+      (connector?: Connector) => hasIncrementalSyncFeature(connector),
     ],
     htmlExtraction: [
       () => [selectors.connector],
       (connector: Connector | undefined) =>
         connector?.configuration.extract_full_html?.value ?? undefined,
+    ],
+    indexName: [
+      () => [selectors.connector],
+      (connector: Connector | undefined) => {
+        return connector?.index_name || undefined;
+      },
     ],
     isLoading: [
       () => [selectors.fetchConnectorApiStatus, selectors.fetchIndexApiStatus, selectors.index],

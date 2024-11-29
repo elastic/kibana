@@ -13,7 +13,6 @@ import type {
   SavedObjectsServiceStart,
   ElasticsearchServiceStart,
   UiSettingsServiceStart,
-  ISavedObjectsRepository,
 } from '@kbn/core/server';
 import { ConcreteTaskInstance, DecoratedError } from '@kbn/task-manager-plugin/server';
 import { PublicMethodsOf } from '@kbn/utility-types';
@@ -39,22 +38,24 @@ import {
   RuleTypeState,
   RuleAction,
   RuleAlertData,
+  RuleSystemAction,
   RulesSettingsFlappingProperties,
-  RulesSettingsQueryDelayProperties,
 } from '../../common';
 import { ActionsConfigMap } from '../lib/get_actions_config_map';
 import { NormalizedRuleType } from '../rule_type_registry';
 import {
   CombinedSummarizedAlerts,
-  MaintenanceWindowClientApi,
   RawRule,
-  RulesClientApi,
-  RulesSettingsClientApi,
   RuleTypeRegistry,
   SpaceIdToNamespaceFunction,
 } from '../types';
 import { RuleRunMetrics, RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
+import { BackfillClient } from '../backfill_client/backfill_client';
+import { ElasticsearchError } from '../lib';
+import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
+import { RulesSettingsService } from '../rules_settings';
+import { MaintenanceWindowsService } from './maintenance_windows';
 
 export interface RuleTaskRunResult {
   state: RuleTaskState;
@@ -72,7 +73,6 @@ export interface RunRuleParams<Params extends RuleTypeParams> {
   apiKey: RawRule['apiKey'];
   fakeRequest: KibanaRequest;
   rule: SanitizedRule<Params>;
-  rulesClient: RulesClientApi;
   validatedParams: Params;
   version: string | undefined;
 }
@@ -81,9 +81,8 @@ export interface RuleTaskInstance extends ConcreteTaskInstance {
   state: RuleTaskState;
 }
 
-// / ExecutionHandler
-
-export interface ExecutionHandlerOptions<
+// ActionScheduler
+export interface ActionSchedulerOptions<
   Params extends RuleTypeParams,
   ExtractedParams extends RuleTypeParams,
   RuleState extends RuleTypeState,
@@ -124,7 +123,7 @@ export type Executable<
   ActionGroupIds extends string,
   RecoveryActionGroupId extends string
 > = {
-  action: RuleAction;
+  action: RuleAction | RuleSystemAction;
 } & (
   | {
       alert: Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>;
@@ -138,40 +137,49 @@ export type Executable<
 
 export interface RuleTypeRunnerContext {
   alertingEventLogger: AlertingEventLogger;
-  flappingSettings: RulesSettingsFlappingProperties;
+  flappingSettings?: RulesSettingsFlappingProperties;
+  maintenanceWindowsService?: MaintenanceWindowsService;
   namespace?: string;
-  queryDelaySettings: RulesSettingsQueryDelayProperties;
+  queryDelaySec?: number;
+  request: KibanaRequest;
   ruleId: string;
   ruleLogPrefix: string;
   ruleRunMetricsStore: RuleRunMetricsStore;
   spaceId: string;
+  isServerless: boolean;
+}
+
+export interface RuleRunnerErrorStackTraceLog {
+  message: ElasticsearchError;
+  stackTrace?: string;
 }
 
 export interface TaskRunnerContext {
   actionsConfigMap: ActionsConfigMap;
   actionsPlugin: ActionsPluginStartContract;
   alertsService: AlertsService | null;
+  backfillClient: BackfillClient;
   basePathService: IBasePath;
   cancelAlertsOnRuleTimeout: boolean;
+  connectorAdapterRegistry: ConnectorAdapterRegistry;
   data: DataPluginStart;
   dataViews: DataViewsPluginStart;
   elasticsearch: ElasticsearchServiceStart;
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   eventLogger: IEventLogger;
   executionContext: ExecutionContextStart;
-  getMaintenanceWindowClientWithRequest(request: KibanaRequest): MaintenanceWindowClientApi;
-  getRulesClientWithRequest(request: KibanaRequest): RulesClientApi;
-  getRulesSettingsClientWithRequest(request: KibanaRequest): RulesSettingsClientApi;
-  internalSavedObjectsRepository: ISavedObjectsRepository;
   kibanaBaseUrl: string | undefined;
   logger: Logger;
+  maintenanceWindowsService: MaintenanceWindowsService;
   maxAlerts: number;
   maxEphemeralActionsPerRule: number;
   ruleTypeRegistry: RuleTypeRegistry;
+  rulesSettingsService: RulesSettingsService;
   savedObjects: SavedObjectsServiceStart;
   share: SharePluginStart;
   spaceIdToNamespace: SpaceIdToNamespaceFunction;
   supportsEphemeralTasks: boolean;
   uiSettings: UiSettingsServiceStart;
   usageCounter?: UsageCounter;
+  isServerless: boolean;
 }

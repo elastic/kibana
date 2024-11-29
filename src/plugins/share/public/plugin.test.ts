@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { registryMock, managerMock } from './plugin.test.mocks';
@@ -71,7 +72,6 @@ describe('SharePlugin', () => {
             getShareMenuItems: expect.any(Function),
           }),
           true, // disableEmbed - true because buildFlavor === 'serverless'
-          expect.anything(),
           undefined
         );
         expect(start.toggleShareContextMenu).toBeDefined();
@@ -98,7 +98,6 @@ describe('SharePlugin', () => {
             getShareMenuItems: expect.any(Function),
           }),
           true, // disableEmbed - true because buildFlavor === 'serverless'
-          expect.anything(),
           anonymousAccessServiceProvider
         );
         expect(start.toggleShareContextMenu).toBeDefined();

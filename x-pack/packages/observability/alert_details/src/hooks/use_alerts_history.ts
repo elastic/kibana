@@ -6,10 +6,10 @@
  */
 
 import { type HttpSetup } from '@kbn/core/public';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { AggregationsDateHistogramBucketKeys } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   ALERT_DURATION,
+  ALERT_INSTANCE_ID,
   ALERT_RULE_UUID,
   ALERT_START,
   ALERT_STATUS,
@@ -27,7 +27,7 @@ export interface Props {
     from: string;
     to: string;
   };
-  queries?: QueryDslQueryContainer[];
+  instanceId?: string;
 }
 
 interface FetchAlertsHistory {
@@ -47,13 +47,15 @@ export const EMPTY_ALERTS_HISTORY = {
   histogramTriggeredAlerts: [] as AggregationsDateHistogramBucketKeys[],
   avgTimeToRecoverUS: 0,
 };
+
 export function useAlertsHistory({
   featureIds,
   ruleId,
   dateRange,
   http,
-  queries,
+  instanceId,
 }: Props): UseAlertsHistory {
+  const enabled = !!featureIds.length;
   const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data } = useQuery({
     queryKey: ['useAlertsHistory'],
     queryFn: async ({ signal }) => {
@@ -66,14 +68,15 @@ export function useAlertsHistory({
         ruleId,
         dateRange,
         signal,
-        queries,
+        instanceId,
       });
     },
     refetchOnWindowFocus: false,
+    enabled,
   });
   return {
     data: isInitialLoading ? EMPTY_ALERTS_HISTORY : data ?? EMPTY_ALERTS_HISTORY,
-    isLoading: isInitialLoading || isLoading || isRefetching,
+    isLoading: enabled && (isInitialLoading || isLoading || isRefetching),
     isSuccess,
     isError,
   };
@@ -103,7 +106,7 @@ export async function fetchTriggeredAlertsHistory({
   ruleId,
   dateRange,
   signal,
-  queries = [],
+  instanceId,
 }: {
   featureIds: ValidFeatureId[];
   http: HttpSetup;
@@ -113,7 +116,7 @@ export async function fetchTriggeredAlertsHistory({
     to: string;
   };
   signal?: AbortSignal;
-  queries?: QueryDslQueryContainer[];
+  instanceId?: string;
 }): Promise<FetchAlertsHistory> {
   try {
     const responseES = await http.post<AggsESResponse>(`${BASE_RAC_ALERTS_API_PATH}/find`, {
@@ -129,7 +132,15 @@ export async function fetchTriggeredAlertsHistory({
                   [ALERT_RULE_UUID]: ruleId,
                 },
               },
-              ...queries,
+              ...(instanceId && instanceId !== '*'
+                ? [
+                    {
+                      term: {
+                        [ALERT_INSTANCE_ID]: instanceId,
+                      },
+                    },
+                  ]
+                : []),
               {
                 range: {
                   [ALERT_TIME_RANGE]: dateRange,

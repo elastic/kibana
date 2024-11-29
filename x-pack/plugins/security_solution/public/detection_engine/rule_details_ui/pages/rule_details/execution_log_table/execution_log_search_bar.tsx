@@ -9,10 +9,17 @@ import React, { useCallback } from 'react';
 import { replace } from 'lodash';
 import { EuiFieldSearch, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import type { RuleExecutionStatus } from '../../../../../../common/api/detection_engine/rule_monitoring';
-import { RuleExecutionStatusEnum } from '../../../../../../common/api/detection_engine/rule_monitoring';
-import { ExecutionStatusFilter } from '../../../../rule_monitoring';
+import type {
+  RuleExecutionStatus,
+  RuleRunType,
+} from '../../../../../../common/api/detection_engine/rule_monitoring';
 
+import {
+  RUN_TYPE_FILTERS,
+  STATUS_FILTERS,
+} from '../../../../../../common/detection_engine/rule_management/execution_log';
+
+import { ExecutionStatusFilter, ExecutionRunTypeFilter } from '../../../../rule_monitoring';
 import * as i18n from './translations';
 
 export const EXECUTION_LOG_SCHEMA_MAPPING = {
@@ -36,18 +43,13 @@ export const replaceQueryTextAliases = (queryText: string): string => {
   );
 };
 
-// This only includes statuses which are or can be final
-const STATUS_FILTERS: RuleExecutionStatus[] = [
-  RuleExecutionStatusEnum.succeeded,
-  RuleExecutionStatusEnum.failed,
-  RuleExecutionStatusEnum['partial failure'],
-];
-
 interface ExecutionLogTableSearchProps {
   onlyShowFilters: true;
   selectedStatuses: RuleExecutionStatus[];
   onStatusFilterChange: (selectedStatuses: RuleExecutionStatus[]) => void;
   onSearch: (queryText: string) => void;
+  selectedRunTypes: RuleRunType[];
+  onRunTypeFilterChange: (selectedRunTypes: RuleRunType[]) => void;
 }
 
 /**
@@ -58,7 +60,14 @@ interface ExecutionLogTableSearchProps {
  * Please see this comment for history/details: https://github.com/elastic/kibana/pull/127339/files#r825240516
  */
 export const ExecutionLogSearchBar = React.memo<ExecutionLogTableSearchProps>(
-  ({ onlyShowFilters, selectedStatuses, onStatusFilterChange, onSearch }) => {
+  ({
+    onlyShowFilters,
+    selectedStatuses,
+    onStatusFilterChange,
+    onSearch,
+    selectedRunTypes,
+    onRunTypeFilterChange,
+  }) => {
     const handleSearch = useCallback(
       (queryText: string) => {
         onSearch(replaceQueryTextAliases(queryText));
@@ -81,11 +90,23 @@ export const ExecutionLogSearchBar = React.memo<ExecutionLogTableSearchProps>(
           )}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <ExecutionStatusFilter
-            items={STATUS_FILTERS}
-            selectedItems={selectedStatuses}
-            onChange={onStatusFilterChange}
-          />
+          <EuiFlexGroup gutterSize={'s'}>
+            <EuiFlexItem grow={true}>
+              <ExecutionRunTypeFilter
+                items={RUN_TYPE_FILTERS}
+                selectedItems={selectedRunTypes}
+                onChange={onRunTypeFilterChange}
+              />
+            </EuiFlexItem>
+
+            <EuiFlexItem grow={true}>
+              <ExecutionStatusFilter
+                items={STATUS_FILTERS}
+                selectedItems={selectedStatuses}
+                onChange={onStatusFilterChange}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
     );

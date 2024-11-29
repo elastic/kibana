@@ -7,7 +7,8 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
-import { UserEntityOverview } from './user_entity_overview';
+import { useMisconfigurationPreview } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview';
+import { UserEntityOverview, USER_PREVIEW_BANNER } from './user_entity_overview';
 import { useFirstLastSeen } from '../../../../common/containers/use_first_last_seen';
 import {
   ENTITIES_USER_OVERVIEW_DOMAIN_TEST_ID,
@@ -15,15 +16,22 @@ import {
   ENTITIES_USER_OVERVIEW_LINK_TEST_ID,
   ENTITIES_USER_OVERVIEW_RISK_LEVEL_TEST_ID,
   ENTITIES_USER_OVERVIEW_LOADING_TEST_ID,
+  ENTITIES_USER_OVERVIEW_MISCONFIGURATIONS_TEST_ID,
+  ENTITIES_USER_OVERVIEW_ALERT_COUNT_TEST_ID,
 } from './test_ids';
 import { useObservedUserDetails } from '../../../../explore/users/containers/users/observed_details';
-import { mockContextValue } from '../mocks/mock_context';
+import { mockContextValue } from '../../shared/mocks/mock_context';
 import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
-import { RightPanelContext } from '../context';
-import { LeftPanelInsightsTab, DocumentDetailsLeftPanelKey } from '../../left';
+import { DocumentDetailsContext } from '../../shared/context';
+import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
+import { LeftPanelInsightsTab } from '../../left';
 import { ENTITIES_TAB_ID } from '../../left/components/entities_details';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
-import { type ExpandableFlyoutApi, useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { mockFlyoutApi } from '../../shared/mocks/mock_flyout_context';
+import { UserPreviewPanelKey } from '../../../entity_details/user_right';
+import { useAlertsByStatus } from '../../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
 
 const userName = 'user';
 const domain = 'n54bg2lfc7';
@@ -40,14 +48,31 @@ const panelContextValue = {
   dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
 };
 
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: jest.fn(),
-  ExpandableFlyoutProvider: ({ children }: React.PropsWithChildren<{}>) => <>{children}</>,
-}));
+jest.mock('@kbn/expandable-flyout');
+jest.mock('@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview');
 
-const flyoutContextValue = {
-  openLeftPanel: jest.fn(),
-} as unknown as ExpandableFlyoutApi;
+jest.mock('../../../../common/lib/kibana');
+
+jest.mock('react-router-dom', () => {
+  const actual = jest.requireActual('react-router-dom');
+  return { ...actual, useLocation: jest.fn().mockReturnValue({ pathname: '' }) };
+});
+
+jest.mock(
+  '../../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status'
+);
+const mockAlertData = {
+  open: {
+    total: 2,
+    severities: [
+      { key: 'high', value: 1, label: 'High' },
+      { key: 'low', value: 1, label: 'Low' },
+    ],
+  },
+};
+
+jest.mock('../../../../common/hooks/use_experimental_features');
+const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
 
 const mockUseGlobalTime = jest.fn().mockReturnValue({ from, to });
 jest.mock('../../../../common/containers/use_global_time', () => {
@@ -57,7 +82,7 @@ jest.mock('../../../../common/containers/use_global_time', () => {
 });
 
 const mockUseSourcererDataView = jest.fn().mockReturnValue({ selectedPatterns });
-jest.mock('../../../../common/containers/sourcerer', () => {
+jest.mock('../../../../sourcerer/containers', () => {
   return {
     useSourcererDataView: (...props: unknown[]) => mockUseSourcererDataView(...props),
   };
@@ -75,15 +100,18 @@ jest.mock('../../../../common/containers/use_first_last_seen');
 const renderUserEntityOverview = () =>
   render(
     <TestProviders>
-      <RightPanelContext.Provider value={panelContextValue}>
+      <DocumentDetailsContext.Provider value={panelContextValue}>
         <UserEntityOverview userName={userName} />
-      </RightPanelContext.Provider>
+      </DocumentDetailsContext.Provider>
     </TestProviders>
   );
 
 describe('<UserEntityOverview />', () => {
   beforeAll(() => {
-    jest.mocked(useExpandableFlyoutApi).mockReturnValue(flyoutContextValue);
+    jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
+    mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+    (useMisconfigurationPreview as jest.Mock).mockReturnValue({});
+    (useAlertsByStatus as jest.Mock).mockReturnValue({ isLoading: false, items: {} });
   });
 
   describe('license is valid', () => {
@@ -138,9 +166,9 @@ describe('<UserEntityOverview />', () => {
 
       const { getByTestId, queryByTestId } = render(
         <TestProviders>
-          <RightPanelContext.Provider value={panelContextValue}>
+          <DocumentDetailsContext.Provider value={panelContextValue}>
             <UserEntityOverview userName={userName} />
-          </RightPanelContext.Provider>
+          </DocumentDetailsContext.Provider>
         </TestProviders>
       );
       expect(getByTestId(ENTITIES_USER_OVERVIEW_LOADING_TEST_ID)).toBeInTheDocument();
@@ -153,29 +181,29 @@ describe('<UserEntityOverview />', () => {
 
       const { getByTestId, queryByTestId } = render(
         <TestProviders>
-          <RightPanelContext.Provider value={panelContextValue}>
+          <DocumentDetailsContext.Provider value={panelContextValue}>
             <UserEntityOverview userName={userName} />
-          </RightPanelContext.Provider>
+          </DocumentDetailsContext.Provider>
         </TestProviders>
       );
       expect(getByTestId(ENTITIES_USER_OVERVIEW_LOADING_TEST_ID)).toBeInTheDocument();
       expect(queryByTestId(ENTITIES_USER_OVERVIEW_DOMAIN_TEST_ID)).not.toBeInTheDocument();
     });
 
-    it('should navigate to left panel entities tab when clicking on title', () => {
+    it('should navigate to left panel entities tab when clicking on title when feature flag is off', () => {
       mockUseUserDetails.mockReturnValue([false, { userDetails: userData }]);
       mockUseRiskScore.mockReturnValue({ data: riskLevel, isAuthorized: true });
 
       const { getByTestId } = render(
         <TestProviders>
-          <RightPanelContext.Provider value={panelContextValue}>
+          <DocumentDetailsContext.Provider value={panelContextValue}>
             <UserEntityOverview userName={userName} />
-          </RightPanelContext.Provider>
+          </DocumentDetailsContext.Provider>
         </TestProviders>
       );
 
       getByTestId(ENTITIES_USER_OVERVIEW_LINK_TEST_ID).click();
-      expect(flyoutContextValue.openLeftPanel).toHaveBeenCalledWith({
+      expect(mockFlyoutApi.openLeftPanel).toHaveBeenCalledWith({
         id: DocumentDetailsLeftPanelKey,
         path: { tab: LeftPanelInsightsTab, subTab: ENTITIES_TAB_ID },
         params: {
@@ -184,6 +212,64 @@ describe('<UserEntityOverview />', () => {
           scopeId: panelContextValue.scopeId,
         },
       });
+    });
+
+    it('should open user preview if feature flag is true', () => {
+      mockUseUserDetails.mockReturnValue([false, { userDetails: userData }]);
+      mockUseRiskScore.mockReturnValue({ data: riskLevel, isAuthorized: true });
+      mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
+
+      const { getByTestId } = render(
+        <TestProviders>
+          <DocumentDetailsContext.Provider value={panelContextValue}>
+            <UserEntityOverview userName={userName} />
+          </DocumentDetailsContext.Provider>
+        </TestProviders>
+      );
+
+      getByTestId(ENTITIES_USER_OVERVIEW_LINK_TEST_ID).click();
+      expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
+        id: UserPreviewPanelKey,
+        params: {
+          userName,
+          scopeId: mockContextValue.scopeId,
+          banner: USER_PREVIEW_BANNER,
+        },
+      });
+    });
+  });
+
+  describe('distribution bar insights', () => {
+    beforeEach(() => {
+      mockUseUserDetails.mockReturnValue([false, { userDetails: userData }]);
+      mockUseRiskScore.mockReturnValue({ data: riskLevel, isAuthorized: true });
+    });
+
+    it('should not render if no data is available', () => {
+      const { queryByTestId } = renderUserEntityOverview();
+      expect(
+        queryByTestId(ENTITIES_USER_OVERVIEW_MISCONFIGURATIONS_TEST_ID)
+      ).not.toBeInTheDocument();
+      expect(queryByTestId(ENTITIES_USER_OVERVIEW_ALERT_COUNT_TEST_ID)).not.toBeInTheDocument();
+    });
+
+    it('should render alert count when data is available', () => {
+      (useAlertsByStatus as jest.Mock).mockReturnValue({
+        isLoading: false,
+        items: mockAlertData,
+      });
+
+      const { getByTestId } = renderUserEntityOverview();
+      expect(getByTestId(ENTITIES_USER_OVERVIEW_ALERT_COUNT_TEST_ID)).toBeInTheDocument();
+    });
+
+    it('should render misconfiguration when data is available', () => {
+      (useMisconfigurationPreview as jest.Mock).mockReturnValue({
+        data: { count: { passed: 1, failed: 2 } },
+      });
+
+      const { getByTestId } = renderUserEntityOverview();
+      expect(getByTestId(ENTITIES_USER_OVERVIEW_MISCONFIGURATIONS_TEST_ID)).toBeInTheDocument();
     });
   });
 });

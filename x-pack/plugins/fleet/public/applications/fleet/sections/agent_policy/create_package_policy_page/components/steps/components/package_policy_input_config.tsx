@@ -14,6 +14,7 @@ import {
   EuiText,
   EuiSpacer,
   EuiButtonEmpty,
+  useIsWithinMinBreakpoint,
 } from '@elastic/eui';
 
 import type { NewPackagePolicyInput, RegistryVarsEntry } from '../../../../../../types';
@@ -68,12 +69,15 @@ export const PackagePolicyInputConfig: React.FunctionComponent<{
       [advancedVars, inputVarsValidationResults.vars]
     );
 
+    const isBiggerScreen = useIsWithinMinBreakpoint('xxl');
+    const flexWidth = isBiggerScreen ? 7 : 5;
+
     return (
       <EuiFlexGrid columns={2}>
         <EuiFlexItem>
           <EuiFlexGroup gutterSize="none" alignItems="flexStart">
             <EuiFlexItem grow={1} />
-            <EuiFlexItem grow={5}>
+            <EuiFlexItem grow={flexWidth}>
               <EuiText>
                 <h4>
                   <FormattedMessage
@@ -102,8 +106,10 @@ export const PackagePolicyInputConfig: React.FunctionComponent<{
           <EuiFlexGroup direction="column" gutterSize="m">
             {requiredVars.map((varDef) => {
               const { name: varName, type: varType } = varDef;
-              if (!packagePolicyInput.vars) return;
-              const { value, frozen } = packagePolicyInput.vars[varName];
+
+              const value = packagePolicyInput.vars?.[varName]?.value;
+              const frozen = packagePolicyInput.vars?.[varName]?.frozen;
+
               return (
                 <EuiFlexItem key={varName}>
                   <PackagePolicyInputVarField

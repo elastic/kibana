@@ -10,14 +10,8 @@ import { i18n } from '@kbn/i18n';
 import * as t from 'io-ts';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { AgentKeysResponse, getAgentKeys } from './get_agent_keys';
-import {
-  AgentKeysPrivilegesResponse,
-  getAgentKeysPrivileges,
-} from './get_agent_keys_privileges';
-import {
-  invalidateAgentKey,
-  InvalidateAgentKeyResponse,
-} from './invalidate_agent_key';
+import { AgentKeysPrivilegesResponse, getAgentKeysPrivileges } from './get_agent_keys_privileges';
+import { invalidateAgentKey, InvalidateAgentKeyResponse } from './invalidate_agent_key';
 import { createAgentKey, CreateAgentKeyResponse } from './create_agent_key';
 import { privilegesTypeRt } from '../../../common/privilege_type';
 
@@ -61,7 +55,7 @@ const agentKeysPrivilegesRoute = createApmServerRoute({
 
 const invalidateAgentKeyRoute = createApmServerRoute({
   endpoint: 'POST /internal/apm/api_key/invalidate',
-  options: { tags: ['access:apm', 'access:apm_write'] },
+  options: { tags: ['access:apm', 'access:apm_settings_write'] },
   params: t.type({
     body: t.type({ id: t.string }),
   }),
@@ -97,7 +91,7 @@ const invalidateAgentKeyRoute = createApmServerRoute({
 
 const createAgentKeyRoute = createApmServerRoute({
   endpoint: 'POST /api/apm/agent_keys 2023-10-31',
-  options: { tags: ['access:apm', 'access:apm_write'] },
+  options: { tags: ['access:apm', 'access:apm_settings_write', 'oas-tag:APM agent keys'] },
   params: t.type({
     body: t.type({
       name: t.string,
@@ -125,7 +119,6 @@ export const agentKeysRouteRepository = {
   ...createAgentKeyRoute,
 };
 
-const SECURITY_REQUIRED_MESSAGE = i18n.translate(
-  'xpack.apm.api.apiKeys.securityRequired',
-  { defaultMessage: 'Security plugin is required' }
-);
+const SECURITY_REQUIRED_MESSAGE = i18n.translate('xpack.apm.api.apiKeys.securityRequired', {
+  defaultMessage: 'Security plugin is required',
+});

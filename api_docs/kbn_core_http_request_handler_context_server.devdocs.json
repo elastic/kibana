@@ -11,18 +11,10 @@
   "server": {
     "classes": [],
     "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-http-request-handler-context-server",
-        "id": "def-common.CoreRequestHandlerContext",
+        "id": "def-server.CoreRequestHandlerContext",
         "type": "Interface",
         "tags": [],
         "label": "CoreRequestHandlerContext",
@@ -35,17 +27,19 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-http-request-handler-context-server",
-            "id": "def-common.CoreRequestHandlerContext.savedObjects",
+            "id": "def-server.CoreRequestHandlerContext.savedObjects",
             "type": "Object",
             "tags": [],
             "label": "savedObjects",
-            "description": [],
+            "description": [
+              "\n{@link SavedObjectsRequestHandlerContext}"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-common.SavedObjectsRequestHandlerContext",
+                "section": "def-server.SavedObjectsRequestHandlerContext",
                 "text": "SavedObjectsRequestHandlerContext"
               }
             ],
@@ -55,17 +49,19 @@
           },
           {
             "parentPluginId": "@kbn/core-http-request-handler-context-server",
-            "id": "def-common.CoreRequestHandlerContext.elasticsearch",
+            "id": "def-server.CoreRequestHandlerContext.elasticsearch",
             "type": "Object",
             "tags": [],
             "label": "elasticsearch",
-            "description": [],
+            "description": [
+              "\n{@link ElasticsearchRequestHandlerContext}"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-elasticsearch-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                "section": "def-common.ElasticsearchRequestHandlerContext",
+                "section": "def-server.ElasticsearchRequestHandlerContext",
                 "text": "ElasticsearchRequestHandlerContext"
               }
             ],
@@ -75,17 +71,35 @@
           },
           {
             "parentPluginId": "@kbn/core-http-request-handler-context-server",
-            "id": "def-common.CoreRequestHandlerContext.uiSettings",
+            "id": "def-server.CoreRequestHandlerContext.featureFlags",
+            "type": "Object",
+            "tags": [],
+            "label": "featureFlags",
+            "description": [
+              "\n{@link FeatureFlagsRequestHandlerContext}"
+            ],
+            "signature": [
+              "{ getBooleanValue: (flagName: string, fallbackValue: boolean) => Promise<boolean>; getStringValue: <Value extends string>(flagName: string, fallbackValue: Value) => Promise<Value>; getNumberValue: <Value extends number>(flagName: string, fallbackValue: Value) => Promise<Value>; }"
+            ],
+            "path": "packages/core/http/core-http-request-handler-context-server/src/request_handler_context.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-request-handler-context-server",
+            "id": "def-server.CoreRequestHandlerContext.uiSettings",
             "type": "Object",
             "tags": [],
             "label": "uiSettings",
-            "description": [],
+            "description": [
+              "\n{@link UiSettingsRequestHandlerContext}"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-ui-settings-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreUiSettingsServerPluginApi",
-                "section": "def-common.UiSettingsRequestHandlerContext",
+                "section": "def-server.UiSettingsRequestHandlerContext",
                 "text": "UiSettingsRequestHandlerContext"
               }
             ],
@@ -95,17 +109,19 @@
           },
           {
             "parentPluginId": "@kbn/core-http-request-handler-context-server",
-            "id": "def-common.CoreRequestHandlerContext.deprecations",
+            "id": "def-server.CoreRequestHandlerContext.deprecations",
             "type": "Object",
             "tags": [],
             "label": "deprecations",
-            "description": [],
+            "description": [
+              "\n{@link DeprecationsRequestHandlerContext}"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-deprecations-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreDeprecationsServerPluginApi",
-                "section": "def-common.DeprecationsRequestHandlerContext",
+                "section": "def-server.DeprecationsRequestHandlerContext",
                 "text": "DeprecationsRequestHandlerContext"
               }
             ],
@@ -115,18 +131,42 @@
           },
           {
             "parentPluginId": "@kbn/core-http-request-handler-context-server",
-            "id": "def-common.CoreRequestHandlerContext.security",
+            "id": "def-server.CoreRequestHandlerContext.security",
             "type": "Object",
             "tags": [],
             "label": "security",
-            "description": [],
+            "description": [
+              "\n{@link SecurityRequestHandlerContext}"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-security-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSecurityServerPluginApi",
-                "section": "def-common.SecurityRequestHandlerContext",
+                "section": "def-server.SecurityRequestHandlerContext",
                 "text": "SecurityRequestHandlerContext"
+              }
+            ],
+            "path": "packages/core/http/core-http-request-handler-context-server/src/request_handler_context.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-request-handler-context-server",
+            "id": "def-server.CoreRequestHandlerContext.userProfile",
+            "type": "Object",
+            "tags": [],
+            "label": "userProfile",
+            "description": [
+              "\n{@link UserProfileRequestHandlerContext}"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-user-profile-server",
+                "scope": "server",
+                "docId": "kibKbnCoreUserProfileServerPluginApi",
+                "section": "def-server.UserProfileRequestHandlerContext",
+                "text": "UserProfileRequestHandlerContext"
               }
             ],
             "path": "packages/core/http/core-http-request-handler-context-server/src/request_handler_context.ts",
@@ -138,28 +178,32 @@
       },
       {
         "parentPluginId": "@kbn/core-http-request-handler-context-server",
-        "id": "def-common.PrebootCoreRequestHandlerContext",
+        "id": "def-server.PrebootCoreRequestHandlerContext",
         "type": "Interface",
         "tags": [],
         "label": "PrebootCoreRequestHandlerContext",
-        "description": [],
+        "description": [
+          "\nThe `core` context provided to route handler during the preboot phase."
+        ],
         "path": "packages/core/http/core-http-request-handler-context-server/src/preboot_request_handler_context.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-http-request-handler-context-server",
-            "id": "def-common.PrebootCoreRequestHandlerContext.uiSettings",
+            "id": "def-server.PrebootCoreRequestHandlerContext.uiSettings",
             "type": "Object",
             "tags": [],
             "label": "uiSettings",
-            "description": [],
+            "description": [
+              "\n{@link PrebootUiSettingsRequestHandlerContext}"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-http-request-handler-context-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                "section": "def-common.PrebootUiSettingsRequestHandlerContext",
+                "section": "def-server.PrebootUiSettingsRequestHandlerContext",
                 "text": "PrebootUiSettingsRequestHandlerContext"
               }
             ],
@@ -172,25 +216,27 @@
       },
       {
         "parentPluginId": "@kbn/core-http-request-handler-context-server",
-        "id": "def-common.PrebootRequestHandlerContext",
+        "id": "def-server.PrebootRequestHandlerContext",
         "type": "Interface",
         "tags": [],
         "label": "PrebootRequestHandlerContext",
-        "description": [],
+        "description": [
+          "\nBase context passed to a route handler during the preboot phase, containing the `core` context part."
+        ],
         "signature": [
           {
             "pluginId": "@kbn/core-http-request-handler-context-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-            "section": "def-common.PrebootRequestHandlerContext",
+            "section": "def-server.PrebootRequestHandlerContext",
             "text": "PrebootRequestHandlerContext"
           },
           " extends ",
           {
             "pluginId": "@kbn/core-http-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.RequestHandlerContextBase",
+            "section": "def-server.RequestHandlerContextBase",
             "text": "RequestHandlerContextBase"
           }
         ],
@@ -200,18 +246,20 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-http-request-handler-context-server",
-            "id": "def-common.PrebootRequestHandlerContext.core",
+            "id": "def-server.PrebootRequestHandlerContext.core",
             "type": "Object",
             "tags": [],
             "label": "core",
-            "description": [],
+            "description": [
+              "\nPromise that resolves the {@link PrebootCoreRequestHandlerContext}"
+            ],
             "signature": [
               "Promise<",
               {
                 "pluginId": "@kbn/core-http-request-handler-context-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                "section": "def-common.PrebootCoreRequestHandlerContext",
+                "section": "def-server.PrebootCoreRequestHandlerContext",
                 "text": "PrebootCoreRequestHandlerContext"
               },
               ">"
@@ -225,28 +273,32 @@
       },
       {
         "parentPluginId": "@kbn/core-http-request-handler-context-server",
-        "id": "def-common.PrebootUiSettingsRequestHandlerContext",
+        "id": "def-server.PrebootUiSettingsRequestHandlerContext",
         "type": "Interface",
         "tags": [],
         "label": "PrebootUiSettingsRequestHandlerContext",
-        "description": [],
+        "description": [
+          "\n`uiSettings` http request context provider during the preboot phase."
+        ],
         "path": "packages/core/http/core-http-request-handler-context-server/src/preboot_request_handler_context.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-http-request-handler-context-server",
-            "id": "def-common.PrebootUiSettingsRequestHandlerContext.client",
+            "id": "def-server.PrebootUiSettingsRequestHandlerContext.client",
             "type": "Object",
             "tags": [],
             "label": "client",
-            "description": [],
+            "description": [
+              "\nThe {@link IUiSettingsClient | UI Settings client}."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-ui-settings-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreUiSettingsServerPluginApi",
-                "section": "def-common.IUiSettingsClient",
+                "section": "def-server.IUiSettingsClient",
                 "text": "IUiSettingsClient"
               }
             ],
@@ -259,7 +311,7 @@
       },
       {
         "parentPluginId": "@kbn/core-http-request-handler-context-server",
-        "id": "def-common.RequestHandlerContext",
+        "id": "def-server.RequestHandlerContext",
         "type": "Interface",
         "tags": [],
         "label": "RequestHandlerContext",
@@ -269,17 +321,17 @@
         "signature": [
           {
             "pluginId": "@kbn/core-http-request-handler-context-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-            "section": "def-common.RequestHandlerContext",
+            "section": "def-server.RequestHandlerContext",
             "text": "RequestHandlerContext"
           },
           " extends ",
           {
             "pluginId": "@kbn/core-http-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.RequestHandlerContextBase",
+            "section": "def-server.RequestHandlerContextBase",
             "text": "RequestHandlerContextBase"
           }
         ],
@@ -289,18 +341,20 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-http-request-handler-context-server",
-            "id": "def-common.RequestHandlerContext.core",
+            "id": "def-server.RequestHandlerContext.core",
             "type": "Object",
             "tags": [],
             "label": "core",
-            "description": [],
+            "description": [
+              "\nPromise that resolves the {@link CoreRequestHandlerContext}"
+            ],
             "signature": [
               "Promise<",
               {
                 "pluginId": "@kbn/core-http-request-handler-context-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                "section": "def-common.CoreRequestHandlerContext",
+                "section": "def-server.CoreRequestHandlerContext",
                 "text": "CoreRequestHandlerContext"
               },
               ">"
@@ -317,7 +371,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/core-http-request-handler-context-server",
-        "id": "def-common.CustomRequestHandlerContext",
+        "id": "def-server.CustomRequestHandlerContext",
         "type": "Type",
         "tags": [],
         "label": "CustomRequestHandlerContext",
@@ -327,9 +381,9 @@
         "signature": [
           {
             "pluginId": "@kbn/core-http-request-handler-context-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-            "section": "def-common.RequestHandlerContext",
+            "section": "def-server.RequestHandlerContext",
             "text": "RequestHandlerContext"
           },
           " & { [Key in keyof T]: T[Key] extends Promise<unknown> ? T[Key] : Promise<T[Key]>; }"
@@ -340,6 +394,14 @@
         "initialIsOpen": false
       }
     ],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": []
   }
 }

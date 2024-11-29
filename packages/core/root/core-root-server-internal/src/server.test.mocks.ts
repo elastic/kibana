@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { httpServiceMock } from '@kbn/core-http-server-mocks';
@@ -23,6 +24,7 @@ import { deprecationsServiceMock } from '@kbn/core-deprecations-server-mocks';
 import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import { userSettingsServiceMock } from '@kbn/core-user-settings-server-mocks';
 import { securityServiceMock } from '@kbn/core-security-server-mocks';
+import { userProfileServiceMock } from '@kbn/core-user-profile-server-mocks';
 
 export const mockHttpService = httpServiceMock.create();
 jest.doMock('@kbn/core-http-server-internal', () => ({
@@ -68,6 +70,7 @@ jest.doMock('@kbn/core-ui-settings-server-internal', () => ({
 }));
 
 import { customBrandingServiceMock } from '@kbn/core-custom-branding-server-mocks';
+import { coreUsageDataServiceMock } from '@kbn/core-usage-data-server-mocks';
 
 export const mockCustomBrandingService = customBrandingServiceMock.create();
 jest.doMock('@kbn/core-custom-branding-server-internal', () => ({
@@ -137,4 +140,14 @@ jest.doMock('@kbn/core-doc-links-server-internal', () => ({
 export const mockSecurityService = securityServiceMock.create();
 jest.doMock('@kbn/core-security-server-internal', () => ({
   SecurityService: jest.fn(() => mockSecurityService),
+}));
+
+export const mockUserProfileService = userProfileServiceMock.create();
+jest.doMock('@kbn/core-user-profile-server-internal', () => ({
+  UserProfileService: jest.fn(() => mockUserProfileService),
+}));
+
+export const mockUsageDataService = coreUsageDataServiceMock.create();
+jest.doMock('@kbn/core-usage-data-server-internal', () => ({
+  CoreUsageDataService: jest.fn(() => mockUsageDataService),
 }));

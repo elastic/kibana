@@ -7,13 +7,10 @@
 
 import expect from '@kbn/expect';
 import { ALERT_RISK_SCORE } from '@kbn/rule-data-utils';
-import {
-  ENABLE_ASSET_CRITICALITY_SETTING,
-  RISK_SCORE_PREVIEW_URL,
-} from '@kbn/security-solution-plugin/common/constants';
-import type { RiskScore } from '@kbn/security-solution-plugin/common/entity_analytics/risk_engine';
+import { RISK_SCORE_PREVIEW_URL } from '@kbn/security-solution-plugin/common/constants';
 import { v4 as uuidv4 } from 'uuid';
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
+import { EntityRiskScoreRecord } from '@kbn/security-solution-plugin/common/api/entity_analytics/common';
 import { dataGeneratorFactory } from '../../../detections_response/utils';
 import {
   createAlertsIndex,
@@ -37,14 +34,15 @@ export default ({ getService }: FtrProviderContext): void => {
   const esArchiver = getService('esArchiver');
   const es = getService('es');
   const log = getService('log');
-  const kibanaServer = getService('kibanaServer');
 
   const createAndSyncRuleAndAlerts = createAndSyncRuleAndAlertsFactory({ supertest, log });
   const previewRiskScores = async ({
     body,
   }: {
     body: object;
-  }): Promise<{ scores: { host?: RiskScore[]; user?: RiskScore[] } }> => {
+  }): Promise<{
+    scores: { host?: EntityRiskScoreRecord[]; user?: EntityRiskScoreRecord[] };
+  }> => {
     const defaultBody = { data_view_id: '.alerts-security.alerts-default' };
     const { body: result } = await supertest
       .post(RISK_SCORE_PREVIEW_URL)
@@ -70,12 +68,6 @@ export default ({ getService }: FtrProviderContext): void => {
   };
 
   describe('@ess @serverless Risk Scoring Preview API', () => {
-    before(async () => {
-      await kibanaServer.uiSettings.update({
-        [ENABLE_ASSET_CRITICALITY_SETTING]: true,
-      });
-    });
-
     context('with auditbeat data', () => {
       const { indexListOfDocuments } = dataGeneratorFactory({
         es,
@@ -118,9 +110,9 @@ export default ({ getService }: FtrProviderContext): void => {
           expect(score).to.eql({
             calculated_level: 'Unknown',
             calculated_score: 21,
-            calculated_score_norm: 8.039816232771823,
+            calculated_score_norm: 8.10060175898781,
             category_1_count: 1,
-            category_1_score: 8.039816232771821,
+            category_1_score: 8.10060175898781,
             id_field: 'host.name',
             id_value: 'host-1',
           });
@@ -146,18 +138,18 @@ export default ({ getService }: FtrProviderContext): void => {
             {
               calculated_level: 'Unknown',
               calculated_score: 21,
-              calculated_score_norm: 8.039816232771823,
+              calculated_score_norm: 8.10060175898781,
               category_1_count: 1,
-              category_1_score: 8.039816232771821,
+              category_1_score: 8.10060175898781,
               id_field: 'host.name',
               id_value: 'host-1',
             },
             {
               calculated_level: 'Unknown',
               calculated_score: 21,
-              calculated_score_norm: 8.039816232771823,
+              calculated_score_norm: 8.10060175898781,
               category_1_count: 1,
-              category_1_score: 8.039816232771821,
+              category_1_score: 8.10060175898781,
               id_field: 'host.name',
               id_value: 'host-2',
             },
@@ -179,9 +171,9 @@ export default ({ getService }: FtrProviderContext): void => {
             {
               calculated_level: 'Unknown',
               calculated_score: 28.42462120245875,
-              calculated_score_norm: 10.88232052161514,
+              calculated_score_norm: 10.964596976723788,
               category_1_count: 2,
-              category_1_score: 10.882320521615142,
+              category_1_score: 10.964596976723788,
               id_field: 'host.name',
               id_value: 'host-1',
             },
@@ -201,9 +193,9 @@ export default ({ getService }: FtrProviderContext): void => {
             {
               calculated_level: 'Unknown',
               calculated_score: 47.25513506055279,
-              calculated_score_norm: 18.091552473412246,
+              calculated_score_norm: 18.228334771081926,
               category_1_count: 30,
-              category_1_score: 18.091552473412246,
+              category_1_score: 18.228334771081926,
               id_field: 'host.name',
               id_value: 'host-1',
             },
@@ -226,18 +218,18 @@ export default ({ getService }: FtrProviderContext): void => {
             {
               calculated_level: 'Unknown',
               calculated_score: 47.25513506055279,
-              calculated_score_norm: 18.091552473412246,
+              calculated_score_norm: 18.228334771081926,
               category_1_count: 30,
-              category_1_score: 18.091552473412246,
+              category_1_score: 18.228334771081926,
               id_field: 'host.name',
               id_value: 'host-1',
             },
             {
               calculated_level: 'Unknown',
               calculated_score: 21,
-              calculated_score_norm: 8.039816232771823,
+              calculated_score_norm: 8.10060175898781,
               category_1_count: 1,
-              category_1_score: 8.039816232771821,
+              category_1_score: 8.10060175898781,
               id_field: 'host.name',
               id_value: 'host-2',
             },
@@ -257,9 +249,63 @@ export default ({ getService }: FtrProviderContext): void => {
             {
               calculated_level: 'Unknown',
               calculated_score: 50.67035607277805,
-              calculated_score_norm: 19.399064346392823,
+              calculated_score_norm: 19.545732168175455,
               category_1_count: 100,
-              category_1_score: 19.399064346392823,
+              category_1_score: 19.545732168175455,
+              id_field: 'host.name',
+              id_value: 'host-1',
+            },
+          ]);
+        });
+
+        it('calculates risk from 5 alerts, all in closed state, all for the same host', async () => {
+          const documentId = uuidv4();
+          const doc = buildDocument(
+            { host: { name: 'host-1' }, kibana: { alert: { workflow_status: 'closed' } } },
+            documentId
+          );
+          await indexListOfDocuments(Array(10).fill(doc));
+
+          const body = await getRiskScoreAfterRuleCreationAndExecution(documentId, {
+            alerts: 5,
+          });
+
+          expect(sanitizeScores(body.scores.host!)).to.eql([
+            {
+              calculated_level: 'Unknown',
+              calculated_score: 41.90206636025764,
+              calculated_score_norm: 16.163426307767953,
+              category_1_count: 10,
+              category_1_score: 16.163426307767953,
+              id_field: 'host.name',
+              id_value: 'host-1',
+            },
+          ]);
+        });
+        it('calculates risk from 10 alerts, some in closed state, some in open state, all for the same host', async () => {
+          const documentId = uuidv4();
+          const docStatusClosed = buildDocument(
+            { host: { name: 'host-1' }, kibana: { alert: { workflow_status: 'closed' } } },
+            documentId
+          );
+          const docStatusOpen = buildDocument(
+            { host: { name: 'host-1' }, kibana: { alert: { workflow_status: 'open' } } },
+            documentId
+          );
+          await indexListOfDocuments(Array(5).fill(docStatusClosed));
+          await indexListOfDocuments(Array(5).fill(docStatusOpen));
+
+          const body = await getRiskScoreAfterRuleCreationAndExecution(documentId, {
+            alerts: 10,
+          });
+
+          expect(sanitizeScores(body.scores.host!)).to.eql([
+            {
+              calculated_level: 'Unknown',
+              calculated_score: 41.90206636025764,
+              calculated_score_norm: 16.163426307767953,
+              category_1_count: 10,
+              category_1_score: 16.163426307767953,
               id_field: 'host.name',
               id_value: 'host-1',
             },
@@ -282,9 +328,9 @@ export default ({ getService }: FtrProviderContext): void => {
             {
               calculated_level: 'Critical',
               calculated_score: 241.2874098703716,
-              calculated_score_norm: 92.37649688758484,
+              calculated_score_norm: 93.07491508654975,
               category_1_count: 100,
-              category_1_score: 92.37649688758484,
+              category_1_score: 93.07491508654975,
               id_field: 'host.name',
               id_value: 'host-1',
             },
@@ -313,9 +359,9 @@ export default ({ getService }: FtrProviderContext): void => {
             {
               calculated_level: 'Critical',
               calculated_score: 254.91456029175757,
-              calculated_score_norm: 97.59362951445543,
+              calculated_score_norm: 98.33149216623883,
               category_1_count: 1000,
-              category_1_score: 97.59362951445543,
+              category_1_score: 98.33149216623883,
               id_field: 'host.name',
               id_value: 'host-1',
             },
@@ -409,9 +455,9 @@ export default ({ getService }: FtrProviderContext): void => {
             {
               calculated_level: 'High',
               calculated_score: 225.1106801442913,
-              calculated_score_norm: 86.18326192354185,
+              calculated_score_norm: 86.83485578779946,
               category_1_count: 100,
-              category_1_score: 86.18326192354185,
+              category_1_score: 86.83485578779946,
               id_field: 'host.name',
               id_value: 'host-1',
             },
@@ -438,9 +484,9 @@ export default ({ getService }: FtrProviderContext): void => {
             {
               calculated_level: 'Moderate',
               calculated_score: 120.6437049351858,
-              calculated_score_norm: 46.18824844379242,
+              calculated_score_norm: 46.537457543274876,
               category_1_count: 100,
-              category_1_score: 92.37649688758484,
+              category_1_score: 93.07491508654975,
               id_field: 'host.name',
               id_value: 'host-1',
             },
@@ -465,9 +511,9 @@ export default ({ getService }: FtrProviderContext): void => {
             {
               calculated_level: 'Moderate',
               calculated_score: 168.9011869092601,
-              calculated_score_norm: 64.66354782130938,
+              calculated_score_norm: 65.15244056058482,
               category_1_count: 100,
-              category_1_score: 92.37649688758484,
+              category_1_score: 93.07491508654975,
               id_field: 'user.name',
               id_value: 'user-1',
             },
@@ -494,9 +540,9 @@ export default ({ getService }: FtrProviderContext): void => {
             {
               calculated_level: 'Low',
               calculated_score: 93.23759116471251,
-              calculated_score_norm: 35.695861854790394,
+              calculated_score_norm: 35.96574261869793,
               category_1_count: 50,
-              category_1_score: 89.23965463697598,
+              category_1_score: 89.91435654674481,
               id_field: 'host.name',
               id_value: 'host-1',
             },
@@ -506,59 +552,9 @@ export default ({ getService }: FtrProviderContext): void => {
             {
               calculated_level: 'High',
               calculated_score: 186.47518232942502,
-              calculated_score_norm: 71.39172370958079,
+              calculated_score_norm: 71.93148523739586,
               category_1_count: 50,
-              category_1_score: 89.23965463697598,
-              id_field: 'user.name',
-              id_value: 'user-1',
-            },
-          ]);
-        });
-      });
-
-      context('with category weights', () => {
-        it('weights risk inputs from different categories according to the category weight', async () => {
-          const documentId = uuidv4();
-          const userSignal = buildDocument(
-            { 'event.kind': 'signal', 'user.name': 'user-1' },
-            documentId
-          );
-          const hostSignal = buildDocument(
-            { 'event.kind': 'signal', 'host.name': 'host-1' },
-            documentId
-          );
-          await indexListOfDocuments(Array(50).fill(userSignal).concat(Array(50).fill(hostSignal)));
-
-          await createAndSyncRuleAndAlerts({
-            query: `id: ${documentId}`,
-            alerts: 100,
-            riskScore: 100,
-          });
-          const { scores } = await previewRiskScores({
-            body: {
-              weights: [{ type: 'risk_category', value: 'category_1', host: 0.4, user: 0.8 }],
-            },
-          });
-
-          expect(sanitizeScores(scores.host!)).to.eql([
-            {
-              calculated_level: 'Low',
-              calculated_score: 93.2375911647125,
-              calculated_score_norm: 35.695861854790394,
-              category_1_score: 35.69586185479039,
-              category_1_count: 50,
-              id_field: 'host.name',
-              id_value: 'host-1',
-            },
-          ]);
-
-          expect(sanitizeScores(scores.user!)).to.eql([
-            {
-              calculated_level: 'High',
-              calculated_score: 186.475182329425,
-              calculated_score_norm: 71.39172370958079,
-              category_1_score: 71.39172370958077,
-              category_1_count: 50,
+              category_1_score: 89.91435654674481,
               id_field: 'user.name',
               id_value: 'user-1',
             },
@@ -599,23 +595,34 @@ export default ({ getService }: FtrProviderContext): void => {
               criticality_modifier: 2.0,
               calculated_level: 'Unknown',
               calculated_score: 21,
-              calculated_score_norm: 14.8830616583983,
+              calculated_score_norm: 14.987153868113044,
               category_1_count: 1,
-              category_1_score: 8.039816232771821,
+              category_1_score: 8.10060175898781,
               id_field: 'host.name',
               id_value: 'host-1',
             },
             {
               calculated_level: 'Unknown',
               calculated_score: 21,
-              calculated_score_norm: 8.039816232771823,
+              calculated_score_norm: 8.10060175898781,
               category_1_count: 1,
-              category_1_score: 8.039816232771821,
+              category_1_score: 8.10060175898781,
               id_field: 'host.name',
               id_value: 'host-2',
             },
           ]);
         });
+      });
+    });
+
+    it('does not return an 404 when the data_view_id is an non existent index', async () => {
+      const { scores } = await previewRiskScores({
+        body: { data_view_id: 'invalid-index' },
+      });
+
+      expect(scores).to.eql({
+        host: [],
+        user: [],
       });
     });
   });

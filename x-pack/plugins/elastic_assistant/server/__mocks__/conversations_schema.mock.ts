@@ -13,10 +13,10 @@ import {
   ConversationResponse,
   ConversationUpdateProps,
 } from '@kbn/elastic-assistant-common';
-import { SearchEsConversationSchema } from '../ai_assistant_data_clients/conversations/types';
+import { EsConversationSchema } from '../ai_assistant_data_clients/conversations/types';
 
 export const getConversationSearchEsMock = () => {
-  const searchResponse: estypes.SearchResponse<SearchEsConversationSchema> = {
+  const searchResponse: estypes.SearchResponse<EsConversationSchema> = {
     took: 3,
     timed_out: false,
     _shards: {
@@ -60,12 +60,14 @@ export const getConversationSearchEsMock = () => {
   return searchResponse;
 };
 
-export const getCreateConversationSchemaMock = (): ConversationCreateProps => ({
+export const getCreateConversationSchemaMock = (
+  rest?: Partial<ConversationCreateProps>
+): ConversationCreateProps => ({
   title: 'Welcome',
   apiConfig: {
+    actionTypeId: '.gen-ai',
     connectorId: '1',
     defaultSystemPromptId: 'Default',
-    connectorTypeTitle: 'Test connector',
     model: 'model',
   },
   excludeFromLastConversationStorage: false,
@@ -82,6 +84,7 @@ export const getCreateConversationSchemaMock = (): ConversationCreateProps => ({
     },
   ],
   category: 'assistant',
+  ...rest,
 });
 
 export const getUpdateConversationSchemaMock = (
@@ -89,9 +92,9 @@ export const getUpdateConversationSchemaMock = (
 ): ConversationUpdateProps => ({
   title: 'Welcome 2',
   apiConfig: {
+    actionTypeId: '.gen-ai',
     connectorId: '2',
     defaultSystemPromptId: 'Default',
-    connectorTypeTitle: 'Test connector',
     model: 'model',
   },
   excludeFromLastConversationStorage: false,
@@ -129,11 +132,10 @@ export const getConversationMock = (
 ): ConversationResponse => ({
   id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
   apiConfig: {
+    actionTypeId: '.gen-ai',
     connectorId: '1',
     defaultSystemPromptId: 'Default',
-    connectorTypeTitle: 'OpenAI',
   },
-  replacements: [],
   title: 'test',
   ...params,
   createdAt: '2019-12-13T16:40:33.400Z',
@@ -154,9 +156,9 @@ export const getQueryConversationParams = (
     ? {
         title: 'Welcome 2',
         apiConfig: {
+          actionTypeId: '.gen-ai',
           connectorId: '2',
           defaultSystemPromptId: 'Default',
-          connectorTypeTitle: 'Test connector',
           model: 'model',
         },
         category: 'assistant',
@@ -178,9 +180,9 @@ export const getQueryConversationParams = (
         title: 'Welcome',
         category: 'assistant',
         apiConfig: {
+          actionTypeId: '.gen-ai',
           connectorId: '1',
           defaultSystemPromptId: 'Default',
-          connectorTypeTitle: 'Test connector',
           model: 'model',
         },
         excludeFromLastConversationStorage: false,

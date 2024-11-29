@@ -6,40 +6,63 @@
  */
 import { i18n } from '@kbn/i18n';
 import { toBooleanRt, toNumberRt } from '@kbn/io-ts-utils';
-import {
-  ALERT_STATUS_ACTIVE,
-  ALERT_STATUS_RECOVERED,
-} from '@kbn/rule-data-utils';
+import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
 import { Outlet } from '@kbn/typed-react-router-config';
 import * as t from 'io-ts';
 import qs from 'query-string';
 import React from 'react';
 import { Redirect } from 'react-router-dom';
+import { dynamic } from '@kbn/shared-ux-utility';
 import { offsetRt } from '../../../../common/comparison_rt';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { environmentRt } from '../../../../common/environment_rt';
-import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
+import {
+  LatencyAggregationType,
+  latencyAggregationTypeRt,
+} from '../../../../common/latency_aggregation_types';
 import { ApmTimeRangeMetadataContextProvider } from '../../../context/time_range_metadata/time_range_metadata_context';
 import { useApmParams } from '../../../hooks/use_apm_params';
-import { AlertsOverview, ALERT_STATUS_ALL } from '../../app/alerts_overview';
-import { ErrorGroupDetails } from '../../app/error_group_details';
-import { ErrorGroupOverview } from '../../app/error_group_overview';
-import { InfraOverview } from '../../app/infra_overview';
+import { ALERT_STATUS_ALL, AlertsOverview } from '../../app/alerts_overview';
 import { InfraTab } from '../../app/infra_overview/infra_tabs/use_tabs';
-import { Metrics } from '../../app/metrics';
-import { MetricsDetails } from '../../app/metrics_details';
-import { ServiceDependencies } from '../../app/service_dependencies';
-import { ServiceLogs } from '../../app/service_logs';
-import { ServiceMapServiceDetail } from '../../app/service_map';
-import { ServiceOverview } from '../../app/service_overview';
-import { TransactionDetails } from '../../app/transaction_details';
-import { TransactionOverview } from '../../app/transaction_overview';
 import { ApmServiceTemplate } from '../templates/apm_service_template';
 import { ApmServiceWrapper } from './apm_service_wrapper';
 import { RedirectToDefaultServiceRouteView } from './redirect_to_default_service_route_view';
-import { ProfilingOverview } from '../../app/profiling_overview';
 import { SearchBar } from '../../shared/search_bar/search_bar';
+import { ServiceDependencies } from '../../app/service_dependencies';
 import { ServiceDashboards } from '../../app/service_dashboards';
+import { ErrorGroupDetails } from '../../app/error_group_details';
+
+const ErrorGroupOverview = dynamic(() =>
+  import('../../app/error_group_overview').then((mod) => ({ default: mod.ErrorGroupOverview }))
+);
+const InfraOverview = dynamic(() =>
+  import('../../app/infra_overview').then((mod) => ({ default: mod.InfraOverview }))
+);
+const Metrics = dynamic(() =>
+  import('../../app/metrics').then((mod) => ({ default: mod.Metrics }))
+);
+const MetricsDetails = dynamic(() =>
+  import('../../app/metrics_details').then((mod) => ({ default: mod.MetricsDetails }))
+);
+
+const ServiceLogs = dynamic(() =>
+  import('../../app/service_logs').then((mod) => ({ default: mod.ServiceLogs }))
+);
+const ServiceMapServiceDetail = dynamic(() =>
+  import('../../app/service_map').then((mod) => ({ default: mod.ServiceMapServiceDetail }))
+);
+const ServiceOverview = dynamic(() =>
+  import('../../app/service_overview').then((mod) => ({ default: mod.ServiceOverview }))
+);
+const TransactionDetails = dynamic(() =>
+  import('../../app/transaction_details').then((mod) => ({ default: mod.TransactionDetails }))
+);
+const TransactionOverview = dynamic(() =>
+  import('../../app/transaction_overview').then((mod) => ({ default: mod.TransactionOverview }))
+);
+const ProfilingOverview = dynamic(() =>
+  import('../../app/profiling_overview').then((mod) => ({ default: mod.ProfilingOverview }))
+);
 
 function page({
   title,
@@ -56,11 +79,7 @@ function page({
 } {
   return {
     element: (
-      <ApmServiceTemplate
-        title={title}
-        selectedTab={tab}
-        searchBarOptions={searchBarOptions}
-      >
+      <ApmServiceTemplate title={title} selectedTab={tab} searchBarOptions={searchBarOptions}>
         {element}
       </ApmServiceTemplate>
     ),
@@ -70,17 +89,11 @@ function page({
 function RedirectNodesToMetrics() {
   const { query, path } = useApmParams('/services/{serviceName}/nodes');
   const search = qs.stringify(query);
-  return (
-    <Redirect
-      to={{ pathname: `/services/${path.serviceName}/metrics`, search }}
-    />
-  );
+  return <Redirect to={{ pathname: `/services/${path.serviceName}/metrics`, search }} />;
 }
 
 function RedirectNodeMetricsToMetricsDetails() {
-  const { query, path } = useApmParams(
-    '/services/{serviceName}/nodes/{serviceNodeName}/metrics'
-  );
+  const { query, path } = useApmParams('/services/{serviceName}/nodes/{serviceNodeName}/metrics');
   const search = qs.stringify(query);
   return (
     <Redirect
@@ -116,7 +129,7 @@ export const serviceDetailRoute = {
             comparisonEnabled: toBooleanRt,
           }),
           t.partial({
-            latencyAggregationType: t.string,
+            latencyAggregationType: latencyAggregationTypeRt,
             transactionType: t.string,
             refreshPaused: t.union([t.literal('true'), t.literal('false')]),
             refreshInterval: t.string,
@@ -142,8 +155,7 @@ export const serviceDetailRoute = {
             defaultMessage: 'Overview',
           }),
           searchBarOptions: {
-            showTransactionTypeSelector: true,
-            showTimeComparison: true,
+            hidden: true,
           },
         }),
         params: t.partial({
@@ -318,7 +330,7 @@ export const serviceDetailRoute = {
         }),
         element: <ServiceLogs />,
         searchBarOptions: {
-          showUnifiedSearchBar: false,
+          showQueryInput: false,
         },
       }),
       '/services/{serviceName}/infrastructure': {

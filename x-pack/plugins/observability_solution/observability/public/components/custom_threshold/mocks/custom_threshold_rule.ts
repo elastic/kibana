@@ -7,8 +7,9 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
+import { COMPARATORS } from '@kbn/alerting-comparators';
 import { CustomThresholdAlertFields } from '../types';
-import { Aggregators, Comparator } from '../../../../common/custom_threshold_rule/types';
+import { Aggregators } from '../../../../common/custom_threshold_rule/types';
 
 import { CustomThresholdAlert, CustomThresholdRule } from '../components/types';
 
@@ -16,12 +17,11 @@ export const buildCustomThresholdRule = (
   rule: Partial<CustomThresholdRule> = {}
 ): CustomThresholdRule => {
   return {
-    alertTypeId: 'metrics.alert.threshold',
+    ruleTypeId: 'metrics.alert.threshold',
     createdBy: 'admin',
     updatedBy: 'admin',
     createdAt: new Date('2023-02-20T15:25:32.125Z'),
     updatedAt: new Date('2023-03-02T16:24:41.177Z'),
-    apiKey: 'apiKey',
     apiKeyOwner: 'admin',
     notifyWhen: null,
     muteAll: false,
@@ -61,11 +61,12 @@ export const buildCustomThresholdRule = (
     params: {
       criteria: [
         {
-          comparator: Comparator.GT,
+          comparator: COMPARATORS.GREATER_THAN,
           metrics: [
             {
               name: 'A',
               aggType: Aggregators.COUNT,
+              filter: 'host.name: host-1',
             },
           ],
           threshold: [2000],
@@ -73,7 +74,7 @@ export const buildCustomThresholdRule = (
           timeUnit: 'm',
         },
         {
-          comparator: Comparator.GT,
+          comparator: COMPARATORS.GREATER_THAN,
           metrics: [
             {
               name: 'B',
@@ -84,11 +85,9 @@ export const buildCustomThresholdRule = (
           threshold: [4],
           timeSize: 15,
           timeUnit: 'm',
-          warningComparator: Comparator.GT,
-          warningThreshold: [2.2],
         },
         {
-          comparator: Comparator.GT,
+          comparator: COMPARATORS.GREATER_THAN,
           metrics: [
             {
               name: 'C',
@@ -101,7 +100,7 @@ export const buildCustomThresholdRule = (
           timeUnit: 'm',
         },
         {
-          comparator: Comparator.GT,
+          comparator: COMPARATORS.GREATER_THAN,
           metrics: [
             {
               name: 'A',
@@ -116,7 +115,7 @@ export const buildCustomThresholdRule = (
             'A + A + A + A + A + A + A + A + A + A + A + A + A + A + A + A + A + A + A + A + A',
         },
         {
-          comparator: Comparator.GT,
+          comparator: COMPARATORS.GREATER_THAN,
           metrics: [
             {
               name: 'C',
@@ -134,7 +133,7 @@ export const buildCustomThresholdRule = (
           timeUnit: 'm',
         },
         {
-          comparator: Comparator.GT,
+          comparator: COMPARATORS.GREATER_THAN,
           metrics: [
             {
               name: 'CAD',
@@ -210,7 +209,7 @@ export const buildCustomThresholdAlert = (
       'kibana.alert.rule.parameters': {
         criteria: [
           {
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             metrics: [
               {
                 name: 'A',
@@ -223,24 +222,28 @@ export const buildCustomThresholdAlert = (
             timeUnit: 'm',
           },
           {
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             metrics: [
               {
                 name: 'B',
                 aggType: Aggregators.MAX,
-                metric: 'system.cpu.user.pct',
+                field: 'system.cpu.user.pct',
               },
             ],
             threshold: [4],
             timeSize: 15,
             timeUnit: 'm',
-            warningComparator: Comparator.GT,
-            warningThreshold: [2.2],
           },
         ],
-        sourceId: 'default',
         alertOnNoData: true,
         alertOnGroupDisappear: true,
+        searchConfiguration: {
+          query: {
+            query: '',
+            language: 'kuery',
+          },
+          index: 'b3eadf0e-1053-41d0-9672-dc1d7789dd68',
+        },
       },
       'kibana.alert.evaluation.values': [2500, 5],
       'kibana.alert.group': [{ field: 'host.name', value: 'host-1' }],

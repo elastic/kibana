@@ -104,7 +104,7 @@
         "signature": [
           "(props: ",
           "ExploratoryViewPageProps",
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/index.tsx",
         "deprecated": false,
@@ -139,7 +139,7 @@
         "signature": [
           "(props: ",
           "FilterValueLabelProps",
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/index.tsx",
         "deprecated": false,
@@ -207,7 +207,7 @@
         "signature": [
           "(props: ",
           "SelectableUrlListProps",
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/index.tsx",
         "deprecated": false,
@@ -713,7 +713,7 @@
             "label": "align",
             "description": [],
             "signature": [
-              "\"right\" | \"left\" | \"center\" | undefined"
+              "\"right\" | \"center\" | \"left\" | undefined"
             ],
             "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
             "deprecated": false,
@@ -798,6 +798,21 @@
             "description": [],
             "signature": [
               "string | undefined"
+            ],
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "exploratoryView",
+            "id": "def-public.ExploratoryEmbeddableProps.dslFilters",
+            "type": "Array",
+            "tags": [],
+            "label": "dslFilters",
+            "description": [],
+            "signature": [
+              "QueryDslQueryContainer",
+              "[] | undefined"
             ],
             "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
             "deprecated": false,
@@ -1133,7 +1148,7 @@
             "signature": [
               "{ locators: ObservabilitySharedLocators; navigation: { PageTemplate: (pageTemplateProps: ",
               "WrappedPageTemplateProps",
-              ") => JSX.Element; registerSections: (sections$: ",
+              ") => React.JSX.Element; registerSections: (sections$: ",
               "Observable",
               "<",
               {
@@ -1146,9 +1161,9 @@
               "[]>) => void; }; updateGlobalNavigation: ({ capabilities, deepLinks, updater$, }: { capabilities: Readonly<{ [x: string]: Readonly<{ [x: string]: boolean | Readonly<{ [x: string]: boolean; }>; }>; navLinks: Readonly<{ [x: string]: boolean; }>; management: Readonly<{ [x: string]: Readonly<{ [x: string]: boolean; }>; }>; catalogue: Readonly<{ [x: string]: boolean; }>; }>; deepLinks: ",
               {
                 "pluginId": "@kbn/core-application-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-common.AppDeepLink",
+                "section": "def-public.AppDeepLink",
                 "text": "AppDeepLink"
               },
               "<string>[]; updater$: ",
@@ -1156,12 +1171,12 @@
               "<",
               {
                 "pluginId": "@kbn/core-application-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-common.AppUpdater",
+                "section": "def-public.AppUpdater",
                 "text": "AppUpdater"
               },
-              ">; }) => void; setIsSidebarEnabled: (isEnabled: boolean) => void; }"
+              ">; }) => void; }"
             ],
             "path": "x-pack/plugins/observability_solution/exploratory_view/public/plugin.ts",
             "deprecated": false,
@@ -1343,7 +1358,8 @@
                 "docId": "kibObservabilityAIAssistantPluginApi",
                 "section": "def-public.ObservabilityAIAssistantPublicStart",
                 "text": "ObservabilityAIAssistantPublicStart"
-              }
+              },
+              " | undefined"
             ],
             "path": "x-pack/plugins/observability_solution/exploratory_view/public/plugin.ts",
             "deprecated": false,
@@ -1809,7 +1825,7 @@
             "label": "dataType",
             "description": [],
             "signature": [
-              "\"uptime\" | \"alerts\" | \"synthetics\" | \"ux\" | \"infra_logs\" | \"infra_metrics\" | \"apm\" | \"mobile\""
+              "\"uptime\" | \"alerts\" | \"apm\" | \"synthetics\" | \"ux\" | \"infra_logs\" | \"infra_metrics\" | \"mobile\""
             ],
             "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/types.ts",
             "deprecated": false,
@@ -2231,7 +2247,7 @@
           "section": "def-public.ExploratoryEmbeddableProps",
           "text": "ExploratoryEmbeddableProps"
         },
-        ") => JSX.Element | null; }"
+        ") => React.JSX.Element | null; }"
       ],
       "path": "x-pack/plugins/observability_solution/exploratory_view/public/plugin.ts",
       "deprecated": false,

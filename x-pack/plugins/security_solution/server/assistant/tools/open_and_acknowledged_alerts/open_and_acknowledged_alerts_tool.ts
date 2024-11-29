@@ -6,14 +6,18 @@
  */
 
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import type { Replacement } from '@kbn/elastic-assistant-common';
-import { getAnonymizedValue, transformRawData } from '@kbn/elastic-assistant-common';
-import { DynamicTool } from 'langchain/tools';
+import type { Replacements } from '@kbn/elastic-assistant-common';
+import {
+  getAnonymizedValue,
+  getOpenAndAcknowledgedAlertsQuery,
+  getRawDataOrDefault,
+  sizeIsOutOfRange,
+  transformRawData,
+} from '@kbn/elastic-assistant-common';
+import { DynamicStructuredTool } from '@langchain/core/tools';
 import { requestHasRequiredAnonymizationParams } from '@kbn/elastic-assistant-plugin/server/lib/langchain/helpers';
-
+import { z } from '@kbn/zod';
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
-import { getOpenAndAcknowledgedAlertsQuery } from './get_open_and_acknowledged_alerts_query';
-import { getRawDataOrDefault, sizeIsOutOfRange } from './helpers';
 import { APP_UI_ID } from '../../../../common';
 
 export interface OpenAndAcknowledgedAlertsToolParams extends AssistantToolParams {
@@ -22,7 +26,7 @@ export interface OpenAndAcknowledgedAlertsToolParams extends AssistantToolParams
 }
 
 export const OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL_DESCRIPTION =
-  'Call this for knowledge about the latest n open and acknowledged alerts (sorted by `kibana.alert.risk_score`) in the environment, or when answering questions about open alerts';
+  'Call this for knowledge about the latest n open and acknowledged alerts (sorted by `kibana.alert.risk_score`) in the environment, or when answering questions about open alerts. Do not call this tool for alert count or quantity. The output is an array of the latest n open and acknowledged alerts.';
 
 /**
  * Returns a tool for querying open and acknowledged alerts, or null if the
@@ -47,20 +51,20 @@ export const OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL: AssistantTool = {
 
     const {
       alertsIndexPattern,
-      allow,
-      allowReplacement,
+      anonymizationFields,
       esClient,
       onNewReplacements,
       replacements,
       size,
     } = params as OpenAndAcknowledgedAlertsToolParams;
-    return new DynamicTool({
+    return new DynamicStructuredTool({
       name: 'OpenAndAcknowledgedAlertsTool',
       description: OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL_DESCRIPTION,
+      schema: z.object({}),
       func: async () => {
         const query = getOpenAndAcknowledgedAlertsQuery({
           alertsIndexPattern,
-          allow: allow ?? [],
+          anonymizationFields: anonymizationFields ?? [],
           size,
         });
 
@@ -68,24 +72,9 @@ export const OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL: AssistantTool = {
 
         // Accumulate replacements locally so we can, for example use the same
         // replacement for a hostname when we see it in multiple alerts:
-        let localReplacements: Replacement[] = replacements ?? [];
-        const localOnNewReplacements = (newReplacements: Replacement[]) => {
-          const localReplacementsDict = localReplacements.reduce(
-            (acc: Record<string, string>, r) => {
-              acc[r.value] = r.uuid;
-              return acc;
-            },
-            {}
-          );
-          const newReplacementsDict = newReplacements.reduce((acc: Record<string, string>, r) => {
-            acc[r.value] = r.uuid;
-            return acc;
-          }, {});
-          const updatedReplacements = { ...localReplacementsDict, ...newReplacementsDict };
-          localReplacements = Object.keys(updatedReplacements).map((key) => ({
-            value: key,
-            uuid: updatedReplacements[key],
-          }));
+        let localReplacements: Replacements = replacements ?? {};
+        const localOnNewReplacements = (newReplacements: Replacements) => {
+          localReplacements = { ...localReplacements, ...newReplacements };
           onNewReplacements?.(localReplacements); // invoke the callback with the latest replacements
           return Promise.resolve(localReplacements);
         };
@@ -93,8 +82,7 @@ export const OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL: AssistantTool = {
         return JSON.stringify(
           result.hits?.hits?.map((x) =>
             transformRawData({
-              allow: allow ?? [],
-              allowReplacement: allowReplacement ?? [],
+              anonymizationFields,
               currentReplacements: localReplacements, // <-- the latest local replacements
               getAnonymizedValue,
               onNewReplacements: localOnNewReplacements, // <-- the local callback

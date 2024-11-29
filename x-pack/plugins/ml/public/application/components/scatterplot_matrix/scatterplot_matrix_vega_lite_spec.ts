@@ -11,7 +11,7 @@ import type { TopLevelSpec } from 'vega-lite/build/vega-lite';
 
 import type { euiLightVars as euiThemeLight } from '@kbn/ui-theme';
 
-import { euiPaletteColorBlind, euiPaletteNegative, euiPalettePositive } from '@elastic/eui';
+import { euiPaletteColorBlind, euiPaletteRed, euiPaletteGreen } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
@@ -25,11 +25,11 @@ export const USER_SELECTION = 'user_selection';
 export const SINGLE_POINT_CLICK = 'single_point_click';
 
 export const COLOR_BLUR = '#bbb';
-export const COLOR_OUTLIER = euiPaletteNegative(2)[1];
+export const COLOR_OUTLIER = euiPaletteRed(2)[1];
 export const COLOR_SELECTION = euiPaletteColorBlind()[2];
 export const COLOR_RANGE_OUTLIER = [euiPaletteColorBlind()[1], euiPaletteColorBlind()[2]];
 export const COLOR_RANGE_NOMINAL = euiPaletteColorBlind({ rotations: 2 });
-export const COLOR_RANGE_QUANTITATIVE = euiPalettePositive(5);
+export const COLOR_RANGE_QUANTITATIVE = euiPaletteGreen(5);
 const CUSTOM_VIS_FIELDS_PATH = 'fields';
 
 export const getColorSpec = (
@@ -249,11 +249,28 @@ const getVegaSpecLayer = (
   };
 };
 
-// Escapes the characters .[] in field names with double backslashes
+// Escapes the characters .[]\ in field names with double backslashes
 // since VEGA treats dots/brackets in field names as nested values.
 // See https://vega.github.io/vega-lite/docs/field.html for details.
-function getEscapedVegaFieldName(fieldName: string, prependString: string = '') {
-  return `${prependString}${fieldName.replace(/([\.|\[|\]])/g, '\\$1')}`;
+export function getEscapedVegaFieldName(fieldName: string, prependString: string = '') {
+  // Note the following isn't 100% ideal because there are cases when we may
+  // end up with an additional backslash being rendered for labels of the
+  // scatterplot. However, all other variations I tried caused rendering
+  // problems of the charts and rendering would fail completely.
+
+  // For example, just escaping \n in the first replace without the general
+  // backslash escaping causes the following Vega error:
+  // Duplicate scale or projection name: "child__row_my_numbercolumn_my_number_x"
+
+  // Escaping just the backslash without the additional \n escaping causes
+  // causes an "expression parse error" in Vega and the chart wouldn't render.
+
+  // Escape newline characters
+  fieldName = fieldName.replace(/\n/g, '\\n');
+  // Escape .[]\
+  fieldName = fieldName.replace(/([\.|\[|\]|\\])/g, '\\$1');
+
+  return `${prependString}${fieldName}`;
 }
 
 type VegaValue = Record<string, string | number>;

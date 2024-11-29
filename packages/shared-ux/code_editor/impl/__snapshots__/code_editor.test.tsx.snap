@@ -2,7 +2,7 @@
 
 exports[`<CodeEditor /> hint element should be tabable 1`] = `
 <div
-  aria-label="Code Editor"
+  aria-label="Code Editor, activate edit mode"
   css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop).,false"
   data-test-subj="codeEditorHint codeEditorHint--active"
   id="1234"
@@ -16,16 +16,8 @@ exports[`<CodeEditor /> is rendered 1`] = `
   height={250}
   intl={
     Object {
-      "defaultFormats": Object {},
-      "defaultLocale": "en",
-      "formatDate": [Function],
-      "formatHTMLMessage": [Function],
-      "formatMessage": [Function],
-      "formatNumber": [Function],
-      "formatPlural": [Function],
-      "formatRelative": [Function],
-      "formatTime": [Function],
-      "formats": Object {
+      "$t": [Function],
+      "defaultFormats": Object {
         "date": Object {
           "full": Object {
             "day": "numeric",
@@ -59,22 +51,22 @@ exports[`<CodeEditor /> is rendered 1`] = `
         },
         "relative": Object {
           "days": Object {
-            "units": "day",
+            "style": "long",
           },
           "hours": Object {
-            "units": "hour",
+            "style": "long",
           },
           "minutes": Object {
-            "units": "minute",
+            "style": "long",
           },
           "months": Object {
-            "units": "month",
+            "style": "long",
           },
           "seconds": Object {
-            "units": "second",
+            "style": "long",
           },
           "years": Object {
-            "units": "year",
+            "style": "long",
           },
         },
         "time": Object {
@@ -101,19 +93,36 @@ exports[`<CodeEditor /> is rendered 1`] = `
           },
         },
       },
+      "defaultLocale": "en",
+      "fallbackOnEmptyString": true,
+      "formatDate": [Function],
+      "formatDateTimeRange": [Function],
+      "formatDateToParts": [Function],
+      "formatDisplayName": [Function],
+      "formatList": [Function],
+      "formatListToParts": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatNumberToParts": [Function],
+      "formatPlural": [Function],
+      "formatRelativeTime": [Function],
+      "formatTime": [Function],
+      "formatTimeToParts": [Function],
+      "formats": Object {},
       "formatters": Object {
         "getDateTimeFormat": [Function],
+        "getDisplayNames": [Function],
+        "getListFormat": [Function],
         "getMessageFormat": [Function],
         "getNumberFormat": [Function],
-        "getPluralFormat": [Function],
-        "getRelativeFormat": [Function],
+        "getPluralRules": [Function],
+        "getRelativeTimeFormat": [Function],
       },
       "locale": "en",
       "messages": Object {},
-      "now": [Function],
       "onError": [Function],
-      "textComponent": Symbol(react.fragment),
-      "timeZone": null,
+      "onWarn": [Function],
+      "timeZone": undefined,
     }
   }
   languageId="loglang"
@@ -133,7 +142,7 @@ exports[`<CodeEditor /> is rendered 1`] = `
       content={
         <React.Fragment>
           <p>
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Press {key} to start editing."
               id="sharedUXPackages.codeEditor.startEditing"
               values={
@@ -146,7 +155,7 @@ exports[`<CodeEditor /> is rendered 1`] = `
             />
           </p>
           <p>
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Press {key} to stop editing."
               id="sharedUXPackages.codeEditor.stopEditing"
               values={
@@ -160,6 +169,7 @@ exports[`<CodeEditor /> is rendered 1`] = `
           </p>
         </React.Fragment>
       }
+      data-test-subj="codeEditorAccessibilityOverlay"
       delay="regular"
       display="block"
       position="top"
@@ -170,11 +180,13 @@ exports[`<CodeEditor /> is rendered 1`] = `
         isVisible={false}
         onBlur={[Function]}
         onFocus={[Function]}
+        onKeyDown={[Function]}
         onMouseOut={[Function]}
         onMouseOver={[Function]}
       >
         <span
           css="unknown styles"
+          onKeyDown={[Function]}
           onMouseOut={[Function]}
           onMouseOver={[Function]}
         >
@@ -209,7 +221,7 @@ exports[`<CodeEditor /> is rendered 1`] = `
                     </style>
                     <style
                       data-styled="active"
-                      data-styled-version="5.1.0"
+                      data-styled-version="5.3.11"
                     />
                   </head>,
                   "ctr": 2,
@@ -250,11 +262,12 @@ exports[`<CodeEditor /> is rendered 1`] = `
           />
           <span
             className="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+            onKeyDown={[Function]}
             onMouseOut={[Function]}
             onMouseOver={[Function]}
           >
             <div
-              aria-label="Code Editor"
+              aria-label="Code Editor, activate edit mode"
               css={
                 Array [
                   Object {
@@ -327,7 +340,7 @@ exports[`<CodeEditor /> is rendered 1`] = `
                 "wrappingIndent": "indent",
               }
             }
-            theme="euiColors"
+            theme="codeEditorLightTheme"
             value="
 [Sun Mar 7 20:54:27 2004] [notice] [client xx.xx.xx.xx] This is a notice!
 [Sun Mar 7 20:58:27 2004] [info] [client xx.xx.xx.xx] (104)Connection reset by peer: client stopped connection before send body completed
@@ -365,7 +378,7 @@ exports[`<CodeEditor /> is rendered 1`] = `
                     "wrappingIndent": "indent",
                   }
                 }
-                theme="euiColors"
+                theme="codeEditorLightTheme"
                 value="
 [Sun Mar 7 20:54:27 2004] [notice] [client xx.xx.xx.xx] This is a notice!
 [Sun Mar 7 20:58:27 2004] [info] [client xx.xx.xx.xx] (104)Connection reset by peer: client stopped connection before send body completed

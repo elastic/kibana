@@ -32,10 +32,15 @@ export const NO_VULNERABILITIES_STATUS_TEST_SUBJ = {
 export const CNVM_NOT_INSTALLED_ACTION_SUBJ = 'cnvm-not-installed-action';
 export const CSPM_NOT_INSTALLED_ACTION_SUBJ = 'cspm-not-installed-action';
 export const KSPM_NOT_INSTALLED_ACTION_SUBJ = 'kspm-not-installed-action';
-
+export const THIRD_PARTY_INTEGRATIONS_NO_MISCONFIGURATIONS_FINDINGS_PROMPT =
+  '3p-integrations-no-misconfigurations-findings-prompt';
+export const THIRD_PARTY_INTEGRATIONS_NO_VULNERABILITIES_FINDINGS_PROMPT =
+  '3p-integrations-no-vulnerabilities-findings-prompt';
+export const THIRD_PARTY_NO_MISCONFIGURATIONS_FINDINGS_PROMPT_WIZ_INTEGRATION_BUTTON =
+  '3p-no-misconfigurations-findings-prompt-wiz-integration-button';
+export const THIRD_PARTY_NO_VULNERABILITIES_FINDINGS_PROMPT_WIZ_INTEGRATION_BUTTON =
+  '3p-no-vulnerabilities-findings-prompt-wiz-integration-button';
 export const VULNERABILITIES_CONTAINER_TEST_SUBJ = 'vulnerabilities_container';
-
-export const VULNERABILITIES_CVSS_SCORE_BADGE_SUBJ = 'vulnerabilities_cvss_score_badge';
 
 export const TAKE_ACTION_SUBJ = 'csp:take_action';
 export const CREATE_RULE_ACTION_SUBJ = 'csp:create_rule';
@@ -63,10 +68,11 @@ export const CIS_AZURE_OPTION_TEST_SUBJ = 'cisAzureTestId';
 
 export const SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ = 'setup-technology-selector-accordion';
 export const SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ = 'setup-technology-selector';
+export const AZURE_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ = 'azure-credentials-type-selector';
 export const CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS = {
   TENANT_ID: 'cisAzureTenantId',
   CLIENT_ID: 'cisAzureClientId',
-  CLIENT_SECRET: 'cisAzureClientSecret',
+  CLIENT_SECRET: 'passwordInput-client-secret',
   CLIENT_CERTIFICATE_PATH: 'cisAzureClientCertificatePath',
   CLIENT_CERTIFICATE_PASSWORD: 'cisAzureClientCertificatePassword',
   CLIENT_USERNAME: 'cisAzureClientUsername',
@@ -84,3 +90,9 @@ export const CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS = {
   CREDENTIALS_FILE: 'credentials_file_test_id',
   CREDENTIALS_JSON: 'credentials_json_test_id',
 };
+
+export const SUBSCRIPTION_NOT_ALLOWED_TEST_SUBJECT = 'cloud_posture_page_subscription_not_allowed';
+
+export const COMPLIANCE_SCORE_BAR_UNKNOWN = 'complianceScoreBarUnknown';
+export const COMPLIANCE_SCORE_BAR_FAILED = 'complianceScoreBarFailed';
+export const COMPLIANCE_SCORE_BAR_PASSED = 'complianceScoreBarPassed';

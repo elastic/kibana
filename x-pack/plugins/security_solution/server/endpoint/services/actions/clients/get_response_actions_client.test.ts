@@ -6,12 +6,11 @@
  */
 
 import type { GetResponseActionsClientConstructorOptions } from '../..';
+import { getResponseActionsClient } from '../..';
 import { responseActionsClientMock } from './mocks';
 import { RESPONSE_ACTION_AGENT_TYPE } from '../../../../../common/endpoint/service/response_actions/constants';
-import { getResponseActionsClient } from '../..';
 import { ResponseActionsClientImpl } from './lib/base_response_actions_client';
 import { UnsupportedResponseActionsAgentTypeError } from './errors';
-import { sentinelOneMock } from './sentinelone/mocks';
 
 describe('getResponseActionsClient()', () => {
   let options: GetResponseActionsClientConstructorOptions;
@@ -19,7 +18,7 @@ describe('getResponseActionsClient()', () => {
   beforeEach(() => {
     options = {
       ...responseActionsClientMock.createConstructorOptions(),
-      connectorActions: sentinelOneMock.createConnectorActionsClient(),
+      connectorActions: responseActionsClientMock.createNormalizedExternalConnectorClient(),
     };
   });
 
@@ -33,6 +32,7 @@ describe('getResponseActionsClient()', () => {
   );
 
   it(`should throw error if agentType is not supported`, () => {
+    // @ts-expect-error Argument of type "foo" is not assignable to ResponseActionAgentType
     expect(() => getResponseActionsClient('foo', options)).toThrow(
       UnsupportedResponseActionsAgentTypeError
     );

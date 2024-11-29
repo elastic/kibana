@@ -5,82 +5,102 @@
  * 2.0.
  */
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
-import { internal, notFound } from '@hapi/boom';
+import { notFound } from '@hapi/boom';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, IUiSettingsClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import apm from 'elastic-apm-node';
-import { decode, encode } from 'gpt-tokenizer';
-import { last, merge, noop, omit, pick, take } from 'lodash';
+import { SpanKind, context } from '@opentelemetry/api';
+import { last, merge, omit } from 'lodash';
 import {
+  catchError,
+  combineLatest,
+  defer,
   filter,
-  isObservable,
-  last as lastOperator,
-  lastValueFrom,
+  forkJoin,
+  from,
+  map,
+  merge as mergeOperator,
   Observable,
+  of,
   shareReplay,
+  switchMap,
   tap,
-  toArray,
+  throwError,
 } from 'rxjs';
 import { Readable } from 'stream';
 import { v4 } from 'uuid';
+import type { AssistantScope } from '@kbn/ai-assistant-common';
+import { resourceNames } from '..';
 import { ObservabilityAIAssistantConnectorType } from '../../../common/connectors';
 import {
   ChatCompletionChunkEvent,
   ChatCompletionErrorEvent,
+  ConversationCreateEvent,
+  ConversationUpdateEvent,
   createConversationNotFoundError,
+  createInternalServerError,
   createTokenLimitReachedError,
-  MessageAddEvent,
   StreamingChatResponseEventType,
   TokenCountEvent,
   type StreamingChatResponseEvent,
 } from '../../../common/conversation_complete';
+import { CompatibleJSONSchema } from '../../../common/functions/types';
 import {
-  CompatibleJSONSchema,
-  FunctionResponse,
-  FunctionVisibility,
-} from '../../../common/functions/types';
-import {
-  MessageRole,
+  type AdHocInstruction,
   type Conversation,
   type ConversationCreateRequest,
   type ConversationUpdateRequest,
   type KnowledgeBaseEntry,
   type Message,
+  KnowledgeBaseType,
+  KnowledgeBaseEntryRole,
 } from '../../../common/types';
-import { concatenateChatCompletionChunks } from '../../../common/utils/concatenate_chat_completion_chunks';
-import { createFunctionResponseError } from '../../../common/utils/create_function_response_error';
-import { emitWithConcatenatedMessage } from '../../../common/utils/emit_with_concatenated_message';
+import { withoutTokenCountEvents } from '../../../common/utils/without_token_count_events';
+import { CONTEXT_FUNCTION_NAME } from '../../functions/context';
 import type { ChatFunctionClient } from '../chat_function_client';
-import {
-  KnowledgeBaseEntryOperationType,
-  KnowledgeBaseService,
-  RecalledEntry,
-} from '../knowledge_base_service';
-import type { ChatFn, ObservabilityAIAssistantResourceNames } from '../types';
+import { KnowledgeBaseService, RecalledEntry } from '../knowledge_base_service';
 import { getAccessQuery } from '../util/get_access_query';
-import { rejectTokenCountEvents } from '../util/reject_token_count_events';
-import { createBedrockClaudeAdapter } from './adapters/bedrock_claude_adapter';
+import { getSystemMessageFromInstructions } from '../util/get_system_message_from_instructions';
+import { replaceSystemMessage } from '../util/replace_system_message';
+import { withAssistantSpan } from '../util/with_assistant_span';
+import { createBedrockClaudeAdapter } from './adapters/bedrock/bedrock_claude_adapter';
+import { failOnNonExistingFunctionCall } from './adapters/fail_on_non_existing_function_call';
+import { createGeminiAdapter } from './adapters/gemini/gemini_adapter';
 import { createOpenAiAdapter } from './adapters/openai_adapter';
 import { LlmApiAdapter } from './adapters/types';
+import { getContextFunctionRequestIfNeeded } from './get_context_function_request_if_needed';
+import { LangTracer } from './instrumentation/lang_tracer';
+import { continueConversation } from './operators/continue_conversation';
+import { extractMessages } from './operators/extract_messages';
+import { extractTokenCount } from './operators/extract_token_count';
+import { getGeneratedTitle } from './operators/get_generated_title';
+import { instrumentAndCountTokens } from './operators/instrument_and_count_tokens';
+import {
+  LangtraceServiceProvider,
+  withLangtraceChatCompleteSpan,
+} from './operators/with_langtrace_chat_complete_span';
+import { runSemanticTextKnowledgeBaseMigration } from '../task_manager_definitions/register_migrate_knowledge_base_entries_task';
+
+const MAX_FUNCTION_CALLS = 8;
 
 export class ObservabilityAIAssistantClient {
   constructor(
     private readonly dependencies: {
       actionsClient: PublicMethodsOf<ActionsClient>;
+      uiSettingsClient: IUiSettingsClient;
       namespace: string;
       esClient: {
         asInternalUser: ElasticsearchClient;
         asCurrentUser: ElasticsearchClient;
       };
-      resources: ObservabilityAIAssistantResourceNames;
       logger: Logger;
-      user: {
+      user?: {
         id?: string;
         name: string;
       };
       knowledgeBaseService: KnowledgeBaseService;
+      scopes: AssistantScope[];
     }
   ) {}
 
@@ -88,7 +108,7 @@ export class ObservabilityAIAssistantClient {
     conversationId: string
   ): Promise<SearchHit<Conversation> | undefined> => {
     const response = await this.dependencies.esClient.asInternalUser.search<Conversation>({
-      index: this.dependencies.resources.aliases.conversations,
+      index: resourceNames.aliases.conversations,
       query: {
         bool: {
           filter: [
@@ -134,411 +154,312 @@ export class ObservabilityAIAssistantClient {
     }
 
     await this.dependencies.esClient.asInternalUser.delete({
-      id: conversation._id,
+      id: conversation._id!,
       index: conversation._index,
       refresh: true,
     });
   };
 
-  complete = (params: {
+  complete = ({
+    functionClient,
+    connectorId,
+    simulateFunctionCalling = false,
+    instructions: adHocInstructions = [],
+    messages: initialMessages,
+    signal,
+    persist,
+    kibanaPublicUrl,
+    isPublic,
+    title: predefinedTitle,
+    conversationId: predefinedConversationId,
+    disableFunctions = false,
+  }: {
     messages: Message[];
     connectorId: string;
     signal: AbortSignal;
     functionClient: ChatFunctionClient;
     persist: boolean;
-    responseLanguage?: string;
     conversationId?: string;
     title?: string;
+    isPublic?: boolean;
+    kibanaPublicUrl?: string;
+    instructions?: AdHocInstruction[];
+    simulateFunctionCalling?: boolean;
+    disableFunctions?:
+      | boolean
+      | {
+          except: string[];
+        };
   }): Observable<Exclude<StreamingChatResponseEvent, ChatCompletionErrorEvent>> => {
-    return new Observable<Exclude<StreamingChatResponseEvent, ChatCompletionErrorEvent>>(
-      (subscriber) => {
-        const { messages, connectorId, signal, functionClient, persist } = params;
+    return new LangTracer(context.active()).startActiveSpan(
+      'complete',
+      ({ tracer: completeTracer }) => {
+        const isConversationUpdate = persist && !!predefinedConversationId;
 
-        const conversationId = params.conversationId || '';
-        const title = params.title || '';
-        const responseLanguage = params.responseLanguage || 'English';
+        const conversationId = persist ? predefinedConversationId || v4() : '';
 
-        const tokenCountResult = {
-          prompt: 0,
-          completion: 0,
-          total: 0,
-        };
-
-        const chatWithTokenCountIncrement: ChatFn = async (...chatArgs) => {
-          const response$ = await this.chat(...chatArgs);
-
-          const incrementTokenCount = () => {
-            return <T extends ChatCompletionChunkEvent | TokenCountEvent>(
-              source: Observable<T>
-            ): Observable<T> => {
-              return source.pipe(
-                tap((event) => {
-                  if (event.type === StreamingChatResponseEventType.TokenCount) {
-                    tokenCountResult.prompt += event.tokens.prompt;
-                    tokenCountResult.completion += event.tokens.completion;
-                    tokenCountResult.total += event.tokens.total;
-                  }
-                })
-              );
-            };
-          };
-
-          return response$.pipe(incrementTokenCount(), rejectTokenCountEvents());
-        };
-
-        let numFunctionsCalled: number = 0;
-
-        const MAX_FUNCTION_CALLS = 5;
-        const MAX_FUNCTION_RESPONSE_TOKEN_COUNT = 4000;
-
-        const allFunctions = functionClient
-          .getFunctions()
-          .filter((fn) => {
-            const visibility = fn.definition.visibility ?? FunctionVisibility.All;
-            return (
-              visibility === FunctionVisibility.All ||
-              visibility === FunctionVisibility.AssistantOnly
-            );
-          })
-          .map((fn) => pick(fn.definition, 'name', 'description', 'parameters'));
-
-        const allActions = functionClient.getActions();
-
-        const next = async (nextMessages: Message[]): Promise<void> => {
-          const lastMessage = last(nextMessages);
-
-          const isUserMessage = lastMessage?.message.role === MessageRole.User;
-
-          const isUserMessageWithoutFunctionResponse = isUserMessage && !lastMessage?.message.name;
-
-          const contextFirst =
-            isUserMessageWithoutFunctionResponse && functionClient.hasFunction('context');
-
-          const isAssistantMessageWithFunctionRequest =
-            lastMessage?.message.role === MessageRole.Assistant &&
-            !!lastMessage?.message.function_call?.name;
-
-          if (contextFirst) {
-            const addedMessage = {
-              '@timestamp': new Date().toISOString(),
-              message: {
-                role: MessageRole.Assistant,
-                content: '',
-                function_call: {
-                  name: 'context',
-                  arguments: JSON.stringify({
-                    queries: [],
-                    categories: [],
-                  }),
-                  trigger: MessageRole.Assistant as const,
-                },
-              },
-            };
-
-            subscriber.next({
-              type: StreamingChatResponseEventType.MessageAdd,
-              id: v4(),
-              message: addedMessage,
-            });
-
-            return await next(nextMessages.concat(addedMessage));
-          } else if (isUserMessage) {
-            const functions =
-              numFunctionsCalled >= MAX_FUNCTION_CALLS ? [] : allFunctions.concat(allActions);
-
-            const response$ = (
-              await chatWithTokenCountIncrement(
-                lastMessage.message.name && lastMessage.message.name !== 'context'
-                  ? 'function_response'
-                  : 'user_message',
-                {
-                  messages: nextMessages,
-                  connectorId,
-                  signal,
-                  functions,
-                }
-              )
-            ).pipe(emitWithConcatenatedMessage(), shareReplay());
-
-            response$.subscribe({
-              next: (val) => subscriber.next(val),
-              // we handle the error below
-              error: noop,
-            });
-
-            const emittedMessageEvents = await lastValueFrom(
-              response$.pipe(
-                filter(
-                  (event): event is MessageAddEvent =>
-                    event.type === StreamingChatResponseEventType.MessageAdd
-                ),
-                toArray()
-              )
-            );
-
-            return await next(
-              nextMessages.concat(emittedMessageEvents.map((event) => event.message))
-            );
-          }
-
-          if (isAssistantMessageWithFunctionRequest) {
-            const functionCallName = lastMessage.message.function_call!.name;
-
-            if (functionClient.hasAction(functionCallName)) {
-              this.dependencies.logger.debug(`Executing client-side action: ${functionCallName}`);
-
-              // if validation fails, return the error to the LLM.
-              // otherwise, close the stream.
-
-              try {
-                functionClient.validate(
-                  functionCallName,
-                  JSON.parse(lastMessage.message.function_call!.arguments || '{}')
-                );
-              } catch (error) {
-                const functionResponseMessage = createFunctionResponseError({
-                  name: functionCallName,
-                  error,
-                });
-                nextMessages = nextMessages.concat(functionResponseMessage.message);
-
-                subscriber.next(functionResponseMessage);
-
-                return await next(nextMessages);
-              }
-
-              subscriber.complete();
-
-              return;
-            }
-
-            const span = apm.startSpan(`execute_function ${functionCallName}`);
-
-            span?.addLabels({
-              ai_assistant_args: JSON.stringify(lastMessage.message.function_call!.arguments ?? {}),
-            });
-
-            const functionResponse =
-              numFunctionsCalled >= MAX_FUNCTION_CALLS
-                ? {
-                    content: {
-                      error: {},
-                      message: 'Function limit exceeded, ask the user what to do next',
-                    },
-                  }
-                : await functionClient
-                    .executeFunction({
-                      chat: chatWithTokenCountIncrement,
-                      connectorId,
-                      name: functionCallName,
-                      messages: nextMessages,
-                      args: lastMessage.message.function_call!.arguments,
-                      signal,
-                    })
-                    .then((response) => {
-                      if (isObservable(response)) {
-                        return response;
-                      }
-
-                      span?.setOutcome('success');
-
-                      const encoded = encode(JSON.stringify(response.content || {}));
-
-                      if (encoded.length <= MAX_FUNCTION_RESPONSE_TOKEN_COUNT) {
-                        return response;
-                      }
-
-                      return {
-                        data: response.data,
-                        content: {
-                          message:
-                            'Function response exceeded the maximum length allowed and was truncated',
-                          truncated: decode(take(encoded, MAX_FUNCTION_RESPONSE_TOKEN_COUNT)),
-                        },
-                      };
-                    })
-                    .catch((error): FunctionResponse => {
-                      span?.setOutcome('failure');
-                      return {
-                        content: {
-                          message: error.toString(),
-                          error,
-                        },
-                      };
-                    });
-
-            numFunctionsCalled++;
-
-            if (signal.aborted) {
-              span?.end();
-              return;
-            }
-
-            if (isObservable(functionResponse)) {
-              const shared = functionResponse.pipe(shareReplay());
-
-              shared.subscribe({
-                next: (val) => subscriber.next(val),
-                // we handle the error below
-                error: noop,
-              });
-
-              const messageEvents = await lastValueFrom(
-                shared.pipe(
-                  filter(
-                    (event): event is MessageAddEvent =>
-                      event.type === StreamingChatResponseEventType.MessageAdd
-                  ),
-                  toArray()
-                )
-              );
-
-              span?.end();
-
-              return await next(nextMessages.concat(messageEvents.map((event) => event.message)));
-            }
-
-            const functionResponseMessage = {
-              '@timestamp': new Date().toISOString(),
-              message: {
-                name: lastMessage.message.function_call!.name,
-
-                content: JSON.stringify(functionResponse.content || {}),
-                data: functionResponse.data ? JSON.stringify(functionResponse.data) : undefined,
-                role: MessageRole.User,
-              },
-            };
-
-            this.dependencies.logger.debug(
-              `Function response: ${JSON.stringify(functionResponseMessage, null, 2)}`
-            );
-            nextMessages = nextMessages.concat(functionResponseMessage);
-
-            subscriber.next({
-              type: StreamingChatResponseEventType.MessageAdd,
-              message: functionResponseMessage,
-              id: v4(),
-            });
-
-            span?.end();
-
-            return await next(nextMessages);
-          }
-
-          this.dependencies.logger.debug(`Conversation: ${JSON.stringify(nextMessages, null, 2)}`);
-
-          if (!persist) {
-            subscriber.complete();
-            return;
-          }
-
-          this.dependencies.logger.debug(
-            `Token count for conversation: ${JSON.stringify(tokenCountResult)}`
-          );
-
-          apm.addLabels({
-            tokenCountPrompt: tokenCountResult.prompt,
-            tokenCountCompletion: tokenCountResult.completion,
-            tokenCountTotal: tokenCountResult.total,
+        if (persist && !isConversationUpdate && kibanaPublicUrl) {
+          adHocInstructions.push({
+            instruction_type: 'application_instruction',
+            text: `This conversation will be persisted in Kibana and available at this url: ${
+              kibanaPublicUrl + `/app/observabilityAIAssistant/conversations/${conversationId}`
+            }.`,
           });
+        }
 
-          // store the updated conversation and close the stream
-          if (conversationId) {
-            const conversation = await this.getConversationWithMetaFields(conversationId);
-            if (!conversation) {
-              throw createConversationNotFoundError();
-            }
+        const userInstructions$ = from(this.getKnowledgeBaseUserInstructions()).pipe(shareReplay());
 
-            if (signal.aborted) {
-              return;
-            }
+        const registeredAdhocInstructions = functionClient.getAdhocInstructions();
+        const allAdHocInstructions = adHocInstructions.concat(registeredAdhocInstructions);
 
-            const persistedTokenCount = conversation._source?.conversation.token_count;
-
-            const updatedConversation = await this.update(
-              conversationId,
-
-              merge(
-                {},
-
-                // base conversation without messages
-                omit(conversation._source, 'messages'),
-
-                // update messages
-                { messages: nextMessages },
-
-                // update token count
-                {
-                  conversation: {
-                    token_count: {
-                      prompt: (persistedTokenCount?.prompt || 0) + tokenCountResult.prompt,
-                      completion:
-                        (persistedTokenCount?.completion || 0) + tokenCountResult.completion,
-                      total: (persistedTokenCount?.total || 0) + tokenCountResult.total,
-                    },
-                  },
-                }
-              )
+        // from the initial messages, override any system message with
+        // the one that is based on the instructions (registered, request, kb)
+        const messagesWithUpdatedSystemMessage$ = userInstructions$.pipe(
+          map((userInstructions) => {
+            // this is what we eventually store in the conversation
+            const messagesWithUpdatedSystemMessage = replaceSystemMessage(
+              getSystemMessageFromInstructions({
+                applicationInstructions: functionClient.getInstructions(),
+                userInstructions,
+                adHocInstructions: allAdHocInstructions,
+                availableFunctionNames: functionClient
+                  .getFunctions()
+                  .map((fn) => fn.definition.name),
+              }),
+              initialMessages
             );
-            subscriber.next({
-              type: StreamingChatResponseEventType.ConversationUpdate,
-              conversation: updatedConversation.conversation,
-            });
-          } else {
-            const generatedTitle = await titlePromise;
-            if (signal.aborted) {
-              return;
-            }
 
-            const conversation = await this.create({
-              '@timestamp': new Date().toISOString(),
-              conversation: {
-                title: generatedTitle || title || 'New conversation',
-                token_count: tokenCountResult,
-              },
-              messages: nextMessages,
-              labels: {},
-              numeric_labels: {},
-              public: false,
-            });
+            return messagesWithUpdatedSystemMessage;
+          }),
+          shareReplay()
+        );
 
-            subscriber.next({
-              type: StreamingChatResponseEventType.ConversationCreate,
-              conversation: conversation.conversation,
-            });
-          }
+        // if it is:
+        // - a new conversation
+        // - no predefined title is given
+        // - we need to store the conversation
+        // we generate a title
+        // if not, we complete with an empty string
+        const title$ =
+          predefinedTitle || isConversationUpdate || !persist
+            ? of(predefinedTitle || '').pipe(shareReplay())
+            : messagesWithUpdatedSystemMessage$.pipe(
+                switchMap((messages) =>
+                  getGeneratedTitle({
+                    messages,
+                    logger: this.dependencies.logger,
+                    chat: (name, chatParams) => {
+                      return this.chat(name, {
+                        ...chatParams,
+                        simulateFunctionCalling,
+                        connectorId,
+                        signal,
+                      });
+                    },
+                    tracer: completeTracer,
+                  })
+                ),
+                shareReplay()
+              );
 
-          subscriber.complete();
-        };
+        // we continue the conversation here, after resolving both the materialized
+        // messages and the knowledge base instructions
+        const nextEvents$ = combineLatest([
+          messagesWithUpdatedSystemMessage$,
+          userInstructions$,
+        ]).pipe(
+          switchMap(([messagesWithUpdatedSystemMessage, userInstructions]) => {
+            // if needed, inject a context function request here
+            const contextRequest = functionClient.hasFunction(CONTEXT_FUNCTION_NAME)
+              ? getContextFunctionRequestIfNeeded(messagesWithUpdatedSystemMessage)
+              : undefined;
 
-        next(this.addResponseLanguage(messages, responseLanguage)).catch((error) => {
-          if (!signal.aborted) {
-            this.dependencies.logger.error(error);
-          }
-          subscriber.error(error);
-        });
-
-        const titlePromise =
-          !conversationId && !title && persist
-            ? this.getGeneratedTitle({
-                chat: chatWithTokenCountIncrement,
-                messages,
-                connectorId,
+            return mergeOperator(
+              // if we have added a context function request, also emit
+              // the messageAdd event for it, so we can notify the consumer
+              // and add it to the conversation
+              ...(contextRequest ? [of(contextRequest)] : []),
+              continueConversation({
+                messages: [
+                  ...messagesWithUpdatedSystemMessage,
+                  ...(contextRequest ? [contextRequest.message] : []),
+                ],
+                chat: (name, chatParams) => {
+                  // inject a chat function with predefined parameters
+                  return this.chat(name, {
+                    ...chatParams,
+                    signal,
+                    simulateFunctionCalling,
+                    connectorId,
+                  });
+                },
+                // start out with the max number of function calls
+                functionCallsLeft: MAX_FUNCTION_CALLS,
+                functionClient,
+                userInstructions,
+                adHocInstructions,
                 signal,
-                responseLanguage,
-              }).catch((error) => {
-                this.dependencies.logger.error(
-                  'Could not generate title, falling back to default title'
-                );
-                this.dependencies.logger.error(error);
-                return Promise.resolve(undefined);
+                logger: this.dependencies.logger,
+                disableFunctions,
+                tracer: completeTracer,
+                connectorId,
+                useSimulatedFunctionCalling: simulateFunctionCalling === true,
               })
-            : Promise.resolve(undefined);
+            );
+          }),
+          shareReplay()
+        );
+
+        const output$ = mergeOperator(
+          // get all the events from continuing the conversation
+          nextEvents$,
+          // wait until all dependencies have completed
+          forkJoin([
+            messagesWithUpdatedSystemMessage$,
+            // get just the new messages
+            nextEvents$.pipe(withoutTokenCountEvents(), extractMessages()),
+            // count all the token count events emitted during completion
+            mergeOperator(
+              nextEvents$,
+              title$.pipe(filter((value): value is TokenCountEvent => typeof value !== 'string'))
+            ).pipe(extractTokenCount()),
+            // get just the title, and drop the token count events
+            title$.pipe(filter((value): value is string => typeof value === 'string')),
+          ]).pipe(
+            switchMap(
+              ([messagesWithUpdatedSystemMessage, addedMessages, tokenCountResult, title]) => {
+                const initialMessagesWithAddedMessages =
+                  messagesWithUpdatedSystemMessage.concat(addedMessages);
+
+                const lastMessage = last(initialMessagesWithAddedMessages);
+
+                // if a function request is at the very end, close the stream to consumer
+                // without persisting or updating the conversation. we need to wait
+                // on the function response to have a valid conversation
+                const isFunctionRequest = !!lastMessage?.message.function_call?.name;
+
+                if (!persist || isFunctionRequest) {
+                  return of();
+                }
+
+                if (isConversationUpdate) {
+                  return from(this.getConversationWithMetaFields(conversationId))
+                    .pipe(
+                      switchMap((conversation) => {
+                        if (!conversation) {
+                          return throwError(() => createConversationNotFoundError());
+                        }
+
+                        const persistedTokenCount = conversation._source?.conversation
+                          .token_count ?? {
+                          prompt: 0,
+                          completion: 0,
+                          total: 0,
+                        };
+
+                        return from(
+                          this.update(
+                            conversationId,
+
+                            merge(
+                              {},
+
+                              // base conversation without messages
+                              omit(conversation._source, 'messages'),
+
+                              // update messages
+                              { messages: initialMessagesWithAddedMessages },
+
+                              // update token count
+                              {
+                                conversation: {
+                                  title: title || conversation._source?.conversation.title,
+                                  token_count: {
+                                    prompt: persistedTokenCount.prompt + tokenCountResult.prompt,
+                                    completion:
+                                      persistedTokenCount.completion + tokenCountResult.completion,
+                                    total: persistedTokenCount.total + tokenCountResult.total,
+                                  },
+                                },
+                              }
+                            )
+                          )
+                        );
+                      })
+                    )
+                    .pipe(
+                      map((conversation): ConversationUpdateEvent => {
+                        return {
+                          conversation: conversation.conversation,
+                          type: StreamingChatResponseEventType.ConversationUpdate,
+                        };
+                      })
+                    );
+                }
+
+                return from(
+                  this.create({
+                    '@timestamp': new Date().toISOString(),
+                    conversation: {
+                      title,
+                      id: conversationId,
+                      token_count: tokenCountResult,
+                    },
+                    public: !!isPublic,
+                    labels: {},
+                    numeric_labels: {},
+                    messages: initialMessagesWithAddedMessages,
+                  })
+                ).pipe(
+                  map((conversation): ConversationCreateEvent => {
+                    return {
+                      conversation: conversation.conversation,
+                      type: StreamingChatResponseEventType.ConversationCreate,
+                    };
+                  })
+                );
+              }
+            )
+          )
+        );
+
+        return output$.pipe(
+          instrumentAndCountTokens('complete'),
+          withoutTokenCountEvents(),
+          catchError((error) => {
+            this.dependencies.logger.error(error);
+            return throwError(() => error);
+          }),
+          tap((event) => {
+            if (this.dependencies.logger.isLevelEnabled('debug')) {
+              switch (event.type) {
+                case StreamingChatResponseEventType.MessageAdd:
+                  this.dependencies.logger.debug(
+                    () => `Added message: ${JSON.stringify(event.message)}`
+                  );
+                  break;
+
+                case StreamingChatResponseEventType.ConversationCreate:
+                  this.dependencies.logger.debug(
+                    () => `Created conversation: ${JSON.stringify(event.conversation)}`
+                  );
+                  break;
+
+                case StreamingChatResponseEventType.ConversationUpdate:
+                  this.dependencies.logger.debug(
+                    () => `Updated conversation: ${JSON.stringify(event.conversation)}`
+                  );
+                  break;
+              }
+            }
+          }),
+          shareReplay()
+        );
       }
-    ).pipe(shareReplay());
+    );
   };
 
-  chat = async (
+  chat = (
     name: string,
     {
       messages,
@@ -546,126 +467,142 @@ export class ObservabilityAIAssistantClient {
       functions,
       functionCall,
       signal,
+      simulateFunctionCalling,
+      tracer,
     }: {
       messages: Message[];
       connectorId: string;
       functions?: Array<{ name: string; description: string; parameters?: CompatibleJSONSchema }>;
       functionCall?: string;
       signal: AbortSignal;
+      simulateFunctionCalling?: boolean;
+      tracer: LangTracer;
     }
-  ): Promise<Observable<ChatCompletionChunkEvent | TokenCountEvent>> => {
-    const span = apm.startSpan(`chat ${name}`);
+  ): Observable<ChatCompletionChunkEvent | TokenCountEvent> => {
+    return defer(() =>
+      from(
+        withAssistantSpan('get_connector', () =>
+          this.dependencies.actionsClient.get({ id: connectorId, throwIfSystemAction: true })
+        )
+      )
+    ).pipe(
+      switchMap((connector) => {
+        this.dependencies.logger.debug(`Creating "${connector.actionTypeId}" adapter`);
 
-    const spanId = (span?.ids['span.id'] || '').substring(0, 6);
+        let adapter: LlmApiAdapter;
 
-    const loggerPrefix = `${name}${spanId ? ` (${spanId})` : ''}`;
+        switch (connector.actionTypeId) {
+          case ObservabilityAIAssistantConnectorType.OpenAI:
+            adapter = createOpenAiAdapter({
+              messages,
+              functions,
+              functionCall,
+              logger: this.dependencies.logger,
+              simulateFunctionCalling,
+            });
+            break;
 
-    try {
-      const connector = await this.dependencies.actionsClient.get({
-        id: connectorId,
-      });
+          case ObservabilityAIAssistantConnectorType.Bedrock:
+            adapter = createBedrockClaudeAdapter({
+              messages,
+              functions,
+              functionCall,
+              logger: this.dependencies.logger,
+            });
+            break;
 
-      let adapter: LlmApiAdapter;
+          case ObservabilityAIAssistantConnectorType.Gemini:
+            adapter = createGeminiAdapter({
+              messages,
+              functions,
+              functionCall,
+              logger: this.dependencies.logger,
+            });
+            break;
 
-      this.dependencies.logger.debug(`Creating "${connector.actionTypeId}" adapter`);
-
-      switch (connector.actionTypeId) {
-        case ObservabilityAIAssistantConnectorType.OpenAI:
-          adapter = createOpenAiAdapter({
-            messages,
-            functions,
-            functionCall,
-            logger: this.dependencies.logger,
-          });
-          break;
-
-        case ObservabilityAIAssistantConnectorType.Bedrock:
-          adapter = createBedrockClaudeAdapter({
-            messages,
-            functions,
-            functionCall,
-            logger: this.dependencies.logger,
-          });
-          break;
-
-        default:
-          throw new Error(`Connector type is not supported: ${connector.actionTypeId}`);
-      }
-
-      const subAction = adapter.getSubAction();
-
-      this.dependencies.logger.debug(`${loggerPrefix}: Sending conversation to connector`);
-      this.dependencies.logger.trace(
-        `${loggerPrefix}:\n${JSON.stringify(subAction.subActionParams, null, 2)}`
-      );
-
-      const now = performance.now();
-
-      const executeResult = await this.dependencies.actionsClient.execute({
-        actionId: connectorId,
-        params: subAction,
-      });
-
-      this.dependencies.logger.debug(
-        `${loggerPrefix}: Received action client response: ${
-          executeResult.status
-        } (took: ${Math.round(performance.now() - now)}ms)`
-      );
-
-      if (executeResult.status === 'error' && executeResult?.serviceMessage) {
-        const tokenLimitRegex =
-          /This model's maximum context length is (\d+) tokens\. However, your messages resulted in (\d+) tokens/g;
-        const tokenLimitRegexResult = tokenLimitRegex.exec(executeResult.serviceMessage);
-
-        if (tokenLimitRegexResult) {
-          const [, tokenLimit, tokenCount] = tokenLimitRegexResult;
-          throw createTokenLimitReachedError(parseInt(tokenLimit, 10), parseInt(tokenCount, 10));
+          default:
+            throw new Error(`Connector type is not supported: ${connector.actionTypeId}`);
         }
-      }
 
-      if (executeResult.status === 'error') {
-        throw internal(`${executeResult?.message} - ${executeResult?.serviceMessage}`);
-      }
+        const subAction = adapter.getSubAction();
 
-      const response = executeResult.data as Readable;
+        if (this.dependencies.logger.isLevelEnabled('trace')) {
+          this.dependencies.logger.trace(JSON.stringify(subAction.subActionParams, null, 2));
+        }
 
-      signal.addEventListener('abort', () => response.destroy());
+        return from(
+          withAssistantSpan('get_execute_result', () =>
+            this.dependencies.actionsClient.execute({
+              actionId: connectorId,
+              params: subAction,
+            })
+          )
+        ).pipe(
+          switchMap((executeResult) => {
+            if (executeResult.status === 'error' && executeResult?.serviceMessage) {
+              const tokenLimitRegex =
+                /This model's maximum context length is (\d+) tokens\. However, your messages resulted in (\d+) tokens/g;
+              const tokenLimitRegexResult = tokenLimitRegex.exec(executeResult.serviceMessage);
 
-      const response$ = adapter.streamIntoObservable(response).pipe(shareReplay());
-      response$
-        .pipe(rejectTokenCountEvents(), concatenateChatCompletionChunks(), lastOperator())
-        .subscribe({
-          error: (error) => {
-            this.dependencies.logger.debug('Error in chat response');
-            this.dependencies.logger.debug(error);
-          },
-          next: (message) => {
-            this.dependencies.logger.debug(`Received message:\n${JSON.stringify(message)}`);
-          },
-        });
+              if (tokenLimitRegexResult) {
+                const [, tokenLimit, tokenCount] = tokenLimitRegexResult;
+                throw createTokenLimitReachedError(
+                  parseInt(tokenLimit, 10),
+                  parseInt(tokenCount, 10)
+                );
+              }
+            }
 
-      lastValueFrom(response$)
-        .then(() => {
-          span?.setOutcome('success');
-        })
-        .catch(() => {
-          span?.setOutcome('failure');
-        })
-        .finally(() => {
-          span?.end();
-        });
+            if (executeResult.status === 'error') {
+              throw createInternalServerError(
+                `${executeResult?.message} - ${executeResult?.serviceMessage}`
+              );
+            }
 
-      return response$;
-    } catch (error) {
-      span?.setOutcome('failure');
-      span?.end();
-      throw error;
-    }
+            const response = executeResult.data as Readable;
+
+            signal.addEventListener('abort', () => response.destroy());
+
+            return tracer.startActiveSpan(
+              '/chat/completions',
+              {
+                kind: SpanKind.CLIENT,
+              },
+              ({ span }) => {
+                return adapter.streamIntoObservable(response).pipe(
+                  withLangtraceChatCompleteSpan({
+                    span,
+                    messages,
+                    functions,
+                    model: connector.name,
+                    serviceProvider:
+                      connector.actionTypeId === ObservabilityAIAssistantConnectorType.OpenAI
+                        ? LangtraceServiceProvider.OpenAI
+                        : LangtraceServiceProvider.Anthropic,
+                  })
+                );
+              }
+            );
+          })
+        );
+      }),
+      instrumentAndCountTokens(name),
+      failOnNonExistingFunctionCall({ functions }),
+      tap((event) => {
+        if (
+          event.type === StreamingChatResponseEventType.ChatCompletionChunk &&
+          this.dependencies.logger.isLevelEnabled('trace')
+        ) {
+          this.dependencies.logger.trace(`Received chunk: ${JSON.stringify(event.message)}`);
+        }
+      }),
+      shareReplay()
+    );
   };
 
   find = async (options?: { query?: string }): Promise<{ conversations: Conversation[] }> => {
     const response = await this.dependencies.esClient.asInternalUser.search<Conversation>({
-      index: this.dependencies.resources.aliases.conversations,
+      index: resourceNames.aliases.conversations,
       allow_no_indices: true,
       query: {
         bool: {
@@ -705,85 +642,13 @@ export class ObservabilityAIAssistantClient {
     );
 
     await this.dependencies.esClient.asInternalUser.update({
-      id: persistedConversation._id,
+      id: persistedConversation._id!,
       index: persistedConversation._index,
       doc: updatedConversation,
       refresh: true,
     });
 
     return updatedConversation;
-  };
-
-  getGeneratedTitle = async ({
-    chat,
-    messages,
-    connectorId,
-    signal,
-    responseLanguage,
-  }: {
-    chat: (
-      ...chatParams: Parameters<InstanceType<typeof ObservabilityAIAssistantClient>['chat']>
-    ) => Promise<Observable<ChatCompletionChunkEvent>>;
-    messages: Message[];
-    connectorId: string;
-    signal: AbortSignal;
-    responseLanguage: string;
-  }) => {
-    const response$ = await chat('generate_title', {
-      messages: [
-        {
-          '@timestamp': new Date().toString(),
-          message: {
-            role: MessageRole.System,
-            content: `You are a helpful assistant for Elastic Observability. Assume the following message is the start of a conversation between you and a user; give this conversation a title based on the content below. DO NOT UNDER ANY CIRCUMSTANCES wrap this title in single or double quotes. This title is shown in a list of conversations to the user, so title it for the user, not for you. Please create the title in ${responseLanguage}.`,
-          },
-        },
-        {
-          '@timestamp': new Date().toISOString(),
-          message: {
-            role: MessageRole.User,
-            content: messages.slice(1).reduce((acc, curr) => {
-              return `${acc} ${curr.message.role}: ${curr.message.content}`;
-            }, 'Generate a title, using the title_conversation_function, based on the following conversation:\n\n'),
-          },
-        },
-      ],
-      functions: [
-        {
-          name: 'title_conversation',
-          description:
-            'Use this function to title the conversation. Do not wrap the title in quotes',
-          parameters: {
-            type: 'object',
-            properties: {
-              title: {
-                type: 'string',
-              },
-            },
-            required: ['title'],
-          },
-        },
-      ],
-      connectorId,
-      signal,
-    });
-
-    const response = await lastValueFrom(response$.pipe(concatenateChatCompletionChunks()));
-
-    const input =
-      (response.message.function_call.name
-        ? JSON.parse(response.message.function_call.arguments).title
-        : response.message?.content) || '';
-
-    // This regular expression captures a string enclosed in single or double quotes.
-    // It extracts the string content without the quotes.
-    // Example matches:
-    // - "Hello, World!" => Captures: Hello, World!
-    // - 'Another Example' => Captures: Another Example
-    // - JustTextWithoutQuotes => Captures: JustTextWithoutQuotes
-    const match = input.match(/^["']?([^"']+)["']?$/);
-    const title = match ? match[1] : input;
-    return title;
   };
 
   setTitle = async ({ conversationId, title }: { conversationId: string; title: string }) => {
@@ -806,7 +671,7 @@ export class ObservabilityAIAssistantClient {
     );
 
     await this.dependencies.esClient.asInternalUser.update({
-      id: document._id,
+      id: document._id!,
       index: document._index,
       doc: { conversation: { title } },
       refresh: true,
@@ -823,13 +688,13 @@ export class ObservabilityAIAssistantClient {
       conversation,
       {
         '@timestamp': now,
-        conversation: { id: v4() },
+        conversation: { id: conversation.conversation.id || v4() },
       },
       this.getConversationUpdateValues(now)
     );
 
     await this.dependencies.esClient.asInternalUser.index({
-      index: this.dependencies.resources.aliases.conversations,
+      index: resourceNames.aliases.conversations,
       document: createdConversation,
       refresh: true,
     });
@@ -841,49 +706,91 @@ export class ObservabilityAIAssistantClient {
     queries,
     categories,
   }: {
-    queries: string[];
+    queries: Array<{ text: string; boost?: number }>;
     categories?: string[];
-  }): Promise<{ entries: RecalledEntry[] }> => {
-    return this.dependencies.knowledgeBaseService.recall({
-      namespace: this.dependencies.namespace,
-      user: this.dependencies.user,
-      queries,
-      categories,
-      asCurrentUser: this.dependencies.esClient.asCurrentUser,
-    });
+  }): Promise<RecalledEntry[]> => {
+    return (
+      this.dependencies.knowledgeBaseService?.recall({
+        namespace: this.dependencies.namespace,
+        user: this.dependencies.user,
+        queries,
+        categories,
+        esClient: this.dependencies.esClient,
+        uiSettingsClient: this.dependencies.uiSettingsClient,
+      }) || []
+    );
   };
 
   getKnowledgeBaseStatus = () => {
-    return this.dependencies.knowledgeBaseService.status();
+    return this.dependencies.knowledgeBaseService.getStatus();
   };
 
-  setupKnowledgeBase = () => {
-    return this.dependencies.knowledgeBaseService.setup();
+  setupKnowledgeBase = (modelId: string | undefined) => {
+    const { esClient } = this.dependencies;
+    return this.dependencies.knowledgeBaseService.setup(esClient, modelId);
   };
 
-  createKnowledgeBaseEntry = async ({
+  resetKnowledgeBase = () => {
+    const { esClient } = this.dependencies;
+    return this.dependencies.knowledgeBaseService.reset(esClient);
+  };
+
+  migrateKnowledgeBaseToSemanticText = () => {
+    return runSemanticTextKnowledgeBaseMigration({
+      esClient: this.dependencies.esClient,
+      logger: this.dependencies.logger,
+    });
+  };
+
+  addUserInstruction = async ({
     entry,
   }: {
-    entry: Omit<KnowledgeBaseEntry, '@timestamp'>;
+    entry: Omit<
+      KnowledgeBaseEntry,
+      '@timestamp' | 'confidence' | 'is_correction' | 'type' | 'role'
+    >;
+  }): Promise<void> => {
+    // for now we want to limit the number of user instructions to 1 per user
+    // if a user instruction already exists for the user, we get the id and update it
+    this.dependencies.logger.debug('Adding user instruction entry');
+    const existingId = await this.dependencies.knowledgeBaseService.getPersonalUserInstructionId({
+      isPublic: entry.public,
+      namespace: this.dependencies.namespace,
+      user: this.dependencies.user,
+    });
+
+    if (existingId) {
+      entry.id = existingId;
+      this.dependencies.logger.debug(`Updating user instruction with id "${existingId}"`);
+    }
+
+    return this.dependencies.knowledgeBaseService.addEntry({
+      namespace: this.dependencies.namespace,
+      user: this.dependencies.user,
+      entry: {
+        ...entry,
+        confidence: 'high',
+        is_correction: false,
+        type: KnowledgeBaseType.UserInstruction,
+        labels: {},
+        role: KnowledgeBaseEntryRole.UserEntry,
+      },
+    });
+  };
+
+  addKnowledgeBaseEntry = async ({
+    entry,
+  }: {
+    entry: Omit<KnowledgeBaseEntry, '@timestamp' | 'type'>;
   }): Promise<void> => {
     return this.dependencies.knowledgeBaseService.addEntry({
       namespace: this.dependencies.namespace,
       user: this.dependencies.user,
-      entry,
+      entry: {
+        ...entry,
+        type: KnowledgeBaseType.Contextual,
+      },
     });
-  };
-
-  importKnowledgeBaseEntries = async ({
-    entries,
-  }: {
-    entries: Array<Omit<KnowledgeBaseEntry, '@timestamp'>>;
-  }): Promise<void> => {
-    const operations = entries.map((entry) => ({
-      type: KnowledgeBaseEntryOperationType.Index,
-      document: { ...entry, '@timestamp': new Date().toISOString() },
-    }));
-
-    await this.dependencies.knowledgeBaseService.addEntries({ operations });
   };
 
   getKnowledgeBaseEntries = async ({
@@ -902,17 +809,10 @@ export class ObservabilityAIAssistantClient {
     return this.dependencies.knowledgeBaseService.deleteEntry({ id });
   };
 
-  private addResponseLanguage = (messages: Message[], responseLanguage: string): Message[] => {
-    const [systemMessage, ...rest] = messages;
-
-    const extendedSystemMessage: Message = {
-      ...systemMessage,
-      message: {
-        ...systemMessage.message,
-        content: `You MUST respond in the users preferred language which is: ${responseLanguage}. ${systemMessage.message.content}`,
-      },
-    };
-
-    return [extendedSystemMessage].concat(rest);
+  getKnowledgeBaseUserInstructions = async () => {
+    return this.dependencies.knowledgeBaseService.getUserInstructions(
+      this.dependencies.namespace,
+      this.dependencies.user
+    );
   };
 }

@@ -15,6 +15,7 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/shared-ux-router",
-    "@kbn/core-application-browser-internal"
+    "@kbn/core-application-browser-internal",
+    "@kbn/react-kibana-context-render"
   ]
 }

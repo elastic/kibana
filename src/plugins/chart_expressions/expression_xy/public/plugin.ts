@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import moment from 'moment';
@@ -53,7 +54,7 @@ export function getTimeZone(uiSettings: IUiSettingsClient) {
 export class ExpressionXyPlugin {
   public setup(
     core: CoreSetup<XYPluginStartDependencies>,
-    { expressions, charts }: SetupDeps
+    { expressions, charts: _charts }: SetupDeps
   ): ExpressionXyPluginSetup {
     expressions.registerFunction(yAxisConfigFunction);
     expressions.registerFunction(dataDecorationConfigFunction);
@@ -98,13 +99,14 @@ export class ExpressionXyPlugin {
         eventAnnotationService,
         timeZone: getTimeZone(core.uiSettings),
         timeFormat: core.uiSettings.get('dateFormat'),
+        startServices: coreStart,
       };
     };
 
     expressions.registerRenderer(getXyChartRenderer({ getStartDeps }));
   }
 
-  public start(core: CoreStart): ExpressionXyPluginStart {}
+  public start(_core: CoreStart): ExpressionXyPluginStart {}
 
   public stop() {}
 }

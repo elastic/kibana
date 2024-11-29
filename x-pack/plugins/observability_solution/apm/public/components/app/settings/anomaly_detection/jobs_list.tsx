@@ -40,17 +40,14 @@ type Jobs = AnomalyDetectionApiResponse['jobs'];
 const columns: Array<ITableColumn<Jobs[0]>> = [
   {
     field: 'environment',
-    name: i18n.translate(
-      'xpack.apm.settings.anomalyDetection.jobList.environmentColumnLabel',
-      { defaultMessage: 'Environment' }
-    ),
+    name: i18n.translate('xpack.apm.settings.anomalyDetection.jobList.environmentColumnLabel', {
+      defaultMessage: 'Environment',
+    }),
     width: '100%',
     render: (_, { environment, jobId, jobState, datafeedState, version }) => {
       return (
         <EuiFlexGroup gutterSize="xl">
-          <EuiFlexItem grow={false}>
-            {getEnvironmentLabel(environment)}
-          </EuiFlexItem>
+          <EuiFlexItem grow={false}>{getEnvironmentLabel(environment)}</EuiFlexItem>
           <EuiFlexItem grow={false}>
             <JobsListStatus
               jobId={jobId}
@@ -66,21 +63,17 @@ const columns: Array<ITableColumn<Jobs[0]>> = [
   {
     field: 'job_id',
     align: RIGHT_ALIGNMENT,
-    name: i18n.translate(
-      'xpack.apm.settings.anomalyDetection.jobList.actionColumnLabel',
-      { defaultMessage: 'Action' }
-    ),
+    name: i18n.translate('xpack.apm.settings.anomalyDetection.jobList.actionColumnLabel', {
+      defaultMessage: 'Action',
+    }),
     render: (_, { jobId }) => {
       return (
         <EuiFlexGroup gutterSize="m">
           <EuiFlexItem grow={false}>
             <EuiToolTip
-              content={i18n.translate(
-                'xpack.apm.settings.anomalyDetection.jobList.mlJobLinkText',
-                {
-                  defaultMessage: 'Manage job',
-                }
-              )}
+              content={i18n.translate('xpack.apm.settings.anomalyDetection.jobList.mlJobLinkText', {
+                defaultMessage: 'Manage job',
+              })}
             >
               {/* setting the key to remount the element as a workaround for https://github.com/elastic/kibana/issues/119951*/}
               <MLManageJobsLink jobId={jobId} key={jobId}>
@@ -116,13 +109,7 @@ interface Props {
   onUpdateComplete: () => void;
 }
 
-export function JobsList({
-  data,
-  status,
-  onAddEnvironments,
-  setupState,
-  onUpdateComplete,
-}: Props) {
+export function JobsList({ data, status, onAddEnvironments, setupState, onUpdateComplete }: Props) {
   const { core } = useApmPluginContext();
 
   const { jobs } = data;
@@ -133,12 +120,10 @@ export function JobsList({
   );
 
   const mlManageJobsHref = useMlManageJobsHref();
+  const canSave = core.application.capabilities.apm['settings:save'];
+  const displayMlCallout = shouldDisplayMlCallout(setupState) && canSave;
 
-  const displayMlCallout = shouldDisplayMlCallout(setupState);
-
-  const filteredJobs = showLegacyJobs
-    ? jobs
-    : jobs.filter((job) => job.version >= 3);
+  const filteredJobs = showLegacyJobs ? jobs : jobs.filter((job) => job.version >= 3);
 
   return (
     <>
@@ -172,26 +157,17 @@ export function JobsList({
             }}
             onUpgradeClick={() => {
               if (setupState === AnomalyDetectionSetupState.UpgradeableJobs) {
-                return callApmApi(
-                  'POST /internal/apm/settings/anomaly-detection/update_to_v3',
-                  {
-                    signal: null,
-                  }
-                ).then(() => {
+                return callApmApi('POST /internal/apm/settings/anomaly-detection/update_to_v3', {
+                  signal: null,
+                }).then(() => {
                   core.notifications.toasts.addSuccess({
-                    title: i18n.translate(
-                      'xpack.apm.jobsList.updateCompletedToastTitle',
-                      {
-                        defaultMessage: 'Anomaly detection jobs created!',
-                      }
-                    ),
-                    text: i18n.translate(
-                      'xpack.apm.jobsList.updateCompletedToastText',
-                      {
-                        defaultMessage:
-                          'Your new anomaly detection jobs have been created successfully. You will start to see anomaly detection results in the app within minutes. The old jobs have been closed but the results are still available within Machine Learning.',
-                      }
-                    ),
+                    title: i18n.translate('xpack.apm.jobsList.updateCompletedToastTitle', {
+                      defaultMessage: 'Anomaly detection jobs created!',
+                    }),
+                    text: i18n.translate('xpack.apm.jobsList.updateCompletedToastText', {
+                      defaultMessage:
+                        'Your new anomaly detection jobs have been created successfully. You will start to see anomaly detection results in the app within minutes. The old jobs have been closed but the results are still available within Machine Learning.',
+                    }),
                   });
                   onUpdateComplete();
                 });
@@ -207,12 +183,9 @@ export function JobsList({
         <EuiFlexItem>
           <EuiTitle size="s">
             <h2>
-              {i18n.translate(
-                'xpack.apm.settings.anomalyDetection.jobList.environments',
-                {
-                  defaultMessage: 'Environments',
-                }
-              )}
+              {i18n.translate('xpack.apm.settings.anomalyDetection.jobList.environments', {
+                defaultMessage: 'Environments',
+              })}
             </h2>
           </EuiTitle>
         </EuiFlexItem>
@@ -236,28 +209,35 @@ export function JobsList({
             href={mlManageJobsHref}
             color="primary"
           >
-            {i18n.translate(
-              'xpack.apm.settings.anomalyDetection.jobList.manageMlJobsButtonText',
-              {
-                defaultMessage: 'Manage jobs',
-              }
-            )}
+            {i18n.translate('xpack.apm.settings.anomalyDetection.jobList.manageMlJobsButtonText', {
+              defaultMessage: 'Manage jobs',
+            })}
           </EuiButton>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton
-            data-test-subj="apmJobsListCreateJobButton"
-            fill
-            iconType="plusInCircle"
-            onClick={onAddEnvironments}
+          <EuiToolTip
+            content={
+              !canSave &&
+              i18n.translate(
+                'xpack.apm.settings.anomalyDetection.jobList.noPermissionAddEnvironmentsTooltipLabel',
+                {
+                  defaultMessage: "Your user role doesn't have permissions to create jobs",
+                }
+              )
+            }
           >
-            {i18n.translate(
-              'xpack.apm.settings.anomalyDetection.jobList.addEnvironments',
-              {
+            <EuiButton
+              data-test-subj="apmJobsListCreateJobButton"
+              fill
+              iconType="plusInCircle"
+              onClick={onAddEnvironments}
+              isDisabled={!canSave}
+            >
+              {i18n.translate('xpack.apm.settings.anomalyDetection.jobList.addEnvironments', {
                 defaultMessage: 'Create job',
-              }
-            )}
-          </EuiButton>
+              })}
+            </EuiButton>
+          </EuiToolTip>
         </EuiFlexItem>
       </EuiFlexGroup>
 
@@ -284,15 +264,13 @@ function getNoItemsMessage({ status }: { status: FETCH_STATUS }) {
 
   // An unexpected error occurred. Show default error message
   if (status === FETCH_STATUS.FAILURE) {
-    return i18n.translate(
-      'xpack.apm.settings.anomalyDetection.jobList.failedFetchText',
-      { defaultMessage: 'Unable to fetch anomaly detection jobs.' }
-    );
+    return i18n.translate('xpack.apm.settings.anomalyDetection.jobList.failedFetchText', {
+      defaultMessage: 'Unable to fetch anomaly detection jobs.',
+    });
   }
 
   // no errors occurred
-  return i18n.translate(
-    'xpack.apm.settings.anomalyDetection.jobList.emptyListText',
-    { defaultMessage: 'No anomaly detection jobs.' }
-  );
+  return i18n.translate('xpack.apm.settings.anomalyDetection.jobList.emptyListText', {
+    defaultMessage: 'No anomaly detection jobs.',
+  });
 }

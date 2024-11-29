@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { AssistantSubFeatureId } from '../product_features_keys';
-import { ProductFeatureAssistantKey } from '../product_features_keys';
+import { AssistantSubFeatureId, ProductFeatureAssistantKey } from '../product_features_keys';
 import type { ProductFeatureKibanaConfig } from '../types';
 
 /**
@@ -29,5 +28,9 @@ export const assistantDefaultProductFeaturesConfig: Record<
         ui: ['ai-assistant'],
       },
     },
+    subFeatureIds: [
+      AssistantSubFeatureId.updateAnonymization,
+      AssistantSubFeatureId.manageGlobalKnowledgeBase,
+    ],
   },
 };

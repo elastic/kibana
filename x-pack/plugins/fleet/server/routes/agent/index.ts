@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { schema } from '@kbn/config-schema';
 
 import type { FleetAuthz } from '../../../common';
 import { API_VERSIONS } from '../../../common/constants';
-
+import { parseExperimentalConfigValue } from '../../../common/experimental_features';
 import { getRouteRequiredAuthz, type FleetAuthzRouter } from '../../services/security';
 
 import { AGENT_API_ROUTES } from '../../constants';
@@ -22,25 +23,42 @@ import {
   GetAgentStatusRequestSchema,
   GetAgentDataRequestSchema,
   PostNewAgentActionRequestSchema,
-  PutAgentReassignRequestSchemaDeprecated,
   PostAgentReassignRequestSchema,
   PostBulkAgentReassignRequestSchema,
   PostAgentUpgradeRequestSchema,
   PostBulkAgentUpgradeRequestSchema,
-  PostCancelActionRequestSchema,
   GetActionStatusRequestSchema,
   PostRequestDiagnosticsActionRequestSchema,
   PostBulkRequestDiagnosticsActionRequestSchema,
   ListAgentUploadsRequestSchema,
   GetAgentUploadFileRequestSchema,
   PostRetrieveAgentsByActionsRequestSchema,
+  DeleteAgentUploadFileRequestSchema,
+  GetTagsResponseSchema,
 } from '../../types';
 import * as AgentService from '../../services/agents';
 import type { FleetConfigType } from '../..';
 
-import { PostBulkUpdateAgentTagsRequestSchema } from '../../types/rest_spec/agent';
+import {
+  DeleteAgentResponseSchema,
+  DeleteAgentUploadFileResponseSchema,
+  GetActionStatusResponseSchema,
+  GetAgentDataResponseSchema,
+  GetAgentResponseSchema,
+  GetAgentStatusResponseSchema,
+  GetAgentsResponseSchema,
+  GetAvailableAgentVersionsResponseSchema,
+  ListAgentUploadsResponseSchema,
+  PostBulkActionResponseSchema,
+  PostBulkUpdateAgentTagsRequestSchema,
+  PostCancelActionRequestSchema,
+  PostNewAgentActionResponseSchema,
+  PostRetrieveAgentsByActionsResponseSchema,
+} from '../../types/rest_spec/agent';
 
 import { calculateRouteAuthz } from '../../services/security/security';
+
+import { genericErrorResponse } from '../schema/errors';
 
 import {
   getAgentsHandler,
@@ -49,7 +67,6 @@ import {
   updateAgentHandler,
   deleteAgentHandler,
   getAgentStatusForAgentPolicyHandler,
-  putAgentsReassignHandlerDeprecated,
   postBulkAgentReassignHandler,
   getAgentDataHandler,
   bulkUpdateAgentTagsHandler,
@@ -57,8 +74,10 @@ import {
   getActionStatusHandler,
   getAgentUploadsHandler,
   getAgentUploadFileHandler,
-  postAgentsReassignHandler,
+  deleteAgentUploadFileHandler,
+  postAgentReassignHandler,
   postRetrieveAgentsByActionsHandler,
+  getAgentStatusRuntimeFieldHandler,
 } from './handlers';
 import {
   postNewAgentActionHandlerBuilder,
@@ -79,11 +98,26 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       fleetAuthz: {
         fleet: { readAgents: true },
       },
+      summary: `Get an agent`,
+      description: `Get an agent by ID.`,
+      options: {
+        tags: ['oas-tag:Elastic Agents'],
+      },
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: { request: GetOneAgentRequestSchema },
+        validate: {
+          request: GetOneAgentRequestSchema,
+          response: {
+            200: {
+              body: () => GetAgentResponseSchema,
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+          },
+        },
       },
       getAgentHandler
     );
@@ -95,11 +129,26 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       fleetAuthz: {
         fleet: { allAgents: true },
       },
+      summary: `Update an agent`,
+      description: `Update an agent by ID.`,
+      options: {
+        tags: ['oas-tag:Elastic Agents'],
+      },
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: { request: UpdateAgentRequestSchema },
+        validate: {
+          request: UpdateAgentRequestSchema,
+          response: {
+            200: {
+              body: () => GetAgentResponseSchema,
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+          },
+        },
       },
       updateAgentHandler
     );
@@ -111,11 +160,25 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       fleetAuthz: {
         fleet: { allAgents: true },
       },
+      summary: `Bulk update agent tags`,
+      options: {
+        tags: ['oas-tag:Elastic Agent actions'],
+      },
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: { request: PostBulkUpdateAgentTagsRequestSchema },
+        validate: {
+          request: PostBulkUpdateAgentTagsRequestSchema,
+          response: {
+            200: {
+              body: () => PostBulkActionResponseSchema,
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+          },
+        },
       },
       bulkUpdateAgentTagsHandler
     );
@@ -127,11 +190,26 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       fleetAuthz: {
         fleet: { allAgents: true },
       },
+      summary: `Delete an agent`,
+      description: `Delete an agent by ID.`,
+      options: {
+        tags: ['oas-tag:Elastic Agents'],
+      },
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: { request: DeleteAgentRequestSchema },
+        validate: {
+          request: DeleteAgentRequestSchema,
+          response: {
+            200: {
+              body: () => DeleteAgentResponseSchema,
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+          },
+        },
       },
       deleteAgentHandler
     );
@@ -144,11 +222,25 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       fleetAuthz: {
         fleet: { readAgents: true },
       },
+      summary: `Get agents`,
+      options: {
+        tags: ['oas-tag:Elastic Agents'],
+      },
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: { request: GetAgentsRequestSchema },
+        validate: {
+          request: GetAgentsRequestSchema,
+          response: {
+            200: {
+              body: () => GetAgentsResponseSchema,
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+          },
+        },
       },
       getAgentsHandler
     );
@@ -160,11 +252,25 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       fleetAuthz: {
         fleet: { readAgents: true },
       },
+      summary: `Get agent tags`,
+      options: {
+        tags: ['oas-tag:Elastic Agents'],
+      },
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: { request: GetTagsRequestSchema },
+        validate: {
+          request: GetTagsRequestSchema,
+          response: {
+            200: {
+              body: () => GetTagsResponseSchema,
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+          },
+        },
       },
       getAgentTagsHandler
     );
@@ -176,11 +282,25 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       fleetAuthz: {
         fleet: { allAgents: true },
       },
+      summary: `Create an agent action`,
+      options: {
+        tags: ['oas-tag:Elastic Agent actions'],
+      },
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: { request: PostNewAgentActionRequestSchema },
+        validate: {
+          request: PostNewAgentActionRequestSchema,
+          response: {
+            200: {
+              body: () => PostNewAgentActionResponseSchema,
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+          },
+        },
       },
       postNewAgentActionHandlerBuilder({
         getAgent: AgentService.getAgentById,
@@ -196,11 +316,25 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       fleetAuthz: {
         fleet: { allAgents: true },
       },
+      summary: `Cancel an agent action`,
+      options: {
+        tags: ['oas-tag:Elastic Agent actions'],
+      },
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: { request: PostCancelActionRequestSchema },
+        validate: {
+          request: PostCancelActionRequestSchema,
+          response: {
+            200: {
+              body: () => PostNewAgentActionResponseSchema,
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+          },
+        },
       },
       postCancelActionHandlerBuilder({
         getAgent: AgentService.getAgentById,
@@ -217,11 +351,25 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       fleetAuthz: {
         fleet: { readAgents: true },
       },
+      summary: `Get agents by action ids`,
+      options: {
+        tags: ['oas-tag:Elastic Agents'],
+      },
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: { request: PostRetrieveAgentsByActionsRequestSchema },
+        validate: {
+          request: PostRetrieveAgentsByActionsRequestSchema,
+          response: {
+            200: {
+              body: () => PostRetrieveAgentsByActionsResponseSchema,
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+          },
+        },
       },
       postRetrieveAgentsByActionsHandler
     );
@@ -232,29 +380,17 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       fleetAuthz: {
         fleet: { allAgents: true },
       },
+      summary: `Unenroll an agent`,
+      options: {
+        tags: ['oas-tag:Elastic Agent actions'],
+      },
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: { request: PostAgentUnenrollRequestSchema },
+        validate: { request: PostAgentUnenrollRequestSchema, response: {} },
       },
       postAgentUnenrollHandler
-    );
-
-  // mark as deprecated
-  router.versioned
-    .put({
-      path: AGENT_API_ROUTES.REASSIGN_PATTERN,
-      fleetAuthz: {
-        fleet: { allAgents: true },
-      },
-    })
-    .addVersion(
-      {
-        version: API_VERSIONS.public.v1,
-        validate: { request: PutAgentReassignRequestSchemaDeprecated },
-      },
-      putAgentsReassignHandlerDeprecated
     );
 
   router.versioned
@@ -263,26 +399,54 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       fleetAuthz: {
         fleet: { allAgents: true },
       },
+      summary: `Reassign an agent`,
+      options: {
+        tags: ['oas-tag:Elastic Agent actions'],
+      },
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: { request: PostAgentReassignRequestSchema },
+        validate: {
+          request: PostAgentReassignRequestSchema,
+          response: {
+            200: {
+              body: () => schema.object({}),
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+          },
+        },
       },
-      postAgentsReassignHandler
+      postAgentReassignHandler
     );
 
   router.versioned
     .post({
       path: AGENT_API_ROUTES.REQUEST_DIAGNOSTICS_PATTERN,
       fleetAuthz: {
-        fleet: { allAgents: true },
+        fleet: { readAgents: true },
+      },
+      summary: `Request agent diagnostics`,
+      options: {
+        tags: ['oas-tag:Elastic Agent actions'],
       },
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: { request: PostRequestDiagnosticsActionRequestSchema },
+        validate: {
+          request: PostRequestDiagnosticsActionRequestSchema,
+          response: {
+            200: {
+              body: () => PostBulkActionResponseSchema,
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+          },
+        },
       },
       requestDiagnosticsHandler
     );
@@ -291,13 +455,27 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     .post({
       path: AGENT_API_ROUTES.BULK_REQUEST_DIAGNOSTICS_PATTERN,
       fleetAuthz: {
-        fleet: { allAgents: true },
+        fleet: { readAgents: true },
+      },
+      summary: `Bulk request diagnostics from agents`,
+      options: {
+        tags: ['oas-tag:Elastic Agent actions'],
       },
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: { request: PostBulkRequestDiagnosticsActionRequestSchema },
+        validate: {
+          request: PostBulkRequestDiagnosticsActionRequestSchema,
+          response: {
+            200: {
+              body: () => PostBulkActionResponseSchema,
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+          },
+        },
       },
       bulkRequestDiagnosticsHandler
     );
@@ -308,11 +486,25 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       fleetAuthz: {
         fleet: { readAgents: true },
       },
+      summary: `Get agent uploads`,
+      options: {
+        tags: ['oas-tag:Elastic Agents'],
+      },
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: { request: ListAgentUploadsRequestSchema },
+        validate: {
+          request: ListAgentUploadsRequestSchema,
+          response: {
+            200: {
+              body: () => ListAgentUploadsResponseSchema,
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+          },
+        },
       },
       getAgentUploadsHandler
     );
@@ -323,13 +515,58 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       fleetAuthz: {
         fleet: { readAgents: true },
       },
+      summary: `Get an uploaded file`,
+      description: `Get a file uploaded by an agent.`,
+      options: {
+        tags: ['oas-tag:Elastic Agents'],
+      },
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: { request: GetAgentUploadFileRequestSchema },
+        validate: {
+          request: GetAgentUploadFileRequestSchema,
+          response: {
+            200: {
+              body: () => schema.stream(), // Readable
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+          },
+        },
       },
       getAgentUploadFileHandler
+    );
+
+  router.versioned
+    .delete({
+      path: AGENT_API_ROUTES.DELETE_UPLOAD_FILE_PATTERN,
+      fleetAuthz: {
+        fleet: { allAgents: true },
+      },
+      summary: `Delete an uploaded file`,
+      description: `Delete a file uploaded by an agent.`,
+      options: {
+        tags: ['oas-tag:Elastic Agents'],
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: {
+          request: DeleteAgentUploadFileRequestSchema,
+          response: {
+            200: {
+              body: () => DeleteAgentUploadFileResponseSchema,
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+          },
+        },
+      },
+      deleteAgentUploadFileHandler
     );
 
   // Get agent status for policy
@@ -341,25 +578,25 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
           fleetAuthz,
           getRouteRequiredAuthz('get', AGENT_API_ROUTES.STATUS_PATTERN)
         ).granted,
-    })
-    .addVersion(
-      {
-        version: API_VERSIONS.public.v1,
-        validate: { request: GetAgentStatusRequestSchema },
-      },
-      getAgentStatusForAgentPolicyHandler
-    );
-  router.versioned
-    .get({
-      path: AGENT_API_ROUTES.STATUS_PATTERN_DEPRECATED,
-      fleetAuthz: {
-        fleet: { readAgents: true },
+      summary: `Get an agent status summary`,
+      options: {
+        tags: ['oas-tag:Elastic Agent status'],
       },
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: { request: GetAgentStatusRequestSchema },
+        validate: {
+          request: GetAgentStatusRequestSchema,
+          response: {
+            200: {
+              body: () => GetAgentStatusResponseSchema,
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+          },
+        },
       },
       getAgentStatusForAgentPolicyHandler
     );
@@ -370,11 +607,25 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       fleetAuthz: {
         fleet: { readAgents: true },
       },
+      summary: `Get incoming agent data`,
+      options: {
+        tags: ['oas-tag:Elastic Agents'],
+      },
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: { request: GetAgentDataRequestSchema },
+        validate: {
+          request: GetAgentDataRequestSchema,
+          response: {
+            200: {
+              body: () => GetAgentDataResponseSchema,
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+          },
+        },
       },
       getAgentDataHandler
     );
@@ -386,11 +637,25 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       fleetAuthz: {
         fleet: { allAgents: true },
       },
+      summary: `Upgrade an agent`,
+      options: {
+        tags: ['oas-tag:Elastic Agent actions'],
+      },
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: { request: PostAgentUpgradeRequestSchema },
+        validate: {
+          request: PostAgentUpgradeRequestSchema,
+          response: {
+            200: {
+              body: () => schema.object({}),
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+          },
+        },
       },
       postAgentUpgradeHandler
     );
@@ -401,11 +666,25 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       fleetAuthz: {
         fleet: { allAgents: true },
       },
+      summary: `Bulk upgrade agents`,
+      options: {
+        tags: ['oas-tag:Elastic Agent actions'],
+      },
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: { request: PostBulkAgentUpgradeRequestSchema },
+        validate: {
+          request: PostBulkAgentUpgradeRequestSchema,
+          response: {
+            200: {
+              body: () => PostBulkActionResponseSchema,
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+          },
+        },
       },
       postBulkAgentsUpgradeHandler
     );
@@ -417,11 +696,25 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       fleetAuthz: {
         fleet: { readAgents: true },
       },
+      summary: `Get an agent action status`,
+      options: {
+        tags: ['oas-tag:Elastic Agent actions'],
+      },
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: { request: GetActionStatusRequestSchema },
+        validate: {
+          request: GetActionStatusRequestSchema,
+          response: {
+            200: {
+              body: () => GetActionStatusResponseSchema,
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+          },
+        },
       },
       getActionStatusHandler
     );
@@ -433,11 +726,25 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       fleetAuthz: {
         fleet: { allAgents: true },
       },
+      summary: `Bulk reassign agents`,
+      options: {
+        tags: ['oas-tag:Elastic Agent actions'],
+      },
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: { request: PostBulkAgentReassignRequestSchema },
+        validate: {
+          request: PostBulkAgentReassignRequestSchema,
+          response: {
+            200: {
+              body: () => PostBulkActionResponseSchema,
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+          },
+        },
       },
       postBulkAgentReassignHandler
     );
@@ -449,11 +756,25 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       fleetAuthz: {
         fleet: { allAgents: true },
       },
+      summary: `Bulk unenroll agents`,
+      options: {
+        tags: ['oas-tag:Elastic Agent actions'],
+      },
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: { request: PostBulkAgentUnenrollRequestSchema },
+        validate: {
+          request: PostBulkAgentUnenrollRequestSchema,
+          response: {
+            200: {
+              body: () => PostBulkActionResponseSchema,
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+          },
+        },
       },
       postBulkAgentsUnenrollHandler
     );
@@ -465,12 +786,57 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       fleetAuthz: {
         fleet: { readAgents: true },
       },
+      summary: `Get available agent versions`,
+      options: {
+        tags: ['oas-tag:Elastic Agents'],
+      },
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: false,
+        validate: {
+          request: {},
+          response: {
+            200: {
+              body: () => GetAvailableAgentVersionsResponseSchema,
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+          },
+        },
       },
       getAvailableVersionsHandler
     );
+
+  const experimentalFeatures = parseExperimentalConfigValue(config.enableExperimental);
+
+  // route used by export CSV feature on the UI to generate report
+  if (experimentalFeatures.enableExportCSV) {
+    router.versioned
+      .get({
+        path: '/internal/fleet/agents/status_runtime_field',
+        access: 'internal',
+        fleetAuthz: {
+          fleet: { readAgents: true },
+        },
+      })
+      .addVersion(
+        {
+          version: API_VERSIONS.internal.v1,
+          validate: {
+            request: {},
+            response: {
+              200: {
+                body: () => schema.string(),
+              },
+              400: {
+                body: genericErrorResponse,
+              },
+            },
+          },
+        },
+        getAgentStatusRuntimeFieldHandler
+      );
+  }
 };

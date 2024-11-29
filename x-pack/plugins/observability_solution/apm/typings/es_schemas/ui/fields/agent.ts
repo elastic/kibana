@@ -5,16 +5,9 @@
  * 2.0.
  */
 
-import type { AgentName } from '@kbn/elastic-agent-utils';
-
 export type {
+  Agent,
   ElasticAgentName,
   OpenTelemetryAgentName,
   AgentName,
-} from '@kbn/elastic-agent-utils';
-
-export interface Agent {
-  ephemeral_id?: string;
-  name: AgentName;
-  version: string;
-}
+} from '@kbn/apm-types/es_schemas_ui';

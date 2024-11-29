@@ -121,8 +121,7 @@ export const transactionWithAllData = {
 
 export const location: Location = {
   state: '',
-  pathname:
-    '/opbeans-go/transactions/request/GET~20~2Fapi~2Fproducts~2F~3Aid~2Fcustomers',
+  pathname: '/opbeans-go/transactions/request/GET~20~2Fapi~2Fproducts~2F~3Aid~2Fcustomers',
   search: '?_g=()&flyoutDetailTab=undefined&waterfallItemId=8b60bd32ecc6e150',
   hash: '',
 };

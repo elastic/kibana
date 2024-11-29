@@ -7,12 +7,12 @@
 
 import { schema } from '@kbn/config-schema';
 import {
-  CONNECTOR_DEFINITIONS,
   createConnector,
   deleteConnectorById,
   fetchConnectorById,
   fetchConnectors,
   fetchSyncJobs,
+  IngestPipelineParams,
   startConnectorSync,
   updateConnectorConfiguration,
   updateConnectorIndexName,
@@ -20,25 +20,34 @@ import {
   updateConnectorScheduling,
   updateConnectorServiceType,
 } from '@kbn/search-connectors';
+import { DEFAULT_INGESTION_PIPELINE } from '../../common';
 import { RouteDependencies } from '../plugin';
+import { errorHandler } from '../utils/error_handler';
 
-export const registerConnectorsRoutes = ({ http, router }: RouteDependencies) => {
+export const registerConnectorsRoutes = ({ logger, http, router }: RouteDependencies) => {
   router.get(
     {
       path: '/internal/serverless_search/connectors',
       validate: {},
     },
-    async (context, request, response) => {
+    errorHandler(logger)(async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
-      const connectors = await fetchConnectors(client.asCurrentUser);
+      const privileges = await client.asCurrentUser.security.hasPrivileges({
+        index: [{ names: ['.elastic-connectors'], privileges: ['read', 'write'] }],
+      });
+      const canManageConnectors = privileges.index['.elastic-connectors'].write;
+      const canReadConnectors = privileges.index['.elastic-connectors'].read;
+
+      const connectors = canReadConnectors ? await fetchConnectors(client.asCurrentUser) : [];
 
       return response.ok({
         body: {
           connectors,
+          canManageConnectors,
+          canReadConnectors,
         },
-        headers: { 'content-type': 'application/json' },
       });
-    }
+    })
   );
 
   router.get(
@@ -50,7 +59,7 @@ export const registerConnectorsRoutes = ({ http, router }: RouteDependencies) =>
         }),
       },
     },
-    async (context, request, response) => {
+    errorHandler(logger)(async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
       const connector = await fetchConnectorById(client.asCurrentUser, request.params.connectorId);
 
@@ -62,31 +71,7 @@ export const registerConnectorsRoutes = ({ http, router }: RouteDependencies) =>
             headers: { 'content-type': 'application/json' },
           })
         : response.notFound();
-    }
-  );
-
-  router.get(
-    {
-      path: '/internal/serverless_search/connector_types',
-      validate: {},
-    },
-    async (context, request, response) => {
-      const connectors = CONNECTOR_DEFINITIONS.map((connector) => ({
-        ...connector,
-        iconPath: connector.iconPath
-          ? http.basePath.prepend(
-              `/plugins/enterpriseSearch/assets/source_icons/${connector.iconPath}`
-            )
-          : 'logoEnterpriseSearch',
-      }));
-
-      return response.ok({
-        body: {
-          connectors,
-        },
-        headers: { 'content-type': 'application/json' },
-      });
-    }
+    })
   );
 
   router.post(
@@ -94,13 +79,19 @@ export const registerConnectorsRoutes = ({ http, router }: RouteDependencies) =>
       path: '/internal/serverless_search/connectors',
       validate: {},
     },
-    async (context, request, response) => {
+    errorHandler(logger)(async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
+      const defaultPipeline: IngestPipelineParams = {
+        name: DEFAULT_INGESTION_PIPELINE,
+        extract_binary_content: true,
+        reduce_whitespace: true,
+        run_ml_inference: true,
+      };
       const connector = await createConnector(client.asCurrentUser, {
         indexName: null,
-        instant_response: true,
         isNative: false,
         language: null,
+        pipeline: defaultPipeline,
       });
 
       return response.ok({
@@ -109,7 +100,7 @@ export const registerConnectorsRoutes = ({ http, router }: RouteDependencies) =>
         },
         headers: { 'content-type': 'application/json' },
       });
-    }
+    })
   );
 
   router.post(
@@ -124,7 +115,7 @@ export const registerConnectorsRoutes = ({ http, router }: RouteDependencies) =>
         }),
       },
     },
-    async (context, request, response) => {
+    errorHandler(logger)(async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
       const result = await updateConnectorNameAndDescription(
         client.asCurrentUser,
@@ -140,7 +131,7 @@ export const registerConnectorsRoutes = ({ http, router }: RouteDependencies) =>
         },
         headers: { 'content-type': 'application/json' },
       });
-    }
+    })
   );
 
   router.post(
@@ -155,7 +146,7 @@ export const registerConnectorsRoutes = ({ http, router }: RouteDependencies) =>
         }),
       },
     },
-    async (context, request, response) => {
+    errorHandler(logger)(async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
       const result = await updateConnectorNameAndDescription(
         client.asCurrentUser,
@@ -171,7 +162,7 @@ export const registerConnectorsRoutes = ({ http, router }: RouteDependencies) =>
         },
         headers: { 'content-type': 'application/json' },
       });
-    }
+    })
   );
 
   router.post(
@@ -186,7 +177,7 @@ export const registerConnectorsRoutes = ({ http, router }: RouteDependencies) =>
         }),
       },
     },
-    async (context, request, response) => {
+    errorHandler(logger)(async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
       try {
         const result = await updateConnectorIndexName(
@@ -203,7 +194,7 @@ export const registerConnectorsRoutes = ({ http, router }: RouteDependencies) =>
       } catch (e) {
         return response.conflict({ body: e });
       }
-    }
+    })
   );
 
   router.post(
@@ -218,7 +209,7 @@ export const registerConnectorsRoutes = ({ http, router }: RouteDependencies) =>
         }),
       },
     },
-    async (context, request, response) => {
+    errorHandler(logger)(async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
       const result = await updateConnectorServiceType(
         client.asCurrentUser,
@@ -232,7 +223,7 @@ export const registerConnectorsRoutes = ({ http, router }: RouteDependencies) =>
         },
         headers: { 'content-type': 'application/json' },
       });
-    }
+    })
   );
 
   router.delete(
@@ -244,7 +235,7 @@ export const registerConnectorsRoutes = ({ http, router }: RouteDependencies) =>
         }),
       },
     },
-    async (context, request, response) => {
+    errorHandler(logger)(async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
       const result = await deleteConnectorById(client.asCurrentUser, request.params.connectorId);
       return response.ok({
@@ -253,7 +244,7 @@ export const registerConnectorsRoutes = ({ http, router }: RouteDependencies) =>
         },
         headers: { 'content-type': 'application/json' },
       });
-    }
+    })
   );
 
   router.post(
@@ -271,7 +262,7 @@ export const registerConnectorsRoutes = ({ http, router }: RouteDependencies) =>
         }),
       },
     },
-    async (context, request, response) => {
+    errorHandler(logger)(async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
       const result = await updateConnectorConfiguration(
         client.asCurrentUser,
@@ -283,7 +274,7 @@ export const registerConnectorsRoutes = ({ http, router }: RouteDependencies) =>
         body: result,
         headers: { 'content-type': 'application/json' },
       });
-    }
+    })
   );
 
   router.post(
@@ -295,7 +286,7 @@ export const registerConnectorsRoutes = ({ http, router }: RouteDependencies) =>
         }),
       },
     },
-    async (context, request, response) => {
+    errorHandler(logger)(async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
       const result = await startConnectorSync(client.asCurrentUser, {
         connectorId: request.params.connectorId,
@@ -305,7 +296,7 @@ export const registerConnectorsRoutes = ({ http, router }: RouteDependencies) =>
         body: result,
         headers: { 'content-type': 'application/json' },
       });
-    }
+    })
   );
 
   router.get(
@@ -322,7 +313,7 @@ export const registerConnectorsRoutes = ({ http, router }: RouteDependencies) =>
         }),
       },
     },
-    async (context, request, response) => {
+    errorHandler(logger)(async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
       const result = await fetchSyncJobs(
         client.asCurrentUser,
@@ -336,7 +327,7 @@ export const registerConnectorsRoutes = ({ http, router }: RouteDependencies) =>
         body: result,
         headers: { 'content-type': 'application/json' },
       });
-    }
+    })
   );
   router.post(
     {
@@ -352,7 +343,7 @@ export const registerConnectorsRoutes = ({ http, router }: RouteDependencies) =>
         }),
       },
     },
-    async (context, request, response) => {
+    errorHandler(logger)(async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
       await updateConnectorScheduling(
         client.asCurrentUser,
@@ -360,6 +351,6 @@ export const registerConnectorsRoutes = ({ http, router }: RouteDependencies) =>
         request.body
       );
       return response.ok();
-    }
+    })
   );
 };

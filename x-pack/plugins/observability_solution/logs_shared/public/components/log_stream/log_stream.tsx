@@ -5,27 +5,33 @@
  * 2.0.
  */
 
+import type { HttpStart } from '@kbn/core-http-browser';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { buildEsQuery, Filter, Query } from '@kbn/es-query';
-import { JsonValue } from '@kbn/utility-types';
-import React, { useCallback, useEffect, useMemo } from 'react';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
+import { JsonValue } from '@kbn/utility-types';
 import { noop } from 'lodash';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
+import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
+import { useKibanaQuerySettings } from '@kbn/observability-shared-plugin/public';
 import { LogEntryCursor } from '../../../common/log_entry';
 import { defaultLogViewsStaticConfig, LogViewReference } from '../../../common/log_views';
 import { BuiltEsQuery, useLogStream } from '../../containers/logs/log_stream';
 import { useLogView } from '../../hooks/use_log_view';
 import { LogViewsClient } from '../../services/log_views';
 import { LogColumnRenderConfiguration } from '../../utils/log_column_render_configuration';
-import { useKibanaQuerySettings } from '../../utils/use_kibana_query_settings';
-import { ScrollableLogTextStreamView } from '../logging/log_text_stream';
-import { LogStreamErrorBoundary } from './log_stream_error_boundary';
 import { useLogEntryFlyout } from '../logging/log_entry_flyout';
+import { ScrollableLogTextStreamView, VisibleInterval } from '../logging/log_text_stream';
+import { LogStreamErrorBoundary } from './log_stream_error_boundary';
 
 interface LogStreamPluginDeps {
   data: DataPublicPluginStart;
+  logsDataAccess: LogsDataAccessPluginStart;
+  http: HttpStart;
+  share: SharePluginStart;
 }
 
 const PAGE_THRESHOLD = 2;
@@ -109,9 +115,9 @@ export const LogStreamContent = ({
   );
 
   const {
-    services: { http, data },
+    services: { http, data, share, logsDataAccess },
   } = useKibana<LogStreamPluginDeps>();
-  if (http == null || data == null) {
+  if (http == null || data == null || share == null || logsDataAccess == null) {
     throw new Error(
       `<LogStream /> cannot access kibana core services.
 
@@ -126,8 +132,15 @@ Read more at https://github.com/elastic/kibana/blob/main/src/plugins/kibana_reac
   const kibanaQuerySettings = useKibanaQuerySettings();
 
   const logViews = useMemo(
-    () => new LogViewsClient(data.dataViews, http, data.search.search, defaultLogViewsStaticConfig),
-    [data.dataViews, data.search.search, http]
+    () =>
+      new LogViewsClient(
+        data.dataViews,
+        logsDataAccess.services.logSourcesService,
+        http,
+        data.search.search,
+        defaultLogViewsStaticConfig
+      ),
+    [data.dataViews, data.search.search, http, logsDataAccess.services.logSourcesService]
   );
 
   const {
@@ -238,7 +251,7 @@ Read more at https://github.com/elastic/kibana/blob/main/src/plugins/kibana_reac
 
   // Pagination handler
   const handlePagination = useCallback(
-    ({ fromScroll, pagesBeforeStart, pagesAfterEnd }) => {
+    ({ fromScroll, pagesBeforeStart, pagesAfterEnd }: VisibleInterval) => {
       if (!fromScroll) {
         return;
       }

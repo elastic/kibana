@@ -7,14 +7,16 @@
 
 import { request } from './common';
 
-export function cleanupAgentPolicies() {
-  request({ url: '/api/fleet/agent_policies' }).then((response: any) => {
+export function cleanupAgentPolicies(spaceId?: string) {
+  request({
+    url: `${spaceId ? `/s/${spaceId}` : ''}/api/fleet/agent_policies?withAgentCount=true`,
+  }).then((response: any) => {
     response.body.items
       .filter((policy: any) => policy.agents === 0)
       .forEach((policy: any) => {
         request({
           method: 'POST',
-          url: '/api/fleet/agent_policies/delete',
+          url: `${spaceId ? `/s/${spaceId}` : ''}/api/fleet/agent_policies/delete`,
           body: { agentPolicyId: policy.id },
         });
       });
@@ -48,13 +50,6 @@ export function cleanupDownloadSources() {
   });
 }
 
-export function deleteFleetServerDocs(ignoreUnavailable: boolean = false) {
-  cy.task('deleteDocsByQuery', {
-    index: '.fleet-servers',
-    query: { match_all: {} },
-    ignoreUnavailable,
-  });
-}
 export function deleteAgentDocs(ignoreUnavailable: boolean = false) {
   cy.task('deleteDocsByQuery', {
     index: '.fleet-agents',

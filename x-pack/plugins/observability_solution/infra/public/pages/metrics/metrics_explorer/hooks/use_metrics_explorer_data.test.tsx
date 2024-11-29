@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useMetricsExplorerData } from './use_metrics_explorer_data';
-
-import { renderHook } from '@testing-library/react-hooks';
+import { DataView } from '@kbn/data-views-plugin/common';
+import { waitFor, act, renderHook } from '@testing-library/react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 import {
@@ -23,6 +23,8 @@ import {
 import { MetricsExplorerOptions, MetricsExplorerTimestamp } from './use_metrics_explorer_options';
 import { DataViewBase } from '@kbn/es-query';
 import { MetricsSourceConfigurationProperties } from '../../../../../common/metrics_sources';
+import { TIMESTAMP_FIELD } from '../../../../../common/constants';
+import { ResolvedDataView } from '../../../../utils/data_view';
 
 const mockedFetch = jest.fn();
 
@@ -35,8 +37,30 @@ const queryClient = new QueryClient({
   },
 });
 
+const mockDataView = {
+  id: 'mock-id',
+  title: 'mock-title',
+  timeFieldName: TIMESTAMP_FIELD,
+  isPersisted: () => false,
+  getName: () => 'mock-data-view',
+  toSpec: () => ({}),
+} as jest.Mocked<DataView>;
+
+jest.mock('../../../../containers/metrics_source', () => ({
+  useMetricsDataViewContext: () => ({
+    metricsView: {
+      indices: 'metricbeat-*',
+      timeFieldName: mockDataView.timeFieldName,
+      fields: mockDataView.fields,
+      dataViewReference: mockDataView,
+    } as ResolvedDataView,
+    loading: false,
+    error: undefined,
+  }),
+}));
+
 const renderUseMetricsExplorerDataHook = () => {
-  const wrapper: React.FC = ({ children }) => {
+  const wrapper: FC<PropsWithChildren<any>> = ({ children }) => {
     const services = {
       http: {
         post: mockedFetch,
@@ -55,12 +79,10 @@ const renderUseMetricsExplorerDataHook = () => {
       derivedIndexPattern: DataViewBase;
       timestamps: MetricsExplorerTimestamp;
     }) =>
-      useMetricsExplorerData(
-        props.options,
-        props.source,
-        props.derivedIndexPattern,
-        props.timestamps
-      ),
+      useMetricsExplorerData({
+        options: props.options,
+        timestamps: props.timestamps,
+      }),
     {
       initialProps: {
         options,
@@ -86,15 +108,14 @@ describe('useMetricsExplorerData Hook', () => {
 
   it('should just work', async () => {
     mockedFetch.mockResolvedValue(resp);
-    const { result, waitForNextUpdate } = renderUseMetricsExplorerDataHook();
+    const { result } = renderUseMetricsExplorerDataHook();
 
     expect(result.current.data).toBeUndefined();
     expect(result.current.isLoading).toBe(true);
 
-    await waitForNextUpdate();
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
 
     expect(result.current.data!.pages[0]).toEqual(resp);
-    expect(result.current.isLoading).toBe(false);
     const { series } = result.current.data!.pages[0];
     expect(series).toBeDefined();
     expect(series.length).toBe(3);
@@ -102,12 +123,11 @@ describe('useMetricsExplorerData Hook', () => {
 
   it('should paginate', async () => {
     mockedFetch.mockResolvedValue(resp);
-    const { result, waitForNextUpdate } = renderUseMetricsExplorerDataHook();
+    const { result } = renderUseMetricsExplorerDataHook();
     expect(result.current.data).toBeUndefined();
     expect(result.current.isLoading).toBe(true);
-    await waitForNextUpdate();
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
     expect(result.current.data!.pages[0]).toEqual(resp);
-    expect(result.current.isLoading).toBe(false);
     const { series } = result.current.data!.pages[0];
     expect(series).toBeDefined();
     expect(series.length).toBe(3);
@@ -115,41 +135,45 @@ describe('useMetricsExplorerData Hook', () => {
       pageInfo: { total: 10, afterKey: 'host-06' },
       series: [createSeries('host-04'), createSeries('host-05'), createSeries('host-06')],
     } as any);
-    result.current.fetchNextPage();
-    await waitForNextUpdate();
-    expect(result.current.isLoading).toBe(false);
-    const { series: nextSeries } = result.current.data!.pages[1];
-    expect(nextSeries).toBeDefined();
-    expect(nextSeries.length).toBe(3);
+    await act(async () => {
+      await result.current.fetchNextPage();
+    });
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+      const { series: nextSeries } = result.current.data!.pages[1];
+      expect(nextSeries).toBeDefined();
+      expect(nextSeries.length).toBe(3);
+    });
   });
 
   it('should reset error upon recovery', async () => {
     const error = new Error('Network Error');
     mockedFetch.mockRejectedValue(error);
-    const { result, waitForNextUpdate } = renderUseMetricsExplorerDataHook();
+    const { result } = renderUseMetricsExplorerDataHook();
     expect(result.current.data).toBeUndefined();
     expect(result.current.error).toEqual(null);
     expect(result.current.isLoading).toBe(true);
-    await waitForNextUpdate();
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
     expect(result.current.data).toBeUndefined();
     expect(result.current.error).toEqual(error);
-    expect(result.current.isLoading).toBe(false);
     mockedFetch.mockResolvedValue(resp as any);
-    result.current.refetch();
-    await waitForNextUpdate();
-    expect(result.current.data!.pages[0]).toEqual(resp);
-    expect(result.current.isLoading).toBe(false);
-    expect(result.current.error).toBe(null);
+    await act(async () => {
+      await result.current.refetch();
+    });
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+      expect(result.current.data!.pages[0]).toEqual(resp);
+      expect(result.current.error).toBe(null);
+    });
   });
 
   it('should not paginate on option change', async () => {
     mockedFetch.mockResolvedValue(resp as any);
-    const { result, waitForNextUpdate, rerender } = renderUseMetricsExplorerDataHook();
+    const { result, rerender } = renderUseMetricsExplorerDataHook();
     expect(result.current.data).toBeUndefined();
     expect(result.current.isLoading).toBe(true);
-    await waitForNextUpdate();
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
     expect(result.current.data!.pages[0]).toEqual(resp);
-    expect(result.current.isLoading).toBe(false);
     const { series } = result.current.data!.pages[0];
     expect(series).toBeDefined();
     expect(series.length).toBe(3);
@@ -165,19 +189,19 @@ describe('useMetricsExplorerData Hook', () => {
       timestamps,
     });
     expect(result.current.isLoading).toBe(true);
-    await waitForNextUpdate();
-    expect(result.current.data!.pages[0]).toEqual(resp);
-    expect(result.current.isLoading).toBe(false);
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+      expect(result.current.data!.pages[0]).toEqual(resp);
+    });
   });
 
   it('should not paginate on time change', async () => {
     mockedFetch.mockResolvedValue(resp as any);
-    const { result, waitForNextUpdate, rerender } = renderUseMetricsExplorerDataHook();
+    const { result, rerender } = renderUseMetricsExplorerDataHook();
     expect(result.current.data).toBeUndefined();
     expect(result.current.isLoading).toBe(true);
-    await waitForNextUpdate();
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
     expect(result.current.data!.pages[0]).toEqual(resp);
-    expect(result.current.isLoading).toBe(false);
     const { series } = result.current.data!.pages[0];
     expect(series).toBeDefined();
     expect(series.length).toBe(3);
@@ -189,8 +213,9 @@ describe('useMetricsExplorerData Hook', () => {
       timestamps: { fromTimestamp: 1678378092225, toTimestamp: 1678381693477, interval: '>=10s' },
     });
     expect(result.current.isLoading).toBe(true);
-    await waitForNextUpdate();
-    expect(result.current.data!.pages[0]).toEqual(resp);
-    expect(result.current.isLoading).toBe(false);
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+      expect(result.current.data!.pages[0]).toEqual(resp);
+    });
   });
 });

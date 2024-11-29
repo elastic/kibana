@@ -4,9 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 
-export const mockCasesContext: React.FC = (props) => {
+export const mockCasesContext: FC<PropsWithChildren<unknown>> = (props) => {
   return <>{props?.children ?? null}</>;
 };
 mockCasesContext.displayName = 'CasesContextMock';

@@ -80,7 +80,7 @@ export const SyncRulesTable: React.FC = () => {
         values: { indexName },
       })}
       <EuiSpacer />
-      <EuiLink href={docLinks.syncRules} external>
+      <EuiLink href={docLinks.syncRules} external target="_blank">
         {i18n.translate('xpack.enterpriseSearch.content.index.connector.syncRules.link', {
           defaultMessage: 'Learn more about customizing your sync rules.',
         })}

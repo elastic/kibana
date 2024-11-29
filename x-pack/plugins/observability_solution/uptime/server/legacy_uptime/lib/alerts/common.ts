@@ -9,10 +9,13 @@ import { isRight } from 'fp-ts/lib/Either';
 import Mustache from 'mustache';
 import { AlertsLocatorParams, getAlertUrl } from '@kbn/observability-plugin/common';
 import { LocatorPublic } from '@kbn/share-plugin/common';
-import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
+import { legacyExperimentalFieldMap, ObservabilityUptimeAlert } from '@kbn/alerts-as-data-utils';
 import { IBasePath } from '@kbn/core/server';
-import { type IRuleTypeAlerts, RuleExecutorServices } from '@kbn/alerting-plugin/server';
+import type { IRuleTypeAlerts } from '@kbn/alerting-plugin/server';
+import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
+import { AlertInstanceState } from '@kbn/alerting-plugin/server';
+import { AlertInstanceContext } from '@kbn/alerting-plugin/server';
 import { uptimeRuleFieldMap } from '../../../../common/rules/uptime_rule_field_map';
 import { SYNTHETICS_RULE_TYPES_ALERT_CONTEXT } from '../../../../common/constants/synthetics_alerts';
 import { UptimeCommonState, UptimeCommonStateType } from '../../../../common/runtime_types';
@@ -82,31 +85,29 @@ export const getAlertDetailsUrl = (
   alertUuid: string | null
 ) => addSpaceIdToPath(basePath.publicBaseUrl, spaceId, `/app/observability/alerts/${alertUuid}`);
 
-export const setRecoveredAlertsContext = async ({
-  alertFactory,
+export const setRecoveredAlertsContext = async <ActionGroupIds extends string>({
+  alertsClient,
+  alertsLocator,
   basePath,
   defaultStartedAt,
-  getAlertStartedDate,
   spaceId,
-  alertsLocator,
-  getAlertUuid,
 }: {
-  alertFactory: RuleExecutorServices['alertFactory'];
-  defaultStartedAt: string;
-  getAlertStartedDate: (alertInstanceId: string) => string | null;
-  basePath: IBasePath;
-  spaceId: string;
+  alertsClient: RuleExecutorServices<
+    AlertInstanceState,
+    AlertInstanceContext,
+    ActionGroupIds,
+    ObservabilityUptimeAlert
+  >['alertsClient'];
   alertsLocator?: LocatorPublic<AlertsLocatorParams>;
-  getAlertUuid?: (alertId: string) => string | null;
+  basePath: IBasePath;
+  defaultStartedAt: string;
+  spaceId: string;
 }) => {
-  const { getRecoveredAlerts } = alertFactory.done();
-
-  for await (const alert of getRecoveredAlerts()) {
-    const recoveredAlertId = alert.getId();
-    const alertUuid = getAlertUuid?.(recoveredAlertId) || null;
-    const indexedStartedAt = getAlertStartedDate(recoveredAlertId) ?? defaultStartedAt;
-
-    const state = alert.getState();
+  for (const recoveredAlert of alertsClient?.getRecoveredAlerts() ?? []) {
+    const recoveredAlertId = recoveredAlert.alert.getId();
+    const alertUuid = recoveredAlert.alert.getUuid();
+    const indexedStartedAt = recoveredAlert.alert.getStart() ?? defaultStartedAt;
+    const state = recoveredAlert.alert.getState();
     const alertUrl = await getAlertUrl(
       alertUuid,
       spaceId,
@@ -115,17 +116,21 @@ export const setRecoveredAlertsContext = async ({
       basePath.publicBaseUrl
     );
 
-    alert.setContext({
-      ...state,
-      [ALERT_DETAILS_URL]: alertUrl,
+    alertsClient!.setAlertData({
+      id: recoveredAlertId,
+      context: {
+        ...state,
+        [ALERT_DETAILS_URL]: alertUrl,
+      },
     });
   }
 };
 
 export const uptimeRuleTypeFieldMap = { ...uptimeRuleFieldMap, ...legacyExperimentalFieldMap };
 
-export const UptimeRuleTypeAlertDefinition: IRuleTypeAlerts = {
+export const UptimeRuleTypeAlertDefinition: IRuleTypeAlerts<ObservabilityUptimeAlert> = {
   context: SYNTHETICS_RULE_TYPES_ALERT_CONTEXT,
   mappings: { fieldMap: uptimeRuleTypeFieldMap },
   useLegacyAlerts: true,
+  shouldWrite: true,
 };

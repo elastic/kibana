@@ -18,10 +18,7 @@ import {
 } from '../../../../context/apm_plugin/mock_apm_plugin_context';
 import { LicenseContext } from '../../../../context/license/license_context';
 import * as hooks from '../../../../hooks/use_fetcher';
-import {
-  expectTextsInDocument,
-  expectTextsNotInDocument,
-} from '../../../../utils/test_helpers';
+import { expectTextsInDocument, expectTextsNotInDocument } from '../../../../utils/test_helpers';
 import * as saveCustomLink from './create_edit_custom_link_flyout/save_custom_link';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
@@ -37,7 +34,7 @@ function getMockAPMContext({ canSave }: { canSave: boolean }) {
     ...mockApmPluginContextValue,
     core: {
       ...mockApmPluginContextValue.core,
-      application: { capabilities: { apm: { save: canSave }, ml: {} } },
+      application: { capabilities: { apm: { 'settings:save': canSave }, ml: {} } },
     },
   } as unknown as ApmPluginContextValue;
 }
@@ -134,12 +131,7 @@ describe('CustomLink', () => {
           </MockApmPluginContextWrapper>
         </LicenseContext.Provider>
       );
-      expectTextsInDocument(component, [
-        'label 1',
-        'url 1',
-        'label 2',
-        'url 2',
-      ]);
+      expectTextsInDocument(component, ['label 1', 'url 1', 'label 2', 'url 2']);
     });
 
     it('checks if create custom link button is available and working', () => {

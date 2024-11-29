@@ -12,13 +12,12 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiLink,
   EuiPageTemplate,
   EuiPanel,
   EuiText,
+  EuiBadge,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
   WelcomeBanner,
   IngestData,
@@ -28,44 +27,48 @@ import {
   InstallClientPanel,
   getLanguageDefinitionCodeSnippet,
   getConsoleRequest,
+  PreprocessDataPanel,
 } from '@kbn/search-api-panels';
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, FC, PropsWithChildren } from 'react';
 import type {
   LanguageDefinition,
   LanguageDefinitionSnippetArguments,
 } from '@kbn/search-api-panels';
 import { useLocation } from 'react-router-dom';
-import { CloudDetailsPanel, PipelinePanel } from '@kbn/search-api-panels';
+import { CloudDetailsPanel } from '@kbn/search-api-panels';
+import { DEFAULT_INGESTION_PIPELINE } from '../../../common';
 import { docLinks } from '../../../common/doc_links';
 import { useKibanaServices } from '../hooks/use_kibana';
 import { useAssetBasePath } from '../hooks/use_asset_base_path';
-import {
-  API_KEY_PLACEHOLDER,
-  CLOUD_ID_PLACEHOLDER,
-  ELASTICSEARCH_URL_PLACEHOLDER,
-} from '../constants';
+import { API_KEY_PLACEHOLDER, CLOUD_ID_PLACEHOLDER } from '../constants';
 import { javaDefinition } from './languages/java';
 import { languageDefinitions } from './languages/languages';
 import { LanguageGrid } from './languages/language_grid';
 import './overview.scss';
 import { ApiKeyPanel } from './api_key/api_key';
-import { ConnectorsCallout } from './connectors_callout';
 import { ConnectorIngestionPanel } from './connectors_ingestion';
-import { PipelineButtonOverview } from './pipeline_button_overview';
+import { PipelineOverviewButton } from './pipeline_overview_button';
+import { SelectClientCallouts } from './select_client_callouts';
+import { PipelineManageButton } from './pipeline_manage_button';
+import { OPTIONAL_LABEL } from '../../../common/i18n_string';
+import { useIngestPipelines } from '../hooks/api/use_ingest_pipelines';
+import { useElasticsearchUrl } from '../hooks/use_elastisearch_url';
 
 export const ElasticsearchOverview = () => {
   const [selectedLanguage, setSelectedLanguage] = useState<LanguageDefinition>(javaDefinition);
   const [clientApiKey, setClientApiKey] = useState<string>(API_KEY_PLACEHOLDER);
   const { application, cloud, user, share, console: consolePlugin } = useKibanaServices();
-  const { elasticsearchURL, cloudId } = useMemo(() => {
+  const { elasticsearchUrl } = useElasticsearchUrl();
+
+  const { cloudId } = useMemo(() => {
     return {
-      elasticsearchURL: cloud?.elasticsearchUrl ?? ELASTICSEARCH_URL_PLACEHOLDER,
       cloudId: cloud?.cloudId ?? CLOUD_ID_PLACEHOLDER,
     };
   }, [cloud]);
   const assetBasePath = useAssetBasePath();
   const { hash } = useLocation();
+
   useEffect(() => {
     if (hash) {
       const id = hash.replace('#', '');
@@ -79,12 +82,16 @@ export const ElasticsearchOverview = () => {
     () => (consolePlugin?.EmbeddableConsole ? <consolePlugin.EmbeddableConsole /> : null),
     [consolePlugin]
   );
+  const [selectedPipeline, setSelectedPipeline] = React.useState<string>('');
 
   const codeSnippetArguments: LanguageDefinitionSnippetArguments = {
-    url: elasticsearchURL,
+    url: elasticsearchUrl,
     apiKey: clientApiKey,
     cloudId,
+    ingestPipeline: selectedPipeline,
   };
+
+  const { data: pipelineData } = useIngestPipelines();
 
   return (
     <EuiPageTemplate offset={0} grow restrictWidth data-test-subj="svlSearchOverviewPage">
@@ -100,7 +107,7 @@ export const ElasticsearchOverview = () => {
       >
         <SelectClientPanel
           docLinks={docLinks}
-          callout={<ConnectorsCallout />}
+          callout={<SelectClientCallouts />}
           application={application}
           consolePlugin={consolePlugin}
           sharePlugin={share}
@@ -158,7 +165,10 @@ export const ElasticsearchOverview = () => {
         bottomBorder="extended"
         data-test-subj="cloud-details-section"
       >
-        <CloudDetailsPanel cloudId={cloud.cloudId} elasticsearchUrl={cloud.elasticsearchUrl} />
+        <CloudDetailsPanel
+          cloudId={cloud.cloudId}
+          elasticsearchUrl={elasticsearchUrl || undefined}
+        />
       </EuiPageTemplate.Section>
       <EuiPageTemplate.Section
         color="subdued"
@@ -183,6 +193,9 @@ export const ElasticsearchOverview = () => {
               assetBasePath={assetBasePath}
               application={application}
               sharePlugin={share}
+              consoleTitle={i18n.translate('xpack.serverlessSearch.configureClient.title', {
+                defaultMessage: 'Configure your client',
+              })}
             />
           }
           links={[
@@ -229,12 +242,65 @@ export const ElasticsearchOverview = () => {
               assetBasePath={assetBasePath}
               application={application}
               sharePlugin={share}
+              consoleTitle={i18n.translate('xpack.serverlessSearch.testConnection.title', {
+                defaultMessage: 'Test your connection',
+              })}
             />
           }
           links={[]}
           title={i18n.translate('xpack.serverlessSearch.testConnection.title', {
             defaultMessage: 'Test your connection',
           })}
+        />
+      </EuiPageTemplate.Section>
+      <EuiPageTemplate.Section
+        color="subdued"
+        bottomBorder="extended"
+        data-test-subj="preprocess-data-section"
+      >
+        <OverviewPanel
+          description={
+            <EuiFlexGroup direction="column">
+              <EuiFlexItem grow={false}>
+                <div>
+                  <EuiBadge>{OPTIONAL_LABEL}</EuiBadge>
+                </div>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                {i18n.translate('xpack.serverlessSearch.preprocessData.description', {
+                  defaultMessage:
+                    'Use ingest pipelines to preprocess your data before indexing into Elasticsearch. This is often much easier and cheaper than post-processing. Use any combination of ingest processors to add, delete, or transform fields in your documents.',
+                })}
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          }
+          leftPanelContent={
+            <PreprocessDataPanel
+              docLinks={docLinks}
+              images={{
+                dataEnrichment: `${assetBasePath}/data_enrichment.svg`,
+                dataTransformation: `${assetBasePath}/data_transformation.svg`,
+                dataFiltering: `${assetBasePath}/data_filtering.svg`,
+                pipelineHandling: `${assetBasePath}/pipeline_handling.svg`,
+                arrayHandling: `${assetBasePath}/array_handling.svg`,
+              }}
+            />
+          }
+          links={[]}
+          title={i18n.translate('xpack.serverlessSearch.preprocessData.title', {
+            defaultMessage:
+              'Preprocess your data by enriching, transforming or filtering with pipelines',
+          })}
+          children={
+            <EuiFlexGroup gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <PipelineOverviewButton />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <PipelineManageButton />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          }
         />
       </EuiPageTemplate.Section>
       <EuiPageTemplate.Section
@@ -249,7 +315,8 @@ export const ElasticsearchOverview = () => {
             'ingestData',
             codeSnippetArguments
           )}
-          consoleRequest={getConsoleRequest('ingestData')}
+          ingestPipelineData={pipelineData?.pipelines}
+          consoleRequest={getConsoleRequest('ingestData', codeSnippetArguments)}
           languages={languageDefinitions}
           selectedLanguage={selectedLanguage}
           setSelectedLanguage={setSelectedLanguage}
@@ -259,6 +326,9 @@ export const ElasticsearchOverview = () => {
           consolePlugin={consolePlugin}
           sharePlugin={share}
           additionalIngestionPanel={<ConnectorIngestionPanel assetBasePath={assetBasePath} />}
+          selectedPipeline={selectedPipeline}
+          setSelectedPipeline={setSelectedPipeline}
+          defaultIngestPipeline={DEFAULT_INGESTION_PIPELINE}
         />
       </EuiPageTemplate.Section>
       <EuiPageTemplate.Section
@@ -286,6 +356,9 @@ export const ElasticsearchOverview = () => {
               application={application}
               consolePlugin={consolePlugin}
               sharePlugin={share}
+              consoleTitle={i18n.translate('xpack.serverlessSearch.searchQuery.title', {
+                defaultMessage: 'Build your first search query',
+              })}
             />
           }
           links={[]}
@@ -294,48 +367,7 @@ export const ElasticsearchOverview = () => {
           })}
         />
       </EuiPageTemplate.Section>
-      <EuiPageTemplate.Section
-        color="subdued"
-        bottomBorder="extended"
-        data-test-subj="pipeline-client-section"
-      >
-        <OverviewPanel
-          description={
-            <FormattedMessage
-              id="xpack.serverlessSearch.pipeline.description"
-              defaultMessage="Use {ingestPipelinesLink} to preprocess your data before it's indexed into Elasticsearch, which is often much easier than post-processing. Use any combination of ingest processors to add, delete, or transform fields in your documents."
-              values={{
-                ingestPipelinesLink: (
-                  <EuiLink
-                    data-test-subj="serverlessSearchElasticsearchOverviewIngestPipelinesLink"
-                    href={docLinks.ingestionPipelines}
-                    target="_blank"
-                  >
-                    {i18n.translate(
-                      'xpack.serverlessSearch.pipeline.description.ingestPipelinesLink.link',
-                      {
-                        defaultMessage: 'ingest pipelines',
-                      }
-                    )}
-                  </EuiLink>
-                ),
-              }}
-            />
-          }
-          leftPanelContent={
-            <PipelinePanel
-              clusterImage={`${assetBasePath}/cluster.svg`}
-              cutImage={`${assetBasePath}/cut.svg`}
-              reporterImage={`${assetBasePath}/reporter.svg`}
-            />
-          }
-          links={[]}
-          title={i18n.translate('xpack.serverlessSearch.pipeline.title', {
-            defaultMessage: 'Transform and enrich your data',
-          })}
-          children={<PipelineButtonOverview />}
-        />
-      </EuiPageTemplate.Section>
+
       <EuiPageTemplate.Section
         alignment="top"
         className="serverlessSearchOverviewFooterSection"
@@ -484,7 +516,7 @@ const OverviewFooter = () => {
   );
 };
 
-const FooterButtonContainer: React.FC = ({ children }) => (
+const FooterButtonContainer: FC<PropsWithChildren<unknown>> = ({ children }) => (
   <EuiFlexItem>
     <EuiPanel hasShadow={false} paddingSize="none">
       <EuiFlexGroup>

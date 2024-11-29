@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { PropsWithChildren } from 'react';
 import React, { useContext, useEffect, useMemo, useState, type FC } from 'react';
 import { useTimefilter } from '@kbn/ml-date-picker';
 import { AnomalyTimelineStateService } from './anomaly_timeline_state_service';
@@ -18,6 +19,7 @@ import { AnomalyExplorerChartsService } from '../services/anomaly_explorer_chart
 import { useTableSeverity } from '../components/controls/select_severity';
 import { AnomalyDetectionAlertsStateService } from './alerts';
 import { explorerServiceFactory, type ExplorerService } from './explorer_dashboard_service';
+import { useMlJobService } from '../services/job_service';
 
 export interface AnomalyExplorerContextValue {
   anomalyExplorerChartsService: AnomalyExplorerChartsService;
@@ -52,23 +54,24 @@ export function useAnomalyExplorerContext() {
 /**
  * Anomaly Explorer Context Provider.
  */
-export const AnomalyExplorerContextProvider: FC = ({ children }) => {
+export const AnomalyExplorerContextProvider: FC<PropsWithChildren<unknown>> = ({ children }) => {
   const [, , anomalyExplorerUrlStateService] = useExplorerUrlState();
 
   const timefilter = useTimefilter();
 
   const {
     services: {
-      mlServices: { mlApiServices, mlFieldFormatService },
+      mlServices: { mlApi, mlFieldFormatService },
       uiSettings,
       data,
     },
   } = useMlKibana();
+  const mlJobService = useMlJobService();
 
   const [, , tableSeverityState] = useTableSeverity();
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const mlResultsService = useMemo(() => mlResultsServiceProvider(mlApiServices), []);
+  const mlResultsService = useMemo(() => mlResultsServiceProvider(mlApi), []);
 
   const [anomalyExplorerContextValue, setAnomalyExplorerContextValue] = useState<
     AnomalyExplorerContextValue | undefined
@@ -79,7 +82,7 @@ export const AnomalyExplorerContextProvider: FC = ({ children }) => {
   // updates so using `useEffect` is the right thing to do here to not get errors
   // related to React lifecycle methods.
   useEffect(() => {
-    const explorerService = explorerServiceFactory(mlFieldFormatService);
+    const explorerService = explorerServiceFactory(mlJobService, mlFieldFormatService);
 
     const anomalyTimelineService = new AnomalyTimelineService(
       timefilter,
@@ -92,6 +95,7 @@ export const AnomalyExplorerContextProvider: FC = ({ children }) => {
     );
 
     const anomalyTimelineStateService = new AnomalyTimelineStateService(
+      mlJobService,
       anomalyExplorerUrlStateService,
       anomalyExplorerCommonStateService,
       anomalyTimelineService,
@@ -100,7 +104,7 @@ export const AnomalyExplorerContextProvider: FC = ({ children }) => {
 
     const anomalyExplorerChartsService = new AnomalyExplorerChartsService(
       timefilter,
-      mlApiServices,
+      mlApi,
       mlResultsService
     );
 

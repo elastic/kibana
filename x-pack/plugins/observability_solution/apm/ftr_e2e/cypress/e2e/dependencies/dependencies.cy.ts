@@ -38,6 +38,7 @@ describe('Dependencies', () => {
   describe('top-level dependencies page', () => {
     it('has a list of dependencies and you can navigate to the page for one', () => {
       cy.visitKibana(`/app/apm/services?${new URLSearchParams(timeRange)}`);
+      cy.getByTestSubj('superDatePickerstartDatePopoverButton');
       cy.contains('nav a', 'Dependencies').click();
 
       // `force: true` because Cypress says the element is 0x0
@@ -48,9 +49,7 @@ describe('Dependencies', () => {
 
     it('has no detectable a11y violations on load', () => {
       cy.visitKibana(
-        `/app/apm/services/opbeans-java/dependencies?${new URLSearchParams(
-          timeRange
-        )}`
+        `/app/apm/services/opbeans-java/dependencies?${new URLSearchParams(timeRange)}`
       );
       cy.contains('a[role="tab"]', 'Dependencies');
       // set skipFailures to true to not fail the test when there are accessibility failures
@@ -91,11 +90,7 @@ describe('Dependencies', () => {
 
   describe('service overview page', () => {
     it('shows dependency information and you can navigate to a page for a dependency', () => {
-      cy.visitKibana(
-        `/app/apm/services/opbeans-java/overview?${new URLSearchParams(
-          timeRange
-        )}`
-      );
+      cy.visitKibana(`/app/apm/services/opbeans-java/overview?${new URLSearchParams(timeRange)}`);
 
       cy.contains('a', 'postgresql').click({ force: true });
 
@@ -105,11 +100,7 @@ describe('Dependencies', () => {
 
   describe('service dependencies tab', () => {
     it('shows dependency information and you can navigate to a page for a dependency', () => {
-      cy.visitKibana(
-        `/app/apm/services/opbeans-java/overview?${new URLSearchParams(
-          timeRange
-        )}`
-      );
+      cy.visitKibana(`/app/apm/services/opbeans-java/overview?${new URLSearchParams(timeRange)}`);
 
       cy.contains('a[role="tab"]', 'Dependencies').click();
 
@@ -141,12 +132,7 @@ describe('Dependencies with high volume of data', () => {
   });
 
   it('shows dependencies inventory page', () => {
-    cy.visitKibana(
-      `/app/apm/dependencies/inventory?${new URLSearchParams({
-        ...timeRange,
-        kuery: 'elasticsearch*',
-      })}`
-    );
+    cy.visitKibana(`/app/apm/dependencies/inventory?${new URLSearchParams(timeRange)}`);
 
     cy.getByTestSubj('dependenciesTable');
     cy.contains('nav', 'Page 1 of 60');

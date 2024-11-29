@@ -5,19 +5,12 @@
  * 2.0.
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiPanel,
-} from '@elastic/eui';
+import { usePerformanceContext } from '@kbn/ebt-tools';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
 import React, { ReactNode } from 'react';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { isActivePlatinumLicense } from '../../../../common/license_check';
-import {
-  invalidLicenseMessage,
-  SERVICE_MAP_TIMEOUT_ERROR,
-} from '../../../../common/service_map';
+import { invalidLicenseMessage, SERVICE_MAP_TIMEOUT_ERROR } from '../../../../common/service_map';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { useLicenseContext } from '../../../context/license/use_license_context';
 import { useTheme } from '../../../hooks/use_theme';
@@ -36,6 +29,9 @@ import { useApmParams, useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { Environment } from '../../../../common/environment_rt';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { DisabledPrompt } from './disabled_prompt';
+import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
+import { isLogsOnlySignal } from '../../../utils/get_signal_type';
+import { ServiceTabEmptyState } from '../service_tab_empty_state';
 
 function PromptContainer({ children }: { children: ReactNode }) {
   return (
@@ -47,10 +43,7 @@ function PromptContainer({ children }: { children: ReactNode }) {
         // Set the height to give it some top margin
         style={{ height: '60vh' }}
       >
-        <EuiFlexItem
-          grow={false}
-          style={{ width: 600, textAlign: 'center' as const }}
-        >
+        <EuiFlexItem grow={false} style={{ width: 600, textAlign: 'center' as const }}>
           {children}
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -59,12 +52,7 @@ function PromptContainer({ children }: { children: ReactNode }) {
 }
 
 function LoadingSpinner() {
-  return (
-    <EuiLoadingSpinner
-      size="xl"
-      style={{ position: 'absolute', top: '50%', left: '50%' }}
-    />
-  );
+  return <EuiLoadingSpinner size="xl" style={{ position: 'absolute', top: '50%', left: '50%' }} />;
 }
 
 export function ServiceMapHome() {
@@ -91,14 +79,15 @@ export function ServiceMapServiceDetail() {
     '/mobile-services/{serviceName}/service-map'
   );
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
-  return (
-    <ServiceMap
-      environment={environment}
-      kuery={kuery}
-      start={start}
-      end={end}
-    />
-  );
+  const { serviceEntitySummary } = useApmServiceContext();
+
+  const hasLogsOnlySignal =
+    serviceEntitySummary?.dataStreamTypes && isLogsOnlySignal(serviceEntitySummary.dataStreamTypes);
+
+  if (hasLogsOnlySignal) {
+    return <ServiceTabEmptyState id="serviceMap" />;
+  }
+  return <ServiceMap environment={environment} kuery={kuery} start={start} end={end} />;
 }
 
 export function ServiceMap({
@@ -118,6 +107,7 @@ export function ServiceMap({
   const license = useLicenseContext();
   const serviceName = useServiceName();
   const { config } = useApmPluginContext();
+  const { onPageReady } = usePerformanceContext();
 
   const {
     data = { elements: [] },
@@ -126,11 +116,7 @@ export function ServiceMap({
   } = useFetcher(
     (callApmApi) => {
       // When we don't have a license or a valid license, don't make the request.
-      if (
-        !license ||
-        !isActivePlatinumLicense(license) ||
-        !config.serviceMapEnabled
-      ) {
+      if (!license || !isActivePlatinumLicense(license) || !config.serviceMapEnabled) {
         return;
       }
 
@@ -148,16 +134,7 @@ export function ServiceMap({
         },
       });
     },
-    [
-      license,
-      serviceName,
-      environment,
-      start,
-      end,
-      serviceGroupId,
-      kuery,
-      config.serviceMapEnabled,
-    ]
+    [license, serviceName, environment, start, end, serviceGroupId, kuery, config.serviceMapEnabled]
   );
 
   const { ref, height } = useRefDimensions();
@@ -208,15 +185,15 @@ export function ServiceMap({
     );
   }
 
+  if (status === FETCH_STATUS.SUCCESS) {
+    onPageReady();
+  }
+
   return (
     <>
       <SearchBar showTimeComparison />
       <EuiPanel hasBorder={true} paddingSize="none">
-        <div
-          data-test-subj="serviceMap"
-          style={{ height: heightWithPadding }}
-          ref={ref}
-        >
+        <div data-test-subj="serviceMap" style={{ height: heightWithPadding }} ref={ref}>
           <Cytoscape
             elements={data.elements}
             height={heightWithPadding}

@@ -21,6 +21,9 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
   rename('audit.appender.policy.kind', 'audit.appender.policy.type', { level: 'warning' }),
   rename('audit.appender.strategy.kind', 'audit.appender.strategy.type', { level: 'warning' }),
   rename('audit.appender.path', 'audit.appender.fileName', { level: 'warning' }),
+  rename('experimental.fipsMode.enabled', 'fipsMode.enabled', {
+    level: 'critical',
+  }),
 
   renameFromRoot(
     'security.showInsecureClusterWarning',
@@ -122,6 +125,7 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
         title: i18n.translate('xpack.security.deprecations.maxRedirectURLSizeTitle', {
           defaultMessage:
             '"xpack.security.authc.providers.saml.<provider-name>.maxRedirectURLSize" has no effect',
+          ignoreTag: true,
         }),
         message: i18n.translate('xpack.security.deprecations.maxRedirectURLSizeMessage', {
           defaultMessage: 'This setting is no longer used.',
@@ -133,6 +137,7 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
             i18n.translate('xpack.security.deprecations.maxRedirectURLSize.manualSteps1', {
               defaultMessage:
                 'Remove "xpack.security.authc.providers.saml.<provider-name>.maxRedirectURLSize" from kibana.yml.',
+              ignoreTag: true,
             }),
           ],
         },

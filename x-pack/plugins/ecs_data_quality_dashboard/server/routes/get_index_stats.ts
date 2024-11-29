@@ -7,8 +7,14 @@
 import { i18n } from '@kbn/i18n';
 import type { IRouter, Logger } from '@kbn/core/server';
 
-import type { IndicesStatsIndicesStats } from '@elastic/elasticsearch/lib/api/types';
-import { fetchStats, fetchAvailableIndices } from '../lib';
+import {
+  fetchStats,
+  fetchAvailableIndices,
+  fetchMeteringStats,
+  parseIndicesStats,
+  parseMeteringStats,
+  pickAvailableMeteringStats,
+} from '../lib';
 import { buildResponse } from '../lib/build_response';
 import { GET_INDEX_STATS, INTERNAL_API_VERSION } from '../../common/constants';
 import { buildRouteValidation } from '../schemas/common';
@@ -20,7 +26,11 @@ export const getIndexStatsRoute = (router: IRouter, logger: Logger) => {
     .get({
       path: GET_INDEX_STATS,
       access: 'internal',
-      options: { tags: ['access:securitySolution'] },
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
     })
     .addVersion(
       {
@@ -41,12 +51,14 @@ export const getIndexStatsRoute = (router: IRouter, logger: Logger) => {
 
           const decodedIndexName = decodeURIComponent(request.params.pattern);
 
-          const stats = await fetchStats(client, decodedIndexName);
           const { isILMAvailable, startDate, endDate } = request.query;
 
           if (isILMAvailable === true) {
+            const stats = await fetchStats(client, decodedIndexName);
+            const parsedIndices = parseIndicesStats(stats.indices);
+
             return response.ok({
-              body: stats.indices,
+              body: parsedIndices,
             });
           }
 
@@ -57,24 +69,40 @@ export const getIndexStatsRoute = (router: IRouter, logger: Logger) => {
           if (startDate && endDate) {
             const decodedStartDate = decodeURIComponent(startDate);
             const decodedEndDate = decodeURIComponent(endDate);
+            const meteringStats = await fetchMeteringStats(
+              client,
+              decodedIndexName,
+              request.headers.authorization
+            );
 
-            const indices = await fetchAvailableIndices(esClient, {
-              indexPattern: decodedIndexName,
+            if (!meteringStats.indices) {
+              logger.warn(`No metering stats indices found under pattern: ${decodedIndexName}`);
+              return response.ok({
+                body: {},
+              });
+            }
+
+            const meteringStatsIndices = parseMeteringStats(meteringStats.indices);
+
+            const availableIndices = await fetchAvailableIndices(esClient, {
+              indexNameOrPattern: decodedIndexName,
               startDate: decodedStartDate,
               endDate: decodedEndDate,
             });
-            const availableIndices = indices?.aggregations?.index?.buckets?.reduce(
-              (acc: Record<string, IndicesStatsIndicesStats>, { key }: { key: string }) => {
-                if (stats.indices?.[key]) {
-                  acc[key] = stats.indices?.[key];
-                }
-                return acc;
-              },
-              {}
-            );
+
+            if (availableIndices.length === 0) {
+              logger.warn(
+                `No available indices found under pattern: ${decodedIndexName}, in the given date range: ${decodedStartDate} - ${decodedEndDate}`
+              );
+              return response.ok({
+                body: {},
+              });
+            }
+
+            const indices = pickAvailableMeteringStats(availableIndices, meteringStatsIndices);
 
             return response.ok({
-              body: availableIndices,
+              body: indices,
             });
           } else {
             return resp.error({
@@ -89,7 +117,6 @@ export const getIndexStatsRoute = (router: IRouter, logger: Logger) => {
           }
         } catch (err) {
           logger.error(JSON.stringify(err));
-
           return resp.error({
             body: err.message ?? API_DEFAULT_ERROR_MESSAGE,
             statusCode: err.statusCode ?? 500,

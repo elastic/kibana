@@ -1,11 +1,15 @@
 {
   "type": "plugin",
   "id": "@kbn/console-plugin",
-  "owner": "@elastic/kibana-management",
+  "owner": [
+    "@elastic/kibana-management"
+  ],
+  "group": "platform",
+  "visibility": "shared",
   "plugin": {
     "id": "console",
-    "server": true,
     "browser": true,
+    "server": true,
     "configPath": [
       "console"
     ],
@@ -20,7 +24,6 @@
     ],
     "requiredBundles": [
       "esUiShared",
-      "kibanaReact",
       "kibanaUtils"
     ]
   }

@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import type { RenderHookResult } from '@testing-library/react-hooks';
-import { renderHook } from '@testing-library/react-hooks';
+import type { RenderHookResult } from '@testing-library/react';
+import { renderHook } from '@testing-library/react';
 import type {
   UseFetchRelatedAlertsByAncestryParams,
   UseFetchRelatedAlertsByAncestryResult,
 } from './use_fetch_related_alerts_by_ancestry';
 import { useFetchRelatedAlertsByAncestry } from './use_fetch_related_alerts_by_ancestry';
-import { useAlertPrevalenceFromProcessTree } from '../../../../common/containers/alerts/use_alert_prevalence_from_process_tree';
+import { useAlertPrevalenceFromProcessTree } from './use_alert_prevalence_from_process_tree';
 
-jest.mock('../../../../common/containers/alerts/use_alert_prevalence_from_process_tree');
+jest.mock('./use_alert_prevalence_from_process_tree');
 
 const documentId = 'documentId';
 const indices = ['index1'];
@@ -22,8 +22,8 @@ const scopeId = 'scopeId';
 
 describe('useFetchRelatedAlertsByAncestry', () => {
   let hookResult: RenderHookResult<
-    UseFetchRelatedAlertsByAncestryParams,
-    UseFetchRelatedAlertsByAncestryResult
+    UseFetchRelatedAlertsByAncestryResult,
+    UseFetchRelatedAlertsByAncestryParams
   >;
 
   it('should return loading true while data is loading', () => {

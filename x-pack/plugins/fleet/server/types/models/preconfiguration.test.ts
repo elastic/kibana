@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PreconfiguredOutputsSchema } from './preconfiguration';
+import { PreconfiguredOutputsSchema, PreconfiguredAgentPoliciesSchema } from './preconfiguration';
 
 describe('Test preconfiguration schema', () => {
   describe('PreconfiguredOutputsSchema', () => {
@@ -119,7 +119,7 @@ describe('Test preconfiguration schema', () => {
             type: 'kafka',
             hosts: ['localhost:9200'],
             auth_type: 'ssl',
-            topics: [{ topic: 'topic1' }],
+            topic: 'topic1',
             secrets: {
               password: 'mypassword',
               ssl: {
@@ -142,6 +142,19 @@ describe('Test preconfiguration schema', () => {
             secrets: {
               service_token: 'myservicetoken',
             },
+          },
+        ]);
+      }).not.toThrowError();
+    });
+  });
+
+  describe('PreconfiguredAgentPoliciesSchema', () => {
+    it('should allow basic agent policy only with id and name', () => {
+      expect(() => {
+        PreconfiguredAgentPoliciesSchema.validate([
+          {
+            id: 'agent-default-policy',
+            name: 'test agent policy',
           },
         ]);
       }).not.toThrowError();

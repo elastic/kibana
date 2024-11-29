@@ -6,19 +6,10 @@
  */
 import { MetricDatum, MetricTrendShape } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-} from '@elastic/eui';
+import { EuiIcon, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { useTheme } from '@kbn/observability-shared-plugin/public';
-import {
-  useFetcher,
-  isPending,
-  FETCH_STATUS,
-} from '../../../../../hooks/use_fetcher';
+import { useFetcher, isPending, FETCH_STATUS } from '../../../../../hooks/use_fetcher';
 import { CLIENT_GEO_COUNTRY_NAME } from '../../../../../../common/es_fields/apm';
 import { NOT_AVAILABLE_LABEL } from '../../../../../../common/i18n';
 import { MetricItem } from './metric_item';
@@ -28,13 +19,9 @@ const formatDifference = (value: number) => {
   return value > 0 ? '+' + value.toFixed(0) + '%' : value.toFixed(0) + '%';
 };
 
-const calculateDiffPercentageAndFormat = (
-  currentValue?: number,
-  previousValue?: number
-) => {
+const calculateDiffPercentageAndFormat = (currentValue?: number, previousValue?: number) => {
   if (currentValue && previousValue) {
-    const diffPercentageValue =
-      ((currentValue - previousValue) / previousValue) * 100;
+    const diffPercentageValue = ((currentValue - previousValue) / previousValue) * 100;
 
     return formatDifference(diffPercentageValue);
   }
@@ -66,37 +53,26 @@ export function MobileLocationStats({
 
   const { data: locationStatsData, status: locationStatsStatus } = useFetcher(
     (callApmApi) => {
-      return callApmApi(
-        'GET /internal/apm/mobile-services/{serviceName}/location/stats',
-        {
-          params: {
-            path: { serviceName },
-            query: {
-              start,
-              end,
-              environment,
-              kuery,
-              locationField,
-              offset,
-            },
+      return callApmApi('GET /internal/apm/mobile-services/{serviceName}/location/stats', {
+        params: {
+          path: { serviceName },
+          query: {
+            start,
+            end,
+            environment,
+            kuery,
+            locationField,
+            offset,
           },
-        }
-      );
+        },
+      });
     },
     [start, end, environment, kuery, serviceName, locationField, offset]
   );
 
   const getIcon = useCallback(
     (type: string) =>
-      ({
-        width = 20,
-        height = 20,
-        color,
-      }: {
-        width: number;
-        height: number;
-        color: string;
-      }) => {
+      ({ width = 20, height = 20, color }: { width: number; height: number; color: string }) => {
         return locationStatsStatus === FETCH_STATUS.LOADING ? (
           <EuiLoadingSpinner size="m" />
         ) : (
@@ -112,7 +88,7 @@ export function MobileLocationStats({
   const previousPeriod = locationStatsData?.previousPeriod;
 
   const getComparisonValueFormatter = useCallback(
-    ({ currentPeriodValue, previousPeriodValue }) => {
+    ({ currentPeriodValue, previousPeriodValue }: any) => {
       const comparisonDiffValue = calculateDiffPercentageAndFormat(
         currentPeriodValue,
         previousPeriodValue
@@ -132,19 +108,15 @@ export function MobileLocationStats({
   const metrics: MetricDatum[] = [
     {
       color: euiTheme.eui.euiColorLightestShade,
-      title: i18n.translate(
-        'xpack.apm.mobile.location.metrics.http.requests.title',
-        {
-          defaultMessage: 'Most used in',
-        }
-      ),
+      title: i18n.translate('xpack.apm.mobile.location.metrics.http.requests.title', {
+        defaultMessage: 'Most used in',
+      }),
       extra: getComparisonValueFormatter({
         currentPeriodValue: currentPeriod?.mostRequests.value,
         previousPeriodValue: previousPeriod?.mostRequests.value,
       }),
       icon: getIcon('visBarHorizontal'),
       value: currentPeriod?.mostRequests.location ?? NOT_AVAILABLE_LABEL,
-      valueFormatter: (value) => `${value}`,
       trend: currentPeriod?.mostRequests.timeseries,
       trendShape: MetricTrendShape.Area,
     },
@@ -159,7 +131,6 @@ export function MobileLocationStats({
       }),
       icon: getIcon('bug'),
       value: currentPeriod?.mostCrashes.location ?? NOT_AVAILABLE_LABEL,
-      valueFormatter: (value) => `${value}`,
       trend: currentPeriod?.mostCrashes.timeseries,
       trendShape: MetricTrendShape.Area,
     },
@@ -174,7 +145,6 @@ export function MobileLocationStats({
       }),
       icon: getIcon('timeslider'),
       value: currentPeriod?.mostSessions.location ?? NOT_AVAILABLE_LABEL,
-      valueFormatter: (value) => `${value}`,
       trend: currentPeriod?.mostSessions.timeseries,
       trendShape: MetricTrendShape.Area,
     },
@@ -189,7 +159,6 @@ export function MobileLocationStats({
       }),
       icon: getIcon('launch'),
       value: currentPeriod?.mostLaunches.location ?? NOT_AVAILABLE_LABEL,
-      valueFormatter: (value) => `${value}`,
       trend: currentPeriod?.mostLaunches.timeseries,
       trendShape: MetricTrendShape.Area,
     },
@@ -199,11 +168,7 @@ export function MobileLocationStats({
     <EuiFlexGroup direction="column">
       {metrics.map((metric, key) => (
         <EuiFlexItem key={key}>
-          <MetricItem
-            id={key}
-            data={[metric]}
-            isLoading={loadingLocationStats}
-          />
+          <MetricItem id={key} data={[metric]} isLoading={loadingLocationStats} />
         </EuiFlexItem>
       ))}
     </EuiFlexGroup>

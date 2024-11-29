@@ -7,7 +7,7 @@
 import { Response } from 'supertest';
 import { MessageRole, type Message } from '@kbn/observability-ai-assistant-plugin/common';
 import { omit, pick } from 'lodash';
-import { PassThrough, Readable } from 'stream';
+import { PassThrough } from 'stream';
 import expect from '@kbn/expect';
 import {
   ChatCompletionChunkEvent,
@@ -17,11 +17,21 @@ import {
   StreamingChatResponseEvent,
   StreamingChatResponseEventType,
 } from '@kbn/observability-ai-assistant-plugin/common/conversation_complete';
-import type OpenAI from 'openai';
 import { ObservabilityAIAssistantScreenContextRequest } from '@kbn/observability-ai-assistant-plugin/common/types';
-import { createLlmProxy, LlmProxy, LlmResponseSimulator } from '../../common/create_llm_proxy';
+import {
+  createLlmProxy,
+  isFunctionTitleRequest,
+  LlmProxy,
+  LlmResponseSimulator,
+} from '../../common/create_llm_proxy';
 import { createOpenAiChunk } from '../../common/create_openai_chunk';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
+import {
+  decodeEvents,
+  getConversationCreatedEvent,
+  getConversationUpdatedEvent,
+} from '../conversations/helpers';
+import { createProxyActionConnector, deleteActionConnector } from '../../common/action_connectors';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -44,11 +54,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       message: {
         role: MessageRole.User,
         content: 'Good morning, bot!',
+        // make sure it doesn't 400 on `data` being set
+        data: '{}',
       },
     },
   ];
 
-  describe('Complete', () => {
+  describe('/internal/observability_ai_assistant/chat/complete', () => {
     let proxy: LlmProxy;
     let connectorId: string;
 
@@ -56,20 +68,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       params: { screenContexts?: ObservabilityAIAssistantScreenContextRequest[] },
       cb: (conversationSimulator: LlmResponseSimulator) => Promise<void>
     ) {
-      const titleInterceptor = proxy.intercept(
-        'title',
-        (body) =>
-          (JSON.parse(body) as OpenAI.Chat.ChatCompletionCreateParamsNonStreaming).functions?.find(
-            (fn) => fn.name === 'title_conversation'
-          ) !== undefined
-      );
+      const titleInterceptor = proxy.intercept('title', (body) => isFunctionTitleRequest(body));
 
       const conversationInterceptor = proxy.intercept(
         'conversation',
-        (body) =>
-          (JSON.parse(body) as OpenAI.Chat.ChatCompletionCreateParamsNonStreaming).functions?.find(
-            (fn) => fn.name === 'title_conversation'
-          ) === undefined
+        (body) => !isFunctionTitleRequest(body)
       );
 
       const responsePromise = new Promise<Response>((resolve, reject) => {
@@ -81,13 +84,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             connectorId,
             persist: true,
             screenContexts: params.screenContexts || [],
+            scopes: ['all'],
           })
-          .end((err, response) => {
-            if (err) {
-              return reject(err);
-            }
-            return resolve(response);
-          });
+          .then((response) => resolve(response))
+          .catch((err) => reject(err));
       });
 
       const [conversationSimulator, titleSimulator] = await Promise.all([
@@ -114,33 +114,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
     before(async () => {
       proxy = await createLlmProxy(log);
-
-      const response = await supertest
-        .post('/api/actions/connector')
-        .set('kbn-xsrf', 'foo')
-        .send({
-          name: 'OpenAI Proxy',
-          connector_type_id: '.gen-ai',
-          config: {
-            apiProvider: 'OpenAI',
-            apiUrl: `http://localhost:${proxy.getPort()}`,
-          },
-          secrets: {
-            apiKey: 'my-api-key',
-          },
-        })
-        .expect(200);
-
-      connectorId = response.body.id;
+      connectorId = await createProxyActionConnector({ supertest, log, port: proxy.getPort() });
     });
 
     after(async () => {
-      await supertest
-        .delete(`/api/actions/connector/${connectorId}`)
-        .set('kbn-xsrf', 'foo')
-        .expect(204);
-
       proxy.close();
+      await deleteActionConnector({ supertest, connectorId, log });
     });
 
     it('returns a streaming response from the server', async () => {
@@ -158,6 +137,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           connectorId,
           persist: false,
           screenContexts: [],
+          scopes: ['all'],
         })
         .pipe(passThrough);
 
@@ -202,7 +182,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             role: MessageRole.Assistant,
             function_call: {
               name: 'context',
-              arguments: JSON.stringify({ queries: [], categories: [] }),
               trigger: MessageRole.Assistant,
             },
           },
@@ -243,7 +222,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('when creating a new conversation', async () => {
+    describe('when creating a new conversation', () => {
       let events: StreamingChatResponseEvent[];
 
       before(async () => {
@@ -281,17 +260,27 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             },
           },
         });
-        expect(omit(events[3], 'conversation.id', 'conversation.last_updated')).to.eql({
+
+        expect(
+          omit(
+            events[3],
+            'conversation.id',
+            'conversation.last_updated',
+            'conversation.token_count'
+          )
+        ).to.eql({
           type: StreamingChatResponseEventType.ConversationCreate,
           conversation: {
             title: 'My generated title',
-            token_count: {
-              completion: 7,
-              prompt: 2262,
-              total: 2269,
-            },
           },
         });
+
+        const tokenCount = (events[3] as ConversationCreateEvent).conversation.token_count!;
+
+        expect(tokenCount.completion).to.be.greaterThan(0);
+        expect(tokenCount.prompt).to.be.greaterThan(0);
+
+        expect(tokenCount.total).to.eql(tokenCount.completion + tokenCount.prompt);
       });
 
       after(async () => {
@@ -301,7 +290,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         )[0]?.conversation.id;
 
         await observabilityAIAssistantAPIClient
-          .writeUser({
+          .admin({
             endpoint: 'DELETE /internal/observability_ai_assistant/conversation/{conversationId}',
             params: {
               path: {
@@ -313,7 +302,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('after executing a screen context action', async () => {
+    describe('after executing a screen context action', () => {
       let events: StreamingChatResponseEvent[];
 
       before(async () => {
@@ -377,7 +366,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         ).to.eql(0);
 
         const conversations = await observabilityAIAssistantAPIClient
-          .writeUser({
+          .editor({
             endpoint: 'POST /internal/observability_ai_assistant/conversations',
           })
           .expect(200);
@@ -386,26 +375,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('when updating an existing conversation', async () => {
+    describe('when updating an existing conversation', () => {
       let conversationCreatedEvent: ConversationCreateEvent;
       let conversationUpdatedEvent: ConversationUpdateEvent;
 
-      function getConversationCreatedEvent(body: Readable | string) {
-        const decodedEvents = decodeEvents(body);
-        return decodedEvents.find(
-          (event) => event.type === StreamingChatResponseEventType.ConversationCreate
-        ) as ConversationCreateEvent;
-      }
-
-      function getConversationUpdatedEvent(body: Readable | string) {
-        const decodedEvents = decodeEvents(body);
-        return decodedEvents.find(
-          (event) => event.type === StreamingChatResponseEventType.ConversationUpdate
-        ) as ConversationUpdateEvent;
-      }
-
       before(async () => {
-        proxy
+        void proxy
           .intercept('conversation_title', (body) => isFunctionTitleRequest(body), [
             {
               function_call: {
@@ -414,14 +389,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               },
             },
           ])
-          .complete();
+          .completeAfterIntercept();
 
-        proxy
+        void proxy
           .intercept('conversation', (body) => !isFunctionTitleRequest(body), 'Good morning, sir!')
-          .complete();
+          .completeAfterIntercept();
 
         const createResponse = await observabilityAIAssistantAPIClient
-          .writeUser({
+          .editor({
             endpoint: 'POST /internal/observability_ai_assistant/chat/complete',
             params: {
               body: {
@@ -429,6 +404,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 connectorId,
                 persist: true,
                 screenContexts: [],
+                scopes: ['observability'],
               },
             },
           })
@@ -439,7 +415,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         conversationCreatedEvent = getConversationCreatedEvent(createResponse.body);
 
         const conversationId = conversationCreatedEvent.conversation.id;
-        const fullConversation = await observabilityAIAssistantAPIClient.readUser({
+        const fullConversation = await observabilityAIAssistantAPIClient.editor({
           endpoint: 'GET /internal/observability_ai_assistant/conversation/{conversationId}',
           params: {
             path: {
@@ -448,12 +424,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           },
         });
 
-        proxy
+        void proxy
           .intercept('conversation', (body) => !isFunctionTitleRequest(body), 'Good night, sir!')
-          .complete();
+          .completeAfterIntercept();
 
         const updatedResponse = await observabilityAIAssistantAPIClient
-          .writeUser({
+          .editor({
             endpoint: 'POST /internal/observability_ai_assistant/chat/complete',
             params: {
               body: {
@@ -471,6 +447,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 persist: true,
                 screenContexts: [],
                 conversationId,
+                scopes: ['observability'],
               },
             },
           })
@@ -483,7 +460,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       after(async () => {
         await observabilityAIAssistantAPIClient
-          .writeUser({
+          .editor({
             endpoint: 'DELETE /internal/observability_ai_assistant/conversation/{conversationId}',
             params: {
               path: {
@@ -495,36 +472,19 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('has correct token count for a new conversation', async () => {
-        expect(conversationCreatedEvent.conversation.token_count).to.eql({
-          completion: 21,
-          prompt: 2262,
-          total: 2283,
-        });
+        expect(conversationCreatedEvent.conversation.token_count?.completion).to.be.greaterThan(0);
+        expect(conversationCreatedEvent.conversation.token_count?.prompt).to.be.greaterThan(0);
+        expect(conversationCreatedEvent.conversation.token_count?.total).to.be.greaterThan(0);
       });
 
       it('has correct token count for the updated conversation', async () => {
-        expect(conversationUpdatedEvent.conversation.token_count).to.eql({
-          completion: 31,
-          prompt: 4522,
-          total: 4553,
-        });
+        expect(conversationUpdatedEvent.conversation.token_count!.total).to.be.greaterThan(
+          conversationCreatedEvent.conversation.token_count!.total
+        );
       });
     });
 
     // todo
     it.skip('executes a function', async () => {});
   });
-}
-
-function decodeEvents(body: Readable | string) {
-  return String(body)
-    .split('\n')
-    .map((line) => line.trim())
-    .filter(Boolean)
-    .map((line) => JSON.parse(line) as StreamingChatResponseEvent);
-}
-
-function isFunctionTitleRequest(body: string) {
-  const parsedBody = JSON.parse(body) as OpenAI.Chat.ChatCompletionCreateParamsNonStreaming;
-  return parsedBody.functions?.find((fn) => fn.name === 'title_conversation') !== undefined;
 }

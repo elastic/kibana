@@ -940,6 +940,26 @@
         },
         {
           "parentPluginId": "licensing",
+          "id": "def-public.LicensingPluginStart.getLicense",
+          "type": "Function",
+          "tags": [],
+          "label": "getLicense",
+          "description": [
+            "\nRetrieves the {@link ILicense | licensing information}"
+          ],
+          "signature": [
+            "() => Promise<",
+            "ILicense",
+            ">"
+          ],
+          "path": "x-pack/plugins/licensing/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "licensing",
           "id": "def-public.LicensingPluginStart.refresh",
           "type": "Function",
           "tags": [],
@@ -1003,9 +1023,9 @@
           "<P, Q, B, Context, any, ",
           {
             "pluginId": "@kbn/core-http-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.KibanaResponseFactory",
+            "section": "def-server.KibanaResponseFactory",
             "text": "KibanaResponseFactory"
           },
           ">) => ",
@@ -1013,9 +1033,9 @@
           "<P, Q, B, Context, any, ",
           {
             "pluginId": "@kbn/core-http-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.KibanaResponseFactory",
+            "section": "def-server.KibanaResponseFactory",
             "text": "KibanaResponseFactory"
           },
           ">"
@@ -1057,9 +1077,9 @@
               "<P, Q, B, Context, any, ",
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.KibanaResponseFactory",
+                "section": "def-server.KibanaResponseFactory",
                 "text": "KibanaResponseFactory"
               },
               ">"
@@ -2187,12 +2207,12 @@
               "path": "x-pack/plugins/aiops/server/plugin.ts"
             },
             {
-              "plugin": "ml",
-              "path": "x-pack/plugins/ml/server/plugin.ts"
-            },
-            {
               "plugin": "remoteClusters",
               "path": "x-pack/plugins/remote_clusters/server/plugin.ts"
+            },
+            {
+              "plugin": "ml",
+              "path": "x-pack/plugins/ml/server/plugin.ts"
             },
             {
               "plugin": "graph",
@@ -2203,12 +2223,12 @@
               "path": "x-pack/plugins/index_lifecycle_management/server/services/license.ts"
             },
             {
-              "plugin": "mapsEms",
-              "path": "src/plugins/maps_ems/server/plugin.ts"
-            },
-            {
               "plugin": "osquery",
               "path": "x-pack/plugins/osquery/server/handlers/action/create_action_service.ts"
+            },
+            {
+              "plugin": "securitySolution",
+              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/utils/get_is_alert_suppression_active.ts"
             },
             {
               "plugin": "securitySolution",
@@ -2259,6 +2279,18 @@
               "path": "x-pack/plugins/upgrade_assistant/server/lib/reindexing/reindex_service.test.ts"
             },
             {
+              "plugin": "securitySolution",
+              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/utils/get_is_alert_suppression_active.test.ts"
+            },
+            {
+              "plugin": "securitySolution",
+              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/utils/get_is_alert_suppression_active.test.ts"
+            },
+            {
+              "plugin": "securitySolution",
+              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/utils/get_is_alert_suppression_active.test.ts"
+            },
+            {
               "plugin": "actions",
               "path": "x-pack/plugins/actions/server/lib/license_state.test.ts"
             },
@@ -2296,12 +2328,7 @@
           "deprecated": true,
           "removeBy": "8.8.0",
           "trackAdoption": false,
-          "references": [
-            {
-              "plugin": "mapsEms",
-              "path": "src/plugins/maps_ems/server/plugin.ts"
-            }
-          ],
+          "references": [],
           "children": [],
           "returnComment": []
         },
@@ -2363,6 +2390,26 @@
         },
         {
           "parentPluginId": "licensing",
+          "id": "def-server.LicensingPluginStart.getLicense",
+          "type": "Function",
+          "tags": [],
+          "label": "getLicense",
+          "description": [
+            "\nRetrieves the {@link ILicense | licensing information}"
+          ],
+          "signature": [
+            "() => Promise<",
+            "ILicense",
+            ">"
+          ],
+          "path": "x-pack/plugins/licensing/server/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "licensing",
           "id": "def-server.LicensingPluginStart.refresh",
           "type": "Function",
           "tags": [],
@@ -2394,9 +2441,9 @@
             "(clusterClient: ",
             {
               "pluginId": "@kbn/core-elasticsearch-server",
-              "scope": "common",
+              "scope": "server",
               "docId": "kibKbnCoreElasticsearchServerPluginApi",
-              "section": "def-common.IClusterClient",
+              "section": "def-server.IClusterClient",
               "text": "IClusterClient"
             },
             ", pollingFrequency: number) => { license$: ",
@@ -2421,9 +2468,9 @@
               "signature": [
                 {
                   "pluginId": "@kbn/core-elasticsearch-server",
-                  "scope": "common",
+                  "scope": "server",
                   "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                  "section": "def-common.IClusterClient",
+                  "section": "def-server.IClusterClient",
                   "text": "IClusterClient"
                 }
               ],

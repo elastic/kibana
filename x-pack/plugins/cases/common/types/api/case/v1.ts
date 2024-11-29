@@ -29,7 +29,11 @@ import {
   NonEmptyString,
   paginationSchema,
 } from '../../../schema';
-import { CaseCustomFieldToggleRt, CustomFieldTextTypeRt } from '../../domain';
+import {
+  CaseCustomFieldToggleRt,
+  CustomFieldTextTypeRt,
+  CustomFieldNumberTypeRt,
+} from '../../domain';
 import {
   CaseRt,
   CaseSettingsRt,
@@ -41,7 +45,10 @@ import {
 import { CaseConnectorRt } from '../../domain/connector/v1';
 import { CaseUserProfileRt, UserRt } from '../../domain/user/v1';
 import { CasesStatusResponseRt } from '../stats/v1';
-import { CaseCustomFieldTextWithValidationValueRt } from '../custom_field/v1';
+import {
+  CaseCustomFieldTextWithValidationValueRt,
+  CaseCustomFieldNumberWithValidationValueRt,
+} from '../custom_field/v1';
 
 const CaseCustomFieldTextWithValidationRt = rt.strict({
   key: rt.string,
@@ -49,7 +56,17 @@ const CaseCustomFieldTextWithValidationRt = rt.strict({
   value: rt.union([CaseCustomFieldTextWithValidationValueRt('value'), rt.null]),
 });
 
-const CustomFieldRt = rt.union([CaseCustomFieldTextWithValidationRt, CaseCustomFieldToggleRt]);
+const CaseCustomFieldNumberWithValidationRt = rt.strict({
+  key: rt.string,
+  type: CustomFieldNumberTypeRt,
+  value: rt.union([CaseCustomFieldNumberWithValidationValueRt({ fieldName: 'value' }), rt.null]),
+});
+
+const CustomFieldRt = rt.union([
+  CaseCustomFieldTextWithValidationRt,
+  CaseCustomFieldToggleRt,
+  CaseCustomFieldNumberWithValidationRt,
+]);
 
 export const CaseRequestCustomFieldsRt = limitedArraySchema({
   codec: CustomFieldRt,
@@ -57,6 +74,81 @@ export const CaseRequestCustomFieldsRt = limitedArraySchema({
   min: 0,
   max: MAX_CUSTOM_FIELDS_PER_CASE,
 });
+
+export const CaseBaseOptionalFieldsRequestRt = rt.exact(
+  rt.partial({
+    /**
+     * The description of the case
+     */
+    description: limitedStringSchema({
+      fieldName: 'description',
+      min: 1,
+      max: MAX_DESCRIPTION_LENGTH,
+    }),
+    /**
+     * The identifying strings for filter a case
+     */
+    tags: limitedArraySchema({
+      codec: limitedStringSchema({ fieldName: 'tag', min: 1, max: MAX_LENGTH_PER_TAG }),
+      min: 0,
+      max: MAX_TAGS_PER_CASE,
+      fieldName: 'tags',
+    }),
+    /**
+     * The title of a case
+     */
+    title: limitedStringSchema({ fieldName: 'title', min: 1, max: MAX_TITLE_LENGTH }),
+    /**
+     * The external system that the case can be synced with
+     */
+    connector: CaseConnectorRt,
+    /**
+     * The severity of the case
+     */
+    severity: CaseSeverityRt,
+    /**
+     * The users assigned to this case
+     */
+    assignees: limitedArraySchema({
+      codec: CaseUserProfileRt,
+      fieldName: 'assignees',
+      min: 0,
+      max: MAX_ASSIGNEES_PER_CASE,
+    }),
+    /**
+     * The category of the case.
+     */
+    category: rt.union([
+      limitedStringSchema({ fieldName: 'category', min: 1, max: MAX_CATEGORY_LENGTH }),
+      rt.null,
+    ]),
+    /**
+     * Custom fields of the case
+     */
+    customFields: CaseRequestCustomFieldsRt,
+    /**
+     * The alert sync settings
+     */
+    settings: CaseSettingsRt,
+  })
+);
+
+export const CaseRequestFieldsRt = rt.intersection([
+  CaseBaseOptionalFieldsRequestRt,
+  rt.exact(
+    rt.partial({
+      /**
+       * The current status of the case (open, closed, in-progress)
+       */
+      status: CaseStatusRt,
+
+      /**
+       * The plugin owner of the case
+       */
+      owner: rt.string,
+    })
+  ),
+]);
 
 /**
  * Create case
@@ -356,71 +448,7 @@ export const CasesBulkGetResponseRt = rt.strict({
  * Update cases
  */
 export const CasePatchRequestRt = rt.intersection([
-  rt.exact(
-    rt.partial({
-      /**
-       * The description of the case
-       */
-      description: limitedStringSchema({
-        fieldName: 'description',
-        min: 1,
-        max: MAX_DESCRIPTION_LENGTH,
-      }),
-      /**
-       * The current status of the case (open, closed, in-progress)
-       */
-      status: CaseStatusRt,
-      /**
-       * The identifying strings for filter a case
-       */
-      tags: limitedArraySchema({
-        codec: limitedStringSchema({ fieldName: 'tag', min: 1, max: MAX_LENGTH_PER_TAG }),
-        min: 0,
-        max: MAX_TAGS_PER_CASE,
-        fieldName: 'tags',
-      }),
-      /**
-       * The title of a case
-       */
-      title: limitedStringSchema({ fieldName: 'title', min: 1, max: MAX_TITLE_LENGTH }),
-      /**
-       * The external system that the case can be synced with
-       */
-      connector: CaseConnectorRt,
-      /**
-       * The alert sync settings
-       */
-      settings: CaseSettingsRt,
-      /**
-       * The plugin owner of the case
-       */
-      owner: rt.string,
-      /**
-       * The severity of the case
-       */
-      severity: CaseSeverityRt,
-      /**
-       * The users assigned to this case
-       */
-      assignees: limitedArraySchema({
-        codec: CaseUserProfileRt,
-        fieldName: 'assignees',
-        min: 0,
-        max: MAX_ASSIGNEES_PER_CASE,
-      }),
-      /**
-       * The category of the case.
-       */
-      category: rt.union([
-        limitedStringSchema({ fieldName: 'category', min: 1, max: MAX_CATEGORY_LENGTH }),
-        rt.null,
-      ]),
-      /**
-       * Custom fields of the case
-       */
-      customFields: CaseRequestCustomFieldsRt,
-    })
-  ),
+  CaseRequestFieldsRt,
   /**
    * The saved object ID and version
    */

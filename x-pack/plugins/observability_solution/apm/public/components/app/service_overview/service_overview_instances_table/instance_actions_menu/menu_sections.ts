@@ -12,8 +12,8 @@ import { AllDatasetsLocatorParams } from '@kbn/deeplinks-observability/locators'
 import type { LocatorPublic } from '@kbn/share-plugin/public';
 import { NodeLogsLocatorParams } from '@kbn/logs-shared-plugin/common';
 import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
+import { type AssetDetailsLocator } from '@kbn/observability-shared-plugin/common';
 import { APIReturnType } from '../../../../../services/rest/create_call_apm_api';
-import { getInfraHref } from '../../../../shared/links/infra_link';
 import {
   Action,
   getNonEmptySections,
@@ -25,14 +25,14 @@ type InstaceDetails =
 
 function getInfraMetricsQuery(timestamp?: string) {
   if (!timestamp) {
-    return { from: 0, to: 0 };
+    return undefined;
   }
   const timeInMilliseconds = new Date(timestamp).getTime();
   const fiveMinutes = moment.duration(5, 'minutes').asMilliseconds();
 
   return {
-    from: timeInMilliseconds - fiveMinutes,
-    to: timeInMilliseconds + fiveMinutes,
+    from: new Date(timeInMilliseconds - fiveMinutes).toISOString(),
+    to: new Date(timeInMilliseconds + fiveMinutes).toISOString(),
   };
 }
 
@@ -43,6 +43,7 @@ export function getMenuSections({
   metricsHref,
   allDatasetsLocator,
   nodeLogsLocator,
+  assetDetailsLocator,
 }: {
   instanceDetails: InstaceDetails;
   basePath: IBasePath;
@@ -50,6 +51,7 @@ export function getMenuSections({
   metricsHref: string;
   allDatasetsLocator: LocatorPublic<AllDatasetsLocatorParams>;
   nodeLogsLocator: LocatorPublic<NodeLogsLocatorParams>;
+  assetDetailsLocator?: AssetDetailsLocator;
 }) {
   const podId = instanceDetails.kubernetes?.pod?.uid;
   const containerId = instanceDetails.container?.id;
@@ -70,39 +72,40 @@ export function getMenuSections({
     time,
   });
 
+  const hasPodLink = !!podId && !!assetDetailsLocator;
+  const hasContainerLink = !!containerId && !!assetDetailsLocator;
+
   const podActions: Action[] = [
     {
       key: 'podLogs',
-      label: i18n.translate(
-        'xpack.apm.serviceOverview.instancesTable.actionMenus.podLogs',
-        { defaultMessage: 'Pod logs' }
-      ),
+      label: i18n.translate('xpack.apm.serviceOverview.instancesTable.actionMenus.podLogs', {
+        defaultMessage: 'Pod logs',
+      }),
       href: podLogsHref,
       condition: !!podId,
     },
     {
       key: 'podMetrics',
-      label: i18n.translate(
-        'xpack.apm.serviceOverview.instancesTable.actionMenus.podMetrics',
-        { defaultMessage: 'Pod metrics' }
-      ),
-      href: getInfraHref({
-        app: 'metrics',
-        basePath,
-        path: `/link-to/pod-detail/${podId}`,
-        query: infraMetricsQuery,
+      label: i18n.translate('xpack.apm.serviceOverview.instancesTable.actionMenus.podMetrics', {
+        defaultMessage: 'Pod metrics',
       }),
-      condition: !!podId,
+      href: hasPodLink
+        ? assetDetailsLocator.getRedirectUrl({
+            assetId: podId,
+            assetType: 'pod',
+            assetDetails: { dateRange: infraMetricsQuery },
+          })
+        : undefined,
+      condition: hasPodLink,
     },
   ];
 
   const containerActions: Action[] = [
     {
       key: 'containerLogs',
-      label: i18n.translate(
-        'xpack.apm.serviceOverview.instancesTable.actionMenus.containerLogs',
-        { defaultMessage: 'Container logs' }
-      ),
+      label: i18n.translate('xpack.apm.serviceOverview.instancesTable.actionMenus.containerLogs', {
+        defaultMessage: 'Container logs',
+      }),
       href: containerLogsHref,
       condition: !!containerId,
     },
@@ -112,13 +115,14 @@ export function getMenuSections({
         'xpack.apm.serviceOverview.instancesTable.actionMenus.containerMetrics',
         { defaultMessage: 'Container metrics' }
       ),
-      href: getInfraHref({
-        app: 'metrics',
-        basePath,
-        path: `/link-to/container-detail/${containerId}`,
-        query: infraMetricsQuery,
-      }),
-      condition: !!containerId,
+      href: hasContainerLink
+        ? assetDetailsLocator.getRedirectUrl({
+            assetId: containerId,
+            assetType: 'container',
+            assetDetails: { dateRange: infraMetricsQuery },
+          })
+        : undefined,
+      condition: hasContainerLink,
     },
   ];
 
@@ -136,12 +140,9 @@ export function getMenuSections({
     },
     {
       key: 'analyzeRuntimeMetric',
-      label: i18n.translate(
-        'xpack.apm.serviceOverview.instancesTable.actionMenus.metrics',
-        {
-          defaultMessage: 'Metrics',
-        }
-      ),
+      label: i18n.translate('xpack.apm.serviceOverview.instancesTable.actionMenus.metrics', {
+        defaultMessage: 'Metrics',
+      }),
       href: metricsHref,
       condition: true,
     },
@@ -151,17 +152,13 @@ export function getMenuSections({
     observability: [
       {
         key: 'podDetails',
-        title: i18n.translate(
-          'xpack.apm.serviceOverview.instancesTable.actionMenus.pod.title',
-          {
-            defaultMessage: 'Pod details',
-          }
-        ),
+        title: i18n.translate('xpack.apm.serviceOverview.instancesTable.actionMenus.pod.title', {
+          defaultMessage: 'Pod details',
+        }),
         subtitle: i18n.translate(
           'xpack.apm.serviceOverview.instancesTable.actionMenus.pod.subtitle',
           {
-            defaultMessage:
-              'View logs and metrics for this pod to get further details.',
+            defaultMessage: 'View logs and metrics for this pod to get further details.',
           }
         ),
         actions: podActions,
@@ -177,8 +174,7 @@ export function getMenuSections({
         subtitle: i18n.translate(
           'xpack.apm.serviceOverview.instancesTable.actionMenus.container.subtitle',
           {
-            defaultMessage:
-              'View logs and metrics for this container to get further details.',
+            defaultMessage: 'View logs and metrics for this container to get further details.',
           }
         ),
         actions: containerActions,

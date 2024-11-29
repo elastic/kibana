@@ -20,6 +20,8 @@ import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { Filter } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import { dataTableSelectors, TableId } from '@kbn/securitysolution-data-table';
+import { dataViewSpecToViewBase } from '../../../../common/lib/kuery';
+import { useCalculateEntityRiskScore } from '../../../../entity_analytics/api/hooks/use_calculate_entity_risk_score';
 import {
   useAssetCriticalityData,
   useAssetCriticalityPrivileges,
@@ -53,17 +55,21 @@ import { getUsersDetailsPageFilters } from './helpers';
 import { showGlobalFilters } from '../../../../timelines/components/timeline/helpers';
 import { useGlobalFullScreen } from '../../../../common/containers/use_full_screen';
 import { timelineDefaults } from '../../../../timelines/store/defaults';
-import { useSourcererDataView } from '../../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../../sourcerer/containers';
 import {
   useDeepEqualSelector,
   useShallowEqualSelector,
 } from '../../../../common/hooks/use_selector';
 import { useInvalidFilterQuery } from '../../../../common/hooks/use_invalid_filter_query';
 import { LastEventTime } from '../../../../common/components/last_event_time';
-import { LastEventIndexKey } from '../../../../../common/search_strategy';
+import { LastEventIndexKey, RiskScoreEntity } from '../../../../../common/search_strategy';
 
 import { AnomalyTableProvider } from '../../../../common/components/ml/anomaly/anomaly_table_provider';
-import { UserOverview } from '../../../../overview/components/user_overview';
+import type { UserSummaryProps } from '../../../../overview/components/user_overview';
+import {
+  UserOverview,
+  USER_OVERVIEW_RISK_SCORE_QUERY_ID,
+} from '../../../../overview/components/user_overview';
 import { useObservedUserDetails } from '../../containers/users/observed_details';
 import { useQueryInspector } from '../../../../common/components/page/manage_query';
 import { scoreIntervalToDateTime } from '../../../../common/components/ml/score/score_interval_to_datetime';
@@ -72,7 +78,7 @@ import { UsersType } from '../../store/model';
 import { hasMlUserPermissions } from '../../../../../common/machine_learning/has_ml_user_permissions';
 import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
 import { EmptyPrompt } from '../../../../common/components/empty_prompt';
-import { useHasSecurityCapability } from '../../../../helper_hooks';
+import { useRefetchOverviewPageRiskScore } from '../../../../entity_analytics/api/hooks/use_refetch_overview_page_risk_score';
 
 const QUERY_ID = 'UsersDetailsQueryId';
 const ES_USER_FIELD = 'user.name';
@@ -82,7 +88,6 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
   usersDetailsPagePath,
 }) => {
   const dispatch = useDispatch();
-  const hasEntityAnalyticsCapability = useHasSecurityCapability('entity-analytics');
   const getTable = useMemo(() => dataTableSelectors.getTableByIdSelector(), []);
   const graphEventId = useShallowEqualSelector(
     (state) => (getTable(state, TableId.hostsPageEvents) ?? timelineDefaults).graphEventId
@@ -111,14 +116,13 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
     [detailName]
   );
 
-  const { indicesExist, indexPattern, selectedPatterns, sourcererDataView } =
-    useSourcererDataView();
+  const { indicesExist, selectedPatterns, sourcererDataView } = useSourcererDataView();
 
   const [rawFilteredQuery, kqlError] = useMemo(() => {
     try {
       return [
         buildEsQuery(
-          indexPattern,
+          dataViewSpecToViewBase(sourcererDataView),
           [query],
           [...usersDetailsPageFilters, ...globalFilters],
           getEsQueryConfig(uiSettings)
@@ -127,7 +131,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
     } catch (e) {
       return [undefined, e];
     }
-  }, [globalFilters, indexPattern, query, uiSettings, usersDetailsPageFilters]);
+  }, [globalFilters, sourcererDataView, query, uiSettings, usersDetailsPageFilters]);
 
   const stringifiedAdditionalFilters = JSON.stringify(rawFilteredQuery);
   useInvalidFilterQuery({
@@ -156,7 +160,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
 
   useQueryInspector({ setQuery, deleteQuery, refetch, inspect, loading, queryId: QUERY_ID });
 
-  const narrowDateRange = useCallback(
+  const narrowDateRange = useCallback<UserSummaryProps['narrowDateRange']>(
     (score, interval) => {
       const fromTo = scoreIntervalToDateTime(score, interval);
       dispatch(
@@ -180,10 +184,24 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
 
   const entity = useMemo(() => ({ type: 'user' as const, name: detailName }), [detailName]);
   const privileges = useAssetCriticalityPrivileges(entity.name);
+
+  const refetchRiskScore = useRefetchOverviewPageRiskScore(USER_OVERVIEW_RISK_SCORE_QUERY_ID);
+  const { calculateEntityRiskScore } = useCalculateEntityRiskScore(
+    RiskScoreEntity.user,
+    detailName,
+    { onSuccess: refetchRiskScore }
+  );
+
+  const additionalFilters = useMemo(
+    () => (rawFilteredQuery ? [rawFilteredQuery] : []),
+    [rawFilteredQuery]
+  );
+
   const canReadAssetCriticality = !!privileges.data?.has_read_permissions;
   const criticality = useAssetCriticalityData({
     entity,
     enabled: canReadAssetCriticality,
+    onChange: calculateEntityRiskScore,
   });
 
   return (
@@ -250,14 +268,14 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
                     <AlertsByStatus
                       signalIndexName={signalIndexName}
                       entityFilter={entityFilter}
-                      additionalFilters={rawFilteredQuery ? [rawFilteredQuery] : []}
+                      additionalFilters={additionalFilters}
                     />
                   </EuiFlexItem>
                   <EuiFlexItem>
                     <AlertCountByRuleByStatus
                       entityFilter={entityFilter}
                       signalIndexName={signalIndexName}
-                      additionalFilters={rawFilteredQuery ? [rawFilteredQuery] : []}
+                      additionalFilters={additionalFilters}
                     />
                   </EuiFlexItem>
                 </EuiFlexGroup>
@@ -266,11 +284,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
             )}
 
             <TabNavigation
-              navTabs={navTabsUsersDetails(
-                detailName,
-                hasMlUserPermissions(capabilities),
-                hasEntityAnalyticsCapability
-              )}
+              navTabs={navTabsUsersDetails(detailName, hasMlUserPermissions(capabilities))}
             />
             <EuiSpacer />
             <UsersDetailsTabs
@@ -279,7 +293,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
               filterQuery={stringifiedAdditionalFilters}
               from={from}
               indexNames={selectedPatterns}
-              indexPattern={indexPattern}
+              dataViewSpec={sourcererDataView}
               isInitializing={isInitializing}
               userDetailFilter={usersDetailsPageFilters}
               setQuery={setQuery}

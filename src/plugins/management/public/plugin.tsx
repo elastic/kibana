@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n as kbnI18n } from '@kbn/i18n';
@@ -118,6 +119,7 @@ export class ManagementPlugin
       async mount(params: AppMountParameters) {
         const { renderApp } = await import('./application');
         const [coreStart, deps] = await core.getStartServices();
+        const chromeStyle$ = coreStart.chrome.getChromeStyle$();
 
         return renderApp(params, {
           sections: getSectionsServiceStartPrivate(),
@@ -129,13 +131,22 @@ export class ManagementPlugin
               const [, ...trailingBreadcrumbs] = newBreadcrumbs;
               deps.serverless.setBreadcrumbs(trailingBreadcrumbs);
             } else {
-              coreStart.chrome.setBreadcrumbs(newBreadcrumbs);
+              coreStart.chrome.setBreadcrumbs(newBreadcrumbs, {
+                project: { value: newBreadcrumbs, absolute: true },
+              });
             }
           },
           isSidebarEnabled$: managementPlugin.isSidebarEnabled$,
           cardsNavigationConfig$: managementPlugin.cardsNavigationConfig$,
+          chromeStyle$,
         });
       },
+    });
+
+    core.getStartServices().then(([coreStart]) => {
+      coreStart.chrome
+        .getChromeStyle$()
+        .subscribe((style) => this.isSidebarEnabled$.next(style === 'classic'));
     });
 
     return {
@@ -160,8 +171,6 @@ export class ManagementPlugin
     }
 
     return {
-      setIsSidebarEnabled: (isSidebarEnabled: boolean) =>
-        this.isSidebarEnabled$.next(isSidebarEnabled),
       setupCardsNavigation: ({ enabled, hideLinksTo, extendCardNavDefinitions }) =>
         this.cardsNavigationConfig$.next({ enabled, hideLinksTo, extendCardNavDefinitions }),
     };

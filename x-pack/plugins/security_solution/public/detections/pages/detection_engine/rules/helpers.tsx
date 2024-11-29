@@ -22,6 +22,13 @@ import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
 import type { Filter } from '@kbn/es-query';
 import type { ActionVariables } from '@kbn/triggers-actions-ui-plugin/public';
 import { requiredOptional } from '@kbn/zod-helpers';
+import {
+  ALERT_SUPPRESSION_FIELDS_FIELD_NAME,
+  ALERT_SUPPRESSION_DURATION_TYPE_FIELD_NAME,
+  ALERT_SUPPRESSION_DURATION_FIELD_NAME,
+  ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME,
+} from '../../../../detection_engine/rule_creation/components/alert_suppression_edit';
+import { THRESHOLD_ALERT_SUPPRESSION_ENABLED } from '../../../../detection_engine/rule_creation/components/threshold_alert_suppression_edit';
 import type { ResponseAction } from '../../../../../common/api/detection_engine/model/rule_response_actions';
 import { normalizeThresholdField } from '../../../../../common/detection_engine/utils';
 import { assertUnreachable } from '../../../../../common/utility_types';
@@ -36,7 +43,7 @@ import type {
   ScheduleStepRule,
   ActionsStepRule,
 } from './types';
-import { DataSourceType, GroupByOptions } from './types';
+import { DataSourceType, AlertSuppressionDurationType } from './types';
 import { severityOptions } from '../../../../detection_engine/rule_creation_ui/components/step_about_rule/data';
 import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../common/detection_engine/constants';
 import type { RuleAction, RuleResponse } from '../../../../../common/api/detection_engine';
@@ -156,27 +163,28 @@ export const getDefineStepsData = (rule: RuleResponse): DefineStepRule => ({
       ? convertHistoryStartToSize(rule.history_window_start)
       : '7d',
   shouldLoadQueryDynamically: Boolean(rule.type === 'saved_query' && rule.saved_id),
-  groupByFields:
+  [ALERT_SUPPRESSION_FIELDS_FIELD_NAME]:
     ('alert_suppression' in rule &&
       rule.alert_suppression &&
       'group_by' in rule.alert_suppression &&
       rule.alert_suppression.group_by) ||
     [],
-  groupByRadioSelection:
+  [ALERT_SUPPRESSION_DURATION_TYPE_FIELD_NAME]:
     'alert_suppression' in rule && rule.alert_suppression?.duration
-      ? GroupByOptions.PerTimePeriod
-      : GroupByOptions.PerRuleExecution,
-  groupByDuration: ('alert_suppression' in rule && rule.alert_suppression?.duration) || {
+      ? AlertSuppressionDurationType.PerTimePeriod
+      : AlertSuppressionDurationType.PerRuleExecution,
+  [ALERT_SUPPRESSION_DURATION_FIELD_NAME]: ('alert_suppression' in rule &&
+    rule.alert_suppression?.duration) || {
     value: 5,
     unit: 'm',
   },
-  suppressionMissingFields:
+  [ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME]:
     ('alert_suppression' in rule &&
       rule.alert_suppression &&
       'missing_fields_strategy' in rule.alert_suppression &&
       rule.alert_suppression.missing_fields_strategy) ||
     DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY,
-  enableThresholdSuppression: Boolean(
+  [THRESHOLD_ALERT_SUPPRESSION_ENABLED]: Boolean(
     'alert_suppression' in rule && rule.alert_suppression?.duration
   ),
 });
@@ -199,6 +207,23 @@ export const getScheduleStepsData = (rule: RuleResponse): ScheduleStepRule => {
   };
 };
 
+/**
+ * Converts seconds to duration string, like "1h", "30m" or "15s"
+ */
+export const secondsToDurationString = (seconds: number): string => {
+  if (seconds === 0) {
+    return `0s`;
+  }
+
+  if (seconds % 3600 === 0) {
+    return `${seconds / 3600}h`;
+  } else if (seconds % 60 === 0) {
+    return `${seconds / 60}m`;
+  } else {
+    return `${seconds}s`;
+  }
+};
+
 export const getHumanizedDuration = (from: string, interval: string): string => {
   const fromValue = dateMath.parse(from) ?? moment();
   const intervalValue = dateMath.parse(`now-${interval}`) ?? moment();
@@ -208,21 +233,12 @@ export const getHumanizedDuration = (from: string, interval: string): string => 
   // Basing calculations off floored seconds count as moment durations weren't precise
   const intervalDuration = Math.floor(fromDuration.asSeconds());
   // For consistency of display value
-  if (intervalDuration === 0) {
-    return `0s`;
-  }
 
-  if (intervalDuration % 3600 === 0) {
-    return `${intervalDuration / 3600}h`;
-  } else if (intervalDuration % 60 === 0) {
-    return `${intervalDuration / 60}m`;
-  } else {
-    return `${intervalDuration}s`;
-  }
+  return secondsToDurationString(intervalDuration);
 };
 
 export const getAboutStepsData = (rule: RuleResponse, detailsView: boolean): AboutStepRule => {
-  const { name, description, note } = determineDetailsValue(rule, detailsView);
+  const { name, description, note, setup } = determineDetailsValue(rule, detailsView);
   const {
     author,
     building_block_type: buildingBlockType,
@@ -240,6 +256,7 @@ export const getAboutStepsData = (rule: RuleResponse, detailsView: boolean): Abo
     investigation_fields: investigationFields,
     tags,
     threat,
+    max_signals: maxSignals,
   } = rule;
   const threatIndicatorPath =
     'threat_indicator_path' in rule ? rule.threat_indicator_path : undefined;
@@ -272,6 +289,8 @@ export const getAboutStepsData = (rule: RuleResponse, detailsView: boolean): Abo
     investigationFields: investigationFields?.field_names ?? [],
     threat: threat as Threats,
     threatIndicatorPath,
+    maxSignals,
+    setup,
   };
 };
 
@@ -296,13 +315,13 @@ export const fillEmptySeverityMappings = (mappings: SeverityMapping): SeverityMa
 export const determineDetailsValue = (
   rule: RuleResponse,
   detailsView: boolean
-): Pick<RuleResponse, 'name' | 'description' | 'note'> => {
-  const { name, description, note } = rule;
+): Pick<RuleResponse, 'name' | 'description' | 'note' | 'setup'> => {
+  const { name, description, note, setup } = rule;
   if (detailsView) {
-    return { name: '', description: '', note: '' };
+    return { name: '', description: '', note: '', setup: '' };
   }
 
-  return { name, description, note: note ?? '' };
+  return { name, description, setup, note: note ?? '' };
 };
 
 export const getModifiedAboutDetailsData = (rule: RuleResponse): AboutStepRuleDetails => ({

@@ -16,12 +16,17 @@ import { createAppMockRenderer } from '../../common/mock';
 import { basicFileMock } from '../../containers/mock';
 import { FileAttachmentEvent } from './file_attachment_event';
 
-describe('FileAttachmentEvent', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/174661
+describe.skip('FileAttachmentEvent', () => {
   let appMockRender: AppMockRenderer;
 
   beforeEach(() => {
     jest.clearAllMocks();
     appMockRender = createAppMockRenderer();
+  });
+
+  afterEach(async () => {
+    await appMockRender.clearQueryCache();
   });
 
   it('renders clickable name', async () => {
@@ -33,7 +38,7 @@ describe('FileAttachmentEvent', () => {
 
     expect(nameLink).toBeInTheDocument();
 
-    userEvent.click(nameLink);
+    await userEvent.click(nameLink);
 
     expect(await screen.findByTestId('cases-files-image-preview')).toBeInTheDocument();
   });

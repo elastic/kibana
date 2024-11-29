@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks/dom';
+import { renderHook, act } from '@testing-library/react';
 import { useUrlQuery } from './use_url_query';
 import { useLocation, useHistory } from 'react-router-dom';
-import { encodeQuery } from '../navigation/query_utils';
+import { encodeQuery } from '@kbn/cloud-security-posture';
 
 jest.mock('react-router-dom', () => ({
   useHistory: jest.fn(),

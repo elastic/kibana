@@ -29,7 +29,6 @@
     "@kbn/kibana-react-plugin",
     "@kbn/i18n-react",
     "@kbn/analytics",
-    "@kbn/rison",
     "@kbn/es-query",
     "@kbn/config-schema",
     "@kbn/security-plugin",
@@ -37,7 +36,13 @@
     "@kbn/utility-types",
     "@kbn/shared-ux-router",
     "@kbn/logs-shared-plugin",
-    "@kbn/shared-ux-link-redirect-app"
+    "@kbn/shared-ux-link-redirect-app",
+    "@kbn/react-kibana-context-render",
+    "@kbn/data-views-plugin",
+    "@kbn/deeplinks-observability",
+    "@kbn/core-logging-server-mocks",
+    "@kbn/core-http-server-mocks",
+    "@kbn/core-http-server-utils"
   ],
   "exclude": [
     "target/**/*",

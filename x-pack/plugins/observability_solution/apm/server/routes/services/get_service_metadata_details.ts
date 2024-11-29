@@ -7,37 +7,32 @@
 
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import { FlattenedApmEvent } from '@kbn/apm-data-access-plugin/server/utils/unflatten_known_fields';
+import { getAgentName } from '@kbn/elastic-agent-utils';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import {
-  AGENT,
-  CONTAINER,
-  CLOUD,
   CLOUD_AVAILABILITY_ZONE,
   CLOUD_REGION,
   CLOUD_MACHINE_TYPE,
   CLOUD_SERVICE_NAME,
   CONTAINER_ID,
-  HOST,
-  KUBERNETES,
-  SERVICE,
   SERVICE_NAME,
   SERVICE_NODE_NAME,
   SERVICE_VERSION,
   FAAS_ID,
   FAAS_TRIGGER_TYPE,
-  LABEL_TELEMETRY_AUTO_VERSION,
+  AGENT_NAME,
+  TELEMETRY_SDK_LANGUAGE,
+  TELEMETRY_SDK_NAME,
+  AGENT_VERSION,
+  TELEMETRY_SDK_VERSION,
 } from '../../../common/es_fields/apm';
-
 import { ContainerType } from '../../../common/service_metadata';
-import { TransactionRaw } from '../../../typings/es_schemas/raw/transaction_raw';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { should } from './get_service_metadata_icons';
-import { isOpenTelemetryAgentName } from '../../../common/agent_name';
-
-type ServiceMetadataDetailsRaw = Pick<
-  TransactionRaw,
-  'service' | 'agent' | 'host' | 'container' | 'kubernetes' | 'cloud' | 'labels'
->;
+import { isOpenTelemetryAgentName, hasOpenTelemetryPrefix } from '../../../common/agent_name';
+import { maybe } from '../../../common/utils/maybe';
 
 export interface ServiceMetadataDetails {
   service?: {
@@ -106,28 +101,12 @@ export async function getServiceMetadataDetails({
 
   const params = {
     apm: {
-      events: [
-        ProcessorEvent.transaction,
-        ProcessorEvent.error,
-        ProcessorEvent.metric,
-      ],
+      events: [ProcessorEvent.transaction, ProcessorEvent.error, ProcessorEvent.metric],
     },
-    sort: [
-      { _score: { order: 'desc' as const } },
-      { '@timestamp': { order: 'desc' as const } },
-    ],
+    sort: [{ _score: { order: 'desc' as const } }, { '@timestamp': { order: 'desc' as const } }],
     body: {
       track_total_hits: 1,
       size: 1,
-      _source: [
-        SERVICE,
-        AGENT,
-        HOST,
-        CONTAINER,
-        KUBERNETES,
-        CLOUD,
-        LABEL_TELEMETRY_AUTO_VERSION,
-      ],
       query: { bool: { filter, should } },
       aggs: {
         serviceVersions: {
@@ -181,15 +160,13 @@ export async function getServiceMetadataDetails({
         },
         totalNumberInstances: { cardinality: { field: SERVICE_NODE_NAME } },
       },
+      fields: ['*'],
     },
   };
 
-  const response = await apmEventClient.search(
-    'get_service_metadata_details',
-    params
-  );
+  const data = await apmEventClient.search('get_service_metadata_details', params);
 
-  if (response.hits.total.value === 0) {
+  if (data.hits.total.value === 0) {
     return {
       service: undefined,
       container: undefined,
@@ -197,31 +174,47 @@ export async function getServiceMetadataDetails({
     };
   }
 
-  const { service, agent, host, kubernetes, container, cloud, labels } =
-    response.hits.hits[0]._source as ServiceMetadataDetailsRaw;
+  const response = structuredClone(data);
+  response.hits.hits[0].fields[AGENT_NAME] = getAgentName(
+    data.hits.hits[0]?.fields?.[AGENT_NAME] as unknown as string | null,
+    data.hits.hits[0]?.fields?.[TELEMETRY_SDK_LANGUAGE] as unknown as string | null,
+    data.hits.hits[0]?.fields?.[TELEMETRY_SDK_NAME] as unknown as string | null
+  ) as unknown as unknown[];
+  response.hits.hits[0].fields[AGENT_VERSION] =
+    response.hits.hits[0].fields[AGENT_VERSION] ??
+    data.hits.hits[0]?.fields?.[TELEMETRY_SDK_VERSION];
+
+  const event = unflattenKnownApmEventFields(
+    maybe(response.hits.hits[0])?.fields as undefined | FlattenedApmEvent
+  );
+
+  if (!event) {
+    return {
+      service: undefined,
+      container: undefined,
+      cloud: undefined,
+    };
+  }
+
+  const { service, agent, host, kubernetes, container, cloud, labels } = event;
 
   const serviceMetadataDetails = {
-    versions: response.aggregations?.serviceVersions.buckets.map(
-      (bucket) => bucket.key as string
-    ),
+    versions: response.aggregations?.serviceVersions.buckets.map((bucket) => bucket.key as string),
     runtime: service.runtime,
     framework: service.framework?.name,
     agent,
   };
 
   const otelDetails =
-    !!agent?.name && isOpenTelemetryAgentName(agent.name)
+    Boolean(agent?.name) && isOpenTelemetryAgentName(agent.name)
       ? {
-          language: agent.name.startsWith('opentelemetry')
-            ? agent.name.replace(/^opentelemetry\//, '')
-            : undefined,
+          language: hasOpenTelemetryPrefix(agent.name) ? agent.name.split('/')[1] : undefined,
           sdkVersion: agent?.version,
           autoVersion: labels?.telemetry_auto_version as string,
         }
       : undefined;
 
-  const totalNumberInstances =
-    response.aggregations?.totalNumberInstances.value;
+  const totalNumberInstances = response.aggregations?.totalNumberInstances.value;
 
   const containerDetails =
     host || container || totalNumberInstances || kubernetes
@@ -229,9 +222,7 @@ export async function getServiceMetadataDetails({
           type: (!!kubernetes ? 'Kubernetes' : 'Docker') as ContainerType,
           os: host?.os?.platform,
           totalNumberInstances,
-          ids: response.aggregations?.containerIds.buckets.map(
-            (bucket) => bucket.key as string
-          ),
+          ids: response.aggregations?.containerIds.buckets.map((bucket) => bucket.key as string),
         }
       : undefined;
 
@@ -257,9 +248,7 @@ export async function getServiceMetadataDetails({
         availabilityZones: response.aggregations?.availabilityZones.buckets.map(
           (bucket) => bucket.key as string
         ),
-        regions: response.aggregations?.regions.buckets.map(
-          (bucket) => bucket.key as string
-        ),
+        regions: response.aggregations?.regions.buckets.map((bucket) => bucket.key as string),
         machineTypes: response.aggregations?.machineTypes.buckets.map(
           (bucket) => bucket.key as string
         ),

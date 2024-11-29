@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import * as Rx from 'rxjs';
@@ -25,7 +26,8 @@ const packageMatcher = makeMatcher([
 /**
  * Any code that is outside of a package must match this in order to trigger a restart
  */
-const nonPackageMatcher = makeMatcher(['config/**/*.yml']);
+const nonPackageMatcher = makeMatcher(['config/**/*.yml', 'plugins/**/server/**/*']);
+const staticFileMatcher = makeMatcher(['plugins/**/kibana.json']);
 
 export interface Options {
   enabled: boolean;
@@ -86,6 +88,10 @@ export class Watcher {
           if (result.type === 'non-package') {
             return nonPackageMatcher(result.repoRel) && fire(result.repoRel);
           }
+
+          if (result.type === 'static') {
+            return staticFileMatcher(result.repoRel) && fire(result.repoRel);
+          }
         }
       },
       {
@@ -94,7 +100,7 @@ export class Watcher {
         ignore: [
           '**/{node_modules,target,public,coverage,__*__}/**',
           '**/*.{test,spec,story,stories}.*',
-          '**/*.{md,sh,txt}',
+          '**/*.{http,md,sh,txt}',
           '**/debug.log',
         ],
       }

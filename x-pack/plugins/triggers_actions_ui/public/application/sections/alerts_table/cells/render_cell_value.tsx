@@ -6,7 +6,7 @@
  */
 
 import { isEmpty } from 'lodash';
-import React, { type ReactNode } from 'react';
+import React from 'react';
 import {
   ALERT_DURATION,
   AlertConsumers,
@@ -22,15 +22,9 @@ import {
   FieldFormatParams,
   FieldFormatsRegistry,
 } from '@kbn/field-formats-plugin/common';
-import { EuiBadge, EuiLink } from '@elastic/eui';
+import { EuiBadge, EuiLink, RenderCellValue } from '@elastic/eui';
 import { alertProducersData, observabilityFeatureIds } from '../constants';
-import { GetRenderCellValue } from '../../../../types';
 import { useKibana } from '../../../../common/lib/kibana';
-
-interface Props {
-  columnId: string;
-  data: any;
-}
 
 export const getMappedNonEcsValue = ({
   data,
@@ -59,22 +53,17 @@ const getRenderValue = (mappedNonEcsValue: any) => {
   return '—';
 };
 
-export const getRenderCellValue = (fieldFormats: FieldFormatsRegistry): GetRenderCellValue => {
+export const getRenderCellValue: RenderCellValue = ({ columnId, data, fieldFormats }) => {
   const alertValueFormatter = getAlertFormatters(fieldFormats);
+  if (data == null) return null;
 
-  return () =>
-    (props): ReactNode => {
-      const { columnId, data } = props as Props;
-      if (data == null) return null;
+  const mappedNonEcsValue = getMappedNonEcsValue({
+    data,
+    fieldName: columnId,
+  });
+  const value = getRenderValue(mappedNonEcsValue);
 
-      const mappedNonEcsValue = getMappedNonEcsValue({
-        data,
-        fieldName: columnId,
-      });
-      const value = getRenderValue(mappedNonEcsValue);
-
-      return alertValueFormatter(columnId, value, data);
-    };
+  return alertValueFormatter(columnId, value, data);
 };
 
 const defaultParam: Record<string, FieldFormatParams> = {
@@ -147,9 +136,9 @@ export function getAlertFormatters(fieldFormats: FieldFormatsRegistry) {
         );
       case ALERT_RULE_CONSUMER:
         const producer = rowData?.find(({ field }) => field === ALERT_RULE_PRODUCER)?.value?.[0];
-        const consumer: AlertConsumers = observabilityFeatureIds.includes(value)
+        const consumer: AlertConsumers = observabilityFeatureIds.includes(producer)
           ? 'observability'
-          : producer && (value === 'alerts' || value === 'stackAlerts')
+          : producer && (value === 'alerts' || value === 'stackAlerts' || value === 'discover')
           ? producer
           : value;
         const consumerData = alertProducersData[consumer];

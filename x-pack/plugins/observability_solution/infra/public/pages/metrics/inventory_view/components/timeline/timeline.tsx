@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback, useEffect } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import moment from 'moment';
@@ -28,7 +28,8 @@ import { EuiFlexItem } from '@elastic/eui';
 import { EuiFlexGroup } from '@elastic/eui';
 import { EuiIcon } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { useTimelineChartTheme } from '../../../../../utils/use_timeline_chart_theme';
+import { Metric } from '../../../../../../common/http_api/infra_ml';
+import { useTimelineChartTheme } from '../../../../../hooks/use_timeline_chart_theme';
 import { toMetricOpt } from '../../../../../../common/snapshot_metric_i18n';
 import { MetricsExplorerAggregation } from '../../../../../../common/http_api';
 import { colorTransformer, Color } from '../../../../../../common/color_palette';
@@ -40,7 +41,7 @@ import { useWaffleFiltersContext } from '../../hooks/use_waffle_filters';
 import { MetricExplorerSeriesChart } from '../../../metrics_explorer/components/series_chart';
 import { MetricsExplorerChartType } from '../../../metrics_explorer/hooks/use_metrics_explorer_options';
 import { calculateDomain } from '../../../metrics_explorer/components/helpers/calculate_domain';
-import { InfraFormatter } from '../../../../../lib/lib';
+import { InfraFormatter } from '../../../../../common/inventory/types';
 import { useMetricsHostsAnomaliesResults } from '../../hooks/use_metrics_hosts_anomalies';
 import { useMetricsK8sAnomaliesResults } from '../../hooks/use_metrics_k8s_anomalies';
 
@@ -70,6 +71,20 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
     isVisible
   );
 
+  const anomalyMetricName = useMemo((): Metric | undefined => {
+    const metricType = metric.type;
+    switch (metricType) {
+      case 'memory':
+        return 'memory_usage';
+      case 'rx':
+        return 'network_in';
+      case 'tx':
+        return 'network_out';
+      default:
+        return;
+    }
+  }, [metric]);
+
   const anomalyParams = {
     sourceId: 'default',
     anomalyThreshold: source?.configuration.anomalyThreshold || 0,
@@ -80,20 +95,15 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
       field: 'anomalyScore' as const,
     },
     defaultPaginationOptions: { pageSize: 100 },
+    metric: anomalyMetricName,
   };
 
-  const { metricsHostsAnomalies, getMetricsHostsAnomalies } =
-    useMetricsHostsAnomaliesResults(anomalyParams);
-  const { metricsK8sAnomalies, getMetricsK8sAnomalies } =
-    useMetricsK8sAnomaliesResults(anomalyParams);
-
-  const getAnomalies = useMemo(() => {
-    if (nodeType === 'host') {
-      return getMetricsHostsAnomalies;
-    } else if (nodeType === 'pod') {
-      return getMetricsK8sAnomalies;
-    }
-  }, [nodeType, getMetricsK8sAnomalies, getMetricsHostsAnomalies]);
+  const { metricsHostsAnomalies } = useMetricsHostsAnomaliesResults(anomalyParams, {
+    active: nodeType === 'host',
+  });
+  const { metricsK8sAnomalies } = useMetricsK8sAnomaliesResults(anomalyParams, {
+    active: nodeType === 'pod',
+  });
 
   const anomalies = useMemo(() => {
     if (nodeType === 'host') {
@@ -103,8 +113,8 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
     }
   }, [nodeType, metricsHostsAnomalies, metricsK8sAnomalies]);
 
-  const metricLabel = toMetricOpt(metric.type)?.textLC;
-  const metricPopoverLabel = toMetricOpt(metric.type)?.text;
+  const metricLabel = toMetricOpt(metric.type, nodeType)?.textLC;
+  const metricPopoverLabel = toMetricOpt(metric.type, nodeType)?.text;
 
   const chartMetric = {
     color: Color.color0,
@@ -148,25 +158,6 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
     },
     [jumpToTime, stopAutoReload]
   );
-
-  const anomalyMetricName = useMemo(() => {
-    const metricType = metric.type;
-    if (metricType === 'memory') {
-      return 'memory_usage';
-    }
-    if (metricType === 'rx') {
-      return 'network_in';
-    }
-    if (metricType === 'tx') {
-      return 'network_out';
-    }
-  }, [metric]);
-
-  useEffect(() => {
-    if (getAnomalies && anomalyMetricName) {
-      getAnomalies(anomalyMetricName);
-    }
-  }, [getAnomalies, anomalyMetricName]);
 
   if (loading) {
     return (

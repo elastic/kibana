@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type {
@@ -50,8 +51,8 @@ function buildVisualizationState(config: LensXYConfig): XYState {
     hideEndzones: true,
     preferredSeriesType: 'line',
     valueLabels: 'hide',
-    emphasizeFitting: config?.emphasizeFitting ?? false,
-    fittingFunction: config?.fittingFunction ?? 'None',
+    emphasizeFitting: config?.emphasizeFitting ?? true,
+    fittingFunction: config?.fittingFunction ?? 'Linear',
     yLeftExtent: {
       mode: config.yBounds?.mode ?? 'full',
       lowerBound: config.yBounds?.lowerBound,
@@ -163,7 +164,7 @@ function buildAllFormulasInLayer(
   layer: LensSeriesLayer | LensAnnotationLayer | LensReferenceLineLayer,
   i: number,
   dataView: DataView,
-  formulaAPI: FormulaPublicApi
+  formulaAPI?: FormulaPublicApi
 ): PersistedIndexPatternLayer {
   return layer.yAxis.reduce((acc, curr, valueIndex) => {
     const formulaColumn = getFormulaColumn(
@@ -181,7 +182,7 @@ function buildFormulaLayer(
   layer: LensSeriesLayer | LensAnnotationLayer | LensReferenceLineLayer,
   i: number,
   dataView: DataView,
-  formulaAPI: FormulaPublicApi
+  formulaAPI?: FormulaPublicApi
 ): FormBasedPersistedState['layers'][0] {
   if (layer.type === 'series') {
     const resultLayer = buildAllFormulasInLayer(layer, i, dataView, formulaAPI);

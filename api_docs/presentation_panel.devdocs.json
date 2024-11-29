@@ -33,15 +33,19 @@
           "DefaultPresentationPanelApi",
           " = ",
           "DefaultPresentationPanelApi",
-          ", PropsType extends {} = {}>(props: ",
+          ", PropsType extends {} = {}>(props: Omit<",
+          "PresentationPanelInternalProps",
+          "<ApiType, PropsType>, \"Component\"> & { Component: ",
           {
-            "pluginId": "presentationPanel",
-            "scope": "public",
-            "docId": "kibPresentationPanelPluginApi",
-            "section": "def-public.PresentationPanelProps",
-            "text": "PresentationPanelProps"
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.MaybePromise",
+            "text": "MaybePromise"
           },
-          "<ApiType, PropsType>) => JSX.Element"
+          "<",
+          "PanelCompatibleComponent",
+          "<ApiType, PropsType> | null>; } & { hidePanelChrome?: boolean | undefined; }) => React.JSX.Element | null"
         ],
         "path": "src/plugins/presentation_panel/public/panel_component/presentation_panel.tsx",
         "deprecated": false,
@@ -55,14 +59,19 @@
             "label": "props",
             "description": [],
             "signature": [
+              "Omit<",
+              "PresentationPanelInternalProps",
+              "<ApiType, PropsType>, \"Component\"> & { Component: ",
               {
-                "pluginId": "presentationPanel",
-                "scope": "public",
-                "docId": "kibPresentationPanelPluginApi",
-                "section": "def-public.PresentationPanelProps",
-                "text": "PresentationPanelProps"
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.MaybePromise",
+                "text": "MaybePromise"
               },
-              "<ApiType, PropsType>"
+              "<",
+              "PanelCompatibleComponent",
+              "<ApiType, PropsType> | null>; } & { hidePanelChrome?: boolean | undefined; }"
             ],
             "path": "src/plugins/presentation_panel/public/panel_component/presentation_panel.tsx",
             "deprecated": false,
@@ -91,7 +100,7 @@
           },
           "; api?: ",
           "DefaultPresentationPanelApi",
-          " | undefined; }) => JSX.Element"
+          " | undefined; }) => React.JSX.Element"
         ],
         "path": "src/plugins/presentation_panel/public/panel_component/presentation_panel_error.tsx",
         "deprecated": false,

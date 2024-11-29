@@ -25,7 +25,7 @@ describe('UserRiskScoreTable', () => {
           risk: {
             rule_risks: [],
             calculated_score_norm: 71,
-            calculated_level: RiskSeverity.high,
+            calculated_level: RiskSeverity.High,
             multipliers: [],
             '@timestamp': '',
             id_field: '',

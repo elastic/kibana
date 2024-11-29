@@ -37,46 +37,33 @@ interface Props {
   refetch: () => void;
 }
 
-export function AgentConfigurationList({
-  status,
-  configurations,
-  refetch,
-}: Props) {
+export function AgentConfigurationList({ status, configurations, refetch }: Props) {
   const { core } = useApmPluginContext();
-  const canSave = core.application.capabilities.apm.save;
+  const canSave = core.application.capabilities.apm['settings:save'];
   const theme = useTheme();
-  const [configToBeDeleted, setConfigToBeDeleted] = useState<Config | null>(
-    null
-  );
+  const [configToBeDeleted, setConfigToBeDeleted] = useState<Config | null>(null);
 
   const apmRouter = useApmRouter();
 
-  const createAgentConfigurationHref = apmRouter.link(
-    '/settings/agent-configuration/create'
-  );
+  const createAgentConfigurationHref = apmRouter.link('/settings/agent-configuration/create');
 
   const emptyStatePrompt = (
     <EuiEmptyPrompt
       iconType="controlsHorizontal"
       title={
         <h2>
-          {i18n.translate(
-            'xpack.apm.agentConfig.configTable.emptyPromptTitle',
-            { defaultMessage: 'No configurations found.' }
-          )}
+          {i18n.translate('xpack.apm.agentConfig.configTable.emptyPromptTitle', {
+            defaultMessage: 'No configurations found.',
+          })}
         </h2>
       }
       actions={
         <EuiToolTip
           content={
             !canSave &&
-            i18n.translate(
-              'xpack.apm.settings.agentConfig.createConfigButton.tooltip',
-              {
-                defaultMessage:
-                  "You don't have permissions to create agent configurations",
-              }
-            )
+            i18n.translate('xpack.apm.settings.agentConfig.createConfigButton.tooltip', {
+              defaultMessage: "You don't have permissions to create agent configurations",
+            })
           }
         >
           <EuiButton
@@ -86,10 +73,9 @@ export function AgentConfigurationList({
             href={createAgentConfigurationHref}
             isDisabled={!canSave}
           >
-            {i18n.translate(
-              'xpack.apm.agentConfig.configTable.createConfigButtonLabel',
-              { defaultMessage: 'Create configuration' }
-            )}
+            {i18n.translate('xpack.apm.agentConfig.configTable.createConfigButtonLabel', {
+              defaultMessage: 'Create configuration',
+            })}
           </EuiButton>
         </EuiToolTip>
       }
@@ -102,13 +88,10 @@ export function AgentConfigurationList({
       body={
         <>
           <p>
-            {i18n.translate(
-              'xpack.apm.agentConfig.configTable.configTable.failurePromptText',
-              {
-                defaultMessage:
-                  'The list of agent configurations could not be fetched. Your user may not have the sufficient permissions.',
-              }
-            )}
+            {i18n.translate('xpack.apm.agentConfig.configTable.configTable.failurePromptText', {
+              defaultMessage:
+                'The list of agent configurations could not be fetched. Your user may not have the sufficient permissions.',
+            })}
           </p>
         </>
       }
@@ -134,28 +117,23 @@ export function AgentConfigurationList({
         <EuiToolTip
           content={
             appliedByAgent
-              ? i18n.translate(
-                  'xpack.apm.agentConfig.configTable.appliedTooltipMessage',
-                  { defaultMessage: 'Applied by at least one agent' }
-                )
-              : i18n.translate(
-                  'xpack.apm.agentConfig.configTable.notAppliedTooltipMessage',
-                  { defaultMessage: 'Not yet applied by any agents' }
-                )
+              ? i18n.translate('xpack.apm.agentConfig.configTable.appliedTooltipMessage', {
+                  defaultMessage: 'Applied by at least one agent',
+                })
+              : i18n.translate('xpack.apm.agentConfig.configTable.notAppliedTooltipMessage', {
+                  defaultMessage: 'Not yet applied by any agents',
+                })
           }
         >
-          <EuiHealth
-            color={appliedByAgent ? 'success' : theme.eui.euiColorLightShade}
-          />
+          <EuiHealth color={appliedByAgent ? 'success' : theme.eui.euiColorLightShade} />
         </EuiToolTip>
       ),
     },
     {
       field: 'service.name',
-      name: i18n.translate(
-        'xpack.apm.agentConfig.configTable.serviceNameColumnLabel',
-        { defaultMessage: 'Service name' }
-      ),
+      name: i18n.translate('xpack.apm.agentConfig.configTable.serviceNameColumnLabel', {
+        defaultMessage: 'Service name',
+      }),
       sortable: true,
       render: (_, config: Config) => (
         <EuiButtonEmpty
@@ -176,24 +154,20 @@ export function AgentConfigurationList({
     },
     {
       field: 'service.environment',
-      name: i18n.translate(
-        'xpack.apm.agentConfig.configTable.environmentColumnLabel',
-        { defaultMessage: 'Service environment' }
-      ),
+      name: i18n.translate('xpack.apm.agentConfig.configTable.environmentColumnLabel', {
+        defaultMessage: 'Service environment',
+      }),
       sortable: true,
       render: (_, { service }) => getOptionLabel(service.environment),
     },
     {
       align: RIGHT_ALIGNMENT,
       field: '@timestamp',
-      name: i18n.translate(
-        'xpack.apm.agentConfig.configTable.lastUpdatedColumnLabel',
-        { defaultMessage: 'Last updated' }
-      ),
+      name: i18n.translate('xpack.apm.agentConfig.configTable.lastUpdatedColumnLabel', {
+        defaultMessage: 'Last updated',
+      }),
       sortable: true,
-      render: (_, item) => (
-        <TimestampTooltip time={item['@timestamp']} timeUnit="minutes" />
-      ),
+      render: (_, item) => <TimestampTooltip time={item['@timestamp']} timeUnit="minutes" />,
     },
     ...(canSave
       ? [

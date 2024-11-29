@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { render } from '@testing-library/react';
-import React, { FC } from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 
 import { KibanaErrorBoundary } from '../..';
 import { BadComponent, ChunkLoadErrorComponent, getServicesMock } from '../../mocks';
@@ -19,10 +20,11 @@ import { errorMessageStrings as strings } from './message_strings';
 describe('<KibanaErrorBoundary>', () => {
   let services: KibanaErrorBoundaryServices;
   beforeEach(() => {
+    jest.spyOn(console, 'error').mockImplementation(() => {});
     services = getServicesMock();
   });
 
-  const Template: FC = ({ children }) => {
+  const Template: FC<PropsWithChildren<unknown>> = ({ children }) => {
     return (
       <KibanaErrorBoundaryDepsProvider {...services}>
         <KibanaErrorBoundary>{children}</KibanaErrorBoundary>

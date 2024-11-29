@@ -7,7 +7,7 @@
 
 import type { Observable } from 'rxjs';
 import { of } from 'rxjs';
-import { map as mapObservable } from 'rxjs/operators';
+import { map as mapObservable } from 'rxjs';
 import type { TimeRange } from '@kbn/es-query';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
@@ -17,15 +17,15 @@ import type {
   MlEntityField,
   MlRecordForInfluencer,
 } from '@kbn/ml-anomaly-utils';
+import type { TimeRangeBounds } from '@kbn/ml-time-buckets';
 import type { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
 import type { SeriesConfigWithMetadata } from '../../../common/types/results';
 
 import type { ExplorerChartsData } from '../explorer/explorer_charts/explorer_charts_container_service';
-import type { TimeRangeBounds } from '../util/time_buckets';
 import type { AppStateSelectedCells } from '../explorer/explorer_utils';
-import { SWIM_LANE_LABEL_WIDTH } from '../explorer/swimlane_container';
+import { SWIM_LANE_LABEL_WIDTH } from '../explorer/constants';
 
-import type { MlApiServices } from './ml_api_service';
+import type { MlApi } from './ml_api_service';
 import type { MlResultsService } from './results_service';
 
 const MAX_CHARTS_PER_ROW = 4;
@@ -45,7 +45,7 @@ export class AnomalyExplorerChartsService {
 
   constructor(
     private timeFilter: TimefilterContract,
-    private mlApiServices: MlApiServices,
+    private mlApi: MlApi,
     private mlResultsService: MlResultsService
   ) {
     this.timeFilter.enableTimeRangeSelector();
@@ -64,7 +64,7 @@ export class AnomalyExplorerChartsService {
   public async getCombinedJobs(jobIds: string[]): Promise<CombinedJob[]> {
     const combinedResults = await Promise.all(
       // Getting only necessary job config and datafeed config without the stats
-      jobIds.map((jobId) => this.mlApiServices.jobs.jobForCloning(jobId))
+      jobIds.map((jobId) => this.mlApi.jobs.jobForCloning(jobId))
     );
     return combinedResults
       .filter(isDefined)
@@ -139,7 +139,7 @@ export class AnomalyExplorerChartsService {
 
     const maxSeriesToPlot = maxSeries ?? Math.max(chartsPerRow * 2, DEFAULT_MAX_SERIES_TO_PLOT);
 
-    return this.mlApiServices.results
+    return this.mlApi.results
       .getAnomalyCharts$(
         jobIds,
         influencers ?? [],

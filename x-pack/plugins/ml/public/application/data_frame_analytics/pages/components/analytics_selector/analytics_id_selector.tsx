@@ -28,8 +28,8 @@ import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-util
 import { useTrainedModelsApiService } from '../../../../services/ml_api_service/trained_models';
 import type { GetDataFrameAnalyticsResponse } from '../../../../services/ml_api_service/data_frame_analytics';
 import { useToastNotificationService } from '../../../../services/toast_notification_service';
-import { ModelsTableToConfigMapping } from '../../../../model_management';
-import { useMlApiContext } from '../../../../contexts/kibana';
+import { ModelsTableToConfigMapping } from '../../../../model_management/config_mapping';
+import { useMlApi } from '../../../../contexts/kibana';
 import type { TrainedModelConfigResponse } from '../../../../../../common/types/trained_models';
 
 export interface AnalyticsSelectorIds {
@@ -127,7 +127,7 @@ export function AnalyticsIdSelector({
   const trainedModelsApiService = useTrainedModelsApiService();
   const {
     dataFrameAnalytics: { getDataFrameAnalytics },
-  } = useMlApiContext();
+  } = useMlApi();
 
   function renderTabs() {
     return <EuiTabbedContent size="s" tabs={tabs} initialSelectedTab={tabs[0]} />;
@@ -238,7 +238,6 @@ export function AnalyticsIdSelector({
           pagination={pagination}
           sorting={true}
           selection={selectionValue}
-          isSelectable={true}
         />
       ),
     },
@@ -259,7 +258,6 @@ export function AnalyticsIdSelector({
           pagination={pagination}
           sorting={true}
           selection={selectionValue}
-          isSelectable={true}
         />
       ),
     });

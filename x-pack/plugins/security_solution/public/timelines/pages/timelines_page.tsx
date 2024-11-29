@@ -9,7 +9,7 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { NewTimelineButton } from '../components/new_timeline';
-import { TimelineType } from '../../../common/api/timeline';
+import { TimelineTypeEnum } from '../../../common/api/timeline';
 import { HeaderPage } from '../../common/components/header_page';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { useKibana } from '../../common/lib/kibana';
@@ -17,7 +17,7 @@ import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { StatefulOpenTimeline } from '../components/open_timeline';
 import * as i18n from './translations';
 import { SecurityPageName } from '../../app/types';
-import { useSourcererDataView } from '../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../sourcerer/containers';
 import { EmptyPrompt } from '../../common/components/empty_prompt';
 
 export const DEFAULT_SEARCH_RESULTS_PER_PAGE = 10;
@@ -33,8 +33,8 @@ export const TimelinesPage = React.memo(() => {
     setImportDataModal(true);
   }, [setImportDataModal]);
 
-  const timelineType: TimelineType =
-    tabName === TimelineType.default ? TimelineType.default : TimelineType.template;
+  const timelineType =
+    tabName === TimelineTypeEnum.default ? TimelineTypeEnum.default : TimelineTypeEnum.template;
 
   return (
     <>

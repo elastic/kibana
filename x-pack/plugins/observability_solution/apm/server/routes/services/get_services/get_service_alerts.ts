@@ -10,6 +10,7 @@ import {
   termQuery,
   rangeQuery,
   wildcardQuery,
+  termsQuery,
 } from '@kbn/observability-plugin/server';
 import {
   ALERT_RULE_PRODUCER,
@@ -17,6 +18,7 @@ import {
   ALERT_STATUS_ACTIVE,
   ALERT_UUID,
 } from '@kbn/rule-data-utils';
+import { observabilityFeatureId } from '@kbn/observability-shared-plugin/common';
 import { SERVICE_NAME } from '../../../../common/es_fields/apm';
 import { ServiceGroup } from '../../../../common/service_groups';
 import { ApmAlertsClient } from '../../../lib/helpers/get_apm_alerts_client';
@@ -56,7 +58,7 @@ export async function getServicesAlerts({
     query: {
       bool: {
         filter: [
-          ...termQuery(ALERT_RULE_PRODUCER, 'apm'),
+          ...termsQuery(ALERT_RULE_PRODUCER, 'apm', observabilityFeatureId),
           ...termQuery(ALERT_STATUS, ALERT_STATUS_ACTIVE),
           ...rangeQuery(start, end),
           ...kqlQuery(kuery),

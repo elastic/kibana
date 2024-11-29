@@ -57,7 +57,6 @@
     "@kbn/dom-drag-drop",
     "@kbn/ebt-tools",
     "@kbn/unified-field-list",
-    "@kbn/core-saved-objects-api-server",
     "@kbn/cell-actions",
     "@kbn/shared-ux-utility",
     "@kbn/core-saved-objects-server",
@@ -84,7 +83,25 @@
     "@kbn/deeplinks-analytics",
     "@kbn/shared-ux-markdown",
     "@kbn/data-view-utils",
-    "@kbn/presentation-publishing"
+    "@kbn/presentation-publishing",
+    "@kbn/aiops-log-pattern-analysis",
+    "@kbn/field-types",
+    "@kbn/elastic-agent-utils",
+    "@kbn/custom-icons",
+    "@kbn/observability-ai-assistant-plugin",
+    "@kbn/aiops-plugin",
+    "@kbn/data-visualizer-plugin",
+    "@kbn/search-types",
+    "@kbn/presentation-containers",
+    "@kbn/observability-ai-assistant-plugin",
+    "@kbn/fields-metadata-plugin",
+    "@kbn/logs-data-access-plugin",
+    "@kbn/core-lifecycle-browser",
+    "@kbn/discover-contextual-components",
+    "@kbn/esql-ast",
+    "@kbn/discover-shared-plugin"
   ],
-  "exclude": ["target/**/*"]
+  "exclude": [
+    "target/**/*"
+  ]
 }

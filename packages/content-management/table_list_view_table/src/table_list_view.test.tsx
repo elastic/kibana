@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { EuiEmptyPrompt } from '@elastic/eui';
@@ -14,12 +15,13 @@ import moment, { Moment } from 'moment';
 import { act } from 'react-dom/test-utils';
 import type { ReactWrapper } from 'enzyme';
 import type { LocationDescriptor, History } from 'history';
+import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 
 import { WithServices } from './__jest__';
-import { getTagList } from './mocks';
+import { getTagList, localStorageMock } from './mocks';
 import { TableListViewTable, type TableListViewTableProps } from './table_list_view_table';
 import { getActions } from './table_list_view.test.helpers';
-import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
+import type { Services } from './services';
 
 const mockUseEffect = useEffect;
 
@@ -71,17 +73,25 @@ describe('TableListView', () => {
     jest.useFakeTimers({ legacyFakeTimers: true });
   });
 
+  beforeEach(() => {
+    localStorage.clear();
+  });
+
   afterAll(() => {
     jest.useRealTimers();
   });
 
-  const setup = registerTestBed<string, TableListViewTableProps>(
-    WithServices<TableListViewTableProps>(TableListViewTable),
-    {
-      defaultProps: { ...requiredProps },
-      memoryRouter: { wrapComponent: true },
-    }
-  );
+  const setup = (
+    propsOverride?: Partial<TableListViewTableProps>,
+    serviceOverride?: Partial<Services>
+  ) =>
+    registerTestBed<string, TableListViewTableProps>(
+      WithServices<TableListViewTableProps>(TableListViewTable, serviceOverride),
+      {
+        defaultProps: { ...requiredProps },
+        memoryRouter: { wrapComponent: true },
+      }
+    )(propsOverride);
 
   describe('empty prompt', () => {
     test('render default empty prompt', async () => {
@@ -232,8 +242,8 @@ describe('TableListView', () => {
       const updatedAtValues: Moment[] = [];
 
       const updatedHits = hits.map(({ id, attributes, references }, i) => {
-        const updatedAt = new Date(new Date().setDate(new Date().getDate() - (7 + i)));
-        updatedAtValues.push(moment(updatedAt));
+        const updatedAt = moment().subtract(7 + i, 'days');
+        updatedAtValues.push(updatedAt);
 
         return {
           id,
@@ -259,8 +269,8 @@ describe('TableListView', () => {
 
       expect(tableCellsValues).toEqual([
         // Renders the datetime with this format: "July 28, 2022"
-        ['Item 1Item 1 description', updatedAtValues[0].format('LL')],
-        ['Item 2Item 2 description', updatedAtValues[1].format('LL')],
+        ['Item 1Item 1 description', updatedAtValues[0].format('ll')],
+        ['Item 2Item 2 description', updatedAtValues[1].format('ll')],
       ]);
     });
 
@@ -324,6 +334,12 @@ describe('TableListView', () => {
     const initialPageSize = 20;
     const totalItems = 30;
     const updatedAt = new Date().toISOString();
+
+    beforeEach(() => {
+      Object.defineProperty(window, 'localStorage', {
+        value: localStorageMock(),
+      });
+    });
 
     const hits: UserContentCommonSchema[] = [...Array(totalItems)].map((_, i) => ({
       id: `item${i}`,
@@ -419,6 +435,54 @@ describe('TableListView', () => {
       expect(firstRowTitle).toBe('Item 20');
       expect(lastRowTitle).toBe('Item 29');
     });
+
+    test('should persist the number of rows in the table', async () => {
+      let testBed: TestBed;
+
+      const tableId = 'myTable';
+
+      await act(async () => {
+        testBed = await setup({
+          initialPageSize,
+          findItems: jest.fn().mockResolvedValue({ total: hits.length, hits: [...hits] }),
+          id: tableId,
+        });
+      });
+
+      {
+        const { component, table, find } = testBed!;
+        component.update();
+
+        const { tableCellsValues } = table.getMetaData('itemsInMemTable');
+        expect(tableCellsValues.length).toBe(20); // 20 by default
+
+        let storageValue = localStorage.getItem(`tablePersist:${tableId}`);
+        expect(storageValue).toBe(null);
+
+        find('tablePaginationPopoverButton').simulate('click');
+        find('tablePagination-10-rows').simulate('click');
+
+        storageValue = localStorage.getItem(`tablePersist:${tableId}`);
+        expect(storageValue).not.toBe(null);
+        expect(JSON.parse(storageValue!).pageSize).toBe(10);
+      }
+
+      // Mount a second table and verify that is shows only 10 rows
+      {
+        await act(async () => {
+          testBed = await setup({
+            initialPageSize,
+            findItems: jest.fn().mockResolvedValue({ total: hits.length, hits: [...hits] }),
+            id: tableId,
+          });
+        });
+
+        const { component, table } = testBed!;
+        component.update();
+        const { tableCellsValues } = table.getMetaData('itemsInMemTable');
+        expect(tableCellsValues.length).toBe(10); // 10 items this time
+      }
+    });
   });
 
   describe('column sorting', () => {
@@ -501,7 +565,7 @@ describe('TableListView', () => {
       ]);
     });
 
-    test('filter select should change the sort order', async () => {
+    test('filter select should change the sort order and remember the order', async () => {
       let testBed: TestBed;
 
       await act(async () => {
@@ -510,7 +574,7 @@ describe('TableListView', () => {
         });
       });
 
-      const { component, table, find } = testBed!;
+      let { component, table, find } = testBed!;
       const { openSortSelect } = getActions(testBed!);
       component.update();
 
@@ -533,6 +597,26 @@ describe('TableListView', () => {
       });
       component.update();
 
+      ({ tableCellsValues } = table.getMetaData('itemsInMemTable'));
+
+      expect(tableCellsValues).toEqual([
+        ['z-foo', twoDaysAgoToString],
+        ['a-foo', yesterdayToString],
+      ]);
+
+      expect(localStorage.getItem('tableSort:test')).toBe(
+        '{"field":"attributes.title","direction":"desc"}'
+      );
+
+      component.unmount();
+      await act(async () => {
+        testBed = await setupColumnSorting({
+          findItems: jest.fn().mockResolvedValue({ total: hits.length, hits }),
+        });
+      });
+
+      ({ component, table, find } = testBed!);
+      component.update();
       ({ tableCellsValues } = table.getMetaData('itemsInMemTable'));
 
       expect(tableCellsValues).toEqual([
@@ -618,6 +702,91 @@ describe('TableListView', () => {
       expect(filterOptions.map((wrapper) => wrapper.text())).toEqual([
         'Name A-Z ',
         'Name Z-A. Checked option. ', // now this option is checked
+        'Recently updated ',
+        'Least recently updated ',
+      ]);
+    });
+  });
+
+  describe('column sorting with recently accessed', () => {
+    const setupColumnSorting = registerTestBed<string, TableListViewTableProps>(
+      WithServices<TableListViewTableProps>(TableListViewTable, {
+        TagList: getTagList({ references: [] }),
+      }),
+      {
+        defaultProps: {
+          ...requiredProps,
+          recentlyAccessed: { get: () => [{ id: '123', link: '', label: '' }] },
+        },
+        memoryRouter: { wrapComponent: true },
+      }
+    );
+
+    const hits: UserContentCommonSchema[] = [
+      {
+        id: '123',
+        updatedAt: twoDaysAgo.toISOString(), // first asc, last desc
+        type: 'dashboard',
+        attributes: {
+          title: 'z-foo', // first desc, last asc
+        },
+        references: [{ id: 'id-tag-1', name: 'tag-1', type: 'tag' }],
+      },
+      {
+        id: '456',
+        updatedAt: yesterday.toISOString(), // first desc, last asc
+        type: 'dashboard',
+        attributes: {
+          title: 'a-foo', // first asc, last desc
+        },
+        references: [],
+      },
+    ];
+
+    test('should initially sort by "Recently Accessed"', async () => {
+      let testBed: TestBed;
+
+      await act(async () => {
+        testBed = await setupColumnSorting({
+          findItems: jest.fn().mockResolvedValue({ total: hits.length, hits }),
+        });
+      });
+
+      const { component, table } = testBed!;
+      component.update();
+
+      const { tableCellsValues } = table.getMetaData('itemsInMemTable');
+
+      expect(tableCellsValues).toEqual([
+        ['z-foo', twoDaysAgoToString],
+        ['a-foo', yesterdayToString],
+      ]);
+    });
+
+    test('filter select should have 5 options', async () => {
+      let testBed: TestBed;
+
+      await act(async () => {
+        testBed = await setupColumnSorting({
+          findItems: jest.fn().mockResolvedValue({ total: hits.length, hits }),
+        });
+      });
+      const { openSortSelect } = getActions(testBed!);
+      const { component, find } = testBed!;
+      component.update();
+
+      act(() => {
+        openSortSelect();
+      });
+      component.update();
+
+      const filterOptions = find('sortSelect').find('li');
+
+      expect(filterOptions.length).toBe(5);
+      expect(filterOptions.map((wrapper) => wrapper.text())).toEqual([
+        'Recently viewed. Checked option.Additional information ',
+        'Name A-Z ',
+        'Name Z-A ',
         'Recently updated ',
         'Least recently updated ',
       ]);
@@ -756,8 +925,10 @@ describe('TableListView', () => {
         });
       });
 
-      const { component, table, find } = testBed!;
+      const { component, table, find, exists } = testBed!;
       component.update();
+
+      expect(exists('tagFilterPopoverButton')).toBe(true);
 
       const getSearchBoxValue = () => find('tableListSearchBox').props().defaultValue;
 
@@ -851,6 +1022,25 @@ describe('TableListView', () => {
       expect(getSearchBoxValue()).toBe(expected);
       expect(searchTerm).toBe(expected);
     });
+
+    test('should not have the tag filter if tagging is disabled', async () => {
+      let testBed: TestBed;
+      const findItems = jest.fn().mockResolvedValue({ total: hits.length, hits });
+
+      await act(async () => {
+        testBed = await setup(
+          {
+            findItems,
+          },
+          { isTaggingEnabled: () => false }
+        );
+      });
+
+      const { component, exists } = testBed!;
+      component.update();
+
+      expect(exists('tagFilterPopoverButton')).toBe(false);
+    });
   });
 
   describe('initialFilter', () => {
@@ -917,7 +1107,7 @@ describe('TableListView', () => {
   });
 
   describe('search', () => {
-    const updatedAt = new Date('2023-07-15').toISOString();
+    const updatedAt = moment('2023-07-15').toISOString();
 
     const hits: UserContentCommonSchema[] = [
       {
@@ -942,25 +1132,29 @@ describe('TableListView', () => {
 
     const findItems = jest.fn();
 
-    const setupSearch = (...args: Parameters<ReturnType<typeof registerTestBed>>) => {
-      const testBed = registerTestBed<string, TableListViewTableProps>(
-        WithServices<TableListViewTableProps>(TableListViewTable),
-        {
-          defaultProps: {
-            ...requiredProps,
-            findItems,
-            urlStateEnabled: false,
-            entityName: 'Foo',
-            entityNamePlural: 'Foos',
-          },
-          memoryRouter: { wrapComponent: true },
-        }
-      )(...args);
+    const setupSearch = async (...args: Parameters<ReturnType<typeof registerTestBed>>) => {
+      let testBed: TestBed;
 
-      const { updateSearchText, getSearchBoxValue } = getActions(testBed);
+      await act(async () => {
+        testBed = registerTestBed<string, TableListViewTableProps>(
+          WithServices<TableListViewTableProps>(TableListViewTable),
+          {
+            defaultProps: {
+              ...requiredProps,
+              findItems,
+              urlStateEnabled: false,
+              entityName: 'Foo',
+              entityNamePlural: 'Foos',
+            },
+            memoryRouter: { wrapComponent: true },
+          }
+        )(...args);
+      });
+
+      const { updateSearchText, getSearchBoxValue } = getActions(testBed!);
 
       return {
-        testBed,
+        testBed: testBed!,
         updateSearchText,
         getSearchBoxValue,
         getLastCallArgsFromFindItems: () => findItems.mock.calls[findItems.mock.calls.length - 1],
@@ -972,15 +1166,8 @@ describe('TableListView', () => {
     });
 
     test('should search the table items', async () => {
-      let testBed: TestBed;
-      let updateSearchText: (value: string) => Promise<void>;
-      let getLastCallArgsFromFindItems: () => Parameters<typeof findItems>;
-      let getSearchBoxValue: () => string;
-
-      await act(async () => {
-        ({ testBed, getLastCallArgsFromFindItems, getSearchBoxValue, updateSearchText } =
-          await setupSearch());
-      });
+      const { testBed, getLastCallArgsFromFindItems, getSearchBoxValue, updateSearchText } =
+        await setupSearch();
 
       const { component, table } = testBed!;
       component.update();
@@ -996,11 +1183,11 @@ describe('TableListView', () => {
         Array [
           Array [
             "Item 1",
-            "July 15, 2023",
+            "Jul 15, 2023",
           ],
           Array [
             "Item 2",
-            "July 15, 2023",
+            "Jul 15, 2023",
           ],
         ]
       `);
@@ -1011,7 +1198,7 @@ describe('TableListView', () => {
           {
             id: 'item-from-search',
             type: 'dashboard',
-            updatedAt: new Date('2023-07-01').toISOString(),
+            updatedAt: moment('2023-07-01').toISOString(),
             attributes: {
               title: 'Item from search',
             },
@@ -1030,19 +1217,14 @@ describe('TableListView', () => {
         Array [
           Array [
             "Item from search",
-            "July 1, 2023",
+            "Jul 1, 2023",
           ],
         ]
       `);
     });
 
     test('should search and render empty list if no result', async () => {
-      let testBed: TestBed;
-      let updateSearchText: (value: string) => Promise<void>;
-
-      await act(async () => {
-        ({ testBed, updateSearchText } = await setupSearch());
-      });
+      const { testBed, updateSearchText } = await setupSearch();
 
       const { component, table, find } = testBed!;
       component.update();
@@ -1072,51 +1254,74 @@ describe('TableListView', () => {
         Array [
           Array [
             "Item 1",
-            "July 15, 2023",
+            "Jul 15, 2023",
           ],
           Array [
             "Item 2",
-            "July 15, 2023",
+            "Jul 15, 2023",
           ],
         ]
       `);
+    });
+
+    test('should show error hint when inserting invalid chars', async () => {
+      const { testBed, getLastCallArgsFromFindItems, getSearchBoxValue, updateSearchText } =
+        await setupSearch();
+
+      const { component, exists } = testBed;
+      component.update();
+
+      expect(exists('forbiddenCharErrorMessage')).toBe(false);
+
+      const expected = '[foo';
+      await updateSearchText!(expected);
+      expect(getSearchBoxValue!()).toBe(expected);
+
+      expect(exists('forbiddenCharErrorMessage')).toBe(true); // hint is shown
+
+      const [searchTerm] = getLastCallArgsFromFindItems!();
+      expect(searchTerm).toBe(''); // no search has been made
     });
   });
 
   describe('url state', () => {
     let router: Router | undefined;
 
-    const setupTagFiltering = registerTestBed<string, TableListViewTableProps>(
-      WithServices<TableListViewTableProps>(TableListViewTable, {
-        getTagList: () => [
-          {
-            id: 'id-tag-1',
-            name: 'tag-1',
-            type: 'tag',
-            description: '',
-            color: '',
-            managed: false,
+    const setupInitialUrl = (initialSearchQuery: string = '') =>
+      registerTestBed<string, TableListViewTableProps>(
+        WithServices<TableListViewTableProps>(TableListViewTable, {
+          getTagList: () => [
+            {
+              id: 'id-tag-1',
+              name: 'tag-1',
+              type: 'tag',
+              description: '',
+              color: '',
+              managed: false,
+            },
+            {
+              id: 'id-tag-2',
+              name: 'tag-2',
+              type: 'tag',
+              description: '',
+              color: '',
+              managed: false,
+            },
+          ],
+        }),
+        {
+          defaultProps: { ...requiredProps, urlStateEnabled: true },
+          memoryRouter: {
+            wrapComponent: true,
+            initialEntries: [{ search: initialSearchQuery }],
+            onRouter: (_router: Router) => {
+              router = _router;
+            },
           },
-          {
-            id: 'id-tag-2',
-            name: 'tag-2',
-            type: 'tag',
-            description: '',
-            color: '',
-            managed: false,
-          },
-        ],
-      }),
-      {
-        defaultProps: { ...requiredProps, urlStateEnabled: true },
-        memoryRouter: {
-          wrapComponent: true,
-          onRouter: (_router: Router) => {
-            router = _router;
-          },
-        },
-      }
-    );
+        }
+      );
+
+    const setupTagFiltering = setupInitialUrl();
 
     const hits: UserContentCommonSchema[] = [
       {
@@ -1141,13 +1346,13 @@ describe('TableListView', () => {
       },
     ];
 
-    test('should read search term from URL', async () => {
+    test('should read the initial search term from URL', async () => {
       let testBed: TestBed;
 
       const findItems = jest.fn().mockResolvedValue({ total: hits.length, hits: [...hits] });
 
       await act(async () => {
-        testBed = await setupTagFiltering({
+        testBed = await setupInitialUrl('?s=hello')({
           findItems,
         });
       });
@@ -1158,22 +1363,23 @@ describe('TableListView', () => {
       const getSearchBoxValue = () => find('tableListSearchBox').props().defaultValue;
 
       // Start with empty search box
-      expect(getSearchBoxValue()).toBe('');
-      expect(router?.history.location?.search).toBe('');
+      expect(getSearchBoxValue()).toBe('hello');
+      expect(router?.history.location?.search).toBe('?s=hello');
 
       // Change the URL
       await act(async () => {
         if (router?.history.push) {
           router.history.push({
-            search: `?${queryString.stringify({ s: 'hello' }, { encode: false })}`,
+            search: `?${queryString.stringify({ s: '' }, { encode: false })}`,
           });
         }
       });
+
       component.update();
 
-      // Search box is updated
+      // Search box is not updated
       expect(getSearchBoxValue()).toBe('hello');
-      expect(router?.history.location?.search).toBe('?s=hello');
+      expect(router?.history.location?.search).toBe('?s=');
     });
 
     test('should update the URL when changing the search term', async () => {
@@ -1202,13 +1408,15 @@ describe('TableListView', () => {
       expect(router?.history.location?.search).toBe('?s=search-changed');
     });
 
-    test('should filter by tag from the URL', async () => {
+    test('should filter by initial tag from the URL', async () => {
       let testBed: TestBed;
 
       const findItems = jest.fn().mockResolvedValue({ total: hits.length, hits: [...hits] });
 
       await act(async () => {
-        testBed = await setupTagFiltering({
+        testBed = await setupInitialUrl(
+          `?${queryString.stringify({ s: 'tag:(tag-2)' }, { encode: false })}`
+        )({
           findItems,
         });
       });
@@ -1221,7 +1429,7 @@ describe('TableListView', () => {
 
       const getSearchBoxValue = () => find('tableListSearchBox').props().defaultValue;
 
-      let expected = '';
+      let expected = 'tag:(tag-2)';
       let [searchTerm] = getLastCallArgsFromFindItems();
       expect(getSearchBoxValue()).toBe(expected);
       expect(searchTerm).toBe(expected);
@@ -1230,13 +1438,13 @@ describe('TableListView', () => {
       await act(async () => {
         if (router?.history.push) {
           router.history.push({
-            search: `?${queryString.stringify({ s: 'tag:(tag-2)' }, { encode: false })}`,
+            search: `?${queryString.stringify({ s: '' }, { encode: false })}`,
           });
         }
       });
       component.update();
 
-      // The search bar should be updated
+      // The search bar shouldn't be updated
       expected = 'tag:(tag-2)';
       [searchTerm] = getLastCallArgsFromFindItems();
       expect(getSearchBoxValue()).toBe(expected);
@@ -1277,13 +1485,15 @@ describe('TableListView', () => {
       expect(router?.history.location?.search).toBe('?s=tag:(tag-2)');
     });
 
-    test('should set sort column and direction from URL', async () => {
+    test('should set initial sort column and direction from URL', async () => {
       let testBed: TestBed;
 
       const findItems = jest.fn().mockResolvedValue({ total: hits.length, hits: [...hits] });
 
       await act(async () => {
-        testBed = await setupTagFiltering({
+        testBed = await setupInitialUrl(
+          `?${queryString.stringify({ sort: 'updatedAt', sortdir: 'asc' })}`
+        )({
           findItems,
         });
       });
@@ -1291,21 +1501,18 @@ describe('TableListView', () => {
       const { component, table } = testBed!;
       component.update();
 
-      // Start with empty search box
-      expect(router?.history.location?.search).toBe('');
-
       let { tableCellsValues } = table.getMetaData('itemsInMemTable');
 
       expect(tableCellsValues).toEqual([
-        ['Item 1tag-1', yesterdayToString],
         ['Item 2tag-2', twoDaysAgoToString],
+        ['Item 1tag-1', yesterdayToString],
       ]);
 
       // Change the URL
       await act(async () => {
         if (router?.history.push) {
           router.history.push({
-            search: `?${queryString.stringify({ sort: 'updatedAt', sortdir: 'asc' })}`,
+            search: `?${queryString.stringify({ sort: 'updatedAt', sortdir: 'desc' })}`,
           });
         }
       });
@@ -1314,24 +1521,8 @@ describe('TableListView', () => {
       ({ tableCellsValues } = table.getMetaData('itemsInMemTable'));
 
       expect(tableCellsValues).toEqual([
-        ['Item 2tag-2', twoDaysAgoToString], // Sort got inverted
-        ['Item 1tag-1', yesterdayToString],
-      ]);
-
-      await act(async () => {
-        if (router?.history.push) {
-          router.history.push({
-            search: `?${queryString.stringify({ sort: 'title' })}`, // if dir not specified, asc by default
-          });
-        }
-      });
-      component.update();
-
-      ({ tableCellsValues } = table.getMetaData('itemsInMemTable'));
-
-      expect(tableCellsValues).toEqual([
-        ['Item 1tag-1', yesterdayToString],
         ['Item 2tag-2', twoDaysAgoToString],
+        ['Item 1tag-1', yesterdayToString], // Sort stayed the same
       ]);
     });
 

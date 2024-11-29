@@ -15,6 +15,8 @@ import {
   ChatCompletionError,
   MessageAddEvent,
   createInternalServerError,
+  createConversationNotFoundError,
+  StreamingChatResponseEventWithoutError,
 } from '../../common';
 import type { ObservabilityAIAssistantChatService } from '../types';
 import { complete } from './complete';
@@ -45,7 +47,7 @@ const messages: Message[] = [
 
 const createLlmResponse = (
   chunks: Array<{ content: string; function_call?: { name: string; arguments: string } }>
-): StreamingChatResponseEvent[] => {
+): StreamingChatResponseEventWithoutError[] => {
   const id = v4();
   const message = chunks.reduce<Message['message']>(
     (prev, current) => {
@@ -61,7 +63,7 @@ const createLlmResponse = (
     }
   );
 
-  const events: StreamingChatResponseEvent[] = [
+  const events: StreamingChatResponseEventWithoutError[] = [
     ...chunks.map((msg) => ({
       id,
       message: msg,
@@ -97,8 +99,10 @@ describe('complete', () => {
         getScreenContexts: () => [],
         messages,
         persist: false,
+        disableFunctions: false,
         signal: new AbortController().signal,
         ...params,
+        scopes: ['all'],
       },
       requestCallback
     );
@@ -106,20 +110,12 @@ describe('complete', () => {
 
   describe('when an error is emitted', () => {
     beforeEach(() => {
-      requestCallback.mockImplementation(() =>
-        of({
-          type: StreamingChatResponseEventType.ChatCompletionError,
-          error: {
-            message: 'Not found',
-            code: ChatCompletionErrorCode.NotFoundError,
-          },
-        })
-      );
+      requestCallback.mockImplementation(() => throwError(() => createConversationNotFoundError()));
     });
 
     it('the observable errors out', async () => {
       await expect(async () => await lastValueFrom(callComplete())).rejects.toThrowError(
-        'Not found'
+        'Conversation not found'
       );
 
       await expect(async () => await lastValueFrom(callComplete())).rejects.toBeInstanceOf(
@@ -283,6 +279,7 @@ describe('complete', () => {
           '@timestamp': expect.any(String),
           message: {
             content: expect.any(String),
+            data: expect.any(String),
             name: 'my_action',
             role: MessageRole.User,
           },

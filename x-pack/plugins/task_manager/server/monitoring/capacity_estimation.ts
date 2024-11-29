@@ -10,7 +10,7 @@ import stats from 'stats-lite';
 import { JsonObject } from '@kbn/utility-types';
 import { Logger } from '@kbn/core/server';
 import { RawMonitoringStats, RawMonitoredStat, HealthStatus } from './monitoring_stats_stream';
-import { AveragedStat } from './task_run_calcultors';
+import { AveragedStat } from './task_run_calculators';
 import { TaskPersistenceTypes } from './task_run_statistics';
 import { asErr, asOk, map, Result } from '../lib/result_type';
 
@@ -46,11 +46,10 @@ function isCapacityEstimationParams(
 
 export function estimateCapacity(
   logger: Logger,
-  capacityStats: CapacityEstimationParams
+  capacityStats: CapacityEstimationParams,
+  assumedKibanaInstances: number
 ): RawMonitoredStat<CapacityEstimationStat> {
   const workload = capacityStats.workload.value;
-  // if there are no active owners right now, assume there's at least 1
-  const assumedKibanaInstances = Math.max(workload.owner_ids, 1);
 
   const {
     load: { p90: averageLoadPercentage },
@@ -61,8 +60,10 @@ export function estimateCapacity(
     non_recurring: percentageOfExecutionsUsedByNonRecurringTasks,
   } = capacityStats.runtime.value.execution.persistence;
   const { overdue, capacity_requirements: capacityRequirements } = workload;
-  const { poll_interval: pollInterval, max_workers: maxWorkers } =
-    capacityStats.configuration.value;
+  const {
+    poll_interval: pollInterval,
+    capacity: { config: configuredCapacity },
+  } = capacityStats.configuration.value;
 
   /**
    * On average, how many polling cycles does it take to execute a task?
@@ -78,10 +79,10 @@ export function estimateCapacity(
   );
 
   /**
-   * Given the current configuration how much task capacity do we have?
+   * Given the current configuration how much capacity do we have to run normal cost tasks?
    */
   const capacityPerMinutePerKibana = Math.round(
-    ((60 * 1000) / (averagePollIntervalsPerExecution * pollInterval)) * maxWorkers
+    ((60 * 1000) / (averagePollIntervalsPerExecution * pollInterval)) * configuredCapacity
   );
 
   /**
@@ -242,28 +243,31 @@ function getHealthStatus(
     capacityPerMinutePerKibana,
   } = params;
   if (assumedRequiredThroughputPerMinutePerKibana < capacityPerMinutePerKibana) {
-    return { status: HealthStatus.OK };
-  }
-
-  if (assumedAverageRecurringRequiredThroughputPerMinutePerKibana < capacityPerMinutePerKibana) {
-    const reason = `setting HealthStatus.Warning because assumedAverageRecurringRequiredThroughputPerMinutePerKibana (${assumedAverageRecurringRequiredThroughputPerMinutePerKibana}) < capacityPerMinutePerKibana (${capacityPerMinutePerKibana})`;
+    const reason = `Task Manager is healthy, the assumedRequiredThroughputPerMinutePerKibana (${assumedRequiredThroughputPerMinutePerKibana}) < capacityPerMinutePerKibana (${capacityPerMinutePerKibana})`;
     logger.debug(reason);
-    return { status: HealthStatus.Warning, reason };
+    return { status: HealthStatus.OK, reason };
   }
 
-  const reason = `setting HealthStatus.Error because assumedRequiredThroughputPerMinutePerKibana (${assumedRequiredThroughputPerMinutePerKibana}) >= capacityPerMinutePerKibana (${capacityPerMinutePerKibana}) AND assumedAverageRecurringRequiredThroughputPerMinutePerKibana (${assumedAverageRecurringRequiredThroughputPerMinutePerKibana}) >= capacityPerMinutePerKibana (${capacityPerMinutePerKibana})`;
-  logger.debug(reason);
-  return { status: HealthStatus.Error, reason };
+  if (assumedAverageRecurringRequiredThroughputPerMinutePerKibana > capacityPerMinutePerKibana) {
+    const reason = `Task Manager is unhealthy, the assumedAverageRecurringRequiredThroughputPerMinutePerKibana (${assumedAverageRecurringRequiredThroughputPerMinutePerKibana}) > capacityPerMinutePerKibana (${capacityPerMinutePerKibana})`;
+    logger.warn(reason);
+    return { status: HealthStatus.OK, reason };
+  }
+
+  const reason = `Task Manager is unhealthy, the assumedRequiredThroughputPerMinutePerKibana (${assumedRequiredThroughputPerMinutePerKibana}) >= capacityPerMinutePerKibana (${capacityPerMinutePerKibana})`;
+  logger.warn(reason);
+  return { status: HealthStatus.OK, reason };
 }
 
 export function withCapacityEstimate(
   logger: Logger,
-  monitoredStats: RawMonitoringStats['stats']
+  monitoredStats: RawMonitoringStats['stats'],
+  assumedKibanaInstances: number
 ): RawMonitoringStats['stats'] {
   if (isCapacityEstimationParams(monitoredStats)) {
     return {
       ...monitoredStats,
-      capacity_estimation: estimateCapacity(logger, monitoredStats),
+      capacity_estimation: estimateCapacity(logger, monitoredStats, assumedKibanaInstances),
     };
   }
   return monitoredStats;

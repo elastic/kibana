@@ -51,7 +51,7 @@ export class UpgradeAssistantUIPlugin
         title: pluginName,
         order: 1,
         async mount(params) {
-          const [coreStart, { data, ...plugins }] = await coreSetup.getStartServices();
+          const [coreStart, { data }] = await coreSetup.getStartServices();
 
           const {
             chrome: { docTitle },
@@ -65,10 +65,6 @@ export class UpgradeAssistantUIPlugin
             plugins: {
               cloud,
               share,
-              // Infra plugin doesnt export anything as a public interface. So the only
-              // way we have at this stage for checking if the plugin is available or not
-              // is by checking if the startServices has the `infra` key.
-              infra: plugins.hasOwnProperty('infra') ? {} : undefined,
             },
             services: {
               core: coreStart,
@@ -77,7 +73,6 @@ export class UpgradeAssistantUIPlugin
               api: apiService,
               breadcrumbs: breadcrumbService,
             },
-            theme$: params.theme$,
           };
 
           const { mountManagementSection } = await import('./application/mount_management_section');

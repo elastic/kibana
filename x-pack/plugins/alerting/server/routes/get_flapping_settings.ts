@@ -37,8 +37,13 @@ export const getFlappingSettingsRoute = (
     {
       path: `${INTERNAL_BASE_ALERTING_API_PATH}/rules/settings/_flapping`,
       validate: false,
+      security: {
+        authz: {
+          requiredPrivileges: [`${API_PRIVILEGES.READ_FLAPPING_SETTINGS}`],
+        },
+      },
       options: {
-        tags: [`access:${API_PRIVILEGES.READ_FLAPPING_SETTINGS}`],
+        access: 'internal',
       },
     },
     router.handleLegacyErrors(

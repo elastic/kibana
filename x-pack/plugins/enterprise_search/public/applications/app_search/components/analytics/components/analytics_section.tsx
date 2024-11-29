@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 
 import {
   EuiFlexGroup,
@@ -23,7 +23,12 @@ interface Props {
   subtitle: string;
   title: string;
 }
-export const AnalyticsSection: React.FC<Props> = ({ title, subtitle, iconType, children }) => (
+export const AnalyticsSection: FC<PropsWithChildren<Props>> = ({
+  title,
+  subtitle,
+  iconType,
+  children,
+}) => (
   <section>
     <header>
       <EuiFlexGroup

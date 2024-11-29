@@ -1,14 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { FC, useCallback } from 'react';
 import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
-import { EuiListGroupItem } from '@elastic/eui';
+import { EuiListGroupItem, transparentize, useEuiTheme } from '@elastic/eui';
+import classNames from 'classnames';
+import { css } from '@emotion/css';
 
 import { useNavigation as useServices } from '../../../services';
 import { NavItemLabel } from './panel_nav_item_label';
@@ -23,6 +26,7 @@ export const PanelNavItem: FC<Props> = ({ item }) => {
   const { close: closePanel } = usePanel();
   const { id, icon, deepLink, openInNewTab } = item;
   const href = deepLink?.url ?? item.href;
+  const { euiTheme } = useEuiTheme();
 
   const onClick = useCallback<React.MouseEventHandler>(
     (e) => {
@@ -40,7 +44,14 @@ export const PanelNavItem: FC<Props> = ({ item }) => {
       key={id}
       label={<NavItemLabel item={item} />}
       wrapText
-      className="sideNavPanelLink"
+      className={classNames(
+        'sideNavPanelLink',
+        css`
+          &.sideNavPanelLink:hover {
+            background-color: ${transparentize(euiTheme.colors.lightShade, 0.5)};
+          }
+        `
+      )}
       size="s"
       data-test-subj={`panelNavItem panelNavItem-id-${item.id}`}
       href={href}

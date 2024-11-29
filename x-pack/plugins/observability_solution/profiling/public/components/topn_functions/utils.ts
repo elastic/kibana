@@ -32,7 +32,7 @@ export function scaleValue({ value, scaleFactor = 1 }: { value: number; scaleFac
   return value * scaleFactor;
 }
 
-export const getTotalCount = (topNFunctions?: TopNFunctions) => topNFunctions?.TotalCount ?? 0;
+export const getTotalCount = (topNFunctions?: TopNFunctions) => topNFunctions?.selfCPU ?? 0;
 
 export interface IFunctionRow {
   id: string;
@@ -48,6 +48,7 @@ export interface IFunctionRow {
   selfAnnualCostUSD: number;
   totalAnnualCO2kgs: number;
   totalAnnualCostUSD: number;
+  subGroups?: Record<string, number>;
   diff?: {
     rank: number;
     samples: number;
@@ -94,15 +95,15 @@ export function getFunctionsRows({
       scaleFactor: baselineScaleFactor,
     });
 
-    const totalCPUPerc = (topN.CountInclusive / topNFunctions.TotalCount) * 100;
-    const selfCPUPerc = (topN.CountExclusive / topNFunctions.TotalCount) * 100;
+    const totalCPUPerc = (topN.CountInclusive / topNFunctions.selfCPU) * 100;
+    const selfCPUPerc = (topN.CountExclusive / topNFunctions.selfCPU) * 100;
 
     const impactEstimates =
       totalSeconds > 0
         ? calculateImpactEstimates({
             countExclusive: topN.CountExclusive,
             countInclusive: topN.CountInclusive,
-            totalSamples: topNFunctions.TotalCount,
+            totalSamples: topNFunctions.selfCPU,
             totalSeconds,
           })
         : undefined;
@@ -123,10 +124,9 @@ export function getFunctionsRows({
           selfCPU: comparisonRow.CountExclusive,
           totalCPU: comparisonRow.CountInclusive,
           selfCPUPerc:
-            selfCPUPerc - (comparisonRow.CountExclusive / comparisonTopNFunctions.TotalCount) * 100,
+            selfCPUPerc - (comparisonRow.CountExclusive / comparisonTopNFunctions.selfCPU) * 100,
           totalCPUPerc:
-            totalCPUPerc -
-            (comparisonRow.CountInclusive / comparisonTopNFunctions.TotalCount) * 100,
+            totalCPUPerc - (comparisonRow.CountInclusive / comparisonTopNFunctions.selfCPU) * 100,
           selfAnnualCO2kgs: comparisonRow.selfAnnualCO2kgs,
           selfAnnualCostUSD: comparisonRow.selfAnnualCostUSD,
           totalAnnualCO2kgs: comparisonRow.totalAnnualCO2kgs,
@@ -149,6 +149,7 @@ export function getFunctionsRows({
       selfAnnualCostUSD: topN.selfAnnualCostUSD,
       totalAnnualCO2kgs: topN.totalAnnualCO2kgs,
       totalAnnualCostUSD: topN.totalAnnualCostUSD,
+      subGroups: topN.subGroups,
       diff: calculateDiff(),
     };
   });
@@ -214,5 +215,6 @@ export function convertRowToFrame(row: IFunctionRow) {
     totalAnnualCO2Kgs: row.totalAnnualCO2kgs,
     selfAnnualCostUSD: row.selfAnnualCostUSD,
     totalAnnualCostUSD: row.totalAnnualCostUSD,
+    subGroups: row.subGroups,
   };
 }

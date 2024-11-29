@@ -15,9 +15,7 @@ describe('groupResourceNodes', () => {
     const responseWithGroups = groupResourceNodes(
       preGroupedData as { elements: ConnectionElement[] }
     );
-    expect(responseWithGroups.elements).toHaveLength(
-      expectedGroupedData.elements.length
-    );
+    expect(responseWithGroups.elements).toHaveLength(expectedGroupedData.elements.length);
     for (const element of responseWithGroups.elements) {
       const expectedElement = expectedGroupedData.elements.find(
         ({ data: { id } }: { data: { id: string } }) => id === element.data.id

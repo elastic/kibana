@@ -115,8 +115,11 @@ export const PROFILES_MAP = PROFILE_VALUES.reduce((acc, profile) => {
   return acc;
 }, {} as { [key: string]: ThrottlingConfig });
 
+export const ALLOWED_SCHEDULES_IN_SECONDS = ['10s', '30s'];
+
 export const ALLOWED_SCHEDULES_IN_MINUTES = [
   '1',
+  '2',
   '3',
   '5',
   '10',
@@ -149,7 +152,9 @@ export const DEFAULT_COMMON_FIELDS: CommonFields = {
   [ConfigKey.CONFIG_HASH]: '',
   [ConfigKey.MONITOR_QUERY_ID]: '',
   [ConfigKey.PARAMS]: '',
+  [ConfigKey.LABELS]: {},
   [ConfigKey.MAX_ATTEMPTS]: 2,
+  revision: 1,
 };
 
 export const DEFAULT_BROWSER_ADVANCED_FIELDS: BrowserAdvancedFields = {

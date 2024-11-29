@@ -5,16 +5,14 @@
  * 2.0.
  */
 
-import 'brace';
-import 'brace/mode/json';
-
 import { registerTestBed } from '@kbn/test-jest-helpers';
 import { Editor, Props } from './editor';
 
 describe('Editor Component', () => {
   it('renders', async () => {
     const props: Props = {
-      initialValue: '',
+      editorValue: '',
+      setEditorValue: () => {},
       licenseEnabled: true,
       onEditorReady: (e: any) => {},
     };

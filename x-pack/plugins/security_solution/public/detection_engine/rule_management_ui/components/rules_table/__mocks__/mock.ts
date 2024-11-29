@@ -14,12 +14,25 @@ import type {
 } from '../../../../../detections/pages/detection_engine/rules/types';
 import {
   DataSourceType,
-  GroupByOptions,
+  AlertSuppressionDurationType,
 } from '../../../../../detections/pages/detection_engine/rules/types';
-import type { FieldValueQueryBar } from '../../../../rule_creation_ui/components/query_bar';
+import type { FieldValueQueryBar } from '../../../../rule_creation_ui/components/query_bar_field';
 import { fillEmptySeverityMappings } from '../../../../../detections/pages/detection_engine/rules/helpers';
 import { getThreatMock } from '../../../../../../common/detection_engine/schemas/types/threat.mock';
-import type { RuleResponse, SavedQueryRule } from '../../../../../../common/api/detection_engine';
+import {
+  AlertSuppressionMissingFieldsStrategyEnum,
+  type RuleResponse,
+  type SavedQueryRule,
+} from '../../../../../../common/api/detection_engine';
+import {
+  ALERT_SUPPRESSION_DURATION_FIELD_NAME,
+  ALERT_SUPPRESSION_DURATION_TYPE_FIELD_NAME,
+  ALERT_SUPPRESSION_DURATION_UNIT_FIELD_NAME,
+  ALERT_SUPPRESSION_DURATION_VALUE_FIELD_NAME,
+  ALERT_SUPPRESSION_FIELDS_FIELD_NAME,
+  ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME,
+} from '../../../../rule_creation/components/alert_suppression_edit';
+import { THRESHOLD_ALERT_SUPPRESSION_ENABLED } from '../../../../rule_creation/components/threshold_alert_suppression_edit';
 
 export const mockQueryBar: FieldValueQueryBar = {
   query: {
@@ -81,7 +94,7 @@ export const mockRule = (id: string): SavedQueryRule => ({
   meta: { from: '0m' },
   related_integrations: [],
   required_fields: [],
-  setup: '',
+  setup: '# this is some setup documentation',
   severity: 'low',
   severity_mapping: [],
   updated_by: 'elastic',
@@ -94,6 +107,7 @@ export const mockRule = (id: string): SavedQueryRule => ({
   version: 1,
   revision: 1,
   exceptions_list: [],
+  rule_source: { type: 'internal' },
 });
 
 export const mockRuleWithEverything = (id: string): RuleResponse => ({
@@ -149,7 +163,7 @@ export const mockRuleWithEverything = (id: string): RuleResponse => ({
   meta: { from: '0m' },
   related_integrations: [],
   required_fields: [],
-  setup: '',
+  setup: '# this is some setup documentation',
   severity: 'low',
   severity_mapping: [],
   updated_by: 'elastic',
@@ -197,7 +211,9 @@ export const mockAboutStepRule = (): AboutStepRule => ({
   tags: ['tag1', 'tag2'],
   threat: getThreatMock(),
   note: '# this is some markdown documentation',
+  setup: '# this is some setup documentation',
   investigationFields: ['foo', 'bar'],
+  maxSignals: 100,
 });
 
 export const mockActionsStepRule = (enabled = false): ActionsStepRule => ({
@@ -214,8 +230,18 @@ export const mockDefineStepRule = (): DefineStepRule => ({
   dataViewId: undefined,
   queryBar: mockQueryBar,
   threatQueryBar: mockQueryBar,
-  requiredFields: [],
-  relatedIntegrations: [],
+  requiredFields: [{ name: 'host.name', type: 'keyword' }],
+  relatedIntegrations: [
+    {
+      package: 'aws',
+      integration: 'route53',
+      version: '~1.2.3',
+    },
+    {
+      package: 'system',
+      version: '^1.2.3',
+    },
+  ],
   threatMapping: [],
   timeline: {
     id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',
@@ -235,13 +261,14 @@ export const mockDefineStepRule = (): DefineStepRule => ({
   newTermsFields: ['host.ip'],
   historyWindowSize: '7d',
   shouldLoadQueryDynamically: false,
-  groupByFields: [],
-  groupByRadioSelection: GroupByOptions.PerRuleExecution,
-  groupByDuration: {
-    unit: 'm',
-    value: 5,
+  [ALERT_SUPPRESSION_FIELDS_FIELD_NAME]: [],
+  [ALERT_SUPPRESSION_DURATION_TYPE_FIELD_NAME]: AlertSuppressionDurationType.PerRuleExecution,
+  [ALERT_SUPPRESSION_DURATION_FIELD_NAME]: {
+    [ALERT_SUPPRESSION_DURATION_VALUE_FIELD_NAME]: 5,
+    [ALERT_SUPPRESSION_DURATION_UNIT_FIELD_NAME]: 'm',
   },
-  enableThresholdSuppression: false,
+  [ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME]: AlertSuppressionMissingFieldsStrategyEnum.suppress,
+  [THRESHOLD_ALERT_SUPPRESSION_ENABLED]: false,
 });
 
 export const mockScheduleStepRule = (): ScheduleStepRule => ({

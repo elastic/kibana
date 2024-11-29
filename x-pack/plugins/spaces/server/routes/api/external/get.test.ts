@@ -14,8 +14,11 @@ import {
   httpServiceMock,
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
+import type { MockedVersionedRouter } from '@kbn/core-http-router-server-mocks';
+import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 
 import { initGetSpaceApi } from './get';
+import { API_VERSIONS } from '../../../../common';
 import { spacesConfig } from '../../../lib/__fixtures__';
 import { SpacesClientService } from '../../../spaces_client';
 import { SpacesService } from '../../../spaces_service';
@@ -34,6 +37,7 @@ describe('GET space', () => {
   const setup = async () => {
     const httpService = httpServiceMock.createSetupContract();
     const router = httpService.createRouter();
+    const versionedRouterMock = router.versioned as MockedVersionedRouter;
 
     const coreStart = coreMock.createStart();
 
@@ -41,7 +45,7 @@ describe('GET space', () => {
 
     const log = loggingSystemMock.create().get('spaces');
 
-    const clientService = new SpacesClientService(jest.fn());
+    const clientService = new SpacesClientService(jest.fn(), 'traditional');
     clientService
       .setup({ config$: Rx.of(spacesConfig) })
       .setClientRepositoryFactory(() => savedObjectsRepositoryMock);
@@ -53,7 +57,7 @@ describe('GET space', () => {
 
     const usageStatsServicePromise = Promise.resolve(usageStatsServiceMock.createSetupContract());
 
-    const clientServiceStart = clientService.start(coreStart);
+    const clientServiceStart = clientService.start(coreStart, featuresPluginMock.createStart());
 
     const spacesServiceStart = service.start({
       basePath: coreStart.http.basePath,
@@ -66,10 +70,15 @@ describe('GET space', () => {
       log,
       getSpacesService: () => spacesServiceStart,
       usageStatsServicePromise,
+      isServerless: false,
     });
 
+    const { handler } = versionedRouterMock.getRoute('get', '/api/spaces/space/{id}').versions[
+      API_VERSIONS.public.v1
+    ];
+
     return {
-      routeHandler: router.get.mock.calls[0][1],
+      routeHandler: handler,
     };
   };
 

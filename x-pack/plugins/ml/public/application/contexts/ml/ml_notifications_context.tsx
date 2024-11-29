@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import React, { useContext, useState, useEffect } from 'react';
 import { combineLatest, timer } from 'rxjs';
-import { switchMap, map, tap, retry } from 'rxjs/operators';
+import { switchMap, map, tap, retry } from 'rxjs';
 import moment from 'moment';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { useStorage } from '@kbn/ml-local-storage';
@@ -39,10 +39,10 @@ export const MlNotificationsContext = React.createContext<{
   setLastCheckedAt: () => {},
 });
 
-export const MlNotificationsContextProvider: FC = ({ children }) => {
+export const MlNotificationsContextProvider: FC<PropsWithChildren<unknown>> = ({ children }) => {
   const {
     services: {
-      mlServices: { mlApiServices },
+      mlServices: { mlApi },
       application: { capabilities },
     },
   } = useMlKibana();
@@ -75,7 +75,7 @@ export const MlNotificationsContextProvider: FC = ({ children }) => {
             setLatestRequestedAt(lastCheckedAtQuery);
           }),
           switchMap((lastCheckedAtQuery) =>
-            mlApiServices.notifications.countMessages$({
+            mlApi.notifications.countMessages$({
               lastCheckedAt: lastCheckedAtQuery,
             })
           ),
@@ -89,7 +89,7 @@ export const MlNotificationsContextProvider: FC = ({ children }) => {
         subscription.unsubscribe();
       };
     },
-    [canGetNotifications, lastCheckedAt$, mlApiServices.notifications]
+    [canGetNotifications, lastCheckedAt$, mlApi.notifications]
   );
 
   return (

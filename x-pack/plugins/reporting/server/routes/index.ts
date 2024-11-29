@@ -9,7 +9,6 @@ import type { Logger } from '@kbn/core/server';
 import { ReportingCore } from '..';
 import { registerDeprecationsRoutes } from './internal/deprecations/deprecations';
 import { registerDiagnosticRoutes } from './internal/diagnostic';
-import { registerGenerateCsvFromSavedObjectImmediate } from './internal/generate/csv_searchsource_immediate';
 import { registerGenerationRoutesInternal } from './internal/generate/generate_from_jobparams';
 import { registerJobInfoRoutesInternal } from './internal/management/jobs';
 import { registerGenerationRoutesPublic } from './public/generate_from_jobparams';
@@ -18,7 +17,6 @@ import { registerJobInfoRoutesPublic } from './public/jobs';
 export function registerRoutes(reporting: ReportingCore, logger: Logger) {
   registerDeprecationsRoutes(reporting, logger);
   registerDiagnosticRoutes(reporting, logger);
-  registerGenerateCsvFromSavedObjectImmediate(reporting, logger);
   registerGenerationRoutesInternal(reporting, logger);
   registerJobInfoRoutesInternal(reporting);
   registerGenerationRoutesPublic(reporting, logger);

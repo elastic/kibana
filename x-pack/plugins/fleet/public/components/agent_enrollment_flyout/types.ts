@@ -47,7 +47,6 @@ export interface BaseProps {
    * The user selected policy to be used. If this value is `undefined` a value must be provided for `agentPolicies`.
    */
   agentPolicy?: AgentPolicy;
-
   isFleetServerPolicySelected?: boolean;
 
   isK8s?: K8sMode;
@@ -65,6 +64,7 @@ export interface BaseProps {
 export interface FlyOutProps extends BaseProps {
   onClose: () => void;
   defaultMode?: FlyoutMode;
+  selectedAgentPolicies?: AgentPolicy[];
 }
 
 export interface InstructionProps extends BaseProps {
@@ -80,7 +80,8 @@ export interface InstructionProps extends BaseProps {
   setSelectionType: (type: SelectionType) => void;
   selectedApiKeyId?: string;
   setSelectedAPIKeyId: (key?: string) => void;
-  fleetServerHosts: string[];
+  fleetServerHost: string;
   fleetProxy?: FleetProxy;
   downloadSource?: DownloadSource;
+  downloadSourceProxy?: FleetProxy;
 }

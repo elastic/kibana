@@ -6,26 +6,36 @@
  */
 
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import { DataTier } from '@kbn/observability-shared-plugin/common';
+import { searchExcludedDataTiers } from '@kbn/observability-plugin/common/ui_settings_keys';
 import { APMEventClient } from './create_es_client/create_apm_event_client';
 import { withApmSpan } from '../../utils/with_apm_span';
-import { APMRouteHandlerResources } from '../../routes/apm_routes/register_apm_server_routes';
+import { MinimalAPMRouteHandlerResources } from '../../routes/apm_routes/register_apm_server_routes';
+import { inspectableEsQueriesMap } from '../../routes/apm_routes/register_apm_server_routes';
 
 export async function getApmEventClient({
   context,
   params,
-  config,
   getApmIndices,
   request,
-}: APMRouteHandlerResources): Promise<APMEventClient> {
+}: Pick<
+  MinimalAPMRouteHandlerResources,
+  'context' | 'params' | 'getApmIndices' | 'request'
+>): Promise<APMEventClient> {
   return withApmSpan('get_apm_event_client', async () => {
     const coreContext = await context.core;
-    const [indices, includeFrozen] = await Promise.all([
+    const [indices, uiSettings] = await Promise.all([
       getApmIndices(),
-      withApmSpan('get_ui_settings', () =>
-        coreContext.uiSettings.client.get<boolean>(
+      withApmSpan('get_ui_settings', async () => {
+        const includeFrozen = await coreContext.uiSettings.client.get<boolean>(
           UI_SETTINGS.SEARCH_INCLUDE_FROZEN
-        )
-      ),
+        );
+        const excludedDataTiers = await coreContext.uiSettings.client.get<DataTier[]>(
+          searchExcludedDataTiers
+        );
+
+        return { includeFrozen, excludedDataTiers };
+      }),
     ]);
 
     return new APMEventClient({
@@ -34,8 +44,9 @@ export async function getApmEventClient({
       request,
       indices,
       options: {
-        includeFrozen,
-        forceSyntheticSource: config.forceSyntheticSource,
+        includeFrozen: uiSettings.includeFrozen,
+        excludedDataTiers: uiSettings.excludedDataTiers,
+        inspectableEsQueriesMap,
       },
     });
   });

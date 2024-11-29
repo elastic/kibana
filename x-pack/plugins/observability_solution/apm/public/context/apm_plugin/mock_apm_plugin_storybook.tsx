@@ -19,10 +19,7 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { Observable, of } from 'rxjs';
 import { apmRouter } from '../../components/routing/apm_route_config';
 import { createCallApmApi } from '../../services/rest/create_call_apm_api';
-import {
-  APMServiceContext,
-  APMServiceContextValue,
-} from '../apm_service/apm_service_context';
+import { APMServiceContext, APMServiceContextValue } from '../apm_service/apm_service_context';
 import { MockTimeRangeContextProvider } from '../time_range_metadata/mock_time_range_metadata_context_provider';
 import { ApmTimeRangeMetadataContextProvider } from '../time_range_metadata/time_range_metadata_context';
 import { ApmPluginContext, ApmPluginContextValue } from './apm_plugin_context';
@@ -123,13 +120,53 @@ const mockCore = {
     get: (key: string) => uiSettings[key],
     get$: (key: string) => of(mockCore.uiSettings.get(key)),
   },
+  unifiedSearch: {
+    autocomplete: {
+      hasQuerySuggestions: () => Promise.resolve(false),
+      getQuerySuggestions: () => [],
+      getValueSuggestions: () =>
+        new Promise((resolve) => {
+          setTimeout(() => {
+            resolve([]);
+          }, 300);
+        }),
+    },
+  },
+  data: {
+    query: {
+      queryString: { getQuery: jest.fn(), setQuery: jest.fn(), clearQuery: jest.fn() },
+      timefilter: {
+        timefilter: {
+          setTime: jest.fn(),
+          setRefreshInterval: jest.fn(),
+        },
+      },
+    },
+  },
+  dataViews: {
+    create: jest.fn(),
+  },
+};
+
+const mockUnifiedSearchBar = {
+  ui: {
+    SearchBar: () => <div />,
+  },
 };
 
 const mockApmPluginContext = {
   core: mockCore,
   plugins: mockPlugin,
+  unifiedSearch: mockUnifiedSearchBar,
   observabilityAIAssistant: {
     service: { setScreenContext: () => noop },
+  },
+  share: {
+    url: {
+      locators: {
+        get: jest.fn(),
+      },
+    },
   },
 } as unknown as ApmPluginContextValue;
 
@@ -150,7 +187,7 @@ export function MockApmPluginStorybook({
     contextMock.core as unknown as Partial<CoreStart>
   );
 
-  const history2 = createMemoryHistory({
+  const history = createMemoryHistory({
     initialEntries: [routePath || '/services/?rangeFrom=now-15m&rangeTo=now'],
   });
 
@@ -160,7 +197,7 @@ export function MockApmPluginStorybook({
         <KibanaReactContext.Provider>
           <ApmPluginContext.Provider value={contextMock}>
             <APMServiceContext.Provider value={serviceContextValue}>
-              <RouterProvider router={apmRouter as any} history={history2}>
+              <RouterProvider router={apmRouter as any} history={history}>
                 <MockTimeRangeContextProvider>
                   <ApmTimeRangeMetadataContextProvider>
                     {children}

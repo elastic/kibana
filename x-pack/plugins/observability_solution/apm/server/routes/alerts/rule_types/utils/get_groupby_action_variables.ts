@@ -37,14 +37,8 @@ const renameActionVariable = (field: string): string => {
 export const getGroupByActionVariables = (
   groupByFields: Record<string, string>
 ): Record<string, string> => {
-  return Object.keys(groupByFields).reduce<Record<string, string>>(
-    (acc, cur) => {
-      acc[renameActionVariable(cur)] = getFieldValueLabel(
-        cur,
-        groupByFields[cur]
-      );
-      return acc;
-    },
-    {}
-  );
+  return Object.keys(groupByFields).reduce<Record<string, string>>((acc, cur) => {
+    acc[renameActionVariable(cur)] = getFieldValueLabel(cur, groupByFields[cur]);
+    return acc;
+  }, {});
 };

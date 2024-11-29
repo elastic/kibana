@@ -7,7 +7,7 @@
 
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { FleetStartContract } from '@kbn/fleet-plugin/server';
-import { FleetArtifactsClient } from '@kbn/fleet-plugin/server/services';
+import { ArtifactsClientInterface } from '@kbn/fleet-plugin/server/services';
 import { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import { CoreStart, Logger } from '@kbn/core/server';
 import { getApmArtifactClient } from '../fleet/source_maps';
@@ -51,8 +51,7 @@ export async function scheduleSourceMapMigration({
           async run() {
             logger.debug(`Run task: "${TASK_TYPE}"`);
             const coreStart = await coreStartPromise;
-            const internalESClient =
-              coreStart.elasticsearch.client.asInternalUser;
+            const internalESClient = coreStart.elasticsearch.client.asInternalUser;
 
             // ensure that the index template has been created before running migration
             await createApmSourceMapIndexTemplate({
@@ -112,9 +111,7 @@ export async function runFleetSourcemapArtifactsMigration({
   logger: Logger;
 }) {
   try {
-    const latestApmSourceMapTimestamp = await getLatestApmSourceMap(
-      internalESClient
-    );
+    const latestApmSourceMapTimestamp = await getLatestApmSourceMap(internalESClient);
     const createdDateFilter = latestApmSourceMapTimestamp
       ? ` AND created:>${asLuceneEncoding(latestApmSourceMapTimestamp)}`
       : '';
@@ -144,7 +141,7 @@ async function getArtifactsForPage({
   kuery,
 }: {
   page: number;
-  apmArtifactClient: FleetArtifactsClient;
+  apmArtifactClient: ArtifactsClientInterface;
   kuery: string;
 }) {
   return await apmArtifactClient.listArtifacts({
@@ -166,7 +163,7 @@ async function paginateArtifacts({
 }: {
   taskState?: TaskState;
   page: number;
-  apmArtifactClient: FleetArtifactsClient;
+  apmArtifactClient: ArtifactsClientInterface;
   kuery: string;
   logger: Logger;
   internalESClient: ElasticsearchClient;

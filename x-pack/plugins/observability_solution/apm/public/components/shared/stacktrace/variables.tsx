@@ -11,7 +11,7 @@ import React from 'react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { Stackframe } from '../../../../typings/es_schemas/raw/fields/stackframe';
 import { KeyValueTable } from '../key_value_table';
-import { flattenObject } from '../../../utils/flatten_object';
+import { flattenObject } from '../../../../common/utils/flatten_object';
 
 const VariablesContainer = euiStyled.div`
   background: ${({ theme }) => theme.eui.euiColorEmptyShade};
@@ -35,10 +35,9 @@ export function Variables({ vars }: Props) {
         <EuiAccordion
           id="local-variables"
           className="euiAccordion"
-          buttonContent={i18n.translate(
-            'xpack.apm.stacktraceTab.localVariablesToogleButtonLabel',
-            { defaultMessage: 'Local variables' }
-          )}
+          buttonContent={i18n.translate('xpack.apm.stacktraceTab.localVariablesToogleButtonLabel', {
+            defaultMessage: 'Local variables',
+          })}
         >
           <React.Fragment>
             <KeyValueTable keyValuePairs={flattenedVariables} />

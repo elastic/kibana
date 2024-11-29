@@ -8,9 +8,10 @@
 import { i18n } from '@kbn/i18n';
 import { ConditionEntryField } from '@kbn/securitysolution-utils';
 import type {
-  MacosLinuxConditionEntry,
+  LinuxConditionEntry,
   WindowsConditionEntry,
   OperatorFieldIds,
+  MacosConditionEntry,
 } from '../../../../../common/endpoint/types';
 
 export const NAME_LABEL = i18n.translate('xpack.securitySolution.trustedApps.name.label', {
@@ -68,6 +69,10 @@ export const CONDITION_FIELD_TITLE: { [K in ConditionEntryField]: string } = {
     'xpack.securitySolution.trustedapps.logicalConditionBuilder.entry.field.signature',
     { defaultMessage: 'Signature' }
   ),
+  [ConditionEntryField.SIGNER_MAC]: i18n.translate(
+    'xpack.securitySolution.trustedapps.logicalConditionBuilder.entry.field.signatureMac',
+    { defaultMessage: 'Signature' }
+  ),
 };
 
 export const CONDITION_FIELD_DESCRIPTION: { [K in ConditionEntryField]: string } = {
@@ -83,6 +88,10 @@ export const CONDITION_FIELD_DESCRIPTION: { [K in ConditionEntryField]: string }
     'xpack.securitySolution.trustedapps.logicalConditionBuilder.entry.field.description.signature',
     { defaultMessage: 'The signer of the application' }
   ),
+  [ConditionEntryField.SIGNER_MAC]: i18n.translate(
+    'xpack.securitySolution.trustedapps.logicalConditionBuilder.entry.field.description.signatureMac',
+    { defaultMessage: 'The signer of the application' }
+  ),
 };
 
 export const OPERATOR_TITLES: { [K in OperatorFieldIds]: string } = {
@@ -95,7 +104,10 @@ export const OPERATOR_TITLES: { [K in OperatorFieldIds]: string } = {
 };
 
 export const ENTRY_PROPERTY_TITLES: Readonly<{
-  [K in keyof Omit<MacosLinuxConditionEntry | WindowsConditionEntry, 'type'>]: string;
+  [K in keyof Omit<
+    LinuxConditionEntry | WindowsConditionEntry | MacosConditionEntry,
+    'type'
+  >]: string;
 }> = {
   field: i18n.translate('xpack.securitySolution.trustedapps.trustedapp.entry.field', {
     defaultMessage: 'Field',
@@ -156,29 +168,12 @@ export const INPUT_ERRORS = {
     ),
   wildcardWithWrongOperatorWarning: (index: number) =>
     i18n.translate('xpack.securitySolution.trustedapps.create.conditionWrongOperatorMsg', {
-      defaultMessage: `[{row}] Using a '*' or a '?' in the value with the 'IS' operator can make the entry ineffective. Change the operator to 'matches' to ensure wildcards run properly.`,
+      defaultMessage: `[{row}] Using a "*" or a "?" in the value with the "is" operator can make the entry ineffective. Change the operator to "matches" to ensure wildcards run properly.`,
       values: { row: index + 1 },
     }),
-};
-
-export const CONFIRM_WARNING_MODAL_LABELS = {
-  title: i18n.translate('xpack.securitySolution.trustedapps.confirmWarningModal.title', {
-    defaultMessage: 'Confirm trusted application',
-  }),
-  body: i18n.translate('xpack.securitySolution.trustedapps.confirmWarningModal.body', {
-    defaultMessage:
-      'Using a "*" or a "?" in the value and with the "IS" operator can make the entry ineffective. Change the operator to ‘matches’ to ensure wildcards run properly. Select “cancel” to revise your entry, or "add" to continue with entry in its current state.',
-  }),
-  confirmButton: i18n.translate(
-    'xpack.securitySolution.trustedapps.confirmWarningModal.confirmButtonText',
-    {
-      defaultMessage: 'Add',
-    }
-  ),
-  cancelButton: i18n.translate(
-    'xpack.securitySolution.trustedapps.confirmWarningModal.cancelButtonText',
-    {
-      defaultMessage: 'Cancel',
-    }
-  ),
+  wildcardWithWrongField: (index: number) =>
+    i18n.translate('xpack.securitySolution.trustedapps.create.conditionWrongFieldMsg', {
+      defaultMessage: `[{row}] Wildcards (? or *) are not supported for hash or signature entries.`,
+      values: { row: index + 1 },
+    }),
 };

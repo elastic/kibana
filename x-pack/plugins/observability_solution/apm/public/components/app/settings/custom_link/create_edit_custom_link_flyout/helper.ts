@@ -9,10 +9,7 @@ import { i18n } from '@kbn/i18n';
 import Mustache from 'mustache';
 import { isEmpty, get } from 'lodash';
 import { FILTER_OPTIONS } from '../../../../../../common/custom_link/custom_link_filter_options';
-import {
-  Filter,
-  FilterKey,
-} from '../../../../../../common/custom_link/custom_link_types';
+import { Filter, FilterKey } from '../../../../../../common/custom_link/custom_link_types';
 import { Transaction } from '../../../../../../typings/es_schemas/ui/transaction';
 import { getEncodedCustomLinkUrl } from '../../../../../../common/custom_link';
 
@@ -23,10 +20,9 @@ interface FilterSelectOption {
 
 export const DEFAULT_OPTION: FilterSelectOption = {
   value: 'DEFAULT',
-  text: i18n.translate(
-    'xpack.apm.settings.customLink.flyOut.filters.defaultOption',
-    { defaultMessage: 'Select field...' }
-  ),
+  text: i18n.translate('xpack.apm.settings.customLink.flyOut.filters.defaultOption', {
+    defaultMessage: 'Select field...',
+  }),
 };
 
 export const FILTER_SELECT_OPTIONS: FilterSelectOption[] = [
@@ -43,20 +39,15 @@ export const FILTER_SELECT_OPTIONS: FilterSelectOption[] = [
  * @param filters
  * @param selectedKey
  */
-export const getSelectOptions = (
-  filters: Filter[],
-  selectedKey: Filter['key']
-) => {
+export const getSelectOptions = (filters: Filter[], selectedKey: Filter['key']) => {
   return FILTER_SELECT_OPTIONS.filter(
     ({ value }) =>
+      value === DEFAULT_OPTION.value ||
       !filters.some(({ key }) => key === value && key !== selectedKey)
   );
 };
 
-const getInvalidTemplateVariables = (
-  template: string,
-  transaction: Transaction
-) => {
+const getInvalidTemplateVariables = (template: string, transaction: Transaction) => {
   return (Mustache.parse(template) as Array<[string, string]>)
     .filter(([type]) => type === 'name')
     .map(([, value]) => value)
@@ -65,45 +56,31 @@ const getInvalidTemplateVariables = (
 
 const validateUrl = (url: string, transaction?: Transaction) => {
   if (!transaction || isEmpty(transaction)) {
-    return i18n.translate(
-      'xpack.apm.settings.customLink.preview.transaction.notFound',
-      {
-        defaultMessage:
-          "We couldn't find a matching transaction document based on the defined filters.",
-      }
-    );
+    return i18n.translate('xpack.apm.settings.customLink.preview.transaction.notFound', {
+      defaultMessage:
+        "We couldn't find a matching transaction document based on the defined filters.",
+    });
   }
   try {
     const invalidVariables = getInvalidTemplateVariables(url, transaction);
     if (!isEmpty(invalidVariables)) {
-      return i18n.translate(
-        'xpack.apm.settings.customLink.preview.contextVariable.noMatch',
-        {
-          defaultMessage:
-            "We couldn't find a value match for {variables} in the example transaction document.",
-          values: {
-            variables: invalidVariables
-              .map((variable) => `{{${variable}}}`)
-              .join(', '),
-          },
-        }
-      );
+      return i18n.translate('xpack.apm.settings.customLink.preview.contextVariable.noMatch', {
+        defaultMessage:
+          "We couldn't find a value match for {variables} in the example transaction document.",
+        values: {
+          variables: invalidVariables.map((variable) => `{{${variable}}}`).join(', '),
+        },
+      });
     }
   } catch (e) {
-    return i18n.translate(
-      'xpack.apm.settings.customLink.preview.contextVariable.invalid',
-      {
-        defaultMessage:
-          "We couldn't find an example transaction document due to invalid variable(s) defined.",
-      }
-    );
+    return i18n.translate('xpack.apm.settings.customLink.preview.contextVariable.invalid', {
+      defaultMessage:
+        "We couldn't find an example transaction document due to invalid variable(s) defined.",
+    });
   }
 };
 
-export const replaceTemplateVariables = (
-  url: string,
-  transaction?: Transaction
-) => ({
+export const replaceTemplateVariables = (url: string, transaction?: Transaction) => ({
   formattedUrl: getEncodedCustomLinkUrl(url, transaction),
   error: validateUrl(url, transaction),
 });

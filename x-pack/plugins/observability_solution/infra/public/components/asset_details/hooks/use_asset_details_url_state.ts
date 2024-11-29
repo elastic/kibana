@@ -15,8 +15,8 @@ import {
   ALERT_STATUS_RECOVERED,
   ALERT_STATUS_UNTRACKED,
 } from '@kbn/rule-data-utils';
+import { useUrlState } from '@kbn/observability-shared-plugin/public';
 import { ContentTabIds } from '../types';
-import { useUrlState } from '../../../utils/use_url_state';
 import { ASSET_DETAILS_URL_STATE_KEY } from '../constants';
 import { ALERT_STATUS_ALL } from '../../shared/alerts/constants';
 
@@ -54,11 +54,13 @@ export const useAssetDetailsUrlState = (): [AssetDetailsUrl, SetAssetDetailsStat
 const TabIdRT = rt.union([
   rt.literal(ContentTabIds.OVERVIEW),
   rt.literal(ContentTabIds.METADATA),
+  rt.literal(ContentTabIds.METRICS),
   rt.literal(ContentTabIds.PROCESSES),
   rt.literal(ContentTabIds.PROFILING),
   rt.literal(ContentTabIds.LOGS),
   rt.literal(ContentTabIds.ANOMALIES),
   rt.literal(ContentTabIds.OSQUERY),
+  rt.literal(ContentTabIds.DASHBOARDS),
 ]);
 
 const AlertStatusRT = rt.union([
@@ -67,6 +69,18 @@ const AlertStatusRT = rt.union([
   rt.literal(ALERT_STATUS_RECOVERED),
   rt.literal(ALERT_STATUS_UNTRACKED),
 ]);
+
+interface TabIdWithSectionBrand {
+  readonly TabIdWithSection: unique symbol;
+}
+
+// Custom codec for tabId with fragment
+const TabIdWithSectionRT = rt.brand(
+  rt.string,
+  (s): s is rt.Branded<string, TabIdWithSectionBrand> =>
+    s.includes('#') ? TabIdRT.is(s.split('#')[0]) : TabIdRT.is(s),
+  'TabIdWithSection'
+);
 
 const AssetDetailsUrlStateRT = rt.partial({
   autoRefresh: rt.partial({
@@ -77,18 +91,23 @@ const AssetDetailsUrlStateRT = rt.partial({
     from: rt.string,
     to: rt.string,
   }),
-  tabId: TabIdRT,
+  tabId: TabIdWithSectionRT,
   name: rt.string,
   processSearch: rt.string,
   metadataSearch: rt.string,
   logsSearch: rt.string,
   profilingSearch: rt.string,
   alertStatus: AlertStatusRT,
+  dashboardId: rt.string,
+  alertMetric: rt.string,
 });
 
 const AssetDetailsUrlRT = rt.union([AssetDetailsUrlStateRT, rt.null]);
 
-export type AssetDetailsUrlState = rt.TypeOf<typeof AssetDetailsUrlStateRT>;
+export type AssetDetailsUrlState = Omit<rt.TypeOf<typeof AssetDetailsUrlStateRT>, 'tabId'> & {
+  tabId?: string;
+};
+
 type AssetDetailsUrl = rt.TypeOf<typeof AssetDetailsUrlRT>;
 type Payload = Partial<AssetDetailsUrlState>;
 

@@ -11,6 +11,7 @@ import type { CommonResponseActionMethodOptions } from '../../../endpoint/servic
 
 export type Alert = ParsedTechnicalFields & {
   _id: string;
+  _index: string;
   agent?: AlertAgent;
   host?: {
     name: string;
@@ -18,11 +19,20 @@ export type Alert = ParsedTechnicalFields & {
   process?: {
     pid: string;
   };
+  kibana: {
+    alert?: {
+      rule: {
+        uuid: string;
+        name: string;
+      };
+    };
+  };
 };
 
 export interface AlertAgent {
   id: string;
   name: string;
+  type: string;
 }
 
 export interface AlertWithAgent extends Alert {

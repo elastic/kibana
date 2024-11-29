@@ -5,17 +5,16 @@
  * 2.0.
  */
 
+import type { DataViewTitleSchema } from '../../api_schemas/common';
+import { dataViewTitleSchema } from '../../api_schemas/common';
+import type { FieldHistogramsRequestSchema } from '../../api_schemas/field_histograms';
+import { fieldHistogramsRequestSchema } from '../../api_schemas/field_histograms';
 import { addInternalBasePath } from '../../../../common/constants';
-
-import type { DataViewTitleSchema } from '../../../../common/api_schemas/common';
-import { dataViewTitleSchema } from '../../../../common/api_schemas/common';
-import type { FieldHistogramsRequestSchema } from '../../../../common/api_schemas/field_histograms';
-import { fieldHistogramsRequestSchema } from '../../../../common/api_schemas/field_histograms';
 import type { RouteDependencies } from '../../../types';
 
 import { routeHandler } from './route_handler';
 
-export function registerRoute({ router, license }: RouteDependencies) {
+export function registerRoute({ router, getLicense }: RouteDependencies) {
   router.versioned
     .post({
       path: addInternalBasePath('field_histograms/{dataViewTitle}'),
@@ -24,6 +23,13 @@ export function registerRoute({ router, license }: RouteDependencies) {
     .addVersion<DataViewTitleSchema, undefined, FieldHistogramsRequestSchema>(
       {
         version: '1',
+        security: {
+          authz: {
+            enabled: false,
+            reason:
+              'This route is opted out from authorization because permissions will be checked by elasticsearch',
+          },
+        },
         validate: {
           request: {
             params: dataViewTitleSchema,
@@ -31,8 +37,11 @@ export function registerRoute({ router, license }: RouteDependencies) {
           },
         },
       },
-      license.guardApiRoute<DataViewTitleSchema, undefined, FieldHistogramsRequestSchema>(
-        routeHandler
-      )
+      async (ctx, request, response) => {
+        const license = await getLicense();
+        return license.guardApiRoute<DataViewTitleSchema, undefined, FieldHistogramsRequestSchema>(
+          routeHandler
+        )(ctx, request, response);
+      }
     );
 }

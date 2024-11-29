@@ -1,26 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
-import { EuiContextMenuPanel, EuiContextMenuItem } from '@elastic/eui';
+import { EuiContextMenuPanel, EuiContextMenuItem, EuiButtonEmpty } from '@elastic/eui';
 import type {
   AppDeepLinkId,
-  ChromeProjectBreadcrumb,
   ChromeProjectNavigationNode,
   ChromeSetProjectBreadcrumbsParams,
   ChromeBreadcrumb,
-  SolutionNavigationDefinitions,
   CloudLinks,
 } from '@kbn/core-chrome-browser';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-
-import { getSolutionNavSwitcherBreadCrumb } from '../ui/solution_nav_switcher_breadcrumbs';
 
 export function buildBreadcrumbs({
   projectName,
@@ -28,26 +25,22 @@ export function buildBreadcrumbs({
   projectBreadcrumbs,
   activeNodes,
   chromeBreadcrumbs,
-  solutionNavigations,
+  isServerless,
 }: {
   projectName?: string;
   projectBreadcrumbs: {
-    breadcrumbs: ChromeProjectBreadcrumb[];
+    breadcrumbs: ChromeBreadcrumb[];
     params: ChromeSetProjectBreadcrumbsParams;
   };
   chromeBreadcrumbs: ChromeBreadcrumb[];
   cloudLinks: CloudLinks;
   activeNodes: ChromeProjectNavigationNode[][];
-  solutionNavigations?: {
-    definitions: SolutionNavigationDefinitions;
-    activeId: string;
-    onChange: (id: string, options?: { redirect?: boolean }) => void;
-  };
-}): ChromeProjectBreadcrumb[] {
+  isServerless: boolean;
+}): ChromeBreadcrumb[] {
   const rootCrumb = buildRootCrumb({
     projectName,
-    solutionNavigations,
     cloudLinks,
+    isServerless,
   });
 
   if (projectBreadcrumbs.params.absolute) {
@@ -60,7 +53,7 @@ export function buildBreadcrumbs({
     (n) => Boolean(n.title) && n.breadcrumbStatus !== 'hidden'
   );
   const navBreadcrumbs = navBreadcrumbPath.map(
-    (node): ChromeProjectBreadcrumb => ({
+    (node): ChromeBreadcrumb => ({
       href: node.deepLink?.url ?? node.href,
       deepLinkId: node.deepLink?.id as AppDeepLinkId,
       text: node.title,
@@ -99,56 +92,86 @@ export function buildBreadcrumbs({
 
 function buildRootCrumb({
   projectName,
-  solutionNavigations,
   cloudLinks,
+  isServerless,
 }: {
   projectName?: string;
   cloudLinks: CloudLinks;
-  solutionNavigations?: {
-    definitions: SolutionNavigationDefinitions;
-    activeId: string;
-    onChange: (id: string, options?: { redirect?: boolean }) => void;
-  };
-}): ChromeProjectBreadcrumb {
-  if (solutionNavigations) {
-    // if there are solution navigations, it means that we are in Kibana stateful and not
-    // in serverless with projects.
-    const { definitions, activeId, onChange } = solutionNavigations;
-    return getSolutionNavSwitcherBreadCrumb({
-      definitions,
-      onChange,
-      activeId,
-      cloudLinks,
-    });
+  isServerless: boolean;
+}): ChromeBreadcrumb {
+  if (isServerless) {
+    return {
+      text:
+        projectName ??
+        i18n.translate('core.ui.primaryNav.cloud.projectLabel', {
+          defaultMessage: 'Project',
+        }),
+      // increase the max-width of the root breadcrumb to not truncate too soon
+      style: { maxWidth: '320px' },
+      popoverContent: (
+        <EuiContextMenuPanel
+          size="s"
+          items={[
+            <EuiContextMenuItem key="project" href={cloudLinks.deployment?.href} icon={'gear'}>
+              <FormattedMessage
+                id="core.ui.primaryNav.cloud.linkToProject"
+                defaultMessage="Manage project"
+              />
+            </EuiContextMenuItem>,
+            <EuiContextMenuItem key="projects" href={cloudLinks.projects?.href} icon={'grid'}>
+              <FormattedMessage
+                id="core.ui.primaryNav.cloud.linkToAllProjects"
+                defaultMessage="View all projects"
+              />
+            </EuiContextMenuItem>,
+          ]}
+        />
+      ),
+      popoverProps: { panelPaddingSize: 'none' },
+    };
   }
 
   return {
-    text:
-      projectName ??
-      i18n.translate('core.ui.primaryNav.cloud.projectLabel', {
-        defaultMessage: 'Project',
-      }),
-    // increase the max-width of the root breadcrumb to not truncate too soon
-    style: { maxWidth: '320px' },
-    popoverContent: (
-      <EuiContextMenuPanel
-        size="s"
-        items={[
-          <EuiContextMenuItem key="project" href={cloudLinks.deployment?.href} icon={'gear'}>
-            <FormattedMessage
-              id="core.ui.primaryNav.cloud.linkToProject"
-              defaultMessage="Manage project"
-            />
-          </EuiContextMenuItem>,
-          <EuiContextMenuItem key="projects" href={cloudLinks.projects?.href} icon={'grid'}>
-            <FormattedMessage
-              id="core.ui.primaryNav.cloud.linkToAllProjects"
-              defaultMessage="View all projects"
-            />
-          </EuiContextMenuItem>,
-        ]}
-      />
+    text: i18n.translate('core.ui.primaryNav.cloud.deploymentLabel', {
+      defaultMessage: 'Deployment',
+    }),
+    'data-test-subj': 'deploymentCrumb',
+    popoverContent: () => (
+      <>
+        {cloudLinks.deployment && (
+          <EuiButtonEmpty
+            href={cloudLinks.deployment.href}
+            color="text"
+            iconType="gear"
+            data-test-subj="manageDeploymentBtn"
+            size="s"
+          >
+            {i18n.translate('core.ui.primaryNav.cloud.breadCrumbDropdown.manageDeploymentLabel', {
+              defaultMessage: 'Manage this deployment',
+            })}
+          </EuiButtonEmpty>
+        )}
+
+        {cloudLinks.deployments && (
+          <EuiButtonEmpty
+            href={cloudLinks.deployments.href}
+            color="text"
+            iconType="spaces"
+            data-test-subj="viewDeploymentsBtn"
+            size="s"
+          >
+            {cloudLinks.deployments.title}
+          </EuiButtonEmpty>
+        )}
+      </>
     ),
-    popoverProps: { panelPaddingSize: 'none' },
+    popoverProps: {
+      panelPaddingSize: 's',
+      zIndex: 6000,
+      panelStyle: { maxWidth: 240 },
+      panelProps: {
+        'data-test-subj': 'deploymentLinksPanel',
+      },
+    },
   };
 }

@@ -16,6 +16,7 @@ import { GlobalFieldsProvider } from '../global_fields_context';
 
 interface Props {
   form: FormHook;
+  children: React.ReactNode;
 }
 
 export const Form: FunctionComponent<Props> = ({ form, children }) => {

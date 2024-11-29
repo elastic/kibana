@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -13,11 +14,11 @@ import {
 
 import { loggerMock } from '@kbn/logging-mocks';
 import { coreContextMock } from '@kbn/core-base-browser-mocks';
-import type { CoreSecurityContract } from '@kbn/core-security-browser';
+import type { CoreSecurityDelegateContract } from '@kbn/core-security-browser';
 import { SecurityService } from './security_service';
 
-const createStubInternalContract = (): CoreSecurityContract => {
-  return Symbol('stubContract') as unknown as CoreSecurityContract;
+const createStubInternalContract = (): CoreSecurityDelegateContract => {
+  return Symbol('stubContract') as unknown as CoreSecurityDelegateContract;
 };
 
 describe('SecurityService', () => {
@@ -33,14 +34,14 @@ describe('SecurityService', () => {
   });
 
   describe('#setup', () => {
-    describe('#registerSecurityApi', () => {
+    describe('#registerSecurityDelegate', () => {
       it('throws if called more than once', () => {
-        const { registerSecurityApi } = service.setup();
+        const { registerSecurityDelegate } = service.setup();
 
         const contract = createStubInternalContract();
-        registerSecurityApi(contract);
+        registerSecurityDelegate(contract);
 
-        expect(() => registerSecurityApi(contract)).toThrowErrorMatchingInlineSnapshot(
+        expect(() => registerSecurityDelegate(contract)).toThrowErrorMatchingInlineSnapshot(
           `"security API can only be registered once"`
         );
       });
@@ -62,10 +63,10 @@ describe('SecurityService', () => {
     });
 
     it('calls convertSecurityApi with the registered API', () => {
-      const { registerSecurityApi } = service.setup();
+      const { registerSecurityDelegate } = service.setup();
 
       const contract = createStubInternalContract();
-      registerSecurityApi(contract);
+      registerSecurityDelegate(contract);
 
       service.start();
 

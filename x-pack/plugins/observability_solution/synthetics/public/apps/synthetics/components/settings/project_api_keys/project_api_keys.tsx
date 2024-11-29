@@ -21,10 +21,7 @@ const syntheticsTestRunDocsLink =
   'https://www.elastic.co/guide/en/observability/current/synthetic-run-tests.html';
 
 export const ProjectAPIKeys = () => {
-  const {
-    loading: enablementLoading,
-    enablement: { canManageApiKeys },
-  } = useEnablement();
+  const { loading: enablementLoading, canManageApiKeys } = useEnablement();
   const [apiKey, setApiKey] = useState<string | undefined>(undefined);
   const [loadAPIKey, setLoadAPIKey] = useState(false);
   const [accessToElasticManagedLocations, setAccessToElasticManagedLocations] = useState(true);
@@ -41,6 +38,9 @@ export const ProjectAPIKeys = () => {
       return fetchProjectAPIKey(accessToElasticManagedLocations && Boolean(canUsePublicLocations));
     }
     return null;
+    // FIXME: Dario thinks there is a better way to do this but
+    // he's getting tired and maybe the Synthetics folks can fix it
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loadAPIKey, canUsePublicLocations]);
 
   useEffect(() => {

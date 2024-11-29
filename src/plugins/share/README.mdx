@@ -13,35 +13,14 @@ The `share` plugin contains various utilities for displaying sharing context men
 generating deep links to other apps using *locators*, and creating short URLs.
 
 
-## Sharing context menu
+## Sharing context menu and modal
 
-You can register an item into sharing context menu (which is displayed in
-Dashboard, Discover, and Visualize apps).
-
-### Example registration
-
-```ts
-import { ShareContext, ShareMenuItem } from 'src/plugins/share/public';
-
-plugins.share.register({
-  id: 'demo',
-  getShareMenuItems: (context) => [
-    {
-      panel: {
-        id: 'demo',
-        title: 'Panel title',
-        content: 'Panel content',
-      },
-      shareMenuItem: {
-        name: 'Demo list item (from share_example plugin)',
-      },
-    }
-  ],
-});
-```
-
-Now the "Demo list item" will appear under the "Share" menu in Discover and
-Dashboard applications.
+You can register an item into sharing context modal or menu (which is displayed in
+Dashboard, Discover, and Visualize apps). In early 2024, the Shared UX team created a tabbed share modal redesign.
+Canvas still is using the older share context menu, but Dashboard, Discover, and Visualize apps are since using 
+the new modal implementation. This change was made for a less cluttered UI and streamlined user experience. 
+Copy links default to short links based on user feedback. Reports/Exports have been consolidated into one tab called 
+Exports, versus the separated panels in the share context menu. 
 
 
 ## Locators
@@ -228,3 +207,4 @@ const url = await shortUrls.create({
 ```
 
 To resolve the short URL, navigate to `/r/s/<slug>` in the browser.
+

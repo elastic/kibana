@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { Stream } from 'stream';
@@ -39,6 +40,8 @@ export type ResponseErrorAttributes = Record<string, any>;
  */
 export type ResponseError =
   | string
+  | Buffer
+  | Stream
   | Error
   | {
       message: string | Error;
@@ -53,6 +56,26 @@ export interface IKibanaResponse<T extends HttpResponsePayload | ResponseError =
   readonly status: number;
   readonly payload?: T;
   readonly options: HttpResponseOptions;
+}
+
+export function isKibanaResponse(response?: Record<string, any>): response is IKibanaResponse {
+  if (!response) {
+    return false;
+  }
+
+  const { status, options, payload, ...rest } = response;
+
+  if (Object.keys(rest).length !== 0) {
+    return false;
+  }
+
+  return (
+    typeof status === 'number' &&
+    typeof options === 'object' &&
+    !Array.isArray(options) &&
+    options !== null &&
+    !(options instanceof Set)
+  );
 }
 
 /**

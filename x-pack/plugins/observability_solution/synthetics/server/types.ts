@@ -17,6 +17,10 @@ import {
   Logger,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
+import {
+  PluginStartContract as AlertingPluginStart,
+  PluginSetupContract as AlertingPluginSetup,
+} from '@kbn/alerting-plugin/server';
 import { SharePluginSetup } from '@kbn/share-plugin/server';
 import { ObservabilityPluginSetup } from '@kbn/observability-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
@@ -30,15 +34,15 @@ import {
   EncryptedSavedObjectsPluginSetup,
   EncryptedSavedObjectsPluginStart,
 } from '@kbn/encrypted-saved-objects-plugin/server';
-import { PluginSetupContract } from '@kbn/features-plugin/server';
+import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
 import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import { TelemetryEventsSender } from './telemetry/sender';
-import { UptimeConfig } from '../common/config';
-import { UptimeEsClient } from './lib';
+import { UptimeConfig } from './config';
+import { SyntheticsEsClient } from './lib';
 
 export interface SyntheticsServerSetup {
   router: UptimeRouter;
@@ -54,16 +58,18 @@ export interface SyntheticsServerSetup {
   stackVersion: string;
   logger: Logger;
   telemetry: TelemetryEventsSender;
-  uptimeEsClient: UptimeEsClient;
+  syntheticsEsClient: SyntheticsEsClient;
   basePath: IBasePath;
   isDev?: boolean;
   coreStart: CoreStart;
+  alerting: AlertingPluginSetup;
   pluginsStart: SyntheticsPluginsStartDependencies;
+  isElasticsearchServerless: boolean;
 }
 
 export interface SyntheticsPluginsSetupDependencies {
-  features: PluginSetupContract;
-  alerting: any;
+  features: FeaturesPluginSetup;
+  alerting: AlertingPluginSetup;
   observability: ObservabilityPluginSetup;
   usageCollection: UsageCollectionSetup;
   ml: MlSetup;
@@ -84,6 +90,7 @@ export interface SyntheticsPluginsStartDependencies {
   taskManager: TaskManagerStartContract;
   telemetry: TelemetryPluginStart;
   spaces?: SpacesPluginStart;
+  alerting: AlertingPluginStart;
 }
 
 export type UptimeRequestHandlerContext = CustomRequestHandlerContext<{

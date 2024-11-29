@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { RightPanelContext } from '../context';
+import { DocumentDetailsContext } from '../../shared/context';
 import { DocumentStatus } from './status';
 import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
 import { TestProviders } from '../../../../common/mock';
@@ -17,13 +17,13 @@ import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
 
 jest.mock('../../../../detections/components/alerts_table/timeline_actions/use_alerts_actions');
 
-const renderStatus = (contextValue: RightPanelContext) =>
+const renderStatus = (contextValue: DocumentDetailsContext) =>
   render(
     <TestProviders>
       <TestProvider>
-        <RightPanelContext.Provider value={contextValue}>
+        <DocumentDetailsContext.Provider value={contextValue}>
           <DocumentStatus />
-        </RightPanelContext.Provider>
+        </DocumentDetailsContext.Provider>
       </TestProvider>
     </TestProviders>
   );
@@ -45,7 +45,7 @@ describe('<DocumentStatus />', () => {
       browserFields: {},
       dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
       scopeId: 'scopeId',
-    } as unknown as RightPanelContext;
+    } as unknown as DocumentDetailsContext;
 
     const { getByTestId, getByText } = renderStatus(contextValue);
 
@@ -62,7 +62,7 @@ describe('<DocumentStatus />', () => {
       browserFields: {},
       dataFormattedForFieldBrowser: [],
       scopeId: 'scopeId',
-    } as unknown as RightPanelContext;
+    } as unknown as DocumentDetailsContext;
 
     const { container } = renderStatus(contextValue);
 
@@ -76,7 +76,7 @@ describe('<DocumentStatus />', () => {
       dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
       scopeId: 'scopeId',
       isPreview: true,
-    } as unknown as RightPanelContext;
+    } as unknown as DocumentDetailsContext;
 
     const { container } = renderStatus(contextValue);
 

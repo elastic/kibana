@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { act, waitFor, renderHook } from '@testing-library/react';
+
+import type { ActionStatus } from '../../../../../../../common/types';
 
 import { sendGetActionStatus, sendPostCancelAction, useStartServices } from '../../../../hooks';
 
@@ -41,7 +43,7 @@ describe('useActionStatus', () => {
       nbAgentsFailed: 0,
       nbAgentsActioned: 2,
       creationTime: '2022-09-19T12:07:27.102Z',
-    },
+    } as ActionStatus,
   ];
   beforeEach(() => {
     mockSendGetActionStatus.mockReset();
@@ -56,27 +58,22 @@ describe('useActionStatus', () => {
   it('should set action statuses on init', async () => {
     let result: any | undefined;
     await act(async () => {
-      ({ result } = renderHook(() => useActionStatus(mockOnAbortSuccess, false)));
+      ({ result } = renderHook(() => useActionStatus(mockOnAbortSuccess, false, 20, null)));
     });
     expect(result?.current.currentActions).toEqual(mockActionStatuses);
   });
 
   it('should refresh statuses on refresh flag', async () => {
     let refresh = false;
-    await act(async () => {
-      const result = renderHook(() => useActionStatus(mockOnAbortSuccess, refresh));
-      refresh = true;
-      result.rerender();
-    });
-    expect(mockSendGetActionStatus).toHaveBeenCalledTimes(2);
+    const result = renderHook(() => useActionStatus(mockOnAbortSuccess, refresh, 20, null));
+    refresh = true;
+    result.rerender();
+    await waitFor(() => expect(mockSendGetActionStatus).toHaveBeenCalled());
   });
 
   it('should post cancel and invoke callback on cancel upgrade', async () => {
     mockSendPostCancelAction.mockResolvedValue({});
-    let result: any | undefined;
-    await act(async () => {
-      ({ result } = renderHook(() => useActionStatus(mockOnAbortSuccess, false)));
-    });
+    const { result } = renderHook(() => useActionStatus(mockOnAbortSuccess, false, 20, null));
     await act(async () => {
       await result.current.abortUpgrade(mockActionStatuses[0]);
     });
@@ -89,10 +86,7 @@ describe('useActionStatus', () => {
 
   it('should post cancel and invoke callback on cancel upgrade - plural', async () => {
     mockSendPostCancelAction.mockResolvedValue({});
-    let result: any | undefined;
-    await act(async () => {
-      ({ result } = renderHook(() => useActionStatus(mockOnAbortSuccess, false)));
-    });
+    const { result } = renderHook(() => useActionStatus(mockOnAbortSuccess, false, 20, null));
     await act(async () => {
       await result.current.abortUpgrade({ ...mockActionStatuses[0], nbAgentsAck: 0 });
     });
@@ -106,10 +100,7 @@ describe('useActionStatus', () => {
   it('should report error on cancel upgrade failure', async () => {
     const error = new Error('error');
     mockSendPostCancelAction.mockRejectedValue(error);
-    let result: any | undefined;
-    await act(async () => {
-      ({ result } = renderHook(() => useActionStatus(mockOnAbortSuccess, false)));
-    });
+    const { result } = renderHook(() => useActionStatus(mockOnAbortSuccess, false, 20, null));
     await act(async () => {
       await result.current.abortUpgrade(mockActionStatuses[0]);
     });

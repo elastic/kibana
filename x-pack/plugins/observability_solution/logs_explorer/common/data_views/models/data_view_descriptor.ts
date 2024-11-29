@@ -5,14 +5,13 @@
  * 2.0.
  */
 
+import { createRegExpPatternFrom, testPatternAgainstAllowedList } from '@kbn/data-view-utils';
+import { DEFAULT_ALLOWED_LOGS_BASE_PATTERNS } from '@kbn/discover-utils';
 import { DataViewSpecWithId } from '../../data_source_selection';
 import { DataViewDescriptorType } from '../types';
-import { buildIndexPatternRegExp } from '../utils';
 
-type Allowlist = Array<string | RegExp>;
-
-const LOGS_ALLOWLIST: Allowlist = [
-  buildIndexPatternRegExp(['logs', 'auditbeat', 'filebeat', 'winbeat']),
+const LOGS_ALLOWED_LIST = [
+  createRegExpPatternFrom(DEFAULT_ALLOWED_LOGS_BASE_PATTERNS),
   // Add more strings or regex patterns as needed
 ];
 
@@ -58,6 +57,12 @@ export class DataViewDescriptor {
     };
   }
 
+  testAgainstAllowedList(allowedList: string[]) {
+    return this.title
+      ? testPatternAgainstAllowedList([createRegExpPatternFrom(allowedList)])(this.title)
+      : false;
+  }
+
   public static create({ id, namespaces, title, type, name }: DataViewDescriptorFactoryParams) {
     const nameWithFallbackTitle = name ?? title;
     const dataType = title ? DataViewDescriptor.#extractDataType(title) : 'unresolved';
@@ -74,7 +79,7 @@ export class DataViewDescriptor {
   }
 
   static #extractDataType(title: string): DataViewDescriptorType['dataType'] {
-    if (isAllowed(title, LOGS_ALLOWLIST)) {
+    if (testPatternAgainstAllowedList(LOGS_ALLOWED_LIST)(title)) {
       return 'logs';
     }
 
@@ -92,18 +97,4 @@ export class DataViewDescriptor {
   public isUnresolvedDataType() {
     return this.dataType === 'unresolved';
   }
-}
-
-function isAllowed(value: string, allowList: Allowlist) {
-  for (const allowedItem of allowList) {
-    if (typeof allowedItem === 'string') {
-      return value === allowedItem;
-    }
-    if (allowedItem instanceof RegExp) {
-      return allowedItem.test(value);
-    }
-  }
-
-  // If no match is found in the allowList, return false
-  return false;
 }

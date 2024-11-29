@@ -13,6 +13,7 @@ import type {
   JiraActionParams,
   WebhookActionParams,
   EmailActionParams,
+  SlackApiActionParams,
 } from '@kbn/stack-connectors-plugin/server/connector_types';
 import { RuleAction as RuleActionOrig } from '@kbn/alerting-plugin/common';
 import { v4 as uuidv4 } from 'uuid';
@@ -21,6 +22,7 @@ import { ActionConnector, ActionTypeId } from './types';
 import { DefaultEmail } from '../runtime_types';
 
 export const SLACK_WEBHOOK_ACTION_ID: ActionTypeId = '.slack';
+export const SLACK_WEBAPI_ACTION_ID: ActionTypeId = '.slack_api';
 export const PAGER_DUTY_ACTION_ID: ActionTypeId = '.pagerduty';
 export const SERVER_LOG_ACTION_ID: ActionTypeId = '.server-log';
 export const INDEX_ACTION_ID: ActionTypeId = '.index';
@@ -105,6 +107,12 @@ export function populateAlertActions({
         };
         actions.push(recoveredAction);
         break;
+      case SLACK_WEBAPI_ACTION_ID:
+        const allowedChannels = aId.config?.allowedChannels || [];
+        action.params = getSlackAPIActionParams(translations, allowedChannels);
+        recoveredAction.params = getSlackAPIActionParams(translations, allowedChannels, true);
+        actions.push(recoveredAction);
+        break;
       case EMAIL_ACTION_ID:
         if (defaultEmail) {
           action.params = getEmailActionParams(translations, defaultEmail);
@@ -122,6 +130,20 @@ export function populateAlertActions({
   });
 
   return actions;
+}
+
+function getSlackAPIActionParams(
+  { defaultActionMessage, defaultRecoveryMessage }: Translations,
+  allowedChannels: Array<{ id: string; name: string }>,
+  recovery = false
+): SlackApiActionParams {
+  return {
+    subAction: 'postMessage',
+    subActionParams: {
+      text: recovery ? defaultRecoveryMessage : defaultActionMessage,
+      channelIds: allowedChannels.map((channel) => channel.id),
+    },
+  };
 }
 
 function getIndexActionParams(translations: Translations, recovery = false): IndexActionParams {
@@ -214,6 +236,7 @@ function getServiceNowActionParams({ defaultActionMessage }: Translations): Serv
         externalId: null,
         correlation_id: null,
         correlation_display: null,
+        additional_fields: null,
       },
       comments: [],
     },
@@ -232,6 +255,7 @@ function getJiraActionParams({ defaultActionMessage }: Translations): JiraAction
         priority: '2',
         labels: null,
         parent: null,
+        otherFields: null,
       },
       comments: [],
     },

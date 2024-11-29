@@ -10,7 +10,7 @@ import { RuleTaskState } from '../../types';
 import { taskInstanceToAlertTaskInstance } from '../../task_runner/alert_task_instance';
 import { ReadOperations, AlertingAuthorizationEntity } from '../../authorization';
 import { RulesClientContext } from '../types';
-import { get } from './get';
+import { getRule } from '../../application/rule/methods/get/get_rule';
 
 export interface GetAlertStateParams {
   id: string;
@@ -19,7 +19,7 @@ export async function getAlertState(
   context: RulesClientContext,
   { id }: GetAlertStateParams
 ): Promise<RuleTaskState | void> {
-  const rule = await get(context, { id });
+  const rule = await getRule(context, { id });
   await context.authorization.ensureAuthorized({
     ruleTypeId: rule.alertTypeId,
     consumer: rule.consumer,

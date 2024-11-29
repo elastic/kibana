@@ -7,10 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import React, { Fragment, useEffect, useMemo, useState } from 'react';
 import { get } from 'lodash';
-
-import { useHistory } from 'react-router-dom';
 
 import './edit_policy.scss';
 
@@ -27,8 +26,14 @@ import {
   EuiTimeline,
 } from '@elastic/eui';
 
-import { TextField, useForm, useFormData, useKibana } from '../../../shared_imports';
-import { toasts } from '../../services/notification';
+import {
+  TextField,
+  useForm,
+  useFormData,
+  useKibana,
+  useFormIsModified,
+} from '../../../shared_imports';
+import { getPoliciesListPath, getPolicyViewPath } from '../../services/navigation';
 import { UseField } from './form';
 import { savePolicy } from './save_policy';
 import {
@@ -69,10 +74,11 @@ export const EditPolicy: React.FunctionComponent = () => {
   } = useEditPolicyContext();
 
   const {
-    services: { cloud, docLinks },
+    services: { cloud, docLinks, history, navigateToUrl, overlays, http },
   } = useKibana();
 
   const [isClonedPolicy, setIsClonedPolicy] = useState(false);
+  const [hasSubmittedForm, setHasSubmittedForm] = useState<boolean>(false);
   const originalPolicyName: string = isNewPolicy ? '' : policyName!;
   const isAllowedByLicense = license.canUseSearchableSnapshot();
   const isCloudEnabled = Boolean(cloud?.isCloudEnabled);
@@ -105,6 +111,8 @@ export const EditPolicy: React.FunctionComponent = () => {
   });
 
   const [formData] = useFormData({ form, watch: policyNamePath });
+  const isFormDirty = useFormIsModified({ form });
+
   const getPolicyName = () => {
     return isNewPolicy || isClonedPolicy ? get(formData, policyNamePath) : originalPolicyName;
   };
@@ -119,37 +127,51 @@ export const EditPolicy: React.FunctionComponent = () => {
     [originalPolicyName, existingPolicies, isClonedPolicy]
   );
 
-  const history = useHistory();
-  const backToPolicyList = () => {
-    history.push('/policies');
+  const backToPolicyList = (name?: string) => {
+    const url = name ? getPolicyViewPath(name) : getPoliciesListPath();
+    history.push(url);
   };
 
   const submit = async () => {
     const { data: policy, isValid } = await form.submit();
 
     if (!isValid) {
-      toasts.addDanger(
-        i18n.translate('xpack.indexLifecycleMgmt.editPolicy.formErrorsMessage', {
-          defaultMessage: 'Please fix the errors on this page.',
-        })
-      );
-    } else {
-      const success = await savePolicy(
-        {
-          ...policy,
-          name: getPolicyName(),
-        },
-        isNewPolicy || isClonedPolicy
-      );
-      if (success) {
-        backToPolicyList();
-      }
+      return;
+    }
+
+    const name = getPolicyName();
+    setHasSubmittedForm(true);
+    const success = await savePolicy(
+      {
+        ...policy,
+        name,
+      },
+      isNewPolicy || isClonedPolicy
+    );
+
+    if (success) {
+      backToPolicyList(name);
     }
   };
 
   const togglePolicyJsonFlyout = () => {
     setIsShowingPolicyJsonFlyout(!isShowingPolicyJsonFlyout);
   };
+
+  useUnsavedChangesPrompt({
+    titleText: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.unsavedPrompt.title', {
+      defaultMessage: 'Exit without saving changes?',
+    }),
+    messageText: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.unsavedPrompt.body', {
+      defaultMessage:
+        'The data will be lost if you leave this page without saving the policy changes.',
+    }),
+    hasUnsavedChanges: isFormDirty && hasSubmittedForm === false,
+    openConfirm: overlays.openConfirm,
+    history,
+    http,
+    navigateToUrl,
+  });
 
   return (
     <>
@@ -281,7 +303,10 @@ export const EditPolicy: React.FunctionComponent = () => {
               </EuiFlexItem>
 
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty data-test-subj="cancelTestPolicy" onClick={backToPolicyList}>
+                <EuiButtonEmpty
+                  data-test-subj="cancelTestPolicy"
+                  onClick={() => backToPolicyList()}
+                >
                   <FormattedMessage
                     id="xpack.indexLifecycleMgmt.editPolicy.cancelButton"
                     defaultMessage="Cancel"

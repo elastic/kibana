@@ -18,14 +18,14 @@ import { inputsActions } from '../../../common/store/inputs';
 
 import * as i18n from '../../pages/translations';
 import type {
-  TimelineTypeLiteralWithNull,
-  TimelineStatusLiteralWithNull,
+  TimelineType,
+  TimelineStatus,
   PageInfoTimeline,
-  TimelineResult,
+  TimelineResponse,
   SortTimeline,
-  GetAllTimelineVariables,
+  GetTimelinesRequestQuery,
 } from '../../../../common/api/timeline';
-import { TimelineType } from '../../../../common/api/timeline';
+import { TimelineTypeEnum } from '../../../../common/api/timeline';
 import { getAllTimelines } from '../api';
 
 export interface AllTimelinesArgs {
@@ -52,14 +52,14 @@ export interface AllTimelinesVariables {
   pageInfo: PageInfoTimeline;
   search: string;
   sort: SortTimeline;
-  status: TimelineStatusLiteralWithNull;
-  timelineType: TimelineTypeLiteralWithNull;
+  status: TimelineStatus | null;
+  timelineType: TimelineType | null;
 }
 
 export const ALL_TIMELINE_QUERY_ID = 'FETCH_ALL_TIMELINES';
 
 export const getAllTimeline = memoizeOne(
-  (_variables: string, timelines: TimelineResult[]): OpenTimelineResult[] =>
+  (_variables: string, timelines: TimelineResponse[]): OpenTimelineResult[] =>
     timelines.map((timeline) => ({
       created: timeline.created,
       description: timeline.description,
@@ -93,7 +93,7 @@ export const getAllTimeline = memoizeOne(
       title: timeline.title,
       updated: timeline.updated,
       updatedBy: timeline.updatedBy,
-      timelineType: timeline.timelineType ?? TimelineType.default,
+      timelineType: timeline.timelineType ?? TimelineTypeEnum.default,
       templateTimelineId: timeline.templateTimelineId,
       queryType: getTimelineQueryTypes(timeline),
     }))
@@ -132,13 +132,15 @@ export const useGetAllTimeline = (): AllTimelinesArgs => {
             loading: true,
           }));
 
-          const variables: GetAllTimelineVariables = {
-            onlyUserFavorite,
-            pageInfo,
+          const variables: GetTimelinesRequestQuery = {
+            only_user_favorite: onlyUserFavorite ? 'true' : 'false',
+            page_size: pageInfo.pageSize.toString(),
+            page_index: pageInfo.pageIndex.toString(),
             search,
-            sort,
-            status,
-            timelineType,
+            sort_field: sort.sortField,
+            sort_order: sort.sortOrder,
+            status: status || undefined,
+            timeline_type: timelineType,
           };
           const getAllTimelineResponse = await getAllTimelines(variables, abortCtrl.signal);
           const totalCount = getAllTimelineResponse?.totalCount ?? 0;
@@ -163,7 +165,7 @@ export const useGetAllTimeline = (): AllTimelinesArgs => {
             setAllTimelines({
               loading: false,
               totalCount,
-              timelines: getAllTimeline(JSON.stringify(variables), timelines as TimelineResult[]),
+              timelines: getAllTimeline(JSON.stringify(variables), timelines as TimelineResponse[]),
               customTemplateTimelineCount,
               defaultTimelineCount,
               elasticTemplateTimelineCount,

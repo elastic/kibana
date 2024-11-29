@@ -15,7 +15,12 @@ import { LastRefreshed } from '../components/last_refreshed';
 import { AutoRefreshButton } from '../components/auto_refresh_button';
 import { useSyntheticsSettingsContext } from '../../../contexts';
 import { useGetUrlParams } from '../../../hooks';
-import { MONITOR_ROUTE, SETTINGS_ROUTE } from '../../../../../../common/constants';
+import {
+  MONITOR_ADD_ROUTE,
+  MONITOR_EDIT_ROUTE,
+  MONITOR_ROUTE,
+  SETTINGS_ROUTE,
+} from '../../../../../../common/constants';
 import { stringifyUrlParams } from '../../../utils/url_params';
 import { InspectorHeaderLink } from './inspector_header_link';
 import { ToggleAlertFlyoutButton } from '../../alerts/toggle_alert_flyout_button';
@@ -41,6 +46,8 @@ export function ActionMenuContent(): React.ReactElement {
   }; /* useSelector(monitorStatusSelector) TODO: Implement state for monitor status */
 
   const detailRouteMatch = useRouteMatch(MONITOR_ROUTE);
+  const isEditRoute = useRouteMatch(MONITOR_EDIT_ROUTE);
+  const isAddRoute = useRouteMatch(MONITOR_ADD_ROUTE);
   const monitorId = selectedMonitor?.monitor?.id;
 
   const syntheticExploratoryViewLink = createExploratoryViewUrl(
@@ -69,13 +76,17 @@ export function ActionMenuContent(): React.ReactElement {
 
   return (
     <EuiHeaderLinks gutterSize="xs">
-      <LastRefreshed />
-      <AutoRefreshButton />
+      {!isEditRoute && !isAddRoute && (
+        <>
+          <LastRefreshed />
+          <AutoRefreshButton />
+        </>
+      )}
       <ToggleAlertFlyoutButton />
 
       <EuiHeaderLink
         aria-label={i18n.translate('xpack.synthetics.page_header.settingsLink.label', {
-          defaultMessage: 'Navigate to the Uptime settings page',
+          defaultMessage: 'Navigate to the Synthetics settings page',
         })}
         color="text"
         data-test-subj="settings-page-link"

@@ -35,9 +35,7 @@ export async function getKibanaVersion({
           );
 
         case 404:
-          throw new AbortError(
-            `Could not get version on ${e.config?.url} (Code: 404)`
-          );
+          throw new AbortError(`Could not get version on ${e.config?.url} (Code: 404)`);
 
         default:
           throw new AbortError(

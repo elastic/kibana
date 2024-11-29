@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { EsQueryConfig } from '@kbn/es-query';
 import type { Logger } from '@kbn/logging';
 import { isString, get, identity } from 'lodash';
 import {
@@ -30,6 +31,7 @@ export const checkMissingGroups = async (
   searchConfiguration: SearchConfigurationType,
   logger: Logger,
   timeframe: { start: number; end: number },
+  esQueryConfig: EsQueryConfig,
   missingGroups: MissingGroupsRecord[] = []
 ): Promise<MissingGroupsRecord[]> => {
   if (missingGroups.length === 0) {
@@ -52,8 +54,10 @@ export const checkMissingGroups = async (
       currentTimeFrame,
       timeFieldName,
       searchConfiguration,
+      esQueryConfig,
       groupByQueries
     );
+
     return [
       { index: indexPattern },
       {
@@ -65,9 +69,9 @@ export const checkMissingGroups = async (
     ];
   });
 
-  logger.trace(`Request: ${JSON.stringify({ searches })}`);
+  logger.trace(() => `Request: ${JSON.stringify({ searches })}`);
   const response = await esClient.msearch({ searches });
-  logger.trace(`Response: ${JSON.stringify(response)}`);
+  logger.trace(() => `Response: ${JSON.stringify(response)}`);
 
   const verifiedMissingGroups = response.responses
     .map((resp, index) => {

@@ -19,19 +19,22 @@ import { FormattedRelative } from '@kbn/i18n-react';
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
-
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useKibana } from '../../../../common/lib/kibana';
+import { DocumentDetailsRightPanelKey } from '../../../../flyout/document_details/shared/constants/panel_keys';
 import type { TimelineResultNote } from '../types';
 import { getEmptyValue, defaultToEmptyTag } from '../../../../common/components/empty_value';
 import { MarkdownRenderer } from '../../../../common/components/markdown_editor';
 import { timelineActions, timelineSelectors } from '../../../store';
 import { NOTE_CONTENT_CLASS_NAME } from '../../timeline/body/helpers';
 import * as i18n from './translations';
-import { TimelineTabs, TimelineId } from '../../../../../common/types/timeline';
+import { TimelineId } from '../../../../../common/types/timeline';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
-import { useSourcererDataView } from '../../../../common/containers/sourcerer';
+import { SourcererScopeName } from '../../../../sourcerer/store/model';
+import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { useDeleteNote } from './hooks/use_delete_note';
-import { getTimelineNoteSelector } from '../../timeline/notes_tab_content/selectors';
+import { getTimelineNoteSelector } from '../../timeline/tabs/notes/selectors';
+import { DocumentEventTypes } from '../../../../common/lib/telemetry';
 
 export const NotePreviewsContainer = styled.section`
   padding-top: ${({ theme }) => `${theme.eui.euiSizeS}`};
@@ -48,25 +51,31 @@ const ToggleEventDetailsButtonComponent: React.FC<ToggleEventDetailsButtonProps>
   eventId,
   timelineId,
 }) => {
-  const dispatch = useDispatch();
   const { selectedPatterns } = useSourcererDataView(SourcererScopeName.timeline);
 
+  const { telemetry } = useKibana().services;
+  const { openFlyout } = useExpandableFlyoutApi();
+
   const handleClick = useCallback(() => {
-    dispatch(
-      timelineActions.toggleDetailPanel({
-        panelView: 'eventDetail',
-        tabType: TimelineTabs.notes,
-        id: timelineId,
+    openFlyout({
+      right: {
+        id: DocumentDetailsRightPanelKey,
         params: {
-          eventId,
+          id: eventId,
           indexName: selectedPatterns.join(','),
+          scopeId: timelineId,
         },
-      })
-    );
-  }, [dispatch, eventId, selectedPatterns, timelineId]);
+      },
+    });
+    telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
+      location: timelineId,
+      panel: 'right',
+    });
+  }, [eventId, openFlyout, selectedPatterns, telemetry, timelineId]);
 
   return (
     <EuiButtonIcon
+      data-test-subj="notes-toggle-event-details"
       title={i18n.TOGGLE_EXPAND_EVENT_DETAILS}
       aria-label={i18n.TOGGLE_EXPAND_EVENT_DETAILS}
       color="text"
@@ -170,10 +179,32 @@ const NoteActions = React.memo<{
   savedObjectId?: string | null;
   confirmingNoteId?: string | null;
   eventIdToNoteIds?: Record<string, string[]>;
-}>(({ eventId, timelineId, noteId, confirmingNoteId, eventIdToNoteIds, savedObjectId }) => {
-  return eventId && timelineId ? (
-    <>
-      <ToggleEventDetailsButton eventId={eventId} timelineId={timelineId} />
+  showToggleEventDetailsAction?: boolean;
+}>(
+  ({
+    eventId,
+    timelineId,
+    noteId,
+    confirmingNoteId,
+    eventIdToNoteIds,
+    savedObjectId,
+    showToggleEventDetailsAction = true,
+  }) => {
+    return eventId && timelineId ? (
+      <>
+        {showToggleEventDetailsAction ? (
+          <ToggleEventDetailsButton eventId={eventId} timelineId={timelineId} />
+        ) : null}
+        <DeleteNoteButton
+          noteId={noteId}
+          eventId={eventId}
+          confirmingNoteId={confirmingNoteId}
+          savedObjectId={savedObjectId}
+          timelineId={timelineId}
+          eventIdToNoteIds={eventIdToNoteIds}
+        />
+      </>
+    ) : (
       <DeleteNoteButton
         noteId={noteId}
         eventId={eventId}
@@ -182,18 +213,9 @@ const NoteActions = React.memo<{
         timelineId={timelineId}
         eventIdToNoteIds={eventIdToNoteIds}
       />
-    </>
-  ) : (
-    <DeleteNoteButton
-      noteId={noteId}
-      eventId={eventId}
-      confirmingNoteId={confirmingNoteId}
-      savedObjectId={savedObjectId}
-      timelineId={timelineId}
-      eventIdToNoteIds={eventIdToNoteIds}
-    />
-  );
-});
+    );
+  }
+);
 
 NoteActions.displayName = 'NoteActions';
 /**
@@ -204,10 +226,11 @@ interface NotePreviewsProps {
   notes?: TimelineResultNote[] | null;
   timelineId?: string;
   showTimelineDescription?: boolean;
+  showToggleEventDetailsAction?: boolean;
 }
 
 export const NotePreviews = React.memo<NotePreviewsProps>(
-  ({ notes, timelineId, showTimelineDescription }) => {
+  ({ notes, timelineId, showTimelineDescription, showToggleEventDetailsAction = true }) => {
     const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
     const getTimelineNotes = useMemo(() => getTimelineNoteSelector(), []);
     const timeline = useDeepEqualSelector((state) =>
@@ -281,6 +304,7 @@ export const NotePreviews = React.memo<NotePreviewsProps>(
                 savedObjectId={note.savedObjectId}
                 confirmingNoteId={timeline?.confirmingNoteId}
                 eventIdToNoteIds={eventIdToNoteIds}
+                showToggleEventDetailsAction={showToggleEventDetailsAction}
               />
             ),
             timelineAvatar: (
@@ -292,7 +316,13 @@ export const NotePreviews = React.memo<NotePreviewsProps>(
             ),
           };
         }),
-      [eventIdToNoteIds, notes, timelineId, timeline?.confirmingNoteId]
+      [
+        eventIdToNoteIds,
+        notes,
+        timelineId,
+        timeline?.confirmingNoteId,
+        showToggleEventDetailsAction,
+      ]
     );
 
     const commentList = useMemo(

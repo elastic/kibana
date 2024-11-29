@@ -6,12 +6,20 @@
  */
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
+import {
+  GetViewInAppRelativeUrlFnOpts,
+  ActionGroupIdsOf,
+  AlertInstanceContext as AlertContext,
+  AlertInstanceState as AlertState,
+  RuleTypeState,
+  RuleExecutorOptions,
+  AlertsClientError,
+} from '@kbn/alerting-plugin/server';
 import { KibanaRequest, DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import datemath from '@kbn/datemath';
 import type { ESSearchResponse } from '@kbn/es-types';
 import {
-  getAlertUrl,
+  getAlertDetailsUrl,
   observabilityPaths,
   ProcessorEvent,
 } from '@kbn/observability-plugin/common';
@@ -23,7 +31,7 @@ import {
   ALERT_SEVERITY,
   ApmRuleType,
 } from '@kbn/rule-data-utils';
-import { createLifecycleRuleTypeFactory } from '@kbn/rule-registry-plugin/server';
+import { ObservabilityApmAlert } from '@kbn/alerts-as-data-utils';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { asyncForEach } from '@kbn/std';
 import { compact } from 'lodash';
@@ -43,6 +51,7 @@ import {
   APM_SERVER_FEATURE_ID,
   formatAnomalyReason,
   RULE_TYPES_CONFIG,
+  THRESHOLD_MET_GROUP,
 } from '../../../../../common/rules/apm_rule_types';
 import { asMutableArray } from '../../../../../common/utils/as_mutable_array';
 import { getAlertUrlTransaction } from '../../../../../common/utils/formatters';
@@ -53,13 +62,20 @@ import {
   RegisterRuleDependencies,
 } from '../../register_apm_rule_types';
 import { getServiceGroupFieldsForAnomaly } from './get_service_group_fields_for_anomaly';
-import { anomalyParamsSchema } from '../../../../../common/rules/schema';
+import { anomalyParamsSchema, ApmRuleParamsType } from '../../../../../common/rules/schema';
 import {
   getAnomalyDetectorIndex,
   getAnomalyDetectorType,
 } from '../../../../../common/anomaly_detection/apm_ml_detectors';
 
 const ruleTypeConfig = RULE_TYPES_CONFIG[ApmRuleType.Anomaly];
+
+type AnomalyRuleTypeParams = ApmRuleParamsType[ApmRuleType.Anomaly];
+type AnomalyActionGroups = ActionGroupIdsOf<typeof THRESHOLD_MET_GROUP>;
+type AnomalyRuleTypeState = RuleTypeState;
+type AnomalyAlertState = AlertState;
+type AnomalyAlertContext = AlertContext;
+type AnomalyAlert = ObservabilityApmAlert;
 
 export function registerAnomalyRuleType({
   alerting,
@@ -70,296 +86,278 @@ export function registerAnomalyRuleType({
   ml,
   ruleDataClient,
 }: RegisterRuleDependencies) {
-  const createLifecycleRuleType = createLifecycleRuleTypeFactory({
-    logger,
-    ruleDataClient,
-  });
+  if (!alerting) {
+    throw new Error('Cannot register anomaly rule type. The alerting plugin needs to be enabled.');
+  }
 
-  alerting.registerType(
-    createLifecycleRuleType({
-      id: ApmRuleType.Anomaly,
-      name: ruleTypeConfig.name,
-      actionGroups: ruleTypeConfig.actionGroups,
-      defaultActionGroupId: ruleTypeConfig.defaultActionGroupId,
-      validate: { params: anomalyParamsSchema },
-      schemas: {
-        params: {
-          type: 'config-schema',
-          schema: anomalyParamsSchema,
-        },
+  alerting.registerType({
+    id: ApmRuleType.Anomaly,
+    name: ruleTypeConfig.name,
+    actionGroups: ruleTypeConfig.actionGroups,
+    defaultActionGroupId: ruleTypeConfig.defaultActionGroupId,
+    validate: { params: anomalyParamsSchema },
+    schemas: {
+      params: {
+        type: 'config-schema',
+        schema: anomalyParamsSchema,
       },
-      actionVariables: {
-        context: [
-          apmActionVariables.alertDetailsUrl,
-          apmActionVariables.environment,
-          apmActionVariables.reason,
-          apmActionVariables.serviceName,
-          apmActionVariables.threshold,
-          apmActionVariables.transactionType,
-          apmActionVariables.triggerValue,
-          apmActionVariables.viewInAppUrl,
-        ],
-      },
-      category: DEFAULT_APP_CATEGORIES.observability.id,
-      producer: APM_SERVER_FEATURE_ID,
-      minimumLicenseRequired: 'basic',
-      isExportable: true,
-      executor: async ({
-        params,
-        services,
-        spaceId,
-        startedAt,
-        getTimeRange,
-      }) => {
-        if (!ml) {
-          return { state: {} };
-        }
+    },
+    actionVariables: {
+      context: [
+        apmActionVariables.alertDetailsUrl,
+        apmActionVariables.environment,
+        apmActionVariables.reason,
+        apmActionVariables.serviceName,
+        apmActionVariables.threshold,
+        apmActionVariables.transactionType,
+        apmActionVariables.triggerValue,
+        apmActionVariables.viewInAppUrl,
+      ],
+    },
+    category: DEFAULT_APP_CATEGORIES.observability.id,
+    producer: APM_SERVER_FEATURE_ID,
+    minimumLicenseRequired: 'basic',
+    isExportable: true,
+    executor: async (
+      options: RuleExecutorOptions<
+        AnomalyRuleTypeParams,
+        AnomalyRuleTypeState,
+        AnomalyAlertState,
+        AnomalyAlertContext,
+        AnomalyActionGroups,
+        AnomalyAlert
+      >
+    ) => {
+      if (!ml) {
+        return { state: {} };
+      }
 
-        const {
-          getAlertUuid,
-          getAlertStartedDate,
-          savedObjectsClient,
-          scopedClusterClient,
-        } = services;
+      const { params, services, spaceId, getTimeRange } = options;
+      const { alertsClient, savedObjectsClient, scopedClusterClient, uiSettingsClient } = services;
+      if (!alertsClient) {
+        throw new AlertsClientError();
+      }
 
-        const apmIndices = await getApmIndices(savedObjectsClient);
+      const apmIndices = await getApmIndices(savedObjectsClient);
 
-        const ruleParams = params;
-        const request = {} as KibanaRequest;
-        const { mlAnomalySearch } = ml.mlSystemProvider(
-          request,
-          savedObjectsClient
+      const ruleParams = params;
+      const request = {} as KibanaRequest;
+      const { mlAnomalySearch } = ml.mlSystemProvider(request, savedObjectsClient);
+      const anomalyDetectors = ml.anomalyDetectorsProvider(request, savedObjectsClient);
+
+      const mlJobs = await getMLJobs(anomalyDetectors, ruleParams.environment);
+
+      const selectedOption = ANOMALY_ALERT_SEVERITY_TYPES.find(
+        (option) => option.type === ruleParams.anomalySeverityType
+      );
+
+      if (!selectedOption) {
+        throw new Error(
+          `Anomaly alert severity type ${ruleParams.anomalySeverityType} is not supported.`
         );
-        const anomalyDetectors = ml.anomalyDetectorsProvider(
-          request,
-          savedObjectsClient
-        );
+      }
 
-        const mlJobs = await getMLJobs(
-          anomalyDetectors,
-          ruleParams.environment
-        );
+      const threshold = selectedOption.threshold;
 
-        const selectedOption = ANOMALY_ALERT_SEVERITY_TYPES.find(
-          (option) => option.type === ruleParams.anomalySeverityType
-        );
+      if (mlJobs.length === 0) {
+        return { state: {} };
+      }
 
-        if (!selectedOption) {
-          throw new Error(
-            `Anomaly alert severity type ${ruleParams.anomalySeverityType} is not supported.`
-          );
-        }
+      // Lookback window must be at least 30m to support rules created before this change where default was 15m
+      const minimumWindow = '30m';
+      const requestedWindow = `${ruleParams.windowSize}${ruleParams.windowUnit}`;
 
-        const threshold = selectedOption.threshold;
+      const window =
+        datemath.parse(`now-${minimumWindow}`)!.valueOf() <
+        datemath.parse(`now-${requestedWindow}`)!.valueOf()
+          ? minimumWindow
+          : requestedWindow;
 
-        if (mlJobs.length === 0) {
-          return { state: {} };
-        }
+      const { dateStart } = getTimeRange(window);
 
-        // Lookback window must be at least 30m to support rules created before this change where default was 15m
-        const minimumWindow = '30m';
-        const requestedWindow = `${ruleParams.windowSize}${ruleParams.windowUnit}`;
-
-        const window =
-          datemath.parse(`now-${minimumWindow}`)!.valueOf() <
-          datemath.parse(`now-${requestedWindow}`)!.valueOf()
-            ? minimumWindow
-            : requestedWindow;
-
-        const { dateStart } = getTimeRange(window);
-
-        const jobIds = mlJobs.map((job) => job.jobId);
-        const anomalySearchParams = {
-          body: {
-            track_total_hits: false,
-            size: 0,
-            query: {
-              bool: {
-                filter: [
-                  { term: { result_type: 'record' } },
-                  { terms: { job_id: jobIds } },
-                  { term: { is_interim: false } },
-                  {
-                    range: {
-                      timestamp: {
-                        gte: dateStart,
-                      },
+      const jobIds = mlJobs.map((job) => job.jobId);
+      const anomalySearchParams = {
+        body: {
+          track_total_hits: false,
+          size: 0,
+          query: {
+            bool: {
+              filter: [
+                { term: { result_type: 'record' } },
+                { terms: { job_id: jobIds } },
+                { term: { is_interim: false } },
+                {
+                  range: {
+                    timestamp: {
+                      gte: dateStart,
                     },
                   },
-                  ...termQuery(
-                    'partition_field_value',
-                    ruleParams.serviceName,
-                    { queryEmptyString: false }
-                  ),
-                  ...termQuery('by_field_value', ruleParams.transactionType, {
-                    queryEmptyString: false,
-                  }),
-                  ...termsQuery(
-                    'detector_index',
-                    ...(ruleParams.anomalyDetectorTypes?.map((type) =>
-                      getAnomalyDetectorIndex(type)
-                    ) ?? [])
-                  ),
-                ] as QueryDslQueryContainer[],
-              },
-            },
-            aggs: {
-              anomaly_groups: {
-                multi_terms: {
-                  terms: [
-                    { field: 'partition_field_value' },
-                    { field: 'by_field_value' },
-                    { field: 'job_id' },
-                    { field: 'detector_index' },
-                  ],
-                  size: 1000,
-                  order: { 'latest_score.record_score': 'desc' as const },
                 },
-                aggs: {
-                  latest_score: {
-                    top_metrics: {
-                      metrics: asMutableArray([
-                        { field: 'record_score' },
-                        { field: 'partition_field_value' },
-                        { field: 'by_field_value' },
-                        { field: 'job_id' },
-                        { field: 'timestamp' },
-                        { field: 'bucket_span' },
-                        { field: 'detector_index' },
-                      ] as const),
-                      sort: {
-                        timestamp: 'desc' as const,
-                      },
+                ...termQuery('partition_field_value', ruleParams.serviceName, {
+                  queryEmptyString: false,
+                }),
+                ...termQuery('by_field_value', ruleParams.transactionType, {
+                  queryEmptyString: false,
+                }),
+                ...termsQuery(
+                  'detector_index',
+                  ...(ruleParams.anomalyDetectorTypes?.map((type) =>
+                    getAnomalyDetectorIndex(type)
+                  ) ?? [])
+                ),
+              ] as QueryDslQueryContainer[],
+            },
+          },
+          aggs: {
+            anomaly_groups: {
+              multi_terms: {
+                terms: [
+                  { field: 'partition_field_value' },
+                  { field: 'by_field_value' },
+                  { field: 'job_id' },
+                  { field: 'detector_index' },
+                ],
+                size: 1000,
+                order: { 'latest_score.record_score': 'desc' as const },
+              },
+              aggs: {
+                latest_score: {
+                  top_metrics: {
+                    metrics: asMutableArray([
+                      { field: 'record_score' },
+                      { field: 'partition_field_value' },
+                      { field: 'by_field_value' },
+                      { field: 'job_id' },
+                      { field: 'timestamp' },
+                      { field: 'bucket_span' },
+                      { field: 'detector_index' },
+                    ] as const),
+                    sort: {
+                      timestamp: 'desc' as const,
                     },
                   },
                 },
               },
             },
           },
-        };
+        },
+      };
 
-        const response: ESSearchResponse<unknown, typeof anomalySearchParams> =
-          (await mlAnomalySearch(anomalySearchParams, [])) as any;
+      const response: ESSearchResponse<unknown, typeof anomalySearchParams> =
+        (await mlAnomalySearch(anomalySearchParams, [])) as any;
 
-        const anomalies =
-          response.aggregations?.anomaly_groups.buckets
-            .map((bucket) => {
-              const latest = bucket.latest_score.top[0].metrics;
+      const anomalies =
+        response.aggregations?.anomaly_groups.buckets
+          .map((bucket) => {
+            const latest = bucket.latest_score.top[0].metrics;
 
-              const job = mlJobs.find((j) => j.jobId === latest.job_id);
+            const job = mlJobs.find((j) => j.jobId === latest.job_id);
 
-              if (!job) {
-                logger.warn(
-                  `Could not find matching job for job id ${latest.job_id}`
-                );
-                return undefined;
-              }
+            if (!job) {
+              logger.warn(`Could not find matching job for job id ${latest.job_id}`);
+              return undefined;
+            }
 
-              return {
-                serviceName: latest.partition_field_value as string,
-                transactionType: latest.by_field_value as string,
-                environment: job.environment,
-                score: latest.record_score as number,
-                detectorType: getAnomalyDetectorType(
-                  latest.detector_index as number
-                ),
-                timestamp: Date.parse(latest.timestamp as string),
-                bucketSpan: latest.bucket_span as number,
-                bucketKey: bucket.key,
-              };
-            })
-            .filter((anomaly) =>
-              anomaly ? anomaly.score >= threshold : false
-            ) ?? [];
+            return {
+              serviceName: latest.partition_field_value as string,
+              transactionType: latest.by_field_value as string,
+              environment: job.environment,
+              score: latest.record_score as number,
+              detectorType: getAnomalyDetectorType(latest.detector_index as number),
+              timestamp: Date.parse(latest.timestamp as string),
+              bucketSpan: latest.bucket_span as number,
+              bucketKey: bucket.key,
+            };
+          })
+          .filter((anomaly) => (anomaly ? anomaly.score >= threshold : false)) ?? [];
 
-        await asyncForEach(compact(anomalies), async (anomaly) => {
-          const {
-            serviceName,
-            environment,
-            transactionType,
-            score,
-            detectorType,
-            timestamp,
-            bucketSpan,
-            bucketKey,
-          } = anomaly;
+      await asyncForEach(compact(anomalies), async (anomaly) => {
+        const {
+          serviceName,
+          environment,
+          transactionType,
+          score,
+          detectorType,
+          timestamp,
+          bucketSpan,
+          bucketKey,
+        } = anomaly;
 
-          const eventSourceFields = await getServiceGroupFieldsForAnomaly({
-            apmIndices,
-            scopedClusterClient,
-            savedObjectsClient,
-            serviceName,
-            environment,
-            transactionType,
-            timestamp,
-            bucketSpan,
-          });
-
-          const severityLevel = getSeverity(score);
-          const reasonMessage = formatAnomalyReason({
-            anomalyScore: score,
-            serviceName,
-            severityLevel,
-            windowSize: params.windowSize,
-            windowUnit: params.windowUnit,
-            detectorType,
-          });
-
-          const alertId = bucketKey.join('_');
-
-          const alert = services.alertWithLifecycle({
-            id: alertId,
-            fields: {
-              [SERVICE_NAME]: serviceName,
-              ...getEnvironmentEsField(environment),
-              [TRANSACTION_TYPE]: transactionType,
-              [PROCESSOR_EVENT]: ProcessorEvent.transaction,
-              [ALERT_SEVERITY]: severityLevel,
-              [ALERT_EVALUATION_VALUE]: score,
-              [ALERT_EVALUATION_THRESHOLD]: threshold,
-              [ALERT_REASON]: reasonMessage,
-              ...eventSourceFields,
-            },
-          });
-
-          const relativeViewInAppUrl = getAlertUrlTransaction(
-            serviceName,
-            getEnvironmentEsField(environment)?.[SERVICE_ENVIRONMENT],
-            transactionType
-          );
-          const viewInAppUrl = addSpaceIdToPath(
-            basePath.publicBaseUrl,
-            spaceId,
-            relativeViewInAppUrl
-          );
-          const indexedStartedAt =
-            getAlertStartedDate(alertId) ?? startedAt.toISOString();
-          const alertUuid = getAlertUuid(alertId);
-          const alertDetailsUrl = await getAlertUrl(
-            alertUuid,
-            spaceId,
-            indexedStartedAt,
-            alertsLocator,
-            basePath.publicBaseUrl
-          );
-
-          alert.scheduleActions(ruleTypeConfig.defaultActionGroupId, {
-            alertDetailsUrl,
-            environment: getEnvironmentLabel(environment),
-            reason: reasonMessage,
-            serviceName,
-            threshold: selectedOption?.label,
-            transactionType,
-            triggerValue: severityLevel,
-            viewInAppUrl,
-          });
+        const eventSourceFields = await getServiceGroupFieldsForAnomaly({
+          apmIndices,
+          scopedClusterClient,
+          savedObjectsClient,
+          uiSettingsClient,
+          serviceName,
+          environment,
+          transactionType,
+          timestamp,
+          bucketSpan,
         });
 
-        return { state: {} };
-      },
-      alerts: ApmRuleTypeAlertDefinition,
-      getViewInAppRelativeUrl: ({ rule }: GetViewInAppRelativeUrlFnOpts<{}>) =>
-        observabilityPaths.ruleDetails(rule.id),
-    })
-  );
+        const severityLevel = getSeverity(score);
+        const reasonMessage = formatAnomalyReason({
+          anomalyScore: score,
+          serviceName,
+          severityLevel,
+          windowSize: params.windowSize,
+          windowUnit: params.windowUnit,
+          detectorType,
+        });
+
+        const alertId = bucketKey.join('_');
+
+        const { uuid } = alertsClient.report({
+          id: alertId,
+          actionGroup: ruleTypeConfig.defaultActionGroupId,
+        });
+
+        const relativeViewInAppUrl = getAlertUrlTransaction(
+          serviceName,
+          getEnvironmentEsField(environment)?.[SERVICE_ENVIRONMENT],
+          transactionType
+        );
+        const viewInAppUrl = addSpaceIdToPath(
+          basePath.publicBaseUrl,
+          spaceId,
+          relativeViewInAppUrl
+        );
+        const alertDetailsUrl = await getAlertDetailsUrl(basePath, spaceId, uuid);
+
+        const payload = {
+          [SERVICE_NAME]: serviceName,
+          ...getEnvironmentEsField(environment),
+          [TRANSACTION_TYPE]: transactionType,
+          [PROCESSOR_EVENT]: ProcessorEvent.transaction,
+          [ALERT_SEVERITY]: severityLevel,
+          [ALERT_EVALUATION_VALUE]: score,
+          [ALERT_EVALUATION_THRESHOLD]: threshold,
+          [ALERT_REASON]: reasonMessage,
+          ...eventSourceFields,
+        };
+
+        const context = {
+          alertDetailsUrl,
+          environment: getEnvironmentLabel(environment),
+          reason: reasonMessage,
+          serviceName,
+          threshold: selectedOption?.label,
+          transactionType,
+          triggerValue: severityLevel,
+          viewInAppUrl,
+        };
+
+        alertsClient.setAlertData({
+          id: alertId,
+          payload,
+          context,
+        });
+      });
+
+      return { state: {} };
+    },
+    alerts: ApmRuleTypeAlertDefinition,
+    getViewInAppRelativeUrl: ({ rule }: GetViewInAppRelativeUrlFnOpts<{}>) =>
+      observabilityPaths.ruleDetails(rule.id),
+  });
 }

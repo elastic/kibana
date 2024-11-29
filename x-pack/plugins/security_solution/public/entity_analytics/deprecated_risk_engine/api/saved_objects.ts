@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import type { HttpSetup, NotificationsStart, ThemeServiceStart } from '@kbn/core/public';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import type { HttpSetup } from '@kbn/core/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
+import type { StartRenderServices } from '../../../types';
 import {
   RISKY_HOSTS_DASHBOARD_TITLE,
   RISKY_USERS_DASHBOARD_TITLE,
@@ -38,23 +39,21 @@ export const bulkCreatePrebuiltSavedObjects = async ({
   to,
   errorMessage,
   http,
-  notifications,
   options,
   renderDashboardLink,
   renderDocLink,
   from,
-  theme,
+  startServices: { notifications, ...startServices },
 }: {
   dashboard?: DashboardStart;
   to: string;
   errorMessage?: string;
   http: HttpSetup;
-  notifications?: NotificationsStart;
   options: Options;
   renderDashboardLink?: (message: string, dashboardUrl: string) => React.ReactNode;
   renderDocLink?: (message: string) => React.ReactNode;
   from: string;
-  theme?: ThemeServiceStart;
+  startServices: StartRenderServices;
 }) => {
   const res = await http
     .post<
@@ -72,7 +71,7 @@ export const bulkCreatePrebuiltSavedObjects = async ({
       const error = response?.error?.message;
 
       if (error) {
-        notifications?.toasts?.addError(new Error(errorMessage ?? IMPORT_SAVED_OBJECTS_FAILURE), {
+        notifications.toasts.addError(new Error(errorMessage ?? IMPORT_SAVED_OBJECTS_FAILURE), {
           title: errorMessage ?? IMPORT_SAVED_OBJECTS_FAILURE,
           toastMessage: renderDocLink ? (renderDocLink(error) as unknown as string) : error,
           toastLifeTimeMs,
@@ -104,23 +103,21 @@ export const bulkCreatePrebuiltSavedObjects = async ({
           return;
         }
 
-        notifications?.toasts?.addSuccess({
+        notifications.toasts.addSuccess({
           'data-test-subj': `${options.templateName}SuccessToast`,
           title: IMPORT_SAVED_OBJECTS_SUCCESS(response?.body?.length),
           text: toMountPoint(
             renderDashboardLink && targetUrl
               ? renderDashboardLink(successMessage, targetUrl)
               : successMessage,
-            {
-              theme$: theme?.theme$,
-            }
+            startServices
           ),
           toastLifeTimeMs,
         });
       }
     })
     .catch((e) => {
-      notifications?.toasts?.addError(new Error(errorMessage ?? IMPORT_SAVED_OBJECTS_FAILURE), {
+      notifications.toasts.addError(new Error(errorMessage ?? IMPORT_SAVED_OBJECTS_FAILURE), {
         title: errorMessage ?? IMPORT_SAVED_OBJECTS_FAILURE,
         toastMessage: renderDocLink ? renderDocLink(e?.body?.message) : e?.body?.message,
         toastLifeTimeMs,
@@ -132,19 +129,19 @@ export const bulkCreatePrebuiltSavedObjects = async ({
 
 export const bulkDeletePrebuiltSavedObjects = async ({
   http,
-  notifications,
   errorMessage,
   options,
+  startServices: { notifications },
 }: {
   http: HttpSetup;
-  notifications?: NotificationsStart;
   errorMessage?: string;
   options: Options;
+  startServices: StartRenderServices;
 }) => {
   const res = await http
     .post(prebuiltSavedObjectsBulkDeleteUrl(options.templateName), { version: '1' })
     .catch((e) => {
-      notifications?.toasts?.addDanger({
+      notifications.toasts.addDanger({
         title: errorMessage ?? DELETE_SAVED_OBJECTS_FAILURE,
         text: e?.body?.message,
       });

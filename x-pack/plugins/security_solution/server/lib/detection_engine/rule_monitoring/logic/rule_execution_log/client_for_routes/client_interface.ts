@@ -12,6 +12,7 @@ import type {
   RuleExecutionEventType,
   RuleExecutionStatus,
   SortFieldOfRuleExecutionResult,
+  RuleRunType,
 } from '../../../../../../../common/api/detection_engine/rule_monitoring';
 import type { RuleObjectId } from '../../../../../../../common/api/detection_engine/model/rule_schema';
 import type { SortOrder } from '../../../../../../../common/api/detection_engine';
@@ -91,4 +92,6 @@ export interface GetExecutionResultsArgs {
 
   /** Number of results to fetch per page. */
   perPage: number;
+
+  runTypeFilters: RuleRunType[];
 }

@@ -7,7 +7,6 @@
 
 import type { UseQueryResult } from '@tanstack/react-query';
 import { useQuery } from '@tanstack/react-query';
-import type { UserProfile } from '@kbn/security-plugin/common';
 import type { ServerError } from '@kbn/cases-plugin/public/types';
 import { loadActionTypes } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
@@ -41,8 +40,18 @@ export const useLoadActionTypes = ({
         http,
         featureId: GenerativeAIForSecurityConnectorFeatureId,
       });
-      const sortedData = queryResult.sort((a, b) => a.name.localeCompare(b.name));
 
+      const actionTypeKey = {
+        bedrock: '.bedrock',
+        openai: '.gen-ai',
+        gemini: '.gemini',
+      };
+
+      const sortedData = queryResult
+        .filter((p) =>
+          [actionTypeKey.bedrock, actionTypeKey.openai, actionTypeKey.gemini].includes(p.id)
+        )
+        .sort((a, b) => a.name.localeCompare(b.name));
       return sortedData;
     },
     {
@@ -62,5 +71,3 @@ export const useLoadActionTypes = ({
     }
   );
 };
-
-export type UseSuggestUserProfiles = UseQueryResult<UserProfile[], ServerError>;

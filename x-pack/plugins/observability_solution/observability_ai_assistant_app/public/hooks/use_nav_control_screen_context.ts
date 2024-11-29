@@ -8,11 +8,11 @@
 import { useEffect, useState } from 'react';
 import datemath from '@elastic/datemath';
 import moment from 'moment';
+import { useAIAssistantAppService } from '@kbn/ai-assistant';
 import { useKibana } from './use_kibana';
-import { useObservabilityAIAssistantAppService } from './use_observability_ai_assistant_app_service';
 
 export function useNavControlScreenContext() {
-  const service = useObservabilityAIAssistantAppService();
+  const service = useAIAssistantAppService();
 
   const {
     services: {
@@ -59,8 +59,8 @@ export function useNavControlScreenContext() {
   }, []);
 
   useEffect(() => {
-    const start = datemath.parse(from)?.format() ?? moment().subtract(1, 'day').toISOString();
-    const end = datemath.parse(to)?.format() ?? moment().toISOString();
+    const start = datemath.parse(from)?.toISOString() ?? moment().subtract(1, 'day').toISOString();
+    const end = datemath.parse(to)?.toISOString() ?? moment().toISOString();
 
     return service.setScreenContext({
       screenDescription: `The user is looking at ${href}. The current time range is ${start} - ${end}.`,

@@ -5,18 +5,9 @@
  * 2.0.
  */
 
-import {
-  termQuery,
-  kqlQuery,
-  rangeQuery,
-} from '@kbn/observability-plugin/server';
+import { termQuery, kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import {
-  PROCESSOR_EVENT,
-  SERVICE_NAME,
-  TIER,
-  INDEX,
-} from '../../../common/es_fields/apm';
+import { PROCESSOR_EVENT, SERVICE_NAME, TIER, INDEX } from '../../../common/es_fields/apm';
 import {
   IndexLifecyclePhaseSelectOption,
   indexLifeCyclePhaseToDataTier,
@@ -75,10 +66,7 @@ export async function getStorageDetailsPerProcessorEvent({
               ...rangeQuery(start, end),
               ...termQuery(SERVICE_NAME, serviceName),
               ...(indexLifecyclePhase !== IndexLifecyclePhaseSelectOption.All
-                ? termQuery(
-                    TIER,
-                    indexLifeCyclePhaseToDataTier[indexLifecyclePhase]
-                  )
+                ? termQuery(TIER, indexLifeCyclePhaseToDataTier[indexLifecyclePhase])
                 : []),
             ],
           },
@@ -126,16 +114,13 @@ export async function getStorageDetailsPerProcessorEvent({
     ProcessorEvent.metric,
     ProcessorEvent.error,
   ].map((processorEvent) => {
-    const bucketForProcessorEvent =
-      response.aggregations?.sample.processor_event.buckets?.find(
-        (x) => x.key === processorEvent
-      );
+    const bucketForProcessorEvent = response.aggregations?.sample.processor_event.buckets?.find(
+      (x) => x.key === processorEvent
+    );
 
     return {
       processorEvent,
-      docs:
-        bucketForProcessorEvent?.number_of_metric_docs_for_processor_event
-          .value ?? 0,
+      docs: bucketForProcessorEvent?.number_of_metric_docs_for_processor_event.value ?? 0,
       size:
         allIndicesStats && bucketForProcessorEvent
           ? bucketForProcessorEvent.indices.buckets.reduce((prev, curr) => {
@@ -174,56 +159,50 @@ export async function getStorageDetailsPerIndex({
   kuery: string;
   serviceName: string;
 }) {
-  const [
-    { indices: allIndicesStats },
-    indicesLifecycleStatus,
-    indicesInfo,
-    response,
-  ] = await Promise.all([
-    getTotalIndicesStats({ apmEventClient, context }),
-    getIndicesLifecycleStatus({ apmEventClient, context }),
-    getIndicesInfo({ apmEventClient, context }),
-    apmEventClient.search('get_storage_details_per_index', {
-      apm: {
-        events: [
-          ProcessorEvent.span,
-          ProcessorEvent.transaction,
-          ProcessorEvent.error,
-          ProcessorEvent.metric,
-        ],
-      },
-      body: {
-        size: 0,
-        track_total_hits: false,
-        query: {
-          bool: {
-            filter: [
-              ...environmentQuery(environment),
-              ...kqlQuery(kuery),
-              ...rangeQuery(start, end),
-              ...termQuery(SERVICE_NAME, serviceName),
-              ...(indexLifecyclePhase !== IndexLifecyclePhaseSelectOption.All
-                ? termQuery(
-                    TIER,
-                    indexLifeCyclePhaseToDataTier[indexLifecyclePhase]
-                  )
-                : []),
-            ],
-          },
+  const [{ indices: allIndicesStats }, indicesLifecycleStatus, indicesInfo, response] =
+    await Promise.all([
+      getTotalIndicesStats({ apmEventClient, context }),
+      getIndicesLifecycleStatus({ apmEventClient, context }),
+      getIndicesInfo({ apmEventClient, context }),
+      apmEventClient.search('get_storage_details_per_index', {
+        apm: {
+          events: [
+            ProcessorEvent.span,
+            ProcessorEvent.transaction,
+            ProcessorEvent.error,
+            ProcessorEvent.metric,
+          ],
         },
-        aggs: {
-          sample: {
-            random_sampler: randomSampler,
-            aggs: {
-              indices: {
-                terms: {
-                  field: INDEX,
-                  size: 500,
-                },
-                aggs: {
-                  number_of_metric_docs_for_index: {
-                    value_count: {
-                      field: INDEX,
+        body: {
+          size: 0,
+          track_total_hits: false,
+          query: {
+            bool: {
+              filter: [
+                ...environmentQuery(environment),
+                ...kqlQuery(kuery),
+                ...rangeQuery(start, end),
+                ...termQuery(SERVICE_NAME, serviceName),
+                ...(indexLifecyclePhase !== IndexLifecyclePhaseSelectOption.All
+                  ? termQuery(TIER, indexLifeCyclePhaseToDataTier[indexLifecyclePhase])
+                  : []),
+              ],
+            },
+          },
+          aggs: {
+            sample: {
+              random_sampler: randomSampler,
+              aggs: {
+                indices: {
+                  terms: {
+                    field: INDEX,
+                    size: 500,
+                  },
+                  aggs: {
+                    number_of_metric_docs_for_index: {
+                      value_count: {
+                        field: INDEX,
+                      },
                     },
                   },
                 },
@@ -231,9 +210,8 @@ export async function getStorageDetailsPerIndex({
             },
           },
         },
-      },
-    }),
-  ]);
+      }),
+    ]);
 
   return (
     response.aggregations?.sample.indices.buckets.map((bucket) => {
@@ -253,18 +231,12 @@ export async function getStorageDetailsPerIndex({
       return {
         indexName,
         numberOfDocs,
-        primary: indexInfo
-          ? indexInfo.settings?.index?.number_of_shards ?? 0
-          : undefined,
-        replica: indexInfo
-          ? indexInfo.settings?.index?.number_of_replicas ?? 0
-          : undefined,
+        primary: indexInfo ? indexInfo.settings?.index?.number_of_shards ?? 0 : undefined,
+        replica: indexInfo ? indexInfo.settings?.index?.number_of_replicas ?? 0 : undefined,
         size,
         dataStream: indexInfo?.data_stream,
         lifecyclePhase:
-          indexLifecycle && 'phase' in indexLifecycle
-            ? indexLifecycle.phase
-            : undefined,
+          indexLifecycle && 'phase' in indexLifecycle ? indexLifecycle.phase : undefined,
       };
     }) ?? []
   );

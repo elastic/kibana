@@ -47,9 +47,9 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
     render = async (props = {}) => {
       renderResult = renderSetup.renderArtifactListPage(props);
 
-      await waitFor(async () => {
-        expect(renderResult.getByTestId('testPage-flyout'));
-      });
+      await waitFor(async () =>
+        expect(renderResult.getByTestId('testPage-flyout')).toBeInTheDocument()
+      );
 
       return renderResult;
     };
@@ -81,9 +81,7 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
   ])('should close flyout when `%s` button is clicked', async (_, testId) => {
     await render();
 
-    act(() => {
-      userEvent.click(renderResult.getByTestId(testId));
-    });
+    await userEvent.click(renderResult.getByTestId(testId));
 
     expect(renderResult.queryByTestId('testPage-flyout')).toBeNull();
     expect(history.location.search).toEqual('');
@@ -143,7 +141,7 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
 
     describe('and user clicks submit', () => {
       let releaseApiUpdateResponse: () => void;
-      let getByTestId: typeof renderResult['getByTestId'];
+      let getByTestId: (typeof renderResult)['getByTestId'];
 
       beforeEach(async () => {
         await act(async () => {
@@ -157,9 +155,7 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
         mockedApi.responseProvider.trustedAppCreate.mockDelay.mockReturnValue(deferrable.promise);
         releaseApiUpdateResponse = deferrable.resolve;
 
-        act(() => {
-          userEvent.click(renderResult.getByTestId('testPage-flyout-submitButton'));
-        });
+        await userEvent.click(renderResult.getByTestId('testPage-flyout-submitButton'));
       });
 
       afterEach(() => {
@@ -194,9 +190,7 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
           await render();
         });
 
-        act(() => {
-          userEvent.click(renderResult.getByTestId('testPage-flyout-submitButton'));
-        });
+        await userEvent.click(renderResult.getByTestId('testPage-flyout-submitButton'));
 
         await waitFor(() => {
           expect(renderResult.queryByTestId('testPage-flyout')).toBeNull();
@@ -227,9 +221,7 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
             await _renderAndWaitForFlyout(...args);
           });
 
-          act(() => {
-            userEvent.click(renderResult.getByTestId('testPage-flyout-submitButton'));
-          });
+          await userEvent.click(renderResult.getByTestId('testPage-flyout-submitButton'));
 
           await waitFor(() =>
             expect(mockedApi.responseProvider.trustedAppCreate).toHaveBeenCalled()
@@ -280,9 +272,7 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
           await render({ onFormSubmit: handleSubmitCallback });
         });
 
-        act(() => {
-          userEvent.click(renderResult.getByTestId('testPage-flyout-submitButton'));
-        });
+        await userEvent.click(renderResult.getByTestId('testPage-flyout-submitButton'));
       });
 
       afterEach(() => {
@@ -353,9 +343,7 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
 
       it('should show the warning modal', async () => {
         await render();
-        act(() => {
-          userEvent.click(renderResult.getByTestId('testPage-flyout-submitButton'));
-        });
+        await userEvent.click(renderResult.getByTestId('testPage-flyout-submitButton'));
         expect(renderResult.getByTestId('artifactConfirmModal')).toBeTruthy();
         expect(renderResult.getByTestId('artifactConfirmModal-header').textContent).toEqual(
           'title'

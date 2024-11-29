@@ -31,7 +31,7 @@ const DFA_EXTRA_MEMORY = numeral('5MB').value();
 
 const NODE_FIELDS = ['attributes', 'name', 'roles'] as const;
 
-export type RequiredNodeFields = Pick<estypes.NodesInfoNodeInfo, typeof NODE_FIELDS[number]>;
+export type RequiredNodeFields = Pick<estypes.NodesInfoNodeInfo, (typeof NODE_FIELDS)[number]>;
 
 export class MemoryUsageService {
   constructor(private readonly mlClient: MlClient, private readonly mlFeatures: MlFeatures) {}
@@ -181,6 +181,7 @@ export class MemoryUsageService {
 
     const mlNodes = Object.entries(response.nodes).filter(([, node]) => node.roles.includes('ml'));
 
+    // @ts-expect-error `throughput_last_minute` is not declared in ES Types
     const nodeDeploymentStatsResponses: NodeDeploymentStatsResponse[] = mlNodes.map(
       ([nodeId, node]) => {
         const nodeFields = pick(node, NODE_FIELDS) as RequiredNodeFields;

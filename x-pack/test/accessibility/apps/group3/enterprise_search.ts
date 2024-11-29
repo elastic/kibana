@@ -46,15 +46,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
         await a11y.testAppSnapshot();
       });
-
-      it('loads a setup guide', async function () {
-        await testSubjects.click('setupGuideLink');
-        await retry.waitFor(
-          'setup guide visible',
-          async () => await testSubjects.exists('setupGuide')
-        );
-        await a11y.testAppSnapshot();
-      });
     });
 
     describe('Content', () => {
@@ -113,9 +104,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('Search Applications', () => {
+    describe('Playground', () => {
       before(async () => {
         await common.navigateToApp('enterprise_search/applications');
+      });
+
+      it('loads playground', async function () {
+        await retry.waitFor(
+          'playground docs link',
+          async () => await testSubjects.exists('playground-documentation-link')
+        );
+        await a11y.testAppSnapshot();
+      });
+    });
+
+    describe('Search Applications', () => {
+      before(async () => {
+        await common.navigateToApp('enterprise_search/applications/search_applications');
       });
 
       it('loads search applications list', async function () {

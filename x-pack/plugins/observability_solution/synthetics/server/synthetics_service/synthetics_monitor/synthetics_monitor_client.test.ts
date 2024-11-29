@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { loggerMock } from '@kbn/logging-mocks';
-import { KibanaRequest, SavedObjectsClientContract, CoreStart } from '@kbn/core/server';
+import { SavedObjectsClientContract, CoreStart } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
 import { SyntheticsMonitorClient } from './synthetics_monitor_client';
 import { SyntheticsService } from '../synthetics_service';
@@ -46,13 +46,12 @@ describe('SyntheticsMonitorClient', () => {
     bulkUpdate: jest.fn(),
     get: jest.fn(),
   } as unknown as SavedObjectsClientContract;
-  const mockRequest = {} as unknown as KibanaRequest;
 
   const logger = loggerMock.create();
 
   const serverMock: SyntheticsServerSetup = {
     logger,
-    uptimeEsClient: mockEsClient,
+    syntheticsEsClient: mockEsClient,
     authSavedObjectsClient: {
       bulkUpdate: jest.fn(),
       get: jest.fn(),
@@ -130,12 +129,7 @@ describe('SyntheticsMonitorClient', () => {
     const client = new SyntheticsMonitorClient(syntheticsService, serverMock);
     client.privateLocationAPI.createPackagePolicies = jest.fn();
 
-    await client.addMonitors(
-      [{ monitor, id }],
-      savedObjectsClientMock,
-      privateLocations,
-      'test-space'
-    );
+    await client.addMonitors([{ monitor, id }], privateLocations, 'test-space');
 
     expect(syntheticsService.addConfigs).toHaveBeenCalledTimes(1);
     expect(client.privateLocationAPI.createPackagePolicies).toHaveBeenCalledTimes(1);
@@ -153,14 +147,9 @@ describe('SyntheticsMonitorClient', () => {
         {
           id,
           monitor,
-          previousMonitor,
           decryptedPreviousMonitor: previousMonitor,
         },
       ],
-      {
-        request: mockRequest,
-        savedObjectsClient: savedObjectsClientMock,
-      } as any,
       privateLocations,
       'test-space'
     );
@@ -186,14 +175,9 @@ describe('SyntheticsMonitorClient', () => {
         {
           monitor,
           id,
-          previousMonitor,
           decryptedPreviousMonitor: previousMonitor,
         },
       ],
-      {
-        request: mockRequest,
-        savedObjectsClient: savedObjectsClientMock,
-      } as any,
       privateLocations,
       'test-space'
     );

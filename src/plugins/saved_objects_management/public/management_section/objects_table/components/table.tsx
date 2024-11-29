@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { ApplicationStart, IBasePath } from '@kbn/core/public';
@@ -153,13 +154,11 @@ export class Table extends PureComponent<TableProps, TableState> {
 
       if (updatedAt.diff(moment(), 'days') > -7) {
         return (
-          <FormattedRelative value={new Date(dateTime).getTime()}>
-            {(formattedDate: string) => (
-              <EuiToolTip content={updatedAt.format('LL LT')}>
-                <span>{formattedDate}</span>
-              </EuiToolTip>
-            )}
-          </FormattedRelative>
+          <EuiToolTip content={updatedAt.format('LL LT')}>
+            <span>
+              <FormattedRelative value={new Date(dateTime).getTime()} />
+            </span>
+          </EuiToolTip>
         );
       }
       return (
@@ -234,7 +233,7 @@ export class Table extends PureComponent<TableProps, TableState> {
         name: i18n.translate('savedObjectsManagement.objectsTable.table.columnTypeName', {
           defaultMessage: 'Type',
         }),
-        width: '50px',
+        width: '65px',
         align: 'center',
         description: i18n.translate(
           'savedObjectsManagement.objectsTable.table.columnTypeDescription',
@@ -387,21 +386,30 @@ export class Table extends PureComponent<TableProps, TableState> {
     const activeActionContents = this.state.activeAction?.render() ?? null;
     const exceededResultCount = totalItemCount > MAX_PAGINATED_ITEM;
 
+    const allHidden = selectedSavedObjects.every(({ meta: { hiddenType } }) => hiddenType);
+
     return (
       <Fragment>
         {activeActionContents}
         <EuiSearchBar
-          box={{ 'data-test-subj': 'savedObjectSearchBar' }}
+          box={{
+            'data-test-subj': 'savedObjectSearchBar',
+            schema: {
+              recognizedFields: ['type', 'tag'],
+            },
+          }}
           filters={filters as any}
           onChange={this.onChange}
           defaultQuery={this.props.initialQuery}
           toolsRight={[
             <EuiToolTip
               content={
-                <FormattedMessage
-                  id="savedObjectsManagement.objectsTable.table.deleteDisabledTooltip"
-                  defaultMessage="Selected objects can’t be deleted because they are either Elastic managed objects or hidden objects."
-                />
+                allHidden ? (
+                  <FormattedMessage
+                    id="savedObjectsManagement.objectsTable.table.deleteDisabledTooltip"
+                    defaultMessage="Selected objects can’t be deleted because they are hidden objects."
+                  />
+                ) : undefined
               }
             >
               <EuiButton
@@ -409,11 +417,7 @@ export class Table extends PureComponent<TableProps, TableState> {
                 iconType="trash"
                 color="danger"
                 onClick={onDelete}
-                isDisabled={
-                  selectedSavedObjects.filter(
-                    ({ managed, meta: { hiddenType } }) => !managed && !hiddenType
-                  ).length === 0 || !capabilities.savedObjectsManagement.delete
-                }
+                isDisabled={allHidden || !capabilities.savedObjectsManagement.delete}
                 title={
                   capabilities.savedObjectsManagement.delete
                     ? undefined
@@ -470,7 +474,7 @@ export class Table extends PureComponent<TableProps, TableState> {
           ]}
         />
         {queryParseError}
-        <EuiSpacer size="s" />
+        <EuiSpacer />
         {exceededResultCount && (
           <>
             <EuiText color="subdued" size="s" data-test-subj="savedObjectsTableTooManyResultsLabel">

@@ -17,6 +17,7 @@ export enum ApmFeatureFlagName {
   SourcemapApiAvailable = 'sourcemapApiAvailable',
   StorageExplorerAvailable = 'storageExplorerAvailable',
   ProfilingIntegrationAvailable = 'profilingIntegrationAvailable',
+  RuleFormV2Enabled = 'ruleFormV2Enabled',
 }
 
 const apmFeatureFlagMap = {
@@ -52,6 +53,10 @@ const apmFeatureFlagMap = {
     default: false,
     type: t.boolean,
   },
+  [ApmFeatureFlagName.RuleFormV2Enabled]: {
+    default: false,
+    type: t.boolean,
+  },
 };
 
 type ApmFeatureFlagMap = typeof apmFeatureFlagMap;
@@ -60,9 +65,9 @@ export type ApmFeatureFlags = {
   [TApmFeatureFlagName in keyof ApmFeatureFlagMap]: ValueOfApmFeatureFlag<TApmFeatureFlagName>;
 };
 
-export type ValueOfApmFeatureFlag<
-  TApmFeatureFlagName extends ApmFeatureFlagName
-> = t.OutputOf<ApmFeatureFlagMap[TApmFeatureFlagName]['type']>;
+export type ValueOfApmFeatureFlag<TApmFeatureFlagName extends ApmFeatureFlagName> = t.OutputOf<
+  ApmFeatureFlagMap[TApmFeatureFlagName]['type']
+>;
 
 export function getApmFeatureFlags(): ApmFeatureFlags {
   return mapValues(apmFeatureFlagMap, (value, key) => value.default);

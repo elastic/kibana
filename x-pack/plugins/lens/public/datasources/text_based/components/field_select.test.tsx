@@ -6,37 +6,9 @@
  */
 
 import React from 'react';
-import { FieldPicker, FieldOptionValue } from '@kbn/visualization-ui-components';
-
-import { type FieldOptionCompatible, FieldSelect, FieldSelectProps } from './field_select';
-import { shallowWithIntl as shallow } from '@kbn/test-jest-helpers';
-
-const fields = [
-  {
-    name: 'timestamp',
-    id: 'timestamp',
-    meta: {
-      type: 'date',
-    },
-    compatible: true,
-  },
-  {
-    name: 'bytes',
-    id: 'bytes',
-    meta: {
-      type: 'number',
-    },
-    compatible: true,
-  },
-  {
-    name: 'memory',
-    id: 'memory',
-    meta: {
-      type: 'number',
-    },
-    compatible: true,
-  },
-] as FieldOptionCompatible[];
+import { FieldSelect, FieldSelectProps } from './field_select';
+import { RenderOptions, render, screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 describe('Layer Data Panel', () => {
   let defaultProps: FieldSelectProps;
@@ -50,63 +22,101 @@ describe('Layer Data Panel', () => {
           type: 'number',
         },
       },
-      existingFields: fields,
+      existingFields: [
+        {
+          name: 'timestamp',
+          id: 'timestamp',
+          meta: {
+            type: 'date',
+          },
+          compatible: true,
+        },
+        {
+          name: 'bytes',
+          id: 'bytes',
+          meta: {
+            type: 'number',
+          },
+          compatible: true,
+        },
+        {
+          name: 'memory',
+          id: 'memory',
+          meta: {
+            type: 'number',
+          },
+          compatible: true,
+        },
+      ],
       onChoose: jest.fn(),
     };
   });
 
+  const renderFieldSelect = (props?: Partial<FieldSelectProps>, renderOptions?: RenderOptions) => {
+    const rtlRender = render(<FieldSelect {...defaultProps} {...props} />, renderOptions);
+    return {
+      ...rtlRender,
+      comboboxInput: screen.getByRole('combobox'),
+      getAllOptions: () =>
+        within(screen.getByRole('listbox'))
+          .getAllByRole('option')
+          .map((option) => within(option).getByTestId('fullText').textContent),
+    };
+  };
+
   it('should display the selected field if given', () => {
-    const instance = shallow(<FieldSelect {...defaultProps} />);
-    expect(instance.find(FieldPicker).prop('selectedOptions')).toStrictEqual([
-      {
-        label: 'bytes',
-        value: {
-          type: 'field',
-          field: 'bytes',
-          dataType: 'number',
-        },
-      },
-    ]);
+    const { comboboxInput } = renderFieldSelect();
+    expect(comboboxInput).toHaveValue('bytes');
   });
 
-  it('should pass the fields with the correct format', () => {
-    const instance = shallow(<FieldSelect {...defaultProps} />);
-    expect(instance.find(FieldPicker).prop('options')).toStrictEqual([
-      {
-        label: 'Available fields',
-        options: [
-          {
-            compatible: 1,
-            exists: true,
-            label: 'timestamp',
-            value: {
-              type: 'field' as FieldOptionValue['type'],
-              field: 'timestamp',
-              dataType: 'date',
-            },
-          },
-          {
-            compatible: 1,
-            exists: true,
-            label: 'bytes',
-            value: {
-              type: 'field' as FieldOptionValue['type'],
-              field: 'bytes',
-              dataType: 'number',
-            },
-          },
-          {
-            compatible: 1,
-            exists: true,
-            label: 'memory',
-            value: {
-              type: 'field' as FieldOptionValue['type'],
-              field: 'memory',
-              dataType: 'number',
-            },
-          },
-        ],
-      },
-    ]);
+  it('should list all the fields', async () => {
+    const { comboboxInput, getAllOptions } = renderFieldSelect();
+    await userEvent.click(comboboxInput);
+    const options = getAllOptions();
+    expect(options).toEqual(['timestamp', 'bytes', 'memory']);
+  });
+  it('user can remove the value from the input', async () => {
+    const { comboboxInput } = renderFieldSelect();
+    await userEvent.click(comboboxInput);
+    expect(comboboxInput).toHaveValue('bytes');
+    // type into input
+    await userEvent.type(comboboxInput, '{backspace}{backspace}{backspace}{backspace}{backspace}');
+    expect(comboboxInput).toHaveValue('');
+  });
+  describe('behavior on blur', () => {
+    const Wrapper = ({ children }: { children: React.ReactNode }) => (
+      <div>
+        <button>testing blur by clicking outside button</button>
+        {children}
+      </div>
+    );
+
+    it('when user blurs the empty input, the input receives selected field', async () => {
+      const { comboboxInput } = renderFieldSelect(undefined, { wrapper: Wrapper });
+      await userEvent.click(comboboxInput);
+      expect(comboboxInput).toHaveValue('bytes');
+      // type into input
+      await userEvent.type(
+        comboboxInput,
+        '{backspace}{backspace}{backspace}{backspace}{backspace}'
+      );
+      expect(comboboxInput).toHaveValue('');
+      await userEvent.click(
+        screen.getByRole('button', { name: /testing blur by clicking outside button/i })
+      );
+      expect(comboboxInput).toHaveValue('bytes');
+    });
+    it('when user blurs non-empty input, the value persists', async () => {
+      const { comboboxInput } = renderFieldSelect(undefined, { wrapper: Wrapper });
+      await userEvent.click(comboboxInput);
+      expect(comboboxInput).toHaveValue('bytes');
+      // type into input
+      await userEvent.type(comboboxInput, '{backspace}{backspace}{backspace}');
+      expect(comboboxInput).toHaveValue('by');
+      await userEvent.click(
+        screen.getByRole('button', { name: /testing blur by clicking outside button/i })
+      );
+      expect(comboboxInput).toHaveValue('by');
+    });
   });
 });

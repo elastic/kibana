@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { Plugin, CoreSetup, AppMountParameters } from '@kbn/core/public';
@@ -14,7 +15,7 @@ import { UiActionsStart, UiActionsSetup } from '@kbn/ui-actions-plugin/public';
 import { getExpressionsInspectorViewDescription } from './inspector';
 import { NAVIGATE_TRIGGER_ID, navigateTrigger } from './actions/navigate_trigger';
 import { ACTION_NAVIGATE, createNavigateAction } from './actions/navigate_action';
-import { buttonRenderer } from './renderers/button';
+import { getButtonRenderer } from './renderers/button';
 import { buttonFn } from './functions/button';
 
 interface StartDeps {
@@ -41,7 +42,7 @@ export class ExpressionsExplorerPlugin implements Plugin<void, void, SetupDeps, 
     deps.uiActions.attachAction(NAVIGATE_TRIGGER_ID, ACTION_NAVIGATE);
 
     // register custom functions and renderers
-    deps.expressions.registerRenderer(buttonRenderer);
+    deps.expressions.registerRenderer(getButtonRenderer(core));
     deps.expressions.registerFunction(buttonFn);
 
     core.application.register({
@@ -59,6 +60,7 @@ export class ExpressionsExplorerPlugin implements Plugin<void, void, SetupDeps, 
             uiSettings: core.uiSettings,
             settings: core.settings,
             theme: coreStart.theme,
+            i18n: coreStart.i18n,
           },
           params
         );

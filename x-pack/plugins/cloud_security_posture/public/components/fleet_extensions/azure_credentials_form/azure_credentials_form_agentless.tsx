@@ -17,6 +17,7 @@ import {
   AzureSetupInfoContent,
   AzureInputVarFields,
   ARM_TEMPLATE_EXTERNAL_DOC_URL,
+  AZURE_CREDENTIALS_TYPE,
 } from './azure_credentials_form';
 import { getPosturePolicy } from '../utils';
 import {
@@ -28,17 +29,19 @@ export const AzureCredentialsFormAgentless = ({
   input,
   newPolicy,
   updatePolicy,
+  packageInfo,
 }: AzureCredentialsFormProps) => {
-  const integrationLink = cspIntegrationDocsNavigation.cspm.getStartedPath;
+  const documentationLink = cspIntegrationDocsNavigation.cspm.azureGetStartedPath;
   const options = getAzureCredentialsFormOptions();
-  const group = options.service_principal_with_client_secret;
+  const group = options[AZURE_CREDENTIALS_TYPE.SERVICE_PRINCIPAL_WITH_CLIENT_SECRET];
   const fields = getInputVarsFields(input, group.fields);
 
   return (
     <>
-      <AzureSetupInfoContent integrationLink={integrationLink} />
+      <AzureSetupInfoContent documentationLink={documentationLink} />
       <EuiSpacer size="l" />
       <AzureInputVarFields
+        packageInfo={packageInfo}
         fields={fields}
         onChange={(key, value) => {
           updatePolicy(getPosturePolicy(newPolicy, input.type, { [key]: { value } }));

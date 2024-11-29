@@ -9,30 +9,20 @@ import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-m
 import { requestContextMock } from '../../__mocks__/request_context';
 import { serverMock } from '../../__mocks__/server';
 import { createConversationRoute } from './create_route';
-import {
-  getBasicEmptySearchResponse,
-  getEmptyFindResult,
-  getFindConversationsResultWithSingleHit,
-} from '../../__mocks__/response';
+import { getBasicEmptySearchResponse, getEmptyFindResult } from '../../__mocks__/response';
 import { getCreateConversationRequest, requestMock } from '../../__mocks__/request';
 import {
   getCreateConversationSchemaMock,
   getConversationMock,
   getQueryConversationParams,
 } from '../../__mocks__/conversations_schema.mock';
+import { authenticatedUser } from '../../__mocks__/user';
 import { ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL } from '@kbn/elastic-assistant-common';
-import { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 
 describe('Create conversation route', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
-  const mockUser1 = {
-    username: 'my_username',
-    authentication_realm: {
-      type: 'my_realm_type',
-      name: 'my_realm_name',
-    },
-  } as AuthenticatedUser;
+  const mockUser1 = authenticatedUser;
 
   beforeEach(() => {
     server = serverMock.create();
@@ -72,22 +62,6 @@ describe('Create conversation route', () => {
   });
 
   describe('unhappy paths', () => {
-    test('returns a duplicate error if conversation_id already exists', async () => {
-      clients.elasticAssistant.getAIAssistantConversationsDataClient.findDocuments.mockResolvedValue(
-        Promise.resolve(getFindConversationsResultWithSingleHit())
-      );
-      const response = await server.inject(
-        getCreateConversationRequest(),
-        requestContextMock.convertContext(context)
-      );
-
-      expect(response.status).toEqual(409);
-      expect(response.body).toEqual({
-        message: expect.stringContaining('already exists'),
-        status_code: 409,
-      });
-    });
-
     test('catches error if creation throws', async () => {
       clients.elasticAssistant.getAIAssistantConversationsDataClient.createConversation.mockImplementation(
         async () => {

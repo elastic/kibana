@@ -11,21 +11,14 @@ import { euiLightVars as theme } from '@kbn/ui-theme';
 import { isEmpty } from 'lodash';
 import { APMConfig } from '../../..';
 import { ApmTransactionDocumentType } from '../../../../common/document_type';
-import {
-  FAAS_BILLED_DURATION,
-  FAAS_ID,
-  METRICSET_NAME,
-} from '../../../../common/es_fields/apm';
+import { FAAS_BILLED_DURATION, FAAS_ID, METRICSET_NAME } from '../../../../common/es_fields/apm';
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 import { RollupInterval } from '../../../../common/rollup';
 import { isFiniteNumber } from '../../../../common/utils/is_finite_number';
 import { getVizColorForIndex } from '../../../../common/viz_colors';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { getLatencyTimeseries } from '../../transactions/get_latency_charts';
-import {
-  fetchAndTransformMetrics,
-  GenericMetricsChart,
-} from '../fetch_and_transform_metrics';
+import { fetchAndTransformMetrics, GenericMetricsChart } from '../fetch_and_transform_metrics';
 import { ChartBase } from '../types';
 
 const billedDurationAvg = {
@@ -42,13 +35,10 @@ const chartBase: ChartBase = {
   type: 'linemark',
   yUnit: 'time',
   series: {},
-  description: i18n.translate(
-    'xpack.apm.agentMetrics.serverless.avgDuration.description',
-    {
-      defaultMessage:
-        'Transaction duration is the time spent processing and responding to a request. If the request is queued it will not be contribute to the transaction duration but will contribute the overall billed duration',
-    }
-  ),
+  description: i18n.translate('xpack.apm.agentMetrics.serverless.avgDuration.description', {
+    defaultMessage:
+      'Transaction duration is the time spent processing and responding to a request. If the request is queued it will not be contribute to the transaction duration but will contribute the overall billed duration',
+  }),
 };
 
 async function getServerlessLatencySeries({
@@ -90,10 +80,9 @@ async function getServerlessLatencySeries({
 
   return [
     {
-      title: i18n.translate(
-        'xpack.apm.agentMetrics.serverless.transactionDuration',
-        { defaultMessage: 'Transaction Duration' }
-      ),
+      title: i18n.translate('xpack.apm.agentMetrics.serverless.transactionDuration', {
+        defaultMessage: 'Transaction Duration',
+      }),
       key: 'transaction_duration',
       type: 'linemark',
       color: getVizColorForIndex(1, theme),

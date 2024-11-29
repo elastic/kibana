@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { TelemetryEvent } from '../../types';
-import { TelemetryEventTypes } from '../../constants';
+import type { DocumentDetailsTelemetryEvent } from './types';
+import { DocumentEventTypes } from './types';
 
-export const DocumentDetailsFlyoutOpenedEvent: TelemetryEvent = {
-  eventType: TelemetryEventTypes.DetailsFlyoutOpened,
+export const DocumentDetailsFlyoutOpenedEvent: DocumentDetailsTelemetryEvent = {
+  eventType: DocumentEventTypes.DetailsFlyoutOpened,
   schema: {
-    tableId: {
+    location: {
       type: 'text',
       _meta: {
         description: 'Table ID',
@@ -28,10 +28,10 @@ export const DocumentDetailsFlyoutOpenedEvent: TelemetryEvent = {
   },
 };
 
-export const DocumentDetailsTabClickedEvent: TelemetryEvent = {
-  eventType: TelemetryEventTypes.DetailsFlyoutTabClicked,
+export const DocumentDetailsTabClickedEvent: DocumentDetailsTelemetryEvent = {
+  eventType: DocumentEventTypes.DetailsFlyoutTabClicked,
   schema: {
-    tableId: {
+    location: {
       type: 'text',
       _meta: {
         description: 'Table ID',
@@ -54,3 +54,8 @@ export const DocumentDetailsTabClickedEvent: TelemetryEvent = {
     },
   },
 };
+
+export const documentTelemetryEvents = [
+  DocumentDetailsFlyoutOpenedEvent,
+  DocumentDetailsTabClickedEvent,
+];

@@ -74,6 +74,11 @@ components:
         throttle:
           $ref: './common_attributes.schema.yaml#/components/schemas/RuleActionThrottle'
 
+        response_actions:
+          type: array
+          items:
+            $ref: '../rule_response_actions/response_actions.schema.yaml#/components/schemas/ResponseAction'
+
     BaseDefaultableFields:
       x-inline: true
       type: object
@@ -117,17 +122,31 @@ components:
         author:
           $ref: './common_attributes.schema.yaml#/components/schemas/RuleAuthorArray'
 
+        # False positive examples
         false_positives:
           $ref: './common_attributes.schema.yaml#/components/schemas/RuleFalsePositiveArray'
 
+        # Reference URLs
         references:
           $ref: './common_attributes.schema.yaml#/components/schemas/RuleReferenceArray'
 
-        # maxSignals not used in ML rules but probably should be used
+        # Max alerts per run
         max_signals:
           $ref: './common_attributes.schema.yaml#/components/schemas/MaxSignals'
         threat:
           $ref: './common_attributes.schema.yaml#/components/schemas/ThreatArray'
+        setup:
+          $ref: './common_attributes.schema.yaml#/components/schemas/SetupGuide'
+
+        # Related integrations
+        related_integrations:
+          $ref: './common_attributes.schema.yaml#/components/schemas/RelatedIntegrationArray'
+
+        # Required fields
+        required_fields:
+          type: array
+          items:
+            $ref: './common_attributes.schema.yaml#/components/schemas/RequiredFieldInput'
 
     BaseCreateProps:
       x-inline: true
@@ -161,6 +180,8 @@ components:
           $ref: './common_attributes.schema.yaml#/components/schemas/RuleSignatureId'
         immutable:
           $ref: './common_attributes.schema.yaml#/components/schemas/IsRuleImmutable'
+        rule_source:
+          $ref: './common_attributes.schema.yaml#/components/schemas/RuleSource'
         updated_at:
           type: string
           format: date-time
@@ -174,23 +195,20 @@ components:
         revision:
           type: integer
           minimum: 0
-        # NOTE: For now, Related Integrations, Required Fields and Setup Guide are
+        # NOTE: For now, Required Fields are
         # supported for prebuilt rules only. We don't want to allow users to edit these 3
         # fields via the API. If we added them to baseParams.defaultable, they would
         # become a part of the request schema as optional fields. This is why we add them
         # here, in order to add them only to the response schema.
-        related_integrations:
-          $ref: './common_attributes.schema.yaml#/components/schemas/RelatedIntegrationArray'
         required_fields:
           $ref: './common_attributes.schema.yaml#/components/schemas/RequiredFieldArray'
-        setup:
-          $ref: './common_attributes.schema.yaml#/components/schemas/SetupGuide'
         execution_summary:
           $ref: '../../rule_monitoring/model/execution_summary.schema.yaml#/components/schemas/RuleExecutionSummary'
       required:
         - id
         - rule_id
         - immutable
+        - rule_source
         - updated_at
         - updated_by
         - created_at
@@ -198,7 +216,6 @@ components:
         - revision
         - related_integrations
         - required_fields
-        - setup
 
     SharedCreateProps:
       x-inline: true
@@ -279,7 +296,9 @@ components:
           $ref: './specific_attributes/eql_attributes.schema.yaml#/components/schemas/TiebreakerField'
         timestamp_field:
           $ref: './specific_attributes/eql_attributes.schema.yaml#/components/schemas/TimestampField'
-          
+        alert_suppression:
+          $ref: './common_attributes.schema.yaml#/components/schemas/AlertSuppression'
+
     EqlRuleCreateFields:
       allOf:
         - $ref: '#/components/schemas/EqlRequiredFields'
@@ -341,10 +360,6 @@ components:
           $ref: './common_attributes.schema.yaml#/components/schemas/RuleFilterArray'
         saved_id:
           $ref: './common_attributes.schema.yaml#/components/schemas/SavedQueryId'
-        response_actions:
-          type: array
-          items:
-            $ref: '../rule_response_actions/response_actions.schema.yaml#/components/schemas/ResponseAction'
         alert_suppression:
           $ref: './common_attributes.schema.yaml#/components/schemas/AlertSuppression'
 
@@ -422,10 +437,6 @@ components:
           $ref: './common_attributes.schema.yaml#/components/schemas/DataViewId'
         filters:
           $ref: './common_attributes.schema.yaml#/components/schemas/RuleFilterArray'
-        response_actions:
-          type: array
-          items:
-            $ref: '../rule_response_actions/response_actions.schema.yaml#/components/schemas/ResponseAction'
         alert_suppression:
           $ref: './common_attributes.schema.yaml#/components/schemas/AlertSuppression'
         query:
@@ -673,18 +684,27 @@ components:
         - machine_learning_job_id
         - anomaly_threshold
 
+    MachineLearningRuleOptionalFields:
+      type: object
+      properties:
+        alert_suppression:
+          $ref: './common_attributes.schema.yaml#/components/schemas/AlertSuppression'
+
     MachineLearningRulePatchFields:
       allOf:
         - $ref: '#/components/schemas/MachineLearningRuleRequiredFields'
           x-modify: partial
+        - $ref: '#/components/schemas/MachineLearningRuleOptionalFields'
 
     MachineLearningRuleResponseFields:
       allOf:
         - $ref: '#/components/schemas/MachineLearningRuleRequiredFields'
+        - $ref: '#/components/schemas/MachineLearningRuleOptionalFields'
 
     MachineLearningRuleCreateFields:
       allOf:
         - $ref: '#/components/schemas/MachineLearningRuleRequiredFields'
+        - $ref: '#/components/schemas/MachineLearningRuleOptionalFields'
 
     MachineLearningRule:
       allOf:
@@ -738,6 +758,8 @@ components:
           $ref: './common_attributes.schema.yaml#/components/schemas/DataViewId'
         filters:
           $ref: './common_attributes.schema.yaml#/components/schemas/RuleFilterArray'
+        alert_suppression:
+          $ref: './common_attributes.schema.yaml#/components/schemas/AlertSuppression'
 
     NewTermsRuleDefaultableFields:
       type: object
@@ -811,17 +833,26 @@ components:
         - language
         - query
 
+    EsqlRuleOptionalFields:
+      type: object
+      properties:
+        alert_suppression:
+          $ref: './common_attributes.schema.yaml#/components/schemas/AlertSuppression'
+
     EsqlRulePatchFields:
       allOf:
+        - $ref: '#/components/schemas/EsqlRuleOptionalFields'
         - $ref: '#/components/schemas/EsqlRuleRequiredFields'
           x-modify: partial
 
     EsqlRuleResponseFields:
       allOf:
+        - $ref: '#/components/schemas/EsqlRuleOptionalFields'
         - $ref: '#/components/schemas/EsqlRuleRequiredFields'
 
     EsqlRuleCreateFields:
       allOf:
+        - $ref: '#/components/schemas/EsqlRuleOptionalFields'
         - $ref: '#/components/schemas/EsqlRuleRequiredFields'
 
     EsqlRule:

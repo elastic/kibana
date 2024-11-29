@@ -17,12 +17,12 @@ describe(`Result`, () => {
 
     test(`unwraps Errs from the result`, async () => {
       const uniqueId = uuidv4();
-      expect(unwrapPromise(Promise.resolve(asErr(uniqueId)))).rejects.toEqual(uniqueId);
+      await expect(unwrapPromise(Promise.resolve(asErr(uniqueId)))).rejects.toEqual(uniqueId);
     });
 
     test(`unwraps Errs from the result when promise rejects`, async () => {
       const uniqueId = uuidv4();
-      expect(unwrapPromise(Promise.reject(asErr(uniqueId)))).rejects.toEqual(uniqueId);
+      await expect(unwrapPromise(Promise.reject(asErr(uniqueId)))).rejects.toEqual(uniqueId);
     });
   });
 });

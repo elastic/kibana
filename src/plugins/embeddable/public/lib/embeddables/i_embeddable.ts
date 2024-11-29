@@ -1,13 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { ErrorLike } from '@kbn/expressions-plugin/common';
-import { CanLinkToLibrary, CanUnlinkFromLibrary } from '@kbn/presentation-library';
 import { DefaultPresentationPanelApi } from '@kbn/presentation-panel-plugin/public/panel_component/types';
 import {
   HasEditCapabilities,
@@ -25,6 +25,9 @@ import {
   PublishesWritablePanelTitle,
   PublishesPhaseEvents,
   PublishesSavedObjectId,
+  HasLegacyLibraryTransforms,
+  EmbeddableAppContext,
+  CanLockHoverActions,
 } from '@kbn/presentation-publishing';
 import { Observable } from 'rxjs';
 import { EmbeddableInput } from '../../../common/types';
@@ -53,18 +56,11 @@ export type LegacyEmbeddableAPI = HasType &
   PublishesDisabledActionIds &
   PublishesWritablePanelTitle &
   PublishesWritablePanelDescription &
-  Partial<CanLinkToLibrary & CanUnlinkFromLibrary> &
+  Partial<HasLegacyLibraryTransforms> &
   HasParentApi<DefaultPresentationPanelApi['parentApi']> &
   EmbeddableHasTimeRange &
-  PublishesSavedObjectId;
-
-export interface EmbeddableAppContext {
-  /**
-   * Current app's path including query and hash starting from {appId}
-   */
-  getCurrentPath?: () => string;
-  currentAppId?: string;
-}
+  PublishesSavedObjectId &
+  CanLockHoverActions;
 
 export interface EmbeddableOutput {
   // Whether the embeddable is actively loading.

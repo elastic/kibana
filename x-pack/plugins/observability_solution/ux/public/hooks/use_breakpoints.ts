@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  useIsWithinMaxBreakpoint,
-  useIsWithinMinBreakpoint,
-} from '@elastic/eui';
+import { useIsWithinMaxBreakpoint, useIsWithinMinBreakpoint } from '@elastic/eui';
 
 export type Breakpoints = Record<string, boolean>;
 

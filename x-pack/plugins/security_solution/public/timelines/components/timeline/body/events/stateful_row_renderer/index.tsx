@@ -6,7 +6,13 @@
  */
 
 import { noop } from 'lodash/fp';
-import { EuiFocusTrap, EuiOutsideClickDetector, EuiScreenReaderOnly } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFocusTrap,
+  EuiOutsideClickDetector,
+  EuiScreenReaderOnly,
+  EuiFlexItem,
+} from '@elastic/eui';
 import React, { useMemo } from 'react';
 
 import {
@@ -16,10 +22,10 @@ import {
 } from '@kbn/timelines-plugin/public';
 import type { RowRenderer } from '../../../../../../../common/types';
 import type { TimelineItem } from '../../../../../../../common/search_strategy/timeline';
-import { getRowRenderer } from '../../renderers/get_row_renderer';
 import { useStatefulEventFocus } from '../use_stateful_event_focus';
 
 import * as i18n from '../translations';
+import { useStatefulRowRenderer } from './use_stateful_row_renderer';
 
 /**
  * This component addresses the accessibility of row renderers.
@@ -34,67 +40,67 @@ import * as i18n from '../translations';
  *   which focuses the current or next row, respectively.
  * - A screen-reader-only message provides additional context and instruction
  */
-export const StatefulRowRenderer = ({
-  ariaRowindex,
-  containerRef,
-  event,
-  lastFocusedAriaColindex,
-  rowRenderers,
-  timelineId,
-}: {
-  ariaRowindex: number;
-  containerRef: React.MutableRefObject<HTMLDivElement | null>;
-  event: TimelineItem;
-  lastFocusedAriaColindex: number;
-  rowRenderers: RowRenderer[];
-  timelineId: string;
-}) => {
-  const { focusOwnership, onFocus, onKeyDown, onOutsideClick } = useStatefulEventFocus({
+export const StatefulRowRenderer = React.memo(
+  ({
     ariaRowindex,
-    colindexAttribute: ARIA_COLINDEX_ATTRIBUTE,
     containerRef,
+    event,
     lastFocusedAriaColindex,
-    onColumnFocused: noop,
-    rowindexAttribute: ARIA_ROWINDEX_ATTRIBUTE,
-  });
-
-  const rowRenderer = useMemo(
-    () => getRowRenderer({ data: event.ecs, rowRenderers }),
-    [event.ecs, rowRenderers]
-  );
-
-  const content = useMemo(
-    () =>
-      rowRenderer && (
-        // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
-        <div className={getRowRendererClassName(ariaRowindex)} role="dialog" onFocus={onFocus}>
-          <EuiOutsideClickDetector onOutsideClick={onOutsideClick}>
-            <EuiFocusTrap clickOutsideDisables={true} disabled={focusOwnership !== 'owned'}>
-              <EuiScreenReaderOnly data-test-subj="eventRendererScreenReaderOnly">
-                <p>{i18n.YOU_ARE_IN_AN_EVENT_RENDERER(ariaRowindex)}</p>
-              </EuiScreenReaderOnly>
-              <div onKeyDown={onKeyDown}>
-                {rowRenderer.renderRow({
-                  data: event.ecs,
-                  isDraggable: true,
-                  scopeId: timelineId,
-                })}
-              </div>
-            </EuiFocusTrap>
-          </EuiOutsideClickDetector>
-        </div>
-      ),
-    [
+    rowRenderers,
+    timelineId,
+  }: {
+    ariaRowindex: number;
+    containerRef: React.MutableRefObject<HTMLDivElement | null>;
+    event: TimelineItem;
+    lastFocusedAriaColindex: number;
+    rowRenderers: RowRenderer[];
+    timelineId: string;
+  }) => {
+    const { focusOwnership, onFocus, onKeyDown, onOutsideClick } = useStatefulEventFocus({
       ariaRowindex,
-      event.ecs,
-      focusOwnership,
-      onFocus,
-      onKeyDown,
-      onOutsideClick,
-      rowRenderer,
-      timelineId,
-    ]
-  );
+      colindexAttribute: ARIA_COLINDEX_ATTRIBUTE,
+      containerRef,
+      lastFocusedAriaColindex,
+      onColumnFocused: noop,
+      rowindexAttribute: ARIA_ROWINDEX_ATTRIBUTE,
+    });
 
-  return content;
-};
+    const { rowRenderer } = useStatefulRowRenderer({
+      data: event.ecs,
+      rowRenderers,
+    });
+
+    const row = useMemo(() => {
+      const result = rowRenderer?.renderRow({
+        data: event.ecs,
+        isDraggable: false,
+        scopeId: timelineId,
+      });
+      return result;
+    }, [rowRenderer, event.ecs, timelineId]);
+
+    const content = useMemo(
+      () =>
+        rowRenderer && (
+          // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
+          <div className={getRowRendererClassName(ariaRowindex)} role="dialog" onFocus={onFocus}>
+            <EuiOutsideClickDetector onOutsideClick={onOutsideClick}>
+              <EuiFocusTrap clickOutsideDisables={true} disabled={focusOwnership !== 'owned'}>
+                <EuiScreenReaderOnly data-test-subj="eventRendererScreenReaderOnly">
+                  <p>{i18n.YOU_ARE_IN_AN_EVENT_RENDERER(ariaRowindex)}</p>
+                </EuiScreenReaderOnly>
+                <EuiFlexGroup direction="column" onKeyDown={onKeyDown}>
+                  <EuiFlexItem grow={true}>{row}</EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFocusTrap>
+            </EuiOutsideClickDetector>
+          </div>
+        ),
+      [ariaRowindex, focusOwnership, onFocus, onKeyDown, onOutsideClick, rowRenderer, row]
+    );
+
+    return content;
+  }
+);
+
+StatefulRowRenderer.displayName = 'StatefulRowRenderer';

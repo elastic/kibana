@@ -29,14 +29,14 @@ import { first } from 'lodash';
 import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import useAsync from 'react-use/lib/useAsync';
-import { ERROR_GROUP_ID } from '../../../../../common/es_fields/apm';
+import { AT_TIMESTAMP, ERROR_GROUP_ID } from '../../../../../common/es_fields/apm';
 import { TraceSearchType } from '../../../../../common/trace_explorer';
 import { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
-import { FETCH_STATUS, isPending } from '../../../../hooks/use_fetcher';
+import { FETCH_STATUS, isPending, isSuccess } from '../../../../hooks/use_fetcher';
 import { useTraceExplorerEnabledSetting } from '../../../../hooks/use_trace_explorer_enabled_setting';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { TransactionDetailLink } from '../../../shared/links/apm/transaction_detail_link';
@@ -71,10 +71,7 @@ interface Props {
   occurrencesCount: number;
 }
 
-function getCurrentTab(
-  tabs: ErrorTab[] = [],
-  currentTabKey: string | undefined
-): ErrorTab | {} {
+function getCurrentTab(tabs: ErrorTab[] = [], currentTabKey: string | undefined): ErrorTab | {} {
   const selectedTab = tabs.find(({ key }) => key === currentTabKey);
   return selectedTab ?? (first(tabs) || {});
 }
@@ -114,9 +111,7 @@ export function ErrorSampleDetails({
   const loadingErrorData = isPending(errorFetchStatus);
   const isLoading = loadingErrorSamplesData || loadingErrorData;
 
-  const isSucceded =
-    errorSamplesFetchStatus === FETCH_STATUS.SUCCESS &&
-    errorFetchStatus === FETCH_STATUS.SUCCESS;
+  const isSucceeded = isSuccess(errorSamplesFetchStatus) && isSuccess(errorFetchStatus);
 
   useEffect(() => {
     setSampleActivePage(0);
@@ -141,7 +136,7 @@ export function ErrorSampleDetails({
     });
   }, [error, transaction, uiActions]);
 
-  if (!error && errorSampleIds?.length === 0 && isSucceded) {
+  if (!error && errorSampleIds?.length === 0 && isSucceeded) {
     return (
       <EuiEmptyPrompt
         title={
@@ -164,7 +159,7 @@ export function ErrorSampleDetails({
   const status = error.http?.response?.status_code;
   const environment = error.service.environment;
   const serviceVersion = error.service.version;
-  const isUnhandled = error.error.exception?.[0].handled === false;
+  const isUnhandled = error.error.exception?.[0]?.handled === false;
 
   const traceExplorerLink = router.link('/traces/explorer/waterfall', {
     query: {
@@ -185,12 +180,9 @@ export function ErrorSampleDetails({
         <EuiFlexItem grow={false}>
           <EuiTitle size="s">
             <h3>
-              {i18n.translate(
-                'xpack.apm.errorSampleDetails.errorOccurrenceTitle',
-                {
-                  defaultMessage: 'Error sample',
-                }
-              )}
+              {i18n.translate('xpack.apm.errorSampleDetails.errorOccurrenceTitle', {
+                defaultMessage: 'Error sample',
+              })}
             </h3>
           </EuiTitle>
         </EuiFlexItem>
@@ -206,21 +198,15 @@ export function ErrorSampleDetails({
         </EuiFlexItem>
         {isTraceExplorerEnabled && (
           <EuiFlexItem grow={false}>
-            <EuiLink
-              data-test-subj="apmErrorSampleDetailsLink"
-              href={traceExplorerLink}
-            >
+            <EuiLink data-test-subj="apmErrorSampleDetailsLink" href={traceExplorerLink}>
               <EuiFlexGroup alignItems="center" gutterSize="s">
                 <EuiFlexItem>
                   <EuiIcon type="apmTrace" />
                 </EuiFlexItem>
                 <EuiFlexItem style={{ whiteSpace: 'nowrap' }}>
-                  {i18n.translate(
-                    'xpack.apm.errorSampleDetails.viewOccurrencesInTraceExplorer',
-                    {
-                      defaultMessage: 'Explore traces with this error',
-                    }
-                  )}
+                  {i18n.translate('xpack.apm.errorSampleDetails.viewOccurrencesInTraceExplorer', {
+                    defaultMessage: 'Explore traces with this error',
+                  })}
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiLink>
@@ -258,27 +244,18 @@ export function ErrorSampleDetails({
       ) : (
         <Summary
           items={[
-            <TimestampTooltip
-              time={errorData ? error.timestamp.us / 1000 : 0}
-            />,
+            <TimestampTooltip time={errorData ? error.timestamp.us / 1000 : 0} />,
             errorUrl && method ? (
-              <HttpInfoSummaryItem
-                url={errorUrl}
-                method={method}
-                status={status}
-              />
+              <HttpInfoSummaryItem url={errorUrl} method={method} status={status} />
             ) : null,
             transaction && transaction.user_agent ? (
               <UserAgentSummaryItem {...transaction.user_agent} />
             ) : null,
             transaction && (
               <EuiToolTip
-                content={i18n.translate(
-                  'xpack.apm.errorSampleDetails.relatedTransactionSample',
-                  {
-                    defaultMessage: 'Related transaction sample',
-                  }
-                )}
+                content={i18n.translate('xpack.apm.errorSampleDetails.relatedTransactionSample', {
+                  defaultMessage: 'Related transaction sample',
+                })}
               >
                 <TransactionDetailLink
                   traceId={transaction.trace.id}
@@ -290,32 +267,24 @@ export function ErrorSampleDetails({
                   comparisonEnabled={comparisonEnabled}
                 >
                   <EuiIcon type="merge" />
-                  <TransactionLinkName>
-                    {transaction.transaction.name}
-                  </TransactionLinkName>
+                  <TransactionLinkName>{transaction.transaction.name}</TransactionLinkName>
                 </TransactionDetailLink>
               </EuiToolTip>
             ),
             environment ? (
               <EuiToolTip
-                content={i18n.translate(
-                  'xpack.apm.errorSampleDetails.serviceEnvironment',
-                  {
-                    defaultMessage: 'Environment',
-                  }
-                )}
+                content={i18n.translate('xpack.apm.errorSampleDetails.serviceEnvironment', {
+                  defaultMessage: 'Environment',
+                })}
               >
                 <EuiBadge color="hollow">{environment}</EuiBadge>
               </EuiToolTip>
             ) : null,
             serviceVersion ? (
               <EuiToolTip
-                content={i18n.translate(
-                  'xpack.apm.errorSampleDetails.serviceVersion',
-                  {
-                    defaultMessage: 'Service version',
-                  }
-                )}
+                content={i18n.translate('xpack.apm.errorSampleDetails.serviceVersion', {
+                  defaultMessage: 'Service version',
+                })}
               >
                 <EuiBadge color="hollow">{serviceVersion}</EuiBadge>
               </EuiToolTip>
@@ -378,34 +347,35 @@ export function ErrorSampleDetailTabContent({
   error,
   currentTab,
 }: {
-  error: APMError;
+  error: {
+    service: {
+      language?: {
+        name?: string;
+      };
+    };
+    [AT_TIMESTAMP]: string;
+    error: Pick<APMError['error'], 'id' | 'log' | 'stack_trace' | 'exception'>;
+  };
   currentTab: ErrorTab;
 }) {
   const codeLanguage = error?.service.language?.name;
   const exceptions = error?.error.exception || [];
   const logStackframes = error?.error.log?.stacktrace;
   const isPlaintextException =
-    !!error?.error.stack_trace &&
-    exceptions.length === 1 &&
-    !exceptions[0].stacktrace;
+    !!error.error.stack_trace && exceptions.length === 1 && !exceptions[0].stacktrace;
   switch (currentTab.key) {
     case ErrorTabKey.LogStackTrace:
-      return (
-        <Stacktrace stackframes={logStackframes} codeLanguage={codeLanguage} />
-      );
+      return <Stacktrace stackframes={logStackframes} codeLanguage={codeLanguage} />;
     case ErrorTabKey.ExceptionStacktrace:
       return isPlaintextException ? (
         <PlaintextStacktrace
           message={exceptions[0].message}
-          type={exceptions[0].type}
+          type={exceptions[0]?.type}
           stacktrace={error?.error.stack_trace}
           codeLanguage={codeLanguage}
         />
       ) : (
-        <ExceptionStacktrace
-          codeLanguage={codeLanguage}
-          exceptions={exceptions}
-        />
+        <ExceptionStacktrace codeLanguage={codeLanguage} exceptions={exceptions} />
       );
     default:
       return <ErrorMetadata error={error} />;

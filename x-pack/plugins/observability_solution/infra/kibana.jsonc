@@ -2,6 +2,8 @@
   "type": "plugin",
   "id": "@kbn/infra-plugin",
   "owner": ["@elastic/obs-ux-logs-team", "@elastic/obs-ux-infra_services-team"],
+  "group": "observability",
+  "visibility": "private",
   "description": "This plugin visualizes data from Filebeat and Metricbeat, and integrates with other Observability solutions",
   "plugin": {
     "id": "infra",
@@ -16,6 +18,7 @@
       "data",
       "dataViews",
       "dataViewEditor",
+      "dashboard",
       "discover",
       "embeddable",
       "features",
@@ -24,7 +27,6 @@
       "logsShared",
       "metricsDataAccess",
       "observability",
-      "observabilityAIAssistant",
       "observabilityShared",
       "ruleRegistry",
       "security",
@@ -34,7 +36,9 @@
       "unifiedSearch",
       "usageCollection",
       "visTypeTimeseries",
-      "apmDataAccess"
+      "apmDataAccess",
+      "logsDataAccess",
+      "entityManager"
     ],
     "optionalPlugins": [
       "spaces",
@@ -44,6 +48,7 @@
       "osquery",
       "cloud",
       "profilingDataAccess",
+      "observabilityAIAssistant",
       "licenseManagement",
       "serverless"
     ],

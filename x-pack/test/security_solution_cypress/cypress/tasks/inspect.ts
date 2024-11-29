@@ -47,6 +47,7 @@ export const openLensVisualizationsInspectModal = (
         cy.get(LOADER_ARIA).should('not.exist');
       }
 
+      cy.wrap($el).realHover();
       cy.wrap($el).find(EMBEDDABLE_PANEL_TOGGLE_ICON).click();
       cy.get(EMBEDDABLE_PANEL_INSPECT).click();
 
@@ -57,6 +58,5 @@ export const openLensVisualizationsInspectModal = (
 };
 
 export const openTab = (tab: string) => {
-  cy.get(tab).invoke('show');
-  cy.get(tab).click({ force: true });
+  cy.get(tab).click();
 };

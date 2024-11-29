@@ -11,7 +11,7 @@ import type { RouteDependencies } from '../../../types';
 
 import { routeHandlerFactory } from './route_handler_factory';
 
-export function registerRoute({ router, license }: RouteDependencies) {
+export function registerRoute({ router, getLicense }: RouteDependencies) {
   /**
    * @apiGroup Transform Nodes
    *
@@ -27,8 +27,22 @@ export function registerRoute({ router, license }: RouteDependencies) {
     .addVersion<undefined, undefined, undefined>(
       {
         version: '1',
+        security: {
+          authz: {
+            enabled: false,
+            reason:
+              'This route is opted out from authorization because permissions will be checked by elasticsearch',
+          },
+        },
         validate: false,
       },
-      license.guardApiRoute<undefined, undefined, undefined>(routeHandlerFactory(license))
+      async (ctx, request, response) => {
+        const license = await getLicense();
+        return license.guardApiRoute<undefined, undefined, undefined>(routeHandlerFactory(license))(
+          ctx,
+          request,
+          response
+        );
+      }
     );
 }

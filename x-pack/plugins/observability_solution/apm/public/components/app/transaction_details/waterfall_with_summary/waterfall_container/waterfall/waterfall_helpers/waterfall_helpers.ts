@@ -6,8 +6,9 @@
  */
 
 import { euiPaletteColorBlind } from '@elastic/eui';
-import { first, flatten, groupBy, isEmpty, sortBy, uniq } from 'lodash';
+import { Dictionary, first, flatten, groupBy, isEmpty, sortBy, uniq } from 'lodash';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { CriticalPathSegment } from '../../../../../../../../common/critical_path/types';
 import type { APIReturnType } from '../../../../../../../services/rest/create_call_apm_api';
 import type { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
 import {
@@ -79,16 +80,11 @@ export type IWaterfallError = Omit<
   'duration' | 'legendValues' | 'spanLinksCount'
 >;
 
-export type IWaterfallTransaction = IWaterfallItemBase<
-  WaterfallTransaction,
-  'transaction'
->;
+export type IWaterfallTransaction = IWaterfallItemBase<WaterfallTransaction, 'transaction'>;
 
 export type IWaterfallSpan = IWaterfallItemBase<WaterfallSpan, 'span'>;
 
-export type IWaterfallSpanOrTransaction =
-  | IWaterfallTransaction
-  | IWaterfallSpan;
+export type IWaterfallSpanOrTransaction = IWaterfallTransaction | IWaterfallSpan;
 
 export type IWaterfallItem = IWaterfallSpanOrTransaction;
 
@@ -98,9 +94,24 @@ export interface IWaterfallLegend {
   color: string;
 }
 
-function getLegendValues(
-  transactionOrSpan: WaterfallTransaction | WaterfallSpan
-) {
+export interface IWaterfallNode {
+  id: string;
+  item: IWaterfallItem;
+  // children that are loaded
+  children: IWaterfallNode[];
+  // total number of children that needs to be loaded
+  childrenToLoad: number;
+  // collapsed or expanded state
+  expanded: boolean;
+  // level in the tree
+  level: number;
+  // flag to indicate if children are loaded
+  hasInitializedChildren: boolean;
+}
+
+export type IWaterfallNodeFlatten = Omit<IWaterfallNode, 'children'>;
+
+function getLegendValues(transactionOrSpan: WaterfallTransaction | WaterfallSpan) {
   return {
     [WaterfallLegendType.ServiceName]: transactionOrSpan.service.name,
     [WaterfallLegendType.SpanType]:
@@ -132,10 +143,7 @@ function getTransactionItem(
   };
 }
 
-function getSpanItem(
-  span: WaterfallSpan,
-  linkedChildrenCount: number = 0
-): IWaterfallSpan {
+function getSpanItem(span: WaterfallSpan, linkedChildrenCount: number = 0): IWaterfallSpan {
   return {
     docType: 'span',
     doc: span,
@@ -159,9 +167,9 @@ function getErrorItem(
   entryWaterfallTransaction?: IWaterfallTransaction
 ): IWaterfallError {
   const entryTimestamp = entryWaterfallTransaction?.doc.timestamp.us ?? 0;
-  const parent = items.find(
-    (waterfallItem) => waterfallItem.id === error.parent?.id
-  ) as IWaterfallSpanOrTransaction | undefined;
+  const parent = items.find((waterfallItem) => waterfallItem.id === error.parent?.id) as
+    | IWaterfallSpanOrTransaction
+    | undefined;
 
   const errorItem: IWaterfallError = {
     docType: 'error',
@@ -228,10 +236,7 @@ export function getOrderedWaterfallItems(
     }
     visitedWaterfallItemSet.add(item);
 
-    const children = sortBy(
-      childrenByParentId[item.id] || [],
-      'doc.timestamp.us'
-    );
+    const children = sortBy(childrenByParentId[item.id] || [], 'doc.timestamp.us');
 
     item.parent = parentItem;
     // get offset from the beginning of trace
@@ -239,9 +244,7 @@ export function getOrderedWaterfallItems(
     // move the item to the right if it starts before its parent
     item.skew = getClockSkew(item, parentItem);
 
-    const deepChildren = flatten(
-      children.map((child) => getSortedChildren(child, item))
-    );
+    const deepChildren = flatten(children.map((child) => getSortedChildren(child, item)));
     return [item, ...deepChildren];
   }
 
@@ -262,24 +265,21 @@ function getLegends(waterfallItems: IWaterfallItem[]) {
     (item) => item.docType === 'span' || item.docType === 'transaction'
   ) as IWaterfallSpanOrTransaction[];
 
-  const legends = [
-    WaterfallLegendType.ServiceName,
-    WaterfallLegendType.SpanType,
-  ].flatMap((legendType) => {
-    const allLegendValues = uniq(
-      onlyBaseSpanItems.map((item) => item.legendValues[legendType])
-    );
+  const legends = [WaterfallLegendType.ServiceName, WaterfallLegendType.SpanType].flatMap(
+    (legendType) => {
+      const allLegendValues = uniq(onlyBaseSpanItems.map((item) => item.legendValues[legendType]));
 
-    const palette = euiPaletteColorBlind({
-      rotations: Math.ceil(allLegendValues.length / 10),
-    });
+      const palette = euiPaletteColorBlind({
+        rotations: Math.ceil(allLegendValues.length / 10),
+      });
 
-    return allLegendValues.map((value, index) => ({
-      type: legendType,
-      value,
-      color: palette[index],
-    }));
-  });
+      return allLegendValues.map((value, index) => ({
+        type: legendType,
+        value,
+        color: palette[index],
+      }));
+    }
+  );
 
   return legends;
 }
@@ -287,8 +287,7 @@ function getLegends(waterfallItems: IWaterfallItem[]) {
 const getWaterfallDuration = (waterfallItems: IWaterfallItem[]) =>
   Math.max(
     ...waterfallItems.map(
-      (item) =>
-        item.offset + item.skew + ('duration' in item ? item.duration : 0)
+      (item) => item.offset + item.skew + ('duration' in item ? item.duration : 0)
     ),
     0
   );
@@ -306,10 +305,7 @@ const getWaterfallItems = (
       }
       case 'transaction':
         const transaction = item as WaterfallTransaction;
-        return getTransactionItem(
-          transaction,
-          spanLinksCountById[transaction.transaction.id]
-        );
+        return getTransactionItem(transaction, spanLinksCountById[transaction.transaction.id]);
     }
   });
 
@@ -341,9 +337,7 @@ function reparentSpans(waterfallItems: IWaterfallSpanOrTransaction[]) {
   });
 }
 
-const getChildrenGroupedByParentId = (
-  waterfallItems: IWaterfallSpanOrTransaction[]
-) =>
+const getChildrenGroupedByParentId = (waterfallItems: IWaterfallSpanOrTransaction[]) =>
   groupBy(waterfallItems, (item) => (item.parentId ? item.parentId : ROOT_ID));
 
 const getEntryWaterfallTransaction = (
@@ -380,19 +374,12 @@ function getWaterfallErrors(
   if (!entryWaterfallTransaction) {
     return errorItems;
   }
-  const parentIdLookup = [...items, ...errorItems].reduce(
-    (map, { id, parentId }) => {
-      map.set(id, parentId ?? ROOT_ID);
-      return map;
-    },
-    new Map<string, string>()
-  );
+  const parentIdLookup = [...items, ...errorItems].reduce((map, { id, parentId }) => {
+    map.set(id, parentId ?? ROOT_ID);
+    return map;
+  }, new Map<string, string>());
   return errorItems.filter((errorItem) =>
-    isInEntryTransaction(
-      parentIdLookup,
-      entryWaterfallTransaction?.id,
-      errorItem.id
-    )
+    isInEntryTransaction(parentIdLookup, entryWaterfallTransaction?.id, errorItem.id)
   );
 }
 
@@ -400,9 +387,7 @@ function getWaterfallErrors(
 /*
   { 'parentId': 2 }
   */
-function getErrorCountByParentId(
-  errorDocs: TraceAPIResponse['traceItems']['errorDocs']
-) {
+function getErrorCountByParentId(errorDocs: TraceAPIResponse['traceItems']['errorDocs']) {
   return errorDocs.reduce<Record<string, number>>((acc, doc) => {
     const parentId = doc.parent?.id;
 
@@ -461,27 +446,17 @@ export function getWaterfall(apiResponse: TraceAPIResponse): IWaterfall {
     traceItems.spanLinksCountById
   );
 
-  const childrenByParentId = getChildrenGroupedByParentId(
-    reparentSpans(waterfallItems)
-  );
+  const childrenByParentId = getChildrenGroupedByParentId(reparentSpans(waterfallItems));
 
   const entryWaterfallTransaction = getEntryWaterfallTransaction(
     entryTransaction.transaction.id,
     waterfallItems
   );
 
-  const items = getOrderedWaterfallItems(
-    childrenByParentId,
-    entryWaterfallTransaction
-  );
-  const errorItems = getWaterfallErrors(
-    traceItems.errorDocs,
-    items,
-    entryWaterfallTransaction
-  );
+  const items = getOrderedWaterfallItems(childrenByParentId, entryWaterfallTransaction);
+  const errorItems = getWaterfallErrors(traceItems.errorDocs, items, entryWaterfallTransaction);
 
-  const rootWaterfallTransaction =
-    getRootWaterfallTransaction(childrenByParentId);
+  const rootWaterfallTransaction = getRootWaterfallTransaction(childrenByParentId);
 
   const duration = getWaterfallDuration(items);
   const legends = getLegends(items);
@@ -505,3 +480,186 @@ export function getWaterfall(apiResponse: TraceAPIResponse): IWaterfall {
     orphanTraceItemsCount,
   };
 }
+
+function getChildren({
+  path,
+  waterfall,
+  waterfallItemId,
+}: {
+  waterfallItemId: string;
+  waterfall: IWaterfall;
+  path: {
+    criticalPathSegmentsById: Dictionary<CriticalPathSegment[]>;
+    showCriticalPath: boolean;
+  };
+}) {
+  const children = waterfall.childrenByParentId[waterfallItemId] ?? [];
+  return path.showCriticalPath
+    ? children.filter((child) => path.criticalPathSegmentsById[child.id]?.length)
+    : children;
+}
+
+function buildTree({
+  root,
+  waterfall,
+  maxLevelOpen,
+  path,
+}: {
+  root: IWaterfallNode;
+  waterfall: IWaterfall;
+  maxLevelOpen: number;
+  path: {
+    criticalPathSegmentsById: Dictionary<CriticalPathSegment[]>;
+    showCriticalPath: boolean;
+  };
+}) {
+  const tree = { ...root };
+  const queue: IWaterfallNode[] = [tree];
+
+  for (let queueIndex = 0; queueIndex < queue.length; queueIndex++) {
+    const node = queue[queueIndex];
+
+    const children = getChildren({ path, waterfall, waterfallItemId: node.item.id });
+
+    // Set childrenToLoad for all nodes enqueued.
+    // this allows lazy loading of child nodes
+    node.childrenToLoad = children.length;
+
+    if (maxLevelOpen > node.level) {
+      children.forEach((child, index) => {
+        const level = node.level + 1;
+
+        const currentNode: IWaterfallNode = {
+          id: `${level}-${child.id}-${index}`,
+          item: child,
+          children: [],
+          level,
+          expanded: level < maxLevelOpen,
+          childrenToLoad: 0,
+          hasInitializedChildren: false,
+        };
+
+        node.children.push(currentNode);
+        queue.push(currentNode);
+      });
+
+      node.hasInitializedChildren = true;
+    }
+  }
+
+  return tree;
+}
+
+export function buildTraceTree({
+  waterfall,
+  maxLevelOpen,
+  isOpen,
+  path,
+}: {
+  waterfall: IWaterfall;
+  maxLevelOpen: number;
+  isOpen: boolean;
+  path: {
+    criticalPathSegmentsById: Dictionary<CriticalPathSegment[]>;
+    showCriticalPath: boolean;
+  };
+}): IWaterfallNode | null {
+  const entry = waterfall.entryWaterfallTransaction;
+  if (!entry) {
+    return null;
+  }
+
+  const root: IWaterfallNode = {
+    id: entry.id,
+    item: entry,
+    children: [],
+    level: 0,
+    expanded: isOpen,
+    childrenToLoad: 0,
+    hasInitializedChildren: false,
+  };
+
+  return buildTree({ root, maxLevelOpen, waterfall, path });
+}
+
+export const convertTreeToList = (root: IWaterfallNode | null): IWaterfallNodeFlatten[] => {
+  if (!root) {
+    return [];
+  }
+
+  const result: IWaterfallNodeFlatten[] = [];
+  const stack: IWaterfallNode[] = [root];
+
+  while (stack.length > 0) {
+    const node = stack.pop()!;
+
+    const { children, ...nodeWithoutChildren } = node;
+    result.push(nodeWithoutChildren);
+
+    if (node.expanded) {
+      for (let i = node.children.length - 1; i >= 0; i--) {
+        stack.push(node.children[i]);
+      }
+    }
+  }
+
+  return result;
+};
+
+export const updateTraceTreeNode = ({
+  root,
+  updatedNode,
+  waterfall,
+  path,
+}: {
+  root: IWaterfallNode;
+  updatedNode: IWaterfallNodeFlatten;
+  waterfall: IWaterfall;
+  path: {
+    criticalPathSegmentsById: Dictionary<CriticalPathSegment[]>;
+    showCriticalPath: boolean;
+  };
+}) => {
+  if (!root) {
+    return;
+  }
+
+  const tree = { ...root };
+  const stack: Array<{ parent: IWaterfallNode | null; index: number; node: IWaterfallNode }> = [
+    { parent: null, index: 0, node: root },
+  ];
+
+  while (stack.length > 0) {
+    const { parent, index, node } = stack.pop()!;
+
+    if (node.id === updatedNode.id) {
+      Object.assign(node, updatedNode);
+
+      if (updatedNode.expanded && !updatedNode.hasInitializedChildren) {
+        Object.assign(
+          node,
+          buildTree({
+            root: node,
+            waterfall,
+            maxLevelOpen: node.level + 1, // Only one level above the current node will be loaded
+            path,
+          })
+        );
+      }
+
+      if (parent) {
+        parent.children[index] = node;
+      } else {
+        Object.assign(tree, node);
+      }
+
+      return tree;
+    }
+
+    for (let i = node.children.length - 1; i >= 0; i--) {
+      stack.push({ parent: node, index: i, node: node.children[i] });
+    }
+  }
+
+  return tree;
+};

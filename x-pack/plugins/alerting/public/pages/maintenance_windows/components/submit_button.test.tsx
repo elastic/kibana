@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { fireEvent, waitFor } from '@testing-library/react';
 
 import { useForm, Form } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
@@ -17,7 +17,7 @@ import { AppMockRenderer, createAppMockRenderer } from '../../../lib/test_utils'
 describe('SubmitButton', () => {
   const onSubmit = jest.fn();
 
-  const MockHookWrapperComponent: React.FC = ({ children }) => {
+  const MockHookWrapperComponent: FC<PropsWithChildren<unknown>> = ({ children }) => {
     const { form } = useForm<FormProps>({
       defaultValue: { title: 'title' },
       schema: {

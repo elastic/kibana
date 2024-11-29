@@ -31,8 +31,7 @@ const serviceNodeName = 'opbeans-java-prod-1';
 
 const apisToIntercept = [
   {
-    endpoint:
-      '/internal/apm/services/opbeans-java/service_overview_instances/main_statistics?*',
+    endpoint: '/internal/apm/services/opbeans-java/service_overview_instances/main_statistics?*',
     name: 'instancesMainRequest',
   },
   {
@@ -63,9 +62,7 @@ describe('Instances table', () => {
     it('shows empty message', () => {
       cy.visitKibana(testServiveHref);
       cy.contains('test-service');
-      cy.getByTestSubj('serviceInstancesTableContainer').contains(
-        'No instances found'
-      );
+      cy.getByTestSubj('serviceInstancesTableContainer').contains('No instances found');
     });
   });
 

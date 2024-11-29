@@ -96,13 +96,37 @@ All columns that belong to the same layer pane group are sorted in the table.
 
 * *Text alignment* &mdash; Aligns the values in the cell to the *Left*, *Center*, or *Right*.
 
+* *Color by value* &mdash; Applies color to the cell or text values. To change the color, click the *Edit colors* icon. 
+
 * *Hide column* &mdash; Hides the column for the field.
 
 * *Directly filter on click* &mdash; Turns column values into clickable links that allow you to filter or drill down into the data.
 
 * *Summary row* &mdash; Adds a row that displays the summary value. When specified, allows you to enter a *Summary label*.
 
-* *Color by value* &mdash; Applies color to the cell or text values. To change the color, click *Edit*. 
+[float]
+[[assign-colors-to-terms]]
+===== Assign colors to terms
+
+preview::[]
+
+For term-based metrics, assign a color to each term with color mapping. 
+
+. Create a custom table.
+ 
+. In the layer pane, select a *Rows* or *Metrics* field. 
+
+. In the *Color by value* option, select *Cell* or *Text*.
+
+. Click the *Edit colors* icon.
+
+. Toggle the button to use the Color Mapping feature.
+
+. Select a color palette and mode.
+
+. Click *Add assignment* to assign a color to a specific term, or click *Add all unassigned terms* to assign colors to all terms. Assigning colors to dates is unsupported.
+
+. Configure color assignments. You can also select whether unassigned terms should be mapped to the selected color palette or a single color. 
 
 [float]
 [[drag-and-drop-keyboard-navigation]]
@@ -361,13 +385,69 @@ The following component menus are available:
 
 * *Labels* &mdash; Specifies how to display the labels for donut charts, pie charts, and treemaps. 
 
-* *Legend* &mdash; Specifies how to display the legend. For example, you can display the legend inside the visualization and truncate the legend values.
+* *Legend* &mdash; Specifies how to display the legend. You can choose to display the legend inside or outside the visualization, truncate the legend values when they're too long, and <<customize-visualization-legend,select additional statistics to show>>.
 
 * *Left axis*, *Bottom axis*, and *Right axis* &mdash; Specify how you want to display the chart axes. For example, add axis labels and change the orientation and bounds.
 
 [float]
+[[customize-visualization-legend]]
+===== Customize a visualization legend
+
+When creating or editing a visualization, you can customize the way the legend gets displayed, and the data it displays. To do that, look for the image:images/legend-icon.svg[Legend icon] icon.
+
+image::images/legend-popover-8.16.0.png[Menu with options to customize the legend of a visualization, width=50%]
+
+NOTE: The options available can vary based on the type of chart you're setting up. For example, showing additional statistics is only possible for time series charts.
+
+**Change the legend's display**
+
+With the **Visibility**, **Position**, and **Width** options, you can adjust the way the legend appears in or next to the visualization.
+
+**Truncate long labels**
+
+With the **Label truncation** option, you can keep your legend minimal in case of long labels that span over multiple lines.
+
+**Show additional statistics for time series charts**
+
+To make your legends as informative as possible, you can show some additional **Statistics** for charts with a timestamp on one of the axes, and add a **Series header**.
+
+**Bar**, **Line** and **Area** charts can show the following values:
+
+- **Average**: Average value considering all data points in the chart
+- **Median**: Median value considering all data points in the chart
+- **Minimum**: Minimum value considering all data points in the chart
+- **Maximum**: Maximum value considering all data points in the chart
+- **Range**: Difference between min and max values
+- **Last value**: Last value considering all data points in the chart
+- **Last non-null value:** Last non-null value
+- **First value**: First value considering all data points in the chart
+- **First non-null value**: First non-null value
+- **Difference**: Difference between first and last values
+- **Difference %**: % difference between first and last values
+- **Sum**: Sum of al values plotted in the chart
+- **Count**: number of data points plotted in the chart
+- **Distinct Count**: number of data points with different values plotted in the chart
+- **Variance**: Variance of all data points plotted in the chart
+- **Std Deviation**: Standard deviation of all data points plotted in the chart
+- **Current or last value**: The exact value of the current or last data point moused over
+
+
+//Not part of release
+//**Pie** charts can only show two static options:
+//- **Value**
+//- **Percentage**
+
+All statistics are computed based on the selected time range and the aggregated data points shown in the chart, rather than the original data coming from {es}. 
+
+For example, if the metric plotted in the chart is `Median(system.memory)` and the time range is *last 24 hours*, when you show the **Max** statistic in the Legend, the value that shows corresponds to the `Max[Median(system.memory)]` for the last 24 hours.
+
+image::images/statistics-in-legends.png[Additional statistics shown in the legend of a memory consumption bar chart]
+
+
+
+[float]
 [[explore-lens-data-in-discover]]
-=== Explore the data in Discover
+==== Explore the data in Discover
 
 When your visualization includes one data view, you can open and explore the visualization data in *Discover*.
 

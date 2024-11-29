@@ -22,54 +22,59 @@ export interface Margins {
   left: number;
 }
 
-interface TimelineProps {
+export interface TimelineProps {
   marks?: Mark[];
   xMin?: number;
   xMax?: number;
-  height: number;
   margins: Margins;
-  width?: number;
 }
 
-function TimeLineContainer({
-  width,
-  xMin,
-  xMax,
-  height,
-  marks,
-  margins,
-}: TimelineProps) {
-  if (xMax == null || !width) {
+export function TimelineAxisContainer({ xMax, xMin, margins, marks }: TimelineProps) {
+  const [width, setWidth] = useState(0);
+  if (xMax === undefined) {
     return null;
   }
-  const plotValues = getPlotValues({ width, xMin, xMax, height, margins });
-  const topTraceDuration = xMax - (xMin ?? 0);
 
   return (
-    <>
-      <TimelineAxis
-        plotValues={plotValues}
-        marks={marks}
-        topTraceDuration={topTraceDuration}
-      />
-      <VerticalLines
-        plotValues={plotValues}
-        marks={marks}
-        topTraceDuration={topTraceDuration}
-      />
-    </>
+    <EuiResizeObserver onResize={(size) => setWidth(size.width)}>
+      {(resizeRef) => {
+        const plotValues = getPlotValues({ width, xMin, xMax, margins });
+        const topTraceDuration = xMax - (xMin ?? 0);
+        return (
+          <div style={{ width: '100%', height: '100%' }} ref={resizeRef}>
+            <TimelineAxis
+              plotValues={plotValues}
+              marks={marks}
+              topTraceDuration={topTraceDuration}
+            />
+          </div>
+        );
+      }}
+    </EuiResizeObserver>
   );
 }
 
-export function Timeline(props: TimelineProps) {
+export function VerticalLinesContainer({ xMax, xMin, margins, marks }: TimelineProps) {
   const [width, setWidth] = useState(0);
+  if (xMax == null) {
+    return null;
+  }
+
   return (
     <EuiResizeObserver onResize={(size) => setWidth(size.width)}>
-      {(resizeRef) => (
-        <div style={{ width: '100%', height: '100%' }} ref={resizeRef}>
-          <TimeLineContainer {...props} width={width} />
-        </div>
-      )}
+      {(resizeRef) => {
+        const plotValues = getPlotValues({ width, xMin, xMax, margins });
+        const topTraceDuration = xMax - (xMin ?? 0);
+        return (
+          <div style={{ width: '100%', height: '100%' }} ref={resizeRef}>
+            <VerticalLines
+              plotValues={plotValues}
+              marks={marks}
+              topTraceDuration={topTraceDuration}
+            />
+          </div>
+        );
+      }}
     </EuiResizeObserver>
   );
 }

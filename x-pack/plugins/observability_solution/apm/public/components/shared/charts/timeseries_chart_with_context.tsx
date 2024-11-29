@@ -66,11 +66,7 @@ export function TimeseriesChartWithContext({
 }: TimeseriesChartWithContextProps) {
   const {
     query: { comparisonEnabled, offset },
-  } = useAnyOfApmParams(
-    '/services',
-    '/dependencies/*',
-    '/services/{serviceName}'
-  );
+  } = useAnyOfApmParams('/services', '/dependencies/*', '/services/{serviceName}');
   const { core } = useApmPluginContext();
   const timeZone = getTimeZone(core.uiSettings);
   const theme = useTheme();

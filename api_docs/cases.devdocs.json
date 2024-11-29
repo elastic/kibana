@@ -49,17 +49,17 @@
           "<T extends ",
           {
             "pluginId": "@kbn/core-application-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreApplicationBrowserPluginApi",
-            "section": "def-common.AppDeepLink",
+            "section": "def-public.AppDeepLink",
             "text": "AppDeepLink"
           },
           "<string> = ",
           {
             "pluginId": "@kbn/core-application-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreApplicationBrowserPluginApi",
-            "section": "def-common.AppDeepLink",
+            "section": "def-public.AppDeepLink",
             "text": "AppDeepLink"
           },
           "<string>>({ basePath, extend, }: { basePath?: string | undefined; extend?: Partial<Record<",
@@ -345,7 +345,15 @@
             "section": "def-common.ConnectorTypes",
             "text": "ConnectorTypes"
           },
-          ".swimlane; fields: { caseId: string | null; } | null; } & { name: string; })); settings: { syncAlerts: boolean; }; owner: string; } & { assignees?: { uid: string; }[] | undefined; severity?: ",
+          ".swimlane; fields: { caseId: string | null; } | null; } & { name: string; }) | ({ type: ",
+          {
+            "pluginId": "cases",
+            "scope": "common",
+            "docId": "kibCasesPluginApi",
+            "section": "def-common.ConnectorTypes",
+            "text": "ConnectorTypes"
+          },
+          ".theHive; fields: { tlp: number | null; } | null; } & { name: string; })); settings: { syncAlerts: boolean; }; owner: string; } & { assignees?: { uid: string; }[] | undefined; severity?: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -357,7 +365,9 @@
           "CustomFieldTypes",
           ".TOGGLE; value: boolean | null; } | { key: string; type: ",
           "CustomFieldTypes",
-          ".TEXT; value: string | null; })[] | undefined; }, \"title\" | \"description\"> | undefined; }"
+          ".TEXT; value: string | null; } | { key: string; type: ",
+          "CustomFieldTypes",
+          ".NUMBER; value: number | null; })[] | undefined; }, \"title\" | \"description\"> | undefined; }"
         ],
         "path": "x-pack/plugins/cases/public/client/ui/get_create_case_flyout.tsx",
         "deprecated": false,
@@ -483,7 +493,7 @@
               "section": "def-common.CaseSeverity",
               "text": "CaseSeverity"
             },
-            "[] | undefined; assignees?: string | string[] | undefined; reporters?: string | string[] | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; from?: string | undefined; search?: string | undefined; searchFields?: \"title\" | \"description\" | (\"title\" | \"description\")[] | undefined; sortField?: \"title\" | \"createdAt\" | \"updatedAt\" | \"category\" | \"status\" | \"severity\" | \"closedAt\" | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; to?: string | undefined; owner?: string | string[] | undefined; category?: string | string[] | undefined; } & Partial<",
+            "[] | undefined; assignees?: string | string[] | undefined; reporters?: string | string[] | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; from?: string | undefined; search?: string | undefined; searchFields?: \"title\" | \"description\" | (\"title\" | \"description\")[] | undefined; sortField?: \"title\" | \"createdAt\" | \"updatedAt\" | \"status\" | \"severity\" | \"category\" | \"closedAt\" | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; to?: string | undefined; owner?: string | string[] | undefined; category?: string | string[] | undefined; } & Partial<",
             "Pagination",
             ">, signal?: AbortSignal | undefined) => Promise<",
             {
@@ -493,7 +503,7 @@
               "section": "def-common.CasesFindResponseUI",
               "text": "CasesFindResponseUI"
             },
-            ">; getCasesStatus: (query: { from?: string | undefined; to?: string | undefined; owner?: string | string[] | undefined; }, signal?: AbortSignal | undefined) => Promise<{ countOpenCases: number; countInProgressCases: number; countClosedCases: number; }>; getCasesMetrics: (query: { features: ",
+            ">; getCasesMetrics: (query: { features: ",
             {
               "pluginId": "cases",
               "scope": "common",
@@ -501,15 +511,7 @@
               "section": "def-common.CaseMetricsFeature",
               "text": "CaseMetricsFeature"
             },
-            "[]; } & { from?: string | undefined; to?: string | undefined; owner?: string | string[] | undefined; }, signal?: AbortSignal | undefined) => Promise<{ mttr?: number | null | undefined; }>; bulkGet: (params: { ids: string[]; }, signal?: AbortSignal | undefined) => Promise<{ cases: ({ description: string; status: ",
-            {
-              "pluginId": "@kbn/cases-components",
-              "scope": "common",
-              "docId": "kibKbnCasesComponentsPluginApi",
-              "section": "def-common.CaseStatuses",
-              "text": "CaseStatuses"
-            },
-            "; tags: string[]; title: string; connector: { id: string; } & (({ type: ",
+            "[]; } & { from?: string | undefined; to?: string | undefined; owner?: string | string[] | undefined; }, signal?: AbortSignal | undefined) => Promise<{ mttr?: number | null | undefined; status?: { open: number; inProgress: number; closed: number; } | undefined; }>; bulkGet: (params: { ids: string[]; }, signal?: AbortSignal | undefined) => Promise<{ cases: ({ description: string; tags: string[]; title: string; connector: { id: string; } & (({ type: ",
             {
               "pluginId": "cases",
               "scope": "common",
@@ -565,7 +567,15 @@
               "section": "def-common.ConnectorTypes",
               "text": "ConnectorTypes"
             },
-            ".swimlane; fields: { caseId: string | null; } | null; } & { name: string; })); settings: { syncAlerts: boolean; }; owner: string; severity: ",
+            ".swimlane; fields: { caseId: string | null; } | null; } & { name: string; }) | ({ type: ",
+            {
+              "pluginId": "cases",
+              "scope": "common",
+              "docId": "kibCasesPluginApi",
+              "section": "def-common.ConnectorTypes",
+              "text": "ConnectorTypes"
+            },
+            ".theHive; fields: { tlp: number | null; } | null; } & { name: string; })); severity: ",
             {
               "pluginId": "cases",
               "scope": "common",
@@ -577,7 +587,17 @@
             "CustomFieldTypes",
             ".TEXT; value: string | null; } | { key: string; type: ",
             "CustomFieldTypes",
-            ".TOGGLE; value: boolean | null; })[]; } & { duration: number | null; closed_at: string | null; closed_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }; external_service: ({ connector_id: string; } & { connector_name: string; external_id: string; external_title: string; external_url: string; pushed_at: string; pushed_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }; }) | null; updated_at: string | null; updated_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; } & { id: string; totalComment: number; totalAlerts: number; version: string; } & { comments?: ((({ comment: string; type: ",
+            ".TOGGLE; value: boolean | null; } | { key: string; type: ",
+            "CustomFieldTypes",
+            ".NUMBER; value: number | null; })[]; settings: { syncAlerts: boolean; }; status: ",
+            {
+              "pluginId": "@kbn/cases-components",
+              "scope": "common",
+              "docId": "kibKbnCasesComponentsPluginApi",
+              "section": "def-common.CaseStatuses",
+              "text": "CaseStatuses"
+            },
+            "; owner: string; } & { duration: number | null; closed_at: string | null; closed_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }; external_service: ({ connector_id: string; } & { connector_name: string; external_id: string; external_title: string; external_url: string; pushed_at: string; pushed_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }; }) | null; updated_at: string | null; updated_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; } & { id: string; totalComment: number; totalAlerts: number; version: string; } & { comments?: ((({ comment: string; type: ",
             {
               "pluginId": "cases",
               "scope": "common",
@@ -683,9 +703,9 @@
             "GetCasesProps",
             ") => React.ReactElement<",
             "GetCasesProps",
-            ", string | React.JSXElementConstructor<any>>; getCasesContext: () => React.FC<",
+            ", string | React.JSXElementConstructor<any>>; getCasesContext: () => React.FC<React.PropsWithChildren<",
             "GetCasesContextProps",
-            ">; getAllCasesSelectorModal: (props: ",
+            ">>; getAllCasesSelectorModal: (props: ",
             {
               "pluginId": "cases",
               "scope": "public",
@@ -757,7 +777,9 @@
               "section": "def-public.CaseAttachmentsWithoutOwner",
               "text": "CaseAttachmentsWithoutOwner"
             },
-            ") | undefined; }) => void; close: () => void; }; }"
+            ") | undefined; }) => void; close: () => void; }; useIsAddToCaseOpen: ",
+            "UseIsAddToCaseOpen",
+            "; }"
           ],
           "path": "x-pack/plugins/cases/public/types.ts",
           "deprecated": false,
@@ -1022,9 +1044,9 @@
             "(request: ",
             {
               "pluginId": "@kbn/core-http-server",
-              "scope": "common",
+              "scope": "server",
               "docId": "kibKbnCoreHttpServerPluginApi",
-              "section": "def-common.KibanaRequest",
+              "section": "def-server.KibanaRequest",
               "text": "KibanaRequest"
             },
             "<unknown, unknown, unknown, any>) => Promise<",
@@ -1053,9 +1075,9 @@
               "signature": [
                 {
                   "pluginId": "@kbn/core-http-server",
-                  "scope": "common",
+                  "scope": "server",
                   "docId": "kibKbnCoreHttpServerPluginApi",
-                  "section": "def-common.KibanaRequest",
+                  "section": "def-server.KibanaRequest",
                   "text": "KibanaRequest"
                 },
                 "<unknown, unknown, unknown, any>"
@@ -1333,6 +1355,20 @@
             "path": "x-pack/plugins/cases/common/utils/api_tags.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cases",
+            "id": "def-common.CasesApiTags.createComment",
+            "type": "Object",
+            "tags": [],
+            "label": "createComment",
+            "description": [],
+            "signature": [
+              "readonly string[]"
+            ],
+            "path": "x-pack/plugins/cases/common/utils/api_tags.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1420,6 +1456,28 @@
             "type": "boolean",
             "tags": [],
             "label": "[CASES_SETTINGS_CAPABILITY]",
+            "description": [],
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cases",
+            "id": "def-common.CasesCapabilities.CREATE_COMMENT_CAPABILITY",
+            "type": "boolean",
+            "tags": [],
+            "label": "[CREATE_COMMENT_CAPABILITY]",
+            "description": [],
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cases",
+            "id": "def-common.CasesCapabilities.CASES_REOPEN_CAPABILITY",
+            "type": "boolean",
+            "tags": [],
+            "label": "[CASES_REOPEN_CAPABILITY]",
             "description": [],
             "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false,
@@ -1526,6 +1584,28 @@
             "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cases",
+            "id": "def-common.CasesPermissions.reopenCase",
+            "type": "boolean",
+            "tags": [],
+            "label": "reopenCase",
+            "description": [],
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cases",
+            "id": "def-common.CasesPermissions.createComment",
+            "type": "boolean",
+            "tags": [],
+            "label": "createComment",
+            "description": [],
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1589,6 +1669,34 @@
             "type": "Object",
             "tags": [],
             "label": "settings",
+            "description": [],
+            "signature": [
+              "readonly string[]"
+            ],
+            "path": "x-pack/plugins/cases/common/utils/capabilities.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cases",
+            "id": "def-common.CasesUiCapabilities.reopenCase",
+            "type": "Object",
+            "tags": [],
+            "label": "reopenCase",
+            "description": [],
+            "signature": [
+              "readonly string[]"
+            ],
+            "path": "x-pack/plugins/cases/common/utils/capabilities.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cases",
+            "id": "def-common.CasesUiCapabilities.createComment",
+            "type": "Object",
+            "tags": [],
+            "label": "createComment",
             "description": [],
             "signature": [
               "readonly string[]"
@@ -1868,15 +1976,7 @@
         "label": "Case",
         "description": [],
         "signature": [
-          "{ description: string; status: ",
-          {
-            "pluginId": "@kbn/cases-components",
-            "scope": "common",
-            "docId": "kibKbnCasesComponentsPluginApi",
-            "section": "def-common.CaseStatuses",
-            "text": "CaseStatuses"
-          },
-          "; tags: string[]; title: string; connector: { id: string; } & (({ type: ",
+          "{ description: string; tags: string[]; title: string; connector: { id: string; } & (({ type: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -1932,7 +2032,15 @@
             "section": "def-common.ConnectorTypes",
             "text": "ConnectorTypes"
           },
-          ".swimlane; fields: { caseId: string | null; } | null; } & { name: string; })); settings: { syncAlerts: boolean; }; owner: string; severity: ",
+          ".swimlane; fields: { caseId: string | null; } | null; } & { name: string; }) | ({ type: ",
+          {
+            "pluginId": "cases",
+            "scope": "common",
+            "docId": "kibCasesPluginApi",
+            "section": "def-common.ConnectorTypes",
+            "text": "ConnectorTypes"
+          },
+          ".theHive; fields: { tlp: number | null; } | null; } & { name: string; })); severity: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -1944,7 +2052,17 @@
           "CustomFieldTypes",
           ".TEXT; value: string | null; } | { key: string; type: ",
           "CustomFieldTypes",
-          ".TOGGLE; value: boolean | null; })[]; } & { duration: number | null; closed_at: string | null; closed_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }; external_service: ({ connector_id: string; } & { connector_name: string; external_id: string; external_title: string; external_url: string; pushed_at: string; pushed_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }; }) | null; updated_at: string | null; updated_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; } & { id: string; totalComment: number; totalAlerts: number; version: string; } & { comments?: ((({ comment: string; type: ",
+          ".TOGGLE; value: boolean | null; } | { key: string; type: ",
+          "CustomFieldTypes",
+          ".NUMBER; value: number | null; })[]; settings: { syncAlerts: boolean; }; status: ",
+          {
+            "pluginId": "@kbn/cases-components",
+            "scope": "common",
+            "docId": "kibKbnCasesComponentsPluginApi",
+            "section": "def-common.CaseStatuses",
+            "text": "CaseStatuses"
+          },
+          "; owner: string; } & { duration: number | null; closed_at: string | null; closed_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }; external_service: ({ connector_id: string; } & { connector_name: string; external_id: string; external_title: string; external_url: string; pushed_at: string; pushed_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }; }) | null; updated_at: string | null; updated_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; } & { id: string; totalComment: number; totalAlerts: number; version: string; } & { comments?: ((({ comment: string; type: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -2056,6 +2174,107 @@
       },
       {
         "parentPluginId": "cases",
+        "id": "def-common.CasePatchRequest",
+        "type": "Type",
+        "tags": [],
+        "label": "CasePatchRequest",
+        "description": [],
+        "signature": [
+          "{ description?: string | undefined; tags?: string[] | undefined; title?: string | undefined; connector?: ({ id: string; } & (({ type: ",
+          {
+            "pluginId": "cases",
+            "scope": "common",
+            "docId": "kibCasesPluginApi",
+            "section": "def-common.ConnectorTypes",
+            "text": "ConnectorTypes"
+          },
+          ".casesWebhook; fields: null; } & { name: string; }) | ({ type: ",
+          {
+            "pluginId": "cases",
+            "scope": "common",
+            "docId": "kibCasesPluginApi",
+            "section": "def-common.ConnectorTypes",
+            "text": "ConnectorTypes"
+          },
+          ".jira; fields: { issueType: string | null; priority: string | null; parent: string | null; } | null; } & { name: string; }) | ({ type: ",
+          {
+            "pluginId": "cases",
+            "scope": "common",
+            "docId": "kibCasesPluginApi",
+            "section": "def-common.ConnectorTypes",
+            "text": "ConnectorTypes"
+          },
+          ".none; fields: null; } & { name: string; }) | ({ type: ",
+          {
+            "pluginId": "cases",
+            "scope": "common",
+            "docId": "kibCasesPluginApi",
+            "section": "def-common.ConnectorTypes",
+            "text": "ConnectorTypes"
+          },
+          ".resilient; fields: { incidentTypes: string[] | null; severityCode: string | null; } | null; } & { name: string; }) | ({ type: ",
+          {
+            "pluginId": "cases",
+            "scope": "common",
+            "docId": "kibCasesPluginApi",
+            "section": "def-common.ConnectorTypes",
+            "text": "ConnectorTypes"
+          },
+          ".serviceNowITSM; fields: { impact: string | null; severity: string | null; urgency: string | null; category: string | null; subcategory: string | null; } | null; } & { name: string; }) | ({ type: ",
+          {
+            "pluginId": "cases",
+            "scope": "common",
+            "docId": "kibCasesPluginApi",
+            "section": "def-common.ConnectorTypes",
+            "text": "ConnectorTypes"
+          },
+          ".serviceNowSIR; fields: { category: string | null; destIp: boolean | null; malwareHash: boolean | null; malwareUrl: boolean | null; priority: string | null; sourceIp: boolean | null; subcategory: string | null; } | null; } & { name: string; }) | ({ type: ",
+          {
+            "pluginId": "cases",
+            "scope": "common",
+            "docId": "kibCasesPluginApi",
+            "section": "def-common.ConnectorTypes",
+            "text": "ConnectorTypes"
+          },
+          ".swimlane; fields: { caseId: string | null; } | null; } & { name: string; }) | ({ type: ",
+          {
+            "pluginId": "cases",
+            "scope": "common",
+            "docId": "kibCasesPluginApi",
+            "section": "def-common.ConnectorTypes",
+            "text": "ConnectorTypes"
+          },
+          ".theHive; fields: { tlp: number | null; } | null; } & { name: string; }))) | undefined; severity?: ",
+          {
+            "pluginId": "cases",
+            "scope": "common",
+            "docId": "kibCasesPluginApi",
+            "section": "def-common.CaseSeverity",
+            "text": "CaseSeverity"
+          },
+          " | undefined; assignees?: { uid: string; }[] | undefined; category?: string | null | undefined; customFields?: ({ key: string; type: ",
+          "CustomFieldTypes",
+          ".TOGGLE; value: boolean | null; } | { key: string; type: ",
+          "CustomFieldTypes",
+          ".TEXT; value: string | null; } | { key: string; type: ",
+          "CustomFieldTypes",
+          ".NUMBER; value: number | null; })[] | undefined; settings?: { syncAlerts: boolean; } | undefined; } & { status?: ",
+          {
+            "pluginId": "@kbn/cases-components",
+            "scope": "common",
+            "docId": "kibKbnCasesComponentsPluginApi",
+            "section": "def-common.CaseStatuses",
+            "text": "CaseStatuses"
+          },
+          " | undefined; owner?: string | undefined; } & { id: string; version: string; }"
+        ],
+        "path": "x-pack/plugins/cases/common/types/api/case/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cases",
         "id": "def-common.CasePostRequest",
         "type": "Type",
         "tags": [],
@@ -2118,7 +2337,15 @@
             "section": "def-common.ConnectorTypes",
             "text": "ConnectorTypes"
           },
-          ".swimlane; fields: { caseId: string | null; } | null; } & { name: string; })); settings: { syncAlerts: boolean; }; owner: string; } & { assignees?: { uid: string; }[] | undefined; severity?: ",
+          ".swimlane; fields: { caseId: string | null; } | null; } & { name: string; }) | ({ type: ",
+          {
+            "pluginId": "cases",
+            "scope": "common",
+            "docId": "kibCasesPluginApi",
+            "section": "def-common.ConnectorTypes",
+            "text": "ConnectorTypes"
+          },
+          ".theHive; fields: { tlp: number | null; } | null; } & { name: string; })); settings: { syncAlerts: boolean; }; owner: string; } & { assignees?: { uid: string; }[] | undefined; severity?: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -2130,7 +2357,9 @@
           "CustomFieldTypes",
           ".TOGGLE; value: boolean | null; } | { key: string; type: ",
           "CustomFieldTypes",
-          ".TEXT; value: string | null; })[] | undefined; }"
+          ".TEXT; value: string | null; } | { key: string; type: ",
+          "CustomFieldTypes",
+          ".NUMBER; value: number | null; })[] | undefined; }"
         ],
         "path": "x-pack/plugins/cases/common/types/api/case/v1.ts",
         "deprecated": false,
@@ -2145,15 +2374,7 @@
         "label": "Cases",
         "description": [],
         "signature": [
-          "({ description: string; status: ",
-          {
-            "pluginId": "@kbn/cases-components",
-            "scope": "common",
-            "docId": "kibKbnCasesComponentsPluginApi",
-            "section": "def-common.CaseStatuses",
-            "text": "CaseStatuses"
-          },
-          "; tags: string[]; title: string; connector: { id: string; } & (({ type: ",
+          "({ description: string; tags: string[]; title: string; connector: { id: string; } & (({ type: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -2209,7 +2430,15 @@
             "section": "def-common.ConnectorTypes",
             "text": "ConnectorTypes"
           },
-          ".swimlane; fields: { caseId: string | null; } | null; } & { name: string; })); settings: { syncAlerts: boolean; }; owner: string; severity: ",
+          ".swimlane; fields: { caseId: string | null; } | null; } & { name: string; }) | ({ type: ",
+          {
+            "pluginId": "cases",
+            "scope": "common",
+            "docId": "kibCasesPluginApi",
+            "section": "def-common.ConnectorTypes",
+            "text": "ConnectorTypes"
+          },
+          ".theHive; fields: { tlp: number | null; } | null; } & { name: string; })); severity: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -2221,7 +2450,17 @@
           "CustomFieldTypes",
           ".TEXT; value: string | null; } | { key: string; type: ",
           "CustomFieldTypes",
-          ".TOGGLE; value: boolean | null; })[]; } & { duration: number | null; closed_at: string | null; closed_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }; external_service: ({ connector_id: string; } & { connector_name: string; external_id: string; external_title: string; external_url: string; pushed_at: string; pushed_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }; }) | null; updated_at: string | null; updated_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; } & { id: string; totalComment: number; totalAlerts: number; version: string; } & { comments?: ((({ comment: string; type: ",
+          ".TOGGLE; value: boolean | null; } | { key: string; type: ",
+          "CustomFieldTypes",
+          ".NUMBER; value: number | null; })[]; settings: { syncAlerts: boolean; }; status: ",
+          {
+            "pluginId": "@kbn/cases-components",
+            "scope": "common",
+            "docId": "kibKbnCasesComponentsPluginApi",
+            "section": "def-common.CaseStatuses",
+            "text": "CaseStatuses"
+          },
+          "; owner: string; } & { duration: number | null; closed_at: string | null; closed_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }; external_service: ({ connector_id: string; } & { connector_name: string; external_id: string; external_title: string; external_url: string; pushed_at: string; pushed_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }; }) | null; updated_at: string | null; updated_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; } & { id: string; totalComment: number; totalAlerts: number; version: string; } & { comments?: ((({ comment: string; type: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -2333,6 +2572,21 @@
       },
       {
         "parentPluginId": "cases",
+        "id": "def-common.CASES_REOPEN_CAPABILITY",
+        "type": "string",
+        "tags": [],
+        "label": "CASES_REOPEN_CAPABILITY",
+        "description": [],
+        "signature": [
+          "\"case_reopen\""
+        ],
+        "path": "x-pack/plugins/cases/common/constants/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cases",
         "id": "def-common.CASES_SETTINGS_CAPABILITY",
         "type": "string",
         "tags": [],
@@ -2371,15 +2625,7 @@
         "label": "CasesBulkGetResponse",
         "description": [],
         "signature": [
-          "{ cases: ({ description: string; status: ",
-          {
-            "pluginId": "@kbn/cases-components",
-            "scope": "common",
-            "docId": "kibKbnCasesComponentsPluginApi",
-            "section": "def-common.CaseStatuses",
-            "text": "CaseStatuses"
-          },
-          "; tags: string[]; title: string; connector: { id: string; } & (({ type: ",
+          "{ cases: ({ description: string; tags: string[]; title: string; connector: { id: string; } & (({ type: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -2435,7 +2681,15 @@
             "section": "def-common.ConnectorTypes",
             "text": "ConnectorTypes"
           },
-          ".swimlane; fields: { caseId: string | null; } | null; } & { name: string; })); settings: { syncAlerts: boolean; }; owner: string; severity: ",
+          ".swimlane; fields: { caseId: string | null; } | null; } & { name: string; }) | ({ type: ",
+          {
+            "pluginId": "cases",
+            "scope": "common",
+            "docId": "kibCasesPluginApi",
+            "section": "def-common.ConnectorTypes",
+            "text": "ConnectorTypes"
+          },
+          ".theHive; fields: { tlp: number | null; } | null; } & { name: string; })); severity: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -2447,7 +2701,17 @@
           "CustomFieldTypes",
           ".TEXT; value: string | null; } | { key: string; type: ",
           "CustomFieldTypes",
-          ".TOGGLE; value: boolean | null; })[]; } & { duration: number | null; closed_at: string | null; closed_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }; external_service: ({ connector_id: string; } & { connector_name: string; external_id: string; external_title: string; external_url: string; pushed_at: string; pushed_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }; }) | null; updated_at: string | null; updated_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; } & { id: string; totalComment: number; totalAlerts: number; version: string; } & { comments?: ((({ comment: string; type: ",
+          ".TOGGLE; value: boolean | null; } | { key: string; type: ",
+          "CustomFieldTypes",
+          ".NUMBER; value: number | null; })[]; settings: { syncAlerts: boolean; }; status: ",
+          {
+            "pluginId": "@kbn/cases-components",
+            "scope": "common",
+            "docId": "kibKbnCasesComponentsPluginApi",
+            "section": "def-common.CaseStatuses",
+            "text": "CaseStatuses"
+          },
+          "; owner: string; } & { duration: number | null; closed_at: string | null; closed_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }; external_service: ({ connector_id: string; } & { connector_name: string; external_id: string; external_title: string; external_url: string; pushed_at: string; pushed_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }; }) | null; updated_at: string | null; updated_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; } & { id: string; totalComment: number; totalAlerts: number; version: string; } & { comments?: ((({ comment: string; type: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -2550,15 +2814,7 @@
         "label": "CasesFindResponseUI",
         "description": [],
         "signature": [
-          "Omit<{ cases: { description: string; status: ",
-          {
-            "pluginId": "@kbn/cases-components",
-            "scope": "common",
-            "docId": "kibKbnCasesComponentsPluginApi",
-            "section": "def-common.CaseStatuses",
-            "text": "CaseStatuses"
-          },
-          "; tags: string[]; title: string; connector: { id: string; type: ",
+          "Omit<{ cases: { description: string; tags: string[]; title: string; connector: { id: string; type: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -2614,7 +2870,15 @@
             "section": "def-common.ConnectorTypes",
             "text": "ConnectorTypes"
           },
-          ".swimlane; fields: { caseId: string | null; } | null; name: string; }; settings: { syncAlerts: boolean; }; owner: string; severity: ",
+          ".swimlane; fields: { caseId: string | null; } | null; name: string; } | { id: string; type: ",
+          {
+            "pluginId": "cases",
+            "scope": "common",
+            "docId": "kibCasesPluginApi",
+            "section": "def-common.ConnectorTypes",
+            "text": "ConnectorTypes"
+          },
+          ".theHive; fields: { tlp: number | null; } | null; name: string; }; severity: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -2626,7 +2890,17 @@
           "CustomFieldTypes",
           ".TEXT; value: string | null; } | { key: string; type: ",
           "CustomFieldTypes",
-          ".TOGGLE; value: boolean | null; })[]; duration: number | null; closedAt: string | null; closedBy: { email: string | null | undefined; fullName: string | null | undefined; username: string | null | undefined; profileUid?: string | undefined; } | null; createdAt: string; createdBy: { email: string | null | undefined; fullName: string | null | undefined; username: string | null | undefined; profileUid?: string | undefined; }; externalService: { connectorId: string; connectorName: string; externalId: string; externalTitle: string; externalUrl: string; pushedAt: string; pushedBy: { email: string | null | undefined; fullName: string | null | undefined; username: string | null | undefined; profileUid?: string | undefined; }; } | null; updatedAt: string | null; updatedBy: { email: string | null | undefined; fullName: string | null | undefined; username: string | null | undefined; profileUid?: string | undefined; } | null; id: string; totalComment: number; totalAlerts: number; version: string; comments?: ({ comment: string; type: ",
+          ".TOGGLE; value: boolean | null; } | { key: string; type: ",
+          "CustomFieldTypes",
+          ".NUMBER; value: number | null; })[]; settings: { syncAlerts: boolean; }; status: ",
+          {
+            "pluginId": "@kbn/cases-components",
+            "scope": "common",
+            "docId": "kibKbnCasesComponentsPluginApi",
+            "section": "def-common.CaseStatuses",
+            "text": "CaseStatuses"
+          },
+          "; owner: string; duration: number | null; closedAt: string | null; closedBy: { email: string | null | undefined; fullName: string | null | undefined; username: string | null | undefined; profileUid?: string | undefined; } | null; createdAt: string; createdBy: { email: string | null | undefined; fullName: string | null | undefined; username: string | null | undefined; profileUid?: string | undefined; }; externalService: { connectorId: string; connectorName: string; externalId: string; externalTitle: string; externalUrl: string; pushedAt: string; pushedBy: { email: string | null | undefined; fullName: string | null | undefined; username: string | null | undefined; profileUid?: string | undefined; }; } | null; updatedAt: string | null; updatedBy: { email: string | null | undefined; fullName: string | null | undefined; username: string | null | undefined; profileUid?: string | undefined; } | null; id: string; totalComment: number; totalAlerts: number; version: string; comments?: ({ comment: string; type: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -2713,24 +2987,9 @@
         "label": "CasesMetricsResponse",
         "description": [],
         "signature": [
-          "{ mttr?: number | null | undefined; }"
+          "{ mttr?: number | null | undefined; status?: { open: number; inProgress: number; closed: number; } | undefined; }"
         ],
         "path": "x-pack/plugins/cases/common/types/api/metrics/v1.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "cases",
-        "id": "def-common.CasesStatus",
-        "type": "Type",
-        "tags": [],
-        "label": "CasesStatus",
-        "description": [],
-        "signature": [
-          "{ countOpenCases: number; countInProgressCases: number; countClosedCases: number; }"
-        ],
-        "path": "x-pack/plugins/cases/common/ui/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2765,15 +3024,7 @@
         "label": "CaseUI",
         "description": [],
         "signature": [
-          "Omit<{ description: string; status: ",
-          {
-            "pluginId": "@kbn/cases-components",
-            "scope": "common",
-            "docId": "kibKbnCasesComponentsPluginApi",
-            "section": "def-common.CaseStatuses",
-            "text": "CaseStatuses"
-          },
-          "; tags: string[]; title: string; connector: { id: string; type: ",
+          "Omit<{ description: string; tags: string[]; title: string; connector: { id: string; type: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -2829,7 +3080,15 @@
             "section": "def-common.ConnectorTypes",
             "text": "ConnectorTypes"
           },
-          ".swimlane; fields: { caseId: string | null; } | null; name: string; }; settings: { syncAlerts: boolean; }; owner: string; severity: ",
+          ".swimlane; fields: { caseId: string | null; } | null; name: string; } | { id: string; type: ",
+          {
+            "pluginId": "cases",
+            "scope": "common",
+            "docId": "kibCasesPluginApi",
+            "section": "def-common.ConnectorTypes",
+            "text": "ConnectorTypes"
+          },
+          ".theHive; fields: { tlp: number | null; } | null; name: string; }; severity: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -2841,7 +3100,17 @@
           "CustomFieldTypes",
           ".TEXT; value: string | null; } | { key: string; type: ",
           "CustomFieldTypes",
-          ".TOGGLE; value: boolean | null; })[]; duration: number | null; closedAt: string | null; closedBy: { email: string | null | undefined; fullName: string | null | undefined; username: string | null | undefined; profileUid?: string | undefined; } | null; createdAt: string; createdBy: { email: string | null | undefined; fullName: string | null | undefined; username: string | null | undefined; profileUid?: string | undefined; }; externalService: { connectorId: string; connectorName: string; externalId: string; externalTitle: string; externalUrl: string; pushedAt: string; pushedBy: { email: string | null | undefined; fullName: string | null | undefined; username: string | null | undefined; profileUid?: string | undefined; }; } | null; updatedAt: string | null; updatedBy: { email: string | null | undefined; fullName: string | null | undefined; username: string | null | undefined; profileUid?: string | undefined; } | null; id: string; totalComment: number; totalAlerts: number; version: string; comments?: ({ comment: string; type: ",
+          ".TOGGLE; value: boolean | null; } | { key: string; type: ",
+          "CustomFieldTypes",
+          ".NUMBER; value: number | null; })[]; settings: { syncAlerts: boolean; }; status: ",
+          {
+            "pluginId": "@kbn/cases-components",
+            "scope": "common",
+            "docId": "kibKbnCasesComponentsPluginApi",
+            "section": "def-common.CaseStatuses",
+            "text": "CaseStatuses"
+          },
+          "; owner: string; duration: number | null; closedAt: string | null; closedBy: { email: string | null | undefined; fullName: string | null | undefined; username: string | null | undefined; profileUid?: string | undefined; } | null; createdAt: string; createdBy: { email: string | null | undefined; fullName: string | null | undefined; username: string | null | undefined; profileUid?: string | undefined; }; externalService: { connectorId: string; connectorName: string; externalId: string; externalTitle: string; externalUrl: string; pushedAt: string; pushedBy: { email: string | null | undefined; fullName: string | null | undefined; username: string | null | undefined; profileUid?: string | undefined; }; } | null; updatedAt: string | null; updatedBy: { email: string | null | undefined; fullName: string | null | undefined; username: string | null | undefined; profileUid?: string | undefined; } | null; id: string; totalComment: number; totalAlerts: number; version: string; comments?: ({ comment: string; type: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -2950,6 +3219,21 @@
       },
       {
         "parentPluginId": "cases",
+        "id": "def-common.CREATE_COMMENT_CAPABILITY",
+        "type": "string",
+        "tags": [],
+        "label": "CREATE_COMMENT_CAPABILITY",
+        "description": [],
+        "signature": [
+          "\"create_comment\""
+        ],
+        "path": "x-pack/plugins/cases/common/constants/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cases",
         "id": "def-common.DELETE_CASES_CAPABILITY",
         "type": "string",
         "tags": [],
@@ -2967,11 +3251,29 @@
         "parentPluginId": "cases",
         "id": "def-common.FEATURE_ID",
         "type": "string",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "FEATURE_ID",
         "description": [],
         "signature": [
           "\"generalCases\""
+        ],
+        "path": "x-pack/plugins/cases/common/constants/application.ts",
+        "deprecated": true,
+        "trackAdoption": false,
+        "references": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cases",
+        "id": "def-common.FEATURE_ID_V2",
+        "type": "string",
+        "tags": [],
+        "label": "FEATURE_ID_V2",
+        "description": [],
+        "signature": [
+          "\"generalCasesV2\""
         ],
         "path": "x-pack/plugins/cases/common/constants/application.ts",
         "deprecated": false,
@@ -3238,7 +3540,9 @@
           "CustomFieldTypes",
           ".TEXT; value: string | null; } | { key: string; type: ",
           "CustomFieldTypes",
-          ".TOGGLE; value: boolean | null; })[]; }; } | { type: \"comment\"; payload: { comment: { type: ",
+          ".TOGGLE; value: boolean | null; } | { key: string; type: ",
+          "CustomFieldTypes",
+          ".NUMBER; value: number | null; })[]; }; } | { type: \"comment\"; payload: { comment: { type: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -3382,11 +3686,21 @@
             "section": "def-common.ConnectorTypes",
             "text": "ConnectorTypes"
           },
-          ".swimlane; fields: { caseId: string | null; } | null; } & { name: string; })); } & { assignees: { uid: string; }[]; description: string; status: string; severity: string; tags: string[]; title: string; settings: { syncAlerts: boolean; }; owner: string; } & { category?: string | null | undefined; customFields?: ({ key: string; type: ",
+          ".swimlane; fields: { caseId: string | null; } | null; } & { name: string; }) | ({ type: ",
+          {
+            "pluginId": "cases",
+            "scope": "common",
+            "docId": "kibCasesPluginApi",
+            "section": "def-common.ConnectorTypes",
+            "text": "ConnectorTypes"
+          },
+          ".theHive; fields: { tlp: number | null; } | null; } & { name: string; })); } & { assignees: { uid: string; }[]; description: string; status: string; severity: string; tags: string[]; title: string; settings: { syncAlerts: boolean; }; owner: string; } & { category?: string | null | undefined; customFields?: ({ key: string; type: ",
           "CustomFieldTypes",
           ".TEXT; value: string | null; } | { key: string; type: ",
           "CustomFieldTypes",
-          ".TOGGLE; value: boolean | null; })[] | undefined; }; }) | { type: \"connector\"; payload: { connector: { id: string; } & (({ type: ",
+          ".TOGGLE; value: boolean | null; } | { key: string; type: ",
+          "CustomFieldTypes",
+          ".NUMBER; value: number | null; })[] | undefined; }; }) | { type: \"connector\"; payload: { connector: { id: string; } & (({ type: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -3442,7 +3756,15 @@
             "section": "def-common.ConnectorTypes",
             "text": "ConnectorTypes"
           },
-          ".swimlane; fields: { caseId: string | null; } | null; } & { name: string; })); }; } | { type: \"pushed\"; payload: { externalService: { connector_id: string; } & { connector_name: string; external_id: string; external_title: string; external_url: string; pushed_at: string; pushed_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }; }; }; }) & { created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }; owner: string; action: \"create\" | \"update\" | \"delete\" | \"add\" | \"push_to_service\"; }) & { comment_id: string | null; }) & { id: string; version: string; })[]; page: number; perPage: number; total: number; }"
+          ".swimlane; fields: { caseId: string | null; } | null; } & { name: string; }) | ({ type: ",
+          {
+            "pluginId": "cases",
+            "scope": "common",
+            "docId": "kibCasesPluginApi",
+            "section": "def-common.ConnectorTypes",
+            "text": "ConnectorTypes"
+          },
+          ".theHive; fields: { tlp: number | null; } | null; } & { name: string; })); }; } | { type: \"pushed\"; payload: { externalService: { connector_id: string; } & { connector_name: string; external_id: string; external_title: string; external_url: string; pushed_at: string; pushed_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }; }; }; }) & { created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }; owner: string; action: \"create\" | \"update\" | \"delete\" | \"add\" | \"push_to_service\"; }) & { comment_id: string | null; }) & { id: string; version: string; })[]; page: number; perPage: number; total: number; }"
         ],
         "path": "x-pack/plugins/cases/common/types/api/user_action/v1.ts",
         "deprecated": false,

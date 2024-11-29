@@ -12,7 +12,7 @@ import { createQuery } from './create_query';
 import {
   INDEX_PATTERN_KIBANA,
   INDEX_PATTERN_BEATS,
-  INDEX_PATTERN_LOGSTASH,
+  INDEX_PATTERN_LOGSTASH_MONITORING,
   KIBANA_SYSTEM_ID,
   BEATS_SYSTEM_ID,
   APM_SYSTEM_ID,
@@ -156,12 +156,14 @@ function groupInstancesByCluster<T extends { cluster_uuid?: string }>(
   // hits are sorted arbitrarily by product UUID
   instances.map((instance) => {
     const clusterUuid = instance._source!.cluster_uuid;
-    const version: string | undefined = get(
-      instance,
-      `_source.${product}_stats.${product}.version`
-    );
-    const cloud: CloudEntry | undefined = get(instance, `_source.${product}_stats.cloud`);
-    const os: OSData | undefined = get(instance, `_source.${product}_stats.os`);
+    const version: string | undefined = get(instance, [
+      `_source`,
+      `${product}_stats`,
+      product,
+      `version`,
+    ]);
+    const cloud: CloudEntry | undefined = get(instance, [`_source`, `${product}_stats`, `cloud`]);
+    const os: OSData | undefined = get(instance, [`_source`, `${product}_stats`, `os`]);
 
     if (clusterUuid) {
       let cluster = clusterMap.get(clusterUuid);
@@ -230,7 +232,7 @@ function getIndexPatternForStackProduct(product: string) {
     case APM_SYSTEM_ID:
       return INDEX_PATTERN_BEATS;
     case LOGSTASH_SYSTEM_ID:
-      return INDEX_PATTERN_LOGSTASH;
+      return INDEX_PATTERN_LOGSTASH_MONITORING;
   }
   return null;
 }
@@ -238,7 +240,6 @@ function getIndexPatternForStackProduct(product: string) {
 /**
  * Get statistics about selected Elasticsearch clusters, for the selected {@code product}.
  *
- * @param {Object} server The server instance
  * @param {function} callCluster The callWithRequest or callWithInternalUser handler
  * @param {Array} clusterUuids The string Cluster UUIDs to fetch details for
  * @param {Date} start Start time to limit the stats
@@ -246,6 +247,7 @@ function getIndexPatternForStackProduct(product: string) {
  * @param {String} product The product to limit too ('kibana', 'logstash', 'beats')
  *
  * Returns an object keyed by the cluster UUIDs to make grouping easier.
+ * @param maxBucketSize size of the return bucket
  */
 export async function getHighLevelStats(
   callCluster: ElasticsearchClient,

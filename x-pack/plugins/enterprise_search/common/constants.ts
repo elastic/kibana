@@ -5,6 +5,21 @@
  * 2.0.
  */
 
+import dedent from 'dedent';
+
+import {
+  ENTERPRISE_SEARCH_APP_ID,
+  ENTERPRISE_SEARCH_CONTENT_APP_ID,
+  ENTERPRISE_SEARCH_RELEVANCE_APP_ID,
+  ENTERPRISE_SEARCH_APPLICATIONS_APP_ID,
+  ENTERPRISE_SEARCH_ANALYTICS_APP_ID,
+  ENTERPRISE_SEARCH_APPSEARCH_APP_ID,
+  ENTERPRISE_SEARCH_WORKPLACESEARCH_APP_ID,
+  SEARCH_ELASTICSEARCH,
+  SEARCH_VECTOR_SEARCH,
+  SEARCH_SEMANTIC_SEARCH,
+  SEARCH_AI_SEARCH,
+} from '@kbn/deeplinks-search';
 import { i18n } from '@kbn/i18n';
 
 import { IngestPipelineParams } from '@kbn/search-connectors';
@@ -12,14 +27,14 @@ import { IngestPipelineParams } from '@kbn/search-connectors';
 import { ProductFeatures } from './types';
 
 export const SEARCH_PRODUCT_NAME = i18n.translate('xpack.enterpriseSearch.search.productName', {
-  defaultMessage: 'Search',
+  defaultMessage: 'Elasticsearch',
 });
 export const ENTERPRISE_SEARCH_PRODUCT_NAME = i18n.translate('xpack.enterpriseSearch.productName', {
   defaultMessage: 'Enterprise Search',
 });
 
 export const ENTERPRISE_SEARCH_OVERVIEW_PLUGIN = {
-  ID: 'enterpriseSearch',
+  ID: ENTERPRISE_SEARCH_APP_ID,
   NAME: SEARCH_PRODUCT_NAME,
   NAV_TITLE: i18n.translate('xpack.enterpriseSearch.overview.navTitle', {
     defaultMessage: 'Overview',
@@ -32,7 +47,7 @@ export const ENTERPRISE_SEARCH_OVERVIEW_PLUGIN = {
 };
 
 export const ENTERPRISE_SEARCH_CONTENT_PLUGIN = {
-  ID: 'enterpriseSearchContent',
+  ID: ENTERPRISE_SEARCH_CONTENT_APP_ID,
   NAME: SEARCH_PRODUCT_NAME,
   NAV_TITLE: i18n.translate('xpack.enterpriseSearch.content.navTitle', {
     defaultMessage: 'Content',
@@ -47,7 +62,7 @@ export const ENTERPRISE_SEARCH_CONTENT_PLUGIN = {
 };
 
 export const AI_SEARCH_PLUGIN = {
-  ID: 'enterpriseSearchAISearch',
+  ID: SEARCH_AI_SEARCH,
   NAME: i18n.translate('xpack.enterpriseSearch.aiSearch.productName', {
     defaultMessage: 'AI Search',
   }),
@@ -63,7 +78,7 @@ export const AI_SEARCH_PLUGIN = {
 };
 
 export const ANALYTICS_PLUGIN = {
-  ID: 'enterpriseSearchAnalytics',
+  ID: ENTERPRISE_SEARCH_ANALYTICS_APP_ID,
   NAME: i18n.translate('xpack.enterpriseSearch.analytics.productName', {
     defaultMessage: 'Behavioral Analytics',
   }),
@@ -80,7 +95,7 @@ export const ANALYTICS_PLUGIN = {
 };
 
 export const ELASTICSEARCH_PLUGIN = {
-  ID: 'enterpriseSearchElasticsearch',
+  ID: SEARCH_ELASTICSEARCH,
   NAME: i18n.translate('xpack.enterpriseSearch.elasticsearch.productName', {
     defaultMessage: 'Elasticsearch',
   }),
@@ -92,7 +107,7 @@ export const ELASTICSEARCH_PLUGIN = {
 };
 
 export const APP_SEARCH_PLUGIN = {
-  ID: 'appSearch',
+  ID: ENTERPRISE_SEARCH_APPSEARCH_APP_ID,
   NAME: i18n.translate('xpack.enterpriseSearch.appSearch.productName', {
     defaultMessage: 'App Search',
   }),
@@ -105,7 +120,7 @@ export const APP_SEARCH_PLUGIN = {
 };
 
 export const WORKPLACE_SEARCH_PLUGIN = {
-  ID: 'workplaceSearch',
+  ID: ENTERPRISE_SEARCH_WORKPLACESEARCH_APP_ID,
   NAME: i18n.translate('xpack.enterpriseSearch.workplaceSearch.productName', {
     defaultMessage: 'Workplace Search',
   }),
@@ -139,13 +154,13 @@ export const SEARCH_EXPERIENCES_PLUGIN = {
 };
 
 export const APPLICATIONS_PLUGIN = {
-  ID: 'enterpriseSearchApplications',
+  ID: ENTERPRISE_SEARCH_APPLICATIONS_APP_ID,
   LOGO: 'logoEnterpriseSearch',
   NAME: i18n.translate('xpack.enterpriseSearch.applications.productName', {
     defaultMessage: 'Applications',
   }),
   NAV_TITLE: i18n.translate('xpack.enterpriseSearch.applications.navTitle', {
-    defaultMessage: 'Search Applications',
+    defaultMessage: 'Build',
   }),
   SUPPORT_URL: 'https://discuss.elastic.co/c/enterprise-search/',
   URL: '/app/enterprise_search/applications',
@@ -156,7 +171,7 @@ export const VECTOR_SEARCH_PLUGIN = {
     defaultMessage:
       'Elasticsearch can be used as a vector database, which enables vector search and semantic search use cases.',
   }),
-  ID: 'enterpriseSearchVectorSearch',
+  ID: SEARCH_VECTOR_SEARCH,
   LOGO: 'logoEnterpriseSearch',
   NAME: i18n.translate('xpack.enterpriseSearch.vectorSearch.productName', {
     defaultMessage: 'Vector Search',
@@ -166,6 +181,47 @@ export const VECTOR_SEARCH_PLUGIN = {
   }),
   SUPPORT_URL: 'https://discuss.elastic.co/c/enterprise-search/',
   URL: '/app/enterprise_search/vector_search',
+};
+
+export const SEMANTIC_SEARCH_PLUGIN = {
+  DESCRIPTION: i18n.translate('xpack.enterpriseSearch.SemanticSearch.description', {
+    defaultMessage:
+      'Easily add semantic search to Elasticsearch with inference endpoints and the semantic_text field type, to boost search relevance.',
+  }),
+  ID: SEARCH_SEMANTIC_SEARCH,
+  LOGO: 'logoEnterpriseSearch',
+  NAME: i18n.translate('xpack.enterpriseSearch.SemanticSearch.productName', {
+    defaultMessage: 'Semantic Search',
+  }),
+  NAV_TITLE: i18n.translate('xpack.enterpriseSearch.SemanticSearch.navTitle', {
+    defaultMessage: 'Semantic Search',
+  }),
+  SUPPORT_URL: 'https://discuss.elastic.co/c/enterprise-search/',
+  URL: '/app/enterprise_search/semantic_search',
+};
+
+export const SEARCH_RELEVANCE_PLUGIN = {
+  ID: ENTERPRISE_SEARCH_RELEVANCE_APP_ID,
+  NAME: i18n.translate('xpack.enterpriseSearch.inferenceEndpoints.productName', {
+    defaultMessage: 'Inference Endpoints',
+  }),
+  NAV_TITLE: i18n.translate('xpack.enterpriseSearch.inferenceEndpoints.navTitle', {
+    defaultMessage: 'Relevance',
+  }),
+  DESCRIPTION: i18n.translate('xpack.enterpriseSearch.inferenceEndpoints.description', {
+    defaultMessage: 'Manage your inference endpoints for semantic search and AI use cases.',
+  }),
+  URL: '/app/elasticsearch/relevance',
+  LOGO: 'logoEnterpriseSearch',
+  SUPPORT_URL: 'https://discuss.elastic.co/c/enterprise-search/',
+};
+
+export const CREATE_CONNECTOR_PLUGIN = {
+  CLI_SNIPPET: dedent`./bin/connectors connector create
+  --index-name my-index
+  --index-language en
+  --from-file config.yml
+  `,
 };
 
 export const LICENSED_SUPPORT_URL = 'https://support.elastic.co';
@@ -187,6 +243,10 @@ export const ENTERPRISE_SEARCH_ANALYTICS_LOGS_SOURCE_ID = 'ent-search-analytics-
 export const APP_SEARCH_URL = '/app/enterprise_search/app_search';
 export const ENTERPRISE_SEARCH_ELASTICSEARCH_URL = '/app/enterprise_search/elasticsearch';
 export const WORKPLACE_SEARCH_URL = '/app/enterprise_search/workplace_search';
+export const CREATE_NEW_INDEX_URL = '/search_indices/new_index';
+export const PLAYGROUND_URL = '/playground';
+
+export const MANAGE_API_KEYS_URL = '/app/management/security/api_keys';
 
 export const ENTERPRISE_SEARCH_DOCUMENTS_DEFAULT_DOC_COUNT = 25;
 
@@ -227,7 +287,6 @@ export const DEFAULT_PRODUCT_FEATURES: ProductFeatures = {
   hasIncrementalSyncEnabled: true,
   hasNativeConnectors: true,
   hasWebCrawler: true,
-  showAIPlayground: false,
 };
 
 export const CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX = '.search-acl-filter-';
@@ -235,3 +294,21 @@ export const PLUGIN_ID = 'enterpriseSearch';
 
 export const CONNECTOR_NATIVE_TYPE = 'native';
 export const CONNECTOR_CLIENTS_TYPE = 'connector_clients';
+
+export const CRAWLER = {
+  github_repo: 'https://github.com/elastic/crawler',
+};
+
+// TODO remove this once the connector service types are no longer in "example" state
+export const EXAMPLE_CONNECTOR_SERVICE_TYPES = ['opentext_documentum'];
+
+export const GETTING_STARTED_TITLE = i18n.translate('xpack.enterpriseSearch.gettingStarted.title', {
+  defaultMessage: 'Getting started',
+});
+
+export const SEARCH_APPS_BREADCRUMB = i18n.translate(
+  'xpack.enterpriseSearch.searchApplications.breadcrumb',
+  {
+    defaultMessage: 'Search Applications',
+  }
+);

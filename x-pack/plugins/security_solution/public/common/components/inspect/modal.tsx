@@ -27,8 +27,9 @@ import { useLocation } from 'react-router-dom';
 import type { InputsModelId } from '../../store/inputs/constants';
 import { NO_ALERT_INDEX } from '../../../../common/constants';
 import * as i18n from './translations';
-import { getScopeFromPath, useSourcererDataView } from '../../containers/sourcerer';
-import { SourcererScopeName } from '../../store/sourcerer/model';
+import { getScopeFromPath } from '../../../sourcerer/containers/sourcerer_paths';
+import { useSourcererDataView } from '../../../sourcerer/containers';
+import { SourcererScopeName } from '../../../sourcerer/store/model';
 
 export interface ModalInspectProps {
   adHocDataViews?: string[] | null;
@@ -58,13 +59,25 @@ interface Response {
 
 const MyEuiModal = styled(EuiModal)`
   width: min(768px, calc(100vw - 16px));
-  min-height: 41vh;
+  height: 41vh;
+
   .euiModal__flex {
     width: 60vw;
   }
-  .euiCodeBlock {
-    height: auto !important;
-    max-width: 718px;
+
+  [role='tabpanel'] {
+    /*
+    * Current tabpanel height is based on the content inside it and since we are using virtualized codeblock,
+    * which needs to have a fixed height of parent to render the codeblock properly, we will set tabpanel height
+    * to take up any remaining space after header, footer and tabs in the Modal.
+    *
+    * height of the tabPanel is calculated according to the Modal height of 41vh
+    * and then subtracting the height of the header, footer and the space between the tabs and the codeblock
+    *
+    * headerHeight + footerHeight + tabsHeight + paddingAroundCodeBlock = 208px
+    *
+    */
+    height: calc(41vh - 208px) !important;
   }
 `;
 
@@ -109,14 +122,18 @@ export const ModalInspectQuery = ({
     inputId === 'timeline' ? SourcererScopeName.timeline : getScopeFromPath(pathname)
   );
 
-  const requests: string[] = [request, ...(additionalRequests != null ? additionalRequests : [])];
-  const responses: string[] = [
-    response,
-    ...(additionalResponses != null ? additionalResponses : []),
-  ];
+  const requests: string[] = useMemo(
+    () => [request, ...(additionalRequests != null ? additionalRequests : [])],
+    [request, additionalRequests]
+  );
 
-  const inspectRequests: Request[] = parseInspectStrings(requests);
-  const inspectResponses: Response[] = parseInspectStrings(responses);
+  const responses: string[] = useMemo(
+    () => [response, ...(additionalResponses != null ? additionalResponses : [])],
+    [response, additionalResponses]
+  );
+
+  const inspectRequests: Request[] = useMemo(() => parseInspectStrings(requests), [requests]);
+  const inspectResponses: Response[] = useMemo(() => parseInspectStrings(responses), [responses]);
 
   const isSourcererPattern = useMemo(
     () =>
@@ -129,129 +146,142 @@ export const ModalInspectQuery = ({
   const statistics: Array<{
     title: NonNullable<ReactNode | string>;
     description: NonNullable<ReactNode | string>;
-  }> = [
-    {
-      title: (
-        <span data-test-subj="index-pattern-title">
-          {i18n.INDEX_PATTERN}{' '}
-          <EuiIconTip color="subdued" content={i18n.INDEX_PATTERN_DESC} type="iInCircle" />
-        </span>
-      ),
-      description: (
-        <span data-test-subj="index-pattern-description">
-          <p>
-            {formatIndexPatternRequested(
-              adHocDataViews != null && adHocDataViews.length > 0
-                ? adHocDataViews
-                : inspectRequests[0]?.index ?? []
-            )}
-          </p>
-
-          {!isSourcererPattern && (
+  }> = useMemo(
+    () => [
+      {
+        title: (
+          <span data-test-subj="index-pattern-title">
+            {i18n.INDEX_PATTERN}{' '}
+            <EuiIconTip color="subdued" content={i18n.INDEX_PATTERN_DESC} type="iInCircle" />
+          </span>
+        ),
+        description: (
+          <span data-test-subj="index-pattern-description">
             <p>
-              <small>
-                <i data-test-subj="not-sourcerer-msg">{i18n.INSPECT_PATTERN_DIFFERENT}</i>
-              </small>
+              {formatIndexPatternRequested(
+                adHocDataViews != null && adHocDataViews.length > 0
+                  ? adHocDataViews
+                  : inspectRequests[0]?.index ?? []
+              )}
             </p>
-          )}
-        </span>
-      ),
-    },
 
-    {
-      title: (
-        <span data-test-subj="query-time-title">
-          {i18n.QUERY_TIME}{' '}
-          <EuiIconTip color="subdued" content={i18n.QUERY_TIME_DESC} type="iInCircle" />
-        </span>
-      ),
-      description: (
-        <span data-test-subj="query-time-description">
-          {inspectResponses[0]?.took === 0
-            ? '0ms'
-            : inspectResponses[0]?.took
-            ? `${numeral(inspectResponses[0].took).format('0,0')}ms`
-            : i18n.SOMETHING_WENT_WRONG}
-        </span>
-      ),
-    },
-    {
-      title: (
-        <span data-test-subj="request-timestamp-title">
-          {i18n.REQUEST_TIMESTAMP}{' '}
-          <EuiIconTip color="subdued" content={i18n.REQUEST_TIMESTAMP_DESC} type="iInCircle" />
-        </span>
-      ),
-      description: (
-        <span data-test-subj="request-timestamp-description">{new Date().toISOString()}</span>
-      ),
-    },
-  ];
+            {!isSourcererPattern && (
+              <p>
+                <small>
+                  <i data-test-subj="not-sourcerer-msg">{i18n.INSPECT_PATTERN_DIFFERENT}</i>
+                </small>
+              </p>
+            )}
+          </span>
+        ),
+      },
 
-  const tabs = [
-    {
-      id: 'statistics',
-      name: 'Statistics',
-      content: (
-        <>
-          <EuiSpacer />
-          <EuiDescriptionList
-            listItems={statistics}
-            type="responsiveColumn"
-            columnWidths={[3, 7]}
-          />
-        </>
-      ),
-    },
-    {
-      id: 'request',
-      name: 'Request',
-      content:
-        inspectRequests.length > 0 ? (
-          inspectRequests.map((inspectRequest, index) => (
-            <Fragment key={index}>
-              <EuiSpacer />
-              <EuiCodeBlock
-                language="js"
-                fontSize="m"
-                paddingSize="m"
-                color="dark"
-                overflowHeight={300}
-                isCopyable
-              >
-                {manageStringify(inspectRequest.body)}
-              </EuiCodeBlock>
-            </Fragment>
-          ))
-        ) : (
-          <EuiCodeBlock>{i18n.SOMETHING_WENT_WRONG}</EuiCodeBlock>
+      {
+        title: (
+          <span data-test-subj="query-time-title">
+            {i18n.QUERY_TIME}{' '}
+            <EuiIconTip color="subdued" content={i18n.QUERY_TIME_DESC} type="iInCircle" />
+          </span>
         ),
-    },
-    {
-      id: 'response',
-      name: 'Response',
-      content:
-        inspectResponses.length > 0 ? (
-          responses.map((responseText, index) => (
-            <Fragment key={index}>
-              <EuiSpacer />
-              <EuiCodeBlock
-                language="js"
-                fontSize="m"
-                paddingSize="m"
-                color="dark"
-                overflowHeight={300}
-                isCopyable
-              >
-                {responseText}
-              </EuiCodeBlock>
-            </Fragment>
-          ))
-        ) : (
-          <EuiCodeBlock>{i18n.SOMETHING_WENT_WRONG}</EuiCodeBlock>
+        description: (
+          <span data-test-subj="query-time-description">
+            {inspectResponses[0]?.took === 0
+              ? '0ms'
+              : inspectResponses[0]?.took
+              ? `${numeral(inspectResponses[0].took).format('0,0')}ms`
+              : i18n.SOMETHING_WENT_WRONG}
+          </span>
         ),
-    },
-  ];
+      },
+      {
+        title: (
+          <span data-test-subj="request-timestamp-title">
+            {i18n.REQUEST_TIMESTAMP}{' '}
+            <EuiIconTip color="subdued" content={i18n.REQUEST_TIMESTAMP_DESC} type="iInCircle" />
+          </span>
+        ),
+        description: (
+          <span data-test-subj="request-timestamp-description">{new Date().toISOString()}</span>
+        ),
+      },
+    ],
+    [adHocDataViews, inspectRequests, inspectResponses, isSourcererPattern]
+  );
+
+  const tabs = useMemo(
+    () => [
+      {
+        id: 'statistics',
+        name: 'Statistics',
+        'data-test-subj': 'modal-inspect-statistics-tab',
+        content: (
+          <>
+            <EuiSpacer />
+            <EuiDescriptionList
+              listItems={statistics}
+              type="responsiveColumn"
+              columnWidths={[3, 7]}
+            />
+          </>
+        ),
+      },
+      {
+        id: 'request',
+        name: 'Request',
+        'data-test-subj': 'modal-inspect-request-tab',
+        content:
+          inspectRequests.length > 0 ? (
+            inspectRequests.map((inspectRequest, index) => (
+              <Fragment key={index}>
+                <EuiCodeBlock
+                  data-test-subj="modal-inspect-request-preview"
+                  language="json"
+                  fontSize="m"
+                  paddingSize="m"
+                  color="dark"
+                  overflowHeight="100%"
+                  isCopyable
+                  isVirtualized
+                  lineNumbers
+                >
+                  {manageStringify(inspectRequest.body)}
+                </EuiCodeBlock>
+              </Fragment>
+            ))
+          ) : (
+            <EuiCodeBlock>{i18n.SOMETHING_WENT_WRONG}</EuiCodeBlock>
+          ),
+      },
+      {
+        id: 'response',
+        name: 'Response',
+        'data-test-subj': 'modal-inspect-response-tab',
+        content:
+          inspectResponses.length > 0 ? (
+            responses.map((responseText, index) => (
+              <Fragment key={index}>
+                <EuiCodeBlock
+                  data-test-subj="modal-inspect-response-preview"
+                  language="json"
+                  fontSize="m"
+                  paddingSize="m"
+                  color="dark"
+                  overflowHeight="100%"
+                  isCopyable
+                  isVirtualized
+                  lineNumbers
+                >
+                  {responseText}
+                </EuiCodeBlock>
+              </Fragment>
+            ))
+          ) : (
+            <EuiCodeBlock>{i18n.SOMETHING_WENT_WRONG}</EuiCodeBlock>
+          ),
+      },
+    ],
+    [inspectRequests, inspectResponses, responses, statistics]
+  );
 
   return (
     <MyEuiModal onClose={closeModal} data-test-subj="modal-inspect-euiModal">

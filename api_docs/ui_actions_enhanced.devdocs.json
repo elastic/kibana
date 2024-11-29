@@ -410,14 +410,14 @@
               {
                 "parentPluginId": "uiActionsEnhanced",
                 "id": "def-public.ActionFactory.CollectConfig.$1",
-                "type": "CompoundType",
+                "type": "Uncategorized",
                 "tags": [],
                 "label": "props",
                 "description": [],
                 "signature": [
-                  "P & { children?: React.ReactNode; }"
+                  "P"
                 ],
-                "path": "node_modules/@types/react/index.d.ts",
+                "path": "node_modules/@types/react/ts5.0/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -431,7 +431,7 @@
                 "signature": [
                   "any"
                 ],
-                "path": "node_modules/@types/react/index.d.ts",
+                "path": "node_modules/@types/react/ts5.0/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1040,9 +1040,9 @@
           " implements ",
           {
             "pluginId": "@kbn/core-plugins-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCorePluginsBrowserPluginApi",
-            "section": "def-common.Plugin",
+            "section": "def-public.Plugin",
             "text": "Plugin"
           },
           "<",
@@ -1110,9 +1110,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-plugins-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCorePluginsBrowserPluginApi",
-                    "section": "def-common.PluginInitializerContext",
+                    "section": "def-public.PluginInitializerContext",
                     "text": "PluginInitializerContext"
                   },
                   "<object>"
@@ -1136,9 +1136,9 @@
               "(core: ",
               {
                 "pluginId": "@kbn/core-lifecycle-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                "section": "def-common.CoreSetup",
+                "section": "def-public.CoreSetup",
                 "text": "CoreSetup"
               },
               "<",
@@ -1166,9 +1166,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-lifecycle-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                    "section": "def-common.CoreSetup",
+                    "section": "def-public.CoreSetup",
                     "text": "CoreSetup"
                   },
                   "<",
@@ -1209,9 +1209,9 @@
               "(core: ",
               {
                 "pluginId": "@kbn/core-lifecycle-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                "section": "def-common.CoreStart",
+                "section": "def-public.CoreStart",
                 "text": "CoreStart"
               },
               ", { uiActions, licensing }: ",
@@ -1239,9 +1239,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-lifecycle-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                    "section": "def-common.CoreStart",
+                    "section": "def-public.CoreStart",
                     "text": "CoreStart"
                   }
                 ],
@@ -2204,9 +2204,9 @@
         "label": "UrlDrilldownCollectConfig",
         "description": [],
         "signature": [
-          "(props: React.PropsWithChildren<",
+          "(props: ",
           "UrlDrilldownCollectConfigProps",
-          ">) => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "src/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/components/url_drilldown_collect_config/lazy.tsx",
         "deprecated": false,
@@ -2215,14 +2215,12 @@
           {
             "parentPluginId": "uiActionsEnhanced",
             "id": "def-public.UrlDrilldownCollectConfig.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
-              "UrlDrilldownCollectConfigProps",
-              ">"
+              "UrlDrilldownCollectConfigProps"
             ],
             "path": "src/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/components/url_drilldown_collect_config/lazy.tsx",
             "deprecated": false,
@@ -2241,9 +2239,9 @@
         "label": "UrlDrilldownOptionsComponent",
         "description": [],
         "signature": [
-          "(props: React.PropsWithChildren<",
+          "(props: ",
           "UrlDrilldownOptionsProps",
-          ">) => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "src/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/components/url_drilldown_collect_config/lazy.tsx",
         "deprecated": false,
@@ -2252,14 +2250,12 @@
           {
             "parentPluginId": "uiActionsEnhanced",
             "id": "def-public.UrlDrilldownOptionsComponent.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
-              "UrlDrilldownOptionsProps",
-              ">"
+              "UrlDrilldownOptionsProps"
             ],
             "path": "src/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/components/url_drilldown_collect_config/lazy.tsx",
             "deprecated": false,
@@ -2278,7 +2274,7 @@
         "label": "validateUrl",
         "description": [],
         "signature": [
-          "(url: string) => { isValid: boolean; error?: string | undefined; }"
+          "(url: string) => { isValid: boolean; error?: string | undefined; invalidUrl?: string | undefined; }"
         ],
         "path": "src/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_validation.ts",
         "deprecated": false,
@@ -2319,7 +2315,7 @@
             "section": "def-public.UrlDrilldownScope",
             "text": "UrlDrilldownScope"
           },
-          "<object, object>) => Promise<{ isValid: boolean; error?: string | undefined; }>"
+          "<object, object>) => Promise<{ isValid: boolean; error?: string | undefined; invalidUrl?: string | undefined; }>"
         ],
         "path": "src/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_validation.ts",
         "deprecated": false,
@@ -2768,14 +2764,14 @@
               {
                 "parentPluginId": "uiActionsEnhanced",
                 "id": "def-public.DrilldownDefinition.CollectConfig.$1",
-                "type": "CompoundType",
+                "type": "Uncategorized",
                 "tags": [],
                 "label": "props",
                 "description": [],
                 "signature": [
-                  "P & { children?: React.ReactNode; }"
+                  "P"
                 ],
-                "path": "node_modules/@types/react/index.d.ts",
+                "path": "node_modules/@types/react/ts5.0/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2789,7 +2785,7 @@
                 "signature": [
                   "any"
                 ],
-                "path": "node_modules/@types/react/index.d.ts",
+                "path": "node_modules/@types/react/ts5.0/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -3365,7 +3361,15 @@
             "label": "isCompatible",
             "description": [],
             "signature": [
-              "<C = unknown>(context: C) => Promise<boolean>"
+              "(context: ",
+              {
+                "pluginId": "@kbn/presentation-publishing",
+                "scope": "public",
+                "docId": "kibKbnPresentationPublishingPluginApi",
+                "section": "def-public.EmbeddableApiContext",
+                "text": "EmbeddableApiContext"
+              },
+              ") => Promise<boolean>"
             ],
             "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
             "deprecated": false,
@@ -3374,12 +3378,18 @@
               {
                 "parentPluginId": "uiActionsEnhanced",
                 "id": "def-public.DynamicActionManagerParams.isCompatible.$1",
-                "type": "Uncategorized",
+                "type": "Object",
                 "tags": [],
                 "label": "context",
                 "description": [],
                 "signature": [
-                  "C"
+                  {
+                    "pluginId": "@kbn/presentation-publishing",
+                    "scope": "public",
+                    "docId": "kibKbnPresentationPublishingPluginApi",
+                    "section": "def-public.EmbeddableApiContext",
+                    "text": "EmbeddableApiContext"
+                  }
                 ],
                 "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
                 "deprecated": false,
@@ -3763,14 +3773,14 @@
             {
               "parentPluginId": "uiActionsEnhanced",
               "id": "def-public.StartContract.DrilldownManager.$1",
-              "type": "CompoundType",
+              "type": "Uncategorized",
               "tags": [],
               "label": "props",
               "description": [],
               "signature": [
-                "P & { children?: React.ReactNode; }"
+                "P"
               ],
-              "path": "node_modules/@types/react/index.d.ts",
+              "path": "node_modules/@types/react/ts5.0/index.d.ts",
               "deprecated": false,
               "trackAdoption": false
             },
@@ -3784,7 +3794,7 @@
               "signature": [
                 "any"
               ],
-              "path": "node_modules/@types/react/index.d.ts",
+              "path": "node_modules/@types/react/ts5.0/index.d.ts",
               "deprecated": false,
               "trackAdoption": false
             }
@@ -3815,9 +3825,9 @@
           " implements ",
           {
             "pluginId": "@kbn/core-plugins-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCorePluginsServerPluginApi",
-            "section": "def-common.Plugin",
+            "section": "def-server.Plugin",
             "text": "Plugin"
           },
           "<",
@@ -3893,9 +3903,9 @@
               "(_core: ",
               {
                 "pluginId": "@kbn/core-lifecycle-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreLifecycleServerPluginApi",
-                "section": "def-common.CoreSetup",
+                "section": "def-server.CoreSetup",
                 "text": "CoreSetup"
               },
               "<object, unknown>, { embeddable }: UiActionsEnhancedServerSetupDependencies) => { registerActionFactory: (definition: ",
@@ -3930,9 +3940,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-lifecycle-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreLifecycleServerPluginApi",
-                    "section": "def-common.CoreSetup",
+                    "section": "def-server.CoreSetup",
                     "text": "CoreSetup"
                   },
                   "<object, unknown>"

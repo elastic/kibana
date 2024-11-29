@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-export const uptimeRuleFieldMap = {
+import { FieldMap } from '@kbn/alerts-as-data-utils';
+
+export const uptimeRuleFieldMap: FieldMap = {
   // common fields
   'monitor.id': {
     type: 'keyword',
@@ -15,13 +17,23 @@ export const uptimeRuleFieldMap = {
     type: 'keyword',
     required: false,
   },
+  'observer.name': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
   'observer.geo.name': {
     type: 'keyword',
+    array: true,
     required: false,
   },
   // monitor status alert fields
   'error.message': {
     type: 'text',
+    required: false,
+  },
+  'error.stack_trace': {
+    type: 'wildcard',
     required: false,
   },
   'agent.name': {
@@ -34,6 +46,33 @@ export const uptimeRuleFieldMap = {
   },
   'monitor.type': {
     type: 'keyword',
+    required: false,
+  },
+  'monitor.tags': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'monitor.state.id': {
+    type: 'keyword',
+    required: false,
+  },
+  configId: {
+    type: 'keyword',
+    required: false,
+  },
+  'host.name': {
+    type: 'keyword',
+    required: false,
+  },
+  'location.id': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  'location.name': {
+    type: 'keyword',
+    array: true,
     required: false,
   },
   // tls alert fields
@@ -66,6 +105,12 @@ export const uptimeRuleFieldMap = {
     type: 'keyword',
     required: false,
   },
+  'service.name': {
+    type: 'keyword',
+    required: false,
+  },
+  labels: {
+    type: 'object',
+    required: false,
+  },
 } as const;
-
-export type UptimeRuleFieldMap = typeof uptimeRuleFieldMap;

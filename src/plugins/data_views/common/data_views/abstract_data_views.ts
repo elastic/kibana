@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type {
@@ -12,7 +13,7 @@ import type {
   SerializedFieldFormat,
 } from '@kbn/field-formats-plugin/common';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
-import { cloneDeep, findIndex, merge } from 'lodash';
+import { cloneDeep } from 'lodash';
 import type { DataViewFieldBase } from '@kbn/es-query';
 import type {
   DataViewSpec,
@@ -47,6 +48,8 @@ interface AbstractDataViewDeps {
   shortDotsEnable?: boolean;
   metaFields?: string[];
 }
+
+type DataViewFieldBaseSpecMap = Record<string, DataViewFieldBase>;
 
 export abstract class AbstractDataView {
   /**
@@ -125,13 +128,14 @@ export abstract class AbstractDataView {
    */
   public matchedIndices: string[] = [];
 
-  protected scriptedFields: DataViewFieldBase[];
+  protected scriptedFieldsMap: DataViewFieldBaseSpecMap;
 
   private allowHidden: boolean = false;
 
   constructor(config: AbstractDataViewDeps) {
     const { spec = {}, fieldFormats, shortDotsEnable = false, metaFields = [] } = config;
 
+    // it's importing field attributes when a data view is imported from a spec and those attributes aren't provided in the fieldAttrs
     const extractedFieldAttrs = spec?.fields
       ? Object.entries(spec.fields).reduce((acc, [key, value]) => {
           const attrs: FieldAttrSet = {};
@@ -147,18 +151,28 @@ export abstract class AbstractDataView {
             hasAttrs = true;
           }
 
+          if (value.customDescription) {
+            attrs.customDescription = value.customDescription;
+            hasAttrs = true;
+          }
+
           if (hasAttrs) {
             acc[key] = attrs;
           }
           return acc;
         }, {} as Record<string, FieldAttrSet>)
-      : [];
+      : {};
 
     this.allowNoIndex = spec?.allowNoIndex || false;
-    // CRUD operations on scripted fields need to be examined
-    this.scriptedFields = spec?.fields
-      ? Object.values(spec.fields).filter((field) => field.scripted)
-      : [];
+
+    this.scriptedFieldsMap = spec?.fields
+      ? Object.values(spec.fields)
+          .filter((field) => field.scripted)
+          .reduce<DataViewFieldBaseSpecMap>((acc, field) => {
+            acc[field.name] = field;
+            return acc;
+          }, {})
+      : {};
 
     // set dependencies
     this.fieldFormats = { ...fieldFormats };
@@ -177,7 +191,7 @@ export abstract class AbstractDataView {
     this.sourceFilters = [...(spec.sourceFilters || [])];
     this.type = spec.type;
     this.typeMeta = spec.typeMeta;
-    this.fieldAttrs = cloneDeep(merge({}, extractedFieldAttrs, spec.fieldAttrs)) || {};
+    this.fieldAttrs = new Map(Object.entries({ ...extractedFieldAttrs, ...spec.fieldAttrs }));
     this.runtimeFieldMap = cloneDeep(spec.runtimeFieldMap) || {};
     this.namespaces = spec.namespaces || [];
     this.name = spec.name || '';
@@ -286,10 +300,8 @@ export abstract class AbstractDataView {
     attrName: K,
     value: FieldAttrSet[K]
   ) {
-    if (!this.fieldAttrs[fieldName]) {
-      this.fieldAttrs[fieldName] = {} as FieldAttrSet;
-    }
-    this.fieldAttrs[fieldName][attrName] = value;
+    const fieldAttrs = this.fieldAttrs.get(fieldName) || {};
+    this.fieldAttrs.set(fieldName, { ...fieldAttrs, [attrName]: value });
   }
 
   /**
@@ -300,6 +312,16 @@ export abstract class AbstractDataView {
 
   protected setFieldCustomLabelInternal(fieldName: string, customLabel: string | undefined | null) {
     this.setFieldAttrs(fieldName, 'customLabel', customLabel === null ? undefined : customLabel);
+  }
+
+  /**
+   * Set field count
+   * @param fieldName name of field to set count on
+   * @param count count value. If undefined, count is removed
+   */
+
+  protected setFieldCountInternal(fieldName: string, count: number | undefined | null) {
+    this.setFieldAttrs(fieldName, 'count', count === null ? undefined : count);
   }
 
   /**
@@ -344,11 +366,11 @@ export abstract class AbstractDataView {
     const stringifyOrUndefined = (obj: any) => (obj ? JSON.stringify(obj) : undefined);
 
     return {
-      fieldAttrs: stringifyOrUndefined(this.fieldAttrs),
+      fieldAttrs: stringifyOrUndefined(Object.fromEntries(this.fieldAttrs.entries())),
       title: this.getIndexPattern(),
       timeFieldName: this.timeFieldName,
       sourceFilters: stringifyOrUndefined(this.sourceFilters),
-      fields: stringifyOrUndefined(this.scriptedFields),
+      fields: stringifyOrUndefined(Object.values(this.scriptedFieldsMap)),
       fieldFormatMap: stringifyOrUndefined(this.fieldFormatMap),
       type: this.type!,
       typeMeta: stringifyOrUndefined(this.typeMeta),
@@ -359,30 +381,91 @@ export abstract class AbstractDataView {
     };
   }
 
+  protected toSpecShared(includeFields = true): DataViewSpec {
+    // if fields aren't included, don't include count
+    const fieldAttrs = Object.fromEntries(this.fieldAttrs.entries());
+    if (!includeFields) {
+      Object.keys(fieldAttrs).forEach((key) => {
+        delete fieldAttrs[key].count;
+        if (Object.keys(fieldAttrs[key]).length === 0) {
+          delete fieldAttrs[key];
+        }
+      });
+    }
+
+    const spec: DataViewSpec = {
+      id: this.id,
+      version: this.version,
+      title: this.getIndexPattern(),
+      timeFieldName: this.timeFieldName,
+      sourceFilters: [...(this.sourceFilters || [])],
+      typeMeta: this.typeMeta,
+      type: this.type,
+      fieldFormats: { ...this.fieldFormatMap },
+      runtimeFieldMap: cloneDeep(this.runtimeFieldMap),
+      fieldAttrs,
+      allowNoIndex: this.allowNoIndex,
+      name: this.name,
+      allowHidden: this.getAllowHidden(),
+    };
+
+    // Filter undefined values from the spec
+    return Object.fromEntries(Object.entries(spec).filter(([, v]) => typeof v !== 'undefined'));
+  }
+
   protected upsertScriptedFieldInternal = (field: FieldSpec) => {
-    // search for scriped field with same name
-    const findByName = (f: DataViewFieldBase) => f.name === field.name;
-
-    const fieldIndex = findIndex(this.scriptedFields, findByName);
-
-    const scriptedField: DataViewFieldBase = {
+    this.scriptedFieldsMap[field.name] = {
       name: field.name,
       script: field.script,
       lang: field.lang,
       type: field.type,
       scripted: field.scripted,
     };
-
-    if (fieldIndex === -1) {
-      this.scriptedFields.push(scriptedField);
-    } else {
-      this.scriptedFields[fieldIndex] = scriptedField;
-    }
   };
 
   protected deleteScriptedFieldInternal = (fieldName: string) => {
-    this.scriptedFields = this.scriptedFields.filter((field) => field.name !== fieldName);
+    delete this.scriptedFieldsMap[fieldName];
   };
+
+  replaceAllScriptedFields(newFields: Record<string, FieldSpec>) {
+    const oldScriptedFieldNames = Object.keys(this.scriptedFieldsMap);
+
+    oldScriptedFieldNames.forEach((name) => {
+      this.removeScriptedField(name);
+    });
+
+    Object.entries(newFields).forEach(([name, field]) => {
+      this.upsertScriptedField(field);
+    });
+  }
+
+  removeScriptedField(name: string) {
+    return this.deleteScriptedFieldInternal(name);
+  }
+
+  upsertScriptedField(field: FieldSpec) {
+    return this.upsertScriptedFieldInternal(field);
+  }
+
+  /**
+   * Only used by search source to process sorting of scripted fields
+   * @param name field name
+   * @returns DataViewFieldBase
+   */
+  getScriptedField(name: string): DataViewFieldBase | undefined {
+    // runtime fields override scripted fields
+    if (this.runtimeFieldMap[name]) {
+      return;
+    }
+
+    const field = this.scriptedFieldsMap[name];
+    if (field) {
+      return {
+        ...field,
+        scripted: true,
+      };
+    }
+  }
 
   /**
    * Checks if runtime field exists
@@ -430,6 +513,29 @@ export abstract class AbstractDataView {
     );
   }
 
+  /**
+   * Replaces all existing runtime fields with new fields.
+   * @param newFields Map of runtime field definitions by field name
+   */
+  replaceAllRuntimeFields(newFields: Record<string, RuntimeField>) {
+    const oldRuntimeFieldNames = Object.keys(this.runtimeFieldMap);
+    oldRuntimeFieldNames.forEach((name) => {
+      this.removeRuntimeField(name);
+    });
+
+    Object.entries(newFields).forEach(([name, field]) => {
+      this.addRuntimeField(name, field);
+    });
+  }
+
+  removeRuntimeField(name: string) {
+    return this.removeRuntimeFieldInteral(name);
+  }
+
+  addRuntimeField(name: string, runtimeField: RuntimeField) {
+    return this.addRuntimeFieldInteral(name, runtimeField);
+  }
+
   protected removeRuntimeFieldInteral(name: string) {
     delete this.runtimeFieldMap[name];
   }
@@ -438,5 +544,8 @@ export abstract class AbstractDataView {
     this.runtimeFieldMap[name] = removeFieldAttrs(runtimeField);
   }
 
-  getFieldAttrs = () => cloneDeep(this.fieldAttrs);
+  getFieldAttrs = () => {
+    const clonedFieldAttrs = cloneDeep(Object.fromEntries(this.fieldAttrs.entries()));
+    return new Map(Object.entries(clonedFieldAttrs));
+  };
 }

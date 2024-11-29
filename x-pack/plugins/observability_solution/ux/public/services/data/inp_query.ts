@@ -14,11 +14,7 @@ import { mergeProjection } from '../../../common/utils/merge_projection';
 import { getRumPageExitTransactionsProjection } from './projections';
 
 export function transformINPResponse<T>(
-  response?: ESSearchResponse<
-    T,
-    ReturnType<typeof inpQuery>,
-    { restTotalHitsAsInt: false }
-  >,
+  response?: ESSearchResponse<T, ReturnType<typeof inpQuery>, { restTotalHitsAsInt: false }>,
   percentile = PERCENTILE_DEFAULT
 ): UXMetrics | undefined {
   if (!response) return response;

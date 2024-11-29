@@ -1,22 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { CommonTokenStream, CharStreams } from 'antlr4';
 import { default as PainlessParser, SourceContext } from '../../antlr/painless_parser';
 import { PainlessLexerEnhanced } from './lexer';
-import { EditorError } from '../../../types';
+import { MonacoEditorError } from '../../../types';
 import { ANTLRErrorListener } from '../../../common/error_listener';
 
 const parse = (
   code: string
 ): {
   source: SourceContext;
-  errors: EditorError[];
+  errors: MonacoEditorError[];
 } => {
   const inputStream = CharStreams.fromString(code);
   const lexer = new PainlessLexerEnhanced(inputStream);
@@ -30,7 +31,7 @@ const parse = (
   lexer.addErrorListener(painlessLangErrorListener);
   parser.addErrorListener(painlessLangErrorListener);
 
-  const errors: EditorError[] = painlessLangErrorListener.getErrors();
+  const errors: MonacoEditorError[] = painlessLangErrorListener.getErrors();
 
   return {
     source: parser.source(),
@@ -38,7 +39,7 @@ const parse = (
   };
 };
 
-export const parseAndGetSyntaxErrors = (code: string): EditorError[] => {
+export const parseAndGetSyntaxErrors = (code: string): MonacoEditorError[] => {
   const { errors } = parse(code);
   return errors;
 };

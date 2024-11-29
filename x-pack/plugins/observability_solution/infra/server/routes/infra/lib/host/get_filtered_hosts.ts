@@ -5,55 +5,41 @@
  * 2.0.
  */
 
-import { ESSearchRequest } from '@kbn/es-types';
-import { lastValueFrom } from 'rxjs';
+import { rangeQuery } from '@kbn/observability-plugin/server';
+import { estypes } from '@elastic/elasticsearch';
+import { castArray } from 'lodash';
+import { HOST_NAME_FIELD, SYSTEM_INTEGRATION } from '../../../../../common/constants';
+import { GetHostParameters } from '../types';
+import { getFilterByIntegration } from '../helpers/query';
 
-import { InfraStaticSourceConfiguration } from '../../../../lib/sources';
-import { decodeOrThrow } from '../../../../../common/runtime_types';
-import { GetInfraMetricsRequestBodyPayload } from '../../../../../common/http_api/infra';
-import {
-  FilteredHostsSearchAggregationResponseRT,
-  FilteredHostsSearchAggregationResponse,
-  GetHostsArgs,
-} from '../types';
-import { BUCKET_KEY, MAX_SIZE } from '../constants';
-import { assertQueryStructure } from '../utils';
-import { createFilters, runQuery } from '../helpers/query';
-
-export const getFilteredHosts = async ({
-  searchClient,
-  sourceConfig,
-  params,
-}: GetHostsArgs): Promise<FilteredHostsSearchAggregationResponse> => {
-  const query = createQuery(params, sourceConfig);
-  return lastValueFrom(
-    runQuery(searchClient, query, decodeOrThrow(FilteredHostsSearchAggregationResponseRT))
-  );
-};
-
-const createQuery = (
-  params: GetInfraMetricsRequestBodyPayload,
-  sourceConfig: InfraStaticSourceConfiguration
-): ESSearchRequest => {
-  assertQueryStructure(params.query);
-
-  return {
+export const getFilteredHostNames = async ({
+  infraMetricsClient,
+  from,
+  to,
+  limit,
+  query,
+}: Pick<GetHostParameters, 'infraMetricsClient' | 'from' | 'to' | 'limit'> & {
+  query?: estypes.QueryDslQueryContainer;
+}) => {
+  const response = await infraMetricsClient.search({
     allow_no_indices: true,
-    ignore_unavailable: true,
-    index: sourceConfig.metricAlias,
     body: {
       size: 0,
+      track_total_hits: false,
       query: {
         bool: {
-          ...params.query.bool,
-          filter: createFilters({ params, extraFilter: params.query }),
+          filter: [
+            ...castArray(query),
+            ...rangeQuery(from, to),
+            getFilterByIntegration(SYSTEM_INTEGRATION),
+          ],
         },
       },
       aggs: {
-        nodes: {
+        uniqueHostNames: {
           terms: {
-            size: params.limit ?? MAX_SIZE,
-            field: BUCKET_KEY,
+            field: HOST_NAME_FIELD,
+            size: limit,
             order: {
               _key: 'asc',
             },
@@ -61,5 +47,38 @@ const createQuery = (
         },
       },
     },
-  };
+  });
+
+  const { uniqueHostNames } = response.aggregations ?? {};
+  return uniqueHostNames?.buckets?.map((p) => p.key as string) ?? [];
+};
+
+export const getHasDataFromSystemIntegration = async ({
+  infraMetricsClient,
+  from,
+  to,
+  query,
+}: Pick<GetHostParameters, 'infraMetricsClient' | 'from' | 'to'> & {
+  query?: estypes.QueryDslQueryContainer;
+}) => {
+  const hitCount = await infraMetricsClient.search({
+    allow_no_indices: true,
+    ignore_unavailable: true,
+    body: {
+      size: 0,
+      terminate_after: 1,
+      track_total_hits: true,
+      query: {
+        bool: {
+          filter: [
+            ...castArray(query),
+            ...rangeQuery(from, to),
+            getFilterByIntegration(SYSTEM_INTEGRATION),
+          ],
+        },
+      },
+    },
+  });
+
+  return hitCount.hits.total.value > 0;
 };

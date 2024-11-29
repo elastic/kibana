@@ -4,30 +4,48 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFieldSearch } from '@elastic/eui';
+import { EuiFieldSearch, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
+import { css } from '@emotion/react';
+import { TechnicalPreviewBadge } from '../technical_preview_badge';
 
 interface Props {
   placeholder: string;
   searchQuery: string;
   onChangeSearchQuery: (value: string) => void;
+  techPreview?: boolean;
 }
 
 export function TableSearchBar({
   placeholder,
   searchQuery,
   onChangeSearchQuery,
+  techPreview = false,
 }: Props) {
   return (
-    <EuiFieldSearch
-      data-test-subj="tableSearchInput"
-      placeholder={placeholder}
-      fullWidth={true}
-      value={searchQuery}
-      onChange={(e) => {
-        onChangeSearchQuery(e.target.value);
-      }}
-    />
+    <EuiFlexGroup gutterSize="s">
+      {techPreview ? (
+        <EuiFlexItem
+          grow={false}
+          css={css`
+            justify-content: center;
+          `}
+        >
+          <TechnicalPreviewBadge icon="beaker" />
+        </EuiFlexItem>
+      ) : null}
+      <EuiFlexItem>
+        <EuiFieldSearch
+          data-test-subj="tableSearchInput"
+          placeholder={placeholder}
+          fullWidth={true}
+          value={searchQuery}
+          onChange={(e) => {
+            onChangeSearchQuery(e.target.value);
+          }}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }
 

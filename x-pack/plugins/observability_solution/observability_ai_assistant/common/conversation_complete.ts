@@ -103,17 +103,24 @@ export type StreamingChatResponseEvent =
   | ConversationCreateEvent
   | ConversationUpdateEvent
   | MessageAddEvent
-  | ChatCompletionErrorEvent;
+  | ChatCompletionErrorEvent
+  | TokenCountEvent
+  | BufferFlushEvent;
 
 export type StreamingChatResponseEventWithoutError = Exclude<
   StreamingChatResponseEvent,
   ChatCompletionErrorEvent
 >;
 
+export type ChatEvent = ChatCompletionChunkEvent | TokenCountEvent;
+export type MessageOrChatEvent = ChatEvent | MessageAddEvent;
+
 export enum ChatCompletionErrorCode {
   InternalError = 'internalError',
   NotFoundError = 'notFoundError',
   TokenLimitReachedError = 'tokenLimitReachedError',
+  FunctionNotFoundError = 'functionNotFoundError',
+  FunctionLimitExceededError = 'functionLimitExceededError',
 }
 
 interface ErrorMetaAttributes {
@@ -123,10 +130,18 @@ interface ErrorMetaAttributes {
     tokenLimit?: number;
     tokenCount?: number;
   };
+  [ChatCompletionErrorCode.FunctionNotFoundError]: {
+    name: string;
+  };
+  [ChatCompletionErrorCode.FunctionLimitExceededError]: {};
 }
 
 export class ChatCompletionError<T extends ChatCompletionErrorCode> extends Error {
-  constructor(public code: T, message: string, public meta?: ErrorMetaAttributes[T]) {
+  constructor(
+    public code: T,
+    message: string,
+    public meta: ErrorMetaAttributes[T] = {} as ErrorMetaAttributes[T]
+  ) {
     super(message);
   }
 }
@@ -162,12 +177,35 @@ export function createInternalServerError(
   return new ChatCompletionError(ChatCompletionErrorCode.InternalError, originalErrorMessage);
 }
 
+export function createFunctionNotFoundError(name: string) {
+  return new ChatCompletionError(
+    ChatCompletionErrorCode.FunctionNotFoundError,
+    `Function ${name} called but was not available`
+  );
+}
+
+export function createFunctionLimitExceededError() {
+  return new ChatCompletionError(
+    ChatCompletionErrorCode.FunctionLimitExceededError,
+    `Function limit exceeded`
+  );
+}
+
 export function isTokenLimitReachedError(
   error: Error
 ): error is ChatCompletionError<ChatCompletionErrorCode.TokenLimitReachedError> {
   return (
     error instanceof ChatCompletionError &&
     error.code === ChatCompletionErrorCode.TokenLimitReachedError
+  );
+}
+
+export function isFunctionNotFoundError(
+  error: Error
+): error is ChatCompletionError<ChatCompletionErrorCode.FunctionNotFoundError> {
+  return (
+    error instanceof ChatCompletionError &&
+    error.code === ChatCompletionErrorCode.FunctionNotFoundError
   );
 }
 

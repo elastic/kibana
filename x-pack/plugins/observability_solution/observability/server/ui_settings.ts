@@ -21,13 +21,13 @@ import {
   apmLabsButton,
   enableAgentExplorerView,
   apmEnableTableSearchBar,
+  entityCentricExperience,
   enableAwsLambdaMetrics,
   apmAWSLambdaPriceFactor,
   apmAWSLambdaRequestCostPerMillion,
   apmEnableServiceMetrics,
   apmEnableContinuousRollups,
   enableCriticalPath,
-  enableInfrastructureHostsView,
   syntheticsThrottlingEnabled,
   enableLegacyUptimeApp,
   apmEnableProfilingIntegration,
@@ -42,6 +42,9 @@ import {
   enableInfrastructureProfilingIntegration,
   apmEnableTransactionProfiling,
   enableInfrastructureAssetCustomDashboards,
+  apmEnableServiceInventoryTableSearchBar,
+  profilingFetchTopNFunctionsFromStacktraces,
+  searchExcludedDataTiers,
 } from '../common/ui_settings_keys';
 
 const betaLabel = i18n.translate('xpack.observability.uiSettings.betaLabel', {
@@ -227,20 +230,6 @@ export const uiSettings: Record<string, UiSettings> = {
     requiresPageReload: true,
     type: 'boolean',
   },
-  [enableInfrastructureHostsView]: {
-    category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.enableInfrastructureHostsView', {
-      defaultMessage: 'Infrastructure Hosts view',
-    }),
-    value: true,
-    description: i18n.translate('xpack.observability.enableInfrastructureHostsViewDescription', {
-      defaultMessage: '{betaLabel} Enable the Hosts view in the Infrastructure app.',
-      values: {
-        betaLabel: `<em>[${betaLabel}]</em>`,
-      },
-    }),
-    schema: schema.boolean(),
-  },
   [enableInfrastructureProfilingIntegration]: {
     category: [observabilityFeatureId],
     name: i18n.translate('xpack.observability.enableInfrastructureProfilingIntegration', {
@@ -265,9 +254,9 @@ export const uiSettings: Record<string, UiSettings> = {
       'xpack.observability.enableInfrastructureAssetCustomDashboardsDescription',
       {
         defaultMessage:
-          '{betaLabel} Enable option to link custom dashboards in the asset details view.',
+          '{technicalPreviewLabel} Enable option to link custom dashboards in the asset details view.',
         values: {
-          betaLabel: `<em>[${betaLabel}]</em>`,
+          technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
         },
       }
     ),
@@ -314,11 +303,47 @@ export const uiSettings: Record<string, UiSettings> = {
     }),
     description: i18n.translate('xpack.observability.apmEnableTableSearchBarDescription', {
       defaultMessage:
-        '{betaLabel} Enables faster searching in APM tables by adding a handy search bar with live filtering. Available for the following tables: Services, Transactions and Errors',
+        '{betaLabel} Enables faster searching in APM tables by adding a handy search bar with live filtering. Available for the following tables: Transactions and Errors',
       values: {
         betaLabel: `<em>[${betaLabel}]</em>`,
       },
     }),
+    schema: schema.boolean(),
+    value: true,
+    requiresPageReload: true,
+    type: 'boolean',
+  },
+  [entityCentricExperience]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.entityCentricExperience', {
+      defaultMessage: 'Entity-centric experience',
+    }),
+    description: i18n.translate('xpack.observability.entityCentricExperienceDescription', {
+      defaultMessage: '{technicalPreviewLabel} Promote entity-centric experience to users.',
+      values: {
+        technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
+      },
+    }),
+    schema: schema.boolean(),
+    value: true,
+    requiresPageReload: true,
+    type: 'boolean',
+  },
+  [apmEnableServiceInventoryTableSearchBar]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.apmEnableServiceInventoryTableSearchBar', {
+      defaultMessage: 'Service Inventory instant table search',
+    }),
+    description: i18n.translate(
+      'xpack.observability.apmEnableServiceInventoryTableSearchBarDescription',
+      {
+        defaultMessage:
+          '{technicalPreviewLabel} Enables faster searching in the APM Service inventory table by adding a handy search bar with live filtering.',
+        values: {
+          technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
+        },
+      }
+    ),
     schema: schema.boolean(),
     value: true,
     requiresPageReload: true,
@@ -478,23 +503,18 @@ export const uiSettings: Record<string, UiSettings> = {
     }),
     value: 1.7,
     description: i18n.translate('xpack.observability.profilingDatacenterPUEUiSettingDescription', {
-      defaultMessage: `Data center power usage effectiveness (PUE) measures how efficiently a data center uses energy. Defaults to 1.7, the average on-premise data center PUE according to the {uptimeLink} survey
-      </br></br>
+      defaultMessage: `Data center power usage effectiveness (PUE) measures how efficiently a data center uses energy. Defaults to 1.7, the average on-premise data center PUE according to the <a>Uptime Institute</a> survey
+      
       You can also use the PUE that corresponds with your cloud provider:
-      <ul style="list-style-type: none;margin-left: 4px;">
+      '<ul style="list-style-type: none;margin-left: 4px;">
         <li><strong>AWS:</strong> 1.135</li>
         <li><strong>GCP:</strong> 1.1</li>
         <li><strong>Azure:</strong> 1.185</li>
-      </ul>
+      </ul>'
       `,
       values: {
-        uptimeLink:
-          '<a href="https://ela.st/uptimeinstitute" target="_blank" rel="noopener noreferrer">' +
-          i18n.translate(
-            'xpack.observability.profilingDatacenterPUEUiSettingDescription.uptimeLink',
-            { defaultMessage: 'Uptime Institute' }
-          ) +
-          '</a>',
+        a: (chunks) =>
+          `<a href="https://ela.st/uptimeinstitute" target="_blank" rel="noopener noreferrer">${chunks}</a>`,
       },
     }),
     schema: schema.number({ min: 0 }),
@@ -578,6 +598,40 @@ export const uiSettings: Record<string, UiSettings> = {
     value: true,
     schema: schema.boolean(),
     requiresPageReload: true,
+  },
+  [profilingFetchTopNFunctionsFromStacktraces]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.profilingFetchTopNFunctionsFromStacktraces', {
+      defaultMessage: 'Switch to fetch the TopN Functions from the Stacktraces API.',
+    }),
+    description: i18n.translate(
+      'xpack.observability.profilingFetchTopNFunctionsFromStacktracesDescription',
+      {
+        defaultMessage: `The topN functions pages use the topN/functions API, turn it on to switch to the stacktraces api`,
+      }
+    ),
+    value: false,
+    schema: schema.boolean(),
+    requiresPageReload: false,
+  },
+  [searchExcludedDataTiers]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.searchExcludedDataTiers', {
+      defaultMessage: 'Excluded data tiers from search',
+    }),
+    description: i18n.translate(
+      'xpack.observability.advancedSettings.searchExcludedDataTiersDesc',
+      {
+        defaultMessage: `{technicalPreviewLabel} Specify the data tiers to exclude from search, such as data_cold and/or data_frozen. 
+        When configured, indices allocated in the selected tiers will be ignored from search requests. Affected apps: APM`,
+        values: { technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>` },
+      }
+    ),
+    value: [],
+    schema: schema.arrayOf(
+      schema.oneOf([schema.literal('data_cold'), schema.literal('data_frozen')])
+    ),
+    requiresPageReload: false,
   },
 };
 

@@ -18,28 +18,37 @@ export async function hasStorageExplorerPrivileges({
   apmEventClient: APMEventClient;
 }) {
   const {
-    indices: { transaction, span, metric, error },
+    // Only use apm index patterns and ignore OTel, as the storage explorer only supports APM data
+    indices: {
+      transaction = 'traces-apm*,apm-*',
+      span = 'traces-apm*,apm-*',
+      metric = 'metrics-apm*,apm-*',
+      error = 'logs-apm*,apm-*',
+    },
   } = apmEventClient;
 
   const names = uniq(
     [transaction, span, metric, error].flatMap((indexPatternString) =>
-      indexPatternString.split(',').map((indexPattern) => indexPattern.trim())
+      indexPatternString
+        .split(',')
+        .map((indexPattern) => indexPattern.trim())
+        // At this point we do not do any work for storage explorer + OTel data. So remove any otel related index
+        .filter((indexPattern) => !indexPattern.includes('otel'))
     )
   );
 
   const esClient = (await context.core).elasticsearch.client;
-  const { index, cluster } =
-    await esClient.asCurrentUser.security.hasPrivileges({
-      body: {
-        index: [
-          {
-            names,
-            privileges: ['monitor'],
-          },
-        ],
-        cluster: ['monitor'],
-      },
-    });
+  const { index, cluster } = await esClient.asCurrentUser.security.hasPrivileges({
+    body: {
+      index: [
+        {
+          names,
+          privileges: ['monitor'],
+        },
+      ],
+      cluster: ['monitor'],
+    },
+  });
 
   const hasPrivileges = cluster.monitor && every(index, 'monitor');
   return hasPrivileges;

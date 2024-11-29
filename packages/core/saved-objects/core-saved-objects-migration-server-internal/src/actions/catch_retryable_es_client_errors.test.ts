@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { errors as esErrors } from '@elastic/elasticsearch';
@@ -71,24 +72,25 @@ describe('catchRetryableEsClientErrors', () => {
         type: 'retryable_es_client_error',
       });
     });
-    it('ResponseError with retryable status code', async () => {
-      const statusCodes = [503, 401, 403, 408, 410, 429];
-      return Promise.all(
-        statusCodes.map(async (status) => {
-          const error = new esErrors.ResponseError(
-            elasticsearchClientMock.createApiResponse({
-              statusCode: status,
-              body: { error: { type: 'reason' } },
-            })
-          );
-          expect(
-            ((await Promise.reject(error).catch(catchRetryableEsClientErrors)) as any).left
-          ).toMatchObject({
-            message: 'reason',
-            type: 'retryable_es_client_error',
-          });
-        })
-      );
-    });
+    it.each([503, 401, 403, 408, 410, 429])(
+      'ResponseError with retryable status code (%d)',
+      async (status) => {
+        const error = new esErrors.ResponseError(
+          elasticsearchClientMock.createApiResponse({
+            statusCode: status,
+            body: { error: { type: 'reason' } },
+          })
+        );
+        expect(
+          ((await Promise.reject(error).catch(catchRetryableEsClientErrors)) as any).left
+        ).toMatchObject({
+          message:
+            status === 410
+              ? 'This API is unavailable in the version of Elasticsearch you are using.'
+              : 'reason',
+          type: 'retryable_es_client_error',
+        });
+      }
+    );
   });
 });

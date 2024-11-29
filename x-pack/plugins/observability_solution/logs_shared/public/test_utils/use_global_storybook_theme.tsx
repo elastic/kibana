@@ -6,11 +6,11 @@
  */
 
 import type { DecoratorFn } from '@storybook/react';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, FC, PropsWithChildren } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import type { CoreTheme } from '@kbn/core/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 
 type StoryContext = Parameters<DecoratorFn>[1];
 
@@ -28,13 +28,14 @@ export const useGlobalStorybookTheme = ({ globals: { euiTheme } }: StoryContext)
   };
 };
 
-export const GlobalStorybookThemeProviders: React.FC<{ storyContext: StoryContext }> = ({
-  children,
-  storyContext,
-}) => {
+export const GlobalStorybookThemeProviders: FC<
+  PropsWithChildren<{
+    storyContext: StoryContext;
+  }>
+> = ({ children, storyContext }) => {
   const { theme, theme$ } = useGlobalStorybookTheme(storyContext);
   return (
-    <KibanaThemeProvider theme$={theme$}>
+    <KibanaThemeProvider theme={{ theme$ }}>
       <EuiThemeProvider darkMode={theme.darkMode}>{children}</EuiThemeProvider>
     </KibanaThemeProvider>
   );
@@ -52,8 +53,8 @@ export const decorateWithGlobalStorybookThemeProviders: DecoratorFn = (
 const euiThemeFromId = (themeId: string): CoreTheme => {
   switch (themeId) {
     case 'v8.dark':
-      return { darkMode: true };
+      return { darkMode: true, name: 'amsterdam' };
     default:
-      return { darkMode: false };
+      return { darkMode: false, name: 'amsterdam' };
   }
 };

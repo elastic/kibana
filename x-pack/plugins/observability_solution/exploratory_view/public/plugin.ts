@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { BehaviorSubject } from 'rxjs';
 import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import {
+  AnalyticsServiceSetup,
   AppMountParameters,
   AppUpdater,
   CoreSetup,
@@ -68,7 +69,7 @@ export interface ExploratoryViewPublicPluginsStart {
   usageCollection: UsageCollectionSetup;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   home?: HomePublicPluginStart;
-  observabilityAIAssistant: ObservabilityAIAssistantPublicStart;
+  observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
 }
 
 export type ExploratoryViewPublicSetup = ReturnType<Plugin['setup']>;
@@ -84,6 +85,8 @@ export class Plugin
     >
 {
   private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
+
+  private analyticsService?: AnalyticsServiceSetup;
 
   constructor(private readonly initContext: PluginInitializerContext) {}
 
@@ -129,6 +132,8 @@ export class Plugin
       ],
     });
 
+    this.analyticsService = core.analytics;
+
     return {
       register: registerDataHandler,
     };
@@ -138,7 +143,10 @@ export class Plugin
     return {
       createExploratoryViewUrl,
       getAppDataView: getAppDataView(pluginsStart.dataViews),
-      ExploratoryViewEmbeddable: getExploratoryViewEmbeddable({ ...coreStart, ...pluginsStart }),
+      ExploratoryViewEmbeddable: getExploratoryViewEmbeddable(
+        { ...coreStart, ...pluginsStart },
+        this.analyticsService
+      ),
     };
   }
 }

@@ -22,6 +22,7 @@ export const ML_PAGES = {
   MEMORY_USAGE: 'memory_usage',
   DATA_FRAME_ANALYTICS_EXPLORATION: 'data_frame_analytics/exploration',
   DATA_FRAME_ANALYTICS_MAP: 'data_frame_analytics/map',
+  SUPPLIED_CONFIGURATIONS: 'supplied_configurations',
   /**
    * Page: Data Visualizer
    */
@@ -61,8 +62,11 @@ export const ML_PAGES = {
   ANOMALY_DETECTION_MODULES_VIEW_OR_CREATE: 'modules/check_view_or_create',
   SETTINGS: 'settings',
   CALENDARS_MANAGE: 'settings/calendars_list',
+  CALENDARS_DST_MANAGE: 'settings/calendars_dst_list',
   CALENDARS_NEW: 'settings/calendars_list/new_calendar',
+  CALENDARS_DST_NEW: 'settings/calendars_dst_list/new_calendar',
   CALENDARS_EDIT: 'settings/calendars_list/edit_calendar',
+  CALENDARS_DST_EDIT: 'settings/calendars_dst_list/edit_calendar',
   FILTER_LISTS_MANAGE: 'settings/filter_lists',
   FILTER_LISTS_NEW: 'settings/filter_lists/new_filter_list',
   FILTER_LISTS_EDIT: 'settings/filter_lists/edit_filter_list',
@@ -85,4 +89,4 @@ export const ML_PAGES = {
   AIOPS_CHANGE_POINT_DETECTION_INDEX_SELECT: 'aiops/change_point_detection_index_select',
 } as const;
 
-export type MlPages = typeof ML_PAGES[keyof typeof ML_PAGES];
+export type MlPages = (typeof ML_PAGES)[keyof typeof ML_PAGES];

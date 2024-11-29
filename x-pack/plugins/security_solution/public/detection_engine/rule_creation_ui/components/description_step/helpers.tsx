@@ -18,23 +18,20 @@ import {
 } from '@elastic/eui';
 import { ALERT_RISK_SCORE } from '@kbn/rule-data-utils';
 
-import { castEsToKbnFieldTypeName } from '@kbn/field-types';
-
 import { isEmpty } from 'lodash/fp';
 import React from 'react';
 import styled from 'styled-components';
-import { FieldIcon } from '@kbn/react-field';
 
 import type { ThreatMapping, Type, Threats } from '@kbn/securitysolution-io-ts-alerting-types';
 import { FilterBadgeGroup } from '@kbn/unified-search-plugin/public';
+import { IntervalAbbrScreenReader } from '../../../../common/components/accessibility';
 import type {
   RequiredFieldArray,
-  Threshold,
   AlertSuppressionMissingFieldsStrategy,
 } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { AlertSuppressionMissingFieldsStrategyEnum } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { MATCHES, AND, OR } from '../../../../common/components/threat_match/translations';
-import type { EqlOptionsSelected } from '../../../../../common/search_strategy';
+import type { EqlOptions } from '../../../../../common/search_strategy';
 import { assertUnreachable } from '../../../../../common/utility_types';
 import * as i18nSeverity from '../severity_mapping/translations';
 import * as i18nRiskScore from '../risk_score_mapping/translations';
@@ -47,12 +44,19 @@ import type {
   AboutStepSeverity,
   Duration,
 } from '../../../../detections/pages/detection_engine/rules/types';
-import { GroupByOptions } from '../../../../detections/pages/detection_engine/rules/types';
+import { AlertSuppressionDurationType } from '../../../../detections/pages/detection_engine/rules/types';
 import { defaultToEmptyTag } from '../../../../common/components/empty_value';
+import { RequiredFieldIcon } from '../../../rule_management/components/rule_details/required_field_icon';
 import { ThreatEuiFlexGroup } from './threat_description';
-import { AlertSuppressionTechnicalPreviewBadge } from './alert_suppression_technical_preview_badge';
-import { TechnicalPreviewBadge } from '../../../../common/components/technical_preview_badge';
+import { AlertSuppressionLabel } from './alert_suppression_label';
+import type { FieldValueThreshold } from '../threshold_input';
+
 const NoteDescriptionContainer = styled(EuiFlexItem)`
+  height: 105px;
+  overflow-y: hidden;
+`;
+
+const SetupDescriptionContainer = styled(EuiFlexItem)`
   height: 105px;
   overflow-y: hidden;
 `;
@@ -143,7 +147,7 @@ export const buildQueryBarDescription = ({
   return items;
 };
 
-export const buildEqlOptionsDescription = (eqlOptions: EqlOptionsSelected): ListItems[] => {
+export const buildEqlOptionsDescription = (eqlOptions: EqlOptions): ListItems[] => {
   let items: ListItems[] = [];
   if (!isEmpty(eqlOptions.eventCategoryField)) {
     items = [
@@ -477,7 +481,7 @@ export const buildRuleTypeDescription = (label: string, ruleType: Type): ListIte
       return [
         {
           title: label,
-          description: <TechnicalPreviewBadge label={i18n.ESQL_TYPE_DESCRIPTION} />,
+          description: i18n.ESQL_TYPE_DESCRIPTION,
         },
       ];
     }
@@ -486,20 +490,29 @@ export const buildRuleTypeDescription = (label: string, ruleType: Type): ListIte
   }
 };
 
-export const buildThresholdDescription = (label: string, threshold: Threshold): ListItems[] => [
-  {
-    title: label,
-    description: (
-      <>
-        {isEmpty(threshold.field[0])
-          ? `${i18n.THRESHOLD_RESULTS_ALL} >= ${threshold.value}`
-          : `${i18n.THRESHOLD_RESULTS_AGGREGATED_BY} ${
-              Array.isArray(threshold.field) ? threshold.field.join(',') : threshold.field
-            } >= ${threshold.value}`}
-      </>
-    ),
-  },
-];
+export const buildThresholdDescription = (
+  label: string,
+  threshold: FieldValueThreshold
+): ListItems[] => {
+  let thresholdDescription = isEmpty(threshold.field[0])
+    ? `${i18n.THRESHOLD_RESULTS_ALL} >= ${threshold.value}`
+    : `${i18n.THRESHOLD_RESULTS_AGGREGATED_BY} ${threshold.field.join(',')} >= ${threshold.value}`;
+
+  if (threshold.cardinality?.value && threshold.cardinality?.field.length > 0) {
+    thresholdDescription = i18n.THRESHOLD_CARDINALITY(
+      thresholdDescription,
+      threshold.cardinality.field[0],
+      threshold.cardinality.value
+    );
+  }
+
+  return [
+    {
+      title: label,
+      description: <>{thresholdDescription}</>,
+    },
+  ];
+};
 
 export const buildThreatMappingDescription = (
   title: string,
@@ -561,11 +574,7 @@ export const buildRequiredFieldsDescription = (
             <EuiFlexItem grow={false}>
               <EuiFlexGroup alignItems="center" gutterSize={'xs'}>
                 <EuiFlexItem grow={false}>
-                  <FieldIcon
-                    data-test-subj="field-type-icon"
-                    type={castEsToKbnFieldTypeName(rF.type)}
-                    label={rF.type}
-                  />
+                  <RequiredFieldIcon data-test-subj="field-type-icon" type={rF.type} />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <FieldTypeText grow={false} size={'s'}>
@@ -581,7 +590,11 @@ export const buildRequiredFieldsDescription = (
   ];
 };
 
-export const buildAlertSuppressionDescription = (label: string, values: string[]): ListItems[] => {
+export const buildAlertSuppressionDescription = (
+  label: string = i18n.ALERT_SUPPRESSION_LABEL,
+  values: string[],
+  ruleType: Type
+): ListItems[] => {
   if (isEmpty(values)) {
     return [];
   }
@@ -599,7 +612,7 @@ export const buildAlertSuppressionDescription = (label: string, values: string[]
     </EuiFlexGroup>
   );
 
-  const title = <AlertSuppressionTechnicalPreviewBadge label={label} />;
+  const title = <AlertSuppressionLabel label={label} ruleType={ruleType} />;
   return [
     {
       title,
@@ -611,14 +624,15 @@ export const buildAlertSuppressionDescription = (label: string, values: string[]
 export const buildAlertSuppressionWindowDescription = (
   label: string,
   value: Duration,
-  groupByRadioSelection: GroupByOptions
+  alertSuppressionDuration: AlertSuppressionDurationType,
+  ruleType: Type
 ): ListItems[] => {
   const description =
-    groupByRadioSelection === GroupByOptions.PerTimePeriod
+    alertSuppressionDuration === AlertSuppressionDurationType.PerTimePeriod
       ? `${value.value}${value.unit}`
       : i18n.ALERT_SUPPRESSION_PER_RULE_EXECUTION;
 
-  const title = <AlertSuppressionTechnicalPreviewBadge label={label} />;
+  const title = <AlertSuppressionLabel label={label} ruleType={ruleType} />;
   return [
     {
       title,
@@ -629,7 +643,8 @@ export const buildAlertSuppressionWindowDescription = (
 
 export const buildAlertSuppressionMissingFieldsDescription = (
   label: string,
-  value: AlertSuppressionMissingFieldsStrategy
+  value: AlertSuppressionMissingFieldsStrategy,
+  ruleType: Type
 ): ListItems[] => {
   if (isEmpty(value)) {
     return [];
@@ -640,11 +655,38 @@ export const buildAlertSuppressionMissingFieldsDescription = (
       ? i18n.ALERT_SUPPRESSION_SUPPRESS_ON_MISSING_FIELDS
       : i18n.ALERT_SUPPRESSION_DO_NOT_SUPPRESS_ON_MISSING_FIELDS;
 
-  const title = <AlertSuppressionTechnicalPreviewBadge label={label} />;
+  const title = <AlertSuppressionLabel label={label} ruleType={ruleType} />;
   return [
     {
       title,
       description,
+    },
+  ];
+};
+
+export const buildSetupDescription = (label: string, setup: string): ListItems[] => {
+  if (setup.trim() !== '') {
+    return [
+      {
+        title: label,
+        description: (
+          <SetupDescriptionContainer>
+            <div data-test-subj="setupDescriptionItem" className="eui-yScrollWithShadows">
+              {setup}
+            </div>
+          </SetupDescriptionContainer>
+        ),
+      },
+    ];
+  }
+  return [];
+};
+
+export const buildIntervalDescription = (label: string, value: string): ListItems[] => {
+  return [
+    {
+      title: label,
+      description: <IntervalAbbrScreenReader interval={value} />,
     },
   ];
 };

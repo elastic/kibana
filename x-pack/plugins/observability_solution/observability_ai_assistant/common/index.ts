@@ -8,7 +8,7 @@
 export type { Message, Conversation, KnowledgeBaseEntry } from './types';
 export type { ConversationCreateRequest } from './types';
 export { KnowledgeBaseEntryRole, MessageRole } from './types';
-export type { FunctionDefinition } from './functions/types';
+export type { FunctionDefinition, CompatibleJSONSchema } from './functions/types';
 export { FunctionVisibility } from './functions/function_visibility';
 export {
   VISUALIZE_ESQL_USER_INTENTIONS,
@@ -34,6 +34,19 @@ export {
   createInternalServerError,
   isTokenLimitReachedError,
   isChatCompletionError,
+  createFunctionNotFoundError,
 } from './conversation_complete';
 
+export {
+  aiAssistantLogsIndexPattern,
+  aiAssistantSimulatedFunctionCalling,
+  aiAssistantSearchConnectorIndexPattern,
+} from './ui_settings/settings_keys';
+
+export { concatenateChatCompletionChunks } from './utils/concatenate_chat_completion_chunks';
+
 export { isSupportedConnectorType } from './connectors';
+
+export { ShortIdTable } from './utils/short_id_table';
+
+export { KnowledgeBaseType } from './types';

@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import React, { createContext, useContext, Context, Dispatch, SetStateAction } from 'react';
+import React, {
+  createContext,
+  useContext,
+  Context,
+  Dispatch,
+  SetStateAction,
+  PropsWithChildren,
+} from 'react';
 import { JourneyStep } from '../../../../../../../../common/runtime_types';
 import {
   WaterfallData,
@@ -13,7 +20,7 @@ import {
   WaterfallMetadata,
 } from '../../../common/network_data/types';
 import { OnSidebarClick, OnElementClick, OnProjectionClick } from '../waterfall_flyout/use_flyout';
-import { SidebarItem } from '../../../common/network_data/types';
+import { WaterfallNetworkItem } from '../../../common/network_data/types';
 
 export type MarkerItems = Array<{
   id:
@@ -36,7 +43,7 @@ export interface IWaterfallContext {
   onSidebarClick?: OnSidebarClick;
   showOnlyHighlightedNetworkRequests: boolean;
   showCustomMarks: boolean;
-  sidebarItems?: SidebarItem[];
+  sidebarItems?: WaterfallNetworkItem[];
   metadata: WaterfallMetadata;
   renderTooltipItem: (
     item: WaterfallDataEntry['config']['tooltipProps'],
@@ -54,7 +61,7 @@ export interface IWaterfallContext {
 
 export const WaterfallContext = createContext<Partial<IWaterfallContext>>({});
 
-export const WaterfallProvider: React.FC<IWaterfallContext> = ({
+export const WaterfallProvider: React.FC<PropsWithChildren<IWaterfallContext>> = ({
   children,
   data,
   markerItems,

@@ -5,26 +5,25 @@
  * 2.0.
  */
 
-import React, { type FC } from 'react';
+import React, { type FC, type PropsWithChildren } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { renderHook } from '@testing-library/react-hooks';
+import { waitFor, renderHook } from '@testing-library/react';
 
 import { useColumns } from './use_columns';
 
-jest.mock('../../../../../shared_imports');
 jest.mock('../../../../app_dependencies');
 
 describe('Transform: Job List Columns', () => {
   test('useColumns()', async () => {
     const queryClient = new QueryClient();
-    const wrapper: FC = ({ children }) => (
+    const wrapper: FC<PropsWithChildren<unknown>> = ({ children }) => (
       <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
     );
-    const { result, waitForNextUpdate } = renderHook(() => useColumns([], () => {}, 1, [], false), {
+    const { result } = renderHook(() => useColumns([], () => {}, 1, [], false), {
       wrapper,
     });
 
-    await waitForNextUpdate();
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     const columns: ReturnType<typeof useColumns>['columns'] = result.current.columns;
 

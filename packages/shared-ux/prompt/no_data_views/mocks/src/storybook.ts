@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { action } from '@storybook/addon-actions';
@@ -33,16 +34,18 @@ export class StorybookMock extends AbstractStorybookMock<
       defaultValue: true,
     },
     dataViewsDocLink: {
-      options: ['some/link', undefined],
+      options: ['dataviews/link', undefined],
       control: { type: 'radio' },
-    },
-    esqlDocLink: {
-      options: ['some/link', undefined],
-      control: { type: 'radio' },
+      defaultValue: 'dataviews/link',
     },
     canTryEsql: {
       control: 'boolean',
       defaultValue: true,
+    },
+    esqlDocLink: {
+      options: ['esql/link', undefined],
+      control: { type: 'radio' },
+      defaultValue: 'esql/link',
     },
   };
   dependencies = [];
@@ -58,7 +61,7 @@ export class StorybookMock extends AbstractStorybookMock<
     let onTryESQL;
 
     if (canTryEsql !== false) {
-      onTryESQL = action('onTryESQL');
+      onTryESQL = action('onTryESQL-from-services');
     }
 
     return {

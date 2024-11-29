@@ -9,7 +9,8 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { rollingTimeWindowTypeSchema, SLOWithSummaryResponse } from '@kbn/slo-schema';
-import { useKibana } from '../../../utils/kibana_react';
+import { SloTabId } from './slo_details';
+import { useKibana } from '../../../hooks/use_kibana';
 import { toDurationAdverbLabel, toDurationLabel } from '../../../utils/slo/labels';
 
 import { ErrorBudgetActions } from './error_budget_actions';
@@ -19,6 +20,7 @@ interface Props {
   showTitle?: boolean;
   isMouseOver?: boolean;
   setDashboardAttachmentReady?: (value: boolean) => void;
+  selectedTabId?: SloTabId;
 }
 
 export function ErrorBudgetHeader({
@@ -26,6 +28,7 @@ export function ErrorBudgetHeader({
   showTitle = true,
   isMouseOver,
   setDashboardAttachmentReady,
+  selectedTabId,
 }: Props) {
   const { executionContext } = useKibana().services;
   const executionContextName = executionContext.get().name;
@@ -57,16 +60,18 @@ export function ErrorBudgetHeader({
           )}
         </EuiFlexGroup>
       </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiText color="subdued" size="s">
-          {rollingTimeWindowTypeSchema.is(slo.timeWindow.type)
-            ? i18n.translate('xpack.slo.sloDetails.errorBudgetChartPanel.duration', {
-                defaultMessage: 'Last {duration}',
-                values: { duration: toDurationLabel(slo.timeWindow.duration) },
-              })
-            : toDurationAdverbLabel(slo.timeWindow.duration)}
-        </EuiText>
-      </EuiFlexItem>
+      {selectedTabId !== 'history' && (
+        <EuiFlexItem>
+          <EuiText color="subdued" size="s">
+            {rollingTimeWindowTypeSchema.is(slo.timeWindow.type)
+              ? i18n.translate('xpack.slo.sloDetails.errorBudgetChartPanel.duration', {
+                  defaultMessage: 'Last {duration}',
+                  values: { duration: toDurationLabel(slo.timeWindow.duration) },
+                })
+              : toDurationAdverbLabel(slo.timeWindow.duration)}
+          </EuiText>
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 }

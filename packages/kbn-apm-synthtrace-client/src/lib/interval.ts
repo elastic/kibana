@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import { castArray } from 'lodash';
 import moment, { unitOfTime } from 'moment';
 import { SynthtraceGenerator } from '../types';
@@ -32,6 +34,10 @@ interface IntervalOptions {
   rate?: number;
 }
 
+interface StepDetails {
+  stepMilliseconds: number;
+}
+
 export class Interval<TFields extends Fields = Fields> {
   private readonly intervalAmount: number;
   private readonly intervalUnit: unitOfTime.DurationConstructor;
@@ -44,12 +50,16 @@ export class Interval<TFields extends Fields = Fields> {
     this._rate = options.rate || 1;
   }
 
+  private getIntervalMilliseconds(): number {
+    return moment.duration(this.intervalAmount, this.intervalUnit).asMilliseconds();
+  }
+
   private getTimestamps() {
     const from = this.options.from.getTime();
     const to = this.options.to.getTime();
 
     let time: number = from;
-    const diff = moment.duration(this.intervalAmount, this.intervalUnit).asMilliseconds();
+    const diff = this.getIntervalMilliseconds();
 
     const timestamps: number[] = [];
 
@@ -66,15 +76,19 @@ export class Interval<TFields extends Fields = Fields> {
   *generator<TGeneratedFields extends Fields = TFields>(
     map: (
       timestamp: number,
-      index: number
+      index: number,
+      stepDetails: StepDetails
     ) => Serializable<TGeneratedFields> | Array<Serializable<TGeneratedFields>>
   ): SynthtraceGenerator<TGeneratedFields> {
     const timestamps = this.getTimestamps();
+    const stepDetails: StepDetails = {
+      stepMilliseconds: this.getIntervalMilliseconds(),
+    };
 
     let index = 0;
 
     for (const timestamp of timestamps) {
-      const events = castArray(map(timestamp, index));
+      const events = castArray(map(timestamp, index, stepDetails));
       index++;
       for (const event of events) {
         yield event;

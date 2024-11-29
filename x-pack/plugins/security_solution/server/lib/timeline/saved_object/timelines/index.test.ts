@@ -21,10 +21,10 @@ import {
 import { convertSavedObjectToSavedTimeline } from './convert_saved_object_to_savedtimeline';
 import { getNotesByTimelineId, persistNote } from '../notes/saved_object';
 import { getAllPinnedEventsByTimelineId, persistPinnedEventOnTimeline } from '../pinned_events';
-import { TimelineType } from '../../../../../common/api/timeline';
+import { TimelineTypeEnum } from '../../../../../common/api/timeline';
 import type {
-  AllTimelinesResponse,
-  ResolvedTimelineWithOutcomeSavedObject,
+  GetTimelinesResponse,
+  ResolvedTimeline,
   SavedTimeline,
 } from '../../../../../common/api/timeline';
 import {
@@ -141,7 +141,7 @@ describe('saved_object', () => {
       pageSize: 10,
       pageIndex: 1,
     };
-    let result = null as unknown as AllTimelinesResponse;
+    let result = null as unknown as GetTimelinesResponse;
     beforeEach(async () => {
       (convertSavedObjectToSavedTimeline as jest.Mock).mockReturnValue(mockGetTimelineValue);
       mockFindSavedObject = jest
@@ -275,7 +275,7 @@ describe('saved_object', () => {
   describe('resolveTimelineOrNull', () => {
     let mockResolveSavedObject: jest.Mock;
     let mockRequest: FrameworkRequest;
-    let result: ResolvedTimelineWithOutcomeSavedObject | null = null;
+    let result: ResolvedTimeline | null = null;
     beforeEach(async () => {
       (convertSavedObjectToSavedTimeline as jest.Mock).mockReturnValue(mockResolvedTimeline);
       mockResolveSavedObject = jest.fn().mockReturnValue(mockResolvedSavedObject);
@@ -455,10 +455,10 @@ describe('saved_object', () => {
     });
 
     test('should get draft filtered by current user', async () => {
-      await getDraftTimeline(mockRequest, TimelineType.default);
+      await getDraftTimeline(mockRequest, TimelineTypeEnum.default);
       expect(mockFindSavedObject).toBeCalledWith({
         filter:
-          'not siem-ui-timeline.attributes.timelineType: template and siem-ui-timeline.attributes.status: draft and not siem-ui-timeline.attributes.status: immutable and siem-ui-timeline.attributes.updatedBy: username and siem-ui-timeline.attributes.createdBy: username',
+          'not siem-ui-timeline.attributes.timelineType: template and siem-ui-timeline.attributes.status: draft and not siem-ui-timeline.attributes.status: immutable and siem-ui-timeline.attributes.updatedBy: "username" and siem-ui-timeline.attributes.createdBy: "username"',
         sortField: 'created',
         sortOrder: 'desc',
         perPage: 1,

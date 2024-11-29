@@ -6,7 +6,7 @@
  */
 
 import type { GlobalSearchResult } from '@kbn/global-search-plugin/common/types';
-import { Tag } from '@kbn/saved-objects-tagging-plugin/public';
+import type { Tag } from '@kbn/saved-objects-tagging-oss-plugin/common';
 import { resultToOption } from './result_to_option';
 
 const createSearchResult = (parts: Partial<GlobalSearchResult> = {}): GlobalSearchResult => ({
@@ -61,6 +61,15 @@ describe('resultToOption', () => {
     );
   });
 
+  it('uses icon for `connector` type', () => {
+    const input = createSearchResult({ type: 'connector', icon: 'connector-icon' });
+    expect(resultToOption(input, [])).toEqual(
+      expect.objectContaining({
+        icon: { type: 'connector-icon' },
+      })
+    );
+  });
+
   it('does not use icon for other types', () => {
     const input = createSearchResult({ type: 'dashboard', icon: 'dash-icon' });
     expect(resultToOption(input, [])).toEqual(
@@ -106,21 +115,20 @@ describe('resultToOption', () => {
       meta: { categoryLabel: 'category', displayName: 'foo', tagIds: ['known', 'unknown'] },
     });
 
-    const getTag = (tagId: string): Tag | undefined => {
-      if (tagId === 'known') {
-        return {
+    const getTagList = (): Tag[] => {
+      return [
+        {
           id: 'known',
           name: 'Known',
           description: 'Known',
           managed: false,
           color: '#000000',
-        };
-      }
+        },
+      ];
     };
-
     const logSpy = jest.spyOn(console, 'warn').mockImplementation();
 
-    const option = resultToOption(input, [], getTag);
+    const option = resultToOption(input, [], getTagList);
     expect(logSpy).toBeCalledWith(
       'SearchBar: Tag with id "unknown" not found. Tag "unknown" is referenced by the search result "dashboard:id". Skipping displaying the missing tag.'
     );

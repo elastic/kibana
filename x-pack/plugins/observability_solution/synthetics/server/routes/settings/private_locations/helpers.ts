@@ -13,6 +13,22 @@ import type {
 import { PrivateLocation } from '../../../../common/runtime_types';
 
 export const toClientContract = (
+  location: PrivateLocationAttributes,
+  agentPolicies?: AgentPolicyInfo[]
+): PrivateLocation => {
+  const agPolicy = agentPolicies?.find((policy) => policy.id === location.agentPolicyId);
+  return {
+    label: location.label,
+    id: location.id,
+    agentPolicyId: location.agentPolicyId,
+    isServiceManaged: false,
+    isInvalid: !Boolean(agPolicy),
+    tags: location.tags,
+    geo: location.geo,
+  };
+};
+
+export const allLocationsToClientContract = (
   attributes: SyntheticsPrivateLocationsAttributes,
   agentPolicies?: AgentPolicyInfo[]
 ): SyntheticsPrivateLocations => {
@@ -26,7 +42,6 @@ export const toClientContract = (
       isInvalid: !Boolean(agPolicy),
       tags: location.tags,
       geo: location.geo,
-      namespace: agPolicy?.namespace,
     };
   });
 };

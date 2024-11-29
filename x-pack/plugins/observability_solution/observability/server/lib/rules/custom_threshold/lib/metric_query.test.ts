@@ -7,12 +7,12 @@
 
 import moment from 'moment';
 import {
-  Comparator,
   Aggregators,
   CustomMetricExpressionParams,
   SearchConfigurationType,
 } from '../../../../../common/custom_threshold_rule/types';
 import { getElasticsearchMetricQuery } from './metric_query';
+import { COMPARATORS } from '@kbn/alerting-comparators';
 
 describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
   const expressionParams: CustomMetricExpressionParams = {
@@ -26,7 +26,7 @@ describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
     timeUnit: 'm',
     timeSize: 1,
     threshold: [1],
-    comparator: Comparator.GT,
+    comparator: COMPARATORS.GREATER_THAN,
   };
   const searchConfiguration: SearchConfigurationType = {
     index: {
@@ -41,6 +41,11 @@ describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
       language: 'kuery',
       query: '',
     },
+  };
+  const esQueryConfig = {
+    allowLeadingWildcards: false,
+    queryStringOptions: {},
+    ignoreFilterIfFieldNotInIndex: false,
   };
 
   const groupBy = 'host.doggoname';
@@ -58,12 +63,13 @@ describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
       100,
       true,
       searchConfiguration,
+      esQueryConfig,
       void 0,
       groupBy
     );
     test('includes a range filter', () => {
       expect(
-        searchBody.query.bool.filter.find((filter) => filter.hasOwnProperty('range'))
+        searchBody.query.bool.filter.find((filter) => Object.hasOwn(filter, 'range'))
       ).toBeTruthy();
     });
 
@@ -114,12 +120,13 @@ describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
       100,
       true,
       currentSearchConfiguration,
+      esQueryConfig,
       void 0,
       groupBy
     );
     test('includes a range filter', () => {
       expect(
-        searchBody.query.bool.filter.find((filter) => filter.hasOwnProperty('range'))
+        searchBody.query.bool.filter.find((filter) => Object.hasOwn(filter, 'range'))
       ).toBeTruthy();
     });
 
@@ -225,12 +232,13 @@ describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
       100,
       true,
       currentSearchConfiguration,
+      esQueryConfig,
       void 0,
       groupBy
     );
     test('includes a range filter', () => {
       expect(
-        searchBody.query.bool.filter.find((filter) => filter.hasOwnProperty('range'))
+        searchBody.query.bool.filter.find((filter) => Object.hasOwn(filter, 'range'))
       ).toBeTruthy();
     });
 

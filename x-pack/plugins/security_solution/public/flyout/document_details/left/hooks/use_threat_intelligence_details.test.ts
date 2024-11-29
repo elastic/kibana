@@ -6,27 +6,26 @@
  */
 
 import { useThreatIntelligenceDetails } from './use_threat_intelligence_details';
-import { renderHook } from '@testing-library/react-hooks';
-
+import { renderHook } from '@testing-library/react';
+import { SecurityPageName } from '@kbn/deeplinks-security';
 import { useTimelineEventsDetails } from '../../../../timelines/containers/details';
-import { useSourcererDataView } from '../../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { useRouteSpy } from '../../../../common/utils/route/use_route_spy';
-import { useLeftPanelContext } from '../context';
-import { useInvestigationTimeEnrichment } from '../../../../common/containers/cti/event_enrichment';
-import { SecurityPageName } from '../../../../../common/constants';
+import { useDocumentDetailsContext } from '../../shared/context';
+import { useInvestigationTimeEnrichment } from '../../shared/hooks/use_investigation_enrichment';
 import type { RouteSpyState } from '../../../../common/utils/route/types';
 import {
-  type GetBasicDataFromDetailsData,
+  type UseBasicDataFromDetailsDataResult,
   useBasicDataFromDetailsData,
-} from '../../../../timelines/components/side_panel/event_details/helpers';
-import { mockContextValue } from '../mocks/mock_context';
+} from '../../shared/hooks/use_basic_data_from_details_data';
+import { mockContextValue } from '../../shared/mocks/mock_context';
 
 jest.mock('../../../../timelines/containers/details');
-jest.mock('../../../../common/containers/sourcerer');
+jest.mock('../../../../sourcerer/containers');
 jest.mock('../../../../common/utils/route/use_route_spy');
-jest.mock('../context');
-jest.mock('../../../../common/containers/cti/event_enrichment');
-jest.mock('../../../../timelines/components/side_panel/event_details/helpers');
+jest.mock('../../shared/context');
+jest.mock('../../shared/hooks/use_investigation_enrichment');
+jest.mock('../../shared/hooks/use_basic_data_from_details_data');
 
 describe('useThreatIntelligenceDetails', () => {
   beforeEach(() => {
@@ -43,18 +42,15 @@ describe('useThreatIntelligenceDetails', () => {
 
     jest
       .mocked(useBasicDataFromDetailsData)
-      .mockReturnValue({ isAlert: true } as unknown as GetBasicDataFromDetailsData);
+      .mockReturnValue({ isAlert: true } as unknown as UseBasicDataFromDetailsDataResult);
 
     jest.mocked(useSourcererDataView).mockReturnValue({
-      runtimeMappings: {},
       browserFields: {},
       dataViewId: '',
       loading: false,
       indicesExist: true,
-      patternList: [],
       selectedPatterns: [],
-      indexPattern: { fields: [], title: '' },
-      sourcererDataView: undefined,
+      sourcererDataView: {},
     });
 
     jest
@@ -64,7 +60,7 @@ describe('useThreatIntelligenceDetails', () => {
         () => {},
       ]);
 
-    jest.mocked(useLeftPanelContext).mockReturnValue(mockContextValue);
+    jest.mocked(useDocumentDetailsContext).mockReturnValue(mockContextValue);
   });
 
   afterEach(() => {

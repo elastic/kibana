@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { sanitizeRequest, getRequestWithStreamOption } from './openai_utils';
+import { sanitizeRequest, getRequestWithStreamOption, removeEndpointFromUrl } from './openai_utils';
 import {
   DEFAULT_OPENAI_MODEL,
   OPENAI_CHAT_URL,
@@ -122,12 +122,67 @@ describe('Open AI Utils', () => {
         const sanitizedBodyString = getRequestWithStreamOption(
           url,
           JSON.stringify(body),
+          false,
+          DEFAULT_OPENAI_MODEL
+        );
+        expect(JSON.parse(sanitizedBodyString)).toEqual({
+          messages: [{ content: 'This is a test', role: 'user' }],
+          model: 'gpt-4',
+          stream: false,
+        });
+      });
+    });
+    it('sets stream_options when stream is true', () => {
+      const body = {
+        model: 'gpt-4',
+        messages: [
+          {
+            role: 'user',
+            content: 'This is a test',
+          },
+        ],
+      };
+
+      [OPENAI_CHAT_URL, OPENAI_LEGACY_COMPLETION_URL].forEach((url: string) => {
+        const sanitizedBodyString = getRequestWithStreamOption(
+          url,
+          JSON.stringify(body),
           true,
           DEFAULT_OPENAI_MODEL
         );
-        expect(sanitizedBodyString).toEqual(
-          `{\"model\":\"gpt-4\",\"messages\":[{\"role\":\"user\",\"content\":\"This is a test\"}],\"stream\":true}`
+        expect(JSON.parse(sanitizedBodyString)).toEqual({
+          messages: [{ content: 'This is a test', role: 'user' }],
+          model: 'gpt-4',
+          stream: true,
+          stream_options: {
+            include_usage: true,
+          },
+        });
+      });
+    });
+    it('does not set stream_options when stream is false', () => {
+      const body = {
+        model: 'gpt-4',
+        messages: [
+          {
+            role: 'user',
+            content: 'This is a test',
+          },
+        ],
+      };
+
+      [OPENAI_CHAT_URL, OPENAI_LEGACY_COMPLETION_URL].forEach((url: string) => {
+        const sanitizedBodyString = getRequestWithStreamOption(
+          url,
+          JSON.stringify(body),
+          false,
+          DEFAULT_OPENAI_MODEL
         );
+        expect(JSON.parse(sanitizedBodyString)).toEqual({
+          messages: [{ content: 'This is a test', role: 'user' }],
+          model: 'gpt-4',
+          stream: false,
+        });
       });
     });
 
@@ -180,6 +235,25 @@ describe('Open AI Utils', () => {
         DEFAULT_OPENAI_MODEL
       );
       expect(sanitizedBodyString).toEqual(bodyString);
+    });
+  });
+
+  describe('removeEndpointFromUrl', () => {
+    test('removes "/chat/completions" from the end of the URL', () => {
+      const originalUrl = 'https://api.openai.com/v1/chat/completions';
+      const expectedUrl = 'https://api.openai.com/v1';
+      expect(removeEndpointFromUrl(originalUrl)).toBe(expectedUrl);
+    });
+
+    test('does not modify the URL if it does not end with "/chat/completions"', () => {
+      const originalUrl = 'https://api.openai.com/v1/some/other/endpoint';
+      expect(removeEndpointFromUrl(originalUrl)).toBe(originalUrl);
+    });
+
+    test('handles URLs with a trailing slash correctly', () => {
+      const originalUrl = 'https://api.openai.com/v1/chat/completions/';
+      const expectedUrl = 'https://api.openai.com/v1';
+      expect(removeEndpointFromUrl(originalUrl)).toBe(expectedUrl);
     });
   });
 });

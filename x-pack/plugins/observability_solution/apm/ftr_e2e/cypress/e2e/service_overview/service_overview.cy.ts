@@ -22,18 +22,15 @@ const baseUrl = url.format({
 
 const apiRequestsToIntercept = [
   {
-    endpoint:
-      '/internal/apm/services/opbeans-node/transactions/groups/main_statistics?*',
+    endpoint: '/internal/apm/services/opbeans-node/transactions/groups/main_statistics?*',
     aliasName: 'transactionsGroupsMainStatisticsRequest',
   },
   {
-    endpoint:
-      '/internal/apm/services/opbeans-node/errors/groups/main_statistics?*',
+    endpoint: '/internal/apm/services/opbeans-node/errors/groups/main_statistics?*',
     aliasName: 'errorsGroupsMainStatisticsRequest',
   },
   {
-    endpoint:
-      '/internal/apm/services/opbeans-node/transaction/charts/breakdown?*',
+    endpoint: '/internal/apm/services/opbeans-node/transaction/charts/breakdown?*',
     aliasName: 'transactionsBreakdownRequest',
   },
   {
@@ -44,8 +41,7 @@ const apiRequestsToIntercept = [
 
 const apiRequestsToInterceptWithComparison = [
   {
-    endpoint:
-      '/internal/apm/services/opbeans-node/transactions/charts/latency?*',
+    endpoint: '/internal/apm/services/opbeans-node/transactions/charts/latency?*',
     aliasName: 'latencyRequest',
   },
   {
@@ -53,18 +49,15 @@ const apiRequestsToInterceptWithComparison = [
     aliasName: 'throughputRequest',
   },
   {
-    endpoint:
-      '/internal/apm/services/opbeans-node/transactions/charts/error_rate?*',
+    endpoint: '/internal/apm/services/opbeans-node/transactions/charts/error_rate?*',
     aliasName: 'errorRateRequest',
   },
   {
-    endpoint:
-      '/internal/apm/services/opbeans-node/transactions/groups/detailed_statistics?*',
+    endpoint: '/internal/apm/services/opbeans-node/transactions/groups/detailed_statistics?*',
     aliasName: 'transactionsGroupsDetailedStatisticsRequest',
   },
   {
-    endpoint:
-      '/internal/apm/services/opbeans-node/service_overview_instances/main_statistics?*',
+    endpoint: '/internal/apm/services/opbeans-node/service_overview_instances/main_statistics?*',
     aliasName: 'instancesMainStatisticsRequest',
   },
 
@@ -75,9 +68,7 @@ const apiRequestsToInterceptWithComparison = [
   },
 ];
 
-const aliasNamesNoComparison = apiRequestsToIntercept.map(
-  ({ aliasName }) => `@${aliasName}`
-);
+const aliasNamesNoComparison = apiRequestsToIntercept.map(({ aliasName }) => `@${aliasName}`);
 
 const aliasNamesWithComparison = apiRequestsToInterceptWithComparison.map(
   ({ aliasName }) => `@${aliasName}`
@@ -125,55 +116,35 @@ describe('Service Overview', () => {
     });
 
     it('persists transaction type selected when clicking on Transactions tab', () => {
-      cy.intercept(
-        'GET',
-        '/internal/apm/services/opbeans-node/transaction_types?*'
-      ).as('transactionTypesRequest');
+      cy.intercept('GET', '/internal/apm/services/opbeans-node/transaction_types?*').as(
+        'transactionTypesRequest'
+      );
 
       cy.visitKibana(baseUrl);
 
       cy.wait('@transactionTypesRequest');
 
-      cy.getByTestSubj('headerFilterTransactionType').should(
-        'have.value',
-        'request'
-      );
+      cy.getByTestSubj('headerFilterTransactionType').should('have.value', 'request');
       cy.getByTestSubj('headerFilterTransactionType').select('Worker');
-      cy.getByTestSubj('headerFilterTransactionType').should(
-        'have.value',
-        'Worker'
-      );
+      cy.getByTestSubj('headerFilterTransactionType').should('have.value', 'Worker');
       cy.contains('Transactions').click();
-      cy.getByTestSubj('headerFilterTransactionType').should(
-        'have.value',
-        'Worker'
-      );
+      cy.getByTestSubj('headerFilterTransactionType').should('have.value', 'Worker');
     });
 
     it('persists transaction type selected when clicking on View Transactions link', () => {
-      cy.intercept(
-        'GET',
-        '/internal/apm/services/opbeans-node/transaction_types?*'
-      ).as('transactionTypesRequest');
+      cy.intercept('GET', '/internal/apm/services/opbeans-node/transaction_types?*').as(
+        'transactionTypesRequest'
+      );
 
       cy.visitKibana(baseUrl);
 
       cy.wait('@transactionTypesRequest');
-      cy.getByTestSubj('headerFilterTransactionType').should(
-        'have.value',
-        'request'
-      );
+      cy.getByTestSubj('headerFilterTransactionType').should('have.value', 'request');
       cy.getByTestSubj('headerFilterTransactionType').select('Worker');
-      cy.getByTestSubj('headerFilterTransactionType').should(
-        'have.value',
-        'Worker'
-      );
+      cy.getByTestSubj('headerFilterTransactionType').should('have.value', 'Worker');
 
       cy.contains('View transactions').click();
-      cy.getByTestSubj('headerFilterTransactionType').should(
-        'have.value',
-        'Worker'
-      );
+      cy.getByTestSubj('headerFilterTransactionType').should('have.value', 'Worker');
     });
   });
 
@@ -181,9 +152,7 @@ describe('Service Overview', () => {
     it('hides dependency tab when RUM service', () => {
       cy.loginAsViewerUser();
 
-      cy.intercept('GET', '/internal/apm/services/opbeans-rum/agent?*').as(
-        'agentRequest'
-      );
+      cy.intercept('GET', '/internal/apm/services/opbeans-rum/agent?*').as('agentRequest');
 
       cy.visitKibana(
         url.format({
@@ -222,21 +191,10 @@ describe('Service Overview', () => {
     it('with the correct environment when changing the environment', () => {
       cy.wait(aliasNames);
 
-      cy.intercept('GET', 'internal/apm/suggestions?*').as(
-        'suggestionsRequest'
-      );
-
-      cy.getByTestSubj('environmentFilter')
-        .find('input')
-        .type('{selectall}production', { force: true });
-
-      cy.expectAPIsToHaveBeenCalledWith({
-        apisIntercepted: ['@suggestionsRequest'],
-        value: 'fieldValue=production',
-      });
-
+      cy.getByTestSubj('environmentFilter').find('input').click();
       cy.getByTestSubj('comboBoxOptionsList environmentFilter-optionsList')
-        .contains('production')
+        .should('be.visible')
+        .contains('button', 'production')
         .click({ force: true });
 
       cy.expectAPIsToHaveBeenCalledWith({

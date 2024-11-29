@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import { ListOperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { OPERATOR_TYPE_LABELS_EXCLUDED, OPERATOR_TYPE_LABELS_INCLUDED } from '../conditions.config';
 import { getEntryOperator, getValue, getValueExpression } from './entry_content.helper';
@@ -14,6 +16,10 @@ import {
   includedListTypeEntry,
   includedMatchTypeEntry,
 } from '../../../mocks/entry.mock';
+import {
+  MockedShowValueListModal,
+  mockShowValueListModal,
+} from '../../../mocks/value_list_modal.mock';
 
 describe('entry_content.helper', () => {
   describe('getEntryOperator', () => {
@@ -62,36 +68,79 @@ describe('entry_content.helper', () => {
   describe('getValueExpression', () => {
     it('should render multiple values in badges when operator type is match_any and values is Array', () => {
       const wrapper = render(
-        getValueExpression(ListOperatorTypeEnum.MATCH_ANY, 'included', ['value 1', 'value 2'])
+        getValueExpression(
+          ListOperatorTypeEnum.MATCH_ANY,
+          'included',
+          ['value 1', 'value 2'],
+          MockedShowValueListModal
+        )
       );
       expect(wrapper.getByTestId('matchAnyBadge0')).toHaveTextContent('value 1');
       expect(wrapper.getByTestId('matchAnyBadge1')).toHaveTextContent('value 2');
     });
     it('should return one value when operator type is match_any and values is not Array', () => {
       const wrapper = render(
-        getValueExpression(ListOperatorTypeEnum.MATCH_ANY, 'included', 'value 1')
+        getValueExpression(
+          ListOperatorTypeEnum.MATCH_ANY,
+          'included',
+          'value 1',
+          MockedShowValueListModal
+        )
       );
       expect(wrapper.getByTestId('entryValueExpression')).toHaveTextContent('value 1');
     });
     it('should return one value when operator type is a single value', () => {
       const wrapper = render(
-        getValueExpression(ListOperatorTypeEnum.EXISTS, 'included', 'value 1')
+        getValueExpression(
+          ListOperatorTypeEnum.EXISTS,
+          'included',
+          'value 1',
+          MockedShowValueListModal
+        )
       );
       expect(wrapper.getByTestId('entryValueExpression')).toHaveTextContent('value 1');
     });
     it('should return value with warning icon when the value contains a leading or trailing space', () => {
       const wrapper = render(
-        getValueExpression(ListOperatorTypeEnum.EXISTS, 'included', ' value 1')
+        getValueExpression(
+          ListOperatorTypeEnum.EXISTS,
+          'included',
+          ' value 1',
+          MockedShowValueListModal
+        )
       );
       expect(wrapper.getByTestId('entryValueExpression')).toHaveTextContent(' value 1');
       expect(wrapper.getByTestId('valueWithSpaceWarningTooltip')).toBeInTheDocument();
     });
     it('should return value without warning icon when the value does not contain a leading or trailing space', () => {
       const wrapper = render(
-        getValueExpression(ListOperatorTypeEnum.EXISTS, 'included', 'value 1')
+        getValueExpression(
+          ListOperatorTypeEnum.EXISTS,
+          'included',
+          'value 1',
+          MockedShowValueListModal
+        )
       );
       expect(wrapper.getByTestId('entryValueExpression')).toHaveTextContent(' value 1');
       expect(wrapper.queryByTestId('valueWithSpaceWarningTooltip')).not.toBeInTheDocument();
+    });
+    it('should render value list modal when operator type is list', () => {
+      mockShowValueListModal.mockReset();
+      render(
+        getValueExpression(
+          ListOperatorTypeEnum.LIST,
+          'included',
+          'value 1',
+          MockedShowValueListModal
+        )
+      );
+      expect(mockShowValueListModal).toHaveBeenCalledWith(
+        expect.objectContaining({
+          children: 'value 1',
+          listId: 'value 1',
+          shouldShowContentIfModalNotAvailable: true,
+        })
+      );
     });
   });
 });

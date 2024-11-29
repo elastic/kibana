@@ -6,14 +6,7 @@
  */
 import React from 'react';
 
-import {
-  Chart,
-  Partition,
-  PartitionLayout,
-  Datum,
-  PartialTheme,
-  Settings,
-} from '@elastic/charts';
+import { Chart, Partition, PartitionLayout, Datum, PartialTheme, Settings } from '@elastic/charts';
 
 import {
   EuiFlexItem,
@@ -62,13 +55,7 @@ export function SunburstChart({
   // The loader needs to be wrapped inside a div with fixed height to avoid layout shift
   const ProgressLoader = (
     <div style={{ height: '5px' }}>
-      {isLoading && (
-        <EuiProgress
-          size="xs"
-          color="accent"
-          style={{ background: 'transparent' }}
-        />
-      )}
+      {isLoading && <EuiProgress size="xs" color="accent" style={{ background: 'transparent' }} />}
     </div>
   );
 
@@ -143,20 +130,12 @@ const noResultsFoundStyle = css({
   justifyContent: 'center',
 });
 export function NoResultsFound() {
-  const noResultsFoundText = i18n.translate(
-    'xpack.apm.mobile.charts.noResultsFound',
-    {
-      defaultMessage: 'No results found',
-    }
-  );
+  const noResultsFoundText = i18n.translate('xpack.apm.mobile.charts.noResultsFound', {
+    defaultMessage: 'No results found',
+  });
   return (
     <div css={noResultsFoundStyle}>
-      <EuiText
-        data-test-subj="mostUsedNoResultsFound"
-        textAlign="center"
-        color="subdued"
-        size="xs"
-      >
+      <EuiText data-test-subj="mostUsedNoResultsFound" textAlign="center" color="subdued" size="xs">
         <EuiIcon type={IconChartDonut} color="subdued" size="l" />
         <EuiSpacer size="s" />
         <p>{noResultsFoundText}</p>

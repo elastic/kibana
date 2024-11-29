@@ -112,7 +112,11 @@ export class SyntheticsRunner {
     let results: PromiseType<ReturnType<typeof syntheticsRun>> = {};
     for (let i = 0; i < noOfRuns; i++) {
       results = await syntheticsRun({
-        params: { kibanaUrl: this.kibanaUrl, getService: this.getService },
+        params: {
+          kibanaUrl: this.kibanaUrl,
+          getService: this.getService,
+          elasticsearchUrl: this.elasticsearchUrl,
+        },
         playwrightOptions: {
           headless: headless ?? !CI,
           testIdAttribute: 'data-test-subj',
@@ -126,7 +130,7 @@ export class SyntheticsRunner {
             dir: '.journeys/videos',
           },
         },
-        match: match === 'undefined' ? '' : match,
+        grepOpts: { match: match === 'undefined' ? '' : match },
         pauseOnError: pauseOnError ?? !CI,
         screenshots: 'only-on-failure',
         reporter: TestReporter,

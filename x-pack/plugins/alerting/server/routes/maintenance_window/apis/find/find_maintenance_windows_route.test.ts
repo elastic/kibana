@@ -22,6 +22,9 @@ jest.mock('../../../../lib/license_api_access', () => ({
 }));
 
 const mockMaintenanceWindows = {
+  page: 1,
+  perPage: 3,
+  total: 2,
   data: [
     {
       ...getMockMaintenanceWindow(),
@@ -56,15 +59,79 @@ describe('findMaintenanceWindowsRoute', () => {
     const [context, req, res] = mockHandlerArguments({ maintenanceWindowClient }, { body: {} });
 
     expect(config.path).toEqual('/internal/alerting/rules/maintenance_window/_find');
-    expect(config.options?.tags?.[0]).toEqual('access:read-maintenance-window');
+    expect(config.options).toMatchInlineSnapshot(`
+      Object {
+        "access": "internal",
+      }
+    `);
+
+    expect(config.security).toMatchInlineSnapshot(`
+      Object {
+        "authz": Object {
+          "requiredPrivileges": Array [
+            "read-maintenance-window",
+          ],
+        },
+      }
+    `);
 
     await handler(context, req, res);
 
-    expect(maintenanceWindowClient.find).toHaveBeenCalled();
+    expect(maintenanceWindowClient.find).toHaveBeenCalledWith({});
     expect(res.ok).toHaveBeenLastCalledWith({
       body: {
         data: mockMaintenanceWindows.data.map((data) => rewriteMaintenanceWindowRes(data)),
         total: 2,
+        page: 1,
+        per_page: 3,
+      },
+    });
+  });
+
+  test('should find the maintenance windows with query', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    findMaintenanceWindowsRoute(router, licenseState);
+
+    maintenanceWindowClient.find.mockResolvedValueOnce(mockMaintenanceWindows);
+    const [config, handler] = router.get.mock.calls[0];
+    const [context, req, res] = mockHandlerArguments(
+      { maintenanceWindowClient },
+      {
+        query: {
+          page: 1,
+          per_page: 3,
+        },
+      }
+    );
+
+    expect(config.path).toEqual('/internal/alerting/rules/maintenance_window/_find');
+    expect(config.options).toMatchInlineSnapshot(`
+      Object {
+        "access": "internal",
+      }
+    `);
+
+    expect(config.security).toMatchInlineSnapshot(`
+      Object {
+        "authz": Object {
+          "requiredPrivileges": Array [
+            "read-maintenance-window",
+          ],
+        },
+      }
+    `);
+
+    await handler(context, req, res);
+
+    expect(maintenanceWindowClient.find).toHaveBeenCalledWith({ page: 1, perPage: 3 });
+    expect(res.ok).toHaveBeenLastCalledWith({
+      body: {
+        data: mockMaintenanceWindows.data.map((data) => rewriteMaintenanceWindowRes(data)),
+        total: 2,
+        page: 1,
+        per_page: 3,
       },
     });
   });
@@ -93,7 +160,7 @@ describe('findMaintenanceWindowsRoute', () => {
     });
     const [, handler] = router.get.mock.calls[0];
     const [context, req, res] = mockHandlerArguments({ maintenanceWindowClient }, { body: {} });
-    expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: Failure]`);
+    await expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: Failure]`);
   });
 
   test('ensures only platinum license can access API', async () => {
@@ -107,6 +174,6 @@ describe('findMaintenanceWindowsRoute', () => {
     });
     const [, handler] = router.get.mock.calls[0];
     const [context, req, res] = mockHandlerArguments({ maintenanceWindowClient }, { body: {} });
-    expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: Failure]`);
+    await expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: Failure]`);
   });
 });

@@ -1,17 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { EuiDataGridCellValueElementProps, type EuiDataGridColumn } from '@elastic/eui';
+import type { ReactElement } from 'react';
+import type { EuiDataGridCellValueElementProps, EuiDataGridColumn } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils/src/types';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { EuiDataGridControlColumn } from '@elastic/eui/src/components/datagrid/data_grid_types';
+export type { DataTableColumnsMeta } from '@kbn/discover-utils/types';
+export type { DataGridDensity } from './constants';
 
 /**
  * User configurable state of data grid, persisted in saved search
@@ -22,6 +24,12 @@ export interface UnifiedDataTableSettings {
 
 export interface UnifiedDataTableSettingsColumn {
   width?: number;
+  /**
+  Optional props passed to Columns to display provided labels as column names instead of field names.
+  This object maps column field names to their corresponding display labels.
+  These labels will take precedence over the data view field names.
+  */
+  display?: string;
 }
 
 export type ValueToStringConverter = (
@@ -30,21 +38,17 @@ export type ValueToStringConverter = (
   options?: { compatibleWithCSV?: boolean }
 ) => { formattedString: string; withFormula: boolean };
 
-/**
- * Custom column types per column name
- */
-export type DataTableColumnTypes = Record<string, string>;
-
 export type DataGridCellValueElementProps = EuiDataGridCellValueElementProps & {
   row: DataTableRecord;
   dataView: DataView;
   fieldFormats: FieldFormatsStart;
   closePopover: () => void;
+  isCompressed?: boolean;
 };
 
 export type CustomCellRenderer = Record<
   string,
-  (props: DataGridCellValueElementProps) => React.ReactNode
+  (props: DataGridCellValueElementProps) => ReactElement
 >;
 
 export interface CustomGridColumnProps {
@@ -56,17 +60,3 @@ export type CustomGridColumnsConfiguration = Record<
   string,
   (props: CustomGridColumnProps) => EuiDataGridColumn
 >;
-
-export interface ControlColumns {
-  select: EuiDataGridControlColumn;
-  openDetails: EuiDataGridControlColumn;
-}
-
-export interface ControlColumnsProps {
-  controlColumns: ControlColumns;
-}
-
-export type CustomControlColumnConfiguration = (props: ControlColumnsProps) => {
-  leadingControlColumns: EuiDataGridControlColumn[];
-  trailingControlColumns?: EuiDataGridControlColumn[];
-};

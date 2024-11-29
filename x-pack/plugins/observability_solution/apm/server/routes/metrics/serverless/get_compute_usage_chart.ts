@@ -7,11 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import {
-  kqlQuery,
-  rangeQuery,
-  termQuery,
-} from '@kbn/observability-plugin/server';
+import { kqlQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import { euiLightVars as theme } from '@kbn/ui-theme';
 import { APMConfig } from '../../..';
 import {
@@ -29,7 +25,7 @@ import { convertComputeUsageToGbSec } from './helper';
 
 export const computeUsageAvgScript = {
   avg: {
-    script: `return doc['${METRIC_SYSTEM_TOTAL_MEMORY}'].value * doc['${FAAS_BILLED_DURATION}'].value`,
+    script: `return $('${METRIC_SYSTEM_TOTAL_MEMORY}', 0) * $('${FAAS_BILLED_DURATION}', 0)`,
   },
 };
 
@@ -91,10 +87,7 @@ export async function getComputeUsageChart({
     },
   };
 
-  const { aggregations } = await apmEventClient.search(
-    'get_compute_usage',
-    params
-  );
+  const { aggregations } = await apmEventClient.search('get_compute_usage', params);
   const timeseriesData = aggregations?.timeseriesData;
 
   return {
@@ -103,28 +96,23 @@ export async function getComputeUsageChart({
     }),
     key: 'compute_usage',
     yUnit: 'number',
-    description: i18n.translate(
-      'xpack.apm.agentMetrics.serverless.computeUsage.description',
-      {
-        defaultMessage:
-          "Compute usage (in GB-seconds) is the execution time multiplied by the available memory size of your function's instances. The compute usage is a direct indicator for the costs of your serverless function.",
-      }
-    ),
+    description: i18n.translate('xpack.apm.agentMetrics.serverless.computeUsage.description', {
+      defaultMessage:
+        "Compute usage (in GB-seconds) is the execution time multiplied by the available memory size of your function's instances. The compute usage is a direct indicator for the costs of your serverless function.",
+    }),
     series:
       !timeseriesData || timeseriesData.buckets.length === 0
         ? []
         : [
             {
-              title: i18n.translate(
-                'xpack.apm.agentMetrics.serverless.computeUsage',
-                { defaultMessage: 'Compute usage' }
-              ),
+              title: i18n.translate('xpack.apm.agentMetrics.serverless.computeUsage', {
+                defaultMessage: 'Compute usage',
+              }),
               key: 'compute_usage',
               type: 'bar',
               overallValue:
                 convertComputeUsageToGbSec({
-                  computeUsageBytesMs:
-                    aggregations?.avgComputeUsageBytesMs.value,
+                  computeUsageBytesMs: aggregations?.avgComputeUsageBytesMs.value,
                   countInvocations: aggregations?.countInvocations.value,
                 }) ?? 0,
               color: theme.euiColorVis0,

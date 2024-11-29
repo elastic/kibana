@@ -102,4 +102,33 @@ describe('ValidateBurnRateRule', () => {
       ).errors.windows[0].longWindow.length
     ).toBe(0);
   });
+
+  it('validates shortWindow is less than longWindow', () => {
+    expect(
+      validateBurnRateRule(
+        createTestParams({
+          shortWindow: { value: 61, unit: 'm' },
+          longWindow: { value: 1, unit: 'h' },
+        })
+      ).errors.windows[0].shortWindow.length
+    ).toBe(1);
+
+    expect(
+      validateBurnRateRule(
+        createTestParams({
+          shortWindow: { value: 60, unit: 'm' },
+          longWindow: { value: 1, unit: 'h' },
+        })
+      ).errors.windows[0].shortWindow.length
+    ).toBe(0);
+
+    expect(
+      validateBurnRateRule(
+        createTestParams({
+          shortWindow: { value: 15, unit: 'm' },
+          longWindow: { value: 1, unit: 'h' },
+        })
+      ).errors.windows[0].shortWindow.length
+    ).toBe(0);
+  });
 });

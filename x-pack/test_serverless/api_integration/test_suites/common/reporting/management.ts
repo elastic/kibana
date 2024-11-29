@@ -5,62 +5,115 @@
  * 2.0.
  */
 
-import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common/src/constants';
 import expect from '@kbn/expect';
 import { INTERNAL_ROUTES } from '@kbn/reporting-common';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { ReportApiJSON } from '@kbn/reporting-common/types';
+import type { CookieCredentials, InternalRequestHeader } from '@kbn/ftr-common-functional-services';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
-// the archived data holds a report created by test_user
-const TEST_USERNAME = 'test_user';
-const TEST_USER_PASSWORD = 'changeme';
-const REPORTING_USER_USERNAME = 'elastic_serverless';
-const REPORTING_USER_PASSWORD = 'changeme';
 const API_HEADER: [string, string] = ['kbn-xsrf', 'reporting'];
-const INTERNAL_HEADER: [string, string] = [X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'Kibana'];
 
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
-  const supertest = getService('supertestWithoutAuth');
+  const kibanaServer = getService('kibanaServer');
+  const reportingAPI = getService('svlReportingApi');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const samlAuth = getService('samlAuth');
+  let cookieCredentials: CookieCredentials;
+  let internalReqHeader: InternalRequestHeader;
+
+  const archives = {
+    ecommerce: {
+      data: 'x-pack/test/functional/es_archives/reporting/ecommerce',
+      savedObjects: 'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce',
+    },
+  };
 
   describe('Reporting Management', function () {
-    // security_exception: action [indices:admin/create] is unauthorized for user [elastic] with effective roles [superuser] on restricted indices [.reporting-2020.04.19], this action is granted by the index privileges [create_index,manage,all]
-    this.tags(['failsOnMKI']);
+    let reportJob: ReportApiJSON;
+    let path: string;
 
-    const dataArchive = 'x-pack/test/functional/es_archives/reporting/archived_reports';
+    before(async () => {
+      cookieCredentials = await samlAuth.getM2MApiCookieCredentialsWithRoleScope('admin');
+      internalReqHeader = samlAuth.getInternalRequestHeader();
 
-    beforeEach(async () => {
-      await esArchiver.load(dataArchive);
+      await esArchiver.load(archives.ecommerce.data);
+      await kibanaServer.importExport.load(archives.ecommerce.savedObjects);
+
+      // generate a report that can be deleted in the test
+      const result = await reportingAPI.createReportJobInternal(
+        'csv_searchsource',
+        {
+          browserTimezone: 'UTC',
+          objectType: 'search',
+          searchSource: {
+            fields: [
+              { field: 'order_date', include_unmapped: true },
+              { field: 'order_id', include_unmapped: true },
+              { field: 'products.product_id', include_unmapped: true },
+            ],
+            filter: [
+              {
+                meta: {
+                  field: 'order_date',
+                  index: '5193f870-d861-11e9-a311-0fa548c5f953',
+                  params: {},
+                },
+                query: {
+                  range: {
+                    order_date: {
+                      format: 'strict_date_optional_time',
+                      gte: '2019-06-20T23:59:44.609Z',
+                      lte: '2019-06-21T00:01:06.957Z',
+                    },
+                  },
+                },
+              },
+              {
+                $state: { store: 'appState' },
+                meta: {
+                  alias: null,
+                  disabled: false,
+                  index: '5193f870-d861-11e9-a311-0fa548c5f953',
+                  key: 'products.product_id',
+                  negate: false,
+                  params: { query: 22599 },
+                  type: 'phrase',
+                },
+                query: { match_phrase: { 'products.product_id': 22599 } },
+              },
+            ],
+            index: '5193f870-d861-11e9-a311-0fa548c5f953',
+            query: { language: 'kuery', query: '' },
+            sort: [{ order_date: { format: 'strict_date_optional_time', order: 'desc' } }],
+          },
+          title: 'Ecommerce Data',
+          version: '8.15.0',
+        },
+        cookieCredentials,
+        internalReqHeader
+      );
+
+      path = result.path;
+      reportJob = result.job;
+
+      await reportingAPI.waitForJobToFinish(path, cookieCredentials, internalReqHeader);
     });
 
     after(async () => {
-      await esArchiver.unload(dataArchive);
+      await esArchiver.unload(archives.ecommerce.data);
+      await kibanaServer.importExport.unload(archives.ecommerce.savedObjects);
     });
 
-    describe('Deletion', () => {
-      const DELETE_REPORT_ID = 'krazcyw4156m0763b503j7f9';
+    it(`user can delete a report they've created`, async () => {
+      const response = await supertestWithoutAuth
+        .delete(`${INTERNAL_ROUTES.JOBS.DELETE_PREFIX}/${reportJob.id}`)
+        .set(...API_HEADER)
+        .set(internalReqHeader)
+        .set(cookieCredentials);
 
-      // archived data uses the test user but functionality for specific users is not possible yet for svl
-      xit(`user can delete a report they've created`, async () => {
-        const response = await supertest
-          .delete(`${INTERNAL_ROUTES.JOBS.DELETE_PREFIX}/${DELETE_REPORT_ID}`)
-          .auth(TEST_USERNAME, TEST_USER_PASSWORD)
-          .set(...API_HEADER)
-          .set(...INTERNAL_HEADER);
-
-        expect(response.status).to.be(200);
-        expect(response.body).to.eql({ deleted: true });
-      });
-
-      it(`user can not delete a report they haven't created`, async () => {
-        const response = await supertest
-          .delete(`${INTERNAL_ROUTES.JOBS.DELETE_PREFIX}/${DELETE_REPORT_ID}`)
-          .auth(REPORTING_USER_USERNAME, REPORTING_USER_PASSWORD)
-          .set(...API_HEADER)
-          .set(...INTERNAL_HEADER);
-
-        expect(response.status).to.be(404);
-        expect(response.body.message).to.be('Not Found');
-      });
+      expect(response.status).to.be(200);
+      expect(response.body).to.eql({ deleted: true });
     });
   });
 };

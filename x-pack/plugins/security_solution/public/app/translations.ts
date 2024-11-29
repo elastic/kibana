@@ -25,6 +25,21 @@ export const ENTITY_ANALYTICS_RISK_SCORE = i18n.translate(
   }
 );
 
+export const ENTITY_STORE = i18n.translate('xpack.securitySolution.navigation.entityStore', {
+  defaultMessage: 'Entity Store',
+});
+
+export const NOTES = i18n.translate('xpack.securitySolution.navigation.notes', {
+  defaultMessage: 'Notes',
+});
+
+export const ASSET_CRITICALITY = i18n.translate(
+  'xpack.securitySolution.navigation.assetCriticality',
+  {
+    defaultMessage: 'Asset criticality',
+  }
+);
+
 export const DETECTION_RESPONSE = i18n.translate(
   'xpack.securitySolution.navigation.detectionResponse',
   {
@@ -86,9 +101,23 @@ export const EXCEPTIONS = i18n.translate('xpack.securitySolution.navigation.exce
   defaultMessage: 'Shared exception lists',
 });
 
+export const SIEM_MIGRATIONS_RULES = i18n.translate(
+  'xpack.securitySolution.navigation.siemMigrationsRules',
+  {
+    defaultMessage: 'SIEM Rules Migrations',
+  }
+);
+
 export const ALERTS = i18n.translate('xpack.securitySolution.navigation.alerts', {
   defaultMessage: 'Alerts',
 });
+
+export const ATTACK_DISCOVERY = i18n.translate(
+  'xpack.securitySolution.navigation.attackDiscovery',
+  {
+    defaultMessage: 'Attack discovery',
+  }
+);
 
 export const TIMELINES = i18n.translate('xpack.securitySolution.navigation.timelines', {
   defaultMessage: 'Timelines',
@@ -129,12 +158,6 @@ export const HOST_ISOLATION_EXCEPTIONS = i18n.translate(
     defaultMessage: 'Host isolation exceptions',
   }
 );
-export const DETECT = i18n.translate('xpack.securitySolution.navigation.detect', {
-  defaultMessage: 'Detect',
-});
-export const FINDINGS = i18n.translate('xpack.securitySolution.navigation.findings', {
-  defaultMessage: 'Findings',
-});
 export const EXPLORE = i18n.translate('xpack.securitySolution.navigation.explore', {
   defaultMessage: 'Explore',
 });
@@ -163,10 +186,3 @@ export const PROTECTION_UPDATES = i18n.translate(
 export const CREATE_NEW_RULE = i18n.translate('xpack.securitySolution.navigation.newRuleTitle', {
   defaultMessage: 'Create new rule',
 });
-
-export const THREAT_INTELLIGENCE = i18n.translate(
-  'xpack.securitySolution.navigation.threatIntelligence',
-  {
-    defaultMessage: 'Intelligence',
-  }
-);

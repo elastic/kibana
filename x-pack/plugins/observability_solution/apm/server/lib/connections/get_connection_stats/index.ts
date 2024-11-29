@@ -14,6 +14,7 @@ import { getDestinationMap } from './get_destination_map';
 import { calculateThroughputWithRange } from '../../helpers/calculate_throughput';
 import { withApmSpan } from '../../../utils/with_apm_span';
 import { APMEventClient } from '../../helpers/create_es_client/create_apm_event_client';
+import { RandomSampler } from '../../helpers/get_random_sampler';
 
 export function getConnectionStats({
   apmEventClient,
@@ -23,6 +24,7 @@ export function getConnectionStats({
   filter,
   collapseBy,
   offset,
+  randomSampler,
 }: {
   apmEventClient: APMEventClient;
   start: number;
@@ -31,9 +33,10 @@ export function getConnectionStats({
   filter: QueryDslQueryContainer[];
   collapseBy: 'upstream' | 'downstream';
   offset?: string;
+  randomSampler: RandomSampler;
 }) {
   return withApmSpan('get_connection_stats_and_map', async () => {
-    const [allMetrics, destinationMap] = await Promise.all([
+    const [allMetrics, { nodesBydependencyName: destinationMap, sampled }] = await Promise.all([
       getStats({
         apmEventClient,
         start,
@@ -48,13 +51,13 @@ export function getConnectionStats({
         end,
         filter,
         offset,
+        randomSampler,
       }),
     ]);
 
     const statsWithLocationIds = allMetrics.map((statsItem) => {
       const { from, timeseries, value } = statsItem;
-      const to =
-        destinationMap.get(statsItem.to.dependencyName) ?? statsItem.to;
+      const to = destinationMap.get(statsItem.to.dependencyName) ?? statsItem.to;
 
       const location = collapseBy === 'upstream' ? from : to;
 
@@ -81,16 +84,12 @@ export function getConnectionStats({
               latency_sum: prev.value.latency_sum + current.value.latency_sum,
               error_count: prev.value.error_count + current.value.error_count,
             },
-            timeseries: joinByKey(
-              [...prev.timeseries, ...current.timeseries],
-              'x',
-              (a, b) => ({
-                x: a.x,
-                count: a.count + b.count,
-                latency_sum: a.latency_sum + b.latency_sum,
-                error_count: a.error_count + b.error_count,
-              })
-            ),
+            timeseries: joinByKey([...prev.timeseries, ...current.timeseries], 'x', (a, b) => ({
+              x: a.x,
+              count: a.count + b.count,
+              latency_sum: a.latency_sum + b.latency_sum,
+              error_count: a.error_count + b.error_count,
+            })),
           };
         },
         {
@@ -160,6 +159,6 @@ export function getConnectionStats({
       };
     });
 
-    return statsItems;
+    return { statsItems, sampled };
   });
 }

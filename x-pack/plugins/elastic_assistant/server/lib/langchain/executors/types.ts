@@ -5,55 +5,75 @@
  * 2.0.
  */
 
-import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import { ActionsClient } from '@kbn/actions-plugin/server';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { BaseMessage } from 'langchain/schema';
+import { BaseMessage } from '@langchain/core/messages';
 import { Logger } from '@kbn/logging';
-import { KibanaRequest } from '@kbn/core-http-server';
-import type { LangChainTracer } from 'langchain/callbacks';
-import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
-import { ExecuteConnectorRequestBody, Replacement } from '@kbn/elastic-assistant-common';
+import { KibanaRequest, KibanaResponseFactory, ResponseHeaders } from '@kbn/core-http-server';
+import type { LangChainTracer } from '@langchain/core/tracers/tracer_langchain';
+import { ExecuteConnectorRequestBody, Message, Replacements } from '@kbn/elastic-assistant-common';
+import { StreamResponseWithHeaders } from '@kbn/ml-response-stream/server';
+import { PublicMethodsOf } from '@kbn/utility-types';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
+import { TelemetryParams } from '@kbn/langchain/server/tracers/telemetry/telemetry_tracer';
 import { ResponseBody } from '../types';
 import type { AssistantTool } from '../../../types';
+import { AIAssistantKnowledgeBaseDataClient } from '../../../ai_assistant_data_clients/knowledge_base';
+import { AIAssistantConversationsDataClient } from '../../../ai_assistant_data_clients/conversations';
+import { AIAssistantDataClient } from '../../../ai_assistant_data_clients';
 
-export interface AgentExecutorParams {
+export type OnLlmResponse = (
+  content: string,
+  traceData?: Message['traceData'],
+  isError?: boolean
+) => Promise<void>;
+
+export interface AssistantDataClients {
+  anonymizationFieldsDataClient?: AIAssistantDataClient;
+  conversationsDataClient?: AIAssistantConversationsDataClient;
+  kbDataClient?: AIAssistantKnowledgeBaseDataClient;
+}
+
+export interface AgentExecutorParams<T extends boolean> {
+  abortSignal?: AbortSignal;
   alertsIndexPattern?: string;
-  actions: ActionsPluginStart;
-  allow?: string[];
-  allowReplacement?: string[];
-  isEnabledKnowledgeBase: boolean;
+  actionsClient: PublicMethodsOf<ActionsClient>;
   assistantTools?: AssistantTool[];
   connectorId: string;
+  conversationId?: string;
+  dataClients?: AssistantDataClients;
   esClient: ElasticsearchClient;
-  kbResource: string | undefined;
   langChainMessages: BaseMessage[];
   llmType?: string;
+  isOssModel?: boolean;
   logger: Logger;
-  onNewReplacements?: (newReplacements: Replacement[]) => void;
-  replacements: Replacement[];
+  inference: InferenceServerStart;
+  onNewReplacements?: (newReplacements: Replacements) => void;
+  replacements: Replacements;
+  isStream?: T;
+  onLlmResponse?: OnLlmResponse;
   request: KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
+  response?: KibanaResponseFactory;
   size?: number;
-  elserId?: string;
-  traceOptions?: TraceOptions;
+  systemPrompt?: string;
   telemetry: AnalyticsServiceSetup;
+  telemetryParams?: TelemetryParams;
+  traceOptions?: TraceOptions;
+  responseLanguage?: string;
 }
 
-export type AgentExecutorResponse = Promise<ResponseBody>;
-
-export type AgentExecutor = (params: AgentExecutorParams) => AgentExecutorResponse;
-
-export type AgentExecutorEvaluator = (
-  langChainMessages: BaseMessage[],
-  exampleId?: string
-) => AgentExecutorResponse;
-
-export interface AgentExecutorEvaluatorWithMetadata {
-  agentEvaluator: AgentExecutorEvaluator;
-  metadata: {
-    connectorName: string;
-    runName: string;
-  };
+export interface StaticReturnType {
+  body: ResponseBody;
+  headers: ResponseHeaders;
 }
+export type AgentExecutorResponse<T extends boolean> = T extends true
+  ? StreamResponseWithHeaders
+  : StaticReturnType;
+
+export type AgentExecutor<T extends boolean> = (
+  params: AgentExecutorParams<T>
+) => Promise<AgentExecutorResponse<T>>;
 
 export interface TraceOptions {
   evaluationId?: string;

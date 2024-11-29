@@ -73,7 +73,7 @@
           "\nBuilds the base filter criteria used in queries,\nadding criteria for the time range and an optional query.\n"
         ],
         "signature": [
-          "(timeFieldName: string | undefined, earliestMs: number | undefined, latestMs: number | undefined, query: string | { [key: string]: any; } | undefined) => ",
+          "(timeFieldName: string | undefined, earliestMs: string | number | undefined, latestMs: string | number | undefined, query: string | { [key: string]: any; } | undefined, timeFormat: string) => ",
           "QueryDslQueryContainer",
           "[]"
         ],
@@ -101,14 +101,14 @@
           {
             "parentPluginId": "@kbn/ml-query-utils",
             "id": "def-common.buildBaseFilterCriteria.$2",
-            "type": "number",
+            "type": "CompoundType",
             "tags": [],
             "label": "earliestMs",
             "description": [
               "- optional earliest timestamp of the selected time range"
             ],
             "signature": [
-              "number | undefined"
+              "string | number | undefined"
             ],
             "path": "x-pack/packages/ml/query_utils/src/build_base_filter_criteria.ts",
             "deprecated": false,
@@ -118,14 +118,14 @@
           {
             "parentPluginId": "@kbn/ml-query-utils",
             "id": "def-common.buildBaseFilterCriteria.$3",
-            "type": "number",
+            "type": "CompoundType",
             "tags": [],
             "label": "latestMs",
             "description": [
               "- optional latest timestamp of the selected time range"
             ],
             "signature": [
-              "number | undefined"
+              "string | number | undefined"
             ],
             "path": "x-pack/packages/ml/query_utils/src/build_base_filter_criteria.ts",
             "deprecated": false,
@@ -148,6 +148,21 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-query-utils",
+            "id": "def-common.buildBaseFilterCriteria.$5",
+            "type": "string",
+            "tags": [],
+            "label": "timeFormat",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/packages/ml/query_utils/src/build_base_filter_criteria.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
           }
         ],
         "returnComment": [
@@ -168,7 +183,7 @@
           "() => ",
           "QueryDslQueryContainer"
         ],
-        "path": "x-pack/packages/ml/query_utils/src/get_default_query.ts",
+        "path": "x-pack/packages/ml/query_utils/src/get_default_dsl_query.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],

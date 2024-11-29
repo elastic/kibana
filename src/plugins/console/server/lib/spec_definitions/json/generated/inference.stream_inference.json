@@ -1,0 +1,16 @@
+{
+  "inference.stream_inference": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_inference/{inference_id}/_stream",
+      "_inference/{task_type}/{inference_id}/_stream"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/post-stream-inference-api.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
+  }
+}

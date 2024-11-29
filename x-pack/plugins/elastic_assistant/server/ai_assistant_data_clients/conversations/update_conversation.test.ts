@@ -7,48 +7,57 @@
 
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import { updateConversation } from './update_conversation';
+import {
+  UpdateConversationSchema,
+  transformToUpdateScheme,
+  updateConversation,
+} from './update_conversation';
 import { getConversation } from './get_conversation';
+import { authenticatedUser } from '../../__mocks__/user';
 import { ConversationResponse, ConversationUpdateProps } from '@kbn/elastic-assistant-common';
-import { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 
 export const getUpdateConversationOptionsMock = (): ConversationUpdateProps => ({
   id: 'test',
   title: 'test',
   apiConfig: {
     connectorId: '1',
-    connectorTypeTitle: 'test-connector',
+    actionTypeId: '.gen-ai',
     defaultSystemPromptId: 'default-system-prompt',
     model: 'test-model',
     provider: 'OpenAI',
   },
   excludeFromLastConversationStorage: false,
   messages: [],
-  replacements: [],
+  replacements: {},
 });
 
-const mockUser1 = {
-  username: 'my_username',
-  authentication_realm: {
-    type: 'my_realm_type',
-    name: 'my_realm_name',
-  },
-} as AuthenticatedUser;
+const mockUser1 = authenticatedUser;
 
 export const getConversationResponseMock = (): ConversationResponse => ({
   id: 'test',
   title: 'test',
   apiConfig: {
+    actionTypeId: '.gen-ai',
     connectorId: '1',
-    connectorTypeTitle: 'test-connector',
     defaultSystemPromptId: 'default-system-prompt',
     model: 'test-model',
     provider: 'OpenAI',
   },
   category: 'assistant',
   excludeFromLastConversationStorage: false,
-  messages: [],
-  replacements: [],
+  messages: [
+    {
+      content: 'Message 3',
+      role: 'user',
+      timestamp: '2024-02-14T22:29:43.862Z',
+    },
+    {
+      content: 'Message 4',
+      role: 'user',
+      timestamp: '2024-02-14T22:29:43.862Z',
+    },
+  ],
+  replacements: {},
   createdAt: '2020-04-20T15:25:31.830Z',
   namespace: 'default',
   isDefault: false,
@@ -111,5 +120,112 @@ describe('updateConversation', () => {
       user: mockUser1,
     });
     expect(updatedList).toEqual(null);
+  });
+});
+
+describe('transformToUpdateScheme', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test('it returns a transformed conversation with converted string datetime to ISO from the client', async () => {
+    const conversation: ConversationUpdateProps = getUpdateConversationOptionsMock();
+    const existingConversation = getConversationResponseMock();
+    (getConversation as unknown as jest.Mock).mockResolvedValueOnce(existingConversation);
+
+    const updateAt = new Date().toISOString();
+    const transformed = transformToUpdateScheme(updateAt, {
+      ...conversation,
+      messages: [
+        {
+          content: 'Message 3',
+          role: 'user',
+          timestamp: '2011-10-05T14:48:00.000Z',
+          traceData: {
+            traceId: 'something',
+            transactionId: 'something',
+          },
+        },
+        {
+          content: 'Message 4',
+          role: 'user',
+          timestamp: '2011-10-06T14:48:00.000Z',
+        },
+      ],
+    });
+    const expected: UpdateConversationSchema = {
+      id: conversation.id,
+      title: 'test',
+      api_config: {
+        action_type_id: '.gen-ai',
+        connector_id: '1',
+        default_system_prompt_id: 'default-system-prompt',
+        model: 'test-model',
+        provider: 'OpenAI',
+      },
+      exclude_from_last_conversation_storage: false,
+      replacements: [],
+      updated_at: updateAt,
+      messages: [
+        {
+          '@timestamp': '2011-10-05T14:48:00.000Z',
+          content: 'Message 3',
+          is_error: undefined,
+          reader: undefined,
+          role: 'user',
+          trace_data: {
+            trace_id: 'something',
+            transaction_id: 'something',
+          },
+        },
+        {
+          '@timestamp': '2011-10-06T14:48:00.000Z',
+          content: 'Message 4',
+          is_error: undefined,
+          reader: undefined,
+          role: 'user',
+        },
+      ],
+    };
+    expect(transformed).toEqual(expected);
+  });
+  test('it does not pass api_config if apiConfig is not updated', async () => {
+    const conversation: ConversationUpdateProps = getUpdateConversationOptionsMock();
+    const existingConversation = getConversationResponseMock();
+    (getConversation as unknown as jest.Mock).mockResolvedValueOnce(existingConversation);
+
+    const updateAt = new Date().toISOString();
+    const transformed = transformToUpdateScheme(updateAt, {
+      id: conversation.id,
+      messages: [
+        {
+          content: 'Message 3',
+          role: 'user',
+          timestamp: '2011-10-05T14:48:00.000Z',
+          traceData: {
+            traceId: 'something',
+            transactionId: 'something',
+          },
+        },
+      ],
+    });
+    const expected: UpdateConversationSchema = {
+      id: conversation.id,
+      updated_at: updateAt,
+      messages: [
+        {
+          '@timestamp': '2011-10-05T14:48:00.000Z',
+          content: 'Message 3',
+          is_error: undefined,
+          reader: undefined,
+          role: 'user',
+          trace_data: {
+            trace_id: 'something',
+            transaction_id: 'something',
+          },
+        },
+      ],
+    };
+    expect(transformed).toEqual(expected);
   });
 });

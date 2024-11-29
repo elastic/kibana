@@ -27,8 +27,8 @@ import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { isDefined } from '@kbn/ml-is-defined';
 import { TRAINED_MODEL_TYPE } from '@kbn/ml-trained-models-utils';
+import { dynamic } from '@kbn/shared-ux-utility';
 import { InferenceApi } from './inference_api_tab';
-import { JobMap } from '../data_frame_analytics/pages/job_map';
 import type { ModelItemFull } from './models_list';
 import { ModelPipelines } from './pipelines';
 import { AllocatedModels } from '../memory_usage/nodes_overview/allocated_models';
@@ -39,6 +39,10 @@ import { useEnabledFeatures } from '../contexts/ml';
 interface ExpandedRowProps {
   item: ModelItemFull;
 }
+
+const JobMap = dynamic(async () => ({
+  default: (await import('../data_frame_analytics/pages/job_map')).JobMap,
+}));
 
 const useBadgeFormatter = () => {
   const xs = useEuiPaddingSize('xs');
@@ -165,19 +169,47 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
     license_level,
   ]);
 
-  const deploymentStatItems: AllocatedModel[] = useMemo<AllocatedModel[]>(() => {
+  const deploymentStatItems = useMemo<AllocatedModel[]>(() => {
     const deploymentStats = stats.deployment_stats;
     const modelSizeStats = stats.model_size_stats;
 
     if (!deploymentStats || !modelSizeStats) return [];
 
-    const items: AllocatedModel[] = deploymentStats.flatMap((perDeploymentStat) => {
+    return deploymentStats.flatMap((perDeploymentStat) => {
+      // A deployment can be in a starting state and not allocated to any node yet.
+      if (perDeploymentStat.nodes.length < 1) {
+        return [
+          {
+            key: `${perDeploymentStat.deployment_id}_no_node`,
+            ...perDeploymentStat,
+            ...modelSizeStats,
+            node: {
+              name: '-',
+              average_inference_time_ms: 0,
+              inference_count: 0,
+              routing_state: {
+                routing_state: perDeploymentStat.state,
+                reason: perDeploymentStat.reason,
+              },
+              last_access: 0,
+              number_of_pending_requests: 0,
+              start_time: 0,
+              throughput_last_minute: 0,
+              number_of_allocations: 0,
+              threads_per_allocation: 0,
+              error_count: 0,
+            },
+          },
+        ];
+      }
+
       return perDeploymentStat.nodes.map((n) => {
         const nodeName = Object.values(n.node)[0].name;
         return {
           key: `${perDeploymentStat.deployment_id}_${nodeName}`,
           ...perDeploymentStat,
           ...modelSizeStats,
+          // @ts-expect-error `throughput_last_minute` is not declared in ES Types
           node: {
             ...pick(n, [
               'average_inference_time_ms',
@@ -196,8 +228,6 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
         };
       });
     });
-
-    return items;
   }, [stats]);
 
   const hideColumns = useMemo(() => {

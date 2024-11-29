@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
 import { BehaviorSubject, firstValueFrom, type Observable, Subject, type Subscription } from 'rxjs';
-import { map, shareReplay, takeUntil, distinctUntilChanged, filter, take } from 'rxjs/operators';
+import { map, shareReplay, takeUntil, distinctUntilChanged, filter, take } from 'rxjs';
 import { createBrowserHistory, History } from 'history';
 
 import type { PluginOpaqueId } from '@kbn/core-base-common';
@@ -182,7 +183,9 @@ export class ApplicationService {
 
     const validateApp = (app: App<unknown>) => {
       if (this.registrationClosed) {
-        throw new Error(`Applications cannot be registered after "setup"`);
+        throw new Error(
+          `Applications cannot be registered after "setup" (attempted to register "${app.id}")`
+        );
       } else if (!applicationIdRegexp.test(app.id)) {
         throw new Error(
           `Invalid application id: it can only be composed of alphanum chars, '-' and '_'`
@@ -324,6 +327,9 @@ export class ApplicationService {
         takeUntil(this.stop$)
       ),
       history: this.history!,
+      isAppRegistered: (appId: string): boolean => {
+        return applications$.value.get(appId) !== undefined;
+      },
       getUrlForApp: (
         appId,
         {

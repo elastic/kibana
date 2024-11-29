@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -13,19 +14,32 @@ import {
 
 import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
-import type { CoreSecurityContract } from '@kbn/core-security-server';
+import type { CoreSecurityDelegateContract } from '@kbn/core-security-server';
 import { SecurityService } from './security_service';
+import { configServiceMock } from '@kbn/config-mocks';
+import { getFips } from 'crypto';
 
-const createStubInternalContract = (): CoreSecurityContract => {
-  return Symbol('stubContract') as unknown as CoreSecurityContract;
+const createStubInternalContract = (): CoreSecurityDelegateContract => {
+  return Symbol('stubContract') as unknown as CoreSecurityDelegateContract;
 };
 
-describe('SecurityService', () => {
+describe('SecurityService', function () {
   let coreContext: ReturnType<typeof mockCoreContext.create>;
+  let configService: ReturnType<typeof configServiceMock.create>;
   let service: SecurityService;
 
   beforeEach(() => {
-    coreContext = mockCoreContext.create();
+    const mockConfig = {
+      xpack: {
+        security: {
+          fipsMode: {
+            enabled: !!getFips(),
+          },
+        },
+      },
+    };
+    configService = configServiceMock.create({ getConfig$: mockConfig });
+    coreContext = mockCoreContext.create({ configService });
     service = new SecurityService(coreContext);
 
     convertSecurityApiMock.mockReset();
@@ -33,16 +47,29 @@ describe('SecurityService', () => {
   });
 
   describe('#setup', () => {
-    describe('#registerSecurityApi', () => {
+    describe('#registerSecurityDelegate', () => {
       it('throws if called more than once', () => {
-        const { registerSecurityApi } = service.setup();
+        const { registerSecurityDelegate } = service.setup();
 
         const contract = createStubInternalContract();
-        registerSecurityApi(contract);
+        registerSecurityDelegate(contract);
 
-        expect(() => registerSecurityApi(contract)).toThrowErrorMatchingInlineSnapshot(
+        expect(() => registerSecurityDelegate(contract)).toThrowErrorMatchingInlineSnapshot(
           `"security API can only be registered once"`
         );
+      });
+    });
+
+    describe('#fips', () => {
+      describe('#isEnabled', () => {
+        it('should return boolean', () => {
+          const { fips } = service.setup();
+          if (getFips() === 0) {
+            expect(fips.isEnabled()).toBe(false);
+          } else {
+            expect(fips.isEnabled()).toBe(true);
+          }
+        });
       });
     });
   });
@@ -62,10 +89,10 @@ describe('SecurityService', () => {
     });
 
     it('calls convertSecurityApi with the registered API', () => {
-      const { registerSecurityApi } = service.setup();
+      const { registerSecurityDelegate } = service.setup();
 
       const contract = createStubInternalContract();
-      registerSecurityApi(contract);
+      registerSecurityDelegate(contract);
 
       service.start();
 

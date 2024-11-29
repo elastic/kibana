@@ -22,7 +22,7 @@ import { hostsUrl } from '../../../urls/navigation';
 import { kqlSearch } from '../../../tasks/security_header';
 import { mockRiskEngineEnabled } from '../../../tasks/entity_analytics';
 
-describe('risk tab', { tags: ['@ess', '@serverless'] }, () => {
+describe('risk tab', { tags: ['@ess'] }, () => {
   describe('with legacy risk score', () => {
     before(() => {
       cy.task('esArchiverLoad', { archiveName: 'risk_hosts' });
@@ -46,7 +46,7 @@ describe('risk tab', { tags: ['@ess', '@serverless'] }, () => {
       kqlSearch('host.name: "siem-kibana" {enter}');
       cy.get(HOST_BY_RISK_TABLE_CELL).eq(4).should('have.text', 'siem-kibana');
       cy.get(HOST_BY_RISK_TABLE_CELL).eq(5).should('have.text', 'Mar 10, 2021 @ 14:51:05.766');
-      cy.get(HOST_BY_RISK_TABLE_CELL).eq(6).should('have.text', '21');
+      cy.get(HOST_BY_RISK_TABLE_CELL).eq(6).should('have.text', '21.00');
       cy.get(HOST_BY_RISK_TABLE_CELL).eq(7).should('have.text', 'Low');
     });
 
@@ -70,7 +70,7 @@ describe('risk tab', { tags: ['@ess', '@serverless'] }, () => {
     });
   });
 
-  describe('with new risk score', () => {
+  describe('with new risk score', { tags: ['@serverless'] }, () => {
     before(() => {
       cy.task('esArchiverLoad', { archiveName: 'risk_scores_new' });
     });
@@ -93,7 +93,7 @@ describe('risk tab', { tags: ['@ess', '@serverless'] }, () => {
       kqlSearch('host.name: "siem-kibana" {enter}');
       cy.get(HOST_BY_RISK_TABLE_CELL).eq(4).should('have.text', 'siem-kibana');
       cy.get(HOST_BY_RISK_TABLE_CELL).eq(5).should('have.text', 'Mar 10, 2021 @ 14:51:05.766');
-      cy.get(HOST_BY_RISK_TABLE_CELL).eq(6).should('have.text', '90');
+      cy.get(HOST_BY_RISK_TABLE_CELL).eq(6).should('have.text', '90.00');
       cy.get(HOST_BY_RISK_TABLE_CELL).eq(7).should('have.text', 'Critical');
     });
 

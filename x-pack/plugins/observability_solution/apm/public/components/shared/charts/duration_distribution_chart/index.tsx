@@ -85,9 +85,7 @@ const getAnnotationsStyle = (color = 'gray'): LineAnnotationStyle => ({
 const Y_AXIS_MIN_DOMAIN = 0.5;
 const Y_AXIS_MIN_VALUE = 0.0001;
 
-export const replaceHistogramZerosWithMinimumDomainValue = (
-  histogramItems: HistogramItem[]
-) =>
+export const replaceHistogramZerosWithMinimumDomainValue = (histogramItems: HistogramItem[]) =>
   histogramItems.reduce((histogramItem, _, i) => {
     if (histogramItem[i].doc_count === 0) {
       histogramItem[i].doc_count = Y_AXIS_MIN_VALUE;
@@ -98,8 +96,7 @@ export const replaceHistogramZerosWithMinimumDomainValue = (
 // Create and call a duration formatter for every value since the durations for the
 // x axis might have a wide range of values e.g. from low milliseconds to large seconds.
 // This way we can get different suitable units across ticks.
-const xAxisTickFormat: TickFormatter<number> = (d) =>
-  getDurationFormatter(d, 0.9999)(d).formatted;
+const xAxisTickFormat: TickFormatter<number> = (d) => getDurationFormatter(d, 0.9999)(d).formatted;
 
 export function DurationDistributionChart({
   data,
@@ -118,23 +115,17 @@ export function DurationDistributionChart({
   const annotationsDataValues: LineAnnotationDatum[] = [
     {
       dataValue: markerValue,
-      details: i18n.translate(
-        'xpack.apm.durationDistribution.chart.percentileMarkerLabel',
-        {
-          defaultMessage: '{markerPercentile}th percentile',
-          values: {
-            markerPercentile,
-          },
-        }
-      ),
+      details: i18n.translate('xpack.apm.durationDistribution.chart.percentileMarkerLabel', {
+        defaultMessage: '{markerPercentile}th percentile',
+        values: {
+          markerPercentile,
+        },
+      }),
     },
   ];
 
   // This will create y axis ticks for 1, 10, 100, 1000 ...
-  const yMax =
-    Math.max(
-      ...flatten(data.map((d) => d.histogram)).map((d) => d.doc_count)
-    ) ?? 0;
+  const yMax = Math.max(...flatten(data.map((d) => d.histogram)).map((d) => d.doc_count)) ?? 0;
   const yTicks = Math.max(1, Math.ceil(Math.log10(yMax)));
   const yAxisMaxDomain = Math.pow(10, yTicks);
   const yAxisDomain = {
@@ -185,7 +176,7 @@ export function DurationDistributionChart({
                     visible: true,
                   },
                   point: {
-                    visible: false,
+                    visible: 'never',
                     radius: 0,
                   },
                 },
@@ -258,10 +249,9 @@ export function DurationDistributionChart({
           />
           <Axis
             id="x-axis"
-            title={i18n.translate(
-              'xpack.apm.durationDistribution.chart.latencyLabel',
-              { defaultMessage: 'Latency' }
-            )}
+            title={i18n.translate('xpack.apm.durationDistribution.chart.latencyLabel', {
+              defaultMessage: 'Latency',
+            })}
             position={Position.Bottom}
             tickFormat={xAxisTickFormat}
             gridLine={{ visible: false }}

@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiIconTip } from '@elastic/eui';
+import { EuiFieldNumber, EuiFlexGroup, EuiFormRow, EuiIconTip } from '@elastic/eui';
+import { APMTransactionDurationIndicator } from '@kbn/slo-schema';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
+import { useApmDefaultValues } from '../apm_common/use_apm_default_values';
+import { DATA_VIEW_FIELD } from '../custom_common/index_selection';
 import { GroupByField } from '../common/group_by_field';
 import { useCreateDataView } from '../../../../hooks/use_create_data_view';
 import { useFetchApmIndex } from '../../../../hooks/use_fetch_apm_indices';
@@ -16,19 +19,42 @@ import { CreateSLOForm } from '../../types';
 import { FieldSelector } from '../apm_common/field_selector';
 import { DataPreviewChart } from '../common/data_preview_chart';
 import { QueryBuilder } from '../common/query_builder';
+import { formatAllFilters } from '../../helpers/format_filters';
+import { getGroupByCardinalityFilters } from '../apm_common/get_group_by_cardinality_filters';
 
 export function ApmLatencyIndicatorTypeForm() {
-  const { control, watch, getFieldState, setValue } = useFormContext<CreateSLOForm>();
+  const { control, watch, getFieldState } =
+    useFormContext<CreateSLOForm<APMTransactionDurationIndicator>>();
   const { data: apmIndex } = useFetchApmIndex();
 
-  useEffect(() => {
-    if (apmIndex !== '') {
-      setValue('indicator.params.index', apmIndex);
-    }
-  }, [setValue, apmIndex]);
+  const [
+    serviceName = '',
+    environment = '',
+    transactionType = '',
+    transactionName = '',
+    globalFilters,
+  ] = watch([
+    'indicator.params.service',
+    'indicator.params.environment',
+    'indicator.params.transactionType',
+    'indicator.params.transactionName',
+    'indicator.params.filter',
+  ]);
+  const indicatorParamsFilters = getGroupByCardinalityFilters({
+    serviceName,
+    environment,
+    transactionType,
+    transactionName,
+  });
+  const allFilters = formatAllFilters(globalFilters, indicatorParamsFilters);
+
+  useApmDefaultValues();
+
+  const dataViewId = watch(DATA_VIEW_FIELD);
 
   const { dataView, loading: isIndexFieldsLoading } = useCreateDataView({
     indexPatternString: apmIndex,
+    dataViewId,
   });
 
   return (
@@ -95,72 +121,67 @@ export function ApmLatencyIndicatorTypeForm() {
         />
       </EuiFlexGroup>
 
-      <EuiFlexGroup direction="row" gutterSize="l">
-        <EuiFlexItem>
-          <EuiFormRow
-            label={
-              <span>
-                {i18n.translate('xpack.slo.sloEdit.apmLatency.threshold.placeholder', {
-                  defaultMessage: 'Threshold (ms)',
-                })}{' '}
-                <EuiIconTip
-                  content={i18n.translate('xpack.slo.sloEdit.apmLatency.threshold.tooltip', {
-                    defaultMessage:
-                      'Configure the threshold in milliseconds defining the "good" or "successful" requests for the SLO.',
-                  })}
-                  position="top"
-                />
-              </span>
-            }
-            isInvalid={getFieldState('indicator.params.threshold').invalid}
-          >
-            <Controller
-              name="indicator.params.threshold"
-              control={control}
-              defaultValue={250}
-              rules={{
-                required: true,
-                min: 0,
-              }}
-              render={({ field: { ref, ...field }, fieldState }) => (
-                <EuiFieldNumber
-                  {...field}
-                  required
-                  isInvalid={fieldState.invalid}
-                  value={String(field.value)}
-                  data-test-subj="apmLatencyThresholdInput"
-                  min={0}
-                  onChange={(event) => field.onChange(Number(event.target.value))}
-                />
-              )}
+      <EuiFormRow
+        label={
+          <span>
+            {i18n.translate('xpack.slo.sloEdit.apmLatency.threshold.placeholder', {
+              defaultMessage: 'Threshold (ms)',
+            })}{' '}
+            <EuiIconTip
+              content={i18n.translate('xpack.slo.sloEdit.apmLatency.threshold.tooltip', {
+                defaultMessage:
+                  'Configure the threshold in milliseconds defining the "good" or "successful" requests for the SLO.',
+              })}
+              position="top"
             />
-          </EuiFormRow>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <QueryBuilder
-            dataTestSubj="apmLatencyFilterInput"
-            indexPatternString={watch('indicator.params.index')}
-            label={i18n.translate('xpack.slo.sloEdit.apmLatency.filter', {
-              defaultMessage: 'Query filter',
-            })}
-            name="indicator.params.filter"
-            placeholder={i18n.translate('xpack.slo.sloEdit.apmLatency.filter.placeholder', {
-              defaultMessage: 'Custom filter to apply on the index',
-            })}
-            tooltip={
-              <EuiIconTip
-                content={i18n.translate('xpack.slo.sloEdit.apm.filter.tooltip', {
-                  defaultMessage:
-                    'This KQL query is used to filter the APM metrics on some relevant criteria for this SLO.',
-                })}
-                position="top"
-              />
-            }
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+          </span>
+        }
+        isInvalid={getFieldState('indicator.params.threshold').invalid}
+      >
+        <Controller
+          name="indicator.params.threshold"
+          control={control}
+          defaultValue={250}
+          rules={{
+            required: true,
+            min: 0,
+          }}
+          render={({ field: { ref, ...field }, fieldState }) => (
+            <EuiFieldNumber
+              {...field}
+              required
+              isInvalid={fieldState.invalid}
+              value={String(field.value)}
+              data-test-subj="apmLatencyThresholdInput"
+              min={0}
+              onChange={(event) => field.onChange(Number(event.target.value))}
+            />
+          )}
+        />
+      </EuiFormRow>
 
-      <GroupByField dataView={dataView} isLoading={isIndexFieldsLoading} />
+      <QueryBuilder
+        dataTestSubj="apmLatencyFilterInput"
+        dataView={dataView}
+        label={i18n.translate('xpack.slo.sloEdit.apmLatency.filter', {
+          defaultMessage: 'Query filter',
+        })}
+        name="indicator.params.filter"
+        placeholder={i18n.translate('xpack.slo.sloEdit.apmLatency.filter.placeholder', {
+          defaultMessage: 'Custom filter to apply on the index',
+        })}
+        tooltip={
+          <EuiIconTip
+            content={i18n.translate('xpack.slo.sloEdit.apm.filter.tooltip', {
+              defaultMessage:
+                'This KQL query is used to filter the APM metrics on some relevant criteria for this SLO.',
+            })}
+            position="top"
+          />
+        }
+      />
+
+      <GroupByField dataView={dataView} isLoading={isIndexFieldsLoading} filters={allFilters} />
 
       <DataPreviewChart />
     </EuiFlexGroup>

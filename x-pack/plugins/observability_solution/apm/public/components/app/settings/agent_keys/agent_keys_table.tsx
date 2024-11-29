@@ -7,62 +7,47 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiInMemoryTable,
-  EuiBasicTableColumn,
-  EuiInMemoryTableProps,
-} from '@elastic/eui';
-import { ApiKey } from '@kbn/security-plugin/common/model';
+import { EuiInMemoryTable, EuiBasicTableColumn, EuiInMemoryTableProps } from '@elastic/eui';
+import { ApiKey } from '@kbn/security-plugin-types-common';
 import { TimestampTooltip } from '../../../shared/timestamp_tooltip';
 import { ConfirmDeleteModal } from './confirm_delete_modal';
 
 interface Props {
   agentKeys: ApiKey[];
   onKeyDelete: () => void;
+  canManage: boolean;
 }
 
-export function AgentKeysTable({ agentKeys, onKeyDelete }: Props) {
+export function AgentKeysTable({ agentKeys, onKeyDelete, canManage }: Props) {
   const [agentKeyToBeDeleted, setAgentKeyToBeDeleted] = useState<ApiKey>();
 
   const columns: Array<EuiBasicTableColumn<ApiKey>> = [
     {
       field: 'name',
-      name: i18n.translate(
-        'xpack.apm.settings.agentKeys.table.nameColumnName',
-        {
-          defaultMessage: 'Name',
-        }
-      ),
+      name: i18n.translate('xpack.apm.settings.agentKeys.table.nameColumnName', {
+        defaultMessage: 'Name',
+      }),
       sortable: true,
     },
     {
       field: 'username',
-      name: i18n.translate(
-        'xpack.apm.settings.agentKeys.table.userNameColumnName',
-        {
-          defaultMessage: 'User',
-        }
-      ),
+      name: i18n.translate('xpack.apm.settings.agentKeys.table.userNameColumnName', {
+        defaultMessage: 'User',
+      }),
       sortable: true,
     },
     {
       field: 'realm',
-      name: i18n.translate(
-        'xpack.apm.settings.agentKeys.table.realmColumnName',
-        {
-          defaultMessage: 'Realm',
-        }
-      ),
+      name: i18n.translate('xpack.apm.settings.agentKeys.table.realmColumnName', {
+        defaultMessage: 'Realm',
+      }),
       sortable: true,
     },
     {
       field: 'creation',
-      name: i18n.translate(
-        'xpack.apm.settings.agentKeys.table.creationColumnName',
-        {
-          defaultMessage: 'Created',
-        }
-      ),
+      name: i18n.translate('xpack.apm.settings.agentKeys.table.creationColumnName', {
+        defaultMessage: 'Created',
+      }),
       dataType: 'date',
       sortable: true,
       mobileOptions: {
@@ -70,15 +55,15 @@ export function AgentKeysTable({ agentKeys, onKeyDelete }: Props) {
       },
       render: (date: number) => <TimestampTooltip time={date} />,
     },
-    {
+  ];
+
+  if (canManage) {
+    columns.push({
       actions: [
         {
-          name: i18n.translate(
-            'xpack.apm.settings.agentKeys.table.deleteActionTitle',
-            {
-              defaultMessage: 'Delete',
-            }
-          ),
+          name: i18n.translate('xpack.apm.settings.agentKeys.table.deleteActionTitle', {
+            defaultMessage: 'Delete',
+          }),
           description: i18n.translate(
             'xpack.apm.settings.agentKeys.table.deleteActionDescription',
             {
@@ -91,8 +76,8 @@ export function AgentKeysTable({ agentKeys, onKeyDelete }: Props) {
           onClick: (agentKey: ApiKey) => setAgentKeyToBeDeleted(agentKey),
         },
       ],
-    },
-  ];
+    });
+  }
 
   const search: EuiInMemoryTableProps<ApiKey>['search'] = {
     box: {
@@ -102,12 +87,9 @@ export function AgentKeysTable({ agentKeys, onKeyDelete }: Props) {
       {
         type: 'field_value_selection',
         field: 'username',
-        name: i18n.translate(
-          'xpack.apm.settings.agentKeys.table.userFilterLabel',
-          {
-            defaultMessage: 'User',
-          }
-        ),
+        name: i18n.translate('xpack.apm.settings.agentKeys.table.userFilterLabel', {
+          defaultMessage: 'User',
+        }),
         multiSelect: 'or',
         operator: 'exact',
         options: Object.keys(
@@ -120,12 +102,9 @@ export function AgentKeysTable({ agentKeys, onKeyDelete }: Props) {
       {
         type: 'field_value_selection',
         field: 'realm',
-        name: i18n.translate(
-          'xpack.apm.settings.agentKeys.table.realmFilterLabel',
-          {
-            defaultMessage: 'Realm',
-          }
-        ),
+        name: i18n.translate('xpack.apm.settings.agentKeys.table.realmFilterLabel', {
+          defaultMessage: 'Realm',
+        }),
         multiSelect: 'or',
         operator: 'exact',
         options: Object.keys(
@@ -141,12 +120,9 @@ export function AgentKeysTable({ agentKeys, onKeyDelete }: Props) {
   return (
     <React.Fragment>
       <EuiInMemoryTable
-        tableCaption={i18n.translate(
-          'xpack.apm.settings.agentKeys.tableCaption',
-          {
-            defaultMessage: 'APM agent keys',
-          }
-        )}
+        tableCaption={i18n.translate('xpack.apm.settings.agentKeys.tableCaption', {
+          defaultMessage: 'APM agent keys',
+        })}
         items={agentKeys ?? []}
         columns={columns}
         pagination={true}

@@ -15,10 +15,15 @@ export interface ValidationResults {
 }
 
 export const agentPolicyFormValidation = (
-  agentPolicy: Partial<NewAgentPolicy | AgentPolicy>
+  agentPolicy: Partial<NewAgentPolicy | AgentPolicy>,
+  options?: { allowedNamespacePrefixes?: string[] }
 ): ValidationResults => {
   const errors: ValidationResults = {};
-  const namespaceValidation = isValidNamespace(agentPolicy.namespace || '');
+  const namespaceValidation = isValidNamespace(
+    agentPolicy.namespace || '',
+    false,
+    options?.allowedNamespacePrefixes
+  );
 
   if (!agentPolicy.name?.trim()) {
     errors.name = [
@@ -47,6 +52,53 @@ export const agentPolicyFormValidation = (
       <FormattedMessage
         id="xpack.fleet.agentPolicyForm.inactivityTimeoutMinValueErrorMessage"
         defaultMessage="Inactivity timeout must be greater than zero."
+      />,
+    ];
+  }
+
+  if (agentPolicy.monitoring_http?.enabled) {
+    if (!agentPolicy.monitoring_http.host?.trim()) {
+      errors['monitoring_http.host'] = [
+        <FormattedMessage
+          id="xpack.fleet.agentPolicyForm.monitoringHttpHostRequiredErrorMessage"
+          defaultMessage="Host is required for HTTP monitoring"
+        />,
+      ];
+    }
+
+    if (
+      !agentPolicy.monitoring_http.port ||
+      (agentPolicy.monitoring_http.port !== undefined && agentPolicy.monitoring_http.port <= 0)
+    ) {
+      errors['monitoring_http.port'] = [
+        <FormattedMessage
+          id="xpack.fleet.agentPolicyForm.monitoringHttpPortRequiredErrorMessage"
+          defaultMessage="Port is required for HTTP monitoring"
+        />,
+      ];
+    }
+  }
+
+  if (
+    agentPolicy.monitoring_diagnostics?.limit?.burst !== undefined &&
+    agentPolicy.monitoring_diagnostics?.limit?.burst <= 0
+  ) {
+    errors['monitoring_diagnostics.limit.burst'] = [
+      <FormattedMessage
+        id="xpack.fleet.agentPolicyForm.diagnosticsLimitBurstMinValueErrorMessage"
+        defaultMessage="Burst must be an integer greater than zero"
+      />,
+    ];
+  }
+
+  if (
+    agentPolicy.monitoring_diagnostics?.uploader?.max_retries !== undefined &&
+    agentPolicy.monitoring_diagnostics?.uploader?.max_retries <= 0
+  ) {
+    errors['monitoring_diagnostics.uploader.max_retries'] = [
+      <FormattedMessage
+        id="xpack.fleet.agentPolicyForm.diagnosticsLimitBurstMinValueErrorMessage"
+        defaultMessage="Max retries must be an integer greater than zero"
       />,
     ];
   }

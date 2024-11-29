@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type {
@@ -98,7 +99,7 @@ function buildFormulaLayer(
   layer: LensMetricConfig,
   i: number,
   dataView: DataView,
-  formulaAPI: FormulaPublicApi
+  formulaAPI?: FormulaPublicApi
 ): FormBasedPersistedState['layers'] {
   const baseLayer: PersistedIndexPatternLayer = {
     columnOrder: [ACCESSOR, HISTOGRAM_COLUMN_NAME],
@@ -196,8 +197,10 @@ function getValueColumns(layer: LensMetricConfig) {
     ...(layer.breakdown
       ? [getValueColumn(getAccessorName('breakdown'), layer.breakdown as string)]
       : []),
-    getValueColumn(ACCESSOR, layer.value),
-    ...(layer.queryMaxValue ? [getValueColumn(getAccessorName('max'), layer.queryMaxValue)] : []),
+    getValueColumn(ACCESSOR, layer.value, 'number'),
+    ...(layer.queryMaxValue
+      ? [getValueColumn(getAccessorName('max'), layer.queryMaxValue, 'number')]
+      : []),
     ...(layer.querySecondaryMetric
       ? [getValueColumn(getAccessorName('secondary'), layer.querySecondaryMetric)]
       : []),

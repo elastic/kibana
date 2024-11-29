@@ -7,10 +7,13 @@
 
 import {
   ApplicationStart,
+  ChromeStart,
+  DocLinksStart,
   HttpStart,
   PluginInitializer,
   PluginInitializerContext,
 } from '@kbn/core/public';
+import { SharePluginStart } from '@kbn/share-plugin/public';
 import {
   ObservabilityOnboardingPlugin,
   ObservabilityOnboardingPluginSetup,
@@ -26,19 +29,27 @@ export interface ConfigSchema {
   };
 }
 
+export interface AppContext {
+  isDev: boolean;
+  isCloud: boolean;
+  isServerless: boolean;
+  stackVersion: string;
+  cloudServiceProvider?: string;
+}
+
 export interface ObservabilityOnboardingAppServices {
   application: ApplicationStart;
   http: HttpStart;
+  share: SharePluginStart;
+  context: AppContext;
   config: ConfigSchema;
+  docLinks: DocLinksStart;
+  chrome: ChromeStart;
 }
 
 export const plugin: PluginInitializer<
   ObservabilityOnboardingPluginSetup,
   ObservabilityOnboardingPluginStart
-> = (ctx: PluginInitializerContext<ConfigSchema>) =>
-  new ObservabilityOnboardingPlugin(ctx);
+> = (ctx: PluginInitializerContext<ConfigSchema>) => new ObservabilityOnboardingPlugin(ctx);
 
-export type {
-  ObservabilityOnboardingPluginSetup,
-  ObservabilityOnboardingPluginStart,
-};
+export type { ObservabilityOnboardingPluginSetup, ObservabilityOnboardingPluginStart };

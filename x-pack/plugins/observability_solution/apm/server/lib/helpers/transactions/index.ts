@@ -14,13 +14,13 @@ import {
   TRANSACTION_DURATION_HISTOGRAM,
   TRANSACTION_ROOT,
   PARENT_ID,
-  METRICSET_INTERVAL,
-  METRICSET_NAME,
   TRANSACTION_DURATION_SUMMARY,
 } from '../../../../common/es_fields/apm';
 import { APMConfig } from '../../..';
 import { APMEventClient } from '../create_es_client/create_apm_event_client';
 import { ApmDocumentType } from '../../../../common/document_type';
+
+export { getBackwardCompatibleDocumentTypeFilter } from '@kbn/apm-data-access-plugin/server/utils';
 
 export async function getHasTransactionsEvents({
   start,
@@ -33,28 +33,25 @@ export async function getHasTransactionsEvents({
   apmEventClient: APMEventClient;
   kuery?: string;
 }) {
-  const response = await apmEventClient.search(
-    'get_has_aggregated_transactions',
-    {
-      apm: {
-        events: [ProcessorEvent.metric],
-      },
-      body: {
-        track_total_hits: 1,
-        terminate_after: 1,
-        size: 0,
-        query: {
-          bool: {
-            filter: [
-              { exists: { field: TRANSACTION_DURATION_HISTOGRAM } },
-              ...(start && end ? rangeQuery(start, end) : []),
-              ...kqlQuery(kuery),
-            ],
-          },
+  const response = await apmEventClient.search('get_has_aggregated_transactions', {
+    apm: {
+      events: [ProcessorEvent.metric],
+    },
+    body: {
+      track_total_hits: 1,
+      terminate_after: 1,
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            { exists: { field: TRANSACTION_DURATION_HISTOGRAM } },
+            ...(start && end ? rangeQuery(start, end) : []),
+            ...kqlQuery(kuery),
+          ],
         },
       },
-    }
-  );
+    },
+  });
 
   return response.hits.total.value > 0;
 }
@@ -74,9 +71,7 @@ export async function getSearchTransactionsEvents({
 }): Promise<boolean> {
   switch (config.searchAggregatedTransactions) {
     case SearchAggregatedTransactionSetting.always:
-      return kuery
-        ? getHasTransactionsEvents({ start, end, apmEventClient, kuery })
-        : true;
+      return kuery ? getHasTransactionsEvents({ start, end, apmEventClient, kuery }) : true;
 
     case SearchAggregatedTransactionSetting.auto:
       return getHasTransactionsEvents({
@@ -109,8 +104,7 @@ export function isSummaryFieldSupportedByDocType(
   }
 
   return (
-    type === ApmDocumentType.ServiceTransactionMetric ||
-    type === ApmDocumentType.TransactionMetric
+    type === ApmDocumentType.ServiceTransactionMetric || type === ApmDocumentType.TransactionMetric
   );
 }
 export function getDurationFieldForTransactions(
@@ -131,31 +125,10 @@ export function getDurationFieldForTransactions(
   return TRANSACTION_DURATION;
 }
 
-// The function returns Document type filter for 1m Transaction Metrics
-export function getBackwardCompatibleDocumentTypeFilter(
-  searchAggregatedTransactions: boolean
-) {
-  return searchAggregatedTransactions
-    ? [
-        {
-          bool: {
-            filter: [{ exists: { field: TRANSACTION_DURATION_HISTOGRAM } }],
-            must_not: [
-              { terms: { [METRICSET_INTERVAL]: ['10m', '60m'] } },
-              { term: { [METRICSET_NAME]: 'service_transaction' } },
-            ],
-          },
-        },
-      ]
-    : [];
-}
-
 export function getProcessorEventForTransactions(
   searchAggregatedTransactions: boolean
 ): ProcessorEvent.metric | ProcessorEvent.transaction {
-  return searchAggregatedTransactions
-    ? ProcessorEvent.metric
-    : ProcessorEvent.transaction;
+  return searchAggregatedTransactions ? ProcessorEvent.metric : ProcessorEvent.transaction;
 }
 
 export function isRootTransaction(searchAggregatedTransactions: boolean) {
@@ -174,17 +147,10 @@ export function isRootTransaction(searchAggregatedTransactions: boolean) {
       };
 }
 
-export function getDurationLegacyFilter(): QueryDslQueryContainer {
+export function isDurationSummaryNotSupportedFilter(): QueryDslQueryContainer {
   return {
     bool: {
-      must: [
-        {
-          bool: {
-            filter: [{ exists: { field: TRANSACTION_DURATION_HISTOGRAM } }],
-            must_not: [{ exists: { field: TRANSACTION_DURATION_SUMMARY } }],
-          },
-        },
-      ],
+      must_not: [{ exists: { field: TRANSACTION_DURATION_SUMMARY } }],
     },
   };
 }

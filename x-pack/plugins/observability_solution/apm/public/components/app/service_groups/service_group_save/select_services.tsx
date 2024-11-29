@@ -30,10 +30,7 @@ import { KueryBar } from '../../../shared/kuery_bar';
 import { ServiceListPreview } from './service_list_preview';
 import type { StagedServiceGroup } from './save_modal';
 import { getDateRange } from '../../../../context/url_params_context/helpers';
-import {
-  validateServiceGroupKuery,
-  isSupportedField,
-} from '../../../../../common/service_groups';
+import { validateServiceGroupKuery, isSupportedField } from '../../../../../common/service_groups';
 
 const CentralizedContainer = styled.div`
   display: flex;
@@ -57,6 +54,7 @@ interface Props {
   onSaveClick: (serviceGroup: StagedServiceGroup) => void;
   onEditGroupDetailsClick: () => void;
   isLoading: boolean;
+  titleId?: string;
 }
 
 export function SelectServices({
@@ -66,12 +64,11 @@ export function SelectServices({
   onSaveClick,
   onEditGroupDetailsClick,
   isLoading,
+  titleId,
 }: Props) {
   const [kuery, setKuery] = useState(serviceGroup?.kuery || '');
   const [stagedKuery, setStagedKuery] = useState(serviceGroup?.kuery || '');
-  const [kueryValidationMessage, setKueryValidationMessage] = useState<
-    string | undefined
-  >();
+  const [kueryValidationMessage, setKueryValidationMessage] = useState<string | undefined>();
 
   const { euiTheme } = useEuiTheme();
 
@@ -122,32 +119,25 @@ export function SelectServices({
     <Container>
       <EuiModalHeader>
         <div>
-          <EuiModalHeaderTitle>
-            {i18n.translate(
-              'xpack.apm.serviceGroups.selectServicesForm.title',
-              {
-                defaultMessage: 'Select services',
-              }
-            )}
+          <EuiModalHeaderTitle id={titleId}>
+            {i18n.translate('xpack.apm.serviceGroups.selectServicesForm.title', {
+              defaultMessage: 'Select services',
+            })}
           </EuiModalHeaderTitle>
           <EuiSpacer size="s" />
           <EuiText color="subdued" size="s">
-            {i18n.translate(
-              'xpack.apm.serviceGroups.selectServicesForm.subtitle',
-              {
-                defaultMessage:
-                  'Use a query to select services for this group. The preview shows services that match this query within the last 24 hours.',
-              }
-            )}
+            {i18n.translate('xpack.apm.serviceGroups.selectServicesForm.subtitle', {
+              defaultMessage:
+                'Use a query to select services for this group. The preview shows services that match this query within the last 24 hours.',
+            })}
           </EuiText>
           <EuiSpacer size="s" />
           <EuiFlexGroup gutterSize="s">
             <EuiFlexItem>
               <KueryBar
-                placeholder={i18n.translate(
-                  'xpack.apm.serviceGroups.selectServicesForm.kql',
-                  { defaultMessage: 'E.g. labels.team: "web"' }
-                )}
+                placeholder={i18n.translate('xpack.apm.serviceGroups.selectServicesForm.kql', {
+                  defaultMessage: 'E.g. labels.team: "web"',
+                })}
                 onSubmit={handleOnSubmit}
                 onChange={(value) => {
                   setStagedKuery(value);
@@ -175,27 +165,22 @@ export function SelectServices({
                 isDisabled={isServiceListPreviewLoading || !stagedKuery}
               >
                 {!kuery
-                  ? i18n.translate(
-                      'xpack.apm.serviceGroups.selectServicesForm.preview',
-                      { defaultMessage: 'Preview' }
-                    )
-                  : i18n.translate(
-                      'xpack.apm.serviceGroups.selectServicesForm.refresh',
-                      { defaultMessage: 'Refresh' }
-                    )}
+                  ? i18n.translate('xpack.apm.serviceGroups.selectServicesForm.preview', {
+                      defaultMessage: 'Preview',
+                    })
+                  : i18n.translate('xpack.apm.serviceGroups.selectServicesForm.refresh', {
+                      defaultMessage: 'Refresh',
+                    })}
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
           {kuery && data?.items && (
             <EuiText color="success" size="s">
-              {i18n.translate(
-                'xpack.apm.serviceGroups.selectServicesForm.matchingServiceCount',
-                {
-                  defaultMessage:
-                    '{servicesCount} {servicesCount, plural, =0 {services} one {service} other {services}} match the query',
-                  values: { servicesCount: data?.items.length },
-                }
-              )}
+              {i18n.translate('xpack.apm.serviceGroups.selectServicesForm.matchingServiceCount', {
+                defaultMessage:
+                  '{servicesCount} {servicesCount, plural, =0 {services} one {service} other {services}} match the query',
+                values: { servicesCount: data?.items.length },
+              })}
             </EuiText>
           )}
         </div>
@@ -203,27 +188,19 @@ export function SelectServices({
       <EuiModalBody
         style={{
           height: `calc(75vh - ${MODAL_HEADER_HEIGHT}px - ${MODAL_FOOTER_HEIGHT}px)`,
-          maxHeight:
-            MAX_CONTAINER_HEIGHT - MODAL_HEADER_HEIGHT - MODAL_FOOTER_HEIGHT,
+          maxHeight: MAX_CONTAINER_HEIGHT - MODAL_HEADER_HEIGHT - MODAL_FOOTER_HEIGHT,
         }}
       >
-        <EuiFlexGroup
-          direction="column"
-          gutterSize="s"
-          style={{ height: '100%' }}
-        >
+        <EuiFlexGroup direction="column" gutterSize="s" style={{ height: '100%' }}>
           <EuiFlexItem>
             <EuiPanel hasShadow={false} hasBorder paddingSize="s">
               {!data && isServiceListPreviewLoading && <EuiLoadingSpinner />}
               {kueryValidationMessage?.length ? (
                 <CentralizedContainer>
                   <EuiCallOut
-                    title={i18n.translate(
-                      'xpack.apm.serviceGroups.searchResults.error',
-                      {
-                        defaultMessage: 'Error retrieving search results',
-                      }
-                    )}
+                    title={i18n.translate('xpack.apm.serviceGroups.searchResults.error', {
+                      defaultMessage: 'Error retrieving search results',
+                    })}
                     color="danger"
                     iconType="error"
                   >
@@ -239,17 +216,13 @@ export function SelectServices({
                   </EuiCallOut>
                 </CentralizedContainer>
               ) : kuery && data ? (
-                <ServiceListPreview
-                  items={data.items}
-                  isLoading={isServiceListPreviewLoading}
-                />
+                <ServiceListPreview items={data.items} isLoading={isServiceListPreviewLoading} />
               ) : (
                 <CentralizedContainer>
                   <EuiText size="s" color="subdued">
-                    {i18n.translate(
-                      'xpack.apm.serviceGroups.selectServicesForm.panelLabel',
-                      { defaultMessage: 'Enter a query to select services' }
-                    )}
+                    {i18n.translate('xpack.apm.serviceGroups.selectServicesForm.panelLabel', {
+                      defaultMessage: 'Enter a query to select services',
+                    })}
                   </EuiText>
                 </CentralizedContainer>
               )}
@@ -268,10 +241,9 @@ export function SelectServices({
                 iconType="sortLeft"
                 isDisabled={isLoading}
               >
-                {i18n.translate(
-                  'xpack.apm.serviceGroups.selectServicesForm.editGroupDetails',
-                  { defaultMessage: 'Edit group details' }
-                )}
+                {i18n.translate('xpack.apm.serviceGroups.selectServicesForm.editGroupDetails', {
+                  defaultMessage: 'Edit group details',
+                })}
               </EuiButton>
             </div>
           </EuiFlexItem>
@@ -281,12 +253,9 @@ export function SelectServices({
               onClick={onCloseModal}
               isDisabled={isLoading}
             >
-              {i18n.translate(
-                'xpack.apm.serviceGroups.selectServicesForm.cancel',
-                {
-                  defaultMessage: 'Cancel',
-                }
-              )}
+              {i18n.translate('xpack.apm.serviceGroups.selectServicesForm.cancel', {
+                defaultMessage: 'Cancel',
+              })}
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -296,14 +265,11 @@ export function SelectServices({
               onClick={() => {
                 onSaveClick({ ...serviceGroup, kuery });
               }}
-              isDisabled={
-                isLoading || !kuery || !isEmpty(kueryValidationMessage)
-              }
+              isDisabled={isLoading || !kuery || !isEmpty(kueryValidationMessage)}
             >
-              {i18n.translate(
-                'xpack.apm.serviceGroups.selectServicesForm.saveGroup',
-                { defaultMessage: 'Save group' }
-              )}
+              {i18n.translate('xpack.apm.serviceGroups.selectServicesForm.saveGroup', {
+                defaultMessage: 'Save group',
+              })}
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>

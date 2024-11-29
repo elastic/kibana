@@ -18,13 +18,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { useChartThemes } from '@kbn/observability-shared-plugin/public';
-import {
-  Chart,
-  Partition,
-  Settings,
-  Datum,
-  PartitionLayout,
-} from '@elastic/charts';
+import { Chart, Partition, Settings, Datum, PartitionLayout } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
@@ -55,43 +49,25 @@ const ProcessorEventLabelMap = {
       defaultMessage: 'Transactions',
     }
   ),
-  [ProcessorEvent.span]: i18n.translate(
-    'xpack.apm.storageExplorer.serviceDetails.spans',
-    {
-      defaultMessage: 'Spans',
-    }
-  ),
-  [ProcessorEvent.metric]: i18n.translate(
-    'xpack.apm.storageExplorer.serviceDetails.metrics',
-    {
-      defaultMessage: 'Metrics',
-    }
-  ),
-  [ProcessorEvent.error]: i18n.translate(
-    'xpack.apm.storageExplorer.serviceDetails.errors',
-    {
-      defaultMessage: 'Errors',
-    }
-  ),
+  [ProcessorEvent.span]: i18n.translate('xpack.apm.storageExplorer.serviceDetails.spans', {
+    defaultMessage: 'Spans',
+  }),
+  [ProcessorEvent.metric]: i18n.translate('xpack.apm.storageExplorer.serviceDetails.metrics', {
+    defaultMessage: 'Metrics',
+  }),
+  [ProcessorEvent.error]: i18n.translate('xpack.apm.storageExplorer.serviceDetails.errors', {
+    defaultMessage: 'Errors',
+  }),
 };
 
-export function StorageDetailsPerService({
-  serviceName,
-  indexLifecyclePhase,
-}: Props) {
+export function StorageDetailsPerService({ serviceName, indexLifecyclePhase }: Props) {
   const { core } = useApmPluginContext();
   const chartThemes = useChartThemes();
   const router = useApmRouter();
   const { euiTheme } = useEuiTheme();
 
   const { query } = useApmParams('/storage-explorer');
-  const {
-    rangeFrom,
-    rangeTo,
-    environment,
-    kuery,
-    comparisonEnabled: urlComparisonEnabled,
-  } = query;
+  const { rangeFrom, rangeTo, environment, kuery, comparisonEnabled: urlComparisonEnabled } = query;
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
@@ -110,23 +86,20 @@ export function StorageDetailsPerService({
 
   const { data, status } = useProgressiveFetcher(
     (callApmApi) => {
-      return callApmApi(
-        'GET /internal/apm/services/{serviceName}/storage_details',
-        {
-          params: {
-            path: {
-              serviceName,
-            },
-            query: {
-              indexLifecyclePhase,
-              start,
-              end,
-              environment,
-              kuery,
-            },
+      return callApmApi('GET /internal/apm/services/{serviceName}/storage_details', {
+        params: {
+          path: {
+            serviceName,
           },
-        }
-      );
+          query: {
+            indexLifecyclePhase,
+            start,
+            end,
+            environment,
+            kuery,
+          },
+        },
+      });
     },
     [indexLifecyclePhase, start, end, environment, kuery, serviceName]
   );
@@ -143,13 +116,11 @@ export function StorageDetailsPerService({
     return null;
   }
 
-  const processorEventStats = data.processorEventStats.map(
-    ({ processorEvent, docs, size }) => ({
-      processorEventLabel: ProcessorEventLabelMap[processorEvent],
-      docs,
-      size,
-    })
-  );
+  const processorEventStats = data.processorEventStats.map(({ processorEvent, docs, size }) => ({
+    processorEventLabel: ProcessorEventLabelMap[processorEvent],
+    docs,
+    size,
+  }));
 
   return (
     <>
@@ -159,12 +130,9 @@ export function StorageDetailsPerService({
             <EuiFlexItem>
               <EuiTitle size="xs">
                 <h4>
-                  {i18n.translate(
-                    'xpack.apm.storageExplorer.serviceDetails.title',
-                    {
-                      defaultMessage: 'Service storage details',
-                    }
-                  )}
+                  {i18n.translate('xpack.apm.storageExplorer.serviceDetails.title', {
+                    defaultMessage: 'Service storage details',
+                  })}
                 </h4>
               </EuiTitle>
             </EuiFlexItem>
@@ -173,12 +141,9 @@ export function StorageDetailsPerService({
                 data-test-subj="apmStorageDetailsPerServiceGoToServiceOverviewLink"
                 href={serviceOverviewLink}
               >
-                {i18n.translate(
-                  'xpack.apm.storageExplorer.serviceDetails.serviceOverviewLink',
-                  {
-                    defaultMessage: 'Go to service overview',
-                  }
-                )}
+                {i18n.translate('xpack.apm.storageExplorer.serviceDetails.serviceOverviewLink', {
+                  defaultMessage: 'Go to service overview',
+                })}
               </EuiLink>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -187,10 +152,7 @@ export function StorageDetailsPerService({
         <EuiFlexItem>
           <EuiFlexGroup justifyContent="spaceBetween" gutterSize="m">
             <EuiFlexItem>
-              <EuiPanel
-                hasShadow={false}
-                data-test-subj="serviceStorageDetailsChart"
-              >
+              <EuiPanel hasShadow={false} data-test-subj="serviceStorageDetailsChart">
                 <Chart>
                   <Settings
                     theme={[
@@ -214,15 +176,12 @@ export function StorageDetailsPerService({
                     data={processorEventStats}
                     valueAccessor={(d) => d.size ?? 0}
                     valueGetter="percent"
-                    valueFormatter={(d: number) =>
-                      asDynamicBytes(d) || NOT_AVAILABLE_LABEL
-                    }
+                    valueFormatter={(d: number) => asDynamicBytes(d) || NOT_AVAILABLE_LABEL}
                     layers={[
                       {
                         groupByRollup: (d: Datum) => d.processorEventLabel,
                         shape: {
-                          fillColor: (dataName, sortIndex) =>
-                            groupedPalette[sortIndex],
+                          fillColor: (dataName, sortIndex) => groupedPalette[sortIndex],
                         },
                       },
                     ]}
@@ -236,44 +195,39 @@ export function StorageDetailsPerService({
                 paddingSize="l"
                 data-test-subj="serviceStorageDetailsTable"
               >
-                {processorEventStats.map(
-                  ({ processorEventLabel, docs, size }) => (
-                    <>
-                      <EuiFlexGrid
-                        columns={2}
-                        css={css`
-                          font-weight: ${euiTheme.font.weight.semiBold};
-                        `}
-                      >
-                        <EuiFlexItem>{processorEventLabel}</EuiFlexItem>
-                        <EuiFlexItem>
-                          <SizeLabel />
-                        </EuiFlexItem>
-                      </EuiFlexGrid>
-                      <EuiFlexGrid
-                        columns={2}
-                        css={css`
-                          background-color: ${euiTheme.colors.lightestShade};
-                          border-top: 1px solid ${euiTheme.colors.lightShade};
-                          border-bottom: 1px solid ${euiTheme.colors.lightShade};
-                        `}
-                      >
-                        <EuiFlexItem>{asInteger(docs)}</EuiFlexItem>
-                        <EuiFlexItem>{asDynamicBytes(size)}</EuiFlexItem>
-                      </EuiFlexGrid>
-                      <EuiSpacer />
-                    </>
-                  )
-                )}
+                {processorEventStats.map(({ processorEventLabel, docs, size }) => (
+                  <>
+                    <EuiFlexGrid
+                      columns={2}
+                      css={css`
+                        font-weight: ${euiTheme.font.weight.semiBold};
+                      `}
+                    >
+                      <EuiFlexItem>{processorEventLabel}</EuiFlexItem>
+                      <EuiFlexItem>
+                        <SizeLabel />
+                      </EuiFlexItem>
+                    </EuiFlexGrid>
+                    <EuiFlexGrid
+                      columns={2}
+                      css={css`
+                        background-color: ${euiTheme.colors.lightestShade};
+                        border-top: 1px solid ${euiTheme.colors.lightShade};
+                        border-bottom: 1px solid ${euiTheme.colors.lightShade};
+                      `}
+                    >
+                      <EuiFlexItem>{asInteger(docs)}</EuiFlexItem>
+                      <EuiFlexItem>{asDynamicBytes(size)}</EuiFlexItem>
+                    </EuiFlexGrid>
+                    <EuiSpacer />
+                  </>
+                ))}
               </EuiPanel>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem>
-          <IndexStatsPerService
-            indicesStats={data.indicesStats}
-            status={status}
-          />
+          <IndexStatsPerService indicesStats={data.indicesStats} status={status} />
         </EuiFlexItem>
       </EuiFlexGroup>
     </>

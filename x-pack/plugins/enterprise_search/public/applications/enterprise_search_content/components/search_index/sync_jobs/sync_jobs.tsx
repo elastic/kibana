@@ -7,29 +7,57 @@
 
 import React, { useEffect, useState } from 'react';
 
-import { type } from 'io-ts';
+import { css } from '@emotion/react';
 import { useActions, useValues } from 'kea';
 
-import { EuiButtonGroup } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiSpacer, useEuiTheme } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-
-import { SyncJobsTable } from '@kbn/search-connectors';
+import { Connector, SyncJobsTable } from '@kbn/search-connectors';
 
 import { KibanaLogic } from '../../../../shared/kibana';
 
-import { IndexViewLogic } from '../index_view_logic';
+import { hasDocumentLevelSecurityFeature } from '../../../utils/connector_helpers';
+
+import {
+  AccessControlIndexSelector,
+  AccessControlSelectorOption,
+} from '../components/access_control_index_selector/access_control_index_selector';
 
 import { SyncJobsViewLogic } from './sync_jobs_view_logic';
 
-export const SyncJobs: React.FC = () => {
-  const { hasDocumentLevelSecurityFeature } = useValues(IndexViewLogic);
+export interface SyncJobsProps {
+  connector: Connector;
+}
+
+export const SyncJobs: React.FC<SyncJobsProps> = ({ connector }) => {
   const { productFeatures } = useValues(KibanaLogic);
-  const [selectedSyncJobCategory, setSelectedSyncJobCategory] = useState<string>('content');
   const shouldShowAccessSyncs =
-    productFeatures.hasDocumentLevelSecurityEnabled && hasDocumentLevelSecurityFeature;
-  const { connectorId, syncJobsPagination: pagination, syncJobs } = useValues(SyncJobsViewLogic);
-  const { fetchSyncJobs } = useActions(SyncJobsViewLogic);
+    productFeatures.hasDocumentLevelSecurityEnabled && hasDocumentLevelSecurityFeature(connector);
+  const errorOnAccessSync = Boolean(connector.last_access_control_sync_error);
+  const errorOnContentSync = Boolean(connector.last_sync_error);
+  const [selectedIndexType, setSelectedIndexType] =
+    useState<AccessControlSelectorOption['value']>('content-index');
+  const {
+    connectorId,
+    syncJobsPagination: pagination,
+    syncJobs,
+    cancelSyncJobLoading,
+    syncJobToCancel,
+    selectedSyncJobCategory,
+    syncTriggeredLocally,
+  } = useValues(SyncJobsViewLogic);
+  const {
+    setConnectorId,
+    fetchSyncJobs,
+    cancelSyncJob,
+    setCancelSyncJob,
+    setSelectedSyncJobCategory,
+  } = useActions(SyncJobsViewLogic);
+
+  useEffect(() => {
+    setConnectorId(connector.id);
+  }, [connector]);
 
   useEffect(() => {
     if (connectorId) {
@@ -37,48 +65,93 @@ export const SyncJobs: React.FC = () => {
         connectorId,
         from: pagination.pageIndex * (pagination.pageSize || 0),
         size: pagination.pageSize ?? 10,
-        type: selectedSyncJobCategory as 'access_control' | 'content',
+        type: selectedSyncJobCategory,
       });
     }
-  }, [connectorId, selectedSyncJobCategory, type]);
+  }, [connectorId, selectedSyncJobCategory]);
 
+  useEffect(() => {
+    if (selectedIndexType === 'content-index') {
+      setSelectedSyncJobCategory('content');
+    } else {
+      setSelectedSyncJobCategory('access_control');
+    }
+  }, [selectedIndexType]);
+  const { euiTheme } = useEuiTheme();
   return (
     <>
       {shouldShowAccessSyncs && (
-        <EuiButtonGroup
-          legend={i18n.translate(
-            'xpack.enterpriseSearch.content.syncJobs.lastSync.tableSelector.legend',
-            { defaultMessage: 'Select sync job type to display.' }
-          )}
-          name={i18n.translate(
-            'xpack.enterpriseSearch.content.syncJobs.lastSync.tableSelector.name',
-            { defaultMessage: 'Sync job type' }
-          )}
-          idSelected={selectedSyncJobCategory}
-          onChange={(optionId) => {
-            setSelectedSyncJobCategory(optionId);
-          }}
-          options={[
-            {
-              id: 'content',
-              label: i18n.translate(
-                'xpack.enterpriseSearch.content.syncJobs.lastSync.tableSelector.content.label',
-                { defaultMessage: 'Content syncs' }
-              ),
-            },
-
-            {
-              id: 'access_control',
-              label: i18n.translate(
-                'xpack.enterpriseSearch.content.syncJobs.lastSync.tableSelector.accessControl.label',
-                { defaultMessage: 'Access control syncs' }
-              ),
-            },
-          ]}
-        />
+        <>
+          <EuiFlexGroup gutterSize="s" alignItems="center">
+            <EuiFlexItem
+              grow={false}
+              css={css`
+                min-width: ${euiTheme.base * 18}px;
+              `}
+            >
+              <AccessControlIndexSelector
+                fullWidth
+                onChange={setSelectedIndexType}
+                valueOfSelected={selectedIndexType}
+                indexSelectorOptions={[
+                  {
+                    description: i18n.translate(
+                      'xpack.enterpriseSearch.content.searchIndex.documents.selector.contentIndexSync.description',
+                      {
+                        defaultMessage: 'Browse content sync history',
+                      }
+                    ),
+                    error: errorOnContentSync,
+                    title: i18n.translate(
+                      'xpack.enterpriseSearch.content.searchIndex.documents.selector.contentIndexSync.title',
+                      {
+                        defaultMessage: 'Content syncs',
+                      }
+                    ),
+                    value: 'content-index',
+                  },
+                  {
+                    description: i18n.translate(
+                      'xpack.enterpriseSearch.content.searchIndex.documents.selector.accessControlSync.description',
+                      {
+                        defaultMessage: 'Browse access control sync history',
+                      }
+                    ),
+                    error: errorOnAccessSync,
+                    title: i18n.translate(
+                      'xpack.enterpriseSearch.content.searchIndex.documents.selectorSync.accessControl.title',
+                      {
+                        defaultMessage: 'Access control syncs',
+                      }
+                    ),
+                    value: 'access-control-index',
+                  },
+                ]}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiIconTip
+                content={
+                  <p>
+                    {i18n.translate(
+                      'xpack.enterpriseSearch.accessControlIndexSelector.p.accessControlSyncsAreLabel',
+                      {
+                        defaultMessage:
+                          'Access control syncs keep permissions information up to date for document level security (DLS)',
+                      }
+                    )}
+                  </p>
+                }
+                position="right"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="m" />
+        </>
       )}
       {selectedSyncJobCategory === 'content' ? (
         <SyncJobsTable
+          isLoading={syncTriggeredLocally}
           onPaginate={({ page: { index, size } }) => {
             if (connectorId) {
               fetchSyncJobs({
@@ -92,9 +165,18 @@ export const SyncJobs: React.FC = () => {
           pagination={pagination}
           syncJobs={syncJobs}
           type="content"
+          cancelConfirmModalProps={{
+            isLoading: cancelSyncJobLoading,
+            onConfirmCb: (syncJobId: string) => {
+              cancelSyncJob({ syncJobId });
+            },
+            setSyncJobIdToCancel: setCancelSyncJob,
+            syncJobIdToCancel: syncJobToCancel ?? undefined,
+          }}
         />
       ) : (
         <SyncJobsTable
+          isLoading={syncTriggeredLocally}
           onPaginate={({ page: { index, size } }) => {
             if (connectorId) {
               fetchSyncJobs({
@@ -104,6 +186,14 @@ export const SyncJobs: React.FC = () => {
                 type: 'access_control',
               });
             }
+          }}
+          cancelConfirmModalProps={{
+            isLoading: cancelSyncJobLoading,
+            onConfirmCb: (syncJobId: string) => {
+              cancelSyncJob({ syncJobId });
+            },
+            setSyncJobIdToCancel: setCancelSyncJob,
+            syncJobIdToCancel: syncJobToCancel ?? undefined,
           }}
           pagination={pagination}
           syncJobs={syncJobs}

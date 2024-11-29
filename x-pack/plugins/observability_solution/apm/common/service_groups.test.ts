@@ -10,11 +10,7 @@ import {
   validateServiceGroupKuery,
   SERVICE_GROUP_SUPPORTED_FIELDS,
 } from './service_groups';
-import {
-  TRANSACTION_TYPE,
-  TRANSACTION_DURATION,
-  SERVICE_FRAMEWORK_VERSION,
-} from './es_fields/apm';
+import { TRANSACTION_TYPE, TRANSACTION_DURATION, SERVICE_FRAMEWORK_VERSION } from './es_fields/apm';
 
 describe('service_groups common utils', () => {
   describe('isSupportedField', () => {
@@ -24,11 +20,7 @@ describe('service_groups common utils', () => {
       });
     });
     it('should reject unsupported fields', () => {
-      const unsupportedFields = [
-        TRANSACTION_TYPE,
-        TRANSACTION_DURATION,
-        SERVICE_FRAMEWORK_VERSION,
-      ];
+      const unsupportedFields = [TRANSACTION_TYPE, TRANSACTION_DURATION, SERVICE_FRAMEWORK_VERSION];
       unsupportedFields.map((field) => {
         expect(isSupportedField(field)).toBe(false);
       });
@@ -36,9 +28,7 @@ describe('service_groups common utils', () => {
   });
   describe('validateServiceGroupKuery', () => {
     it('should validate supported KQL filter for a service group', () => {
-      const result = validateServiceGroupKuery(
-        `service.name: testbeans* or agent.name: "nodejs"`
-      );
+      const result = validateServiceGroupKuery(`service.name: testbeans* or agent.name: "nodejs"`);
       expect(result).toHaveProperty('isValidFields', true);
       expect(result).toHaveProperty('isValidSyntax', true);
       expect(result).not.toHaveProperty('message');
@@ -55,9 +45,7 @@ describe('service_groups common utils', () => {
       );
     });
     it('should return parsing error when KQL is incomplete', () => {
-      const result = validateServiceGroupKuery(
-        `service.name: testbeans* or agent.name: "nod`
-      );
+      const result = validateServiceGroupKuery(`service.name: testbeans* or agent.name: "nod`);
       expect(result).toHaveProperty('isValidFields', false);
       expect(result).toHaveProperty('isValidSyntax', false);
       expect(result).toHaveProperty('message');

@@ -1,38 +1,37 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import React from 'react';
-import { combineLatest, debounceTime, of, ReplaySubject, takeUntil } from 'rxjs';
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { of, ReplaySubject, take, map, Observable, switchMap } from 'rxjs';
+import {
+  PluginInitializerContext,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  HttpStart,
+} from '@kbn/core/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import type {
-  SolutionNavigationDefinition,
-  SolutionNavigationDefinitions,
-} from '@kbn/core-chrome-browser';
+import type { Space } from '@kbn/spaces-plugin/public';
+import type { SolutionId, SolutionNavigationDefinition } from '@kbn/core-chrome-browser';
 import { InternalChromeStart } from '@kbn/core-chrome-browser-internal';
-import { definition as esDefinition } from '@kbn/solution-nav-es';
-import { definition as obltDefinition } from '@kbn/solution-nav-oblt';
 import type { PanelContentProvider } from '@kbn/shared-ux-chrome-navigation';
-import {
-  ENABLE_SOLUTION_NAV_UI_SETTING_ID,
-  OPT_IN_STATUS_SOLUTION_NAV_UI_SETTING_ID,
-  DEFAULT_SOLUTION_NAV_UI_SETTING_ID,
-} from '../common';
-import {
+import type {
   NavigationPublicSetup,
   NavigationPublicStart,
   NavigationPublicSetupDependencies,
   NavigationPublicStartDependencies,
-  ConfigSchema,
-  SolutionNavigation,
+  AddSolutionNavigationArg,
 } from './types';
 import { TopNavMenuExtensionsRegistry, createTopNav } from './top_nav_menu';
 import { RegisteredTopNavMenuData } from './top_nav_menu/top_nav_menu_data';
 import { SideNavComponent } from './side_navigation';
+import { registerNavigationEventTypes } from './analytics';
 
 export class NavigationPublicPlugin
   implements
@@ -48,10 +47,19 @@ export class NavigationPublicPlugin
   private readonly stop$ = new ReplaySubject<void>(1);
   private coreStart?: CoreStart;
   private depsStart?: NavigationPublicStartDependencies;
+  private isSolutionNavEnabled = false;
+  private isCloudTrialUser = false;
 
-  constructor(private initializerContext: PluginInitializerContext<ConfigSchema>) {}
+  constructor(private initializerContext: PluginInitializerContext) {}
 
-  public setup(_core: CoreSetup): NavigationPublicSetup {
+  public setup(core: CoreSetup, deps: NavigationPublicSetupDependencies): NavigationPublicSetup {
+    registerNavigationEventTypes(core);
+
+    const cloudTrialEndDate = deps.cloud?.trialEndDate;
+    if (cloudTrialEndDate) {
+      this.isCloudTrialUser = cloudTrialEndDate.getTime() > Date.now();
+    }
+
     return {
       registerMenuItem: this.topNavMenuExtensionsRegistry.register.bind(
         this.topNavMenuExtensionsRegistry
@@ -66,9 +74,12 @@ export class NavigationPublicPlugin
     this.coreStart = core;
     this.depsStart = depsStart;
 
-    const { unifiedSearch, cloud } = depsStart;
+    const { unifiedSearch, cloud, spaces } = depsStart;
     const extensions = this.topNavMenuExtensionsRegistry.getAll();
     const chrome = core.chrome as InternalChromeStart;
+    const activeSpace$: Observable<Space | undefined> = spaces?.getActiveSpace$() ?? of(undefined);
+    const isServerless = this.initializerContext.env.packageInfo.buildFlavor === 'serverless';
+    this.isSolutionNavEnabled = spaces?.isSolutionViewEnabled ?? false;
 
     /*
      *
@@ -90,48 +101,22 @@ export class NavigationPublicPlugin
       return createTopNav(customUnifiedSearch ?? unifiedSearch, customExtensions ?? extensions);
     };
 
-    const config = this.initializerContext.config.get();
-    const {
-      solutionNavigation: { featureOn: isSolutionNavigationFeatureOn },
-    } = config;
+    const initSolutionNavigation = (activeSpace?: Space) => {
+      this.initiateChromeStyleAndSideNav(chrome, {
+        isServerless,
+        activeSpace,
+      });
 
-    const onCloud = cloud !== undefined; // The new side nav will initially only be available to cloud users
-    const isServerless = this.initializerContext.env.packageInfo.buildFlavor === 'serverless';
-    const isSolutionNavEnabled = isSolutionNavigationFeatureOn && onCloud && !isServerless;
+      if (!this.isSolutionNavEnabled) return;
 
-    if (isSolutionNavEnabled) {
-      chrome.project.setCloudUrls(cloud);
-      this.addDefaultSolutionNavigation({ chrome });
-      this.susbcribeToSolutionNavUiSettings(core);
+      chrome.project.setCloudUrls(cloud!);
+    };
 
-      // Temp. This is temporary to simulate adding a solution nav after bootstrapping
-      setTimeout(() => {
-        this.addSolutionNavigation({
-          id: 'security',
-          title: 'Security',
-          icon: 'logoSecurity',
-          homePage: 'dashboards', // Temp. Wil be updated when all links are registered
-          navigationTree$: of({
-            body: [
-              // Temp. In future work this will be loaded from a package
-              {
-                type: 'navGroup',
-                id: 'security_project_nav',
-                title: 'Security',
-                icon: 'logoSecurity',
-                breadcrumbStatus: 'hidden',
-                defaultIsCollapsed: false,
-                children: [
-                  {
-                    link: 'dashboards',
-                    spaceBefore: 'm',
-                  },
-                ],
-              },
-            ],
-          }),
-        });
-      }, 5000);
+    if (this.getIsUnauthenticated(core.http)) {
+      // Don't fetch the active space if the user is not authenticated
+      initSolutionNavigation();
+    } else {
+      activeSpace$.pipe(take(1)).subscribe(initSolutionNavigation);
     }
 
     return {
@@ -140,46 +125,25 @@ export class NavigationPublicPlugin
         AggregateQueryTopNavMenu: createTopNav(unifiedSearch, extensions),
         createTopNavWithCustomContext: createCustomTopNav,
       },
-      addSolutionNavigation: (
-        solutionNavigation: Omit<SolutionNavigation, 'sideNavComponent'> & {
-          /** Data test subj for the side navigation */
-          dataTestSubj?: string;
-          /** Panel content provider for the side navigation */
-          panelContentProvider?: PanelContentProvider;
-        }
-      ) => {
-        if (!isSolutionNavEnabled) return;
-        return this.addSolutionNavigation(solutionNavigation);
+      addSolutionNavigation: (solutionNavigation) => {
+        if (!this.isSolutionNavEnabled) return;
+        this.addSolutionNavigation(solutionNavigation);
       },
-      isSolutionNavigationEnabled: () => isSolutionNavEnabled,
+      isSolutionNavEnabled$: of(this.getIsUnauthenticated(core.http)).pipe(
+        switchMap((isUnauthenticated) => {
+          if (isUnauthenticated) return of(false);
+          return activeSpace$.pipe(
+            map((activeSpace) => {
+              return this.isSolutionNavEnabled && getIsProjectNav(activeSpace?.solution);
+            })
+          );
+        })
+      ),
     };
   }
 
   public stop() {
     this.stop$.next();
-  }
-
-  private susbcribeToSolutionNavUiSettings(core: CoreStart) {
-    const chrome = core.chrome as InternalChromeStart;
-
-    combineLatest([
-      core.settings.globalClient.get$(ENABLE_SOLUTION_NAV_UI_SETTING_ID),
-      core.settings.globalClient.get$(OPT_IN_STATUS_SOLUTION_NAV_UI_SETTING_ID),
-      core.settings.globalClient.get$(DEFAULT_SOLUTION_NAV_UI_SETTING_ID),
-    ])
-      .pipe(takeUntil(this.stop$), debounceTime(10))
-      .subscribe(([enabled, status, defaultSolution]) => {
-        if (!enabled) {
-          chrome.project.changeActiveSolutionNavigation(null);
-        } else {
-          // TODO: Here we will need to check if the user has opt-in or not.... (value set in their user profile)
-          const changeImmediately = status === 'visible';
-          chrome.project.changeActiveSolutionNavigation(
-            changeImmediately ? defaultSolution : null,
-            { onlyIfNotSet: true }
-          );
-        }
-      });
   }
 
   private getSideNavComponent({
@@ -205,37 +169,47 @@ export class NavigationPublicPlugin
     );
   }
 
-  private addSolutionNavigation(
-    solutionNavigation: SolutionNavigation & {
-      /** Data test subj for the side navigation */
-      dataTestSubj?: string;
-      /** Panel content provider for the side navigation */
-      panelContentProvider?: PanelContentProvider;
-    }
-  ) {
+  private addSolutionNavigation(solutionNavigation: AddSolutionNavigationArg) {
     if (!this.coreStart) throw new Error('coreStart is not available');
     const { dataTestSubj, panelContentProvider, ...rest } = solutionNavigation;
-    const sideNavComponent =
-      solutionNavigation.sideNavComponent ??
-      this.getSideNavComponent({ dataTestSubj, panelContentProvider });
+    const sideNavComponent = this.getSideNavComponent({ dataTestSubj, panelContentProvider });
     const { project } = this.coreStart.chrome as InternalChromeStart;
     project.updateSolutionNavigations({
       [solutionNavigation.id]: { ...rest, sideNavComponent },
     });
   }
 
-  private addDefaultSolutionNavigation({ chrome }: { chrome: InternalChromeStart }) {
-    const solutionNavs: SolutionNavigationDefinitions = {
-      es: {
-        ...esDefinition,
-        sideNavComponent: this.getSideNavComponent({ dataTestSubj: 'svlSearchSideNav' }),
-      },
-      oblt: {
-        ...obltDefinition,
-        sideNavComponent: this.getSideNavComponent({ dataTestSubj: 'svlObservabilitySideNav' }),
-      },
-    };
+  private initiateChromeStyleAndSideNav(
+    chrome: InternalChromeStart,
+    { isServerless, activeSpace }: { isServerless: boolean; activeSpace?: Space }
+  ) {
+    const solutionView = activeSpace?.solution;
+    const isProjectNav = this.isSolutionNavEnabled && getIsProjectNav(solutionView);
 
-    chrome.project.updateSolutionNavigations(solutionNavs, true);
+    // On serverless the chrome style is already set by the serverless plugin
+    if (!isServerless) {
+      chrome.setChromeStyle(isProjectNav ? 'project' : 'classic');
+
+      if (isProjectNav) {
+        chrome.sideNav.setIsFeedbackBtnVisible(!this.isCloudTrialUser);
+      }
+    }
+
+    if (isProjectNav && solutionView !== 'classic') {
+      chrome.project.changeActiveSolutionNavigation(solutionView!);
+    }
   }
+
+  private getIsUnauthenticated(http: HttpStart) {
+    const { anonymousPaths } = http;
+    return anonymousPaths.isAnonymous(window.location.pathname);
+  }
+}
+
+function getIsProjectNav(solutionView?: string) {
+  return Boolean(solutionView) && isKnownSolutionView(solutionView);
+}
+
+function isKnownSolutionView(solution?: string): solution is SolutionId {
+  return Boolean(solution) && ['oblt', 'es', 'security'].includes(solution!);
 }

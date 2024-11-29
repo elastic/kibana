@@ -8,14 +8,20 @@
 import type { Logger } from '@kbn/logging';
 import type { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { SolutionId } from '@kbn/core-chrome-browser';
+
 import { registerCloudDeploymentMetadataAnalyticsContext } from '../common/register_cloud_deployment_id_analytics_context';
 import type { CloudConfigType } from './config';
 import { registerCloudUsageCollector } from './collectors';
 import { getIsCloudEnabled } from '../common/is_cloud_enabled';
 import { parseDeploymentIdFromDeploymentUrl } from '../common/parse_deployment_id_from_deployment_url';
 import { decodeCloudId, DecodedCloudId } from '../common/decode_cloud_id';
+import { parseOnboardingSolution } from '../common/parse_onboarding_default_solution';
 import { getFullCloudUrl } from '../common/utils';
 import { readInstanceSizeMb } from './env';
+import { defineRoutes } from './routes';
+import { CloudRequestHandlerContext } from './routes/types';
+import { setupSavedObjects } from './saved_objects';
 
 interface PluginsSetup {
   usageCollection?: UsageCollectionSetup;
@@ -33,6 +39,16 @@ export interface CloudSetup {
    * @note The `cloudId` is a concatenation of the deployment name and a hash. Users can update the deployment name, changing the `cloudId`. However, the changed `cloudId` will not be re-injected into `kibana.yml`. If you need the current `cloudId` the best approach is to split the injected `cloudId` on the semi-colon, and replace the first element with the `persistent.cluster.metadata.display_name` value as provided by a call to `GET _cluster/settings`.
    */
   cloudId?: string;
+  /**
+   * The cloud service provider identifier.
+   *
+   * @note Expected to be one of `aws`, `gcp` or `azure`, but could be something different.
+   */
+  csp?: string;
+  /**
+   * The Elastic Cloud Organization that owns this deployment/project.
+   */
+  organizationId?: string;
   /**
    * The deployment's ID. Only available when running on Elastic Cloud.
    */
@@ -89,6 +105,15 @@ export interface CloudSetup {
     secretToken?: string;
   };
   /**
+   * Onboarding configuration.
+   */
+  onboarding: {
+    /**
+     * The default solution selected during onboarding.
+     */
+    defaultSolution?: SolutionId;
+  };
+  /**
    * `true` when running on Serverless Elastic Cloud
    * Note that `isCloudEnabled` will always be true when `isServerlessEnabled` is.
    */
@@ -116,6 +141,11 @@ export interface CloudSetup {
      * Will always be present if `isServerlessEnabled` is `true`
      */
     projectType?: string;
+    /**
+     * The serverless orchestrator target. The potential values are `canary` or `non-canary`
+     * Will always be present if `isServerlessEnabled` is `true`
+     */
+    orchestratorTarget?: string;
   };
 }
 
@@ -152,32 +182,46 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
 
   public setup(core: CoreSetup, { usageCollection }: PluginsSetup): CloudSetup {
     const isCloudEnabled = getIsCloudEnabled(this.config.id);
+    const organizationId = this.config.organization_id;
     const projectId = this.config.serverless?.project_id;
     const projectType = this.config.serverless?.project_type;
+    const orchestratorTarget = this.config.serverless?.orchestrator_target;
     const isServerlessEnabled = !!projectId;
     const deploymentId = parseDeploymentIdFromDeploymentUrl(this.config.deployment_url);
 
     registerCloudDeploymentMetadataAnalyticsContext(core.analytics, this.config);
     registerCloudUsageCollector(usageCollection, {
       isCloudEnabled,
+      organizationId,
       trialEndDate: this.config.trial_end_date,
       isElasticStaffOwned: this.config.is_elastic_staff_owned,
       deploymentId,
       projectId,
       projectType,
+      orchestratorTarget,
     });
 
     let decodedId: DecodedCloudId | undefined;
     if (this.config.id) {
       decodedId = decodeCloudId(this.config.id, this.logger);
     }
+    const router = core.http.createRouter<CloudRequestHandlerContext>();
+    const elasticsearchUrl = core.elasticsearch.publicBaseUrl || decodedId?.elasticsearchUrl;
+    defineRoutes({
+      logger: this.logger,
+      router,
+      elasticsearchUrl,
+    });
 
+    setupSavedObjects(core.savedObjects, this.logger);
     return {
       ...this.getCloudUrls(),
       cloudId: this.config.id,
+      csp: this.config.csp,
+      organizationId,
       instanceSizeMb: readInstanceSizeMb(),
       deploymentId,
-      elasticsearchUrl: decodedId?.elasticsearchUrl,
+      elasticsearchUrl,
       kibanaUrl: decodedId?.kibanaUrl,
       cloudHost: decodedId?.host,
       cloudDefaultPort: decodedId?.defaultPort,
@@ -188,11 +232,15 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
         url: this.config.apm?.url,
         secretToken: this.config.apm?.secret_token,
       },
+      onboarding: {
+        defaultSolution: parseOnboardingSolution(this.config.onboarding?.default_solution),
+      },
       isServerlessEnabled,
       serverless: {
         projectId,
         projectName: this.config.serverless?.project_name,
         projectType,
+        orchestratorTarget,
       },
     };
   }

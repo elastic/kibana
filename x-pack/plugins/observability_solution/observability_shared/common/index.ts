@@ -8,7 +8,7 @@ import { AlertConsumers } from '@kbn/rule-data-utils';
 
 export const observabilityFeatureId = 'observability';
 export const observabilityAppId = 'observability-overview';
-export const casesFeatureId = 'observabilityCases';
+export const casesFeatureId = 'observabilityCasesV2';
 export const sloFeatureId = 'slo';
 
 // SLO alerts table in slo detail page
@@ -98,6 +98,7 @@ export {
   LABEL_NAME,
   HOST,
   HOST_HOSTNAME,
+  HOST_NAME,
   HOST_OS_PLATFORM,
   CONTAINER_ID,
   KUBERNETES,
@@ -127,6 +128,15 @@ export {
   PROFILE_ALLOC_SPACE,
   PROFILE_INUSE_OBJECTS,
   PROFILE_INUSE_SPACE,
+  ENTITY,
+  ENTITY_DEFINITION_ID,
+  ENTITY_DISPLAY_NAME,
+  ENTITY_FIRST_SEEN,
+  ENTITY_ID,
+  ENTITY_LAST_SEEN,
+  ENTITY_TYPE,
+  SOURCE_DATA_STREAM_TYPE,
+  ENTITY_IDENTITY_FIELDS,
 } from './field_names/elasticsearch';
 
 export {
@@ -141,8 +151,72 @@ export {
   SYNTHETICS_WAIT_TIMINGS,
 } from './field_names/synthetics';
 
+export { type Color, colorTransformer } from './color_palette';
 export { ObservabilityTriggerId } from './trigger_ids';
 export { getInspectResponse } from './utils/get_inspect_response';
+export {
+  type DataTier,
+  indexLifeCyclePhaseToDataTier,
+  IndexLifecyclePhaseSelectOption,
+} from './ilm_types';
 
 export const LOGS_ONBOARDING_FEEDBACK_LINK = 'https://ela.st/logs-onboarding-feedback';
 export const LOGS_EXPLORER_FEEDBACK_LINK = 'https://ela.st/explorer-feedback';
+
+export type {
+  ServiceOverviewParams,
+  ServiceOverviewLocator,
+  TransactionDetailsByNameParams,
+  TransactionDetailsByNameLocator,
+  AssetDetailsFlyoutLocator,
+  AssetDetailsFlyoutLocatorParams,
+  AssetDetailsLocator,
+  AssetDetailsLocatorParams,
+  HostsLocator,
+  HostsLocatorParams,
+  InventoryLocator,
+  InventoryLocatorParams,
+  MetricsExplorerLocator,
+  MetricsExplorerLocatorParams,
+  FlamegraphLocatorParams,
+  FlamegraphLocator,
+  StacktracesLocatorParams,
+  StacktracesLocator,
+  TopNFunctionsLocatorParams,
+  TopNFunctionsLocator,
+  ServiceEntityLocator,
+  ServiceEntityLocatorParams,
+  TransactionDetailsByTraceIdLocator,
+  TransactionDetailsByTraceIdLocatorParams,
+  EntitiesInventoryLocator,
+} from './locators';
+
+export {
+  ServiceOverviewLocatorDefinition,
+  SERVICE_OVERVIEW_LOCATOR_ID,
+  TransactionDetailsByNameLocatorDefinition,
+  ASSET_DETAILS_FLYOUT_LOCATOR_ID,
+  AssetDetailsFlyoutLocatorDefinition,
+  ASSET_DETAILS_LOCATOR_ID,
+  AssetDetailsLocatorDefinition,
+  SupportedAssetTypes,
+  HostsLocatorDefinition,
+  INVENTORY_LOCATOR_ID,
+  InventoryLocatorDefinition,
+  METRICS_EXPLORER_LOCATOR_ID,
+  MetricsExplorerLocatorDefinition,
+  FlamegraphLocatorDefinition,
+  StacktracesLocatorDefinition,
+  TopNFunctionsLocatorDefinition,
+  HOSTS_LOCATOR_ID,
+  ServiceEntityLocatorDefinition,
+  SERVICE_ENTITY_LOCATOR,
+  TransactionDetailsByTraceIdLocatorDefinition,
+  TRANSACTION_DETAILS_BY_TRACE_ID_LOCATOR,
+  EntitiesInventoryLocatorDefinition,
+  ENTITIES_INVENTORY_LOCATOR_ID,
+} from './locators';
+
+export { COMMON_OBSERVABILITY_GROUPING } from './embeddable_grouping';
+
+export { BUILT_IN_ENTITY_TYPES, EntityDataStreamType } from './entity';

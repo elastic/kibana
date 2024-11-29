@@ -22,6 +22,7 @@ describe('<CustomCriblForm />', () => {
     namespace: 'default',
     enabled: true,
     policy_id: '',
+    policy_ids: [''],
     package: {
       name: 'cribl',
       title: 'Cribl',
@@ -62,10 +63,10 @@ describe('<CustomCriblForm />', () => {
       expect(datastream).toBeInTheDocument();
     });
 
-    userEvent.type(dataId, 'myDataId');
+    await userEvent.type(dataId, 'myDataId');
 
     const datastreamComboBox = getByTestId('comboBoxSearchInput');
-    userEvent.type(datastreamComboBox, datastreamOpts[0]);
+    await userEvent.type(datastreamComboBox, datastreamOpts[0]);
 
     const datastreamComboBoxOpts = getByTestId('comboBoxOptionsList');
     await waitFor(() => {

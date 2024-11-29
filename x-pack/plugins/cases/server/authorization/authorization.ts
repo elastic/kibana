@@ -9,7 +9,7 @@ import type { SavedObject } from '@kbn/core-saved-objects-server';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import Boom from '@hapi/boom';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
-import type { PluginStartContract as FeaturesPluginStart } from '@kbn/features-plugin/server';
+import type { FeaturesPluginStart } from '@kbn/features-plugin/server';
 import type { Space, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { AuthFilterHelpers, OwnerEntity } from './types';
 import { getOwnersFilter, groupByAuthorization } from './utils';
@@ -108,18 +108,17 @@ export class Authorization {
     operation,
   }: {
     entities: OwnerEntity[];
-    operation: OperationDetails;
+    operation: OperationDetails | OperationDetails[];
   }) {
+    const uniqueOwners = Array.from(new Set(entities.map((entity) => entity.owner)));
+    const operations = Array.isArray(operation) ? operation : [operation];
     try {
-      const uniqueOwners = Array.from(new Set(entities.map((entity) => entity.owner)));
-
-      await this._ensureAuthorized(uniqueOwners, operation);
+      await this._ensureAuthorized(uniqueOwners, operations);
     } catch (error) {
-      this.logSavedObjects({ entities, operation, error });
+      this.logSavedObjects({ entities, operation: operations, error });
       throw error;
     }
-
-    this.logSavedObjects({ entities, operation });
+    this.logSavedObjects({ entities, operation: operations });
   }
 
   /**
@@ -171,17 +170,21 @@ export class Authorization {
     return { authorized, unauthorized };
   }
 
-  private async logSavedObjects({
+  private logSavedObjects({
     entities,
     operation,
     error,
   }: {
     entities: OwnerEntity[];
-    operation: OperationDetails;
+    operation: OperationDetails | OperationDetails[];
     error?: Error;
   }) {
+    const operations = Array.isArray(operation) ? operation : [operation];
+
     for (const entity of entities) {
-      this.auditLogger.log({ operation, error, entity });
+      for (const op of operations) {
+        this.auditLogger.log({ operation: op, error, entity });
+      }
     }
   }
 
@@ -197,15 +200,13 @@ export class Authorization {
     }
   }
 
-  private async _ensureAuthorized(owners: string[], operation: OperationDetails) {
+  private async _ensureAuthorized(owners: string[], operations: OperationDetails[]) {
     const { securityAuth } = this;
     const areAllOwnersAvailable = owners.every((owner) => this.featureCaseOwners.has(owner));
-
     if (securityAuth && this.shouldCheckAuthorization()) {
-      const requiredPrivileges: string[] = owners.map((owner) =>
-        securityAuth.actions.cases.get(owner, operation.name)
+      const requiredPrivileges: string[] = operations.flatMap((operation) =>
+        owners.map((owner) => securityAuth.actions.cases.get(owner, operation.name))
       );
-
       const checkPrivileges = securityAuth.checkPrivilegesDynamicallyWithRequest(this.request);
       const { hasAllRequested } = await checkPrivileges({
         kibana: requiredPrivileges,
@@ -219,14 +220,20 @@ export class Authorization {
          * as Privileged.
          * This check will ensure we don't accidentally let these through
          */
-        throw Boom.forbidden(AuthorizationAuditLogger.createFailureMessage({ owners, operation }));
+        throw Boom.forbidden(
+          AuthorizationAuditLogger.createFailureMessage({ owners, operation: operations })
+        );
       }
 
       if (!hasAllRequested) {
-        throw Boom.forbidden(AuthorizationAuditLogger.createFailureMessage({ owners, operation }));
+        throw Boom.forbidden(
+          AuthorizationAuditLogger.createFailureMessage({ owners, operation: operations })
+        );
       }
     } else if (!areAllOwnersAvailable) {
-      throw Boom.forbidden(AuthorizationAuditLogger.createFailureMessage({ owners, operation }));
+      throw Boom.forbidden(
+        AuthorizationAuditLogger.createFailureMessage({ owners, operation: operations })
+      );
     }
 
     // else security is disabled so let the operation proceed
@@ -288,7 +295,6 @@ export class Authorization {
       const { hasAllRequested, username, privileges } = await checkPrivileges({
         kibana: [...requiredPrivileges.keys()],
       });
-
       return {
         hasAllRequested,
         username,

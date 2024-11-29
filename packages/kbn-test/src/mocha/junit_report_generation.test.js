@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { resolve } from 'path';
@@ -45,26 +46,28 @@ describe('dev/mocha/junit report generation', () => {
 
     // test case results are wrapped in <testsuites></testsuites>
     expect(report).toEqual({
-      testsuites: {
+      testsuites: expect.objectContaining({
         testsuite: [report.testsuites.testsuite[0]],
-      },
+      }),
     });
 
     // the single <testsuite> element at the root contains summary data for all tests results
     const [testsuite] = report.testsuites.testsuite;
     expect(testsuite.$.time).toMatch(DURATION_REGEX);
     expect(testsuite.$.timestamp).toMatch(ISO_DATE_SEC_REGEX);
-    expect(testsuite).toEqual({
-      $: {
-        failures: '2',
-        name: 'test',
-        skipped: '1',
-        tests: '4',
-        'metadata-json': '{}',
-        time: testsuite.$.time,
-        timestamp: testsuite.$.timestamp,
-      },
-      testcase: testsuite.testcase,
+    const expectedCommandLine = process.env.CI
+      ? 'node scripts/jest --config=packages/kbn-test/jest.config.js --runInBand --coverage=false --passWithNoTests'
+      : 'node node_modules/jest-worker/build/workers/processChild.js';
+
+    expect(testsuite.$).toMatchObject({
+      'command-line': expectedCommandLine,
+      failures: '2',
+      name: 'test',
+      skipped: '1',
+      tests: '4',
+      'metadata-json': '{}',
+      time: testsuite.$.time,
+      timestamp: testsuite.$.timestamp,
     });
 
     // there are actually only three tests, but since the hook failed
@@ -94,6 +97,7 @@ describe('dev/mocha/junit report generation', () => {
         name: 'SUITE fails',
         time: testFail.$.time,
         'metadata-json': '{}',
+        owners: '',
       },
       'system-out': testFail['system-out'],
       failure: [testFail.failure[0]],
@@ -108,6 +112,7 @@ describe('dev/mocha/junit report generation', () => {
         name: 'SUITE SUB_SUITE "before each" hook: fail hook for "never runs"',
         time: beforeEachFail.$.time,
         'metadata-json': '{}',
+        owners: '',
       },
       'system-out': testFail['system-out'],
       failure: [beforeEachFail.failure[0]],

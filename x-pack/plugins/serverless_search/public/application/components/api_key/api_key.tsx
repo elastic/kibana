@@ -8,7 +8,6 @@
 import {
   EuiBadge,
   EuiButton,
-  EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -21,35 +20,59 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
-import { ApiKey } from '@kbn/security-plugin/common';
-import { useQuery } from '@tanstack/react-query';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { ApiKeySelectableTokenField } from '@kbn/security-api-key-management';
+import {
+  SecurityCreateApiKeyResponse,
+  SecurityUpdateApiKeyResponse,
+} from '@elastic/elasticsearch/lib/api/types';
 import { useKibanaServices } from '../../hooks/use_kibana';
 import { MANAGEMENT_API_KEYS } from '../../../../common/routes';
 import { CreateApiKeyFlyout } from './create_api_key_flyout';
 import './api_key.scss';
-import { CreateApiKeyResponse } from '../../hooks/api/use_create_api_key';
+import { useGetApiKeys } from '../../hooks/api/use_api_key';
+
+function isCreatedResponse(
+  value: SecurityCreateApiKeyResponse | SecurityUpdateApiKeyResponse
+): value is SecurityCreateApiKeyResponse {
+  if ((value as SecurityCreateApiKeyResponse).id) {
+    return true;
+  }
+  return false;
+}
 
 export const ApiKeyPanel = ({ setClientApiKey }: { setClientApiKey: (value: string) => void }) => {
   const { http, user } = useKibanaServices();
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
-  const { data } = useQuery({
-    queryKey: ['apiKey'],
-    queryFn: () => http.fetch<{ apiKeys: ApiKey[] }>('/internal/serverless_search/api_keys'),
-  });
-  const [apiKey, setApiKey] = useState<CreateApiKeyResponse | undefined>(undefined);
-  const saveApiKey = (value: CreateApiKeyResponse) => {
+  const { data } = useGetApiKeys();
+
+  const [apiKey, setApiKey] = useState<SecurityCreateApiKeyResponse | undefined>(undefined);
+  const saveApiKey = (value: SecurityCreateApiKeyResponse) => {
     setApiKey(value);
-    if (value.encoded) setClientApiKey(value.encoded);
   };
+
+  // Prevent flickering in the most common case of having access to manage api keys
+  const canManageOwnApiKey = !data || data.canManageOwnApiKey;
+
+  useEffect(() => {
+    if (apiKey) {
+      setClientApiKey(apiKey.encoded);
+      setIsFlyoutOpen(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [apiKey]);
 
   return (
     <>
       {isFlyoutOpen && (
         <CreateApiKeyFlyout
           onClose={() => setIsFlyoutOpen(false)}
-          setApiKey={saveApiKey}
-          username={user?.full_name || user?.username || ''}
+          setApiKey={(value) => {
+            if (isCreatedResponse(value)) {
+              saveApiKey(value);
+            }
+          }}
+          user={user}
         />
       )}
       {apiKey ? (
@@ -74,13 +97,11 @@ export const ApiKeyPanel = ({ setClientApiKey }: { setClientApiKey: (value: stri
               })}
             </EuiText>
             <EuiSpacer size="s" />
-            <EuiCodeBlock isCopyable data-test-subj="api-key-created-key-codeblock">
-              {JSON.stringify(apiKey, undefined, 2)}
-            </EuiCodeBlock>
+            <ApiKeySelectableTokenField createdApiKey={apiKey} />
           </EuiStep>
         </EuiPanel>
       ) : (
-        <EuiPanel>
+        <EuiPanel color={'plain'}>
           <EuiTitle size="xs">
             <h3>
               {i18n.translate('xpack.serverlessSearch.apiKey.panel.title', {
@@ -96,6 +117,16 @@ export const ApiKeyPanel = ({ setClientApiKey }: { setClientApiKey: (value: stri
             })}
           </EuiText>
           <EuiSpacer size="l" />
+          {!canManageOwnApiKey && (
+            <>
+              <EuiBadge iconType="warningFilled">
+                {i18n.translate('xpack.serverlessSearch.apiKey.panel.noUserPrivileges', {
+                  defaultMessage: "You don't have access to manage API keys",
+                })}
+              </EuiBadge>
+              <EuiSpacer size="m" />
+            </>
+          )}
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
             <EuiFlexItem grow={false}>
               <EuiFlexGroup gutterSize="m">
@@ -106,7 +137,14 @@ export const ApiKeyPanel = ({ setClientApiKey }: { setClientApiKey: (value: stri
                       size="s"
                       fill
                       onClick={() => setIsFlyoutOpen(true)}
+                      disabled={!canManageOwnApiKey}
                       data-test-subj="new-api-key-button"
+                      aria-label={i18n.translate(
+                        'xpack.serverlessSearch.apiKey.newButton.ariaLabel',
+                        {
+                          defaultMessage: 'Add new API key',
+                        }
+                      )}
                     >
                       <EuiText size="s">
                         {i18n.translate('xpack.serverlessSearch.apiKey.newButtonLabel', {
@@ -116,21 +154,29 @@ export const ApiKeyPanel = ({ setClientApiKey }: { setClientApiKey: (value: stri
                     </EuiButton>
                   </span>
                 </EuiFlexItem>
-                <EuiFlexItem>
-                  <span>
-                    <EuiButton
-                      iconType="popout"
-                      size="s"
-                      href={http.basePath.prepend(MANAGEMENT_API_KEYS)}
-                      target="_blank"
-                      data-test-subj="manage-api-keys-button"
-                    >
-                      {i18n.translate('xpack.serverlessSearch.apiKey.manageLabel', {
-                        defaultMessage: 'Manage',
-                      })}
-                    </EuiButton>
-                  </span>
-                </EuiFlexItem>
+                {canManageOwnApiKey && (
+                  <EuiFlexItem>
+                    <span>
+                      <EuiButton
+                        iconType="popout"
+                        size="s"
+                        href={http.basePath.prepend(MANAGEMENT_API_KEYS)}
+                        target="_blank"
+                        data-test-subj="manage-api-keys-button"
+                        aria-label={i18n.translate(
+                          'xpack.serverlessSearch.apiKey.manage.ariaLabel',
+                          {
+                            defaultMessage: 'Manage API keys',
+                          }
+                        )}
+                      >
+                        {i18n.translate('xpack.serverlessSearch.apiKey.manageLabel', {
+                          defaultMessage: 'Manage',
+                        })}
+                      </EuiButton>
+                    </span>
+                  </EuiFlexItem>
+                )}
               </EuiFlexGroup>
             </EuiFlexItem>
             <EuiFlexItem>

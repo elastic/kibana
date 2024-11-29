@@ -36,6 +36,7 @@ const createSetupMock = () => {
       getContextInitializationPromise: jest.fn(),
     },
     getDataStreamAdapter: jest.fn(),
+    registerConnectorAdapter: jest.fn(),
   };
   return mock;
 };
@@ -167,16 +168,17 @@ const createRuleExecutorServicesMock = <
       done: jest.fn().mockReturnValue(alertFactoryMockDone),
     },
     alertsClient: publicAlertsClientMock.create(),
-    savedObjectsClient: savedObjectsClientMock.create(),
-    uiSettingsClient: uiSettingsServiceMock.createClient(),
-    scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
-    shouldWriteAlerts: () => true,
-    shouldStopExecution: () => true,
-    search: createAbortableSearchServiceMock(),
-    searchSourceClient: searchSourceCommonMock,
+    getDataViews: jest.fn().mockResolvedValue(dataViewPluginMocks.createStartContract()),
+    getMaintenanceWindowIds: jest.fn().mockResolvedValue([]),
+    getSearchSourceClient: jest.fn().mockResolvedValue(searchSourceCommonMock),
     ruleMonitoringService: createRuleMonitoringServiceMock(),
+    savedObjectsClient: savedObjectsClientMock.create(),
+    scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
+    search: createAbortableSearchServiceMock(),
     share: createShareStartMock(),
-    dataViews: dataViewPluginMocks.createStartContract(),
+    shouldStopExecution: () => true,
+    shouldWriteAlerts: () => true,
+    uiSettingsClient: uiSettingsServiceMock.createClient(),
   };
 };
 export type RuleExecutorServicesMock = ReturnType<typeof createRuleExecutorServicesMock>;

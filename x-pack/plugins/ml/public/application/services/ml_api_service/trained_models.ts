@@ -25,8 +25,8 @@ import type {
   TrainedModelStat,
   NodesOverviewResponse,
   MemoryUsageInfo,
+  ModelDownloadState,
 } from '../../../../common/types/trained_models';
-
 export interface InferenceQueryParams {
   decompress_definition?: boolean;
   from?: number;
@@ -54,6 +54,26 @@ export interface IngestStats {
 export interface InferenceStatsResponse {
   count: number;
   trained_model_stats: TrainedModelStat[];
+}
+
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type CommonDeploymentParams = {
+  deployment_id?: string;
+  threads_per_allocation: number;
+  priority: 'low' | 'normal';
+  number_of_allocations?: number;
+};
+
+export interface AdaptiveAllocationsParams {
+  adaptive_allocations?: {
+    enabled: boolean;
+    min_number_of_allocations?: number;
+    max_number_of_allocations?: number;
+  };
+}
+
+export interface UpdateAllocationParams extends AdaptiveAllocationsParams {
+  number_of_allocations?: number;
 }
 
 /**
@@ -177,6 +197,18 @@ export function trainedModelsApiProvider(httpService: HttpService) {
       });
     },
 
+    /**
+     * Gets model config based on the cluster OS and CPU architecture.
+     */
+    getCuratedModelConfig(modelName: string, options?: GetModelDownloadConfigOptions) {
+      return httpService.http<ModelDefinitionResponse>({
+        path: `${ML_INTERNAL_BASE_PATH}/trained_models/curated_model_config/${modelName}`,
+        method: 'GET',
+        ...(options ? { query: options as HttpFetchQuery } : {}),
+        version: '1',
+      });
+    },
+
     getTrainedModelsNodesOverview() {
       return httpService.http<NodesOverviewResponse>({
         path: `${ML_INTERNAL_BASE_PATH}/model_management/nodes_overview`,
@@ -187,17 +219,14 @@ export function trainedModelsApiProvider(httpService: HttpService) {
 
     startModelAllocation(
       modelId: string,
-      queryParams?: {
-        number_of_allocations: number;
-        threads_per_allocation: number;
-        priority: 'low' | 'normal';
-        deployment_id?: string;
-      }
+      queryParams?: CommonDeploymentParams,
+      bodyParams?: AdaptiveAllocationsParams
     ) {
       return httpService.http<{ acknowledge: boolean }>({
         path: `${ML_INTERNAL_BASE_PATH}/trained_models/${modelId}/deployment/_start`,
         method: 'POST',
         query: queryParams,
+        ...(bodyParams ? { body: JSON.stringify(bodyParams) } : {}),
         version: '1',
       });
     },
@@ -219,11 +248,7 @@ export function trainedModelsApiProvider(httpService: HttpService) {
       });
     },
 
-    updateModelDeployment(
-      modelId: string,
-      deploymentId: string,
-      params: { number_of_allocations: number }
-    ) {
+    updateModelDeployment(modelId: string, deploymentId: string, params: UpdateAllocationParams) {
       return httpService.http<{ acknowledge: boolean }>({
         path: `${ML_INTERNAL_BASE_PATH}/trained_models/${modelId}/${deploymentId}/deployment/_update`,
         method: 'POST',
@@ -286,6 +311,14 @@ export function trainedModelsApiProvider(httpService: HttpService) {
       return httpService.http<estypes.MlPutTrainedModelResponse>({
         path: `${ML_INTERNAL_BASE_PATH}/trained_models/install_elastic_trained_model/${modelId}`,
         method: 'POST',
+        version: '1',
+      });
+    },
+
+    getModelsDownloadStatus() {
+      return httpService.http<Record<string, ModelDownloadState>>({
+        path: `${ML_INTERNAL_BASE_PATH}/trained_models/download_status`,
+        method: 'GET',
         version: '1',
       });
     },

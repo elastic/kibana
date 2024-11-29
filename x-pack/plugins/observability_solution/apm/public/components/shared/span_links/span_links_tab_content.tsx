@@ -19,12 +19,7 @@ interface Props {
   processorEvent: ProcessorEvent;
 }
 
-export function getSpanLinksTabContent({
-  spanLinksCount,
-  traceId,
-  spanId,
-  processorEvent,
-}: Props) {
+export function getSpanLinksTabContent({ spanLinksCount, traceId, spanId, processorEvent }: Props) {
   if (!spanLinksCount.linkedChildren && !spanLinksCount.linkedParents) {
     return undefined;
   }

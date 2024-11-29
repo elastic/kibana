@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { SecurityCellActionsTrigger } from '../../../actions/constants';
+import { SecurityCellActionsTrigger } from '../../../app/actions/constants';
 import { CellActionsMode, SecurityCellActions } from '.';
 import { CellActions } from '@kbn/cell-actions';
 

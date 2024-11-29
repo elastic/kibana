@@ -14,6 +14,7 @@ import { getControlsForDetector } from './get_controls_for_detector';
 import { getCriteriaFields } from './get_criteria_fields';
 import type { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
 import { getViewableDetectors } from './timeseriesexplorer_utils/get_viewable_detectors';
+import type { MlEntity } from '../../embeddables';
 
 export function isMetricDetector(selectedJob: CombinedJob, selectedDetectorIndex: number) {
   const detectors = getViewableDetectors(selectedJob);
@@ -33,12 +34,10 @@ export const getFunctionDescription = async (
   {
     selectedDetectorIndex,
     selectedEntities,
-    selectedJobId,
     selectedJob,
   }: {
     selectedDetectorIndex: number;
-    selectedEntities: Record<string, any>;
-    selectedJobId: string;
+    selectedEntities: MlEntity | undefined;
     selectedJob: CombinedJob;
   },
   toastNotificationService: ToastNotificationService,
@@ -51,7 +50,7 @@ export const getFunctionDescription = async (
   const entityControls = getControlsForDetector(
     selectedDetectorIndex,
     selectedEntities,
-    selectedJobId
+    selectedJob
   );
   const criteriaFields = getCriteriaFields(selectedDetectorIndex, entityControls);
 

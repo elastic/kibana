@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import type { KibanaRequest, Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 
-import { once } from 'lodash/fp';
-import {
-  ElasticAssistantPluginRouter,
-  ElasticAssistantPluginSetupDependencies,
-  GetElser,
-} from '../types';
+import { cancelAttackDiscoveryRoute } from './attack_discovery/post/cancel/cancel_attack_discovery';
+import { getAttackDiscoveryRoute } from './attack_discovery/get/get_attack_discovery';
+import { postAttackDiscoveryRoute } from './attack_discovery/post/post_attack_discovery';
+import { ElasticAssistantPluginRouter, GetElser } from '../types';
 import { createConversationRoute } from './user_conversations/create_route';
 import { deleteConversationRoute } from './user_conversations/delete_route';
 import { readConversationRoute } from './user_conversations/read_route';
@@ -20,23 +18,37 @@ import { updateConversationRoute } from './user_conversations/update_route';
 import { findUserConversationsRoute } from './user_conversations/find_route';
 import { bulkActionConversationsRoute } from './user_conversations/bulk_actions_route';
 import { appendConversationMessageRoute } from './user_conversations/append_conversation_messages_route';
-import { deleteKnowledgeBaseRoute } from './knowledge_base/delete_knowledge_base';
+import { getKnowledgeBaseIndicesRoute } from './knowledge_base/get_knowledge_base_indices';
 import { getKnowledgeBaseStatusRoute } from './knowledge_base/get_knowledge_base_status';
 import { postKnowledgeBaseRoute } from './knowledge_base/post_knowledge_base';
 import { getEvaluateRoute } from './evaluate/get_evaluate';
 import { postEvaluateRoute } from './evaluate/post_evaluate';
-import { postActionsConnectorExecuteRoute } from './post_actions_connector_execute';
 import { getCapabilitiesRoute } from './capabilities/get_capabilities_route';
 import { bulkPromptsRoute } from './prompts/bulk_actions_route';
 import { findPromptsRoute } from './prompts/find_route';
 import { bulkActionAnonymizationFieldsRoute } from './anonymization_fields/bulk_actions_route';
 import { findAnonymizationFieldsRoute } from './anonymization_fields/find_route';
+import { chatCompleteRoute } from './chat/chat_complete_route';
+import { postActionsConnectorExecuteRoute } from './post_actions_connector_execute';
+import { bulkActionKnowledgeBaseEntriesRoute } from './knowledge_base/entries/bulk_actions_route';
+import { createKnowledgeBaseEntryRoute } from './knowledge_base/entries/create_route';
+import { findKnowledgeBaseEntriesRoute } from './knowledge_base/entries/find_route';
+import {
+  getDefendInsightRoute,
+  getDefendInsightsRoute,
+  postDefendInsightsRoute,
+} from './defend_insights';
 
 export const registerRoutes = (
   router: ElasticAssistantPluginRouter,
   logger: Logger,
-  plugins: ElasticAssistantPluginSetupDependencies
+  getElserId: GetElser
 ) => {
+  /** PUBLIC */
+  // Chat
+  chatCompleteRoute(router, getElserId);
+
+  /** INTERNAL */
   // Capabilities
   getCapabilitiesRoute(router);
 
@@ -53,16 +65,15 @@ export const registerRoutes = (
   // User Conversations search
   findUserConversationsRoute(router);
 
-  // Knowledge Base
-  deleteKnowledgeBaseRoute(router);
-  const getElserId: GetElser = once(
-    async (request: KibanaRequest, savedObjectsClient: SavedObjectsClientContract) => {
-      return (await plugins.ml.trainedModelsProvider(request, savedObjectsClient).getELSER())
-        .model_id;
-    }
-  );
-  getKnowledgeBaseStatusRoute(router, getElserId);
-  postKnowledgeBaseRoute(router, getElserId);
+  // Knowledge Base Setup
+  getKnowledgeBaseIndicesRoute(router);
+  getKnowledgeBaseStatusRoute(router);
+  postKnowledgeBaseRoute(router);
+
+  // Knowledge Base Entries
+  findKnowledgeBaseEntriesRoute(router);
+  createKnowledgeBaseEntryRoute(router);
+  bulkActionKnowledgeBaseEntriesRoute(router);
 
   // Actions Connector Execute (LLM Wrapper)
   postActionsConnectorExecuteRoute(router, getElserId);
@@ -78,4 +89,14 @@ export const registerRoutes = (
   // Anonymization Fields
   bulkActionAnonymizationFieldsRoute(router, logger);
   findAnonymizationFieldsRoute(router, logger);
+
+  // Attack Discovery
+  getAttackDiscoveryRoute(router);
+  postAttackDiscoveryRoute(router);
+  cancelAttackDiscoveryRoute(router);
+
+  // Defend insights
+  getDefendInsightRoute(router);
+  getDefendInsightsRoute(router);
+  postDefendInsightsRoute(router);
 };

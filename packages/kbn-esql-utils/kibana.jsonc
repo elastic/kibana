@@ -1,5 +1,9 @@
 {
   "type": "shared-common",
   "id": "@kbn/esql-utils",
-  "owner": "@elastic/kibana-visualizations"
+  "owner": [
+    "@elastic/kibana-esql"
+  ],
+  "group": "platform",
+  "visibility": "shared"
 }

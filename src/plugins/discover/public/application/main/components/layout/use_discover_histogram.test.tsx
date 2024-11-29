@@ -1,22 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { ReactElement } from 'react';
 import { AggregateQuery, Query } from '@kbn/es-query';
-import { act, renderHook, WrapperComponent } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { FetchStatus } from '../../../types';
-import type { DiscoverStateContainer } from '../../services/discover_state';
+import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { useDiscoverHistogram, UseDiscoverHistogramProps } from './use_discover_histogram';
 import { setTimeout } from 'timers/promises';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
-import { DiscoverMainProvider } from '../../services/discover_state_provider';
+import { DiscoverMainProvider } from '../../state_management/discover_state_provider';
 import { RequestAdapter } from '@kbn/inspector-plugin/public';
 import {
   UnifiedHistogramFetchStatus,
@@ -96,7 +97,6 @@ describe('useDiscoverHistogram', () => {
     stateContainer.appState.update({
       interval: 'auto',
       hideChart: false,
-      breakdownField: 'extension',
     });
     const appState = stateContainer.appState;
     const wrappedStateContainer = Object.create(appState);
@@ -109,21 +109,18 @@ describe('useDiscoverHistogram', () => {
     stateContainer = getStateContainer(),
     inspectorAdapters = { requests: new RequestAdapter() },
     hideChart = false,
-    isPlainRecord = false,
   }: {
     stateContainer?: DiscoverStateContainer;
     inspectorAdapters?: InspectorAdapters;
     hideChart?: boolean;
-    isPlainRecord?: boolean;
   } = {}) => {
     const initialProps = {
       stateContainer,
       inspectorAdapters,
       hideChart,
-      isPlainRecord,
     };
 
-    const Wrapper: WrapperComponent<UseDiscoverHistogramProps> = ({ children }) => (
+    const Wrapper = ({ children }: React.PropsWithChildren<unknown>) => (
       <DiscoverMainProvider value={stateContainer}>{children as ReactElement}</DiscoverMainProvider>
     );
 
@@ -168,14 +165,15 @@ describe('useDiscoverHistogram', () => {
       expect(Object.keys(params?.initialState ?? {})).toEqual([
         'chartHidden',
         'timeInterval',
-        'breakdownField',
         'totalHitsStatus',
         'totalHitsResult',
       ]);
     });
 
-    it('should return the isChartLoading params for text based languages', async () => {
-      const { hook } = await renderUseDiscoverHistogram({ isPlainRecord: true });
+    it('should return the isChartLoading params for ES|QL mode', async () => {
+      const stateContainer = getStateContainer();
+      stateContainer.appState.update({ query: { esql: 'from *' } });
+      const { hook } = await renderUseDiscoverHistogram();
       const isChartLoading = hook.result.current.isChartLoading;
       expect(isChartLoading).toBe(false);
     });
@@ -204,7 +202,6 @@ describe('useDiscoverHistogram', () => {
       const state = {
         timeInterval: '1m',
         chartHidden: true,
-        breakdownField: 'test',
         totalHitsStatus: UnifiedHistogramFetchStatus.loading,
         totalHitsResult: undefined,
       } as unknown as UnifiedHistogramState;
@@ -217,7 +214,6 @@ describe('useDiscoverHistogram', () => {
       expect(stateContainer.appState.update).toHaveBeenCalledWith({
         interval: state.timeInterval,
         hideChart: state.chartHidden,
-        breakdownField: state.breakdownField,
       });
     });
 
@@ -228,7 +224,6 @@ describe('useDiscoverHistogram', () => {
       const state = {
         timeInterval: containerState.interval,
         chartHidden: containerState.hideChart,
-        breakdownField: containerState.breakdownField,
         totalHitsStatus: UnifiedHistogramFetchStatus.loading,
         totalHitsResult: undefined,
       } as unknown as UnifiedHistogramState;
@@ -254,18 +249,14 @@ describe('useDiscoverHistogram', () => {
       api.setTimeInterval = jest.fn((timeInterval) => {
         params = { ...params, timeInterval };
       });
-      api.setBreakdownField = jest.fn((breakdownField) => {
-        params = { ...params, breakdownField };
-      });
       act(() => {
         hook.result.current.ref(api);
       });
-      stateContainer.appState.update({ hideChart: true, interval: '1m', breakdownField: 'test' });
+      stateContainer.appState.update({ hideChart: true, interval: '1m' });
       expect(api.setTotalHits).not.toHaveBeenCalled();
       expect(api.setChartHidden).toHaveBeenCalled();
       expect(api.setTimeInterval).toHaveBeenCalled();
-      expect(api.setBreakdownField).toHaveBeenCalled();
-      expect(Object.keys(params ?? {})).toEqual(['breakdownField', 'timeInterval', 'chartHidden']);
+      expect(Object.keys(params ?? {})).toEqual(['timeInterval', 'chartHidden']);
     });
 
     it('should exclude totalHitsStatus and totalHitsResult from Unified Histogram state updates', async () => {
@@ -275,7 +266,6 @@ describe('useDiscoverHistogram', () => {
       const state = {
         timeInterval: containerState.interval,
         chartHidden: containerState.hideChart,
-        breakdownField: containerState.breakdownField,
         totalHitsStatus: UnifiedHistogramFetchStatus.loading,
         totalHitsResult: undefined,
       } as unknown as UnifiedHistogramState;
@@ -310,7 +300,6 @@ describe('useDiscoverHistogram', () => {
       const state = {
         timeInterval: containerState.interval,
         chartHidden: containerState.hideChart,
-        breakdownField: containerState.breakdownField,
         totalHitsStatus: UnifiedHistogramFetchStatus.loading,
         totalHitsResult: undefined,
       } as unknown as UnifiedHistogramState;
@@ -323,7 +312,6 @@ describe('useDiscoverHistogram', () => {
       expect(stateContainer.dataState.data$.totalHits$.value).not.toEqual({
         fetchStatus: FetchStatus.COMPLETE,
         result: 100,
-        recordRawType: stateContainer.dataState.data$.totalHits$.value.recordRawType,
       });
       act(() => {
         hook.result.current.ref(api);
@@ -331,7 +319,6 @@ describe('useDiscoverHistogram', () => {
       expect(stateContainer.dataState.data$.totalHits$.value).toEqual({
         fetchStatus: FetchStatus.COMPLETE,
         result: 100,
-        recordRawType: stateContainer.dataState.data$.totalHits$.value.recordRawType,
       });
       expect(mockCheckHitCount).toHaveBeenCalledWith(stateContainer.dataState.data$.main$, 100);
     });
@@ -357,7 +344,6 @@ describe('useDiscoverHistogram', () => {
       const state = {
         timeInterval: containerState.interval,
         chartHidden: containerState.hideChart,
-        breakdownField: containerState.breakdownField,
         totalHitsStatus: UnifiedHistogramFetchStatus.loading,
         totalHitsResult: undefined,
       } as unknown as UnifiedHistogramState;
@@ -370,7 +356,6 @@ describe('useDiscoverHistogram', () => {
       expect(stateContainer.dataState.data$.totalHits$.value).not.toEqual({
         fetchStatus: FetchStatus.ERROR,
         error,
-        recordRawType: stateContainer.dataState.data$.totalHits$.value.recordRawType,
       });
       act(() => {
         hook.result.current.ref(api);
@@ -379,27 +364,18 @@ describe('useDiscoverHistogram', () => {
       expect(stateContainer.dataState.data$.totalHits$.value).toEqual({
         fetchStatus: FetchStatus.ERROR,
         error,
-        recordRawType: stateContainer.dataState.data$.totalHits$.value.recordRawType,
       });
       expect(mockCheckHitCount).not.toHaveBeenCalled();
     });
 
     it('should set isChartLoading to true for fetch start', async () => {
-      const fetch$ = new Subject<{
-        options: {
-          reset: boolean;
-          fetchMore: boolean;
-        };
-        searchSessionId: string;
-      }>();
+      const fetch$ = new Subject<void>();
       const stateContainer = getStateContainer();
-      stateContainer.dataState.fetch$ = fetch$;
-      const { hook } = await renderUseDiscoverHistogram({ stateContainer, isPlainRecord: true });
+      stateContainer.appState.update({ query: { esql: 'from *' } });
+      stateContainer.dataState.fetchChart$ = fetch$;
+      const { hook } = await renderUseDiscoverHistogram({ stateContainer });
       act(() => {
-        fetch$.next({
-          options: { reset: false, fetchMore: false },
-          searchSessionId: '1234',
-        });
+        fetch$.next();
       });
       expect(hook.result.current.isChartLoading).toBe(true);
     });
@@ -407,15 +383,9 @@ describe('useDiscoverHistogram', () => {
 
   describe('refetching', () => {
     it('should call refetch when savedSearchFetch$ is triggered', async () => {
-      const savedSearchFetch$ = new Subject<{
-        options: {
-          reset: boolean;
-          fetchMore: boolean;
-        };
-        searchSessionId: string;
-      }>();
+      const savedSearchFetch$ = new Subject<void>();
       const stateContainer = getStateContainer();
-      stateContainer.dataState.fetch$ = savedSearchFetch$;
+      stateContainer.dataState.fetchChart$ = savedSearchFetch$;
       const { hook } = await renderUseDiscoverHistogram({ stateContainer });
       const api = createMockUnifiedHistogramApi();
       act(() => {
@@ -423,24 +393,15 @@ describe('useDiscoverHistogram', () => {
       });
       expect(api.refetch).toHaveBeenCalled();
       act(() => {
-        savedSearchFetch$.next({
-          options: { reset: false, fetchMore: false },
-          searchSessionId: '1234',
-        });
+        savedSearchFetch$.next();
       });
       expect(api.refetch).toHaveBeenCalledTimes(2);
     });
 
     it('should skip the next refetch when hideChart changes from true to false', async () => {
-      const savedSearchFetch$ = new Subject<{
-        options: {
-          reset: boolean;
-          fetchMore: boolean;
-        };
-        searchSessionId: string;
-      }>();
+      const savedSearchFetch$ = new Subject<void>();
       const stateContainer = getStateContainer();
-      stateContainer.dataState.fetch$ = savedSearchFetch$;
+      stateContainer.dataState.fetchChart$ = savedSearchFetch$;
       const { hook, initialProps } = await renderUseDiscoverHistogram({ stateContainer });
       const api = createMockUnifiedHistogramApi();
       act(() => {
@@ -454,45 +415,9 @@ describe('useDiscoverHistogram', () => {
         hook.rerender({ ...initialProps, hideChart: false });
       });
       act(() => {
-        savedSearchFetch$.next({
-          options: { reset: false, fetchMore: false },
-          searchSessionId: '1234',
-        });
+        savedSearchFetch$.next();
       });
       expect(api.refetch).toHaveBeenCalledTimes(1);
-    });
-
-    it('should skip the next refetch when fetching more', async () => {
-      const savedSearchFetch$ = new Subject<{
-        options: {
-          reset: boolean;
-          fetchMore: boolean;
-        };
-        searchSessionId: string;
-      }>();
-      const stateContainer = getStateContainer();
-      stateContainer.dataState.fetch$ = savedSearchFetch$;
-      const { hook } = await renderUseDiscoverHistogram({ stateContainer });
-      const api = createMockUnifiedHistogramApi();
-      act(() => {
-        hook.result.current.ref(api);
-      });
-      expect(api.refetch).toHaveBeenCalledTimes(1);
-      act(() => {
-        savedSearchFetch$.next({
-          options: { reset: false, fetchMore: true },
-          searchSessionId: '1234',
-        });
-      });
-      expect(api.refetch).toHaveBeenCalledTimes(1);
-
-      act(() => {
-        savedSearchFetch$.next({
-          options: { reset: false, fetchMore: false },
-          searchSessionId: '1234',
-        });
-      });
-      expect(api.refetch).toHaveBeenCalledTimes(2);
     });
   });
 

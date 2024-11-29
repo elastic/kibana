@@ -30,11 +30,7 @@ export async function getHasData({
   try {
     const params = {
       apm: {
-        events: [
-          ProcessorEvent.transaction,
-          ProcessorEvent.error,
-          ProcessorEvent.metric,
-        ],
+        events: [ProcessorEvent.transaction, ProcessorEvent.error, ProcessorEvent.metric],
       },
       terminate_after: 1,
       body: {
@@ -43,10 +39,7 @@ export async function getHasData({
       },
     };
 
-    const response = await apmEventClient.search(
-      'observability_overview_has_apm_data',
-      params
-    );
+    const response = await apmEventClient.search('observability_overview_has_apm_data', params);
     return {
       hasData: response.hits.total.value > 0,
       indices,

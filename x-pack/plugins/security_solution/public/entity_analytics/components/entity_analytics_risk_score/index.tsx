@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { HostPanelKey } from '../../../flyout/entity_details/host_right';
@@ -36,6 +36,9 @@ import { useGlobalFilterQuery } from '../../../common/hooks/use_global_filter_qu
 import { useRiskScoreKpi } from '../../api/hooks/use_risk_score_kpi';
 import { useRiskScore } from '../../api/hooks/use_risk_score';
 import { UserPanelKey } from '../../../flyout/entity_details/user_right';
+import { RiskEnginePrivilegesCallOut } from '../risk_engine_privileges_callout';
+import { useMissingRiskEnginePrivileges } from '../../hooks/use_missing_risk_engine_privileges';
+import { EntityEventTypes } from '../../../common/lib/telemetry';
 
 export const ENTITY_RISK_SCORE_TABLE_ID = 'entity-risk-score-table';
 
@@ -49,7 +52,7 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
 
   const openEntityOnAlertsPage = useCallback(
     (entityName: string) => {
-      telemetry.reportEntityAlertsClicked({ entity: riskEntity });
+      telemetry.reportEvent(EntityEventTypes.EntityAlertsClicked, { entity: riskEntity });
       openAlertsPageWithFilters([
         {
           title: getRiskEntityTranslation(riskEntity),
@@ -82,7 +85,7 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
   );
   const [selectedSeverity, setSelectedSeverity] = useState<RiskSeverity[]>([]);
 
-  const onSelectSeverityFilterGroup = useCallback((newSelection: RiskSeverity[]) => {
+  const onSelectSeverityFilter = useCallback((newSelection: RiskSeverity[]) => {
     setSelectedSeverity(newSelection);
   }, []);
 
@@ -158,6 +161,8 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
 
   const refreshPage = useRefetchQueries();
 
+  const privileges = useMissingRiskEnginePrivileges(['read']);
+
   if (!isAuthorized) {
     return null;
   }
@@ -166,6 +171,14 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
     isDisabled: !isModuleEnabled && !isTableLoading,
     isDeprecated: isDeprecated && !isTableLoading,
   };
+
+  if (!privileges.isLoading && !privileges.hasAllRequiredPrivileges) {
+    return (
+      <EuiPanel hasBorder>
+        <RiskEnginePrivilegesCallOut privileges={privileges} />
+      </EuiPanel>
+    );
+  }
 
   if (status.isDisabled || status.isDeprecated) {
     return (
@@ -197,10 +210,9 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
         >
           <RiskScoreHeaderContent
             entityLinkProps={entity.linkProps}
-            onSelectSeverityFilterGroup={onSelectSeverityFilterGroup}
+            onSelectSeverityFilter={onSelectSeverityFilter}
             riskEntity={riskEntity}
             selectedSeverity={selectedSeverity}
-            severityCount={severityCount}
             toggleStatus={toggleStatus}
           />
         </HeaderSection>

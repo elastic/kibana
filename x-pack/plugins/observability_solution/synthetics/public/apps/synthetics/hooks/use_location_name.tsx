@@ -7,10 +7,10 @@
 
 import { useMemo, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { MonitorOverviewItem } from '../../../../common/runtime_types';
+import { OverviewStatusMetaData } from '../../../../common/runtime_types';
 import { selectServiceLocationsState, getServiceLocations } from '../state';
 
-export function useLocationName(monitor: MonitorOverviewItem) {
+export function useLocationName(monitor: OverviewStatusMetaData) {
   const dispatch = useDispatch();
   const { locationsLoaded, locations } = useSelector(selectServiceLocationsState);
   useEffect(() => {
@@ -18,14 +18,14 @@ export function useLocationName(monitor: MonitorOverviewItem) {
       dispatch(getServiceLocations());
     }
   });
-  const locationId = monitor?.location.id;
+  const locationId = monitor?.locationId;
 
   return useMemo(() => {
-    if (!locationsLoaded || monitor.location.label) {
-      return monitor.location.label ?? monitor.location.id;
+    if (!locationsLoaded || monitor.locationLabel) {
+      return monitor.locationLabel ?? monitor.locationId;
     } else {
       const location = locations.find((loc) => loc.id === locationId);
-      return location?.label ?? (monitor.location.label || monitor.location.id);
+      return location?.label ?? (monitor.locationLabel || monitor.locationId);
     }
   }, [locationsLoaded, locations, locationId, monitor]);
 }

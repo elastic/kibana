@@ -7,7 +7,7 @@
 
 import type { RequestHandler } from '@kbn/core/server';
 
-import { type DeleteTransformsRequestSchema } from '../../../../common/api_schemas/delete_transforms';
+import { type DeleteTransformsRequestSchema } from '../../api_schemas/delete_transforms';
 
 import type { TransformRequestHandlerContext } from '../../../services/license';
 import type { RouteDependencies } from '../../../types';
@@ -24,13 +24,14 @@ export const routeHandlerFactory: (
   DeleteTransformsRequestSchema,
   TransformRequestHandlerContext
 > =
-  ({ coreStart, dataViews }) =>
+  ({ getCoreStart, getDataViewsStart }) =>
   async (ctx, req, res) => {
     try {
-      const { savedObjects, elasticsearch } = coreStart;
+      const { savedObjects, elasticsearch } = await getCoreStart();
       const savedObjectsClient = savedObjects.getScopedClient(req);
       const esClient = elasticsearch.client.asScoped(req).asCurrentUser;
 
+      const dataViews = await getDataViewsStart();
       const dataViewsService = await dataViews.dataViewsServiceFactory(
         savedObjectsClient,
         esClient,

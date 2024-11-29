@@ -16,16 +16,10 @@ interface VerticalLinesProps {
   topTraceDuration: number;
 }
 
-export function VerticalLines({
-  topTraceDuration,
-  plotValues,
-  marks = [],
-}: VerticalLinesProps) {
-  const { width, height, margins, tickValues, xScale } = plotValues;
+export function VerticalLines({ topTraceDuration, plotValues, marks = [] }: VerticalLinesProps) {
+  const { width, margins, tickValues, xScale } = plotValues;
 
-  const markTimes = marks
-    .filter((mark) => mark.verticalLine)
-    .map(({ offset }) => offset);
+  const markTimes = marks.filter((mark) => mark.verticalLine).map(({ offset }) => offset);
 
   const theme = useTheme();
 
@@ -39,13 +33,12 @@ export function VerticalLines({
     return Number.isFinite(position) ? [...positions, position] : positions;
   }, []);
 
-  const topTraceDurationPosition =
-    topTraceDuration > 0 ? xScale(topTraceDuration) : NaN;
+  const topTraceDurationPosition = topTraceDuration > 0 ? xScale(topTraceDuration) : NaN;
 
   return (
     <svg
       width={width}
-      height={height + margins.top}
+      height="100%"
       style={{
         position: 'absolute',
         top: 0,
@@ -59,7 +52,7 @@ export function VerticalLines({
             x1={position}
             x2={position}
             y1={0}
-            y2={height}
+            y2="100%"
             stroke={theme.eui.euiColorLightestShade}
           />
         ))}
@@ -69,7 +62,7 @@ export function VerticalLines({
             x1={position}
             x2={position}
             y1={0}
-            y2={height}
+            y2="100%"
             stroke={theme.eui.euiColorMediumShade}
           />
         ))}
@@ -79,7 +72,7 @@ export function VerticalLines({
             x1={topTraceDurationPosition}
             x2={topTraceDurationPosition}
             y1={0}
-            y2={height}
+            y2="100%"
             stroke={theme.eui.euiColorMediumShade}
           />
         )}

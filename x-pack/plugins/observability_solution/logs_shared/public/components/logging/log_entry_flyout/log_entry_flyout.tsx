@@ -42,7 +42,7 @@ export interface LogEntryFlyoutProps {
 export const useLogEntryFlyout = (logViewReference: LogViewReference) => {
   const flyoutRef = useRef<OverlayRef>();
   const {
-    services: { http, data, uiSettings, application, observabilityAIAssistant },
+    services: { http, data, share, uiSettings, application, observabilityAIAssistant },
     overlays: { openFlyout },
   } = useKibanaContextForPlugin();
 
@@ -51,10 +51,11 @@ export const useLogEntryFlyout = (logViewReference: LogViewReference) => {
   }, []);
 
   const openLogEntryFlyout = useCallback(
-    (logEntryId) => {
+    (logEntryId: string | null | undefined) => {
       const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
         http,
         data,
+        share,
         uiSettings,
         application,
         observabilityAIAssistant,
@@ -71,14 +72,15 @@ export const useLogEntryFlyout = (logViewReference: LogViewReference) => {
       );
     },
     [
-      http,
-      data,
-      uiSettings,
       application,
-      openFlyout,
-      logViewReference,
       closeLogEntryFlyout,
+      data,
+      http,
+      logViewReference,
       observabilityAIAssistant,
+      openFlyout,
+      share,
+      uiSettings,
     ]
   );
 
@@ -181,9 +183,14 @@ export const LogEntryFlyout = ({
           }
         >
           <EuiFlexGroup direction="column" gutterSize="m">
-            <EuiFlexItem grow={false}>
-              <LogAIAssistant observabilityAIAssistant={observabilityAIAssistant} doc={logEntry} />
-            </EuiFlexItem>
+            {observabilityAIAssistant && (
+              <EuiFlexItem grow={false}>
+                <LogAIAssistant
+                  observabilityAIAssistant={observabilityAIAssistant}
+                  doc={logEntry}
+                />
+              </EuiFlexItem>
+            )}
             <EuiFlexItem grow={false}>
               <LogEntryFieldsTable logEntry={logEntry} onSetFieldFilter={onSetFieldFilter} />
             </EuiFlexItem>
@@ -203,6 +210,9 @@ export const LogEntryFlyout = ({
     </EuiFlyout>
   );
 };
+
+// eslint-disable-next-line import/no-default-export
+export default LogEntryFlyout;
 
 const loadingProgressMessage = i18n.translate('xpack.logsShared.logFlyout.loadingMessage', {
   defaultMessage: 'Searching log entry in shards',

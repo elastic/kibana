@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 
 import { css } from '@emotion/css';
+import { euiThemeVars } from '@kbn/ui-theme';
+import type { AttackDiscoveryStats } from '@kbn/elastic-assistant-common';
 import { AIConnector, ConnectorSelector } from '../connector_selector';
 import { Conversation } from '../../..';
-import { useLoadConnectors } from '../use_load_connectors';
-import * as i18n from '../translations';
 import { useAssistantContext } from '../../assistant_context';
 import { useConversation } from '../../assistant/use_conversation';
 import { getGenAiConfig } from '../helpers';
@@ -23,15 +23,13 @@ interface Props {
   isDisabled?: boolean;
   selectedConnectorId?: string;
   selectedConversation?: Conversation;
-  onConnectorSelected: (conversation: Conversation) => void;
+  onConnectorIdSelected?: (connectorId: string) => void;
+  onConnectorSelected?: (conversation: Conversation) => void;
+  stats?: AttackDiscoveryStats | null;
 }
 
 const inputContainerClassName = css`
   height: 32px;
-
-  .euiSuperSelect {
-    width: 400px;
-  }
 
   .euiSuperSelectControl {
     border: none;
@@ -47,43 +45,28 @@ const inputContainerClassName = css`
 `;
 
 const inputDisplayClassName = css`
+  margin-right: 8px;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 400px;
-`;
-
-const placeholderButtonClassName = css`
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 400px;
-  font-weight: normal;
-  padding-bottom: 5px;
-  padding-left: 0;
-  padding-top: 2px;
 `;
 
 /**
  * A compact wrapper of the ConnectorSelector component used in the Settings modal.
  */
 export const ConnectorSelectorInline: React.FC<Props> = React.memo(
-  ({ isDisabled = false, selectedConnectorId, selectedConversation, onConnectorSelected }) => {
+  ({
+    isDisabled = false,
+    selectedConnectorId,
+    selectedConversation,
+    onConnectorIdSelected,
+    onConnectorSelected,
+    stats = null,
+  }) => {
     const [isOpen, setIsOpen] = useState<boolean>(false);
-    const { actionTypeRegistry, assistantAvailability, http } = useAssistantContext();
+    const { assistantAvailability } = useAssistantContext();
     const { setApiConfig } = useConversation();
 
-    const { data: aiConnectors } = useLoadConnectors({
-      actionTypeRegistry,
-      http,
-    });
-
-    const selectedConnectorName =
-      (aiConnectors ?? []).find((c) => c.id === selectedConnectorId)?.name ??
-      i18n.INLINE_CONNECTOR_PLACEHOLDER;
     const localIsDisabled = isDisabled || !assistantAvailability.hasConnectorsReadPrivilege;
-
-    const onConnectorClick = useCallback(() => {
-      setIsOpen(!isOpen);
-    }, [isOpen]);
 
     const onChange = useCallback(
       async (connector: AIConnector) => {
@@ -102,20 +85,24 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
             conversation: selectedConversation,
             apiConfig: {
               ...selectedConversation.apiConfig,
+              actionTypeId: connector.actionTypeId,
               connectorId,
-              connectorTypeTitle: connector.connectorTypeTitle,
               // With the inline component, prefer config args to handle 'new connector' case
-              provider: apiProvider ?? config?.apiProvider,
-              model: model ?? config?.defaultModel,
+              provider: apiProvider,
+              model,
             },
           });
 
-          if (conversation) {
+          if (conversation && onConnectorSelected != null) {
             onConnectorSelected(conversation);
           }
         }
+
+        if (onConnectorIdSelected != null) {
+          onConnectorIdSelected(connectorId);
+        }
       },
-      [selectedConversation, setApiConfig, onConnectorSelected]
+      [selectedConversation, setApiConfig, onConnectorIdSelected, onConnectorSelected]
     );
 
     return (
@@ -127,41 +114,24 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
         justifyContent={'flexStart'}
         responsive={false}
       >
-        <EuiFlexItem grow={false}>
-          <EuiText size="xs" color="subdued">
-            {i18n.INLINE_CONNECTOR_LABEL}
-          </EuiText>
-        </EuiFlexItem>
         <EuiFlexItem>
-          {isOpen ? (
-            <ConnectorSelector
-              displayFancy={(displayText) => (
-                <EuiText className={inputDisplayClassName} size="xs">
-                  {displayText}
-                </EuiText>
-              )}
-              isOpen
-              isDisabled={localIsDisabled}
-              selectedConnectorId={selectedConnectorId}
-              setIsOpen={setIsOpen}
-              onConnectorSelectionChange={onChange}
-            />
-          ) : (
-            <span>
-              <EuiButtonEmpty
-                className={placeholderButtonClassName}
-                color={'text'}
-                data-test-subj="connectorSelectorPlaceholderButton"
-                iconSide={'right'}
-                iconType="arrowDown"
-                isDisabled={localIsDisabled}
-                onClick={onConnectorClick}
-                size="xs"
+          <ConnectorSelector
+            displayFancy={(displayText) => (
+              <EuiText
+                className={inputDisplayClassName}
+                size="s"
+                color={euiThemeVars.euiColorPrimaryText}
               >
-                {selectedConnectorName}
-              </EuiButtonEmpty>
-            </span>
-          )}
+                {displayText}
+              </EuiText>
+            )}
+            isOpen={isOpen}
+            isDisabled={localIsDisabled}
+            selectedConnectorId={selectedConnectorId}
+            setIsOpen={setIsOpen}
+            onConnectorSelectionChange={onChange}
+            stats={stats}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     );

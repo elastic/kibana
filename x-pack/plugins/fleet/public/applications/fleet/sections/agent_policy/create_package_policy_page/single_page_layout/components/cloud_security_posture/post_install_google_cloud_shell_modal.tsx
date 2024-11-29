@@ -43,11 +43,10 @@ export const PostInstallGoogleCloudShellModal: React.FunctionComponent<{
     sendGetEnrollmentAPIKeys({
       page: 1,
       perPage: 1,
-      kuery: `policy_id:${agentPolicy.id}`,
+      kuery: `policy_id:"${agentPolicy.id}"`,
     })
   );
-  const { fleetServerHosts, fleetProxy, downloadSource } =
-    useFleetServerHostsForPolicy(agentPolicy);
+  const { fleetServerHost, fleetProxy, downloadSource } = useFleetServerHostsForPolicy(agentPolicy);
   const agentVersion = useAgentVersion();
   const { gcpProjectId, gcpOrganizationId, gcpAccountType } =
     getGcpIntegrationDetailsFromPackagePolicy(packagePolicy);
@@ -63,7 +62,7 @@ export const PostInstallGoogleCloudShellModal: React.FunctionComponent<{
 
   const installManagedCommands = ManualInstructions({
     apiKey: apyKeysData?.data?.items[0]?.api_key || 'no_key',
-    fleetServerHosts,
+    fleetServerHost,
     fleetProxy,
     downloadSource,
     agentVersion,

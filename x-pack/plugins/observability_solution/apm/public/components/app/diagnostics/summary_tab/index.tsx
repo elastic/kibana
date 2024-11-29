@@ -6,12 +6,8 @@
  */
 
 import React from 'react';
-import {
-  EuiFlexGroup,
-  EuiCallOut,
-  EuiDescriptionList,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiCallOut, EuiDescriptionList, EuiSpacer } from '@elastic/eui';
+import { isCCSRemoteIndexName } from '@kbn/es-query';
 
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { ApmIntegrationPackageStatus } from './apm_integration_package_status';
@@ -25,8 +21,7 @@ type DiagnosticsBundle = APIReturnType<'GET /internal/apm/diagnostics'>;
 export function DiagnosticsSummary() {
   const { diagnosticsBundle } = useDiagnosticsContext();
   const isCrossCluster = getIsCrossCluster(diagnosticsBundle);
-  const hasAllPrivileges =
-    diagnosticsBundle?.diagnosticsPrivileges.hasAllPrivileges ?? true;
+  const hasAllPrivileges = diagnosticsBundle?.diagnosticsPrivileges.hasAllPrivileges ?? true;
 
   if (isCrossCluster || !hasAllPrivileges) {
     return (
@@ -57,27 +52,18 @@ export function DiagnosticsSummary() {
 function CrossClusterSearchCallout() {
   return (
     <EuiCallOut title="Cross cluster search not supported" color="warning">
-      The APM index settings is targetting remote clusters. Please note that
-      this is not currently supported by the Diagnostics Tool and functionality
-      will therefore be limited.
+      The APM index settings is targetting remote clusters. Please note that this is not currently
+      supported by the Diagnostics Tool and functionality will therefore be limited.
     </EuiCallOut>
   );
 }
 
-function PrivilegesCallout({
-  diagnosticsBundle,
-}: {
-  diagnosticsBundle: DiagnosticsBundle;
-}) {
-  const missingClusterPrivileges = Object.entries(
-    diagnosticsBundle.diagnosticsPrivileges.cluster
-  )
+function PrivilegesCallout({ diagnosticsBundle }: { diagnosticsBundle: DiagnosticsBundle }) {
+  const missingClusterPrivileges = Object.entries(diagnosticsBundle.diagnosticsPrivileges.cluster)
     .filter(([privilegeName, hasPrivilege]) => !hasPrivilege)
     .map(([privilegeName]) => privilegeName);
 
-  const missingIndexPrivileges = Object.entries(
-    diagnosticsBundle.diagnosticsPrivileges.index
-  )
+  const missingIndexPrivileges = Object.entries(diagnosticsBundle.diagnosticsPrivileges.index)
     .filter(([indexName, privObject]) => !privObject.read)
     .map(([indexName, privObject]) => indexName);
 
@@ -114,7 +100,7 @@ function PrivilegesCallout({
 }
 
 export function getIsCrossCluster(diagnosticsBundle?: DiagnosticsBundle) {
-  return Object.values(diagnosticsBundle?.apmIndices ?? {}).some((indicies) =>
-    indicies.includes(':')
-  );
+  return Object.values(diagnosticsBundle?.apmIndices ?? {}).some((indicies) => {
+    return isCCSRemoteIndexName(indicies);
+  });
 }

@@ -46,10 +46,11 @@ export interface FlyoutNavigationProps {
 export const FlyoutNavigation: FC<FlyoutNavigationProps> = memo(
   ({ flyoutIsExpandable = false, expandDetails, actions }) => {
     const { euiTheme } = useEuiTheme();
-    const { closeLeftPanel } = useExpandableFlyoutApi();
-    const panels = useExpandableFlyoutState();
 
+    const panels = useExpandableFlyoutState();
     const isExpanded: boolean = !!panels.left;
+
+    const { closeLeftPanel } = useExpandableFlyoutApi();
     const collapseDetails = useCallback(() => closeLeftPanel(), [closeLeftPanel]);
 
     const collapseButton = useMemo(
@@ -110,7 +111,7 @@ export const FlyoutNavigation: FC<FlyoutNavigationProps> = memo(
           responsive={false}
           css={css`
             padding-left: ${euiTheme.size.s};
-            padding-right: ${euiTheme.size.xl};
+            padding-right: ${euiTheme.size.xxxxl};
             height: ${euiTheme.size.xxl};
           `}
         >

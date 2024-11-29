@@ -13,10 +13,12 @@ import type {
   SavedObjectsClientContract,
   IRouter,
 } from '@kbn/core/server';
+import type { GetSpaceResult } from '@kbn/spaces-plugin/common';
 
 import type { FleetAuthz } from '../../common/authz';
 import type { AgentClient } from '../services';
 import type { PackagePolicyClient } from '../services/package_policy_service';
+import type { UninstallTokenServiceInterface } from '../services/security/uninstall_token_service';
 
 /** @internal */
 export type FleetRequestHandlerContext = CustomRequestHandlerContext<{
@@ -32,6 +34,9 @@ export type FleetRequestHandlerContext = CustomRequestHandlerContext<{
       asCurrentUser: PackagePolicyClient;
       asInternalUser: PackagePolicyClient;
     };
+    uninstallTokenService: {
+      asCurrentUser: UninstallTokenServiceInterface;
+    };
     /**
      * Saved Objects client configured to use kibana_system privileges instead of end-user privileges. Should only be
      * used by routes that have additional privilege checks for authorization (such as requiring superuser).
@@ -39,6 +44,7 @@ export type FleetRequestHandlerContext = CustomRequestHandlerContext<{
     readonly internalSoClient: SavedObjectsClientContract;
 
     spaceId: string;
+    getAllSpaces(): Promise<GetSpaceResult[]>;
     /**
      * If data is to be limited to the list of integration package names. This will be set when
      * authz to the API was granted only based on Package Privileges.

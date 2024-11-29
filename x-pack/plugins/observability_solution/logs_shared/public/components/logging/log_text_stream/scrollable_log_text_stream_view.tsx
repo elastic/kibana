@@ -28,6 +28,20 @@ import { LogDateRow } from './log_date_row';
 import { LogEntry } from '../../../../common/log_entry';
 import { LogColumnRenderConfiguration } from '../../../utils/log_column_render_configuration';
 
+export interface VisibleInterval {
+  pagesBeforeStart: number;
+  pagesAfterEnd: number;
+  startKey: TimeKey | null;
+  middleKey: TimeKey | null;
+  endKey: TimeKey | null;
+  fromScroll: boolean;
+}
+
+export interface UpdatedDateRange {
+  startDateExpression?: string;
+  endDateExpression?: string;
+}
+
 export interface ScrollableLogTextStreamViewProps {
   columnConfigurations: LogColumnRenderConfiguration[];
   items: StreamItem[];
@@ -41,14 +55,7 @@ export interface ScrollableLogTextStreamViewProps {
   lastLoadedTime?: Date;
   target: TimeKey | null;
   jumpToTarget: (target: TimeKey) => any;
-  reportVisibleInterval: (params: {
-    pagesBeforeStart: number;
-    pagesAfterEnd: number;
-    startKey: TimeKey | null;
-    middleKey: TimeKey | null;
-    endKey: TimeKey | null;
-    fromScroll: boolean;
-  }) => any;
+  reportVisibleInterval: (params: VisibleInterval) => any;
   reloadItems: () => void;
   onOpenLogEntryFlyout?: (logEntryId?: string) => void;
   setContextEntry?: (entry: LogEntry) => void;
@@ -56,7 +63,7 @@ export interface ScrollableLogTextStreamViewProps {
   currentHighlightKey: UniqueTimeKey | null;
   startDateExpression: string;
   endDateExpression: string;
-  updateDateRange: (range: { startDateExpression?: string; endDateExpression?: string }) => void;
+  updateDateRange: (range: UpdatedDateRange) => void;
   startLiveStreaming: () => void;
   hideScrollbar?: boolean;
 }
@@ -157,7 +164,7 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
     const hasContextAction = !!setContextEntry;
 
     return (
-      <ScrollableLogTextStreamViewWrapper>
+      <ScrollableLogTextStreamViewWrapper role="table">
         {isReloading && (!isStreaming || !hasItems) ? (
           <LogsSharedLoadingPanel
             width="100%"
@@ -204,7 +211,7 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
                         onVisibleChildrenChange={this.handleVisibleChildrenChange}
                         target={targetId}
                         hideScrollbar={hideScrollbar}
-                        data-test-subj={'logStream'}
+                        data-test-subj="logStream"
                         isLocked={isScrollLocked}
                         entriesCount={items.length}
                       >

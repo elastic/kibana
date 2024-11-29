@@ -20,15 +20,12 @@ import type {
   HttpStart,
   IUiSettingsClient,
   NotificationsStart,
-  OverlayStart,
 } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
-import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import type { DashboardFeatureFlagConfig } from '@kbn/dashboard-plugin/public';
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
@@ -56,16 +53,17 @@ import type {
   LensTopNavMenuEntryGenerator,
   VisualizationMap,
   UserMessagesGetter,
+  StartServices,
 } from '../types';
-import type { LensAttributeService } from '../lens_attribute_service';
-import type { LensEmbeddableInput } from '../embeddable/embeddable';
+import type { LensAttributesService } from '../lens_attribute_service';
 import type { LensInspector } from '../lens_inspector_service';
 import type { IndexPatternServiceAPI } from '../data_views_service/service';
-import type { Document, SavedObjectIndexStore } from '../persistence/saved_object_store';
+import type { LensDocument, SavedObjectIndexStore } from '../persistence/saved_object_store';
 import type { LensAppLocator, LensAppLocatorParams } from '../../common/locator/locator';
+import { LensSerializedState } from '../react_embeddable/types';
 
 export interface RedirectToOriginProps {
-  input?: LensEmbeddableInput;
+  state?: LensSerializedState;
   isCopied?: boolean;
 }
 
@@ -78,7 +76,7 @@ export interface LensAppProps {
   redirectToOrigin?: (props?: RedirectToOriginProps) => void;
 
   // The initial input passed in by the container when editing. Can be either by reference or by value.
-  initialInput?: LensEmbeddableInput;
+  initialInput?: LensSerializedState;
 
   // State passed in by the container which is used to determine the id of the Originating App.
   incomingState?: EmbeddableEditorState;
@@ -112,7 +110,7 @@ export interface LensTopNavMenuProps {
 
   redirectToOrigin?: (props?: RedirectToOriginProps) => void;
   // The initial input passed in by the container when editing. Can be either by reference or by value.
-  initialInput?: LensEmbeddableInput;
+  initialInput?: LensSerializedState;
   getIsByValueMode: () => boolean;
   indicateNoData: boolean;
   setIsSaveModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
@@ -126,13 +124,12 @@ export interface LensTopNavMenuProps {
   initialContextIsEmbedded?: boolean;
   topNavMenuEntryGenerators: LensTopNavMenuEntryGenerator[];
   initialContext?: VisualizeFieldContext | VisualizeEditorContext;
-  currentDoc: Document | undefined;
-  theme$: Observable<CoreTheme>;
+  currentDoc: LensDocument | undefined;
   indexPatternService: IndexPatternServiceAPI;
-  onTextBasedSavedAndExit: ({ onSave }: { onSave: () => void }) => Promise<void>;
   getUserMessages: UserMessagesGetter;
   shortUrlService: (params: LensAppLocatorParams) => Promise<string>;
   isCurrentStateDirty: boolean;
+  startServices: StartServices;
 }
 
 export interface HistoryLocationState {
@@ -141,13 +138,11 @@ export interface HistoryLocationState {
   originatingApp?: string;
 }
 
-export interface LensAppServices {
+export interface LensAppServices extends StartServices {
   http: HttpStart;
   executionContext: ExecutionContextStart;
   chrome: ChromeStart;
-  overlays: OverlayStart;
   storage: IStorageWrapper;
-  dashboard: DashboardStart;
   dataViews: DataViewsPublicPluginStart;
   fieldFormats: FieldFormatsStart;
   data: DataPublicPluginStart;
@@ -161,7 +156,7 @@ export interface LensAppServices {
   usageCollection?: UsageCollectionStart;
   stateTransfer: EmbeddableStateTransfer;
   navigation: NavigationPublicPluginStart;
-  attributeService: LensAttributeService;
+  attributeService: LensAttributesService;
   contentManagement: ContentManagementPublicStart;
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
   getOriginatingAppName: () => string | undefined;
@@ -171,8 +166,6 @@ export interface LensAppServices {
   share?: SharePluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   docLinks: DocLinksStart;
-  // Temporarily required until the 'by value' paradigm is default.
-  dashboardFeatureFlag: DashboardFeatureFlagConfig;
   dataViewEditor: DataViewEditorStart;
   dataViewFieldEditor: IndexPatternFieldEditorStart;
   locator?: LensAppLocator;

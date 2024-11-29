@@ -19,6 +19,10 @@ import { replace } from '../../components/shared/links/url_helpers';
 import { FETCH_STATUS } from '../../hooks/use_fetcher';
 import { ServerlessType } from '../../../common/serverless';
 import { usePreferredDataSourceAndBucketSize } from '../../hooks/use_preferred_data_source_and_bucket_size';
+import {
+  type ServiceEntitySummary,
+  useServiceEntitySummaryFetcher,
+} from './use_service_entity_summary_fetcher';
 
 export interface APMServiceContextValue {
   serviceName: string;
@@ -30,6 +34,8 @@ export interface APMServiceContextValue {
   runtimeName?: string;
   fallbackToTransactions: boolean;
   serviceAgentStatus: FETCH_STATUS;
+  serviceEntitySummary?: ServiceEntitySummary;
+  serviceEntitySummaryStatus: FETCH_STATUS;
 }
 
 export const APMServiceContext = createContext<APMServiceContextValue>({
@@ -38,23 +44,17 @@ export const APMServiceContext = createContext<APMServiceContextValue>({
   transactionTypes: [],
   fallbackToTransactions: false,
   serviceAgentStatus: FETCH_STATUS.NOT_INITIATED,
+  serviceEntitySummaryStatus: FETCH_STATUS.NOT_INITIATED,
 });
 
-export function ApmServiceContextProvider({
-  children,
-}: {
-  children: ReactNode;
-}) {
+export function ApmServiceContextProvider({ children }: { children: ReactNode }) {
   const history = useHistory();
 
   const {
     path: { serviceName },
     query,
-    query: { kuery, rangeFrom, rangeTo },
-  } = useAnyOfApmParams(
-    '/services/{serviceName}',
-    '/mobile-services/{serviceName}'
-  );
+    query: { kuery, rangeFrom, rangeTo, environment },
+  } = useAnyOfApmParams('/services/{serviceName}', '/mobile-services/{serviceName}');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
@@ -77,14 +77,18 @@ export function ApmServiceContextProvider({
     numBuckets: 100,
   });
 
-  const { transactionTypes, status: transactionTypeStatus } =
-    useServiceTransactionTypesFetcher({
-      serviceName,
-      start,
-      end,
-      documentType: preferred?.source.documentType,
-      rollupInterval: preferred?.source.rollupInterval,
-    });
+  const { transactionTypes, status: transactionTypeStatus } = useServiceTransactionTypesFetcher({
+    serviceName,
+    start,
+    end,
+    documentType: preferred?.source.documentType,
+    rollupInterval: preferred?.source.rollupInterval,
+  });
+
+  const { serviceEntitySummary, serviceEntitySummaryStatus } = useServiceEntitySummaryFetcher({
+    serviceName,
+    environment,
+  });
 
   const currentTransactionType = getOrRedirectToTransactionType({
     transactionType: query.transactionType,
@@ -109,6 +113,8 @@ export function ApmServiceContextProvider({
         runtimeName,
         fallbackToTransactions,
         serviceAgentStatus,
+        serviceEntitySummary,
+        serviceEntitySummaryStatus,
       }}
       children={children}
     />
@@ -157,9 +163,7 @@ export function getTransactionType({
   const defaultTransactionType = getDefaultTransactionType(agentName);
 
   // If the default transaction type is not in transactionTypes the first in the list is returned
-  const currentTransactionType = transactionTypes.includes(
-    defaultTransactionType
-  )
+  const currentTransactionType = transactionTypes.includes(defaultTransactionType)
     ? defaultTransactionType
     : transactionTypes[0];
 

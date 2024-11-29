@@ -90,6 +90,7 @@ const createAndSetupRoot = async (config?: object) => {
 /**
  * Verifies that multiple Kibana instances running in parallel will not create duplicate preconfiguration objects.
  */
+// Failing 9.0 version update: https://github.com/elastic/kibana/issues/192624
 describe('Fleet setup preconfiguration with multiple instances Kibana', () => {
   let esServer: TestElasticsearchUtils;
   // let esClient: Client;
@@ -174,6 +175,11 @@ describe('Fleet setup preconfiguration with multiple instances Kibana', () => {
 
   const preconfiguration = {
     registryUrl,
+    internal: {
+      registry: {
+        kibanaVersionCheckEnabled: false,
+      },
+    },
     packages: [
       {
         name: 'fleet_server',

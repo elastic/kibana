@@ -1,18 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreSetup } from '@kbn/core/public';
 import React from 'react';
+import { Observable } from 'rxjs';
 
-import { PDF_REPORT_TYPE, PDF_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-pdf-common';
+import { PDF_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-pdf-common';
 import { PNG_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-png-common';
 
-import { ReportingAPIClient } from '../../reporting_api_client';
+import { StartServices } from '..';
+import { ReportingAPIClient } from '../..';
 import { ReportingPanelProps } from '../share_context_menu/reporting_panel_content';
 import { ScreenCapturePanelContent } from '../share_context_menu/screen_capture_panel_content_lazy';
 
@@ -22,6 +24,7 @@ import { ScreenCapturePanelContent } from '../share_context_menu/screen_capture_
 export interface ApplicationProps {
   /**
    * A function that Reporting calls to get the sharing data from the application.
+   * Needed for CSV exports and Canvas PDF reports.
    */
   getJobParams: ReportingPanelProps['getJobParams'];
 
@@ -41,25 +44,10 @@ export interface ApplicationProps {
   onClose: () => void;
 }
 
-/**
- * React components used to display share menus with Reporting features in an application.
- */
 export interface ReportingPublicComponents {
-  /**
-   * An element to display a form to export the page as PDF
-   * @deprecated
-   */
-  ReportingPanelPDF(props: ApplicationProps): JSX.Element;
-
-  /**
-   * An element to display a form to export the page as PDF
-   */
-  ReportingPanelPDFV2(props: ApplicationProps): JSX.Element;
-
-  /**
-   * An element to display a form to export the page as PNG
-   */
-  ReportingPanelPNGV2(props: ApplicationProps): JSX.Element;
+  /** Needed for Canvas PDF reports */
+  ReportingPanelPDFV2(props: ApplicationProps): JSX.Element | null;
+  ReportingPanelPNGV2(props: ApplicationProps): JSX.Element | undefined;
 }
 
 /**
@@ -68,48 +56,39 @@ export interface ReportingPublicComponents {
  * Related Discuss issue: https://github.com/elastic/kibana/issues/101422
  */
 export function getSharedComponents(
-  core: CoreSetup,
-  apiClient: ReportingAPIClient
+  apiClient: ReportingAPIClient,
+  startServices$: Observable<StartServices>
 ): ReportingPublicComponents {
   return {
-    ReportingPanelPDF(props: ApplicationProps) {
-      return (
-        <ScreenCapturePanelContent
-          requiresSavedState={false}
-          reportType={PDF_REPORT_TYPE}
-          apiClient={apiClient}
-          toasts={core.notifications.toasts}
-          uiSettings={core.uiSettings}
-          theme={core.theme}
-          {...props}
-        />
-      );
-    },
     ReportingPanelPDFV2(props: ApplicationProps) {
-      return (
-        <ScreenCapturePanelContent
-          requiresSavedState={false}
-          reportType={PDF_REPORT_TYPE_V2}
-          apiClient={apiClient}
-          toasts={core.notifications.toasts}
-          uiSettings={core.uiSettings}
-          theme={core.theme}
-          {...props}
-        />
-      );
+      if (props.layoutOption === 'canvas') {
+        return (
+          <ScreenCapturePanelContent
+            requiresSavedState={false}
+            reportType={PDF_REPORT_TYPE_V2}
+            apiClient={apiClient}
+            layoutOption={'canvas' as const}
+            startServices$={startServices$}
+            {...props}
+          />
+        );
+      } else {
+        return null;
+      }
     },
     ReportingPanelPNGV2(props: ApplicationProps) {
-      return (
-        <ScreenCapturePanelContent
-          requiresSavedState={false}
-          reportType={PNG_REPORT_TYPE_V2}
-          apiClient={apiClient}
-          toasts={core.notifications.toasts}
-          uiSettings={core.uiSettings}
-          theme={core.theme}
-          {...props}
-        />
-      );
+      if (props.layoutOption === 'canvas') {
+        return (
+          <ScreenCapturePanelContent
+            requiresSavedState={false}
+            reportType={PNG_REPORT_TYPE_V2}
+            apiClient={apiClient}
+            layoutOption={'canvas' as const}
+            startServices$={startServices$}
+            {...props}
+          />
+        );
+      }
     },
   };
 }

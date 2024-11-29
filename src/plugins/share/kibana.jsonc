@@ -1,12 +1,18 @@
 {
   "type": "plugin",
   "id": "@kbn/share-plugin",
-  "owner": "@elastic/appex-sharedux",
+  "owner": [
+    "@elastic/appex-sharedux"
+  ],
+  "group": "platform",
+  "visibility": "shared",
   "description": "Adds URL Service and sharing capabilities to Kibana",
   "plugin": {
     "id": "share",
-    "server": true,
     "browser": true,
-    "requiredBundles": ["kibanaReact", "kibanaUtils"],
+    "server": true,
+    "requiredBundles": [
+      "kibanaUtils"
+    ]
   }
 }

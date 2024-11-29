@@ -5,43 +5,22 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingLogo } from '@elastic/eui';
 import React, { useEffect } from 'react';
-
-import {
-  EuiFlexGroup,
-  EuiFlexGroupProps,
-  EuiFlexItem,
-  EuiLink,
-  EuiPanel,
-  EuiSpacer,
-} from '@elastic/eui';
-import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
-import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
-import {
-  isOpenTelemetryAgentName,
-  isRumAgentName,
-  isServerlessAgentName,
-} from '../../../../common/agent_name';
 import { AnnotationsContextProvider } from '../../../context/annotations/annotations_context';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { ChartPointerEventContextProvider } from '../../../context/chart_pointer_event/chart_pointer_event_context';
 import { useApmParams } from '../../../hooks/use_apm_params';
-import { useApmRouter } from '../../../hooks/use_apm_router';
-import { useBreakpoints } from '../../../hooks/use_breakpoints';
 import { useTimeRange } from '../../../hooks/use_time_range';
-import { AggregatedTransactionsBadge } from '../../shared/aggregated_transactions_badge';
-import { FailedTransactionRateChart } from '../../shared/charts/failed_transaction_rate_chart';
-import { LatencyChart } from '../../shared/charts/latency_chart';
-import { TransactionBreakdownChart } from '../../shared/charts/transaction_breakdown_chart';
-import { TransactionColdstartRateChart } from '../../shared/charts/transaction_coldstart_rate_chart';
-import { TransactionsTable } from '../../shared/transactions_table';
-import { ServiceOverviewDependenciesTable } from './service_overview_dependencies_table';
-import { ServiceOverviewErrorsTable } from './service_overview_errors_table';
-import { ServiceOverviewInstancesChartAndTable } from './service_overview_instances_chart_and_table';
-import { ServiceOverviewThroughputChart } from './service_overview_throughput_chart';
-import { SloCallout } from '../../shared/slo_callout';
+import { isApmSignal, isLogsSignal, isLogsOnlySignal } from '../../../utils/get_signal_type';
+import { ApmOverview } from './apm_overview';
+import { LogsOverview } from './logs_overview';
+import { ServiceTabEmptyState } from '../service_tab_empty_state';
 import { useLocalStorage } from '../../../hooks/use_local_storage';
+import { SearchBar } from '../../shared/search_bar/search_bar';
+import { FETCH_STATUS } from '../../../hooks/use_fetcher';
+import { useEntityCentricExperienceSetting } from '../../../hooks/use_entity_centric_experience_setting';
 /**
  * The height a chart should be if it's next to a table with 5 rows and a title.
  * Add the height of the pagination row.
@@ -49,15 +28,13 @@ import { useLocalStorage } from '../../../hooks/use_local_storage';
 export const chartHeight = 288;
 
 export function ServiceOverview() {
-  const router = useApmRouter();
-  const { serviceName, fallbackToTransactions, agentName, serverlessType } =
-    useApmServiceContext();
+  const { isEntityCentricExperienceEnabled } = useEntityCentricExperienceSetting();
+  const { serviceName, serviceEntitySummary, serviceEntitySummaryStatus } = useApmServiceContext();
 
-  const { setScreenContext } =
-    useApmPluginContext().observabilityAIAssistant.service;
+  const setScreenContext = useApmPluginContext().observabilityAIAssistant?.service.setScreenContext;
 
   useEffect(() => {
-    return setScreenContext({
+    return setScreenContext?.({
       screenDescription: `The user is looking at the service overview page for ${serviceName}.`,
       data: [
         {
@@ -70,185 +47,68 @@ export function ServiceOverview() {
   }, [setScreenContext, serviceName]);
 
   const {
-    query,
-    query: { kuery, environment, rangeFrom, rangeTo, transactionType },
+    query: { environment, rangeFrom, rangeTo },
   } = useApmParams('/services/{serviceName}/overview');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
-  const isRumAgent = isRumAgentName(agentName);
-  const isOpenTelemetryAgent = isOpenTelemetryAgentName(agentName as AgentName);
-  const isServerless = isServerlessAgentName(serverlessType);
 
-  const dependenciesLink = router.link('/services/{serviceName}/dependencies', {
-    path: {
-      serviceName,
-    },
-    query,
-  });
-
-  // The default EuiFlexGroup breaks at 768, but we want to break at 1200, so we
-  // observe the window width and set the flex directions of rows accordingly
-  const { isLarge } = useBreakpoints();
-  const isSingleColumn = isLarge;
-
-  const latencyChartHeight = 200;
-  const nonLatencyChartHeight = isSingleColumn
-    ? latencyChartHeight
-    : chartHeight;
-  const rowDirection: EuiFlexGroupProps['direction'] = isSingleColumn
-    ? 'column'
-    : 'row';
-
-  const [sloCalloutDismissed, setSloCalloutDismissed] = useLocalStorage(
-    'apm.sloCalloutDismissed',
+  const [dismissedLogsOnlyEmptyState, setDismissedLogsOnlyEmptyState] = useLocalStorage(
+    `apm.dismissedLogsOnlyEmptyState.overview`,
     false
   );
 
+  const hasSignal =
+    serviceEntitySummary?.dataStreamTypes && serviceEntitySummary?.dataStreamTypes?.length > 0;
+
+  const hasLogsOnlySignal = hasSignal && isLogsOnlySignal(serviceEntitySummary.dataStreamTypes);
+
+  const hasLogsSignal = hasSignal && isLogsSignal(serviceEntitySummary.dataStreamTypes);
+
+  // Shows APM overview when entity has APM signal or when Entity centric is not enabled
+  const hasApmSignal = hasSignal && isApmSignal(serviceEntitySummary.dataStreamTypes);
+
+  // Shows APM overview when entity has APM signal or when Entity centric is not enabled or when entity has no signal
+  const showApmOverview = isEntityCentricExperienceEnabled === false || hasApmSignal || !hasSignal;
+
+  if (serviceEntitySummaryStatus === FETCH_STATUS.LOADING) {
+    return (
+      <div style={{ textAlign: 'center' }}>
+        <EuiLoadingLogo logo="logoObservability" size="l" />
+      </div>
+    );
+  }
+
   return (
-    <AnnotationsContextProvider
-      serviceName={serviceName}
-      environment={environment}
-      start={start}
-      end={end}
-    >
-      {!sloCalloutDismissed && (
-        <SloCallout
-          dismissCallout={() => {
-            setSloCalloutDismissed(true);
-          }}
-          serviceName={serviceName}
-          environment={environment}
-          transactionType={transactionType}
-        />
-      )}
-      <EuiSpacer />
-      <ChartPointerEventContextProvider>
-        <EuiFlexGroup direction="column" gutterSize="s">
-          {fallbackToTransactions && (
-            <EuiFlexItem>
-              <AggregatedTransactionsBadge />
-            </EuiFlexItem>
-          )}
-          <EuiFlexItem>
-            <EuiPanel hasBorder={true}>
-              <LatencyChart height={latencyChartHeight} kuery={kuery} />
-            </EuiPanel>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiFlexGroup
-              direction={rowDirection}
-              gutterSize="s"
-              responsive={false}
-            >
-              <EuiFlexItem grow={3}>
-                <ServiceOverviewThroughputChart
-                  height={nonLatencyChartHeight}
-                  kuery={kuery}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={7}>
-                <EuiPanel hasBorder={true}>
-                  <TransactionsTable
-                    kuery={kuery}
-                    environment={environment}
-                    fixedHeight={true}
-                    start={start}
-                    end={end}
-                    showPerPageOptions={false}
-                    numberOfTransactionsPerPage={5}
-                    showSparkPlots={!isSingleColumn}
-                  />
-                </EuiPanel>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiFlexGroup
-              direction={rowDirection}
-              gutterSize="s"
-              responsive={false}
-            >
-              {!isRumAgent && (
-                <EuiFlexItem grow={3}>
-                  <FailedTransactionRateChart
-                    height={nonLatencyChartHeight}
-                    showAnnotations={false}
-                    kuery={kuery}
-                  />
-                </EuiFlexItem>
-              )}
-              <EuiFlexItem grow={7}>
-                <EuiPanel hasBorder={true}>
-                  <ServiceOverviewErrorsTable serviceName={serviceName} />
-                </EuiPanel>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiFlexGroup
-              direction={rowDirection}
-              gutterSize="s"
-              responsive={false}
-            >
-              {isServerless ? (
-                <EuiFlexItem grow={3}>
-                  <TransactionColdstartRateChart
-                    showAnnotations={false}
-                    environment={environment}
-                    kuery={kuery}
-                  />
-                </EuiFlexItem>
-              ) : (
-                !isOpenTelemetryAgent && (
-                  <EuiFlexItem grow={3}>
-                    <TransactionBreakdownChart
-                      showAnnotations={false}
-                      environment={environment}
-                      kuery={kuery}
+    <>
+      <SearchBar showTimeComparison showTransactionTypeSelector />
+      <AnnotationsContextProvider
+        serviceName={serviceName}
+        environment={environment}
+        start={start}
+        end={end}
+      >
+        <ChartPointerEventContextProvider>
+          <EuiFlexGroup direction="column" gutterSize="s">
+            {showApmOverview ? <ApmOverview /> : null}
+            {/* Only shows Logs overview when entity has Logs signal */}
+            {hasLogsSignal ? (
+              <>
+                {hasLogsOnlySignal && !dismissedLogsOnlyEmptyState && (
+                  <EuiFlexItem>
+                    <ServiceTabEmptyState
+                      id="serviceOverview"
+                      onDismiss={() => setDismissedLogsOnlyEmptyState(true)}
                     />
                   </EuiFlexItem>
-                )
-              )}
-              {!isRumAgent && (
-                <EuiFlexItem grow={7}>
-                  <EuiPanel hasBorder={true}>
-                    <ServiceOverviewDependenciesTable
-                      fixedHeight={true}
-                      showPerPageOptions={false}
-                      link={
-                        <EuiLink
-                          data-test-subj="apmServiceOverviewViewDependenciesLink"
-                          href={dependenciesLink}
-                        >
-                          {i18n.translate(
-                            'xpack.apm.serviceOverview.dependenciesTableTabLink',
-                            { defaultMessage: 'View dependencies' }
-                          )}
-                        </EuiLink>
-                      }
-                      showSparkPlots={!isSingleColumn}
-                    />
-                  </EuiPanel>
+                )}
+                <EuiFlexItem>
+                  <LogsOverview />
                 </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          {!isRumAgent && !isServerless && (
-            <EuiFlexItem>
-              <EuiFlexGroup
-                direction="column"
-                gutterSize="s"
-                responsive={false}
-              >
-                <ServiceOverviewInstancesChartAndTable
-                  chartHeight={nonLatencyChartHeight}
-                  serviceName={serviceName}
-                />
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-      </ChartPointerEventContextProvider>
-    </AnnotationsContextProvider>
+              </>
+            ) : null}
+          </EuiFlexGroup>
+        </ChartPointerEventContextProvider>
+      </AnnotationsContextProvider>
+    </>
   );
 }

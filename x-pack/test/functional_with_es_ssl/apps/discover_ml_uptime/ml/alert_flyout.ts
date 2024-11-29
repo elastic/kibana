@@ -114,6 +114,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await ml.alerting.assertTopNBuckets(1);
         await ml.alerting.assertLookbackInterval('123m');
 
+        await ml.testExecution.logTestStep(
+          'should support updating the advanced settings section with valid values only'
+        );
+        await ml.alerting.setTopNBuckets(0, true);
+        await ml.alerting.setTopNBuckets(2);
+        await ml.alerting.setLookbackInterval('invalid_value', true);
+        await ml.alerting.setLookbackInterval('2h');
+
         await ml.testExecution.logTestStep('should preview the alert condition');
         await ml.alerting.assertPreviewButtonState(false);
         await ml.alerting.setTestInterval('5y');
@@ -126,6 +134,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.triggersActionsUI.setAlertName('ml-test-alert');
         await pageObjects.triggersActionsUI.setAlertInterval(10, 's');
         await pageObjects.triggersActionsUI.saveAlert();
+        await ml.navigation.navigateToAlertsAndAction();
         await pageObjects.triggersActionsUI.clickOnAlertInAlertsList('ml-test-alert');
       });
     });

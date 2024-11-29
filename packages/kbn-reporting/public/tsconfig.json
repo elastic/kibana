@@ -2,17 +2,10 @@
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "target/types",
-    "types": [
-      "jest",
-      "node"
-    ]
+    "types": ["jest", "node"]
   },
-  "include": [
-    "**/*.ts", "**/*.tsx"
-  ],
-  "exclude": [
-    "target/**/*"
-  ],
+  "include": ["**/*.ts", "**/*.tsx"],
+  "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/reporting-common",
     "@kbn/core",
@@ -30,10 +23,9 @@
     "@kbn/screenshotting-plugin",
     "@kbn/i18n-react",
     "@kbn/test-jest-helpers",
-    "@kbn/discover-utils",
-    "@kbn/saved-search-plugin",
-    "@kbn/discover-plugin",
-    "@kbn/embeddable-plugin",
+    "@kbn/react-kibana-mount",
+    "@kbn/home-plugin",
+    "@kbn/management-plugin",
     "@kbn/ui-actions-plugin",
   ]
 }

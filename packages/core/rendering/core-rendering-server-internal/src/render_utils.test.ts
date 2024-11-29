@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { getThemeStylesheetPaths, getCommonStylesheetPaths, getScriptPaths } from './render_utils';
@@ -54,39 +55,31 @@ describe('getCommonStylesheetPaths', () => {
 
 describe('getStylesheetPaths', () => {
   describe('when darkMode is `true`', () => {
-    describe('when themeVersion is `v8`', () => {
-      it('returns the correct list', () => {
-        expect(
-          getThemeStylesheetPaths({
-            darkMode: true,
-            themeVersion: 'v8',
-            baseHref: '/base-path/buildShaShort',
-          })
-        ).toMatchInlineSnapshot(`
+    it('returns the correct list', () => {
+      expect(
+        getThemeStylesheetPaths({
+          darkMode: true,
+          baseHref: '/base-path/buildShaShort',
+        })
+      ).toMatchInlineSnapshot(`
           Array [
-            "/base-path/buildShaShort/bundles/kbn-ui-shared-deps-npm/kbn-ui-shared-deps-npm.v8.dark.css",
             "/base-path/buildShaShort/ui/legacy_dark_theme.min.css",
           ]
         `);
-      });
     });
   });
   describe('when darkMode is `false`', () => {
-    describe('when themeVersion is `v8`', () => {
-      it('returns the correct list', () => {
-        expect(
-          getThemeStylesheetPaths({
-            darkMode: false,
-            themeVersion: 'v8',
-            baseHref: '/base-path/buildShaShort',
-          })
-        ).toMatchInlineSnapshot(`
+    it('returns the correct list', () => {
+      expect(
+        getThemeStylesheetPaths({
+          darkMode: false,
+          baseHref: '/base-path/buildShaShort',
+        })
+      ).toMatchInlineSnapshot(`
           Array [
-            "/base-path/buildShaShort/bundles/kbn-ui-shared-deps-npm/kbn-ui-shared-deps-npm.v8.light.css",
             "/base-path/buildShaShort/ui/legacy_light_theme.min.css",
           ]
         `);
-      });
     });
   });
 });

@@ -4,6 +4,15 @@
     "name"
   ],
   "action_task_params": [],
+  "ad_hoc_run_params": [
+    "apiKeyId",
+    "createdAt",
+    "end",
+    "rule",
+    "rule.alertTypeId",
+    "rule.consumer",
+    "start"
+  ],
   "alert": [
     "actions",
     "actions.actionRef",
@@ -98,6 +107,10 @@
     "timestamp"
   ],
   "application_usage_totals": [],
+  "background-task-node": [
+    "id",
+    "last_seen"
+  ],
   "canvas-element": [
     "@created",
     "@timestamp",
@@ -195,6 +208,13 @@
   "cases-connector-mappings": [
     "owner"
   ],
+  "cases-rules": [
+    "counter",
+    "createdAt",
+    "rules",
+    "rules.id",
+    "updatedAt"
+  ],
   "cases-telemetry": [],
   "cases-user-actions": [
     "action",
@@ -213,9 +233,8 @@
     "payload.connector.type",
     "type"
   ],
-  "cloud-security-posture-settings": [
-    "rules"
-  ],
+  "cloud": [],
+  "cloud-security-posture-settings": [],
   "config": [
     "buildNum"
   ],
@@ -264,12 +283,43 @@
     "title",
     "version"
   ],
+  "dynamic-config-overrides": [],
+  "endpoint:unified-user-artifact-manifest": [
+    "artifactIds",
+    "policyId",
+    "semanticVersion"
+  ],
   "endpoint:user-artifact-manifest": [
     "artifacts",
     "schemaVersion"
   ],
   "enterprise_search_telemetry": [],
+  "entity-definition": [
+    "description",
+    "filter",
+    "id",
+    "identityFields",
+    "indexPatterns",
+    "managed",
+    "metadata",
+    "metrics",
+    "name",
+    "staticFields",
+    "type",
+    "version"
+  ],
+  "entity-discovery-api-key": [
+    "apiKey"
+  ],
+  "entity-engine-status": [
+    "fieldHistoryLength",
+    "filter",
+    "indexPattern",
+    "status",
+    "type"
+  ],
   "epm-packages": [
+    "additional_spaces_installed_kibana",
     "es_index_patterns",
     "experimental_data_stream_features",
     "experimental_data_stream_features.data_stream",
@@ -290,6 +340,7 @@
     "installed_kibana_space_id",
     "internal",
     "keep_policies_up_to_date",
+    "latest_executed_state",
     "latest_install_failed_attempts",
     "name",
     "package_assets",
@@ -391,6 +442,12 @@
     "updated_by",
     "version"
   ],
+  "favorites": [
+    "favoriteIds",
+    "favoriteMetadata",
+    "type",
+    "userId"
+  ],
   "file": [
     "FileKind",
     "Meta",
@@ -414,6 +471,36 @@
     "token",
     "valid_until"
   ],
+  "fleet-agent-policies": [
+    "advanced_settings",
+    "agent_features",
+    "agent_features.enabled",
+    "agent_features.name",
+    "data_output_id",
+    "description",
+    "download_source_id",
+    "fleet_server_host_id",
+    "global_data_tags",
+    "inactivity_timeout",
+    "is_default",
+    "is_default_fleet_server",
+    "is_managed",
+    "is_preconfigured",
+    "is_protected",
+    "keep_monitoring_alive",
+    "monitoring_enabled",
+    "monitoring_output_id",
+    "name",
+    "namespace",
+    "overrides",
+    "revision",
+    "schema_version",
+    "status",
+    "supports_agentless",
+    "unenroll_timeout",
+    "updated_at",
+    "updated_by"
+  ],
   "fleet-fleet-server-host": [
     "host_urls",
     "is_default",
@@ -423,6 +510,34 @@
     "proxy_id"
   ],
   "fleet-message-signing-keys": [],
+  "fleet-package-policies": [
+    "bump_agent_policy_revision",
+    "created_at",
+    "created_by",
+    "description",
+    "elasticsearch",
+    "enabled",
+    "inputs",
+    "is_managed",
+    "name",
+    "namespace",
+    "output_id",
+    "overrides",
+    "package",
+    "package.name",
+    "package.requires_root",
+    "package.title",
+    "package.version",
+    "policy_id",
+    "policy_ids",
+    "revision",
+    "secret_references",
+    "secret_references.id",
+    "supports_agentless",
+    "updated_at",
+    "updated_by",
+    "vars"
+  ],
   "fleet-preconfiguration-deletion-record": [
     "id"
   ],
@@ -435,7 +550,14 @@
     "proxy_headers",
     "url"
   ],
+  "fleet-setup-lock": [
+    "started_at",
+    "status",
+    "uuid"
+  ],
+  "fleet-space-settings": [],
   "fleet-uninstall-tokens": [
+    "namespaces",
     "policy_id",
     "token_plain"
   ],
@@ -462,14 +584,15 @@
   ],
   "infra-custom-dashboards": [
     "assetType",
-    "dashboardIdList",
-    "kuery"
+    "dashboardFilterAssetIdEnabled",
+    "dashboardSavedObjectId"
   ],
   "infrastructure-monitoring-log-view": [
     "name"
   ],
   "infrastructure-ui-source": [],
   "ingest-agent-policies": [
+    "advanced_settings",
     "agent_features",
     "agent_features.enabled",
     "agent_features.name",
@@ -477,6 +600,7 @@
     "description",
     "download_source_id",
     "fleet_server_host_id",
+    "global_data_tags",
     "inactivity_timeout",
     "is_default",
     "is_default_fleet_server",
@@ -484,14 +608,18 @@
     "is_preconfigured",
     "is_protected",
     "keep_monitoring_alive",
+    "monitoring_diagnostics",
     "monitoring_enabled",
+    "monitoring_http",
     "monitoring_output_id",
+    "monitoring_pprof_enabled",
     "name",
     "namespace",
     "overrides",
     "revision",
     "schema_version",
     "status",
+    "supports_agentless",
     "unenroll_timeout",
     "updated_at",
     "updated_by"
@@ -566,6 +694,7 @@
     "version"
   ],
   "ingest-package-policies": [
+    "bump_agent_policy_revision",
     "created_at",
     "created_by",
     "description",
@@ -575,24 +704,34 @@
     "is_managed",
     "name",
     "namespace",
+    "output_id",
+    "overrides",
     "package",
     "package.name",
+    "package.requires_root",
     "package.title",
     "package.version",
     "policy_id",
+    "policy_ids",
     "revision",
     "secret_references",
     "secret_references.id",
+    "supports_agentless",
     "updated_at",
     "updated_by",
     "vars"
   ],
   "ingest_manager_settings": [
+    "delete_unenrolled_agents",
+    "delete_unenrolled_agents.enabled",
+    "delete_unenrolled_agents.is_preconfigured",
     "fleet_server_hosts",
     "has_seen_add_data_notice",
     "output_secret_storage_requirements_met",
     "prerelease_integrations_enabled",
-    "secret_storage_requirements_met"
+    "secret_storage_requirements_met",
+    "use_space_awareness_migration_started_at",
+    "use_space_awareness_migration_status"
   ],
   "inventory-view": [],
   "kql-telemetry": [],
@@ -721,14 +860,23 @@
   "policy-settings-protection-updates-note": [
     "note"
   ],
+  "product-doc-install-status": [
+    "index_name",
+    "installation_status",
+    "last_installation_date",
+    "product_name",
+    "product_version"
+  ],
   "query": [
     "description",
     "title",
     "titleKeyword"
   ],
   "risk-engine-configuration": [
+    "alertSampleSizePerShard",
     "dataViewId",
     "enabled",
+    "excludeAlertStatuses",
     "filter",
     "identifierType",
     "interval",
@@ -902,16 +1050,21 @@
     "tags",
     "version"
   ],
+  "slo-settings": [],
   "space": [
-    "name"
+    "disabledFeatures",
+    "name",
+    "solution"
   ],
   "spaces-usage-stats": [],
+  "synthetics-dynamic-settings": [],
   "synthetics-monitor": [
     "alert",
     "alert.status",
     "alert.status.enabled",
     "alert.tls",
     "alert.tls.enabled",
+    "config_id",
     "custom_heartbeat_id",
     "enabled",
     "hash",
@@ -933,6 +1086,7 @@
     "urls"
   ],
   "synthetics-param": [],
+  "synthetics-private-location": [],
   "synthetics-privates-locations": [],
   "tag": [
     "color",
@@ -943,6 +1097,7 @@
     "attempts",
     "enabled",
     "ownerId",
+    "partition",
     "retryAt",
     "runAt",
     "schedule",
@@ -972,6 +1127,13 @@
     "accessDate",
     "createDate",
     "slug"
+  ],
+  "usage-counter": [
+    "count",
+    "counterName",
+    "counterType",
+    "domainId",
+    "source"
   ],
   "usage-counters": [
     "domainId"

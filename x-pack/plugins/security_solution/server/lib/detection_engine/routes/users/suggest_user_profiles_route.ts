@@ -8,11 +8,11 @@
 import type { IKibanaResponse, StartServicesAccessor } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_ALERT_SUGGEST_USERS_URL } from '../../../../../common/constants';
 import { buildSiemResponse } from '../utils';
 import type { StartPlugins } from '../../../../plugin';
-import { buildRouteValidationWithZod } from '../../../../utils/build_validation/route_validation';
 import { SuggestUserProfilesRequestQuery } from '../../../../../common/api/detection_engine/users';
 
 export const suggestUserProfilesRoute = (
@@ -22,14 +22,16 @@ export const suggestUserProfilesRoute = (
   router.versioned
     .get({
       path: DETECTION_ENGINE_ALERT_SUGGEST_USERS_URL,
-      access: 'public',
-      options: {
-        tags: ['access:securitySolution'],
+      access: 'internal',
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
       },
     })
     .addVersion(
       {
-        version: '2023-10-31',
+        version: '1',
         validate: {
           request: {
             query: buildRouteValidationWithZod(SuggestUserProfilesRequestQuery),

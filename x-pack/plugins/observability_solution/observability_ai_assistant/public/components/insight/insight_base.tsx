@@ -60,7 +60,7 @@ export function InsightBase({
   return (
     <EuiPanel hasBorder hasShadow={false}>
       <EuiAccordion
-        id="obsAiAssistantInsight"
+        id="obsAiAssistantInsightContainer"
         arrowProps={{ css: { alignSelf: 'flex-start' } }}
         buttonContent={
           <EuiFlexGroup wrap responsive={false} gutterSize="m" data-test-subj={dataTestSubj}>
@@ -82,7 +82,7 @@ export function InsightBase({
                   position="right"
                 />
               </EuiFlexGroup>
-              <EuiText size="s" css={{ color: euiTheme.colors.subduedText }}>
+              <EuiText size="s" css={{ color: euiTheme.colors.textSubdued }}>
                 <span>{description}</span>
               </EuiText>
             </EuiFlexItem>
@@ -138,7 +138,12 @@ export function InsightBase({
         onToggle={onToggle}
       >
         <EuiSpacer size="m" />
-        <EuiPanel hasBorder={false} hasShadow={false} color="subdued">
+        <EuiPanel
+          hasBorder={false}
+          hasShadow={false}
+          color="subdued"
+          data-test-subj="obsAiAssistantInsightResponse"
+        >
           {children}
         </EuiPanel>
       </EuiAccordion>

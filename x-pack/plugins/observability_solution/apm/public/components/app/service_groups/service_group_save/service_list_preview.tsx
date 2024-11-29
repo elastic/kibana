@@ -4,12 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  EuiBasicTable,
-  EuiBasicTableColumn,
-  EuiFlexGroup,
-  EuiFlexItem,
-} from '@elastic/eui';
+import { EuiBasicTable, EuiBasicTableColumn, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { AgentIcon } from '@kbn/custom-icons';
 import { i18n } from '@kbn/i18n';
 import { orderBy } from 'lodash';
@@ -20,8 +15,7 @@ import { unit } from '../../../../utils/style';
 import { EnvironmentBadge } from '../../../shared/environment_badge';
 import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
 
-type ServiceListAPIResponse =
-  APIReturnType<'GET /internal/apm/service-group/services'>;
+type ServiceListAPIResponse = APIReturnType<'GET /internal/apm/service-group/services'>;
 type Items = ServiceListAPIResponse['items'];
 type ServiceListItem = ValuesType<Items>;
 
@@ -39,9 +33,7 @@ export function ServiceListPreview({ items, isLoading }: Props) {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const [sortField, setSortField] = useState<SORT_FIELD>(DEFAULT_SORT_FIELD);
-  const [sortDirection, setSortDirection] = useState<DIRECTION>(
-    DEFAULT_SORT_DIRECTION
-  );
+  const [sortDirection, setSortDirection] = useState<DIRECTION>(DEFAULT_SORT_DIRECTION);
 
   const onTableChange = useCallback(
     (options: {
@@ -81,10 +73,9 @@ export function ServiceListPreview({ items, isLoading }: Props) {
   const columns: Array<EuiBasicTableColumn<ServiceListItem>> = [
     {
       field: 'serviceName',
-      name: i18n.translate(
-        'xpack.apm.serviceGroups.selectServicesList.nameColumnLabel',
-        { defaultMessage: 'Name' }
-      ),
+      name: i18n.translate('xpack.apm.serviceGroups.selectServicesList.nameColumnLabel', {
+        defaultMessage: 'Name',
+      }),
       sortable: true,
       render: (_, { serviceName, agentName }) => (
         <TruncateWithTooltip
@@ -93,7 +84,7 @@ export function ServiceListPreview({ items, isLoading }: Props) {
           content={
             <EuiFlexGroup gutterSize="s" justifyContent="flexStart">
               <EuiFlexItem grow={false}>
-                <AgentIcon agentName={agentName} size="l" />
+                <AgentIcon agentName={agentName} size="l" role="presentation" />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>{serviceName}</EuiFlexItem>
             </EuiFlexGroup>
@@ -103,28 +94,22 @@ export function ServiceListPreview({ items, isLoading }: Props) {
     },
     {
       field: 'environments',
-      name: i18n.translate(
-        'xpack.apm.serviceGroups.selectServicesList.environmentColumnLabel',
-        { defaultMessage: 'Environments' }
-      ),
+      name: i18n.translate('xpack.apm.serviceGroups.selectServicesList.environmentColumnLabel', {
+        defaultMessage: 'Environments',
+      }),
       width: `${unit * 10}px`,
       sortable: true,
-      render: (_, { environments }) => (
-        <EnvironmentBadge environments={environments ?? []} />
-      ),
+      render: (_, { environments }) => <EnvironmentBadge environments={environments ?? []} />,
     },
   ];
 
   return (
     <EuiBasicTable
       loading={isLoading}
-      noItemsMessage={i18n.translate(
-        'xpack.apm.serviceGroups.selectServicesList.notFoundLabel',
-        {
-          defaultMessage:
-            'No services available within the last 24 hours. You can still create the group and services that match your query will be added.',
-        }
-      )}
+      noItemsMessage={i18n.translate('xpack.apm.serviceGroups.selectServicesList.notFoundLabel', {
+        defaultMessage:
+          'No services available within the last 24 hours. You can still create the group and services that match your query will be added.',
+      })}
       items={renderedItems}
       columns={columns}
       sorting={sort}

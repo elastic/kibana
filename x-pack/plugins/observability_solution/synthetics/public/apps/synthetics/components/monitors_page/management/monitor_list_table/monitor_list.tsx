@@ -11,12 +11,13 @@ import {
   EuiBasicTable,
   EuiTableSortingType,
   EuiPanel,
-  EuiSpacer,
-  useEuiTheme,
+  EuiHorizontalRule,
   useIsWithinMinBreakpoint,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { MonitorListSortField } from '../../../../../../../common/runtime_types/monitor_management/sort_field';
+import { EuiTableSelectionType } from '@elastic/eui/src/components/basic_table/table_types';
+import { MonitorListHeader } from './monitor_list_header';
+import type { MonitorListSortField } from '../../../../../../../common/runtime_types/monitor_management/sort_field';
 import { DeleteMonitor } from './delete_monitor';
 import { IHttpSerializedFetchError } from '../../../../state/utils/http_error';
 import { MonitorListPageState } from '../../../../state';
@@ -50,11 +51,9 @@ export const MonitorList = ({
   loadPage,
   reloadPage,
 }: Props) => {
-  const { euiTheme } = useEuiTheme();
   const isXl = useIsWithinMinBreakpoint('xxl');
 
-  const [monitorPendingDeletion, setMonitorPendingDeletion] =
-    useState<EncryptedSyntheticsSavedMonitor | null>(null);
+  const [monitorPendingDeletion, setMonitorPendingDeletion] = useState<string[]>([]);
 
   const handleOnChange = useCallback(
     ({
@@ -100,21 +99,32 @@ export const MonitorList = ({
     setMonitorPendingDeletion,
   });
 
+  const [selectedItems, setSelectedItems] = useState<EncryptedSyntheticsSavedMonitor[]>([]);
+  const onSelectionChange = (selItems: EncryptedSyntheticsSavedMonitor[]) => {
+    setSelectedItems(selItems);
+  };
+
+  const selection: EuiTableSelectionType<EncryptedSyntheticsSavedMonitor> = {
+    onSelectionChange,
+    initialSelected: selectedItems,
+  };
+
   return (
     <>
       <EuiPanel hasBorder={false} hasShadow={false} paddingSize="none">
-        {recordRangeLabel}
-        <EuiSpacer size="s" />
-        <hr style={{ border: `1px solid ${euiTheme.colors.lightShade}` }} />
+        <MonitorListHeader
+          recordRangeLabel={recordRangeLabel}
+          selectedItems={selectedItems}
+          setMonitorPendingDeletion={setMonitorPendingDeletion}
+        />
+        <EuiHorizontalRule margin="s" />
         <EuiBasicTable
           aria-label={i18n.translate('xpack.synthetics.management.monitorList.title', {
             defaultMessage: 'Synthetics monitors list',
           })}
           error={error?.body?.message}
           loading={loading}
-          isExpandable={true}
-          hasActions={true}
-          itemId="monitor_id"
+          itemId="config_id"
           items={syntheticsMonitors}
           columns={columns}
           tableLayout={isXl ? 'auto' : 'fixed'}
@@ -122,15 +132,22 @@ export const MonitorList = ({
           sorting={sorting}
           onChange={handleOnChange}
           noItemsMessage={loading ? labels.LOADING : labels.NO_DATA_MESSAGE}
+          selection={selection}
         />
       </EuiPanel>
-      {monitorPendingDeletion && (
+      {monitorPendingDeletion.length > 0 && (
         <DeleteMonitor
-          configId={monitorPendingDeletion[ConfigKey.CONFIG_ID]}
-          name={monitorPendingDeletion[ConfigKey.NAME] ?? ''}
+          configIds={monitorPendingDeletion}
+          name={
+            syntheticsMonitors.find(
+              (mon) => mon[ConfigKey.CONFIG_ID] === monitorPendingDeletion[0]
+            )?.[ConfigKey.NAME] ?? ''
+          }
           setMonitorPendingDeletion={setMonitorPendingDeletion}
           isProjectMonitor={
-            monitorPendingDeletion[ConfigKey.MONITOR_SOURCE_TYPE] === SourceType.PROJECT
+            syntheticsMonitors.find(
+              (mon) => mon[ConfigKey.CONFIG_ID] === monitorPendingDeletion[0]
+            )?.[ConfigKey.MONITOR_SOURCE_TYPE] === SourceType.PROJECT
           }
           reloadPage={reloadPage}
         />

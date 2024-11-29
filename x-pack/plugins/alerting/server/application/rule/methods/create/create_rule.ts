@@ -8,6 +8,7 @@ import Semver from 'semver';
 import Boom from '@hapi/boom';
 import { SavedObject, SavedObjectsUtils } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
+import { validateAndAuthorizeSystemActions } from '../../../../lib/validate_authorize_system_actions';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { parseDuration, getRuleCircuitBreakerErrorMessage } from '../../../../../common';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
@@ -24,16 +25,15 @@ import {
 } from '../../../../rules_client/lib';
 import { generateAPIKeyName, apiKeyAsRuleDomainProperties } from '../../../../rules_client/common';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
-import { RulesClientContext, NormalizedAlertAction } from '../../../../rules_client/types';
+import { RulesClientContext } from '../../../../rules_client/types';
 import { RuleDomain, RuleParams } from '../../types';
-import { SanitizedRule } from '../../../../types';
+import { RawRule, SanitizedRule } from '../../../../types';
 import {
   transformRuleAttributesToRuleDomain,
   transformRuleDomainToRuleAttributes,
   transformRuleDomainToRule,
 } from '../../transforms';
 import { ruleDomainSchema } from '../../schemas';
-import { RuleAttributes } from '../../../../data/rule/types';
 import type { CreateRuleData } from './types';
 import { createRuleDataSchema } from './schemas';
 import { createRuleSavedObject } from '../../../../rules_client/lib';
@@ -47,6 +47,7 @@ export interface CreateRuleParams<Params extends RuleParams = never> {
   data: CreateRuleData<Params>;
   options?: CreateRuleOptions;
   allowMissingConnectorSecrets?: boolean;
+  isFlappingEnabled?: boolean;
 }
 
 export async function createRule<Params extends RuleParams = never>(
@@ -54,15 +55,25 @@ export async function createRule<Params extends RuleParams = never>(
   createParams: CreateRuleParams<Params>
   // TODO (http-versioning): This should be of type Rule, change this when all rule types are fixed
 ): Promise<SanitizedRule<Params>> {
-  const { data: initialData, options, allowMissingConnectorSecrets } = createParams;
+  const {
+    data: initialData,
+    options,
+    allowMissingConnectorSecrets,
+    isFlappingEnabled = false,
+  } = createParams;
 
-  // TODO (http-versioning): Remove this cast when we fix addGeneratedActionValues
+  const actionsClient = await context.getActionsClient();
+
+  const { actions: genAction, systemActions: genSystemActions } = await addGeneratedActionValues(
+    initialData.actions,
+    initialData.systemActions,
+    context
+  );
+
   const data = {
     ...initialData,
-    actions: await addGeneratedActionValues(
-      initialData.actions as NormalizedAlertAction[],
-      context
-    ),
+    actions: genAction,
+    systemActions: genSystemActions,
   };
 
   const id = options?.id || SavedObjectsUtils.generateId();
@@ -93,7 +104,7 @@ export async function createRule<Params extends RuleParams = never>(
   }
 
   try {
-    await withSpan({ name: 'authorization.ensureAuthorized', type: 'rules' }, () =>
+    await withSpan({ name: 'authorization.ensureAuthorized', type: 'rules' }, async () =>
       context.authorization.ensureAuthorized({
         ruleTypeId: data.alertTypeId,
         consumer: data.consumer,
@@ -105,7 +116,7 @@ export async function createRule<Params extends RuleParams = never>(
     context.auditLogger?.log(
       ruleAuditEvent({
         action: RuleAuditAction.CREATE,
-        savedObject: { type: RULE_SAVED_OBJECT_TYPE, id },
+        savedObject: { type: RULE_SAVED_OBJECT_TYPE, id, name: data.name },
         error,
       })
     );
@@ -114,10 +125,10 @@ export async function createRule<Params extends RuleParams = never>(
 
   context.ruleTypeRegistry.ensureRuleTypeEnabled(data.alertTypeId);
 
-  // Throws an error if alert type isn't registered
+  // Throws an error if rule type isn't registered
   const ruleType = context.ruleTypeRegistry.get(data.alertTypeId);
 
-  const validatedAlertTypeParams = validateRuleTypeParams(data.params, ruleType.validate.params);
+  const validatedRuleTypeParams = validateRuleTypeParams(data.params, ruleType.validate.params);
   const username = await context.getUserName();
 
   let createdAPIKey = null;
@@ -144,6 +155,16 @@ export async function createRule<Params extends RuleParams = never>(
     validateActions(context, ruleType, data, allowMissingConnectorSecrets)
   );
 
+  await withSpan({ name: 'validateAndAuthorizeSystemActions', type: 'rules' }, () =>
+    validateAndAuthorizeSystemActions({
+      actionsClient,
+      actionsAuthorization: context.actionsAuthorization,
+      connectorAdapterRegistry: context.connectorAdapterRegistry,
+      systemActions: data.systemActions,
+      rule: { consumer: data.consumer, producer: ruleType.producer },
+    })
+  );
+
   // Throw error if schedule interval is less than the minimum and we are enforcing it
   const intervalInMs = parseDuration(data.schedule.interval);
   if (
@@ -155,13 +176,20 @@ export async function createRule<Params extends RuleParams = never>(
     );
   }
 
+  if (initialData.flapping !== undefined && !isFlappingEnabled) {
+    throw Boom.badRequest(
+      'Error creating rule: can not create rule with flapping if global flapping is disabled'
+    );
+  }
+
+  const allActions = [...data.actions, ...(data.systemActions ?? [])];
   // Extract saved object references for this rule
   const {
     references,
     params: updatedParams,
-    actions,
+    actions: actionsWithRefs,
   } = await withSpan({ name: 'extractReferences', type: 'rules' }, () =>
-    extractReferences(context, ruleType, data.actions, validatedAlertTypeParams)
+    extractReferences(context, ruleType, allActions, validatedRuleTypeParams)
   );
 
   const createTime = Date.now();
@@ -170,10 +198,12 @@ export async function createRule<Params extends RuleParams = never>(
   const notifyWhen = getRuleNotifyWhenType(data.notifyWhen ?? null, data.throttle ?? null);
   const throttle = data.throttle ?? null;
 
+  const { systemActions, actions: actionToNotUse, ...restData } = data;
   // Convert domain rule object to ES rule attributes
-  const ruleAttributes = transformRuleDomainToRuleAttributes(
-    {
-      ...data,
+  const ruleAttributes = transformRuleDomainToRuleAttributes({
+    actionsWithRefs,
+    rule: {
+      ...restData,
       // TODO (http-versioning) create a rule domain version of this function
       // Right now this works because the 2 types can interop but it's not ideal
       ...apiKeyAsRuleDomainProperties(createdAPIKey, username, isAuthTypeApiKey),
@@ -192,15 +222,13 @@ export async function createRule<Params extends RuleParams = never>(
       revision: 0,
       running: false,
     },
-    {
+    params: {
       legacyId,
-      actionsWithRefs: actions,
-      // @ts-expect-error upgrade typescript v4.9.5
       paramsWithRefs: updatedParams,
-    }
-  );
+    },
+  });
 
-  const createdRuleSavedObject: SavedObject<RuleAttributes> = await withSpan(
+  const createdRuleSavedObject: SavedObject<RawRule> = await withSpan(
     { name: 'createRuleSavedObject', type: 'rules' },
     () =>
       createRuleSavedObject(context, {
@@ -213,15 +241,16 @@ export async function createRule<Params extends RuleParams = never>(
       })
   );
 
-  // Convert ES RuleAttributes back to domain rule object
+  // Convert ES RawRule back to domain rule object
   const ruleDomain: RuleDomain<Params> = transformRuleAttributesToRuleDomain<Params>(
     createdRuleSavedObject.attributes,
     {
       id: createdRuleSavedObject.id,
       logger: context.logger,
       ruleType: context.ruleTypeRegistry.get(createdRuleSavedObject.attributes.alertTypeId),
-      references,
-    }
+      references: createdRuleSavedObject.references,
+    },
+    (connectorId: string) => actionsClient.isSystemAction(connectorId)
   );
 
   // Try to validate created rule, but don't throw.

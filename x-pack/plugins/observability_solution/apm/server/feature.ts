@@ -15,17 +15,19 @@ import {
 
 import { APM_INDEX_SETTINGS_SAVED_OBJECT_TYPE } from '@kbn/apm-data-access-plugin/server/saved_objects/apm_indices';
 import { ApmRuleType } from '@kbn/rule-data-utils';
+import { KibanaFeatureConfig, KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { APM_SERVER_FEATURE_ID } from '../common/rules/apm_rule_types';
 
 const ruleTypes = Object.values(ApmRuleType);
 
-export const APM_FEATURE = {
+export const APM_FEATURE: KibanaFeatureConfig = {
   id: APM_SERVER_FEATURE_ID,
   name: i18n.translate('xpack.apm.featureRegistry.apmFeatureName', {
     defaultMessage: 'APM and User Experience',
   }),
   order: 900,
   category: DEFAULT_APP_CATEGORIES.observability,
+  scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
   app: [APM_SERVER_FEATURE_ID, 'ux', 'kibana'],
   catalogue: [APM_SERVER_FEATURE_ID],
   management: {
@@ -77,6 +79,33 @@ export const APM_FEATURE = {
       ui: ['show', 'alerting:show'],
     },
   },
+  subFeatures: [
+    {
+      name: i18n.translate('xpack.apm.subFeatureRegistry.settings', {
+        defaultMessage: 'Settings',
+      }),
+      privilegeGroups: [
+        {
+          groupType: 'independent',
+          privileges: [
+            {
+              id: 'settings_save',
+              name: i18n.translate('xpack.apm.subFeatureRegistry.modifySettings', {
+                defaultMessage: 'Ability to modify settings',
+              }),
+              includeIn: 'all',
+              savedObject: {
+                all: [],
+                read: [],
+              },
+              api: ['apm_settings_write'],
+              ui: ['settings:save'],
+            },
+          ],
+        },
+      ],
+    },
+  ],
 };
 
 interface Feature {

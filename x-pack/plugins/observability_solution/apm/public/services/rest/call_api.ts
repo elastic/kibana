@@ -12,13 +12,9 @@ import hash from 'object-hash';
 import { enableInspectEsQueries } from '@kbn/observability-plugin/public';
 import { FetchOptions } from '../../../common/fetch_options';
 
-function fetchOptionsWithDebug(
-  fetchOptions: FetchOptions,
-  inspectableEsQueriesEnabled: boolean
-) {
+function fetchOptionsWithDebug(fetchOptions: FetchOptions, inspectableEsQueriesEnabled: boolean) {
   const debugEnabled =
-    inspectableEsQueriesEnabled &&
-    startsWith(fetchOptions.pathname, '/internal/apm');
+    inspectableEsQueriesEnabled && startsWith(fetchOptions.pathname, '/internal/apm');
 
   const { body, ...rest } = fetchOptions;
 
@@ -44,9 +40,7 @@ export async function callApi<T = void>(
   { http, uiSettings }: CoreStart | CoreSetup,
   fetchOptions: FetchOptions
 ): Promise<T> {
-  const inspectableEsQueriesEnabled: boolean = uiSettings.get(
-    enableInspectEsQueries
-  );
+  const inspectableEsQueriesEnabled: boolean = uiSettings.get(enableInspectEsQueries);
   const cacheKey = getCacheKey(fetchOptions);
   const cacheResponse = cache.get(cacheKey);
   if (cacheResponse) {
@@ -59,12 +53,7 @@ export async function callApi<T = void>(
     ...options
   } = fetchOptionsWithDebug(fetchOptions, inspectableEsQueriesEnabled);
 
-  const lowercaseMethod = method.toLowerCase() as
-    | 'get'
-    | 'post'
-    | 'put'
-    | 'delete'
-    | 'patch';
+  const lowercaseMethod = method.toLowerCase() as 'get' | 'post' | 'put' | 'delete' | 'patch';
 
   const res = await http[lowercaseMethod]<T>(pathname, options);
 
@@ -82,15 +71,12 @@ function isCachable(fetchOptions: FetchOptions) {
     return fetchOptions.isCachable;
   }
 
-  if (
-    !(fetchOptions.query && fetchOptions.query.start && fetchOptions.query.end)
-  ) {
+  if (!(fetchOptions.query && fetchOptions.query.start && fetchOptions.query.end)) {
     return false;
   }
 
   return (
-    isString(fetchOptions.query.end) &&
-    new Date(fetchOptions.query.end).getTime() < Date.now()
+    isString(fetchOptions.query.end) && new Date(fetchOptions.query.end).getTime() < Date.now()
   );
 }
 

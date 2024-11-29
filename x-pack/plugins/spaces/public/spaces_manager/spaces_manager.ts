@@ -6,15 +6,21 @@
  */
 
 import type { Observable } from 'rxjs';
-import { BehaviorSubject } from 'rxjs';
-import { skipWhile } from 'rxjs/operators';
+import { BehaviorSubject, skipWhile } from 'rxjs';
 
 import type { HttpSetup } from '@kbn/core/public';
 import type { SavedObjectsCollectMultiNamespaceReferencesResponse } from '@kbn/core-saved-objects-api-server';
 import type { LegacyUrlAliasTarget } from '@kbn/core-saved-objects-common';
+import type { Role } from '@kbn/security-plugin-types-common';
 
-import type { GetAllSpacesOptions, GetSpaceResult, Space } from '../../common';
+import {
+  API_VERSIONS,
+  type GetAllSpacesOptions,
+  type GetSpaceResult,
+  type Space,
+} from '../../common';
 import type { CopySavedObjectsToSpaceResponse } from '../copy_saved_objects_to_space/types';
+import type { SpaceContentTypeSummaryItem } from '../types';
 
 interface SavedObjectTarget {
   type: string;
@@ -22,6 +28,7 @@ interface SavedObjectTarget {
 }
 
 const TAG_TYPE = 'tag';
+const version = API_VERSIONS.public.v1;
 
 export class SpacesManager {
   private activeSpace$: BehaviorSubject<Space | null> = new BehaviorSubject<Space | null>(null);
@@ -48,11 +55,11 @@ export class SpacesManager {
   public async getSpaces(options: GetAllSpacesOptions = {}): Promise<GetSpaceResult[]> {
     const { purpose, includeAuthorizedPurposes } = options;
     const query = { purpose, include_authorized_purposes: includeAuthorizedPurposes };
-    return await this.http.get('/api/spaces/space', { query });
+    return await this.http.get('/api/spaces/space', { query, version });
   }
 
   public async getSpace(id: string): Promise<Space> {
-    return await this.http.get(`/api/spaces/space/${encodeURIComponent(id)}`);
+    return await this.http.get(`/api/spaces/space/${encodeURIComponent(id)}`, { version });
   }
 
   public async getActiveSpace({ forceRefresh = false } = {}) {
@@ -68,6 +75,7 @@ export class SpacesManager {
   public async createSpace(space: Space) {
     await this.http.post(`/api/spaces/space`, {
       body: JSON.stringify(space),
+      version,
     });
   }
 
@@ -77,6 +85,7 @@ export class SpacesManager {
         overwrite: true,
       },
       body: JSON.stringify(space),
+      version,
     });
 
     const activeSpaceId = (await this.getActiveSpace()).id;
@@ -87,7 +96,7 @@ export class SpacesManager {
   }
 
   public async deleteSpace(space: Space) {
-    await this.http.delete(`/api/spaces/space/${encodeURIComponent(space.id)}`);
+    await this.http.delete(`/api/spaces/space/${encodeURIComponent(space.id)}`, { version });
   }
 
   public async disableLegacyUrlAliases(aliases: LegacyUrlAliasTarget[]) {
@@ -192,5 +201,15 @@ export class SpacesManager {
 
   private isAnonymousPath() {
     return this.http.anonymousPaths.isAnonymous(window.location.pathname);
+  }
+
+  public getContentForSpace(
+    id: string
+  ): Promise<{ summary: SpaceContentTypeSummaryItem[]; total: number }> {
+    return this.http.get(`/internal/spaces/${id}/content_summary`);
+  }
+
+  public getRolesForSpace(id: string): Promise<Role[]> {
+    return this.http.get(`/internal/security/roles/${id}`);
   }
 }

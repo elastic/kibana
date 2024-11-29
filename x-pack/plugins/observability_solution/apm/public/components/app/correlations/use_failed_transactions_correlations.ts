@@ -8,10 +8,7 @@
 import { useCallback, useEffect, useMemo, useReducer, useRef } from 'react';
 import { chunk, debounce } from 'lodash';
 
-import type {
-  IHttpFetchError,
-  ResponseErrorBody,
-} from '@kbn/core-http-browser';
+import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 
 import { EVENT_OUTCOME } from '../../../../common/es_fields/apm';
 import { EventOutcome } from '../../../../common/event_outcome';
@@ -52,10 +49,7 @@ export function useFailedTransactionsCorrelations() {
     getReducer<FailedTransactionsCorrelationsResponse & CorrelationsProgress>(),
     getInitialResponse()
   );
-  const setResponse = useMemo(
-    () => debounce(setResponseUnDebounced, DEBOUNCE_INTERVAL),
-    []
-  );
+  const setResponse = useMemo(() => debounce(setResponseUnDebounced, DEBOUNCE_INTERVAL), []);
 
   const abortCtrl = useRef(new AbortController());
 
@@ -94,8 +88,7 @@ export function useFailedTransactionsCorrelations() {
             body: {
               ...fetchParams,
               percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
-              chartType:
-                LatencyDistributionChartType.failedTransactionsCorrelations,
+              chartType: LatencyDistributionChartType.failedTransactionsCorrelations,
             },
           },
         }
@@ -139,8 +132,7 @@ export function useFailedTransactionsCorrelations() {
               ],
               durationMin,
               durationMax,
-              chartType:
-                LatencyDistributionChartType.failedTransactionsCorrelations,
+              chartType: LatencyDistributionChartType.failedTransactionsCorrelations,
             },
           },
         }
@@ -181,8 +173,7 @@ export function useFailedTransactionsCorrelations() {
       });
       setResponse.flush();
 
-      const failedTransactionsCorrelations: FailedTransactionsCorrelation[] =
-        [];
+      const failedTransactionsCorrelations: FailedTransactionsCorrelation[] = [];
       let fallbackResult: FailedTransactionsCorrelation | undefined;
       const fieldsToSample = new Set<string>();
       const chunkSize = 10;
@@ -191,32 +182,25 @@ export function useFailedTransactionsCorrelations() {
       const fieldCandidatesChunks = chunk(fieldCandidates, chunkSize);
 
       for (const fieldCandidatesChunk of fieldCandidatesChunks) {
-        const pValues = await callApmApi(
-          'POST /internal/apm/correlations/p_values/transactions',
-          {
-            signal: abortCtrl.current.signal,
-            params: {
-              body: {
-                ...fetchParams,
-                fieldCandidates: fieldCandidatesChunk,
-                durationMin,
-                durationMax,
-              },
+        const pValues = await callApmApi('POST /internal/apm/correlations/p_values/transactions', {
+          signal: abortCtrl.current.signal,
+          params: {
+            body: {
+              ...fetchParams,
+              fieldCandidates: fieldCandidatesChunk,
+              durationMin,
+              durationMax,
             },
-          }
-        );
+          },
+        });
 
         if (pValues.failedTransactionsCorrelations.length > 0) {
           pValues.failedTransactionsCorrelations.forEach((d) => {
             fieldsToSample.add(d.fieldName);
           });
-          failedTransactionsCorrelations.push(
-            ...pValues.failedTransactionsCorrelations
-          );
+          failedTransactionsCorrelations.push(...pValues.failedTransactionsCorrelations);
           responseUpdate.failedTransactionsCorrelations =
-            getFailedTransactionsCorrelationsSortedByScore([
-              ...failedTransactionsCorrelations,
-            ]);
+            getFailedTransactionsCorrelationsSortedByScore([...failedTransactionsCorrelations]);
         } else {
           // If there's no significant correlations found and there's a fallback result
           // Update the highest ranked/scored fall back result
@@ -224,10 +208,7 @@ export function useFailedTransactionsCorrelations() {
             if (!fallbackResult) {
               fallbackResult = pValues.fallbackResult;
             } else {
-              if (
-                pValues.fallbackResult.normalizedScore >
-                fallbackResult.normalizedScore
-              ) {
+              if (pValues.fallbackResult.normalizedScore > fallbackResult.normalizedScore) {
                 fallbackResult = pValues.fallbackResult;
               }
             }
@@ -239,8 +220,7 @@ export function useFailedTransactionsCorrelations() {
           ...responseUpdate,
           loaded:
             LOADED_FIELD_CANDIDATES +
-            (chunkLoadCounter / fieldCandidatesChunks.length) *
-              PROGRESS_STEP_P_VALUES,
+            (chunkLoadCounter / fieldCandidatesChunks.length) * PROGRESS_STEP_P_VALUES,
         });
 
         if (abortCtrl.current.signal.aborted) {
@@ -259,10 +239,7 @@ export function useFailedTransactionsCorrelations() {
       if (!abortCtrl.current.signal.aborted) {
         const err = e as Error | IHttpFetchError<ResponseErrorBody>;
         setResponse({
-          error:
-            'response' in err
-              ? err.body?.message ?? err.response?.statusText
-              : err.message,
+          error: 'response' in err ? err.body?.message ?? err.response?.statusText : err.message,
           isRunning: false,
         });
         setResponse.flush();

@@ -14,7 +14,7 @@ import {
   PackageInfo,
 } from '@kbn/core/public';
 import { from } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import { DiscoverStart } from '@kbn/discover-plugin/public';
@@ -25,7 +25,7 @@ import type {
   ExploratoryViewPublicSetup,
   ExploratoryViewPublicStart,
 } from '@kbn/exploratory-view-plugin/public';
-import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import { EmbeddableStart, EmbeddableSetup } from '@kbn/embeddable-plugin/public';
 import {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
@@ -50,15 +50,22 @@ import type {
   ObservabilitySharedPluginSetup,
   ObservabilitySharedPluginStart,
 } from '@kbn/observability-shared-plugin/public';
+
+import { LicenseManagementUIPluginSetup } from '@kbn/license-management-plugin/public/plugin';
 import {
   ObservabilityAIAssistantPublicSetup,
   ObservabilityAIAssistantPublicStart,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
+import type { UiActionsSetup } from '@kbn/ui-actions-plugin/public';
+import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
+import { DashboardStart, DashboardSetup } from '@kbn/dashboard-plugin/public';
+import { SLOPublicStart } from '@kbn/slo-plugin/public';
+import { registerSyntheticsEmbeddables } from './apps/embeddables/register_embeddables';
+import { kibanaService } from './utils/kibana_service';
 import { PLUGIN } from '../common/constants/plugin';
 import { OVERVIEW_ROUTE } from '../common/constants/ui';
 import { locators } from './apps/locators';
-import { setStartServices } from './kibana_services';
 import { syntheticsAlertTypeInitializers } from './apps/synthetics/lib/alert_types';
 
 export interface ClientPluginsSetup {
@@ -67,11 +74,14 @@ export interface ClientPluginsSetup {
   exploratoryView: ExploratoryViewPublicSetup;
   observability: ObservabilityPublicSetup;
   observabilityShared: ObservabilitySharedPluginSetup;
-  observabilityAIAssistant: ObservabilityAIAssistantPublicSetup;
+  observabilityAIAssistant?: ObservabilityAIAssistantPublicSetup;
   share: SharePluginSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   cloud?: CloudSetup;
+  embeddable: EmbeddableSetup;
   serverless?: ServerlessPluginSetup;
+  uiActions: UiActionsSetup;
+  dashboard: DashboardSetup;
 }
 
 export interface ClientPluginsStart {
@@ -84,7 +94,7 @@ export interface ClientPluginsStart {
   exploratoryView: ExploratoryViewPublicStart;
   observability: ObservabilityPublicStart;
   observabilityShared: ObservabilitySharedPluginStart;
-  observabilityAIAssistant: ObservabilityAIAssistantPublicStart;
+  observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
   share: SharePluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   cases: CasesPublicStart;
@@ -100,9 +110,13 @@ export interface ClientPluginsStart {
   uiSettings: CoreStart['uiSettings'];
   usageCollection: UsageCollectionStart;
   serverless: ServerlessPluginStart;
+  licenseManagement?: LicenseManagementUIPluginSetup;
+  slo?: SLOPublicStart;
+  presentationUtil: PresentationUtilPluginStart;
+  dashboard: DashboardStart;
 }
 
-export interface UptimePluginServices extends Partial<CoreStart> {
+export interface SyntheticsPluginServices extends Partial<CoreStart> {
   embeddable: EmbeddableStart;
   data: DataPublicPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
@@ -112,7 +126,7 @@ export interface UptimePluginServices extends Partial<CoreStart> {
 export type ClientSetup = void;
 export type ClientStart = void;
 
-export class UptimePlugin
+export class SyntheticsPlugin
   implements Plugin<ClientSetup, ClientStart, ClientPluginsSetup, ClientPluginsStart>
 {
   private readonly _packageInfo: Readonly<PackageInfo>;
@@ -121,12 +135,25 @@ export class UptimePlugin
     this._packageInfo = initContext.env.packageInfo;
   }
 
-  public setup(core: CoreSetup<ClientPluginsStart, unknown>, plugins: ClientPluginsSetup): void {
+  public setup(
+    coreSetup: CoreSetup<ClientPluginsStart, unknown>,
+    plugins: ClientPluginsSetup
+  ): void {
     locators.forEach((locator) => {
       plugins.share.url.locators.create(locator);
     });
 
-    registerSyntheticsRoutesWithNavigation(core, plugins);
+    registerSyntheticsRoutesWithNavigation(coreSetup, plugins);
+
+    coreSetup.getStartServices().then(([coreStart, clientPluginsStart]) => {
+      kibanaService.init({
+        coreSetup,
+        coreStart,
+        startPlugins: clientPluginsStart,
+        isDev: this.initContext.env.mode.dev,
+        isServerless: this._isServerless,
+      });
+    });
 
     const appKeywords = [
       'Synthetics',
@@ -147,7 +174,7 @@ export class UptimePlugin
     ];
 
     // Register the Synthetics UI plugin
-    core.application.register({
+    coreSetup.application.register({
       id: 'synthetics',
       euiIconType: 'logoObservability',
       order: 8400,
@@ -157,11 +184,14 @@ export class UptimePlugin
       deepLinks: [
         {
           id: 'overview',
-          title: i18n.translate('xpack.synthetics.overviewPage.linkText', {
-            defaultMessage: 'Monitors',
-          }),
+          title: this._isServerless
+            ? i18n.translate('xpack.synthetics.overviewPage.serverless.linkText', {
+                defaultMessage: 'Overview',
+              })
+            : i18n.translate('xpack.synthetics.overviewPage.linkText', {
+                defaultMessage: 'Monitors',
+              }),
           path: '/',
-          visibleIn: this._isServerless ? ['globalSearch', 'sideNav'] : [],
         },
         {
           id: 'certificates',
@@ -169,29 +199,22 @@ export class UptimePlugin
             defaultMessage: 'TLS Certificates',
           }),
           path: '/certificates',
-          visibleIn: this._isServerless ? ['globalSearch', 'sideNav'] : [],
         },
       ],
       mount: async (params: AppMountParameters) => {
-        const [coreStart, corePlugins] = await core.getStartServices();
-
+        kibanaService.appMountParameters = params;
         const { renderApp } = await import('./apps/synthetics/render_app');
-        return renderApp(
-          coreStart,
-          plugins,
-          corePlugins,
-          params,
-          this.initContext.env.mode.dev,
-          this._isServerless
-        );
+        await coreSetup.getStartServices();
+
+        return renderApp(params);
       },
     });
+
+    registerSyntheticsEmbeddables(coreSetup, plugins);
   }
 
   public start(coreStart: CoreStart, pluginsStart: ClientPluginsStart): void {
     const { triggersActionsUi } = pluginsStart;
-
-    setStartServices(coreStart);
 
     syntheticsAlertTypeInitializers.forEach((init) => {
       const { observabilityRuleTypeRegistry } = pluginsStart.observability;
@@ -234,7 +257,6 @@ function registerSyntheticsRoutesWithNavigation(
                   path: OVERVIEW_ROUTE,
                   matchFullPath: true,
                   ignoreTrailingSlash: true,
-                  isNewFeature: true,
                 },
                 {
                   label: i18n.translate('xpack.synthetics.certificatesPage.heading', {

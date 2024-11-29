@@ -6,43 +6,31 @@
 <titleabbrev>Configure reporting</titleabbrev>
 ++++
 
+[NOTE]
+============
+Kibana PNG/PDF Reporting uses a custom binary of headless Chromium, and support comes with special caveats:
+
+* The functionality requires special OS dependencies which may not be available for all distributions and configurations of Linux.
+* It is subject to system resource configurations such as the limited number of file descriptors, allowed processes, and types of processes.
+* Linux versions that are in end-of-life phase are not supported.
+* Linux systems with SELinux or fapolicyd are not supported.
+
+Before upgrading Kibana in a production environment, we encourage you to test your screenshotting use cases in a pre-production environment
+to make sure your hosts support our latest build of Chromium. For the most reliable configuration of PDF/PNG {report-features}, consider
+installing {kib} using <<docker, Docker>>, or using <<set-up-on-cloud, Elastic Cloud>>.
+============
+
 For security, you grant users access to the {report-features} and secure the reporting endpoints
 with TLS/SSL encryption. Additionally, you can install graphical packages into the operating system
 to enable the {kib} server to have screenshotting capabilities.
 
-* <<install-reporting-packages>>
 * <<grant-user-access>>
 * <<reporting-roles-user-api>>
 * <<grant-user-access-basic>>
 * <<grant-user-access-external-provider>>
 * <<securing-reporting>>
-
-[float]
-[[install-reporting-packages]]
-=== Install the reporting packages
-
-Make sure the {kib} server operating system has the appropriate packages installed for the distribution.
-
-If you are using RHEL operating systems, install the following packages:
-
-* `ipa-gothic-fonts`
-* `xorg-x11-fonts-100dpi`
-* `xorg-x11-fonts-75dpi`
-* `xorg-x11-utils`
-* `xorg-x11-fonts-cyrillic`
-* `xorg-x11-fonts-Type1`
-* `xorg-x11-fonts-misc`
-* `fontconfig`
-* `freetype`
-
-If you are using Ubuntu/Debian systems, install the following packages:
-
-* `fonts-liberation`
-* `libfontconfig1`
-* `libnss3`
-
-The reporting plugin has a built-in utility to check for common issues, such as missing dependencies. See
-<<reporting-diagnostics>> for more information.
+* <<install-reporting-packages>>
+* <<set-reporting-server-host>>
 
 [float]
 [[grant-user-access]]
@@ -60,9 +48,10 @@ NOTE: If you use the default settings, you can still create a custom role that g
 
 . Create the reporting role.
 
-.. Open the main menu, then click *Stack Management*.
+.. Go to the *Roles* management page using the navigation menu or the 
+<<kibana-navigation-search,global search field>>.
 
-.. Click *Roles > Create role*.
+.. Click *Create role*.
 
 . Specify the role settings.
 
@@ -98,9 +87,10 @@ NOTE: If the *Reporting* options for application features are unavailable, and t
 
 . Assign the reporting role to a user.
 
-.. Open the main menu, then click *Stack Management*.
+.. Go to the *Users* management page using the navigation menu or the 
+<<kibana-navigation-search,global search field>>.
 
-.. Click *Users*, then click the user you want to assign the reporting role to.
+.. Select the user you want to assign the reporting role to.
 
 .. From the *Roles* dropdown, select *custom_reporting_user*.
 
@@ -111,9 +101,10 @@ Granting the privilege to generate reports also grants the user the privilege to
 [float]
 [[reporting-roles-user-api]]
 ==== Grant access with the role API
-With <<grant-user-access, {kib} application privileges>> enabled in Reporting, you can also use the {ref}/security-api-put-role.html[role API] to grant access to the {report-features}, using *All* privileges, or sub-feature privileges.
+With <<grant-user-access,{kib} application privileges>> enabled in Reporting, you can also use the {api-kibana}/group/endpoint-roles[role APIs] to grant access to the {report-features}, using *All* privileges, or sub-feature privileges.
 
-NOTE: This link:https://www.elastic.co/guide/en/kibana/current/role-management-api-put.html[API request] needs to be executed against the link:https://www.elastic.co/guide/en/kibana/current/api.html[Kibana API endpoint].
+NOTE: This API request needs to be run against the <<api,Kibana API endpoint>>.
+
 [source, sh]
 ---------------------------------------------------------------
 PUT <kibana host>:<port>/api/security/role/custom_reporting_user
@@ -139,7 +130,7 @@ PUT <kibana host>:<port>/api/security/role/custom_reporting_user
 // CONSOLE
 
 <1> Grants access to generate PNG and PDF reports in *Dashboard*.
-<2> Grants access to download CSV files from saved search panels in *Dashboard*.
+<2> Grants access to generate CSV reports from saved search panels in *Dashboard*.
 <3> Grants access to generate CSV reports from saved searches in *Discover*.
 <4> Grants access to generate PDF reports in *Canvas*.
 <5> Grants access to generate PNG and PDF reports in *Visualize Library*.
@@ -176,7 +167,7 @@ PUT localhost:5601/api/security/role/custom_reporting_user
 // CONSOLE
 
 <1> Grants access to generate CSV reports from saved searches in *Discover*.
-<2> Grants access to download CSV reports from saved search panels in *Dashboard*.
+<2> Grants access to generate CSV reports from saved search panels in *Dashboard*.
 
 [float]
 [[grant-user-access-external-provider]]
@@ -231,3 +222,41 @@ For more information, see {ref}/notification-settings.html#ssl-notification-sett
 Once you've enabled SSL for {kib}, all requests to the reporting endpoints must include valid credentials.
 
 For more information on sharing reports, direct links, and more, refer to <<reporting-getting-started, Reporting and sharing>>.
+
+[float]
+[[install-reporting-packages]]
+=== Install the dependencies for the headless browser
+
+If using PNG/PDF {report-features}, make sure the {kib} server operating system has the appropriate packages installed for the distribution.
+
+If you are using RHEL operating systems, install the following packages:
+
+* `xorg-x11-fonts-100dpi`
+* `xorg-x11-fonts-75dpi`
+* `xorg-x11-utils`
+* `xorg-x11-fonts-cyrillic`
+* `xorg-x11-fonts-Type1`
+* `xorg-x11-fonts-misc`
+* `vlgothic-fonts`
+* `fontconfig`
+* `freetype`
+
+If you are using Ubuntu/Debian systems, install the following packages:
+
+* `fonts-liberation`
+* `libfontconfig1`
+* `libnss3`
+
+The screenshotting plugin used for {reporting-features} has a built-in utility to check for common issues, such as missing dependencies. See
+<<reporting-diagnostics>> for more information.
+
+[float]
+[[set-reporting-server-host]]
+=== Set the `server.host` for the headless browser
+
+If using PNG/PDF {report-features} in a production environment, it is preferred to use the setting of
+`server.host: 0.0.0.0` in the `kibana.yml` configuration file. This allows the headless browser used for
+PDF/PNG reporting to reach {kib} over a local interface, while also allowing the {kib} server to listen on
+outward-facing network interfaces, as it makes the {kib} server accessible from any network interface on the
+machine. Make sure that no firewall rules or other routing rules prevent local services from accessing this
+address.

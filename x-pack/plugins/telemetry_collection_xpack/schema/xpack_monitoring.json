@@ -43,6 +43,9 @@
                       },
                       "cluster_stats": {
                         "properties": {
+                          "monitoringClusterUuid": {
+                            "type": "keyword"
+                          },
                           "collection_types": {
                             "properties": {
                               "DYNAMIC_KEY": {

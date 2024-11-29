@@ -6,7 +6,7 @@
  */
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { useMemo, useState } from 'react';
-import { IUiSettingsClient } from '@kbn/core/public';
+import { IUiSettingsClient, UiSettingsType } from '@kbn/core/public';
 import { isEmpty } from 'lodash';
 import { getFieldDefinition } from '@kbn/management-settings-field-definition';
 import type {
@@ -16,7 +16,6 @@ import type {
   UnsavedFieldChange,
 } from '@kbn/management-settings-types';
 import { normalizeSettings } from '@kbn/management-settings-utilities';
-import { ObservabilityApp } from '../../typings/common';
 
 function getSettingsFields({
   settingsKeys,
@@ -43,10 +42,11 @@ function getSettingsFields({
       fields[key] = field;
     }
   });
+
   return fields;
 }
 
-export function useEditableSettings(app: ObservabilityApp, settingsKeys: string[]) {
+export function useEditableSettings(settingsKeys: string[]) {
   const {
     services: { settings },
   } = useKibana();
@@ -80,6 +80,10 @@ export function useEditableSettings(app: ObservabilityApp, settingsKeys: string[
 
   async function saveAll() {
     if (settings && !isEmpty(unsavedChanges)) {
+      let updateErrorOccurred = false;
+      const subscription = settings.client.getUpdateErrors$().subscribe((error) => {
+        updateErrorOccurred = true;
+      });
       try {
         setIsSaving(true);
         const arr = Object.entries(unsavedChanges).map(([key, value]) =>
@@ -88,6 +92,29 @@ export function useEditableSettings(app: ObservabilityApp, settingsKeys: string[
         await Promise.all(arr);
         setForceReloadSettings((state) => ++state);
         cleanUnsavedChanges();
+        if (updateErrorOccurred) {
+          throw new Error('One or more settings updates failed');
+        }
+      } catch (e) {
+        throw e;
+      } finally {
+        setIsSaving(false);
+        if (subscription) {
+          subscription.unsubscribe();
+        }
+      }
+    }
+  }
+
+  async function saveSingleSetting(
+    id: string,
+    change: UnsavedFieldChange<UiSettingsType>['unsavedValue']
+  ) {
+    if (settings) {
+      try {
+        setIsSaving(true);
+        await settings.client.set(id, change);
+        setForceReloadSettings((state) => ++state);
       } finally {
         setIsSaving(false);
       }
@@ -101,5 +128,6 @@ export function useEditableSettings(app: ObservabilityApp, settingsKeys: string[
     saveAll,
     isSaving,
     cleanUnsavedChanges,
+    saveSingleSetting,
   };
 }

@@ -25,6 +25,9 @@ Object {
   "objective": Object {
     "target": 99,
   },
+  "settings": Object {
+    "preventInitialBackfill": false,
+  },
   "tags": Array [],
   "timeWindow": Object {
     "duration": "30d",
@@ -70,6 +73,9 @@ Object {
   "objective": Object {
     "target": 99,
   },
+  "settings": Object {
+    "preventInitialBackfill": false,
+  },
   "tags": Array [],
   "timeWindow": Object {
     "duration": "30d",
@@ -96,6 +102,9 @@ Object {
   "name": "",
   "objective": Object {
     "target": 99,
+  },
+  "settings": Object {
+    "preventInitialBackfill": false,
   },
   "tags": Array [],
   "timeWindow": Object {
@@ -136,6 +145,9 @@ Object {
   "objective": Object {
     "target": 99,
   },
+  "settings": Object {
+    "preventInitialBackfill": false,
+  },
   "tags": Array [],
   "timeWindow": Object {
     "duration": "30d",
@@ -165,6 +177,9 @@ Object {
     "timesliceTarget": 95,
     "timesliceWindow": "2",
   },
+  "settings": Object {
+    "preventInitialBackfill": false,
+  },
   "tags": Array [],
   "timeWindow": Object {
     "duration": "30d",
@@ -191,6 +206,9 @@ Object {
   "name": "",
   "objective": Object {
     "target": 99,
+  },
+  "settings": Object {
+    "preventInitialBackfill": false,
   },
   "tags": Array [],
   "timeWindow": Object {
@@ -219,6 +237,9 @@ Object {
   "name": "",
   "objective": Object {
     "target": 99,
+  },
+  "settings": Object {
+    "preventInitialBackfill": false,
   },
   "tags": Array [],
   "timeWindow": Object {
@@ -249,6 +270,9 @@ Object {
   "objective": Object {
     "target": 99,
   },
+  "settings": Object {
+    "preventInitialBackfill": false,
+  },
   "tags": Array [],
   "timeWindow": Object {
     "duration": "30d",
@@ -257,7 +281,7 @@ Object {
 }
 `;
 
-exports[`Transform partial URL state into form state with 'indicator' in URL state handles partial Custom KQL state 1`] = `
+exports[`Transform partial URL state into form state with 'indicator' in URL state handles partial Custom Query state 1`] = `
 Object {
   "budgetingMethod": "occurrences",
   "description": "",
@@ -275,6 +299,9 @@ Object {
   "name": "",
   "objective": Object {
     "target": 99,
+  },
+  "settings": Object {
+    "preventInitialBackfill": false,
   },
   "tags": Array [],
   "timeWindow": Object {
@@ -302,6 +329,9 @@ Object {
   "name": "",
   "objective": Object {
     "target": 99,
+  },
+  "settings": Object {
+    "preventInitialBackfill": false,
   },
   "tags": Array [],
   "timeWindow": Object {

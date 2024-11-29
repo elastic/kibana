@@ -20,32 +20,17 @@ import {
   ApmDataAccessPluginStart,
 } from '@kbn/apm-data-access-plugin/server';
 
-import {
-  SpacesPluginSetup,
-  SpacesPluginStart,
-} from '@kbn/spaces-plugin/server';
-import {
-  HomeServerPluginSetup,
-  HomeServerPluginStart,
-} from '@kbn/home-plugin/server';
+import { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import { HomeServerPluginSetup, HomeServerPluginStart } from '@kbn/home-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { ActionsPlugin } from '@kbn/actions-plugin/server';
 import { AlertingPlugin } from '@kbn/alerting-plugin/server';
 import { CloudSetup } from '@kbn/cloud-plugin/server';
-import {
-  PluginSetupContract as FeaturesPluginSetup,
-  PluginStartContract as FeaturesPluginStart,
-} from '@kbn/features-plugin/server';
-import {
-  LicensingPluginSetup,
-  LicensingPluginStart,
-} from '@kbn/licensing-plugin/server';
+import { FeaturesPluginSetup, FeaturesPluginStart } from '@kbn/features-plugin/server';
+import { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import { MlPluginSetup, MlPluginStart } from '@kbn/ml-plugin/server';
 import { ObservabilityPluginSetup } from '@kbn/observability-plugin/server';
-import {
-  SecurityPluginSetup,
-  SecurityPluginStart,
-} from '@kbn/security-plugin/server';
+import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
@@ -65,6 +50,10 @@ import {
   ProfilingDataAccessPluginSetup,
   ProfilingDataAccessPluginStart,
 } from '@kbn/profiling-data-access-plugin/server';
+import {
+  LogsDataAccessPluginSetup,
+  LogsDataAccessPluginStart,
+} from '@kbn/logs-data-access-plugin/server';
 import type {
   ObservabilityAIAssistantServerSetup,
   ObservabilityAIAssistantServerStart,
@@ -86,7 +75,7 @@ export interface APMPluginSetupDependencies {
   metricsDataAccess: MetricsDataPluginSetup;
   dataViews: {};
   share: SharePluginSetup;
-  observabilityAIAssistant: ObservabilityAIAssistantServerSetup;
+  observabilityAIAssistant?: ObservabilityAIAssistantServerSetup;
   // optional dependencies
   actions?: ActionsPlugin['setup'];
   alerting?: AlertingPlugin['setup'];
@@ -100,6 +89,7 @@ export interface APMPluginSetupDependencies {
   usageCollection?: UsageCollectionSetup;
   customIntegrations?: CustomIntegrationsPluginSetup;
   profilingDataAccess?: ProfilingDataAccessPluginSetup;
+  logsDataAccess: LogsDataAccessPluginSetup;
 }
 export interface APMPluginStartDependencies {
   // required dependencies
@@ -112,7 +102,7 @@ export interface APMPluginStartDependencies {
   metricsDataAccess: MetricsDataPluginSetup;
   dataViews: DataViewsServerPluginStart;
   share: undefined;
-  observabilityAIAssistant: ObservabilityAIAssistantServerStart;
+  observabilityAIAssistant?: ObservabilityAIAssistantServerStart;
   // optional dependencies
   actions?: ActionsPlugin['start'];
   alerting?: AlertingPlugin['start'];
@@ -126,4 +116,5 @@ export interface APMPluginStartDependencies {
   usageCollection?: undefined;
   customIntegrations?: CustomIntegrationsPluginStart;
   profilingDataAccess?: ProfilingDataAccessPluginStart;
+  logsDataAccess: LogsDataAccessPluginStart;
 }

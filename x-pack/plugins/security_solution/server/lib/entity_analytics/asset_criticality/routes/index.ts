@@ -5,8 +5,4 @@
  * 2.0.
  */
 
-export { assetCriticalityStatusRoute } from './status';
-export { assetCriticalityUpsertRoute } from './upsert';
-export { assetCriticalityGetRoute } from './get';
-export { assetCriticalityDeleteRoute } from './delete';
-export { assetCriticalityPrivilegesRoute } from './privileges';
+export { registerAssetCriticalityRoutes } from './register_asset_criticality_routes';

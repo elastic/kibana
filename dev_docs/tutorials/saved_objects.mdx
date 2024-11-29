@@ -18,7 +18,7 @@ import { SavedObjectsType } from 'src/core/server';
 
 export const dashboardVisualization: SavedObjectsType = {
   name: 'dashboard_visualization', [1]
-  hidden: true,
+  hidden: true, [3]
   switchToModelVersionAt: '8.10.0', // this is the default, feel free to omit it unless you intend to switch to using model versions before 8.10.0
   namespaceType: 'multiple-isolated', [2]
   mappings: {
@@ -45,6 +45,9 @@ these should follow our API URL path convention and always be written in snake c
 [2] This field determines "space behavior" -- whether these objects can exist in one space, multiple spaces, or all spaces. This value means
 that objects of this type can only exist in a single space. See
 <DocLink id="kibDevDocsSavedObjectsIntro" section="sharing-saved-objects" text="Sharing Saved Objects"/> for more information.
+
+[3] This field determines whether repositories have access to the type by default. Hidden types will not be automatically exposed via the Saved Objects Client APIs.
+Hidden types must be listed in `SavedObjectsClientProviderOptions[includedHiddenTypes]` to be accessible by the client.
 
 **src/plugins/my_plugin/server/saved_objects/index.ts**
 
@@ -122,6 +125,56 @@ Will result in the following mappings being applied to the .kibana index:
 Do not use field mappings like you would use data types for the columns of a SQL database. Instead, field mappings are analogous to a
 SQL index. Only specify field mappings for the fields you wish to search on or query. By specifying `dynamic: false`
  in any level of your mappings, Elasticsearch will accept and store any other fields even if they are not specified in your mappings.
+
+Never use `enabled: false` or `index: false` in your mappings. Elasticsearch does not support toggling these mapping options, so if 
+your plugin ever needs to query the data, you will not be able to do so. Since these fields cannot be queried, they would require 
+migrating to a new field and making associated code changes. Instead, use `dynamic: false` which provides the same flexibility while
+maintaining the future ability to query fields if necessary.
+
+Here's an example of what NOT to do:
+
+```ts
+export const dashboardVisualization: SavedObjectsType = {
+  name: 'dashboard_visualization',
+  ...
+  mappings: {
+    properties: {
+      metadata: {
+        enabled: false,  // ❌ Don't do this
+        properties: {
+          created_by: { type: 'keyword' }
+        }
+      },
+      description: {
+        index: false,    // ❌ Don't do this
+        type: 'text'
+      }
+    }
+  }
+};
+```
+
+Instead, use `dynamic: false` if you want to persist data which does not need to be queryable.
+```ts
+export const dashboardVisualization: SavedObjectsType = {
+  name: 'dashboard_visualization',
+  ...
+  mappings: {
+    properties: {
+      dynamic: false,  // ✅ Do this instead
+      metadata: {
+        // dynamic: false gets inherited from above
+        properties: {
+          // `created_by` can now be stored but won't be queryable
+        }
+      },
+      // `description` can now be stored but won't be queryable
+    }
+  }
+};
+```
+
+This approach maintains flexibility while ensuring all fields remain queryable if needed in the future.
 
 Since Elasticsearch has a default limit of 1000 fields per index, plugins should carefully consider the
 fields they add to the mappings. Similarly, Saved Object types should never use `dynamic: true` as this can cause an arbitrary
@@ -245,6 +298,36 @@ export const dashboardVisualization: SavedObjectsType = {
 That way:
 - SO type versions are decoupled from stack versioning
 - SO type versions are independent between types
+
+### Saved object migrations on serverless
+
+On serverless, Kibana cannot have any downtime &mdash; even during data migrations. In order to accomplish this we rollout new versions while old versions are still running. As soon as new versions are ready to start serving, requests will be directed to them.
+
+<DocCallOut title="Only once a new version is done being rolled out will data migrations be run.">
+</DocCallOut>
+
+
+
+This has a few implications:
+
+1. A _new version_ of application code should **never** introduce a new Saved Object field and treat it as a **required** field
+2. A _new version_ of application code must be **fully backward compatible** with the **previous version's (n-1) Saved Object fields**
+
+In order to introduce a new, required Saved Object field the following algorithm _must_ be followed:
+
+1. Introduce a new model version field, consider this field _optional_ in any application code that uses it
+2. Provide a `data_backfill` function for the new field
+3. Merge to `main`
+4. Wait for the next serverless release containing your data migration changes to complete
+5. Update your code marking the new field as required in interfaces
+6. Merge to `main`
+
+At step 6 your code that was just merged to `main` will be guaranteed to find a value for the new field in Saved Objects.
+
+<DocCallOut color="warning" title="What happens when you skip step 4?">
+  Not waiting until your `data_backfill` has been released means that none of your SO documents will have the field populated with the value you provided in the `data_backfill` function. The new field value will be `undefined` until migrations have run which only happens _after_ application code has already started running!
+</DocCallOut>
+
 
 ### Testing model versions
 Bugs in model version transitions cause downtime for our users and therefore have a very high impact. Follow the <DocLink id="kibDevTutorialTestingPlugins" section="saved-objects-model-versions" text="Saved Objects model versions"/> section in the plugin testing guide.

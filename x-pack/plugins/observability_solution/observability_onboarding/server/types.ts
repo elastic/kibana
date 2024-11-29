@@ -11,12 +11,13 @@ import {
   PluginSetup as DataPluginSetup,
   PluginStart as DataPluginStart,
 } from '@kbn/data-plugin/server';
-import {
-  FleetSetupContract,
-  FleetStartContract,
-} from '@kbn/fleet-plugin/server';
+import { FleetSetupContract, FleetStartContract } from '@kbn/fleet-plugin/server';
 import { ObservabilityPluginSetup } from '@kbn/observability-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import {
+  CustomIntegrationsPluginSetup,
+  CustomIntegrationsPluginStart,
+} from '@kbn/custom-integrations-plugin/server';
 
 export interface ObservabilityOnboardingPluginSetupDependencies {
   data: DataPluginSetup;
@@ -24,6 +25,7 @@ export interface ObservabilityOnboardingPluginSetupDependencies {
   cloud: CloudSetup;
   usageCollection: UsageCollectionSetup;
   fleet: FleetSetupContract;
+  customIntegrations: CustomIntegrationsPluginSetup;
 }
 
 export interface ObservabilityOnboardingPluginStartDependencies {
@@ -32,6 +34,7 @@ export interface ObservabilityOnboardingPluginStartDependencies {
   cloud: CloudStart;
   usageCollection: undefined;
   fleet: FleetStartContract;
+  customIntegrations: CustomIntegrationsPluginStart;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -39,5 +42,4 @@ export interface ObservabilityOnboardingPluginSetup {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ObservabilityOnboardingPluginStart {}
 
-export type ObservabilityOnboardingRequestHandlerContext =
-  CustomRequestHandlerContext<{}>;
+export type ObservabilityOnboardingRequestHandlerContext = CustomRequestHandlerContext<{}>;

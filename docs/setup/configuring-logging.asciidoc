@@ -21,11 +21,14 @@ __<<logging-layouts,Layouts>>__ define how log messages are formatted and what t
 [[log-level]]
 === Log level
 
-Currently we support the following log levels: _all_, _fatal_, _error_, _warn_, _info_, _debug_, _trace_, _off_.
+Currently we support the following log levels: _off_, _fatal_, _error_, _warn_, _info_, _debug_, _trace_, _all_.
 
-Levels are ordered, so _all_ > _fatal_ > _error_ > _warn_ > _info_ > _debug_ > _trace_ > _off_.
+Levels are ordered, so _off_ > _fatal_ > _error_ > _warn_ > _info_ > _debug_ > _trace_ > _all_.
 
-A log record will be logged by the logger if its level is higher than or equal to the level of its logger. Otherwise, the log record is ignored.
+A log record will be logged by the logger if its level is higher than or equal to the level of its logger. For example:
+If the output of an API call is configured to log at the `info` level and the parameters passed to the API call are set to `debug`, with a global logging configuration in `kibana.yml` set to `debug`, both the output _and_ parameters are logged. If the log level is set to `info`, the debug logs are ignored, meaning that you'll only get a record for the API output and _not_ for the parameters.
+
+Logging set at a plugin level is always respected, regardless of the `root` logger level. In other words, if root logger is set to fatal and pluginA logging is set to `debug`, debug logs are only shown for pluginA, with other logs only reporting on `fatal`.
 
 The _all_ and _off_ levels can only be used in configuration and are handy shortcuts that allow you to log every log record or disable logging entirely for a specific logger. These levels can also be specified using <<logging-cli-migration,cli arguments>>.
 

@@ -16,8 +16,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const es = getService('es');
 
   describe('index pattern filter', function describeIndexTests() {
-    // https://github.com/elastic/kibana/issues/178733
-    this.tags('failsOnMKI');
     before(async function () {
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.uiSettings.replace({});
@@ -82,10 +80,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         '@tags.raw',
         '@timestamp',
         '_id',
+        '_ignored',
         '_index',
         '_score',
         '_source',
-        '_test',
       ];
 
       expect(await PageObjects.settings.getFieldNames()).to.eql(unfilteredFields);
@@ -112,10 +110,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         '@tags.raw',
         '@timestamp',
         '_id',
+        '_ignored',
         '_index',
         '_score',
         '_source',
-        'agent',
       ];
 
       expect(await PageObjects.settings.getFieldNames()).to.eql(unfilteredFields);
@@ -187,10 +185,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'keyword',
         'date',
         '_id',
+        '_ignored',
         '_index',
         '',
         '_source',
-        'text',
       ]);
 
       // set other filters to check if they get reset after pressing the button

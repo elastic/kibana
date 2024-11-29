@@ -4,11 +4,28 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
-import type { ESQLSearchReponse } from '@kbn/es-types';
 import { VisualizeESQLUserIntention } from '@kbn/observability-ai-assistant-plugin/common/functions/visualize_esql';
-import { visualizeESQLFunction } from '../../common/functions/visualize_esql';
-import { FunctionRegistrationParameters } from '.';
+import { correctCommonEsqlMistakes } from '@kbn/inference-plugin/common';
+import {
+  visualizeESQLFunction,
+  VisualizeQueryResponsev2,
+} from '../../common/functions/visualize_esql';
+import type { FunctionRegistrationParameters } from '.';
+import { runAndValidateEsqlQuery } from './query/validate_esql_query';
+
+const getMessageForLLM = (
+  intention: VisualizeESQLUserIntention,
+  query: string,
+  hasErrors: boolean
+) => {
+  if (hasErrors) {
+    return 'The query has syntax errors';
+  }
+  return intention === VisualizeESQLUserIntention.executeAndReturnResults ||
+    intention === VisualizeESQLUserIntention.generateQueryOnly
+    ? 'These results are not visualized'
+    : 'Only following query is visualized: ```esql\n' + query + '\n```';
+};
 
 export function registerVisualizeESQLFunction({
   functions,
@@ -16,36 +33,32 @@ export function registerVisualizeESQLFunction({
 }: FunctionRegistrationParameters) {
   functions.registerFunction(
     visualizeESQLFunction,
-    async ({ arguments: { query, intention }, connectorId, messages }, signal) => {
-      // With limit 0 I get only the columns, it is much more performant
-      const performantQuery = `${query} | limit 0`;
-      const coreContext = await resources.context.core;
+    async ({ arguments: { query, intention } }): Promise<VisualizeQueryResponsev2> => {
+      // errorMessages contains the syntax errors from the client side valdation
+      // error contains the error from the server side validation, it is always one error
+      // and help us identify errors like index not found, field not found etc.
 
-      const response = (await (
-        await coreContext
-      ).elasticsearch.client.asCurrentUser.transport.request({
-        method: 'POST',
-        path: '_query',
-        body: {
-          query: performantQuery,
-        },
-      })) as ESQLSearchReponse;
-      const columns =
-        response.columns?.map(({ name, type }) => ({
-          id: name,
-          name,
-          meta: { type: esFieldTypeToKibanaFieldType(type) },
-        })) ?? [];
+      const correctedQuery = correctCommonEsqlMistakes(query).output;
+
+      const { columns, errorMessages, rows, error } = await runAndValidateEsqlQuery({
+        query: correctedQuery,
+        client: (await resources.context.core).elasticsearch.client.asCurrentUser,
+      });
+
+      const message = getMessageForLLM(intention, query, Boolean(errorMessages?.length));
+
       return {
         data: {
-          columns,
+          columns: columns ?? [],
+          rows: rows ?? [],
+          correctedQuery,
         },
         content: {
-          message:
-            intention === VisualizeESQLUserIntention.executeAndReturnResults ||
-            intention === VisualizeESQLUserIntention.generateQueryOnly
-              ? 'These results are not visualized'
-              : 'Only following query is visualized: ```esql\n' + query + '\n```',
+          message,
+          errorMessages: [
+            ...(errorMessages ? errorMessages : []),
+            ...(error ? [error.message] : []),
+          ],
         },
       };
     }

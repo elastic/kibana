@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 export const VALUE_LISTS_FLYOUT_TITLE = i18n.translate(
   'xpack.securitySolution.lists.importValueListTitle',
   {
-    defaultMessage: 'Import value lists',
+    defaultMessage: 'Manage value lists',
   }
 );
 
@@ -65,7 +65,7 @@ export const UPLOAD_ERROR = i18n.translate('xpack.securitySolution.lists.valueLi
 
 export const uploadSuccessMessage = (fileName: string) =>
   i18n.translate('xpack.securitySolution.lists.valueListsImportSuccess', {
-    defaultMessage: "Value list '{fileName}' was imported",
+    defaultMessage: "Value list ''{fileName}'' was imported",
     values: { fileName },
   });
 

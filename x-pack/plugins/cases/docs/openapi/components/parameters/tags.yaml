@@ -3,10 +3,6 @@ name: tags
 description: Filters the returned cases by tags.
 schema:
   oneOf:
-    - type: string
-    - type: array
-      items:
-        type: string
-      maxItems: 100
-      examples:
-        - [ tag-1 ]
+    - $ref: '../schemas/string.yaml'
+    - $ref: '../schemas/string_array.yaml'
+example: tag-1

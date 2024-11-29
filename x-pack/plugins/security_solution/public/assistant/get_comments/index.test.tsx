@@ -5,18 +5,18 @@
  * 2.0.
  */
 
+import type { MessageRole } from '@kbn/elastic-assistant-common';
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/public/common';
 import { getComments } from '.';
-import type { ConversationRole } from '@kbn/elastic-assistant/impl/assistant_context/types';
 
-const user: ConversationRole = 'user';
+const user: MessageRole = 'user';
 const currentConversation = {
   apiConfig: {
+    actionTypeId: '.gen-ai',
     connectorId: 'c29c28a0-20fe-11ee-9306-a1f4d42ec542',
-    connectorTypeTitle: 'OpenAI',
     provider: OpenAiProviderType.OpenAi,
   },
-  replacements: [],
+  replacements: {},
   category: 'assistant',
   id: '1',
   title: '1',
@@ -24,13 +24,15 @@ const currentConversation = {
     {
       role: user,
       content: 'Hello {name}',
-      timestamp: '2022-01-01',
+      timestamp: '2024-03-19T18:59:18.174Z',
       isError: false,
     },
   ],
 };
 const showAnonymizedValues = false;
 const testProps = {
+  abortStream: jest.fn(),
+  setIsStreaming: jest.fn(),
   refetchCurrentConversation: jest.fn(),
   regenerateMessage: jest.fn(),
   isFetchingResponse: false,
@@ -48,11 +50,11 @@ describe('getComments', () => {
       currentConversation: {
         category: 'assistant',
         apiConfig: {
+          actionTypeId: '.gen-ai',
           connectorId: 'c29c28a0-20fe-11ee-9306-a1f4d42ec542',
-          connectorTypeTitle: 'OpenAI',
           provider: OpenAiProviderType.OpenAi,
         },
-        replacements: [],
+        replacements: {},
         id: '1',
         title: '1',
         messages: [
@@ -66,5 +68,12 @@ describe('getComments', () => {
       },
     });
     expect(result[0].eventColor).toEqual('danger');
+  });
+
+  it('It transforms message timestamp from server side ISO format to local date string', () => {
+    const result = getComments(testProps);
+    expect(result[0].timestamp).toEqual(
+      `at: ${new Date('2024-03-19T18:59:18.174Z').toLocaleString()}`
+    );
   });
 });

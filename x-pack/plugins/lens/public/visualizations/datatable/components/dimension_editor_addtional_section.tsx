@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { EuiFormRow, EuiFieldText, EuiText, useEuiTheme, EuiComboBox } from '@elastic/eui';
 import { PaletteRegistry } from '@kbn/coloring';
-import { useDebouncedValue } from '@kbn/visualization-ui-components';
+import { useDebouncedValue } from '@kbn/visualization-utils';
 import type { VisualizationDimensionEditorProps } from '../../../types';
 import type { DatatableVisualizationState } from '../visualization';
 
@@ -21,8 +21,8 @@ import {
   getFinalSummaryConfiguration,
   getSummaryRowOptions,
 } from '../../../../common/expressions/datatable/summary';
-
 import { isNumericFieldForDatatable } from '../../../../common/expressions/datatable/utils';
+import { DatatableInspectorTables } from '../../../../common/expressions/datatable/datatable_fn';
 
 import './dimension_editor.scss';
 
@@ -74,9 +74,9 @@ export function TableDimensionEditorAdditionalSection(
   if (!column) return null;
   if (column.isTransposed) return null;
 
-  const currentData = frame.activeData?.[state.layerId];
+  const currentData =
+    frame.activeData?.[state.layerId] ?? frame.activeData?.[DatatableInspectorTables.Default];
 
-  // either read config state or use same logic as chart itself
   const isNumeric = isNumericFieldForDatatable(currentData, accessor);
   // when switching from one operation to another, make sure to keep the configuration consistent
   const { summaryRow, summaryLabel: fallbackSummaryLabel } = getFinalSummaryConfiguration(

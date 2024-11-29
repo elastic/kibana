@@ -14,7 +14,7 @@ import {
   postElasticsearchNodeDetailResponsePayloadRT,
 } from '../../../../../common/http_api/elasticsearch';
 import { getClusterStats } from '../../../../lib/cluster/get_cluster_stats';
-import { getIndexPatterns } from '../../../../lib/cluster/get_index_patterns';
+import { getIndexPatterns } from '../../../../../common/get_index_patterns';
 import { createValidationFunction } from '../../../../lib/create_route_validation_function';
 import {
   getMetrics,
@@ -40,6 +40,9 @@ export function esNodeRoute(server: MonitoringCore) {
     validate: {
       params: validateParams,
       body: validateBody,
+    },
+    options: {
+      access: 'internal',
     },
     async handler(req) {
       const config = server.config;
@@ -91,6 +94,7 @@ export function esNodeRoute(server: MonitoringCore) {
           includeNodes: true,
           nodeUuid,
         });
+        // @ts-expect-error `clusterState.master_node` types are incompatible
         const nodeSummary = await getNodeSummary(req, clusterState, shardStats, {
           clusterUuid,
           nodeUuid,
@@ -116,7 +120,7 @@ export function esNodeRoute(server: MonitoringCore) {
             cluster,
             'cluster_state.state_uuid',
             get(cluster, 'elasticsearch.cluster.stats.state.state_uuid')
-          );
+          )!;
           const allocationOptions = {
             shardFilter,
             stateUuid,

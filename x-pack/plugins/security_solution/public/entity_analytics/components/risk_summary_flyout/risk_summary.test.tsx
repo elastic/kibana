@@ -12,11 +12,12 @@ import {
 import { render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../common/mock';
-import { RiskSummary } from './risk_summary';
+import { FlyoutRiskSummary } from './risk_summary';
 import type {
   LensAttributes,
   VisualizationEmbeddableProps,
 } from '../../../common/components/visualization_actions/types';
+import type { Query } from '@kbn/es-query';
 
 const mockVisualizationEmbeddable = jest
   .fn()
@@ -27,64 +28,19 @@ jest.mock('../../../common/components/visualization_actions/visualization_embedd
     mockVisualizationEmbeddable(props),
 }));
 
-const mockUseUiSetting = jest.fn().mockReturnValue([false]);
-
-jest.mock('@kbn/kibana-react-plugin/public', () => {
-  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
-  return {
-    ...original,
-    useUiSetting$: () => mockUseUiSetting(),
-  };
-});
-
-describe('RiskSummary', () => {
+describe('FlyoutRiskSummary', () => {
   beforeEach(() => {
     mockVisualizationEmbeddable.mockClear();
   });
 
-  it('renders risk summary table with alerts only', () => {
-    const { getByTestId, queryByTestId } = render(
-      <TestProviders>
-        <RiskSummary
-          riskScoreData={mockHostRiskScoreState}
-          queryId={'testQuery'}
-          openDetailsPanel={() => {}}
-        />
-      </TestProviders>
-    );
-
-    expect(getByTestId('risk-summary-table')).toBeInTheDocument();
-
-    // Alerts
-    expect(getByTestId('risk-summary-table')).toHaveTextContent(
-      `Inputs${mockHostRiskScoreState.data?.[0].host.risk.category_1_count ?? 0}`
-    );
-    expect(getByTestId('risk-summary-table')).toHaveTextContent(
-      `AlertsScore${mockHostRiskScoreState.data?.[0].host.risk.category_1_score ?? 0}`
-    );
-
-    // Context
-    expect(getByTestId('risk-summary-table')).not.toHaveTextContent(
-      `Inputs${mockHostRiskScoreState.data?.[0].host.risk.category_2_count ?? 0}`
-    );
-    expect(getByTestId('risk-summary-table')).not.toHaveTextContent(
-      `ContextsScore${mockHostRiskScoreState.data?.[0].host.risk.category_2_score ?? 0}`
-    );
-
-    // Result row doesn't exist if alerts are the only category
-    expect(queryByTestId('risk-summary-result-count')).not.toBeInTheDocument();
-    expect(queryByTestId('risk-summary-result-score')).not.toBeInTheDocument();
-  });
-
   it('renders risk summary table with context and totals', () => {
-    mockUseUiSetting.mockReturnValue([true]);
-
     const { getByTestId } = render(
       <TestProviders>
-        <RiskSummary
+        <FlyoutRiskSummary
           riskScoreData={mockHostRiskScoreState}
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
+          recalculatingScore={false}
         />
       </TestProviders>
     );
@@ -93,15 +49,12 @@ describe('RiskSummary', () => {
 
     // Alerts
     expect(getByTestId('risk-summary-table')).toHaveTextContent(
-      `Inputs${mockHostRiskScoreState.data?.[0].host.risk.category_1_count ?? 0}`
-    );
-    expect(getByTestId('risk-summary-table')).toHaveTextContent(
-      `AlertsScore${mockHostRiskScoreState.data?.[0].host.risk.category_1_score ?? 0}`
+      `${mockHostRiskScoreState.data?.[0].host.risk.category_1_count}`
     );
 
     // Result
     expect(getByTestId('risk-summary-result-count')).toHaveTextContent(
-      `${mockHostRiskScoreState.data?.[0].host.risk.category_1_count ?? 0}`
+      `${mockHostRiskScoreState.data?.[0].host.risk.category_1_count}`
     );
 
     expect(getByTestId('risk-summary-result-score')).toHaveTextContent(
@@ -115,23 +68,57 @@ describe('RiskSummary', () => {
   it('renders risk summary table when riskScoreData is empty', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <RiskSummary
+        <FlyoutRiskSummary
           riskScoreData={{ ...mockHostRiskScoreState, data: undefined }}
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
+          recalculatingScore={false}
         />
       </TestProviders>
     );
     expect(getByTestId('risk-summary-table')).toBeInTheDocument();
   });
 
+  it('risk summary header does not render link when riskScoreData is loading', () => {
+    const { queryByTestId } = render(
+      <TestProviders>
+        <FlyoutRiskSummary
+          riskScoreData={{ ...mockHostRiskScoreState, data: undefined, loading: true }}
+          queryId={'testQuery'}
+          openDetailsPanel={() => {}}
+          recalculatingScore={false}
+        />
+      </TestProviders>
+    );
+
+    expect(queryByTestId('riskInputsTitleLink')).not.toBeInTheDocument();
+  });
+
+  it('risk summary header does not render expand icon when in preview mode', () => {
+    const { queryByTestId } = render(
+      <TestProviders>
+        <FlyoutRiskSummary
+          riskScoreData={{ ...mockHostRiskScoreState, data: undefined, loading: true }}
+          queryId={'testQuery'}
+          openDetailsPanel={() => {}}
+          recalculatingScore={false}
+          isPreviewMode
+        />
+      </TestProviders>
+    );
+
+    expect(queryByTestId('riskInputsTitleLink')).not.toBeInTheDocument();
+    expect(queryByTestId('riskInputsTitleIcon')).not.toBeInTheDocument();
+  });
+
   it('renders visualization embeddable', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <RiskSummary
+        <FlyoutRiskSummary
           riskScoreData={mockHostRiskScoreState}
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
+          recalculatingScore={false}
         />
       </TestProviders>
     );
@@ -142,10 +129,11 @@ describe('RiskSummary', () => {
   it('renders updated at', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <RiskSummary
+        <FlyoutRiskSummary
           riskScoreData={mockHostRiskScoreState}
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
+          recalculatingScore={false}
         />
       </TestProviders>
     );
@@ -156,10 +144,11 @@ describe('RiskSummary', () => {
   it('builds lens attributes for host risk score', () => {
     render(
       <TestProviders>
-        <RiskSummary
+        <FlyoutRiskSummary
           riskScoreData={mockHostRiskScoreState}
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
+          recalculatingScore={false}
         />
       </TestProviders>
     );
@@ -171,7 +160,7 @@ describe('RiskSummary', () => {
     );
     const firstColumn = Object.values(datasourceLayers[0].columns)[0];
 
-    expect(lensAttributes.state.query.query).toEqual('host.name: test');
+    expect((lensAttributes.state.query as Query).query).toEqual('host.name: test');
     expect(firstColumn).toEqual(
       expect.objectContaining({
         sourceField: 'host.risk.calculated_score_norm',
@@ -182,10 +171,11 @@ describe('RiskSummary', () => {
   it('builds lens cases attachment metadata for host risk score', () => {
     render(
       <TestProviders>
-        <RiskSummary
+        <FlyoutRiskSummary
           riskScoreData={mockHostRiskScoreState}
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
+          recalculatingScore={false}
         />
       </TestProviders>
     );
@@ -203,10 +193,11 @@ describe('RiskSummary', () => {
   it('builds lens cases attachment metadata for user risk score', () => {
     render(
       <TestProviders>
-        <RiskSummary
+        <FlyoutRiskSummary
           riskScoreData={mockUserRiskScoreState}
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
+          recalculatingScore={false}
         />
       </TestProviders>
     );
@@ -224,10 +215,11 @@ describe('RiskSummary', () => {
   it('builds lens attributes for user risk score', () => {
     render(
       <TestProviders>
-        <RiskSummary
+        <FlyoutRiskSummary
           riskScoreData={mockUserRiskScoreState}
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
+          recalculatingScore={false}
         />
       </TestProviders>
     );
@@ -239,7 +231,7 @@ describe('RiskSummary', () => {
     );
     const firstColumn = Object.values(datasourceLayers[0].columns)[0];
 
-    expect(lensAttributes.state.query.query).toEqual('user.name: test');
+    expect((lensAttributes.state.query as Query).query).toEqual('user.name: test');
     expect(firstColumn).toEqual(
       expect.objectContaining({
         sourceField: 'user.risk.calculated_score_norm',

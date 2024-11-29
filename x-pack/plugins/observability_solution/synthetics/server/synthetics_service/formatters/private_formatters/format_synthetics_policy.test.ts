@@ -461,7 +461,7 @@ describe('formatSyntheticsPolicy', () => {
         title: 'Elastic Synthetics',
         version: '0.11.4',
       },
-      policy_id: '404812e0-90e1-11ed-8111-f7f9cad30b61',
+      policy_ids: ['404812e0-90e1-11ed-8111-f7f9cad30b61'],
     });
   });
 
@@ -926,7 +926,7 @@ describe('formatSyntheticsPolicy', () => {
         title: 'Elastic Synthetics',
         version: '0.11.4',
       },
-      policy_id: '404812e0-90e1-11ed-8111-f7f9cad30b61',
+      policy_ids: ['404812e0-90e1-11ed-8111-f7f9cad30b61'],
     });
   });
 });
@@ -941,7 +941,7 @@ const testNewPolicy = {
     experimental_data_stream_features: [],
   },
   enabled: true,
-  policy_id: '404812e0-90e1-11ed-8111-f7f9cad30b61',
+  policy_ids: ['404812e0-90e1-11ed-8111-f7f9cad30b61'],
   inputs: [
     {
       type: 'synthetics/http',

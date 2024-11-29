@@ -19,8 +19,8 @@
     "@kbn/security-plugin",
     "@kbn/security-solution-ess",
     "@kbn/security-solution-plugin",
+    "@kbn/server-http-tools",
     "@kbn/serverless",
-    "@kbn/security-solution-side-nav",
     "@kbn/security-solution-navigation",
     "@kbn/security-solution-upselling",
     "@kbn/kibana-react-plugin",
@@ -38,14 +38,15 @@
     "@kbn/fleet-plugin",
     "@kbn/serverless-security-settings",
     "@kbn/core-elasticsearch-server",
-    "@kbn/usage-collection-plugin",
     "@kbn/cloud-defend-plugin",
     "@kbn/core-logging-server-mocks",
-    "@kbn/shared-ux-chrome-navigation",
     "@kbn/stack-connectors-plugin",
     "@kbn/actions-plugin",
     "@kbn/management-cards-navigation",
-    "@kbn/core-application-browser",
-    "@kbn/discover-plugin"
+    "@kbn/discover-plugin",
+    "@kbn/logging",
+    "@kbn/integration-assistant-plugin",
+    "@kbn/cloud-security-posture-common",
+    "@kbn/dev-utils"
   ]
 }

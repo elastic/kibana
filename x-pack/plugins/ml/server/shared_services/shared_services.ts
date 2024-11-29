@@ -5,19 +5,17 @@
  * 2.0.
  */
 
-import type {
-  IClusterClient,
-  IScopedClusterClient,
-  SavedObjectsClientContract,
-  UiSettingsServiceStart,
-  KibanaRequest,
-} from '@kbn/core/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import { CoreKibanaRequest } from '@kbn/core/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { PluginStart as DataViewsPluginStart } from '@kbn/data-views-plugin/server';
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
+import { isCoreKibanaRequest } from '@kbn/core-http-server-utils';
+import type { KibanaRequest } from '@kbn/core-http-server';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { IClusterClient, IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
+import type { CoreAuditService } from '@kbn/core-security-server';
 import type { CompatibleModule } from '../../common/constants/app';
 import type { MlLicense } from '../../common/license';
 
@@ -49,7 +47,7 @@ import {
   MLUISettingsClientUninitialized,
 } from './errors';
 import type { MlClient } from '../lib/ml_client';
-import { getMlClient } from '../lib/ml_client';
+import { getMlClient, MlAuditLogger } from '../lib/ml_client';
 import type { MLSavedObjectService } from '../saved_objects';
 import { mlSavedObjectServiceFactory } from '../saved_objects';
 import type { MlAlertingServiceProvider } from './providers/alerting_service';
@@ -110,6 +108,7 @@ export function createSharedServices(
   getUiSettings: () => UiSettingsServiceStart | null,
   getFieldsFormat: () => FieldFormatsStart | null,
   getDataViews: () => DataViewsPluginStart,
+  getAuditService: () => CoreAuditService | null,
   isMlReady: () => Promise<void>,
   compatibleModuleType: CompatibleModule | null
 ): {
@@ -137,7 +136,8 @@ export function createSharedServices(
       isMlReady,
       getUiSettings,
       getFieldsFormat,
-      getDataViews
+      getDataViews,
+      getAuditService
     );
 
     const {
@@ -209,7 +209,8 @@ function getRequestItemsProvider(
   isMlReady: () => Promise<void>,
   getUiSettings: () => UiSettingsServiceStart | null,
   getFieldsFormat: () => FieldFormatsStart | null,
-  getDataViews: () => DataViewsPluginStart
+  getDataViews: () => DataViewsPluginStart,
+  getAuditService: () => CoreAuditService | null
 ) {
   return (request: KibanaRequest) => {
     let hasMlCapabilities: HasMlCapabilities = hasMlCapabilitiesProvider(
@@ -237,6 +238,11 @@ function getRequestItemsProvider(
       throw new MLClusterClientUninitialized(`ML's cluster client has not been initialized`);
     }
 
+    const auditService = getAuditService();
+    if (!auditService) {
+      throw new Error('Audit service not initialized');
+    }
+
     const uiSettingsClient = getUiSettings()?.asScopedToClient(savedObjectsClient);
     if (!uiSettingsClient) {
       throw new MLUISettingsClientUninitialized(`ML's UI settings client has not been initialized`);
@@ -260,19 +266,22 @@ function getRequestItemsProvider(
     };
 
     let mlSavedObjectService;
-    if (request instanceof CoreKibanaRequest) {
+    if (isCoreKibanaRequest(request)) {
       scopedClient = clusterClient.asScoped(request);
       mlSavedObjectService = getSobSavedObjectService(scopedClient);
-      mlClient = getMlClient(scopedClient, mlSavedObjectService);
+      const auditLogger = new MlAuditLogger(auditService, request);
+      mlClient = getMlClient(scopedClient, mlSavedObjectService, auditLogger);
     } else {
       hasMlCapabilities = () => Promise.resolve();
       const { asInternalUser } = clusterClient;
       scopedClient = {
         asInternalUser,
         asCurrentUser: asInternalUser,
+        asSecondaryAuthUser: asInternalUser,
       };
       mlSavedObjectService = getSobSavedObjectService(scopedClient);
-      mlClient = getMlClient(scopedClient, mlSavedObjectService);
+      const auditLogger = new MlAuditLogger(auditService);
+      mlClient = getMlClient(scopedClient, mlSavedObjectService, auditLogger);
     }
 
     const getDataViewsService = getDataViewsServiceFactory(

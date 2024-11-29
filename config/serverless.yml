@@ -7,12 +7,72 @@ xpack.fleet.internal.disableILMPolicies: true
 xpack.fleet.internal.activeAgentsSoftLimit: 25000
 xpack.fleet.internal.onlyAllowAgentUpgradeToKnownVersions: true
 xpack.fleet.internal.retrySetupOnBoot: true
+xpack.fleet.internal.useMeteringApi: true
+
+## Fine-tune the feature privileges.
+xpack.features.overrides:
+  dashboard:
+    privileges:
+      ### Dashboard's `All` feature privilege should implicitly grant `All` access to Maps and Visualize features.
+      all.composedOf:
+        - feature: "maps"
+          privileges: [ "all" ]
+        - feature: "visualize"
+          privileges: [ "all" ]
+      ### Dashboard's `Read` feature privilege should implicitly grant `Read` access to Maps and Visualize features.
+      ### Additionally, it should implicitly grant privilege to create short URLs in Visualize app.
+      read.composedOf:
+        - feature: "maps"
+          privileges: [ "read" ]
+        - feature: "visualize"
+          privileges: [ "read" ]
+    ### All Dashboard sub-feature privileges should be hidden: reporting capabilities will be granted via dedicated
+    ### Reporting feature and short URL sub-feature privilege should be granted for both `All` and `Read`.
+    subFeatures.privileges:
+      download_csv_report.disabled: true
+      generate_report.disabled: true
+      store_search_session.disabled: true
+      url_create:
+        disabled: true
+        includeIn: "read"
+  discover:
+    ### All Discover sub-feature privileges should be hidden: reporting capabilities will be granted via dedicated
+    ### Reporting feature and short URL sub-feature privilege should be granted for both `All` and `Read`.
+    subFeatures.privileges:
+      generate_report.disabled: true
+      store_search_session.disabled: true
+      url_create:
+        disabled: true
+        includeIn: "read"
+  ### Shared images feature is hidden in Role management since it's not needed.
+  filesSharedImage.hidden: true
+  ### Maps feature is hidden in Role management since it's automatically granted by Dashboard feature.
+  maps.hidden: true
+  ### Reporting feature is supposed to give access to reporting capabilities across different features.
+  reporting:
+    privileges:
+      all.composedOf:
+        - feature: "dashboard"
+          privileges: [ "download_csv_report" ]
+        - feature: "discover"
+          privileges: [ "generate_report" ]
+  ### Visualize feature is hidden in Role management since it's automatically granted by Dashboard feature.
+  visualize:
+    hidden: true
+    ### The short URL sub-feature privilege should be always granted.
+    subFeatures.privileges.url_create.includeIn: "read"
 
 # Cloud links
 xpack.cloud.base_url: 'https://cloud.elastic.co'
 
+# Disable preboot phase for serverless
+core.lifecycle.disablePreboot: true
+
 # Enable ZDT migration algorithm
 migrations.algorithm: zdt
+
+# Enable elasticsearch response size circuit breaker
+elasticsearch.maxResponseSize: "100mb"
 
 # Limit batch size to reduce possibility of failures.
 # A longer migration time is acceptable due to the ZDT algorithm.
@@ -41,10 +101,21 @@ xpack.index_management.enableIndexActions: false
 xpack.index_management.enableLegacyTemplates: false
 # Disable index stats information from Index Management UI
 xpack.index_management.enableIndexStats: false
+# Enable size and doc count information via metering API from Index Management UI
+xpack.index_management.enableSizeAndDocCount: true
+# Disable data stream stats information from Index Management UI
+xpack.index_management.enableDataStreamStats: false
 # Only limited index settings can be edited
 xpack.index_management.editableIndexSettings: limited
-# Disable Storage size column in the Data streams table from Index Management UI
-xpack.index_management.enableDataStreamsStorageColumn: false
+# Disable _source field in the Mappings editor's advanced options form from Index Management UI
+xpack.index_management.enableMappingsSourceFieldSection: false
+# Disable toggle for enabling data retention in DSL form from Index Management UI
+xpack.index_management.enableTogglingDataRetention: false
+# Disable project level rentention checks in DSL form from Index Management UI
+xpack.index_management.enableProjectLevelRetentionChecks: false
+
+# Disable Manage Processors UI in Ingest Pipelines
+xpack.ingest_pipelines.enableManageProcessors: false
 
 # Keep deeplinks visible so that they are shown in the sidenav
 dev_tools.deeplinks.navLinkStatus: visible
@@ -85,8 +156,9 @@ server.versioned.versionResolution: newest
 server.versioned.strictClientVersionCheck: false
 
 # Enforce single "default" space and disable feature visibility controls
-xpack.spaces.maxSpaces: 1
+xpack.spaces.maxSpaces: 100
 xpack.spaces.allowFeatureVisibility: false
+xpack.spaces.allowSolutionVisibility: false
 
 # Only display console autocomplete suggestions for ES endpoints that are available in serverless
 console.autocompleteDefinitions.endpointsAvailability: serverless
@@ -96,9 +168,6 @@ elasticsearch.ignoreVersionMismatch: true
 
 # Limit maxSockets to 800 as we do in ESS, which improves reliability under high loads.
 elasticsearch.maxSockets: 800
-
-# Enable dynamic config to be updated via the internal HTTP requests
-coreApp.allowDynamicConfigOverrides: true
 
 # Visualizations editors readonly settings
 vis_type_gauge.readOnly: true
@@ -123,33 +192,45 @@ xpack.alerting.rules.run.timeout: 1m
 xpack.alerting.rules.run.ruleTypeOverrides:
   - id: siem.indicatorRule
     timeout: 10m
+  - id: siem.eqlRule
+    timeout: 5m
 xpack.alerting.rules.minimumScheduleInterval.enforce: true
 xpack.alerting.rules.maxScheduledPerMinute: 400
 xpack.actions.run.maxAttempts: 10
 xpack.actions.queued.max: 10000
 
-# Disables ESQL in advanced settings (hides it from the UI)
 uiSettings:
   overrides:
-    discover:enableESQL: false
+    # Disables ESQL in advanced settings (hides it from the UI)
+    enableESQL: true
+    bfetch:disable: true
+    # Disables `Defer loading panels below "the fold"`
+    labs:dashboard:deferBelowFold: false
 
 # Task Manager
 xpack.task_manager.allow_reading_invalid_state: false
 xpack.task_manager.request_timeouts.update_by_query: 60000
+xpack.task_manager.metrics_reset_interval: 120000
 
 # Reporting feature
 xpack.screenshotting.enabled: false
 xpack.reporting.queue.pollInterval: 3m
 xpack.reporting.roles.enabled: false
 xpack.reporting.statefulSettings.enabled: false
+xpack.reporting.csv.maxConcurrentShardRequests: 0
 
 # Disabled Observability plugins
 xpack.ux.enabled: false
-xpack.monitoring.enabled: false
 xpack.legacy_uptime.enabled: false
+monitoring.enabled: false
 monitoring.ui.enabled: false
 
 ## Enable uiSettings validations
 xpack.securitySolution.enableUiSettingsValidations: true
 data.enableUiSettingsValidations: true
 discover.enableUiSettingsValidations: true
+
+## Data Usage in stack management
+xpack.dataUsage.enabled: true
+# This feature is disabled in Serverless until fully tested within a Serverless environment
+xpack.dataUsage.enableExperimental: ['dataUsageDisabled']

@@ -12,10 +12,6 @@ import { useUpdateTimerangeOnPageChange } from './search_bar/use_update_timerang
 import { useInitTimelineFromUrlParam } from './timeline/use_init_timeline_url_param';
 import { useSyncTimelineUrlParam } from './timeline/use_sync_timeline_url_param';
 import { useQueryTimelineByIdOnUrlChange } from './timeline/use_query_timeline_by_id_on_url_change';
-import { useInitFlyoutFromUrlParam } from './flyout/use_init_flyout_url_param';
-import { useSyncFlyoutUrlParam } from './flyout/use_sync_flyout_url_param';
-
-export const EXPANDABLE_FLYOUT_URL_KEY = 'eventFlyout' as const;
 
 export const useUrlState = () => {
   useSyncGlobalQueryString();
@@ -25,13 +21,14 @@ export const useUrlState = () => {
   useInitTimelineFromUrlParam();
   useSyncTimelineUrlParam();
   useQueryTimelineByIdOnUrlChange();
-  useInitFlyoutFromUrlParam();
-  useSyncFlyoutUrlParam();
 };
 
 export const URL_PARAM_KEY = {
   appQuery: 'query',
-  eventFlyout: EXPANDABLE_FLYOUT_URL_KEY,
+  /** @deprecated */
+  eventFlyout: 'eventFlyout', // TODO remove when we assume it's been long enough that all users should use the newer `flyout` key
+  flyout: 'flyout',
+  timelineFlyout: 'timelineFlyout',
   filters: 'filters',
   savedQuery: 'savedQuery',
   sourcerer: 'sourcerer',

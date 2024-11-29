@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import {
+import type {
   IScopedClusterClient,
+  IUiSettingsClient,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
@@ -18,14 +19,15 @@ import {
 } from '../../../../../common/es_fields/apm';
 import { alertingEsClient } from '../../alerting_es_client';
 import {
-  getServiceGroupFields,
-  getServiceGroupFieldsAgg,
-} from '../get_service_group_fields';
+  getApmAlertSourceFields,
+  getApmAlertSourceFieldsAgg,
+} from '../get_apm_alert_source_fields';
 
 export async function getServiceGroupFieldsForAnomaly({
   apmIndices,
   scopedClusterClient,
   serviceName,
+  uiSettingsClient,
   environment,
   transactionType,
   timestamp,
@@ -34,6 +36,7 @@ export async function getServiceGroupFieldsForAnomaly({
   apmIndices: APMIndices;
   scopedClusterClient: IScopedClusterClient;
   savedObjectsClient: SavedObjectsClientContract;
+  uiSettingsClient: IUiSettingsClient;
   serviceName: string;
   environment: string;
   transactionType: string;
@@ -64,7 +67,7 @@ export async function getServiceGroupFieldsForAnomaly({
         },
       },
       aggs: {
-        ...getServiceGroupFieldsAgg({
+        ...getApmAlertSourceFieldsAgg({
           sort: [{ [TRANSACTION_DURATION]: { order: 'desc' as const } }],
         }),
       },
@@ -73,10 +76,12 @@ export async function getServiceGroupFieldsForAnomaly({
 
   const response = await alertingEsClient({
     scopedClusterClient,
+    uiSettingsClient,
     params,
   });
+
   if (!response.aggregations) {
     return {};
   }
-  return getServiceGroupFields(response.aggregations);
+  return getApmAlertSourceFields(response.aggregations);
 }

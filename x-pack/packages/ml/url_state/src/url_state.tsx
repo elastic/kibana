@@ -14,6 +14,7 @@ import React, {
   useRef,
   useEffect,
   type FC,
+  type PropsWithChildren,
 } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { isEqual } from 'lodash';
@@ -23,11 +24,21 @@ import { decode, encode } from '@kbn/rison';
 
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
-import { distinctUntilChanged } from 'rxjs/operators';
+import { distinctUntilChanged } from 'rxjs';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 export interface Dictionary<TValue> {
   [id: string]: TValue;
+}
+
+export interface ListingPageUrlState {
+  pageSize: number;
+  pageIndex: number;
+  sortField: string;
+  sortDirection: string;
+  queryText?: string;
+  showPerPageOptions?: boolean;
+  showAll?: boolean;
 }
 
 export type Accessor = '_a' | '_g';
@@ -56,7 +67,7 @@ export function isRisonSerializationRequired(queryParam: string): boolean {
 }
 
 export function parseUrlState(search: string): Dictionary<any> {
-  const urlState: Dictionary<any> = {};
+  const urlState: Dictionary<any> = Object.create(null);
   const parsedQueryString = parse(search, { sort: false });
 
   try {
@@ -91,7 +102,7 @@ export const urlStateStore = createContext<UrlState>({
 
 export const { Provider } = urlStateStore;
 
-export const UrlStateProvider: FC = ({ children }) => {
+export const UrlStateProvider: FC<PropsWithChildren<unknown>> = ({ children }) => {
   const history = useHistory();
   const { search: searchString } = useLocation();
 
@@ -113,8 +124,8 @@ export const UrlStateProvider: FC = ({ children }) => {
       const urlState = parseUrlState(prevSearchString);
       const parsedQueryString = parse(prevSearchString, { sort: false });
 
-      if (!Object.prototype.hasOwnProperty.call(urlState, accessor)) {
-        urlState[accessor] = {};
+      if (!Object.hasOwn(urlState, accessor)) {
+        urlState[accessor] = Object.create(null);
       }
 
       if (typeof attribute === 'string') {
@@ -240,7 +251,7 @@ export class PageUrlStateService<T> {
   }
 }
 
-interface PageUrlState {
+export interface PageUrlState {
   pageKey: string;
   pageUrlState: object;
 }

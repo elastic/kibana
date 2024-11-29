@@ -24,8 +24,7 @@ describe('TimestampTooltip', () => {
   afterAll(() => moment.tz.setDefault(''));
 
   it('should render component with relative time in body and absolute time in tooltip', () => {
-    expect(shallow(<TimestampTooltip time={timestamp} />))
-      .toMatchInlineSnapshot(`
+    expect(shallow(<TimestampTooltip time={timestamp} />)).toMatchInlineSnapshot(`
       <EuiToolTip
         content="Oct 10, 2019, 08:06:40.123 (UTC-7)"
         delay="regular"

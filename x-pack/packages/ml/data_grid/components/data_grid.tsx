@@ -144,7 +144,7 @@ export const DataGrid: FC<Props> = memo(
         invalidSortingColumnns.forEach((columnId) => {
           toastNotifications.addDanger(
             i18n.translate('xpack.ml.dataGrid.invalidSortingColumnError', {
-              defaultMessage: `The column '{columnId}' cannot be used for sorting.`,
+              defaultMessage: `The column ''{columnId}'' cannot be used for sorting.`,
               values: { columnId },
             })
           );
@@ -154,7 +154,9 @@ export const DataGrid: FC<Props> = memo(
 
     const wrapperEl = useRef<HTMLDivElement>(null);
 
-    if (status === INDEX_STATUS.LOADED && data.length === 0) {
+    // `UNUSED` occurs if we were not able to identify populated fields, because
+    // then the query to fetch actual docs would not have triggered yet.
+    if ((status === INDEX_STATUS.UNUSED || status === INDEX_STATUS.LOADED) && data.length === 0) {
       return (
         <div data-test-subj={`${dataTestSubj} empty`}>
           {isWithHeader(props) && <DataGridTitle title={props.title} />}

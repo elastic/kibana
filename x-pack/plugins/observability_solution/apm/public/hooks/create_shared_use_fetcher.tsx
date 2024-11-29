@@ -6,10 +6,7 @@
  */
 import React, { createContext, useContext, useMemo } from 'react';
 import type { APIEndpoint } from '../../server';
-import type {
-  APIClientRequestParamsOf,
-  APIReturnType,
-} from '../services/rest/create_call_apm_api';
+import type { APIClientRequestParamsOf, APIReturnType } from '../services/rest/create_call_apm_api';
 import { useFetcher, FetcherResult } from './use_fetcher';
 
 interface SharedUseFetcher<TEndpoint extends APIEndpoint> {
@@ -27,11 +24,9 @@ interface SharedUseFetcher<TEndpoint extends APIEndpoint> {
 export function createSharedUseFetcher<TEndpoint extends APIEndpoint>(
   endpoint: TEndpoint
 ): SharedUseFetcher<TEndpoint> {
-  const Context = createContext<
-    APIClientRequestParamsOf<APIEndpoint> | undefined
-  >(undefined);
+  const Context = createContext<APIClientRequestParamsOf<APIEndpoint> | undefined>(undefined);
 
-  const returnValue: SharedUseFetcher<TEndpoint> = {
+  const returnValue: SharedUseFetcher<APIEndpoint> = {
     useFetcherResult: () => {
       const context = useContext(Context);
 
@@ -39,20 +34,16 @@ export function createSharedUseFetcher<TEndpoint extends APIEndpoint>(
         throw new Error('Context was not found');
       }
 
-      const params = context.params;
+      const params = 'params' in context ? context.params : undefined;
 
       const result = useFetcher(
         (callApmApi) => {
-          return callApmApi(
-            ...([endpoint, { params }] as Parameters<typeof callApmApi>)
-          );
+          return callApmApi(endpoint, ...((params ? [{ params }] : []) as any));
         },
         [params]
       );
 
-      return result as ReturnType<
-        SharedUseFetcher<TEndpoint>['useFetcherResult']
-      >;
+      return result as ReturnType<SharedUseFetcher<APIEndpoint>['useFetcherResult']>;
     },
     Provider: (props) => {
       const { children } = props;
@@ -62,9 +53,7 @@ export function createSharedUseFetcher<TEndpoint extends APIEndpoint>(
       const memoizedParams = useMemo(() => {
         return { params };
       }, [params]);
-      return (
-        <Context.Provider value={memoizedParams}>{children}</Context.Provider>
-      );
+      return <Context.Provider value={memoizedParams}>{children}</Context.Provider>;
     },
   };
 

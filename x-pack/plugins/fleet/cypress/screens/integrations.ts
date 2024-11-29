@@ -38,7 +38,8 @@ export const SETTINGS = {
 export const POLICY_EDITOR = {
   POLICY_NAME_INPUT: 'packagePolicyNameInput',
   DATASET_SELECT: 'datasetComboBox',
-  AGENT_POLICY_SELECT: 'agentPolicySelect',
+  AGENT_POLICY_SELECT: 'agentPolicyMultiSelect',
+  AGENT_POLICY_CLEAR: 'comboBoxClearButton',
   INSPECT_PIPELINES_BTN: 'datastreamInspectPipelineBtn',
   EDIT_MAPPINGS_BTN: 'datastreamEditMappingsBtn',
   CREATE_MAPPINGS_BTN: 'datastreamAddCustomComponentTemplateBtn',

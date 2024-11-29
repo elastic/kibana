@@ -4,31 +4,48 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiCallOut } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
+import { FilterStateStore } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { ALL_VALUE, SyntheticsAvailabilityIndicator } from '@kbn/slo-schema';
+import {
+  ALL_VALUE,
+  FiltersSchema,
+  QuerySchema,
+  SyntheticsAvailabilityIndicator,
+} from '@kbn/slo-schema';
+import moment from 'moment';
+import React, { useEffect, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
-import { FieldSelector } from '../synthetics_common/field_selector';
+import { DATA_VIEW_FIELD } from '../custom_common/index_selection';
+import { useCreateDataView } from '../../../../hooks/use_create_data_view';
+import { formatAllFilters } from '../../helpers/format_filters';
 import { CreateSLOForm } from '../../types';
 import { DataPreviewChart } from '../common/data_preview_chart';
+import { GroupByCardinality } from '../common/group_by_cardinality';
 import { QueryBuilder } from '../common/query_builder';
-
-const ONE_DAY_IN_MILLISECONDS = 1 * 60 * 60 * 1000 * 24;
+import { FieldSelector } from '../synthetics_common/field_selector';
 
 export function SyntheticsAvailabilityIndicatorTypeForm() {
-  const { watch } = useFormContext<CreateSLOForm<SyntheticsAvailabilityIndicator>>();
+  const { watch, setValue, getValues } =
+    useFormContext<CreateSLOForm<SyntheticsAvailabilityIndicator>>();
+  const dataViewId = watch(DATA_VIEW_FIELD);
 
-  const [monitorIds = [], projects = [], tags = [], index] = watch([
+  const [monitorIds = [], projects = [], tags = [], index, globalFilters] = watch([
     'indicator.params.monitorIds',
     'indicator.params.projects',
     'indicator.params.tags',
     'indicator.params.index',
+    'indicator.params.filter',
   ]);
 
+  const { dataView } = useCreateDataView({
+    indexPatternString: index,
+    dataViewId,
+  });
+
   const [range, _] = useState({
-    start: new Date().getTime() - ONE_DAY_IN_MILLISECONDS,
-    end: new Date().getTime(),
+    from: moment().subtract(1, 'day').toDate(),
+    to: new Date(),
   });
 
   const filters = {
@@ -36,6 +53,25 @@ export function SyntheticsAvailabilityIndicatorTypeForm() {
     projects: projects.map((project) => project.value).filter((id) => id !== ALL_VALUE),
     tags: tags.map((tag) => tag.value).filter((id) => id !== ALL_VALUE),
   };
+  const groupByCardinalityFilters = getGroupByCardinalityFilters(
+    filters.monitorIds,
+    filters.projects,
+    filters.tags
+  );
+  const allFilters = formatAllFilters(globalFilters, groupByCardinalityFilters);
+
+  const currentMonitors = getValues('indicator.params.monitorIds');
+
+  useEffect(() => {
+    if (!currentMonitors || !currentMonitors.length) {
+      setValue('indicator.params.monitorIds', [
+        {
+          value: '*',
+          label: 'All',
+        },
+      ]);
+    }
+  }, [currentMonitors, setValue]);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="l">
@@ -98,7 +134,7 @@ export function SyntheticsAvailabilityIndicatorTypeForm() {
         <EuiFlexItem>
           <QueryBuilder
             dataTestSubj="syntheticsAvailabilityFilterInput"
-            indexPatternString={index}
+            dataView={dataView}
             label={i18n.translate('xpack.slo.sloEdit.syntheticsAvailability.filter', {
               defaultMessage: 'Query filter',
             })}
@@ -121,11 +157,12 @@ export function SyntheticsAvailabilityIndicatorTypeForm() {
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-
-      <EuiCallOut
-        size="s"
-        title="Synthetics availability SLIs are automatically grouped by monitor and location"
-        iconType="iInCircle"
+      <GroupByCardinality
+        titleAppend={i18n.translate('xpack.slo.sloEdit.syntheticsAvailability.warning', {
+          defaultMessage:
+            'Synthetics availability SLIs are automatically grouped by monitor and location.',
+        })}
+        customFilters={allFilters as QuerySchema}
       />
       <DataPreviewChart range={range} label={LABEL} useGoodBadEventsChart />
     </EuiFlexGroup>
@@ -135,3 +172,89 @@ export function SyntheticsAvailabilityIndicatorTypeForm() {
 const LABEL = i18n.translate('xpack.slo.sloEdit.dataPreviewChart.syntheticsAvailability.xTitle', {
   defaultMessage: 'Last 24 hours',
 });
+
+export const getGroupByCardinalityFilters = (
+  monitorIds: string[],
+  projects: string[],
+  tags: string[]
+): FiltersSchema => {
+  const monitorIdFilters = monitorIds.length
+    ? {
+        meta: {
+          disabled: false,
+          negate: false,
+          alias: null,
+          key: 'monitor.id',
+          params: monitorIds,
+          type: 'phrases',
+        },
+        $state: {
+          store: FilterStateStore.APP_STATE,
+        },
+        query: {
+          bool: {
+            minimum_should_match: 1,
+            should: monitorIds.map((id) => ({
+              match_phrase: {
+                'monitor.id': id,
+              },
+            })),
+          },
+        },
+      }
+    : null;
+
+  const projectFilters = projects.length
+    ? {
+        meta: {
+          disabled: false,
+          negate: false,
+          alias: null,
+          key: 'monitor.project.id',
+          params: projects,
+          type: 'phrases',
+        },
+        $state: {
+          store: FilterStateStore.APP_STATE,
+        },
+        query: {
+          bool: {
+            minimum_should_match: 1,
+            should: projects.map((id) => ({
+              match_phrase: {
+                'monitor.project.id': id,
+              },
+            })),
+          },
+        },
+      }
+    : null;
+
+  const tagFilters = tags.length
+    ? {
+        meta: {
+          disabled: false,
+          negate: false,
+          alias: null,
+          key: 'tags',
+          params: tags,
+          type: 'phrases',
+        },
+        $state: {
+          store: FilterStateStore.APP_STATE,
+        },
+        query: {
+          bool: {
+            minimum_should_match: 1,
+            should: tags.map((tag) => ({
+              match_phrase: {
+                tags: tag,
+              },
+            })),
+          },
+        },
+      }
+    : null;
+
+  return [monitorIdFilters, projectFilters, tagFilters].filter((value) => !!value) as FiltersSchema;
+};

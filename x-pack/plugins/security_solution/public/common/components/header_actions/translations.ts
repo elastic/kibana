@@ -14,20 +14,6 @@ export const OPEN_SESSION_VIEW = i18n.translate(
   }
 );
 
-export const NOTES_DISABLE_TOOLTIP = i18n.translate(
-  'xpack.securitySolution.timeline.body.notes.disableEventTooltip',
-  {
-    defaultMessage: 'Notes may not be added here while editing a template timeline',
-  }
-);
-
-export const NOTES_TOOLTIP = i18n.translate(
-  'xpack.securitySolution.timeline.body.notes.addNoteTooltip',
-  {
-    defaultMessage: 'Add note',
-  }
-);
-
 export const SORT_FIELDS = i18n.translate('xpack.securitySolution.timeline.sortFieldsButton', {
   defaultMessage: 'Sort fields',
 });
@@ -62,21 +48,6 @@ export const ACTION_INVESTIGATE_IN_RESOLVER = i18n.translate(
     defaultMessage: 'Analyze event',
   }
 );
-
-export const CHECKBOX_FOR_ROW = ({
-  ariaRowindex,
-  columnValues,
-  checked,
-}: {
-  ariaRowindex: number;
-  columnValues: string;
-  checked: boolean;
-}) =>
-  i18n.translate('xpack.securitySolution.hoverActions.checkboxForRowAriaLabel', {
-    values: { ariaRowindex, checked, columnValues },
-    defaultMessage:
-      '{checked, select, false {unchecked} true {checked}} checkbox for the alert or event in row {ariaRowindex}, with columns {columnValues}',
-  });
 
 export const ACTION_INVESTIGATE_IN_RESOLVER_FOR_ROW = ({
   ariaRowindex,
@@ -125,9 +96,9 @@ export const PIN_EVENT_FOR_ROW = ({
   isEventPinned: boolean;
 }) =>
   i18n.translate('xpack.securitySolution.hoverActions.pinEventForRowAriaLabel', {
-    values: { ariaRowindex, columnValues, isEventPinned },
     defaultMessage:
-      '{isEventPinned, select, false {Pin} true {Unpin}} the event in row {ariaRowindex} to timeline, with columns {columnValues}',
+      '{isEventPinned, select, true {Unpin} other {Pin} } the event in row {ariaRowindex} to timeline, with columns {columnValues}',
+    values: { ariaRowindex, columnValues, isEventPinned },
   });
 
 export const MORE_ACTIONS_FOR_ROW = ({

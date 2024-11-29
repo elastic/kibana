@@ -10,6 +10,7 @@
 
 import { offeringBasedSchema, schema, TypeOf } from '@kbn/config-schema';
 import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
+import { DEFAULT_ANNOTATION_INDEX } from '../common/annotations';
 import type { ObservabilityPluginSetup } from './plugin';
 import { createOrUpdateIndex, Mappings } from './utils/create_or_update_index';
 import { createOrUpdateIndexTemplate } from './utils/create_or_update_index_template';
@@ -20,7 +21,14 @@ import {
   WrappedElasticsearchClientError,
 } from '../common/utils/unwrap_es_response';
 
-export { rangeQuery, kqlQuery, termQuery, termsQuery, wildcardQuery } from './utils/queries';
+export {
+  rangeQuery,
+  kqlQuery,
+  termQuery,
+  termsQuery,
+  wildcardQuery,
+  existsQuery,
+} from './utils/queries';
 export { getParsedFilterQuery } from './utils/get_parsed_filtered_query';
 export { getInspectResponse } from '../common/utils/get_inspect_response';
 
@@ -29,7 +37,7 @@ export * from './types';
 const configSchema = schema.object({
   annotations: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
-    index: schema.string({ defaultValue: 'observability-annotations' }),
+    index: schema.string({ defaultValue: DEFAULT_ANNOTATION_INDEX }),
   }),
   unsafe: schema.object({
     alertDetails: schema.object({
@@ -51,6 +59,9 @@ const configSchema = schema.object({
         serverless: schema.boolean({ defaultValue: false }),
         traditional: schema.boolean({ defaultValue: false }),
       }),
+    }),
+    ruleFormV2: schema.object({
+      enabled: schema.boolean({ defaultValue: false }),
     }),
   }),
   customThresholdRule: schema.object({
@@ -74,6 +85,7 @@ export const config: PluginConfigDescriptor = {
   deprecations: ({ unused }) => [
     unused('unsafe.thresholdRule.enabled', { level: 'warning' }),
     unused('unsafe.alertDetails.logs.enabled', { level: 'warning' }),
+    unused('unsafe.alertDetails.metrics.enabled', { level: 'warning' }),
     unused('unsafe.alertDetails.observability.enabled', { level: 'warning' }),
   ],
 };

@@ -22,13 +22,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import dateMath from '@kbn/datemath';
 import { i18n } from '@kbn/i18n';
-import { ENABLE_ASSET_CRITICALITY_SETTING } from '../../../../common/constants';
-import { useKibana, useUiSetting$ } from '../../../common/lib/kibana/kibana_react';
-
+import { useKibana } from '../../../common/lib/kibana/kibana_react';
 import { EntityDetailsLeftPanelTab } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
-
 import { InspectButton, InspectButtonContainer } from '../../../common/components/inspect';
-import { ONE_WEEK_IN_HOURS } from '../../../timelines/components/side_panel/new_user_detail/constants';
+import { ONE_WEEK_IN_HOURS } from '../../../flyout/entity_details/shared/constants';
 import { FormattedRelativePreferenceDate } from '../../../common/components/formatted_date';
 import { RiskScoreEntity } from '../../../../common/entity_analytics/risk_engine';
 import { VisualizationEmbeddable } from '../../../common/components/visualization_actions/visualization_embeddable';
@@ -37,7 +34,7 @@ import type { RiskScoreState } from '../../api/hooks/use_risk_score';
 import { getRiskScoreSummaryAttributes } from '../../lens_attributes/risk_score_summary';
 
 import {
-  buildColumns,
+  columnsArray,
   getEntityData,
   getItems,
   isUserRiskData,
@@ -46,17 +43,22 @@ import {
   LENS_VISUALIZATION_MIN_WIDTH,
   SUMMARY_TABLE_MIN_WIDTH,
 } from './common';
+import { EntityEventTypes } from '../../../common/lib/telemetry';
 
 export interface RiskSummaryProps<T extends RiskScoreEntity> {
   riskScoreData: RiskScoreState<T>;
+  recalculatingScore: boolean;
   queryId: string;
-  openDetailsPanel: (tab: EntityDetailsLeftPanelTab) => void;
+  openDetailsPanel?: (tab: EntityDetailsLeftPanelTab) => void;
+  isPreviewMode?: boolean;
 }
 
-const RiskSummaryComponent = <T extends RiskScoreEntity>({
+const FlyoutRiskSummaryComponent = <T extends RiskScoreEntity>({
   riskScoreData,
+  recalculatingScore,
   queryId,
   openDetailsPanel,
+  isPreviewMode,
 }: RiskSummaryProps<T>) => {
   const { telemetry } = useKibana().services;
   const { data } = riskScoreData;
@@ -77,24 +79,13 @@ const RiskSummaryComponent = <T extends RiskScoreEntity>({
   }, [entityData?.name, entityData?.risk?.calculated_level, riskData]);
 
   const xsFontSize = useEuiFontSize('xxs').fontSize;
-
-  const [isAssetCriticalityEnabled] = useUiSetting$<boolean>(ENABLE_ASSET_CRITICALITY_SETTING);
-
-  const columns = useMemo(
-    () => buildColumns(isAssetCriticalityEnabled),
-    [isAssetCriticalityEnabled]
-  );
-
-  const rows = useMemo(
-    () => getItems(entityData, isAssetCriticalityEnabled),
-    [entityData, isAssetCriticalityEnabled]
-  );
+  const rows = useMemo(() => getItems(entityData), [entityData]);
 
   const onToggle = useCallback(
-    (isOpen) => {
+    (isOpen: boolean) => {
       const entity = isUserRiskData(riskData) ? 'user' : 'host';
 
-      telemetry.reportToggleRiskSummaryClicked({
+      telemetry.reportEvent(EntityEventTypes.ToggleRiskSummaryClicked, {
         entity,
         action: isOpen ? 'show' : 'hide',
       });
@@ -108,7 +99,7 @@ const RiskSummaryComponent = <T extends RiskScoreEntity>({
         'xpack.securitySolution.flyout.entityDetails.riskSummary.casesAttachmentLabel',
         {
           defaultMessage:
-            'Risk score for {entityType, select, host {host} user {user}} {entityName}',
+            'Risk score for {entityType, select, user {user} other {host}} {entityName}',
           values: {
             entityName: entityData?.name,
             entityType: isUserRiskData(riskData) ? 'user' : 'host',
@@ -119,11 +110,13 @@ const RiskSummaryComponent = <T extends RiskScoreEntity>({
     [entityData?.name, riskData]
   );
 
+  const riskDataTimestamp = riskData?.['@timestamp'];
   const timerange = useMemo(() => {
     const from = dateMath.parse(LAST_30_DAYS.from)?.toISOString() ?? LAST_30_DAYS.from;
     const to = dateMath.parse(LAST_30_DAYS.to)?.toISOString() ?? LAST_30_DAYS.to;
     return { from, to };
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [riskDataTimestamp]); // Update the timerange whenever the risk score timestamp changes to include new entries
 
   return (
     <EuiAccordion
@@ -182,16 +175,20 @@ const RiskSummaryComponent = <T extends RiskScoreEntity>({
               defaultMessage="View risk contributions"
             />
           ),
-          link: {
-            callback: () => openDetailsPanel(EntityDetailsLeftPanelTab.RISK_INPUTS),
-            tooltip: (
-              <FormattedMessage
-                id="xpack.securitySolution.flyout.entityDetails.showAllRiskInputs"
-                defaultMessage="Show all risk inputs"
-              />
-            ),
-          },
-          iconType: 'arrowStart',
+          link: riskScoreData.loading
+            ? undefined
+            : {
+                callback: openDetailsPanel
+                  ? () => openDetailsPanel(EntityDetailsLeftPanelTab.RISK_INPUTS)
+                  : undefined,
+                tooltip: (
+                  <FormattedMessage
+                    id="xpack.securitySolution.flyout.entityDetails.showAllRiskInputs"
+                    defaultMessage="Show all risk inputs"
+                  />
+                ),
+              },
+          iconType: !isPreviewMode ? 'arrowStart' : undefined,
         }}
         expand={{
           expandable: false,
@@ -261,10 +258,11 @@ const RiskSummaryComponent = <T extends RiskScoreEntity>({
                 </div>
                 <EuiBasicTable
                   data-test-subj="risk-summary-table"
-                  responsive={false}
-                  columns={columns}
+                  responsiveBreakpoint={false}
+                  columns={columnsArray}
                   items={rows}
                   compressed
+                  loading={riskScoreData.loading || recalculatingScore}
                 />
               </div>
             </InspectButtonContainer>
@@ -276,5 +274,5 @@ const RiskSummaryComponent = <T extends RiskScoreEntity>({
   );
 };
 
-export const RiskSummary = React.memo(RiskSummaryComponent);
-RiskSummary.displayName = 'RiskSummary';
+export const FlyoutRiskSummary = React.memo(FlyoutRiskSummaryComponent);
+FlyoutRiskSummary.displayName = 'RiskSummary';

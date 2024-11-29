@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { ReactNode, useCallback, useState } from 'react';
@@ -37,6 +38,8 @@ export type TableListViewProps<T extends UserContentCommonSchema = UserContentCo
   | 'contentEditor'
   | 'titleColumnName'
   | 'withoutPageTemplateWrapper'
+  | 'createdByEnabled'
+  | 'recentlyAccessed'
 > & {
   title: string;
   description?: string;
@@ -73,6 +76,8 @@ export const TableListView = <T extends UserContentCommonSchema>({
   titleColumnName,
   additionalRightSideActions,
   withoutPageTemplateWrapper,
+  createdByEnabled,
+  recentlyAccessed,
 }: TableListViewProps<T>) => {
   const PageTemplate = withoutPageTemplateWrapper
     ? (React.Fragment as unknown as typeof KibanaPageTemplate)
@@ -121,6 +126,8 @@ export const TableListView = <T extends UserContentCommonSchema>({
           withoutPageTemplateWrapper={withoutPageTemplateWrapper}
           onFetchSuccess={onFetchSuccess}
           setPageDataTestSubject={setPageDataTestSubject}
+          createdByEnabled={createdByEnabled}
+          recentlyAccessed={recentlyAccessed}
         />
       </KibanaPageTemplate.Section>
     </PageTemplate>

@@ -19,7 +19,7 @@ import { truncate, unit } from '../../../../../utils/style';
 import { ApmRoutes } from '../../../../routing/apm_route_config';
 import { PopoverTooltip } from '../../../popover_tooltip';
 import { TruncateWithTooltip } from '../../../truncate_with_tooltip';
-import { OTHER_SERVICE_NAME, MaxGroupsMessage } from '../max_groups_message';
+import { MaxGroupsMessage, OTHER_SERVICE_NAME } from '../max_groups_message';
 
 const StyledLink = euiStyled(EuiLink)`${truncate('100%')};`;
 
@@ -33,12 +33,8 @@ interface ServiceLinkProps {
   serviceName: string;
   serviceOverflowCount?: number;
 }
-export function ServiceLink({
-  agentName,
-  query,
-  serviceName,
-}: ServiceLinkProps) {
-  const { link } = useApmRouter();
+export function ServiceLink({ agentName, query, serviceName }: ServiceLinkProps) {
+  const apmRouter = useApmRouter();
 
   const serviceLink = isMobileAgentName(agentName)
     ? '/mobile-services/{serviceName}/overview'
@@ -48,10 +44,7 @@ export function ServiceLink({
     return (
       <EuiFlexGroup alignItems="center" gutterSize="xs">
         <EuiFlexItem grow={false}>
-          <EuiText
-            grow={false}
-            style={{ fontStyle: 'italic', fontSize: '1rem' }}
-          >
+          <EuiText grow={false} style={{ fontStyle: 'italic', fontSize: '1rem' }}>
             {i18n.translate('xpack.apm.serviceLink.otherBucketName', {
               defaultMessage: 'Remaining Services',
             })}
@@ -81,14 +74,14 @@ export function ServiceLink({
       content={
         <StyledLink
           data-test-subj={`serviceLink_${agentName}`}
-          href={link(serviceLink, {
+          href={apmRouter.link(serviceLink, {
             path: { serviceName },
             query,
           })}
         >
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
             <EuiFlexItem grow={false}>
-              <AgentIcon agentName={agentName} size="l" />
+              <AgentIcon agentName={agentName} size="l" role="presentation" />
             </EuiFlexItem>
             <EuiFlexItem className="eui-textTruncate">
               <span className="eui-textTruncate">{serviceName}</span>

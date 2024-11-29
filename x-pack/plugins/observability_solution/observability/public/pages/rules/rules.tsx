@@ -6,13 +6,14 @@
  */
 
 import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
+import { RuleTypeModal } from '@kbn/alerts-ui-shared/src/rule_type_modal';
+import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { useLoadRuleTypesQuery } from '@kbn/triggers-actions-ui-plugin/public';
-import React, { lazy, useState } from 'react';
+import React, { lazy, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { observabilityRuleCreationValidConsumers } from '../../../common/constants';
 import { RULES_LOGS_PATH, RULES_PATH } from '../../../common/locators/paths';
@@ -21,6 +22,7 @@ import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useKibana } from '../../utils/kibana_react';
 import { HeaderMenu } from '../overview/components/header_menu/header_menu';
 import { RulesTab } from './rules_tab';
+import { useGetAvailableRulesWithDescriptions } from '../../hooks/use_get_available_rules_with_descriptions';
 
 const GlobalLogsTab = lazy(() => import('./global_logs_tab'));
 
@@ -33,27 +35,39 @@ export function RulesPage({ activeTab = RULES_TAB_NAME }: RulesPageProps) {
   const {
     http,
     docLinks,
-    triggersActionsUi: { getAddRuleFlyout: AddRuleFlyout, getRulesSettingsLink: RulesSettingsLink },
+    notifications: { toasts },
+    observabilityAIAssistant,
+    triggersActionsUi: {
+      ruleTypeRegistry,
+      getAddRuleFlyout: AddRuleFlyout,
+      getRulesSettingsLink: RulesSettingsLink,
+    },
+    serverless,
   } = useKibana().services;
   const { ObservabilityPageTemplate } = usePluginContext();
   const history = useHistory();
+  const [ruleTypeModalVisibility, setRuleTypeModalVisibility] = useState<boolean>(false);
+  const [ruleTypeIdToCreate, setRuleTypeIdToCreate] = useState<string | undefined>(undefined);
   const [addRuleFlyoutVisibility, setAddRuleFlyoutVisibility] = useState(false);
   const [stateRefresh, setRefresh] = useState(new Date());
 
-  useBreadcrumbs([
-    {
-      text: i18n.translate('xpack.observability.breadcrumbs.alertsLinkText', {
-        defaultMessage: 'Alerts',
-      }),
-      href: http.basePath.prepend('/app/observability/alerts'),
-      deepLinkId: 'observability-overview:alerts',
-    },
-    {
-      text: i18n.translate('xpack.observability.breadcrumbs.rulesLinkText', {
-        defaultMessage: 'Rules',
-      }),
-    },
-  ]);
+  useBreadcrumbs(
+    [
+      {
+        text: i18n.translate('xpack.observability.breadcrumbs.alertsLinkText', {
+          defaultMessage: 'Alerts',
+        }),
+        href: http.basePath.prepend('/app/observability/alerts'),
+        deepLinkId: 'observability-overview:alerts',
+      },
+      {
+        text: i18n.translate('xpack.observability.breadcrumbs.rulesLinkText', {
+          defaultMessage: 'Rules',
+        }),
+      },
+    ],
+    { serverless }
+  );
 
   const filteredRuleTypes = useGetFilteredRuleTypes();
   const {
@@ -64,8 +78,37 @@ export function RulesPage({ activeTab = RULES_TAB_NAME }: RulesPageProps) {
 
   const authorizedRuleTypes = [...ruleTypes.values()];
   const authorizedToCreateAnyRules = authorizedRuleTypes.some(
-    (ruleType) => ruleType.authorizedConsumers[ALERTS_FEATURE_ID]?.all
+    (ruleType) => ruleType.authorizedConsumers[ALERTING_FEATURE_ID]?.all
   );
+
+  const { setScreenContext } = observabilityAIAssistant?.service || {};
+
+  const ruleTypesWithDescriptions = useGetAvailableRulesWithDescriptions();
+
+  useEffect(() => {
+    return setScreenContext?.({
+      screenDescription: `The rule types that are available are: ${JSON.stringify(
+        ruleTypesWithDescriptions
+      )}`,
+      starterPrompts: [
+        {
+          title: i18n.translate(
+            'xpack.observability.aiAssistant.starterPrompts.explainRules.title',
+            {
+              defaultMessage: 'Explain',
+            }
+          ),
+          prompt: i18n.translate(
+            'xpack.observability.aiAssistant.starterPrompts.explainRules.prompt',
+            {
+              defaultMessage: `Can you explain the rule types that are available?`,
+            }
+          ),
+          icon: 'sparkles',
+        },
+      ],
+    });
+  }, [filteredRuleTypes, ruleTypesWithDescriptions, setScreenContext]);
 
   const tabs = [
     {
@@ -96,7 +139,7 @@ export function RulesPage({ activeTab = RULES_TAB_NAME }: RulesPageProps) {
             fill
             iconType="plusInCircle"
             key="create-alert"
-            onClick={() => setAddRuleFlyoutVisibility(true)}
+            onClick={() => setRuleTypeModalVisibility(true)}
           >
             <FormattedMessage
               id="xpack.observability.rules.addRuleButtonLabel"
@@ -141,9 +184,26 @@ export function RulesPage({ activeTab = RULES_TAB_NAME }: RulesPageProps) {
         </EuiFlexItem>
       </EuiFlexGroup>
 
+      {ruleTypeModalVisibility && (
+        <RuleTypeModal
+          onClose={() => setRuleTypeModalVisibility(false)}
+          onSelectRuleType={(ruleTypeId) => {
+            setRuleTypeIdToCreate(ruleTypeId);
+            setRuleTypeModalVisibility(false);
+            setAddRuleFlyoutVisibility(true);
+          }}
+          http={http}
+          toasts={toasts}
+          registeredRuleTypes={ruleTypeRegistry.list()}
+          filteredRuleTypes={filteredRuleTypes}
+        />
+      )}
+
       {addRuleFlyoutVisibility && (
         <AddRuleFlyout
-          consumer={ALERTS_FEATURE_ID}
+          ruleTypeId={ruleTypeIdToCreate}
+          canChangeTrigger={false}
+          consumer={ALERTING_FEATURE_ID}
           filteredRuleTypes={filteredRuleTypes}
           validConsumers={observabilityRuleCreationValidConsumers}
           initialSelectedConsumer={AlertConsumers.LOGS}

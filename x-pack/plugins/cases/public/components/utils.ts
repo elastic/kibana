@@ -13,11 +13,17 @@ import type {
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import type { ConnectorTypeFields } from '../../common/types/domain';
-import { ConnectorTypes } from '../../common/types/domain';
+import { ConnectorTypes, CustomFieldTypes } from '../../common/types/domain';
 import type { CasesPublicStartDependencies } from '../types';
 import { connectorValidator as swimlaneConnectorValidator } from './connectors/swimlane/validator';
 import type { CaseActionConnector } from './types';
-import type { CaseUser, CaseUsers } from '../../common/ui/types';
+import type {
+  CasesConfigurationUI,
+  CaseUI,
+  CaseUICustomField,
+  CaseUser,
+  CaseUsers,
+} from '../../common/ui/types';
 import { convertToCaseUserWithProfileInfo } from './user_profiles/user_converter';
 import type { CaseUserWithProfileInfo } from './user_profiles/types';
 
@@ -228,10 +234,93 @@ export const parseCaseUsers = ({
   return { userProfiles, reporterAsArray };
 };
 
-export const convertCustomFieldValue = (value: string | boolean) => {
+export const convertCustomFieldValue = ({
+  value,
+  type,
+}: {
+  value: string | number | boolean | null;
+  type: CustomFieldTypes;
+}) => {
   if (typeof value === 'string' && isEmpty(value)) {
     return null;
   }
 
+  if (type === CustomFieldTypes.NUMBER) {
+    if (value !== null && Number.isSafeInteger(Number(value))) {
+      return Number(value);
+    } else {
+      return null;
+    }
+  }
+
   return value;
+};
+
+export const addOrReplaceField = <T extends { key: string }>(fields: T[], fieldToAdd: T): T[] => {
+  const foundFieldIndex = fields.findIndex((field) => field.key === fieldToAdd.key);
+
+  if (foundFieldIndex === -1) {
+    return [...fields, fieldToAdd];
+  }
+
+  return fields.map((field) => {
+    if (field.key !== fieldToAdd.key) {
+      return field;
+    }
+
+    return fieldToAdd;
+  });
+};
+
+export function removeEmptyFields<T extends Record<string, unknown>>(obj: T): Partial<T> {
+  return Object.fromEntries(
+    Object.entries(obj)
+      .filter(([_, value]) => !isEmpty(value) || typeof value === 'boolean')
+      .map(([key, value]) => [
+        key,
+        value === Object(value) && !Array.isArray(value)
+          ? removeEmptyFields(value as Record<string, unknown>)
+          : value,
+      ])
+  ) as T;
+}
+
+export const customFieldsFormDeserializer = (
+  customFields?: CaseUI['customFields']
+): Record<string, string | boolean> | null => {
+  if (!customFields || !customFields.length) {
+    return null;
+  }
+
+  return customFields.reduce((acc, customField) => {
+    const initial = {
+      [customField.key]: customField.value,
+    };
+
+    return { ...acc, ...initial };
+  }, {});
+};
+
+export const customFieldsFormSerializer = (
+  customFields: Record<string, string | boolean | number | null>,
+  selectedCustomFieldsConfiguration: CasesConfigurationUI['customFields']
+): CaseUI['customFields'] => {
+  const transformedCustomFields: CaseUI['customFields'] = [];
+
+  if (!customFields || !selectedCustomFieldsConfiguration.length) {
+    return [];
+  }
+
+  for (const [key, value] of Object.entries(customFields)) {
+    const configCustomField = selectedCustomFieldsConfiguration.find((item) => item.key === key);
+    if (configCustomField) {
+      transformedCustomFields.push({
+        key: configCustomField.key,
+        type: configCustomField.type,
+        value: convertCustomFieldValue({ value, type: configCustomField.type }),
+      } as CaseUICustomField);
+    }
+  }
+
+  return transformedCustomFields;
 };

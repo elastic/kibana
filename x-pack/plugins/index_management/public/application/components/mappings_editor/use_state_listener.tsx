@@ -7,6 +7,8 @@
 
 import { useEffect, useMemo } from 'react';
 
+import { EuiSelectableOption } from '@elastic/eui';
+import { cloneDeep } from 'lodash';
 import {
   DocumentFieldsStatus,
   Field,
@@ -22,6 +24,9 @@ import {
   stripUndefinedValues,
   normalizeRuntimeFields,
   deNormalizeRuntimeFields,
+  getAllFieldTypesFromState,
+  getFieldsFromState,
+  getTypeLabelFromField,
 } from './lib';
 import { useMappingsState, useDispatch } from './mappings_state_context';
 
@@ -47,6 +52,14 @@ export const useMappingsStateListener = ({ onChange, value, status }: Args) => {
     () => normalizeRuntimeFields(runtimeFields),
     [runtimeFields]
   );
+  const fieldTypesOptions: EuiSelectableOption[] = useMemo(() => {
+    const allFieldsTypes = getAllFieldTypesFromState(deNormalize(normalize(mappedFields)));
+    return allFieldsTypes.map((dataType) => ({
+      checked: undefined,
+      label: getTypeLabelFromField({ type: dataType }),
+      'data-test-subj': `indexDetailsMappingsSelectFilter-${dataType}`,
+    }));
+  }, [mappedFields]);
 
   const calculateStatus = (fieldStatus: string | undefined, rootLevelFields: string | any[]) => {
     if (fieldStatus) return fieldStatus;
@@ -163,7 +176,25 @@ export const useMappingsStateListener = ({ onChange, value, status }: Args) => {
           editor: 'default',
         },
         runtimeFields: parsedRuntimeFieldsDefaultValue,
+        filter: {
+          selectedOptions: fieldTypesOptions,
+          filteredFields: getFieldsFromState(parsedFieldsDefaultValue),
+          selectedDataTypes: [],
+        },
       },
     });
-  }, [value, parsedFieldsDefaultValue, dispatch, status, parsedRuntimeFieldsDefaultValue]);
+    dispatch({
+      type: 'editor.replaceViewMappings',
+      value: {
+        fields: cloneDeep(parsedFieldsDefaultValue),
+      },
+    });
+  }, [
+    value,
+    parsedFieldsDefaultValue,
+    dispatch,
+    status,
+    parsedRuntimeFieldsDefaultValue,
+    fieldTypesOptions,
+  ]);
 };

@@ -10,7 +10,10 @@ import {
   ObservabilityPublicStart,
 } from '@kbn/observability-plugin/public';
 import {
-  HttpStart,
+  ObservabilitySharedPluginSetup,
+  ObservabilitySharedPluginStart,
+} from '@kbn/observability-shared-plugin/public';
+import {
   AppMountParameters,
   CoreSetup,
   CoreStart,
@@ -18,16 +21,25 @@ import {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/public';
-import {
-  DataPublicPluginSetup,
-  DataPublicPluginStart,
-} from '@kbn/data-plugin/public';
-import { SharePluginSetup } from '@kbn/share-plugin/public';
+import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import { DiscoverSetup, DiscoverStart } from '@kbn/discover-plugin/public';
+import { FleetSetup, FleetStart } from '@kbn/fleet-plugin/public';
+import { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
+import { UsageCollectionSetup, UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { ObservabilityOnboardingConfig } from '../server';
 import { PLUGIN_ID } from '../common';
 import { ObservabilityOnboardingLocatorDefinition } from './locators/onboarding_locator/locator_definition';
 import { ObservabilityOnboardingPluginLocators } from './locators';
 import { ConfigSchema } from '.';
+import {
+  OBSERVABILITY_ONBOARDING_FEEDBACK_TELEMETRY_EVENT,
+  OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT,
+  OBSERVABILITY_ONBOARDING_AUTODETECT_TELEMETRY_EVENT,
+  OBSERVABILITY_ONBOARDING_FLOW_PROGRESS_TELEMETRY_EVENT,
+  OBSERVABILITY_ONBOARDING_FLOW_ERROR_TELEMETRY_EVENT,
+  OBSERVABILITY_ONBOARDING_FLOW_DATASET_DETECTED_TELEMETRY_EVENT,
+} from '../common/telemetry_events';
 
 export type ObservabilityOnboardingPluginSetup = void;
 export type ObservabilityOnboardingPluginStart = void;
@@ -35,43 +47,43 @@ export type ObservabilityOnboardingPluginStart = void;
 export interface ObservabilityOnboardingPluginSetupDeps {
   data: DataPublicPluginSetup;
   observability: ObservabilityPublicSetup;
+  observabilityShared: ObservabilitySharedPluginSetup;
+  discover: DiscoverSetup;
   share: SharePluginSetup;
+  fleet: FleetSetup;
+  cloud?: CloudSetup;
+  usageCollection?: UsageCollectionSetup;
 }
 
 export interface ObservabilityOnboardingPluginStartDeps {
-  http: HttpStart;
   data: DataPublicPluginStart;
   observability: ObservabilityPublicStart;
+  observabilityShared: ObservabilitySharedPluginStart;
+  discover: DiscoverStart;
+  share: SharePluginStart;
+  fleet: FleetStart;
+  cloud?: CloudStart;
+  usageCollection?: UsageCollectionStart;
 }
 
-export interface ObservabilityOnboardingPluginContextValue {
-  core: CoreStart;
-  plugins: ObservabilityOnboardingPluginSetupDeps;
-  data: DataPublicPluginStart;
-  observability: ObservabilityPublicStart;
-  config: ConfigSchema;
-}
+export type ObservabilityOnboardingContextValue = CoreStart &
+  ObservabilityOnboardingPluginStartDeps & { config: ConfigSchema };
 
 export class ObservabilityOnboardingPlugin
-  implements
-    Plugin<
-      ObservabilityOnboardingPluginSetup,
-      ObservabilityOnboardingPluginStart
-    >
+  implements Plugin<ObservabilityOnboardingPluginSetup, ObservabilityOnboardingPluginStart>
 {
   private locators?: ObservabilityOnboardingPluginLocators;
 
-  constructor(private ctx: PluginInitializerContext) {}
+  constructor(private readonly ctx: PluginInitializerContext) {}
 
-  public setup(
-    core: CoreSetup,
-    plugins: ObservabilityOnboardingPluginSetupDeps
-  ) {
+  public setup(core: CoreSetup, plugins: ObservabilityOnboardingPluginSetupDeps) {
+    const stackVersion = this.ctx.env.packageInfo.version;
     const config = this.ctx.config.get<ObservabilityOnboardingConfig>();
     const {
       ui: { enabled: isObservabilityOnboardingUiEnabled },
     } = config;
-
+    const isServerlessBuild = this.ctx.env.packageInfo.buildFlavor === 'serverless';
+    const isDevEnvironment = this.ctx.env.mode.dev;
     const pluginSetupDeps = plugins;
 
     // set xpack.observability_onboarding.ui.enabled: true
@@ -91,9 +103,7 @@ export class ObservabilityOnboardingPlugin
             core.getStartServices(),
           ]);
 
-          const { createCallApi } = await import(
-            './services/rest/create_call_api'
-          );
+          const { createCallApi } = await import('./services/rest/create_call_api');
 
           createCallApi(core);
 
@@ -103,6 +113,14 @@ export class ObservabilityOnboardingPlugin
             appMountParameters,
             corePlugins: corePlugins as ObservabilityOnboardingPluginStartDeps,
             config,
+            context: {
+              isDev: isDevEnvironment,
+              isCloud: Boolean(pluginSetupDeps.cloud?.isCloudEnabled),
+              isServerless:
+                Boolean(pluginSetupDeps.cloud?.isServerlessEnabled) || isServerlessBuild,
+              stackVersion,
+              cloudServiceProvider: pluginSetupDeps.cloud?.csp,
+            },
           });
         },
         visibleIn: [],
@@ -110,19 +128,23 @@ export class ObservabilityOnboardingPlugin
     }
 
     this.locators = {
-      onboarding: plugins.share.url.locators.create(
-        new ObservabilityOnboardingLocatorDefinition()
-      ),
+      onboarding: plugins.share.url.locators.create(new ObservabilityOnboardingLocatorDefinition()),
     };
+
+    core.analytics.registerEventType(OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT);
+    core.analytics.registerEventType(OBSERVABILITY_ONBOARDING_FEEDBACK_TELEMETRY_EVENT);
+    core.analytics.registerEventType(OBSERVABILITY_ONBOARDING_AUTODETECT_TELEMETRY_EVENT);
+    core.analytics.registerEventType(OBSERVABILITY_ONBOARDING_FLOW_PROGRESS_TELEMETRY_EVENT);
+    core.analytics.registerEventType(OBSERVABILITY_ONBOARDING_FLOW_ERROR_TELEMETRY_EVENT);
+    core.analytics.registerEventType(
+      OBSERVABILITY_ONBOARDING_FLOW_DATASET_DETECTED_TELEMETRY_EVENT
+    );
 
     return {
       locators: this.locators,
     };
   }
-  public start(
-    core: CoreStart,
-    plugins: ObservabilityOnboardingPluginStartDeps
-  ) {
+  public start(_core: CoreStart, _plugins: ObservabilityOnboardingPluginStartDeps) {
     return {
       locators: this.locators,
     };

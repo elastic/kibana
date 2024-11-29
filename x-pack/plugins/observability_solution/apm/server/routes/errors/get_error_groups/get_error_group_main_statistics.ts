@@ -6,21 +6,21 @@
  */
 
 import { AggregationsAggregateOrder } from '@elastic/elasticsearch/lib/api/types';
+import { kqlQuery, rangeQuery, termQuery, wildcardQuery } from '@kbn/observability-plugin/server';
+import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import {
-  kqlQuery,
-  rangeQuery,
-  termQuery,
-  wildcardQuery,
-} from '@kbn/observability-plugin/server';
-import {
+  AT_TIMESTAMP,
   ERROR_CULPRIT,
   ERROR_EXC_HANDLED,
   ERROR_EXC_MESSAGE,
   ERROR_EXC_TYPE,
   ERROR_GROUP_ID,
   ERROR_GROUP_NAME,
+  ERROR_ID,
   ERROR_LOG_MESSAGE,
   SERVICE_NAME,
+  TRACE_ID,
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
 } from '../../../../common/es_fields/apm';
@@ -39,6 +39,7 @@ export interface ErrorGroupMainStatisticsResponse {
     culprit: string | undefined;
     handled: boolean | undefined;
     type: string | undefined;
+    traceId: string | undefined;
   }>;
   maxCountExceeded: boolean;
 }
@@ -57,10 +58,10 @@ export async function getErrorGroupMainStatistics({
   transactionType,
   searchQuery,
 }: {
-  kuery: string;
+  kuery?: string;
   serviceName: string;
   apmEventClient: APMEventClient;
-  environment: string;
+  environment?: string;
   sortField?: string;
   sortDirection?: 'asc' | 'desc';
   start: number;
@@ -79,97 +80,117 @@ export async function getErrorGroupMainStatistics({
     ? { [maxTimestampAggKey]: sortDirection }
     : { _count: sortDirection };
 
-  const shouldQuery = searchQuery
-    ? {
-        should: [
-          ERROR_LOG_MESSAGE,
-          ERROR_EXC_MESSAGE,
-          ERROR_GROUP_NAME,
-          ERROR_EXC_TYPE,
-          ERROR_CULPRIT,
-        ].flatMap((field) => wildcardQuery(field, searchQuery)),
-        minimum_should_match: 1,
-      }
-    : {};
-
-  const response = await apmEventClient.search(
-    'get_error_group_main_statistics',
-    {
-      apm: {
-        sources: [
-          {
-            documentType: ApmDocumentType.ErrorEvent,
-            rollupInterval: RollupInterval.None,
-          },
-        ],
-      },
-      body: {
-        track_total_hits: false,
-        size: 0,
-        query: {
+  const shouldMatchSearchQuery = searchQuery
+    ? [
+        {
           bool: {
-            filter: [
-              ...termQuery(SERVICE_NAME, serviceName),
-              ...termQuery(TRANSACTION_NAME, transactionName),
-              ...termQuery(TRANSACTION_TYPE, transactionType),
-              ...rangeQuery(start, end),
-              ...environmentQuery(environment),
-              ...kqlQuery(kuery),
-            ],
-            ...shouldQuery,
+            should: [
+              ERROR_LOG_MESSAGE,
+              ERROR_EXC_MESSAGE,
+              ERROR_GROUP_NAME,
+              ERROR_EXC_TYPE,
+              ERROR_CULPRIT,
+            ].flatMap((field) => wildcardQuery(field, searchQuery)),
+            minimum_should_match: 1,
           },
         },
-        aggs: {
-          error_groups: {
-            terms: {
-              field: ERROR_GROUP_ID,
-              size: maxNumberOfErrorGroups,
-              order,
-            },
-            aggs: {
-              sample: {
-                top_hits: {
-                  size: 1,
-                  _source: [
-                    ERROR_LOG_MESSAGE,
-                    ERROR_EXC_MESSAGE,
-                    ERROR_EXC_HANDLED,
-                    ERROR_EXC_TYPE,
-                    ERROR_CULPRIT,
-                    ERROR_GROUP_ID,
-                    '@timestamp',
-                  ],
-                  sort: {
-                    '@timestamp': 'desc',
-                  },
+      ]
+    : [];
+
+  const requiredFields = asMutableArray([AT_TIMESTAMP, ERROR_GROUP_ID, ERROR_ID] as const);
+
+  const optionalFields = asMutableArray([
+    TRACE_ID,
+    ERROR_CULPRIT,
+    ERROR_LOG_MESSAGE,
+    ERROR_EXC_MESSAGE,
+    ERROR_EXC_HANDLED,
+    ERROR_EXC_TYPE,
+  ] as const);
+
+  const response = await apmEventClient.search('get_error_group_main_statistics', {
+    apm: {
+      sources: [
+        {
+          documentType: ApmDocumentType.ErrorEvent,
+          rollupInterval: RollupInterval.None,
+        },
+      ],
+    },
+    body: {
+      track_total_hits: false,
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            ...termQuery(SERVICE_NAME, serviceName),
+            ...termQuery(TRANSACTION_NAME, transactionName),
+            ...termQuery(TRANSACTION_TYPE, transactionType),
+            ...rangeQuery(start, end),
+            ...environmentQuery(environment),
+            ...kqlQuery(kuery),
+            ...shouldMatchSearchQuery,
+          ],
+        },
+      },
+      aggs: {
+        error_groups: {
+          terms: {
+            field: ERROR_GROUP_ID,
+            size: maxNumberOfErrorGroups,
+            order,
+          },
+          aggs: {
+            sample: {
+              top_hits: {
+                size: 1,
+                fields: [...requiredFields, ...optionalFields],
+                _source: [ERROR_LOG_MESSAGE, ERROR_EXC_MESSAGE, ERROR_EXC_HANDLED, ERROR_EXC_TYPE],
+                sort: {
+                  '@timestamp': 'desc',
                 },
               },
-              ...(sortByLatestOccurrence
-                ? { [maxTimestampAggKey]: { max: { field: '@timestamp' } } }
-                : {}),
             },
+            ...(sortByLatestOccurrence
+              ? { [maxTimestampAggKey]: { max: { field: '@timestamp' } } }
+              : {}),
           },
         },
       },
-    }
-  );
+    },
+  });
 
-  const maxCountExceeded =
-    (response.aggregations?.error_groups.sum_other_doc_count ?? 0) > 0;
+  const maxCountExceeded = (response.aggregations?.error_groups.sum_other_doc_count ?? 0) > 0;
 
   const errorGroups =
     response.aggregations?.error_groups.buckets.map((bucket) => {
+      const errorSource =
+        'error' in bucket.sample.hits.hits[0]._source
+          ? bucket.sample.hits.hits[0]._source
+          : undefined;
+
+      const event = unflattenKnownApmEventFields(bucket.sample.hits.hits[0].fields, requiredFields);
+
+      const mergedEvent = {
+        ...event,
+        error: {
+          ...(event.error ?? {}),
+          exception:
+            (errorSource?.error.exception?.length ?? 0) > 1
+              ? errorSource?.error.exception
+              : event?.error.exception && [event.error.exception],
+        },
+      };
+
       return {
         groupId: bucket.key as string,
-        name: getErrorName(bucket.sample.hits.hits[0]._source),
-        lastSeen: new Date(
-          bucket.sample.hits.hits[0]._source['@timestamp']
-        ).getTime(),
+        name: getErrorName(mergedEvent),
+        lastSeen: new Date(mergedEvent[AT_TIMESTAMP]).getTime(),
         occurrences: bucket.doc_count,
-        culprit: bucket.sample.hits.hits[0]._source.error.culprit,
-        handled:
-          bucket.sample.hits.hits[0]._source.error.exception?.[0].handled,
-        type: bucket.sample.hits.hits[0]._source.error.exception?.[0].type,
+        culprit: mergedEvent.error.culprit,
+        handled: mergedEvent.error.exception?.[0].handled,
+        type: mergedEvent.error.exception?.[0].type,
+        traceId: mergedEvent.trace?.id,
       };
     }) ?? [];
 

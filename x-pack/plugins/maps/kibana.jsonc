@@ -1,11 +1,15 @@
 {
   "type": "plugin",
   "id": "@kbn/maps-plugin",
-  "owner": "@elastic/kibana-gis",
+  "owner": [
+    "@elastic/kibana-presentation"
+  ],
+  "group": "platform",
+  "visibility": "shared",
   "plugin": {
     "id": "maps",
-    "server": true,
     "browser": true,
+    "server": true,
     "configPath": [
       "xpack",
       "maps"
@@ -24,7 +28,6 @@
       "navigation",
       "expressions",
       "visualizations",
-      "dashboard",
       "embeddable",
       "mapsEms",
       "share",
@@ -34,6 +37,7 @@
     "optionalPlugins": [
       "cloud",
       "customIntegrations",
+      "embeddableEnhanced",
       "home",
       "savedObjectsTagging",
       "charts",
@@ -49,8 +53,8 @@
       "usageCollection",
       "unifiedSearch",
       "fieldFormats",
-      "textBasedLanguages",
-      "savedObjects",
+      "esql",
+      "savedObjects"
     ],
     "extraPublicDirs": [
       "common"

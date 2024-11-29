@@ -7,11 +7,14 @@
 import { schema } from '@kbn/config-schema';
 import { SavedObjectsUpdateResponse, SavedObject } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { isEmpty } from 'lodash';
+import { invalidOriginError } from './add_monitor';
+import { InvalidLocationError } from '../../synthetics_service/project_monitor/normalizers/common_fields';
+import { AddEditMonitorAPI, CreateMonitorPayLoad } from './add_monitor/add_monitor_api';
 import { ELASTIC_MANAGED_LOCATIONS_DISABLED } from './add_monitor_project';
 import { getDecryptedMonitor } from '../../saved_objects/synthetics_monitor';
 import { getPrivateLocations } from '../../synthetics_service/get_private_locations';
-import { mergeSourceMonitor } from './helper';
+import { mergeSourceMonitor } from './formatters/saved_object_to_monitor';
 import { RouteContext, SyntheticsRestApiRouteFactory } from '../types';
 import { syntheticsMonitorType } from '../../../common/types/saved_objects';
 import {
@@ -23,48 +26,98 @@ import {
   MonitorLocations,
 } from '../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
-import { validateMonitor } from './monitor_validation';
+import { MonitorValidationError, normalizeAPIConfig, validateMonitor } from './monitor_validation';
 import { getMonitorNotFoundResponse } from '../synthetics_service/service_errors';
 import {
   sendTelemetryEvents,
   formatTelemetryUpdateEvent,
 } from '../telemetry/monitor_upgrade_sender';
 import { formatSecrets, normalizeSecrets } from '../../synthetics_service/utils/secrets';
-import { mapSavedObjectToMonitor } from './helper';
+import { mapSavedObjectToMonitor } from './formatters/saved_object_to_monitor';
 
 // Simplify return promise type and type it with runtime_types
 export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'PUT',
   path: SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/{monitorId}',
-  validate: {
-    params: schema.object({
-      monitorId: schema.string(),
-    }),
-    body: schema.any(),
+  validate: {},
+  validation: {
+    request: {
+      params: schema.object({
+        monitorId: schema.string(),
+      }),
+      query: schema.object({
+        internal: schema.maybe(
+          schema.boolean({
+            defaultValue: false,
+          })
+        ),
+      }),
+      body: schema.any(),
+    },
   },
   handler: async (routeContext): Promise<any> => {
-    const { request, response, savedObjectsClient, server } = routeContext;
+    const { request, response, spaceId, server } = routeContext;
     const { logger } = server;
     const monitor = request.body as SyntheticsMonitor;
+    const reqQuery = request.query as { internal?: boolean };
     const { monitorId } = request.params;
 
+    if (!monitor || typeof monitor !== 'object' || isEmpty(monitor) || Array.isArray(monitor)) {
+      return response.badRequest({
+        body: {
+          message: 'Monitor must be a non-empty object',
+        },
+      });
+    }
+    if (monitor.origin && monitor.origin !== 'ui') {
+      return response.badRequest(getInvalidOriginError(monitor));
+    }
+
+    const editMonitorAPI = new AddEditMonitorAPI(routeContext);
+    if (monitor.name) {
+      const nameError = await editMonitorAPI.validateUniqueMonitorName(monitor.name, monitorId);
+      if (nameError) {
+        return response.badRequest({
+          body: { message: nameError, attributes: { details: nameError } },
+        });
+      }
+    }
+
     try {
-      const spaceId = server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
-
-      const previousMonitor: SavedObject<EncryptedSyntheticsMonitorAttributes> =
-        await savedObjectsClient.get(syntheticsMonitorType, monitorId);
-
       /* Decrypting the previous monitor before editing ensures that all existing fields remain
        * on the object, even in flows where decryption does not take place, such as the enabled tab
        * on the monitor list table. We do not decrypt monitors in bulk for the monitor list table */
-      const decryptedPreviousMonitor = await getDecryptedMonitor(
-        server,
-        monitorId,
-        previousMonitor.namespaces?.[0]!
-      );
-      const normalizedPreviousMonitor = normalizeSecrets(decryptedPreviousMonitor).attributes;
+      const previousMonitor = await getDecryptedMonitor(server, monitorId, spaceId);
+      const normalizedPreviousMonitor = normalizeSecrets(previousMonitor).attributes;
 
-      const editedMonitor = mergeSourceMonitor(normalizedPreviousMonitor, monitor);
+      if (normalizedPreviousMonitor.origin !== 'ui' && !reqQuery.internal) {
+        return response.badRequest(getInvalidOriginError(monitor));
+      }
+
+      let editedMonitor = mergeSourceMonitor(normalizedPreviousMonitor, monitor);
+
+      editMonitorAPI.validateMonitorType(
+        editedMonitor as MonitorFields,
+        normalizedPreviousMonitor as MonitorFields
+      );
+
+      const { errorMessage: unsupportedKeysErrors, formattedConfig } = normalizeAPIConfig(
+        editedMonitor as CreateMonitorPayLoad
+      );
+      if (unsupportedKeysErrors) {
+        return response.badRequest({
+          body: {
+            message: unsupportedKeysErrors,
+            attributes: { details: unsupportedKeysErrors },
+          },
+        });
+      }
+
+      editedMonitor = await editMonitorAPI.normalizeMonitor(
+        formattedConfig as CreateMonitorPayLoad,
+        monitor as CreateMonitorPayLoad,
+        previousMonitor.attributes.locations
+      );
 
       const validationResult = validateMonitor(editedMonitor as MonitorFields);
 
@@ -97,8 +150,7 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
         editedMonitor: editedMonitorSavedObject,
       } = await syncEditedMonitor({
         routeContext,
-        previousMonitor,
-        decryptedPreviousMonitor,
+        decryptedPreviousMonitor: previousMonitor,
         normalizedMonitor: monitorWithRevision,
         spaceId,
       });
@@ -107,7 +159,7 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
         await rollbackUpdate({
           routeContext,
           configId: monitorId,
-          attributes: decryptedPreviousMonitor.attributes,
+          attributes: previousMonitor.attributes,
         });
         throw hasError?.error;
       }
@@ -122,12 +174,23 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
         });
       }
 
-      return mapSavedObjectToMonitor(
-        editedMonitorSavedObject as SavedObject<EncryptedSyntheticsMonitorAttributes>
-      );
+      return mapSavedObjectToMonitor({
+        internal: reqQuery.internal,
+        monitor: {
+          ...(editedMonitorSavedObject as SavedObject<EncryptedSyntheticsMonitorAttributes>),
+          created_at: previousMonitor.created_at,
+        },
+      });
     } catch (updateErr) {
       if (SavedObjectsErrorHelpers.isNotFoundError(updateErr)) {
         return getMonitorNotFoundResponse(response, monitorId);
+      }
+      if (updateErr instanceof InvalidLocationError) {
+        return response.badRequest({ body: { message: updateErr.message } });
+      }
+      if (updateErr instanceof MonitorValidationError) {
+        const { reason: message, details, payload } = updateErr.result;
+        return response.badRequest({ body: { message, attributes: { details, ...payload } } });
       }
       logger.error(updateErr);
 
@@ -158,13 +221,11 @@ const rollbackUpdate = async ({
 
 export const syncEditedMonitor = async ({
   normalizedMonitor,
-  previousMonitor,
   decryptedPreviousMonitor,
   spaceId,
   routeContext,
 }: {
   normalizedMonitor: SyntheticsMonitor;
-  previousMonitor: SavedObject<EncryptedSyntheticsMonitorAttributes>;
   decryptedPreviousMonitor: SavedObject<SyntheticsMonitorWithSecretsAttributes>;
   routeContext: RouteContext;
   spaceId: string;
@@ -174,14 +235,14 @@ export const syncEditedMonitor = async ({
     const monitorWithId = {
       ...normalizedMonitor,
       [ConfigKey.MONITOR_QUERY_ID]:
-        normalizedMonitor[ConfigKey.CUSTOM_HEARTBEAT_ID] || previousMonitor.id,
-      [ConfigKey.CONFIG_ID]: previousMonitor.id,
+        normalizedMonitor[ConfigKey.CUSTOM_HEARTBEAT_ID] || decryptedPreviousMonitor.id,
+      [ConfigKey.CONFIG_ID]: decryptedPreviousMonitor.id,
     };
     const formattedMonitor = formatSecrets(monitorWithId);
 
     const editedSOPromise = savedObjectsClient.update<MonitorFields>(
       syntheticsMonitorType,
-      previousMonitor.id,
+      decryptedPreviousMonitor.id,
       formattedMonitor
     );
 
@@ -191,12 +252,10 @@ export const syncEditedMonitor = async ({
       [
         {
           monitor: monitorWithId as MonitorFields,
-          id: previousMonitor.id,
-          previousMonitor,
+          id: decryptedPreviousMonitor.id,
           decryptedPreviousMonitor,
         },
       ],
-      routeContext,
       allPrivateLocations,
       spaceId
     );
@@ -213,7 +272,7 @@ export const syncEditedMonitor = async ({
       server.telemetry,
       formatTelemetryUpdateEvent(
         editedMonitorSavedObject as SavedObjectsUpdateResponse<EncryptedSyntheticsMonitorAttributes>,
-        previousMonitor,
+        decryptedPreviousMonitor.updated_at,
         server.stackVersion,
         Boolean((normalizedMonitor as MonitorFields)[ConfigKey.SOURCE_INLINE]),
         publicSyncErrors
@@ -223,7 +282,13 @@ export const syncEditedMonitor = async ({
     return {
       failedPolicyUpdates,
       publicSyncErrors,
-      editedMonitor: editedMonitorSavedObject,
+      editedMonitor: {
+        ...editedMonitorSavedObject,
+        attributes: {
+          ...editedMonitorSavedObject?.attributes,
+          ...monitorWithId,
+        },
+      },
     };
   } catch (e) {
     server.logger.error(
@@ -231,7 +296,7 @@ export const syncEditedMonitor = async ({
     );
     await rollbackUpdate({
       routeContext,
-      configId: previousMonitor.id,
+      configId: decryptedPreviousMonitor.id,
       attributes: decryptedPreviousMonitor.attributes,
     });
 
@@ -259,4 +324,16 @@ export const validatePermissions = async (
   if (!elasticManagedLocationsEnabled) {
     return ELASTIC_MANAGED_LOCATIONS_DISABLED;
   }
+};
+
+const getInvalidOriginError = (monitor: SyntheticsMonitor) => {
+  return {
+    body: {
+      message: invalidOriginError(monitor.origin!),
+      attributes: {
+        details: invalidOriginError(monitor.origin!),
+        payload: monitor,
+      },
+    },
+  };
 };

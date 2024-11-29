@@ -8,10 +8,7 @@
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import { tasks } from './tasks';
-import {
-  SERVICE_NAME,
-  SERVICE_ENVIRONMENT,
-} from '../../../../common/es_fields/apm';
+import { SERVICE_NAME, SERVICE_ENVIRONMENT, AT_TIMESTAMP } from '../../../../common/es_fields/apm';
 import { IndicesStatsResponse } from '../telemetry_client';
 
 describe('data telemetry collection tasks', () => {
@@ -69,9 +66,7 @@ describe('data telemetry collection tasks', () => {
         },
       });
 
-      expect(
-        await task?.executor({ indices, telemetryClient: { search } } as any)
-      ).toEqual({
+      expect(await task?.executor({ indices, telemetryClient: { search } } as any)).toEqual({
         environments: {
           services_with_multiple_environments: 1,
           services_without_environment: 2,
@@ -95,9 +90,7 @@ describe('data telemetry collection tasks', () => {
           },
         });
 
-        expect(
-          await task?.executor({ indices, telemetryClient: { search } } as any)
-        ).toEqual({});
+        expect(await task?.executor({ indices, telemetryClient: { search } } as any)).toEqual({});
       });
     });
 
@@ -108,7 +101,7 @@ describe('data telemetry collection tasks', () => {
         // a fixed date range.
         .mockReturnValueOnce({
           hits: {
-            hits: [{ _source: { '@timestamp': new Date().toISOString() } }],
+            hits: [{ fields: { [AT_TIMESTAMP]: [new Date().toISOString()] } }],
           },
           total: {
             value: 1,
@@ -140,9 +133,7 @@ describe('data telemetry collection tasks', () => {
           });
         });
 
-      expect(
-        await task?.executor({ indices, telemetryClient: { search } } as any)
-      ).toEqual({
+      expect(await task?.executor({ indices, telemetryClient: { search } } as any)).toEqual({
         aggregated_transactions: {
           current_implementation: {
             expected_metric_document_count: 1250,
@@ -195,9 +186,7 @@ describe('data telemetry collection tasks', () => {
         },
       });
 
-      expect(
-        await task?.executor({ indices, telemetryClient: { fieldCaps } } as any)
-      ).toEqual({
+      expect(await task?.executor({ indices, telemetryClient: { fieldCaps } } as any)).toEqual({
         counts: {
           global_labels: {
             '1d': 1,
@@ -212,9 +201,7 @@ describe('data telemetry collection tasks', () => {
         fields: {},
       });
 
-      expect(
-        await task?.executor({ indices, telemetryClient: { fieldCaps } } as any)
-      ).toEqual({
+      expect(await task?.executor({ indices, telemetryClient: { fieldCaps } } as any)).toEqual({
         counts: {
           global_labels: {
             '1d': 0,
@@ -251,9 +238,7 @@ describe('data telemetry collection tasks', () => {
         },
       });
 
-      expect(
-        await task?.executor({ indices, telemetryClient: { search } } as any)
-      ).toEqual({
+      expect(await task?.executor({ indices, telemetryClient: { search } } as any)).toEqual({
         cloud: {
           availability_zone: ['us-west-1', 'europe-west1-c'],
           provider: ['aws', 'gcp'],
@@ -266,9 +251,7 @@ describe('data telemetry collection tasks', () => {
       it('returns an empty map', async () => {
         const search = jest.fn().mockResolvedValueOnce({});
 
-        expect(
-          await task?.executor({ indices, telemetryClient: { search } } as any)
-        ).toEqual({
+        expect(await task?.executor({ indices, telemetryClient: { search } } as any)).toEqual({
           cloud: {
             availability_zone: [],
             provider: [],
@@ -295,9 +278,7 @@ describe('data telemetry collection tasks', () => {
         },
       });
 
-      expect(
-        await task?.executor({ indices, telemetryClient: { search } } as any)
-      ).toEqual({
+      expect(await task?.executor({ indices, telemetryClient: { search } } as any)).toEqual({
         host: {
           os: { platform: ['linux', 'windows', 'macos'] },
         },
@@ -308,9 +289,7 @@ describe('data telemetry collection tasks', () => {
       it('returns an empty map', async () => {
         const search = jest.fn().mockResolvedValueOnce({});
 
-        expect(
-          await task?.executor({ indices, telemetryClient: { search } } as any)
-        ).toEqual({
+        expect(await task?.executor({ indices, telemetryClient: { search } } as any)).toEqual({
           host: {
             os: {
               platform: [],
@@ -325,9 +304,7 @@ describe('data telemetry collection tasks', () => {
     const task = tasks.find((t) => t.name === 'processor_events');
 
     it('returns a map of processor events', async () => {
-      const getTime = jest
-        .spyOn(Date.prototype, 'getTime')
-        .mockReturnValue(1594330792957);
+      const getTime = jest.spyOn(Date.prototype, 'getTime').mockReturnValue(1594330792957);
 
       const search = jest.fn().mockImplementation((params: any) => {
         const isTotalHitsQuery = params?.body?.track_total_hits;
@@ -337,15 +314,13 @@ describe('data telemetry collection tasks', () => {
             ? { hits: { total: { value: 1 } } }
             : {
                 hits: {
-                  hits: [{ _source: { '@timestamp': 1 } }],
+                  hits: [{ fields: { [AT_TIMESTAMP]: [1] } }],
                 },
               }
         );
       });
 
-      expect(
-        await task?.executor({ indices, telemetryClient: { search } } as any)
-      ).toEqual({
+      expect(await task?.executor({ indices, telemetryClient: { search } } as any)).toEqual({
         counts: {
           error: {
             '1d': 1,
@@ -395,9 +370,7 @@ describe('data telemetry collection tasks', () => {
     const task = tasks.find((t) => t.name === 'integrations');
 
     it('returns the count of ML jobs', async () => {
-      const transportRequest = jest
-        .fn()
-        .mockResolvedValueOnce({ body: { count: 1 } });
+      const transportRequest = jest.fn().mockResolvedValueOnce({ body: { count: 1 } });
 
       expect(
         await task?.executor({
@@ -681,9 +654,7 @@ describe('data telemetry collection tasks', () => {
         }
       });
 
-      expect(
-        await task?.executor({ indices, telemetryClient: { search } } as any)
-      ).toEqual({
+      expect(await task?.executor({ indices, telemetryClient: { search } } as any)).toEqual({
         cardinality: {
           client: { geo: { country_iso_code: { rum: { '1d': 5 } } } },
           transaction: { name: { all_agents: { '1d': 3 }, rum: { '1d': 1 } } },
@@ -894,14 +865,158 @@ describe('data telemetry collection tasks', () => {
         },
       });
 
-      expect(
-        await task?.executor({ indices, telemetryClient: { search } } as any)
-      ).toEqual({
+      expect(await task?.executor({ indices, telemetryClient: { search } } as any)).toEqual({
         top_traces: {
           max: 1026,
           median: 1023,
         },
       });
+    });
+  });
+
+  describe('services', () => {
+    const task = tasks.find((t) => t.name === 'services');
+
+    it('should return services per agent name', async () => {
+      const search = jest.fn().mockImplementation((params: any) => {
+        const filter = params.body.query.bool.filter[0];
+        const queryKnownAgentNames = filter.term;
+        const queryOtelAgentNames = filter.prefix;
+        const queryServices = filter.exists;
+
+        if (queryKnownAgentNames && queryKnownAgentNames['agent.name'] === 'java') {
+          return Promise.resolve({
+            aggregations: {
+              services: {
+                value: 10,
+              },
+            },
+          });
+        } else if (queryOtelAgentNames) {
+          return Promise.resolve({
+            aggregations: {
+              agent_name: {
+                buckets: [
+                  {
+                    key: 'otlp',
+                    services: { value: 1 },
+                  },
+                  {
+                    key: 'otlp/java',
+                    services: { value: 2 },
+                  },
+                  {
+                    key: 'otlp/java/elastic',
+                    services: { value: 3 },
+                  },
+                  {
+                    key: 'opentelemetry',
+                    services: { value: 4 },
+                  },
+                  {
+                    key: 'opentelemetry/java',
+                    services: { value: 5 },
+                  },
+                  {
+                    key: 'opentelemetry/java/elastic',
+                    services: { value: 6 },
+                  },
+                ],
+              },
+            },
+          });
+        } else if (queryServices) {
+          return Promise.resolve({ hits: { total: { value: 100 } } });
+        } else {
+          return Promise.resolve({ aggregations: { services: { value: 0 } } });
+        }
+      });
+
+      expect(
+        await task?.executor({ indices, telemetryClient: { search } } as any)
+      ).toMatchSnapshot();
+    });
+  });
+
+  describe('agents', () => {
+    const task = tasks.find((t) => t.name === 'agents');
+
+    it('should return agent data per agent name', async () => {
+      const search = jest.fn().mockImplementation((params: any) => {
+        const agentDataMock = {
+          'agent.activation_method': { buckets: [{ key: 'k8s-attach' }] },
+          'agent.version': { buckets: [{ key: '1.38.0' }] },
+          'service.framework.name': {
+            buckets: [
+              {
+                key: 'Spring Web MVC',
+                'service.framework.version': { buckets: [{ key: '1.10.1' }] },
+              },
+            ],
+          },
+          'service.framework.version': { buckets: [{ key: '6.1.11', doc_count: 111 }] },
+          'service.language.name': {
+            buckets: [
+              {
+                key: 'Java',
+                'service.language.version': { buckets: [{ key: '17.0.12' }] },
+              },
+            ],
+          },
+          'service.language.version': { buckets: [{ key: '17.0.12', doc_count: 112 }] },
+          'service.runtime.name': {
+            buckets: [
+              {
+                key: 'Java',
+                'service.runtime.version': { buckets: [{ key: '17.0.12', doc_count: 113 }] },
+              },
+            ],
+          },
+          'service.runtime.version': { buckets: [{ key: '17.0.12', doc_count: 113 }] },
+        };
+
+        const filter = params.body.query.bool.filter[0];
+        const queryKnownAgentNames = filter.term;
+        const queryOtelAgentNames = filter.prefix;
+
+        if (queryKnownAgentNames && queryKnownAgentNames['agent.name'] === 'java') {
+          return Promise.resolve({
+            aggregations: agentDataMock,
+          });
+        } else if (queryOtelAgentNames) {
+          return Promise.resolve({
+            aggregations: {
+              agent_name: {
+                buckets: [
+                  { key: 'otlp', ...agentDataMock },
+                  { key: 'otlp/java', ...agentDataMock },
+                  { key: 'otlp/java/elastic', ...agentDataMock },
+                  { key: 'opentelemetry', ...agentDataMock },
+                  { key: 'opentelemetry/java', ...agentDataMock },
+                  { key: 'opentelemetry/java/elastic', ...agentDataMock },
+                ],
+              },
+            },
+          });
+        } else {
+          return Promise.resolve({
+            aggregations: {
+              'agent.activation_method': { buckets: [] },
+              'agent.version': { buckets: [] },
+              'service.framework.name': { buckets: [] },
+              'service.framework.version': { buckets: [] },
+              'service.language.name': { buckets: [] },
+              'service.language.version': { buckets: [] },
+              'service.runtime.name': { buckets: [] },
+              'service.runtime.version': { buckets: [] },
+            },
+          });
+        }
+      });
+
+      expect(
+        await task?.executor({ indices, telemetryClient: { search } } as any)
+      ).toMatchSnapshot();
     });
   });
 });

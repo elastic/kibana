@@ -10,8 +10,8 @@ import {
   EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
   EuiLink,
-  EuiPanel,
   EuiSpacer,
   EuiTablePagination,
   EuiText,
@@ -19,46 +19,45 @@ import {
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
+import { CoreStart } from '@kbn/core-lifecycle-browser';
 import { Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import React, { memo, useState } from 'react';
 import { GroupSummary } from '@kbn/slo-schema';
-import { CoreStart } from '@kbn/core-lifecycle-browser';
-import { useKibana } from '../../../../utils/kibana_react';
+import React, { memo, useState } from 'react';
 import { paths } from '../../../../../common/locators/paths';
 import { useFetchSloList } from '../../../../hooks/use_fetch_slo_list';
-import { SLI_OPTIONS } from '../../../slo_edit/constants';
+import { useKibana } from '../../../../hooks/use_kibana';
 import { useSloFormattedSLIValue } from '../../hooks/use_slo_summary';
+import type { SortDirection, SortField } from '../../hooks/use_url_search_state';
 import { SlosView } from '../slos_view';
-import type { SortDirection } from '../slo_list_search_bar';
+import { GroupByField } from '../slo_list_group_by';
 import { SLOView } from '../toggle_slo_view';
+import { useGroupName } from './hooks/use_group_name';
 
 interface Props {
   group: string;
-  kqlQuery: string;
-  sloView: SLOView;
-  sort: string;
-  direction: SortDirection;
-  groupBy: string;
-  summary: GroupSummary;
-  filters: Filter[];
+  kqlQuery?: string;
+  view: SLOView;
+  sort?: SortField;
+  direction?: SortDirection;
+  groupBy: GroupByField;
+  summary?: GroupSummary;
+  filters?: Filter[];
 }
 
 export function GroupListView({
   group,
   kqlQuery,
-  sloView,
+  view,
   sort,
   direction,
   groupBy,
   summary,
   filters,
 }: Props) {
-  const query = kqlQuery ? `"${groupBy}": (${group}) and ${kqlQuery}` : `"${groupBy}": ${group}`;
-  let groupName = group.toLowerCase();
-  if (groupBy === 'slo.indicator.type') {
-    groupName = SLI_OPTIONS.find((option) => option.value === group)?.text ?? group;
-  }
+  const groupQuery = `"${groupBy}": "${group}"`;
+  const query = kqlQuery ? `${groupQuery} and ${kqlQuery}` : groupQuery;
+  const groupName = useGroupName(groupBy, group, summary);
 
   const [page, setPage] = useState(0);
   const [accordionState, setAccordionState] = useState<'open' | 'closed'>('closed');
@@ -93,53 +92,65 @@ export function GroupListView({
     setPage(pageNumber);
   };
 
-  const worstSLI = useSloFormattedSLIValue(summary.worst.sliValue);
+  const worstSLI = useSloFormattedSLIValue(summary?.worst.sliValue);
 
   return (
     <>
-      <EuiPanel hasBorder={true} data-test-subj="sloGroupViewPanel">
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <MemoEuiAccordion
-              forceState={accordionState}
-              onToggle={onToggle}
-              buttonContent={
-                <EuiFlexGroup alignItems="center" responsive={false}>
+      <EuiFlexGroup data-test-subj="sloGroupViewPanel">
+        <EuiFlexItem>
+          <MemoEuiAccordion
+            forceState={accordionState}
+            onToggle={onToggle}
+            buttonContent={
+              <EuiFlexGroup alignItems="center" responsive={false} gutterSize="xs">
+                <EuiFlexItem grow={false}>
+                  <EuiTitle size="xs">
+                    <h3>{groupName}</h3>
+                  </EuiTitle>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiText color="subdued">({summary?.total})</EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            }
+            extraAction={
+              <EuiFlexGroup responsive={false} alignItems="center">
+                {summary!.violated > 0 && (
                   <EuiFlexItem grow={false}>
-                    <EuiTitle size="xs">
-                      <h3>{groupName}</h3>
-                    </EuiTitle>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiText color="subdued">({summary.total})</EuiText>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              }
-              extraAction={
-                <EuiFlexGroup alignItems="center">
-                  {summary.violated > 0 && (
-                    <EuiFlexItem grow={false}>
-                      <EuiBadge color="danger">
-                        {i18n.translate('xpack.slo.group.totalViolated', {
-                          defaultMessage: '{total} Violated',
-                          values: {
-                            total: summary.violated,
-                          },
-                        })}
-                      </EuiBadge>
-                    </EuiFlexItem>
-                  )}
-                  <EuiFlexItem grow={false}>
-                    <EuiBadge color={'success'}>
-                      {i18n.translate('xpack.slo.group.totalHealthy', {
-                        defaultMessage: '{total} Healthy',
+                    <EuiBadge color="danger">
+                      {i18n.translate('xpack.slo.group.totalViolated', {
+                        defaultMessage: '{total} Violated',
                         values: {
-                          total: summary.healthy,
+                          total: summary?.violated,
                         },
                       })}
                     </EuiBadge>
                   </EuiFlexItem>
-                  <EuiFlexItem>
+                )}
+                <EuiFlexItem grow={false}>
+                  <EuiBadge color={'success'}>
+                    {i18n.translate('xpack.slo.group.totalHealthy', {
+                      defaultMessage: '{total} Healthy',
+                      values: {
+                        total: summary?.healthy,
+                      },
+                    })}
+                  </EuiBadge>
+                </EuiFlexItem>
+
+                <EuiFlexItem>
+                  {group === 'NO_DATA' ? (
+                    <span>
+                      {i18n.translate('xpack.slo.group.worstPerforming', {
+                        defaultMessage: 'Worst performing: ',
+                      })}
+                      <strong>
+                        {i18n.translate('xpack.slo.group.worstPerforming.notAvailable', {
+                          defaultMessage: 'N/A',
+                        })}
+                      </strong>
+                    </span>
+                  ) : (
                     <EuiToolTip
                       content={
                         <>
@@ -147,7 +158,7 @@ export function GroupListView({
                             {i18n.translate('xpack.slo.group.totalSloViolatedTooltip', {
                               defaultMessage: 'SLO: {name}',
                               values: {
-                                name: summary.worst.slo?.name,
+                                name: summary?.worst.slo?.name,
                               },
                             })}
                           </EuiText>
@@ -155,7 +166,7 @@ export function GroupListView({
                             {i18n.translate('xpack.slo.group.totalSloViolatedTooltip.instance', {
                               defaultMessage: 'Instance: {instance}',
                               values: {
-                                instance: summary.worst.slo?.instanceId,
+                                instance: summary?.worst.slo?.instanceId,
                               },
                             })}
                           </EuiText>
@@ -165,49 +176,54 @@ export function GroupListView({
                       <EuiLink
                         data-test-subj="o11yGroupListViewLink"
                         href={basePath.prepend(
-                          paths.sloDetails(summary.worst.slo?.id, summary.worst.slo?.instanceId)
+                          paths.sloDetails(summary!.worst.slo?.id, summary!.worst.slo?.instanceId)
                         )}
                       >
                         {i18n.translate('xpack.slo.group.worstPerforming', {
                           defaultMessage: 'Worst performing: ',
                         })}
                         <EuiTextColor
-                          color={summary.worst.status !== 'HEALTHY' ? 'danger' : undefined}
+                          color={summary?.worst.status !== 'HEALTHY' ? 'danger' : undefined}
                         >
                           <strong>{worstSLI}</strong>
                         </EuiTextColor>
                       </EuiLink>
                     </EuiToolTip>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              }
-              id={group}
-              initialIsOpen={false}
-            >
-              {isAccordionOpen && (
-                <>
-                  <EuiSpacer size="m" />
-                  <SlosView
-                    sloList={results}
-                    loading={isLoading || isRefetching}
-                    error={isError}
-                    sloView={sloView}
-                  />
-                  <EuiSpacer size="m" />
+                  )}
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            }
+            id={group}
+            initialIsOpen={false}
+          >
+            {isAccordionOpen && (
+              <>
+                <EuiSpacer size="m" />
+                <SlosView
+                  sloList={results}
+                  loading={isLoading || isRefetching}
+                  error={isError}
+                  view={view}
+                />
+                <EuiSpacer size="m" />
+                {total > 0 && total > itemsPerPage ? (
                   <EuiTablePagination
                     pageCount={Math.ceil(total / itemsPerPage)}
                     activePage={page}
                     onChangePage={handlePageClick}
                     itemsPerPage={itemsPerPage}
-                    onChangeItemsPerPage={(perPage) => setItemsPerPage(perPage)}
+                    onChangeItemsPerPage={(perPage) => {
+                      setPage(0);
+                      setItemsPerPage(perPage);
+                    }}
                   />
-                </>
-              )}
-            </MemoEuiAccordion>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPanel>
-      <EuiSpacer size="m" />
+                ) : null}
+              </>
+            )}
+          </MemoEuiAccordion>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiHorizontalRule margin="xs" />
     </>
   );
 }

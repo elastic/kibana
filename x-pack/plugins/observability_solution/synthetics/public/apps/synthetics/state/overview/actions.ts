@@ -5,19 +5,14 @@
  * 2.0.
  */
 import { createAction } from '@reduxjs/toolkit';
+import { GetTrendPayload, TrendRequest, TrendTable } from '../../../../../common/types';
 import { createAsyncAction } from '../utils/actions';
 
-import {
+import type {
   MonitorOverviewFlyoutConfig,
   MonitorOverviewPageState,
   MonitorOverviewState,
 } from './models';
-import { MonitorOverviewResult } from '../../../../../common/runtime_types';
-
-export const fetchMonitorOverviewAction = createAsyncAction<
-  MonitorOverviewPageState,
-  MonitorOverviewResult
->('fetchMonitorOverviewAction');
 
 export const setOverviewPageStateAction = createAction<Partial<MonitorOverviewPageState>>(
   'setOverviewPageStateAction'
@@ -29,7 +24,10 @@ export const setOverviewGroupByAction = createAction<MonitorOverviewState['group
 export const setFlyoutConfig = createAction<MonitorOverviewFlyoutConfig>('setFlyoutConfig');
 export const toggleErrorPopoverOpen = createAction<string | null>('setErrorPopoverOpen');
 
-export const quietFetchOverviewAction = createAsyncAction<
-  MonitorOverviewPageState,
-  MonitorOverviewResult
->('quietFetchOverviewAction');
+export const refreshOverviewTrends = createAsyncAction<void, TrendTable, any>(
+  'refreshOverviewTrendStats'
+);
+
+export const trendStatsBatch = createAsyncAction<TrendRequest[], GetTrendPayload, TrendRequest[]>(
+  'batchTrendStats'
+);

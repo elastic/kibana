@@ -7,7 +7,6 @@
 
 import { before, expect, journey, step } from '@elastic/synthetics';
 import { RetryService } from '@kbn/ftr-common-functional-services';
-import { recordVideo } from '../../helpers/record_video';
 import {
   addTestMonitor,
   cleanTestMonitors,
@@ -16,11 +15,9 @@ import {
 import { syntheticsAppPageProvider } from '../page_objects/synthetics_app';
 
 journey('Overview Search', async ({ page, params }) => {
-  recordVideo(page);
-
   const retry: RetryService = params.getService('retry');
 
-  const syntheticsApp = syntheticsAppPageProvider({ page, kibanaUrl: params.kibanaUrl });
+  const syntheticsApp = syntheticsAppPageProvider({ page, kibanaUrl: params.kibanaUrl, params });
   const elasticJourney = 'Elastic journey';
   const cnnJourney = 'CNN journey';
   const googleJourney = 'Google journey';

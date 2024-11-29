@@ -11,11 +11,7 @@ import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_ev
 import { fetchServicePathsFromTraceIds } from './fetch_service_paths_from_trace_ids';
 import { getConnectionId } from './transform_service_map_responses';
 
-export function getConnections({
-  paths,
-}: {
-  paths: ConnectionNode[][] | undefined;
-}): Connection[] {
+export function getConnections({ paths }: { paths: ConnectionNode[][] | undefined }): Connection[] {
   if (!paths) {
     return [];
   }
@@ -50,6 +46,8 @@ export async function getServiceMapFromTraceIds({
   start,
   end,
   terminateAfter,
+  serviceMapMaxAllowableBytes,
+  numOfRequests,
   logger,
 }: {
   apmEventClient: APMEventClient;
@@ -57,16 +55,19 @@ export async function getServiceMapFromTraceIds({
   start: number;
   end: number;
   terminateAfter: number;
+  serviceMapMaxAllowableBytes: number;
+  numOfRequests: number;
   logger: Logger;
 }) {
-  const serviceMapFromTraceIdsScriptResponse =
-    await fetchServicePathsFromTraceIds({
-      apmEventClient,
-      traceIds,
-      start,
-      end,
-      terminateAfter,
-    });
+  const serviceMapFromTraceIdsScriptResponse = await fetchServicePathsFromTraceIds({
+    apmEventClient,
+    traceIds,
+    start,
+    end,
+    terminateAfter,
+    serviceMapMaxAllowableBytes,
+    numOfRequests,
+  });
 
   logger.debug('Received scripted metric agg response');
 

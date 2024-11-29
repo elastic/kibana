@@ -23,36 +23,30 @@ import {
 import { TelemetryEventsSender } from './telemetry/sender';
 import { SyntheticsMonitorClient } from './synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import { initSyntheticsServer } from './server';
-import { uptimeFeature } from './feature';
-
-import { registerUptimeSavedObjects, savedObjectsAdapter } from './saved_objects/saved_objects';
-import { UptimeConfig } from '../common/config';
+import { syntheticsFeature } from './feature';
+import { registerSyntheticsSavedObjects } from './saved_objects/saved_objects';
+import { UptimeConfig } from './config';
 import { SyntheticsService } from './synthetics_service/synthetics_service';
 import { syntheticsServiceApiKey } from './saved_objects/service_api_key';
 import { SYNTHETICS_RULE_TYPES_ALERT_CONTEXT } from '../common/constants/synthetics_alerts';
-import { uptimeRuleTypeFieldMap } from './alert_rules/common';
+import { syntheticsRuleTypeFieldMap } from './alert_rules/common';
 
 export class Plugin implements PluginType {
   private savedObjectsClient?: SavedObjectsClientContract;
-  private initContext: PluginInitializerContext;
-  private logger: Logger;
+  private readonly logger: Logger;
   private server?: SyntheticsServerSetup;
   private syntheticsService?: SyntheticsService;
   private syntheticsMonitorClient?: SyntheticsMonitorClient;
   private readonly telemetryEventsSender: TelemetryEventsSender;
 
-  constructor(initializerContext: PluginInitializerContext<UptimeConfig>) {
-    this.initContext = initializerContext;
-    this.logger = initializerContext.logger.get();
+  constructor(private readonly initContext: PluginInitializerContext<UptimeConfig>) {
+    this.logger = initContext.logger.get();
     this.telemetryEventsSender = new TelemetryEventsSender(this.logger);
   }
 
   public setup(core: CoreSetup, plugins: SyntheticsPluginsSetupDependencies) {
     const config = this.initContext.config.get<UptimeConfig>();
 
-    savedObjectsAdapter.config = config;
-
-    this.logger = this.initContext.logger.get();
     const { ruleDataService } = plugins.ruleRegistry;
 
     const ruleDataClient = ruleDataService.initializeIndex({
@@ -63,7 +57,7 @@ export class Plugin implements PluginType {
       componentTemplates: [
         {
           name: 'mappings',
-          mappings: mappingFromFieldMap(uptimeRuleTypeFieldMap, 'strict'),
+          mappings: mappingFromFieldMap(syntheticsRuleTypeFieldMap, 'strict'),
         },
       ],
     });
@@ -78,21 +72,22 @@ export class Plugin implements PluginType {
       telemetry: this.telemetryEventsSender,
       isDev: this.initContext.env.mode.dev,
       share: plugins.share,
+      alerting: plugins.alerting,
     } as SyntheticsServerSetup;
 
     this.syntheticsService = new SyntheticsService(this.server);
 
-    this.syntheticsService.setup(plugins.taskManager);
+    this.syntheticsService.setup(plugins.taskManager).catch(() => {});
 
     this.syntheticsMonitorClient = new SyntheticsMonitorClient(this.syntheticsService, this.server);
 
     this.telemetryEventsSender.setup(plugins.telemetry);
 
-    plugins.features.registerKibanaFeature(uptimeFeature);
+    plugins.features.registerKibanaFeature(syntheticsFeature);
 
     initSyntheticsServer(this.server, this.syntheticsMonitorClient, plugins, ruleDataClient);
 
-    registerUptimeSavedObjects(core.savedObjects, plugins.encryptedSavedObjects);
+    registerSyntheticsSavedObjects(core.savedObjects, plugins.encryptedSavedObjects);
 
     return {};
   }
@@ -110,11 +105,12 @@ export class Plugin implements PluginType {
       this.server.encryptedSavedObjects = pluginsStart.encryptedSavedObjects;
       this.server.savedObjectsClient = this.savedObjectsClient;
       this.server.spaces = pluginsStart.spaces;
+      this.server.isElasticsearchServerless = coreStart.elasticsearch.getCapabilities().serverless;
     }
 
     this.syntheticsService?.start(pluginsStart.taskManager);
 
-    this.telemetryEventsSender.start(pluginsStart.telemetry, coreStart);
+    this.telemetryEventsSender.start(pluginsStart.telemetry, coreStart).catch(() => {});
   }
 
   public stop() {}

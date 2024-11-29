@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type {
@@ -28,13 +29,13 @@ export interface ServicesDefinitionSet {
   [version: Version]: ServicesDefinition;
 }
 
-import {
+import type {
   SortOrder,
   AggregationsAggregationContainer,
   SortResults,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import {
+import type {
   MutatingOperationRefreshSetting,
   SavedObjectsPitParams,
   SavedObjectsFindOptionsReference,
@@ -173,6 +174,13 @@ export interface SavedObjectUpdateOptions<Attributes = unknown> {
    * Defaults to `0` when `version` is provided, `3` otherwise.
    */
   retryOnConflict?: number;
+  /**
+   * By default, update will merge the provided attributes with the ones present on the document
+   * (performing a standard partial update). Setting this option to `false` will change the behavior, performing
+   * a "full" update instead, where the provided attributes will fully replace the existing ones.
+   * Defaults to `true`.
+   */
+  mergeAttributes?: boolean;
 }
 
 /** Return value for Saved Object get, T is item returned */
@@ -194,6 +202,8 @@ export interface SOWithMetadata<Attributes extends object = object> {
   version?: string;
   createdAt?: string;
   updatedAt?: string;
+  createdBy?: string;
+  updatedBy?: string;
   error?: {
     error: string;
     message: string;

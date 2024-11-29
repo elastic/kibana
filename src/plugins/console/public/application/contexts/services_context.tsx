@@ -1,21 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { createContext, useContext, useEffect } from 'react';
-import { Observable } from 'rxjs';
-import type { NotificationsSetup, CoreTheme, DocLinksStart, HttpSetup } from '@kbn/core/public';
+import type { NotificationsSetup, DocLinksStart, HttpSetup } from '@kbn/core/public';
+import { RouteComponentProps } from 'react-router-dom';
 
 import type { AutocompleteInfo, History, Settings, Storage } from '../../services';
 import { ObjectStorageClient } from '../../../common/types';
-import { MetricsTracker } from '../../types';
+import { ConsoleStartServices, MetricsTracker } from '../../types';
 import { EsHostService } from '../lib';
 
 interface ContextServices {
+  routeHistory?: RouteComponentProps['history'];
   history: History;
   storage: Storage;
   settings: Settings;
@@ -27,13 +29,12 @@ interface ContextServices {
   autocompleteInfo: AutocompleteInfo;
 }
 
-export interface ContextValue {
+export interface ContextValue extends ConsoleStartServices {
   services: ContextServices;
   docLinkVersion: string;
-  theme$: Observable<CoreTheme>;
   docLinks: DocLinksStart['links'];
-  config?: {
-    isMonacoEnabled: boolean;
+  config: {
+    isDevMode: boolean;
   };
 }
 

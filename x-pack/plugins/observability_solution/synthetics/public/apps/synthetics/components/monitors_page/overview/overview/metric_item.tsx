@@ -6,16 +6,25 @@
  */
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
 import { Chart, Settings, Metric, MetricTrendShape } from '@elastic/charts';
-import { EuiPanel, EuiIconTip, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiPanel, EuiSpacer } from '@elastic/eui';
 import { DARK_THEME } from '@elastic/charts';
 import { useTheme } from '@kbn/observability-shared-plugin/public';
-import { useDispatch, useSelector } from 'react-redux';
 import moment from 'moment';
-import { selectErrorPopoverState, toggleErrorPopoverOpen } from '../../../../state';
+import { useSelector, useDispatch } from 'react-redux';
+
+import { FlyoutParamProps } from './types';
+import { MetricItemBody } from './metric_item/metric_item_body';
+import {
+  selectErrorPopoverState,
+  selectOverviewTrends,
+  toggleErrorPopoverOpen,
+} from '../../../../state';
 import { useLocationName, useStatusByLocationOverview } from '../../../../hooks';
 import { formatDuration } from '../../../../utils/formatting';
-import { MonitorOverviewItem } from '../../../../../../../common/runtime_types';
+import { OverviewStatusMetaData } from '../../../../../../../common/runtime_types';
 import { ActionsPopover } from './actions_popover';
 import {
   hideTestNowFlyoutAction,
@@ -23,6 +32,9 @@ import {
   toggleTestNowFlyoutAction,
 } from '../../../../state/manual_test_runs';
 import { MetricItemIcon } from './metric_item_icon';
+import { MetricItemExtra } from './metric_item/metric_item_extra';
+
+const METRIC_ITEM_HEIGHT = 160;
 
 export const getColor = (
   theme: ReturnType<typeof useTheme>,
@@ -46,28 +58,20 @@ export const getColor = (
 
 export const MetricItem = ({
   monitor,
-  medianDuration,
-  maxDuration,
-  minDuration,
-  avgDuration,
-  data,
   onClick,
+  style,
 }: {
-  monitor: MonitorOverviewItem;
-  data: Array<{ x: number; y: number }>;
-  medianDuration: number;
-  avgDuration: number;
-  minDuration: number;
-  maxDuration: number;
-  onClick: (params: { id: string; configId: string; location: string; locationId: string }) => void;
+  monitor: OverviewStatusMetaData;
+  style?: React.CSSProperties;
+  onClick: (params: FlyoutParamProps) => void;
 }) => {
-  const [isMouseOver, setIsMouseOver] = useState(false);
+  const trendData = useSelector(selectOverviewTrends)[monitor.configId + monitor.locationId];
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const isErrorPopoverOpen = useSelector(selectErrorPopoverState);
   const locationName = useLocationName(monitor);
   const { status, timestamp, ping, configIdByLocation } = useStatusByLocationOverview({
     configId: monitor.configId,
-    locationId: monitor.location.id,
+    locationId: monitor.locationId,
   });
   const theme = useTheme();
 
@@ -76,28 +80,36 @@ export const MetricItem = ({
   const dispatch = useDispatch();
 
   return (
-    <div data-test-subj={`${monitor.name}-metric-item`} style={{ height: '160px' }}>
+    <div
+      data-test-subj={`${monitor.name}-${monitor.locationId}-metric-item`}
+      style={style ?? { height: METRIC_ITEM_HEIGHT }}
+    >
       <EuiPanel
         data-test-subj={`${monitor.name}-metric-item-${locationName}-${status}`}
         paddingSize="none"
-        onMouseOver={() => {
-          if (!isMouseOver) {
-            setIsMouseOver(true);
-          }
-        }}
         onMouseLeave={() => {
           if (isErrorPopoverOpen) {
             dispatch(toggleErrorPopoverOpen(null));
           }
-          if (isMouseOver) {
-            setIsMouseOver(false);
+        }}
+        css={css`
+          height: 100%;
+          overflow: hidden;
+          position: relative;
+
+          & .cardItemActions_hover {
+            pointer-events: none;
+            opacity: 0;
+            &:focus-within {
+              pointer-events: auto;
+              opacity: 1;
+            }
           }
-        }}
-        style={{
-          height: '100%',
-          overflow: 'hidden',
-          position: 'relative',
-        }}
+          &:hover .cardItemActions_hover {
+            pointer-events: auto;
+            opacity: 1;
+          }
+        `}
         title={moment(timestamp).format('LLL')}
       >
         <Chart>
@@ -113,9 +125,10 @@ export const MetricItem = ({
               if (!testInProgress && locationName) {
                 onClick({
                   configId: monitor.configId,
-                  id: monitor.id,
+                  id: monitor.configId,
                   location: locationName,
-                  locationId: monitor.location.id,
+                  locationId: monitor.locationId,
+                  spaceId: monitor.spaceId,
                 });
               }
             }}
@@ -124,66 +137,50 @@ export const MetricItem = ({
             locale={i18n.getLocale()}
           />
           <Metric
-            id={`${monitor.configId}-${monitor.location?.id}`}
+            id={`${monitor.configId}-${monitor.locationId}`}
             data={[
               [
                 {
                   title: monitor.name,
                   subtitle: locationName,
-                  value: medianDuration,
+                  value: trendData !== 'loading' ? trendData?.median ?? 0 : 0,
                   trendShape: MetricTrendShape.Area,
-                  trend: data,
-                  extra: (
-                    <EuiFlexGroup
-                      alignItems="center"
-                      gutterSize="xs"
-                      justifyContent="flexEnd"
-                      // empty title to prevent default title from showing
-                      title=""
-                      component="span"
-                    >
-                      <EuiFlexItem grow={false} component="span">
-                        {i18n.translate('xpack.synthetics.overview.duration.label', {
-                          defaultMessage: 'Duration',
-                        })}
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false} component="span">
-                        <EuiIconTip
-                          title={i18n.translate('xpack.synthetics.overview.duration.description', {
-                            defaultMessage: 'Median duration of last 50 checks',
-                          })}
-                          content={i18n.translate(
-                            'xpack.synthetics.overview.duration.description.values',
-                            {
-                              defaultMessage: 'Avg: {avg}, Min: {min}, Max: {max}',
-                              values: {
-                                avg: formatDuration(avgDuration, { noSpace: true }),
-                                min: formatDuration(minDuration, { noSpace: true }),
-                                max: formatDuration(maxDuration, { noSpace: true }),
-                              },
-                            }
-                          )}
-                          position="top"
+                  trend: trendData !== 'loading' && !!trendData?.data ? trendData.data : [],
+                  extra:
+                    trendData !== 'loading' && !!trendData ? (
+                      <MetricItemExtra
+                        stats={{
+                          medianDuration: trendData.median,
+                          minDuration: trendData.min,
+                          maxDuration: trendData.max,
+                          avgDuration: trendData.avg,
+                        }}
+                      />
+                    ) : trendData === 'loading' ? (
+                      <div>
+                        <FormattedMessage
+                          defaultMessage="Loading metrics"
+                          id="xpack.synthetics.overview.metricItem.loadingMessage"
                         />
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  ),
+                      </div>
+                    ) : undefined,
                   valueFormatter: (d: number) => formatDuration(d),
                   color: getColor(theme, monitor.isEnabled, status),
+                  body: <MetricItemBody monitor={monitor} />,
                 },
               ],
             ]}
           />
         </Chart>
-        {(isMouseOver || isPopoverOpen) && (
+        <div className={isPopoverOpen ? '' : 'cardItemActions_hover'}>
           <ActionsPopover
             monitor={monitor}
             isPopoverOpen={isPopoverOpen}
             setIsPopoverOpen={setIsPopoverOpen}
             position="relative"
-            locationId={monitor.location.id}
+            locationId={monitor.locationId}
           />
-        )}
+        </div>
         {configIdByLocation && (
           <MetricItemIcon
             monitor={monitor}
@@ -194,6 +191,7 @@ export const MetricItem = ({
           />
         )}
       </EuiPanel>
+      <EuiSpacer size="s" />
     </div>
   );
 };

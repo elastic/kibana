@@ -20,22 +20,19 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import { withSuspense } from '@kbn/shared-ux-utility';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import {
-  useEditableSettings,
-  useUiTracker,
-} from '@kbn/observability-shared-plugin/public';
+import { useEditableSettings, useUiTracker } from '@kbn/observability-shared-plugin/public';
 import { FieldRowProvider } from '@kbn/management-settings-components-field-row';
 import { ValueValidation } from '@kbn/core-ui-settings-browser/src/types';
 import { useApmPluginContext } from '../../../../../context/apm_plugin/use_apm_plugin_context';
 import { useFetcher, isPending } from '../../../../../hooks/use_fetcher';
 
 const LazyFieldRow = React.lazy(async () => ({
-  default: (await import('@kbn/management-settings-components-field-row'))
-    .FieldRow,
+  default: (await import('@kbn/management-settings-components-field-row')).FieldRow,
 }));
 
 const FieldRow = withSuspense(LazyFieldRow);
@@ -46,7 +43,11 @@ interface Props {
 
 export function LabsFlyout({ onClose }: Props) {
   const trackApmEvent = useUiTracker({ app: 'apm' });
-  const { docLinks, notifications } = useApmPluginContext().core;
+  const { docLinks, notifications, application } = useApmPluginContext().core;
+
+  const canSave =
+    application.capabilities.advancedSettings.save &&
+    (application.capabilities.apm['settings:save'] as boolean);
 
   const { data, status } = useFetcher(
     (callApmApi) => callApmApi('GET /internal/apm/settings/labs'),
@@ -54,14 +55,8 @@ export function LabsFlyout({ onClose }: Props) {
   );
   const labsItems = data?.labsItems || [];
 
-  const {
-    fields,
-    handleFieldChange,
-    unsavedChanges,
-    saveAll,
-    isSaving,
-    cleanUnsavedChanges,
-  } = useEditableSettings('apm', labsItems);
+  const { fields, handleFieldChange, unsavedChanges, saveAll, isSaving, cleanUnsavedChanges } =
+    useEditableSettings(labsItems);
 
   async function handleSave() {
     try {
@@ -119,11 +114,7 @@ export function LabsFlyout({ onClose }: Props) {
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="s" />
-        <EuiFlexGroup
-          gutterSize="s"
-          alignItems="center"
-          justifyContent="spaceBetween"
-        >
+        <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiText>
               {i18n.translate('xpack.apm.labs.description', {
@@ -160,14 +151,13 @@ export function LabsFlyout({ onClose }: Props) {
                   <FieldRowProvider
                     {...{
                       links: docLinks.links.management,
-                      showDanger: (message: string) =>
-                        notifications.toasts.addDanger(message),
+                      showDanger: (message: string) => notifications.toasts.addDanger(message),
                       validateChange: async () => settingsValidationResponse,
                     }}
                   >
                     <FieldRow
                       field={field}
-                      isSavingEnabled={true}
+                      isSavingEnabled={canSave}
                       onFieldChange={handleFieldChange}
                       unsavedChange={unsavedChanges[settingKey]}
                     />
@@ -180,26 +170,34 @@ export function LabsFlyout({ onClose }: Props) {
           <EuiFlyoutFooter>
             <EuiFlexGroup justifyContent="spaceBetween">
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  data-test-subj="apmLabsFlyoutCancelButton"
-                  onClick={handelCancel}
-                >
+                <EuiButtonEmpty data-test-subj="apmLabsFlyoutCancelButton" onClick={handelCancel}>
                   {i18n.translate('xpack.apm.labs.cancel', {
                     defaultMessage: 'Cancel',
                   })}
                 </EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButton
-                  data-test-subj="apmLabsFlyoutReloadToApplyChangesButton"
-                  fill
-                  isLoading={isSaving}
-                  onClick={handleSave}
+                <EuiToolTip
+                  content={
+                    !canSave &&
+                    i18n.translate('xpack.apm.labs.noPermissionTooltipLabel', {
+                      defaultMessage:
+                        "Your user role doesn't have permissions to modify these settings",
+                    })
+                  }
                 >
-                  {i18n.translate('xpack.apm.labs.reload', {
-                    defaultMessage: 'Reload to apply changes',
-                  })}
-                </EuiButton>
+                  <EuiButton
+                    data-test-subj="apmLabsFlyoutReloadToApplyChangesButton"
+                    fill
+                    isLoading={isSaving}
+                    onClick={handleSave}
+                    isDisabled={!canSave}
+                  >
+                    {i18n.translate('xpack.apm.labs.reload', {
+                      defaultMessage: 'Reload to apply changes',
+                    })}
+                  </EuiButton>
+                </EuiToolTip>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlyoutFooter>

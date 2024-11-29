@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -23,16 +24,18 @@ import { ContentTabIds } from '../../../types';
 import { ExpandableContent } from '../../../components/expandable_content';
 import { MetadataHeader } from './metadata_header';
 import { MetadataExplanationMessage } from '../../../components/metadata_explanation';
-import { MetadataSectionTitle } from '../../../components/section_titles';
-import { CollapsibleSection } from '../section/collapsible_section';
+import { SectionTitle } from '../../../components/section_title';
+import { Section } from '../../../components/section';
 
 interface MetadataSummaryProps {
-  metadata: InfraMetadata | null;
+  metadata?: InfraMetadata;
   loading: boolean;
+  assetType: InventoryItemType;
 }
 interface MetadataSummaryWrapperProps {
   visibleMetadata: MetadataData[];
   loading: boolean;
+  assetType: InventoryItemType;
 }
 
 export interface MetadataData {
@@ -42,7 +45,7 @@ export interface MetadataData {
   tooltipLink?: string;
 }
 
-const extendedMetadata = (metadataInfo: InfraMetadata['info']): MetadataData[] => [
+const hostExtendedMetadata = (metadataInfo: InfraMetadata['info']): MetadataData[] => [
   {
     field: 'cloudProvider',
     value: metadataInfo?.cloud?.provider,
@@ -56,7 +59,7 @@ const extendedMetadata = (metadataInfo: InfraMetadata['info']): MetadataData[] =
   },
 ];
 
-const metadataData = (metadataInfo: InfraMetadata['info']): MetadataData[] => [
+const hostMetadataData = (metadataInfo: InfraMetadata['info']): MetadataData[] => [
   {
     field: 'hostIp',
     value: metadataInfo?.host?.ip,
@@ -70,9 +73,51 @@ const metadataData = (metadataInfo: InfraMetadata['info']): MetadataData[] => [
   },
 ];
 
+const containerExtendedMetadata = (metadataInfo: InfraMetadata['info']): MetadataData[] => [
+  {
+    field: 'runtime',
+    value: metadataInfo?.container?.runtime,
+    tooltipFieldLabel: 'container.runtime',
+  },
+  {
+    field: 'cloudInstanceId',
+    value: metadataInfo?.cloud?.instance?.id,
+    tooltipFieldLabel: 'cloud.instance.id',
+  },
+  {
+    field: 'cloudImageId',
+    value: metadataInfo?.cloud?.imageId,
+    tooltipFieldLabel: 'cloud.image.id',
+  },
+  {
+    field: 'cloudProvider',
+    value: metadataInfo?.cloud?.provider,
+    tooltipFieldLabel: 'cloud.provider',
+  },
+];
+
+const containerMetadataData = (metadataInfo: InfraMetadata['info']): MetadataData[] => [
+  {
+    field: 'containerId',
+    value: metadataInfo?.container?.id,
+    tooltipFieldLabel: 'container.id',
+  },
+  {
+    field: 'containerImageName',
+    value: metadataInfo?.container?.image?.name,
+    tooltipFieldLabel: 'container.image.name',
+  },
+  {
+    field: 'hostName',
+    value: metadataInfo?.host?.name,
+    tooltipFieldLabel: 'host.name',
+  },
+];
+
 const MetadataSummaryListWrapper = ({
   loading: metadataLoading,
   visibleMetadata,
+  assetType,
 }: MetadataSummaryWrapperProps) => {
   const { showTab } = useTabSwitcherContext();
 
@@ -81,62 +126,119 @@ const MetadataSummaryListWrapper = ({
   };
 
   return (
-    <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween" direction="column" wrap>
-      <CollapsibleSection
-        title={MetadataSectionTitle}
-        collapsible
-        data-test-subj="infraAssetDetailsMetadataCollapsible"
-        id="metadata"
-        extraAction={
-          <EuiButtonEmpty
-            data-test-subj="infraAssetDetailsMetadataShowAllButton"
-            onClick={onClick}
-            size="xs"
-            flush="both"
-            iconSide="right"
-            iconType="sortRight"
-            key="metadata-link"
-          >
+    <Section
+      title={
+        <SectionTitle
+          title={
             <FormattedMessage
-              id="xpack.infra.assetDetails.metadataSummary.showAllMetadataButton"
-              defaultMessage="Show all"
+              id="xpack.infra.assetDetails.overview.metadataSectionTitle"
+              defaultMessage="Metadata"
             />
-          </EuiButtonEmpty>
-        }
-      >
-        <>
-          <MetadataExplanationMessage />
-          <EuiSpacer size="s" />
-          <EuiFlexGroup>
-            {visibleMetadata
-              .filter((metadataValue) => metadataValue)
-              .map((metadataValue) => (
-                <EuiFlexItem key={metadataValue.field} grow={false}>
-                  <EuiDescriptionList data-test-subj="infraMetadataSummaryItem" compressed>
-                    <MetadataHeader metadataValue={metadataValue} />
-                    <EuiDescriptionListDescription>
-                      {metadataLoading && !metadataValue.value ? (
-                        <EuiLoadingSpinner />
-                      ) : (
-                        <ExpandableContent values={metadataValue.value ?? NOT_AVAILABLE_LABEL} />
-                      )}
-                    </EuiDescriptionListDescription>
-                  </EuiDescriptionList>
-                </EuiFlexItem>
-              ))}
-          </EuiFlexGroup>
-        </>
-      </CollapsibleSection>
-    </EuiFlexGroup>
+          }
+          data-test-subj="infraAssetDetailsMetadataTitle"
+        />
+      }
+      collapsible
+      data-test-subj="infraAssetDetailsMetadataCollapsible"
+      id="metadata"
+      extraAction={
+        <EuiButtonEmpty
+          data-test-subj="infraAssetDetailsMetadataShowAllButton"
+          onClick={onClick}
+          size="xs"
+          flush="both"
+          iconSide="right"
+          iconType="sortRight"
+          key="metadata-link"
+        >
+          <FormattedMessage
+            id="xpack.infra.assetDetails.metadataSummary.showAllMetadataButton"
+            defaultMessage="Show all"
+          />
+        </EuiButtonEmpty>
+      }
+    >
+      <>
+        <MetadataExplanationMessage assetType={assetType} />
+        <EuiSpacer size="s" />
+        <EuiFlexGroup>
+          {visibleMetadata
+            .filter((metadataValue) => metadataValue)
+            .map((metadataValue) => (
+              <EuiFlexItem key={metadataValue.field} grow={false} style={{ width: '200px' }}>
+                <EuiDescriptionList data-test-subj="infraMetadataSummaryItem" compressed>
+                  <MetadataHeader metadataValue={metadataValue} />
+                  <EuiDescriptionListDescription>
+                    {metadataLoading && !metadataValue.value ? (
+                      <EuiLoadingSpinner />
+                    ) : (
+                      <ExpandableContent values={metadataValue.value ?? NOT_AVAILABLE_LABEL} />
+                    )}
+                  </EuiDescriptionListDescription>
+                </EuiDescriptionList>
+              </EuiFlexItem>
+            ))}
+        </EuiFlexGroup>
+      </>
+    </Section>
   );
 };
-export const MetadataSummaryList = ({ metadata, loading }: MetadataSummaryProps) => (
-  <MetadataSummaryListWrapper
-    visibleMetadata={[...metadataData(metadata?.info), ...extendedMetadata(metadata?.info)]}
-    loading={loading}
-  />
-);
+export const MetadataSummaryList = ({ metadata, loading, assetType }: MetadataSummaryProps) => {
+  switch (assetType) {
+    case 'host':
+      return (
+        <MetadataSummaryListWrapper
+          visibleMetadata={[
+            ...hostMetadataData(metadata?.info),
+            ...hostExtendedMetadata(metadata?.info),
+          ]}
+          loading={loading}
+          assetType={assetType}
+        />
+      );
+    case 'container':
+      return (
+        <MetadataSummaryListWrapper
+          visibleMetadata={[
+            ...containerMetadataData(metadata?.info),
+            ...containerExtendedMetadata(metadata?.info),
+          ]}
+          loading={loading}
+          assetType={assetType}
+        />
+      );
+    default:
+      return (
+        <MetadataSummaryListWrapper visibleMetadata={[]} loading={loading} assetType={assetType} />
+      );
+  }
+};
 
-export const MetadataSummaryListCompact = ({ metadata, loading }: MetadataSummaryProps) => (
-  <MetadataSummaryListWrapper visibleMetadata={metadataData(metadata?.info)} loading={loading} />
-);
+export const MetadataSummaryListCompact = ({
+  metadata,
+  loading,
+  assetType,
+}: MetadataSummaryProps) => {
+  switch (assetType) {
+    case 'host':
+      return (
+        <MetadataSummaryListWrapper
+          visibleMetadata={hostMetadataData(metadata?.info)}
+          loading={loading}
+          assetType={assetType}
+        />
+      );
+    case 'container':
+      return (
+        <MetadataSummaryListWrapper
+          visibleMetadata={containerMetadataData(metadata?.info)}
+          loading={loading}
+          assetType={assetType}
+        />
+      );
+    default:
+      return (
+        <MetadataSummaryListWrapper visibleMetadata={[]} loading={loading} assetType={assetType} />
+      );
+  }
+};

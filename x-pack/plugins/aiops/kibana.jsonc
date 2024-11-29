@@ -1,12 +1,16 @@
 {
   "type": "plugin",
   "id": "@kbn/aiops-plugin",
-  "owner": "@elastic/ml-ui",
+  "owner": [
+    "@elastic/ml-ui"
+  ],
+  "group": "platform",
+  "visibility": "shared",
   "description": "AIOps plugin maintained by ML team.",
   "plugin": {
     "id": "aiops",
-    "server": true,
     "browser": true,
+    "server": true,
     "requiredPlugins": [
       "charts",
       "data",
@@ -22,17 +26,16 @@
     ],
     "optionalPlugins": [
       "cases",
+      "observabilityAIAssistant",
       "usageCollection"
     ],
     "requiredBundles": [
+      "dataViews",
       "fieldFormats",
       "kibanaReact",
       "kibanaUtils",
       "embeddable",
       "cases"
-    ],
-    "extraPublicDirs": [
-      "common"
     ]
   }
 }

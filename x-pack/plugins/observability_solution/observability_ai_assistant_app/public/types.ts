@@ -16,7 +16,6 @@ import type {
   ObservabilityAIAssistantPublicStart,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
-import type { SecurityPluginStart, SecurityPluginSetup } from '@kbn/security-plugin/public';
 import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type {
   ObservabilitySharedPluginSetup,
@@ -28,6 +27,10 @@ import type {
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type {
+  AIAssistantManagementSelectionPluginPublicStart,
+  AIAssistantManagementSelectionPluginPublicSetup,
+} from '@kbn/ai-assistant-management-plugin/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ObservabilityAIAssistantAppPublicStart {}
@@ -37,7 +40,6 @@ export interface ObservabilityAIAssistantAppPublicSetup {}
 export interface ObservabilityAIAssistantAppPluginStartDependencies {
   licensing: LicensingPluginStart;
   share: SharePluginStart;
-  security: SecurityPluginStart;
   lens: LensPublicStart;
   dataViews: DataViewsPublicPluginStart;
   uiActions: UiActionsStart;
@@ -46,12 +48,12 @@ export interface ObservabilityAIAssistantAppPluginStartDependencies {
   ml: MlPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   data: DataPublicPluginStart;
+  aiAssistantManagementSelection: AIAssistantManagementSelectionPluginPublicStart;
 }
 
 export interface ObservabilityAIAssistantAppPluginSetupDependencies {
   licensing: LicensingPluginSetup;
   share: SharePluginSetup;
-  security: SecurityPluginSetup;
   lens: LensPublicSetup;
   dataViews: DataViewsPublicPluginSetup;
   uiActions: UiActionsSetup;
@@ -59,4 +61,5 @@ export interface ObservabilityAIAssistantAppPluginSetupDependencies {
   observabilityShared: ObservabilitySharedPluginSetup;
   ml: MlPluginSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
+  aiAssistantManagementSelection: AIAssistantManagementSelectionPluginPublicSetup;
 }

@@ -5,109 +5,123 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 
 import { useFleetServerHostsForPolicy } from './use_fleet_server_hosts_for_policy';
-import { useGetFleetServerHosts } from './use_request/fleet_server_hosts';
-import { useGetFleetProxies } from './use_request/fleet_proxies';
-import { useGetDownloadSources } from './use_request/download_source';
+import { useGetEnrollmentSettings } from './use_request/settings';
 
-jest.mock('./use_request/fleet_server_hosts');
-jest.mock('./use_request/fleet_proxies');
-jest.mock('./use_request/download_source');
+jest.mock('./use_request/settings');
 
 describe('useFleetServerHostsForPolicy', () => {
   beforeEach(() => {
-    jest.mocked(useGetFleetServerHosts).mockReturnValue({
+    jest.mocked(useGetEnrollmentSettings).mockReturnValue({
       isLoading: false,
       isInitialRequest: false,
+      error: null,
+      resendRequest: jest.fn(),
       data: {
-        items: [
-          {
-            id: 'default',
+        fleet_server: {
+          policies: [
+            {
+              id: 'default-policy',
+              name: 'default-policy',
+              is_managed: false,
+            },
+          ],
+          host: {
+            id: 'fleet-server',
+            name: 'fleet-server',
+            is_preconfigured: false,
             is_default: true,
             host_urls: ['https://defaultfleetserver:8220'],
-            is_preconfigured: false,
-            name: 'Default',
           },
-          {
-            id: 'custom1',
+          host_proxy: {
+            id: 'default-proxy',
+            name: 'default-proxy',
+            url: 'https://defaultproxy',
+            is_preconfigured: false,
+          },
+          has_active: true,
+          es_output: {
+            id: 'es-output',
+            name: 'es-output',
             is_default: false,
-            host_urls: ['https://custom1:8220'],
+            is_default_monitoring: false,
+            type: 'elasticsearch',
+            hosts: ['https://elasticsearch:9200'],
+          },
+          es_output_proxy: {
+            id: 'es-output-proxy',
+            name: 'es-output-proxy',
+            url: 'https://es-output-proxy',
+            proxy_headers: {
+              'header-key': 'header-value',
+            },
             is_preconfigured: false,
-            name: 'Custom 1',
           },
-        ],
-        page: 1,
-        perPage: 100,
-        total: 2,
-      },
-    } as any);
-    jest.mocked(useGetFleetProxies).mockReturnValue({
-      isInitialRequest: false,
-      isLoading: false,
-      data: {
-        items: [],
-      },
-    } as any);
-    jest.mocked(useGetDownloadSources).mockReturnValue({
-      isInitialRequest: false,
-      isLoading: false,
-      data: {
-        items: [
-          {
-            id: 'default',
-            is_default: true,
+        },
+        download_source: {
+          id: 'default-source',
+          name: 'default-source',
+          host: 'https://defaultsource',
+          is_default: false,
+        },
+        download_source_proxy: {
+          id: 'download-src-proxy',
+          name: 'download-src-proxy',
+          url: 'https://download-src-proxy',
+          proxy_headers: {
+            'header-key': 'header-value',
           },
-          {
-            id: 'custom1',
-          },
-        ],
+          is_preconfigured: false,
+        },
       },
-    } as any);
+    });
   });
-  it('should return default hosts if used without agent policy', () => {
+
+  it('should return correct state from api request', () => {
     const { result } = renderHook(() => useFleetServerHostsForPolicy());
-    expect(result.current.fleetServerHosts).toEqual(['https://defaultfleetserver:8220']);
-  });
-
-  it('should return default hosts if used with agent policy that do not override fleet server host', () => {
-    const { result } = renderHook(() =>
-      useFleetServerHostsForPolicy({
-        id: 'testpolicy1',
-      } as any)
-    );
-    expect(result.current.fleetServerHosts).toEqual(['https://defaultfleetserver:8220']);
-  });
-
-  it('should return custom hosts if used with agent policy that override fleet server hosts', () => {
-    const { result } = renderHook(() =>
-      useFleetServerHostsForPolicy({
-        id: 'testpolicy1',
-        fleet_server_host_id: 'custom1',
-      } as any)
-    );
-    expect(result.current.fleetServerHosts).toEqual(['https://custom1:8220']);
-  });
-
-  it('should return default download source if used with a policy not overriding download source', () => {
-    const { result } = renderHook(() =>
-      useFleetServerHostsForPolicy({
-        id: 'testpolicy1',
-        fleet_server_host_id: 'custom1',
-      } as any)
-    );
-    expect(result.current.downloadSource?.id).toEqual('default');
-  });
-
-  it('should return custom download source if used with a policy overriding download source', () => {
-    const { result } = renderHook(() =>
-      useFleetServerHostsForPolicy({
-        id: 'testpolicy1',
-        fleet_server_host_id: 'custom1',
-        download_source_id: 'custom1',
-      } as any)
-    );
-    expect(result.current.downloadSource?.id).toEqual('custom1');
+    expect(result.current).toEqual({
+      isLoadingInitialRequest: false,
+      fleetServerHost: 'https://defaultfleetserver:8220',
+      fleetProxy: {
+        id: 'default-proxy',
+        name: 'default-proxy',
+        url: 'https://defaultproxy',
+        is_preconfigured: false,
+      },
+      esOutput: {
+        id: 'es-output',
+        name: 'es-output',
+        is_default: false,
+        is_default_monitoring: false,
+        type: 'elasticsearch',
+        hosts: ['https://elasticsearch:9200'],
+      },
+      esOutputProxy: {
+        id: 'es-output-proxy',
+        name: 'es-output-proxy',
+        url: 'https://es-output-proxy',
+        proxy_headers: {
+          'header-key': 'header-value',
+        },
+        is_preconfigured: false,
+      },
+      downloadSource: {
+        id: 'default-source',
+        name: 'default-source',
+        host: 'https://defaultsource',
+        is_default: false,
+      },
+      downloadSourceProxy: {
+        id: 'download-src-proxy',
+        name: 'download-src-proxy',
+        url: 'https://download-src-proxy',
+        proxy_headers: {
+          'header-key': 'header-value',
+        },
+        is_preconfigured: false,
+      },
+    });
   });
 });

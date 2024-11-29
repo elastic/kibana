@@ -6,7 +6,7 @@
  */
 
 import { DeepPartial } from 'utility-types';
-import { AgentName, ElasticAgentName } from '@kbn/elastic-agent-utils';
+import type { AgentName } from '@kbn/elastic-agent-utils';
 import { RollupInterval } from '../../../common/rollup';
 
 export interface TimeframeMap {
@@ -126,17 +126,14 @@ export interface APMUsage {
       };
     };
   };
-  retainment: Record<
-    'span' | 'transaction' | 'error' | 'metric' | 'onboarding',
-    { ms: number }
-  >;
+  retainment: Record<'span' | 'transaction' | 'error' | 'metric' | 'onboarding', { ms: number }>;
   integrations: {
     ml: {
       all_jobs_count: number;
     };
   };
   agents: Record<
-    ElasticAgentName,
+    AgentName,
     {
       agent: {
         version: string[];

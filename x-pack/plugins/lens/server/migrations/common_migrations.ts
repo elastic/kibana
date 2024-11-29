@@ -37,7 +37,7 @@ import {
   LensDocShape860,
 } from './types';
 import { DOCUMENT_FIELD_NAME } from '../../common/constants';
-import type { LegacyMetricState } from '../../common/types';
+import { RowHeightMode, type LegacyMetricState } from '../../common/types';
 import { isPartitionShape } from '../../common/visualizations';
 import { LensDocShape } from './saved_object_migrations';
 
@@ -228,7 +228,7 @@ export const commonEnhanceTableRowHeight = (
   const visState810 = attributes.state.visualization as VisState810;
   const newAttributes = cloneDeep(attributes);
   const vizState = newAttributes.state.visualization as VisState820;
-  vizState.rowHeight = visState810.fitRowToContent ? 'auto' : 'single';
+  vizState.rowHeight = visState810.fitRowToContent ? RowHeightMode.auto : RowHeightMode.single;
   vizState.rowHeightLines = visState810.fitRowToContent ? 2 : 1;
   return newAttributes as LensDocShape810<VisState820>;
 };
@@ -323,7 +323,7 @@ export const getLensCustomVisualizationMigrations = (
       const migrationMap: MigrateFunctionsObject = {};
       const currentMigrations = migrationGetter();
       for (const version in currentMigrations) {
-        if (currentMigrations.hasOwnProperty(version)) {
+        if (Object.hasOwn(currentMigrations, version)) {
           migrationMap[version] = getApplyCustomVisualizationMigrationToLens(
             id,
             currentMigrations[version]

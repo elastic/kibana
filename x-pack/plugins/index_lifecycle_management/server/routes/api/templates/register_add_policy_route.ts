@@ -78,6 +78,7 @@ async function updateIndexTemplate(
   }
 
   if (isLegacy) {
+    // @ts-expect-error Types of property auto_expand_replicas are incompatible.
     return client.indices.putTemplate({ name: templateName, body: indexTemplate });
   }
   // @ts-expect-error Type 'IndexSettings' is not assignable to type 'IndicesIndexSettings'.

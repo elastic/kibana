@@ -7,7 +7,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { EuiEmptyPrompt, EuiFlexItem, EuiFormRow, EuiSwitch, EuiSpacer } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { WindowParameters } from '@kbn/aiops-utils';
+import type { WindowParameters } from '@kbn/aiops-log-rate-analysis';
 import { i18n } from '@kbn/i18n';
 import type { Query } from '@kbn/es-query';
 import { ProgressControls } from '@kbn/aiops-components';
@@ -216,7 +216,7 @@ export const DataDriftView = ({
         runAnalysisDisabled={!dataView || requiresWindowParameters}
       >
         <EuiFlexItem grow={false}>
-          <EuiFormRow display="columnCompressedSwitch">
+          <EuiFormRow display="columnCompressed">
             <EuiSwitch
               label={showOnlyDriftedFieldsOptionLabel}
               aria-label={showOnlyDriftedFieldsOptionLabel}

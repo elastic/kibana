@@ -26,13 +26,9 @@ export function AlertsOverview() {
   const {
     path: { serviceName },
     query: { environment, rangeFrom, rangeTo, kuery, alertStatus },
-  } = useAnyOfApmParams(
-    '/services/{serviceName}/alerts',
-    '/mobile-services/{serviceName}/alerts'
-  );
+  } = useAnyOfApmParams('/services/{serviceName}/alerts', '/mobile-services/{serviceName}/alerts');
   const { services } = useKibana<ApmPluginStartDeps>();
-  const [alertStatusFilter, setAlertStatusFilter] =
-    useState<AlertStatus>(ALERT_STATUS_ALL);
+  const [alertStatusFilter, setAlertStatusFilter] = useState<AlertStatus>(ALERT_STATUS_ALL);
   const [esQuery, setEsQuery] = useState<{ bool: BoolQuery }>();
 
   useEffect(() => {
@@ -54,6 +50,7 @@ export function AlertsOverview() {
       },
     },
     uiSettings,
+    observability: { observabilityRuleTypeRegistry },
   } = services;
 
   const useToasts = () => notifications!.toasts;
@@ -74,7 +71,7 @@ export function AlertsOverview() {
   }, [serviceName, environment]);
 
   const onKueryChange = useCallback(
-    (value) => push(history, { query: { kuery: value } }),
+    (value: any) => push(history, { query: { kuery: value } }),
     [history]
   );
 
@@ -86,12 +83,8 @@ export function AlertsOverview() {
             <ObservabilityAlertSearchBar
               appName={'apmApp'}
               kuery={kuery}
-              onRangeFromChange={(value) =>
-                push(history, { query: { rangeFrom: value } })
-              }
-              onRangeToChange={(value) =>
-                push(history, { query: { rangeTo: value } })
-              }
+              onRangeFromChange={(value) => push(history, { query: { rangeFrom: value } })}
+              onRangeToChange={(value) => push(history, { query: { rangeTo: value } })}
               onKueryChange={onKueryChange}
               defaultSearchQueries={apmQueries}
               onStatusChange={setAlertStatusFilter}
@@ -111,14 +104,13 @@ export function AlertsOverview() {
         <EuiFlexItem>
           {esQuery && (
             <AlertsStateTable
-              alertsTableConfigurationRegistry={
-                alertsTableConfigurationRegistry
-              }
+              alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
               id={'service-overview-alerts'}
               configurationId={AlertConsumers.OBSERVABILITY}
               featureIds={[AlertConsumers.APM, AlertConsumers.OBSERVABILITY]}
               query={esQuery}
               showAlertStatusWithFlapping
+              cellContext={{ observabilityRuleTypeRegistry }}
             />
           )}
         </EuiFlexItem>

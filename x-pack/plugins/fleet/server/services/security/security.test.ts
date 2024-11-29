@@ -8,6 +8,8 @@
 import { deepFreeze } from '@kbn/std';
 import type { SecurityPluginStart, CheckPrivilegesDynamically } from '@kbn/security-plugin/server';
 
+import { securityServiceMock, type SecurityStartMock } from '@kbn/core-security-server-mocks';
+
 import { appContextService } from '../app_context';
 import type { FleetAuthz } from '../../../common';
 
@@ -27,6 +29,8 @@ describe('When using calculateRouteAuthz()', () => {
       allAgents: false,
       readSettings: false,
       allSettings: false,
+      addAgents: false,
+      addFleetServers: false,
     },
     integrations: {
       readPackageInfo: false,
@@ -552,12 +556,13 @@ describe('When using calculateRouteAuthz()', () => {
 });
 
 describe('getAuthzFromRequest', () => {
+  let mockSecurityCore: SecurityStartMock;
   let mockSecurity: jest.MockedObjectDeep<SecurityPluginStart>;
   let checkPrivileges: jest.MockedFn<CheckPrivilegesDynamically>;
   beforeEach(() => {
     checkPrivileges = jest.fn();
+    mockSecurityCore = securityServiceMock.createStart();
     mockSecurity = {
-      authc: { getCurrentUser: jest.fn() },
       authz: {
         checkPrivilegesDynamicallyWithRequest: jest.fn().mockReturnValue(checkPrivileges),
         actions: {
@@ -574,6 +579,7 @@ describe('getAuthzFromRequest', () => {
       },
     } as unknown as jest.MockedObjectDeep<SecurityPluginStart>;
 
+    jest.mocked(appContextService.getSecurityCore).mockReturnValue(mockSecurityCore);
     jest.mocked(appContextService.getSecurity).mockReturnValue(mockSecurity);
     jest.mocked(appContextService.getSecurityLicense).mockReturnValue({
       isEnabled: () => true,
@@ -706,7 +712,7 @@ describe('getAuthzFromRequest', () => {
           kibana: [
             {
               resource: 'default',
-              privilege: 'api:fleet-all',
+              privilege: 'api:fleet-agents-all',
               authorized: true,
             },
           ],
@@ -878,6 +884,59 @@ describe('getAuthzFromRequest', () => {
       });
       const res = await getAuthzFromRequest({} as any);
       expect(res.fleet.readAgents).toBe(false);
+    });
+  });
+
+  describe('Fleet addFleetServer', () => {
+    beforeEach(() => {
+      mockSecurity.authz.mode.useRbacForRequest.mockReturnValue(true);
+    });
+    it('should authorize user with Fleet:Agents:All Fleet:AgentsPolicies:All Fleet:Settings:All', async () => {
+      checkPrivileges.mockResolvedValue({
+        privileges: {
+          kibana: [
+            {
+              resource: 'default',
+              privilege: 'api:fleet-agents-all',
+              authorized: true,
+            },
+            {
+              resource: 'default',
+              privilege: 'api:fleet-agent-policies-all',
+              authorized: true,
+            },
+            {
+              resource: 'default',
+              privilege: 'api:fleet-settings-all',
+              authorized: true,
+            },
+          ],
+          elasticsearch: {} as any,
+        },
+        hasAllRequested: true,
+        username: 'test',
+      });
+      const res = await getAuthzFromRequest({} as any);
+      expect(res.fleet.addFleetServers).toBe(true);
+    });
+
+    it('should not authorize user with only Fleet:Agents:All', async () => {
+      checkPrivileges.mockResolvedValue({
+        privileges: {
+          kibana: [
+            {
+              resource: 'default',
+              privilege: 'api:fleet-agents-all',
+              authorized: true,
+            },
+          ],
+          elasticsearch: {} as any,
+        },
+        hasAllRequested: true,
+        username: 'test',
+      });
+      const res = await getAuthzFromRequest({} as any);
+      expect(res.fleet.addFleetServers).toBe(false);
     });
   });
 });

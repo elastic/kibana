@@ -5,15 +5,19 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { NewTimelineButton } from '.';
 import { TimelineId } from '../../../../common/types';
 import { timelineActions } from '../../store';
 import { useDiscoverInTimelineContext } from '../../../common/components/discover_in_timeline/use_discover_in_timeline_context';
-import { defaultHeaders } from '../timeline/body/column_headers/default_headers';
-import { TimelineType } from '../../../../common/api/timeline';
+import {
+  RowRendererValues,
+  type TimelineType,
+  TimelineTypeEnum,
+} from '../../../../common/api/timeline';
 import { TestProviders } from '../../../common/mock';
+import { defaultUdtHeaders } from '../timeline/body/column_headers/default_headers';
 
 jest.mock('../../../common/components/discover_in_timeline/use_discover_in_timeline_context');
 jest.mock('../../../common/hooks/use_selector');
@@ -26,6 +30,8 @@ jest.mock('react-redux', () => {
     useDispatch: () => jest.fn(),
   };
 });
+
+jest.mock('../../../common/hooks/use_experimental_features');
 
 const renderNewTimelineButton = (type: TimelineType) =>
   render(<NewTimelineButton type={type} />, { wrapper: TestProviders });
@@ -41,7 +47,7 @@ describe('NewTimelineButton', () => {
     const spy = jest.spyOn(timelineActions, 'createTimeline');
 
     const { getByTestId, queryByTestId, queryByText } = renderNewTimelineButton(
-      TimelineType.default
+      TimelineTypeEnum.default
     );
 
     const button = getByTestId('timelines-page-create-new-timeline');
@@ -53,14 +59,17 @@ describe('NewTimelineButton', () => {
 
     button.click();
 
-    expect(spy).toHaveBeenCalledWith({
-      columns: defaultHeaders,
-      dataViewId,
-      id: TimelineId.active,
-      indexNames: selectedPatterns,
-      show: true,
-      timelineType: TimelineType.default,
-      updated: undefined,
+    await waitFor(() => {
+      expect(spy).toHaveBeenCalledWith({
+        columns: defaultUdtHeaders,
+        dataViewId,
+        id: TimelineId.active,
+        indexNames: selectedPatterns,
+        show: true,
+        timelineType: TimelineTypeEnum.default,
+        updated: undefined,
+        excludedRowRendererIds: RowRendererValues,
+      });
     });
   });
 
@@ -68,7 +77,7 @@ describe('NewTimelineButton', () => {
     const spy = jest.spyOn(timelineActions, 'createTimeline');
 
     const { getByTestId, queryByTestId, queryByText } = renderNewTimelineButton(
-      TimelineType.template
+      TimelineTypeEnum.template
     );
 
     const button = getByTestId('timelines-page-create-new-timeline-template');
@@ -80,14 +89,17 @@ describe('NewTimelineButton', () => {
 
     button.click();
 
-    expect(spy).toHaveBeenCalledWith({
-      columns: defaultHeaders,
-      dataViewId,
-      id: TimelineId.active,
-      indexNames: selectedPatterns,
-      show: true,
-      timelineType: TimelineType.template,
-      updated: undefined,
+    await waitFor(() => {
+      expect(spy).toHaveBeenCalledWith({
+        columns: defaultUdtHeaders,
+        dataViewId,
+        id: TimelineId.active,
+        indexNames: selectedPatterns,
+        show: true,
+        timelineType: TimelineTypeEnum.template,
+        updated: undefined,
+        excludedRowRendererIds: [],
+      });
     });
   });
 });

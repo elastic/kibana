@@ -1,16 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { registerAnalyticsContextProviderMock } from './chrome_service.test.mocks';
 import { shallow, mount } from 'enzyme';
 import React from 'react';
 import * as Rx from 'rxjs';
-import { toArray } from 'rxjs/operators';
+import { toArray, firstValueFrom } from 'rxjs';
 import { injectedMetadataServiceMock } from '@kbn/core-injected-metadata-browser-mocks';
 import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
@@ -21,7 +22,10 @@ import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { customBrandingServiceMock } from '@kbn/core-custom-branding-browser-mocks';
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
+import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
+import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { getAppInfo } from '@kbn/core-application-browser-internal';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { findTestSubject } from '@kbn/test-jest-helpers';
 import { ChromeService } from './chrome_service';
 
@@ -48,6 +52,9 @@ Object.defineProperty(window, 'localStorage', {
 
 function defaultStartDeps(availableApps?: App[], currentAppId?: string) {
   const deps = {
+    analytics: analyticsServiceMock.createAnalyticsServiceStart(),
+    i18n: i18nServiceMock.createStartContract(),
+    theme: themeServiceMock.createStartContract(),
     application: applicationServiceMock.createInternalStartContract(currentAppId),
     docLinks: docLinksServiceMock.createStartContract(),
     http: httpServiceMock.createStartContract(),
@@ -94,7 +101,7 @@ async function start({
     startDeps.injectedMetadata.getCspConfig.mockReturnValue(cspConfigMock);
   }
 
-  await service.setup({ analytics: analyticsServiceMock.createAnalyticsServiceSetup() });
+  service.setup({ analytics: analyticsServiceMock.createAnalyticsServiceSetup() });
   const chromeStart = await service.start(startDeps);
 
   return {
@@ -118,7 +125,7 @@ describe('setup', () => {
   it('calls registerAnalyticsContextProvider with the correct parameters', async () => {
     const service = new ChromeService(defaultStartTestOptions({}));
     const analytics = analyticsServiceMock.createAnalyticsServiceSetup();
-    await service.setup({ analytics });
+    service.setup({ analytics });
 
     expect(registerAnalyticsContextProviderMock).toHaveBeenCalledTimes(1);
     expect(registerAnalyticsContextProviderMock).toHaveBeenCalledWith(
@@ -206,7 +213,7 @@ describe('start', () => {
     });
 
     it('renders the custom project side navigation', async () => {
-      const { chrome } = await start({
+      const { chrome, startDeps } = await start({
         startDeps: defaultStartDeps([{ id: 'foo', title: 'Foo' } as App], 'foo'),
       });
 
@@ -216,7 +223,11 @@ describe('start', () => {
       chrome.setChromeStyle('project');
       chrome.project.setSideNavComponent(MyNav);
 
-      const component = mount(chrome.getHeaderComponent());
+      const component = mount(
+        <KibanaRenderContextProvider {...startDeps}>
+          {chrome.getHeaderComponent()}
+        </KibanaRenderContextProvider>
+      );
 
       const projectHeader = findTestSubject(component, 'kibanaProjectHeader');
       expect(projectHeader.length).toBe(1);
@@ -229,11 +240,15 @@ describe('start', () => {
     });
 
     it('renders chromeless header', async () => {
-      const { chrome } = await start({ startDeps: defaultStartDeps() });
+      const { chrome, startDeps } = await start({ startDeps: defaultStartDeps() });
 
       chrome.setIsVisible(false);
 
-      const component = mount(chrome.getHeaderComponent());
+      const component = mount(
+        <KibanaRenderContextProvider {...startDeps}>
+          {chrome.getHeaderComponent()}
+        </KibanaRenderContextProvider>
+      );
 
       const chromeless = findTestSubject(component, 'kibanaHeaderChromeless');
       expect(chromeless.length).toBe(1);
@@ -377,7 +392,7 @@ describe('start', () => {
   describe('breadcrumbs', () => {
     it('updates/emits the current set of breadcrumbs', async () => {
       const { chrome, service } = await start();
-      const promise = chrome.getBreadcrumbs$().pipe(toArray()).toPromise();
+      const promise = firstValueFrom(chrome.getBreadcrumbs$().pipe(toArray()));
 
       chrome.setBreadcrumbs([{ text: 'foo' }, { text: 'bar' }]);
       chrome.setBreadcrumbs([{ text: 'foo' }]);
@@ -410,6 +425,35 @@ describe('start', () => {
                       ]
                   `);
     });
+
+    it('allows the project breadcrumb to also be set', async () => {
+      const { chrome } = await start();
+
+      chrome.setBreadcrumbs([{ text: 'foo' }, { text: 'bar' }]); // only setting the classic breadcrumbs
+
+      {
+        const breadcrumbs = await firstValueFrom(chrome.project.getBreadcrumbs$());
+        expect(breadcrumbs.length).toBe(1);
+        expect(breadcrumbs[0]).toMatchObject({
+          'data-test-subj': 'deploymentCrumb',
+        });
+      }
+
+      chrome.setBreadcrumbs([{ text: 'foo' }, { text: 'bar' }], {
+        project: { value: [{ text: 'baz' }] }, // also setting the project breadcrumb
+      });
+
+      {
+        const breadcrumbs = await firstValueFrom(chrome.project.getBreadcrumbs$());
+        expect(breadcrumbs.length).toBe(2);
+        expect(breadcrumbs[0]).toMatchObject({
+          'data-test-subj': 'deploymentCrumb',
+        });
+        expect(breadcrumbs[1]).toEqual({
+          text: 'baz', // the project breadcrumb
+        });
+      }
+    });
   });
 
   describe('breadcrumbsAppendExtension$', () => {
@@ -418,7 +462,7 @@ describe('start', () => {
       const promise = chrome.getBreadcrumbsAppendExtension$().pipe(toArray()).toPromise();
 
       chrome.setBreadcrumbsAppendExtension({
-        content: (element) => () => {},
+        content: () => () => {},
       });
       service.stop();
 
@@ -539,6 +583,74 @@ describe('start', () => {
                         ],
                       ]
                   `);
+    });
+  });
+
+  describe('side nav', () => {
+    describe('isCollapsed$', () => {
+      it('should return false by default', async () => {
+        const { chrome, service } = await start();
+        const isCollapsed = await firstValueFrom(chrome.sideNav.getIsCollapsed$());
+        service.stop();
+        expect(isCollapsed).toBe(false);
+      });
+
+      it('should read the localStorage value', async () => {
+        store.set('core.chrome.isSideNavCollapsed', 'true');
+        const { chrome, service } = await start();
+        const isCollapsed = await firstValueFrom(chrome.sideNav.getIsCollapsed$());
+        service.stop();
+        expect(isCollapsed).toBe(true);
+      });
+    });
+
+    describe('setIsCollapsed', () => {
+      it('should update the isCollapsed$ observable', async () => {
+        const { chrome, service } = await start();
+        const isCollapsed$ = chrome.sideNav.getIsCollapsed$();
+        const isCollapsed = await firstValueFrom(isCollapsed$);
+
+        chrome.sideNav.setIsCollapsed(!isCollapsed);
+
+        const updatedIsCollapsed = await firstValueFrom(isCollapsed$);
+        service.stop();
+        expect(updatedIsCollapsed).toBe(!isCollapsed);
+      });
+    });
+
+    describe('getIsFeedbackBtnVisible$', () => {
+      it('should return false by default', async () => {
+        const { chrome, service } = await start();
+        const isCollapsed = await firstValueFrom(chrome.sideNav.getIsFeedbackBtnVisible$());
+        service.stop();
+        expect(isCollapsed).toBe(false);
+      });
+
+      it('should return "false" when the sidenav is collapsed', async () => {
+        const { chrome, service } = await start();
+
+        const isFeedbackBtnVisible$ = chrome.sideNav.getIsFeedbackBtnVisible$();
+        chrome.sideNav.setIsFeedbackBtnVisible(true); // Mark it as visible
+        chrome.sideNav.setIsCollapsed(true); // But the sidenav is collapsed
+
+        const isFeedbackBtnVisible = await firstValueFrom(isFeedbackBtnVisible$);
+        service.stop();
+        expect(isFeedbackBtnVisible).toBe(false);
+      });
+    });
+
+    describe('setIsFeedbackBtnVisible', () => {
+      it('should update the isFeedbackBtnVisible$ observable', async () => {
+        const { chrome, service } = await start();
+        const isFeedbackBtnVisible$ = chrome.sideNav.getIsFeedbackBtnVisible$();
+        const isFeedbackBtnVisible = await firstValueFrom(isFeedbackBtnVisible$);
+
+        chrome.sideNav.setIsFeedbackBtnVisible(!isFeedbackBtnVisible);
+
+        const updatedIsFeedbackBtnVisible = await firstValueFrom(isFeedbackBtnVisible$);
+        service.stop();
+        expect(updatedIsFeedbackBtnVisible).toBe(!isFeedbackBtnVisible);
+      });
     });
   });
 });

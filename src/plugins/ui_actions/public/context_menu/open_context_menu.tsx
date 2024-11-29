@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -11,8 +12,8 @@ import React from 'react';
 import { EuiContextMenu, EuiContextMenuPanelDescriptor, EuiPopover } from '@elastic/eui';
 import { EventEmitter } from 'events';
 import ReactDOM from 'react-dom';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import { getTheme } from '../services';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { getAnalytics, getI18n, getTheme } from '../services';
 
 let activeSession: ContextMenuSession | null = null;
 
@@ -170,9 +171,10 @@ export function openContextMenu(
   };
 
   ReactDOM.render(
-    <KibanaThemeProvider theme$={getTheme().theme$}>
+    <KibanaRenderContextProvider analytics={getAnalytics()} i18n={getI18n()} theme={getTheme()}>
       <EuiPopover
         className="embPanel__optionsMenuPopover"
+        // @ts-expect-error @types/react@18 upgrade - Type 'HTMLElement' is not assignable to type 'NonNullable<ReactNode> | undefined'
         button={container}
         isOpen={true}
         closePopover={onClose}
@@ -185,7 +187,7 @@ export function openContextMenu(
           data-test-subj={props['data-test-subj']}
         />
       </EuiPopover>
-    </KibanaThemeProvider>,
+    </KibanaRenderContextProvider>,
     container
   );
 

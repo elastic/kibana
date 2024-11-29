@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 
 import { useKibana as mockUseKibana } from '../../../../common/lib/kibana/__mocks__';
 import { useShowRelatedCases } from './use_show_related_cases';
@@ -40,13 +40,13 @@ describe('useShowRelatedCases', () => {
       delete: false,
       push: false,
     });
-
-    const hookResult = renderHook(() => useShowRelatedCases());
+    const getFieldsData = () => null;
+    const hookResult = renderHook(() => useShowRelatedCases({ getFieldsData }));
 
     expect(hookResult.result.current).toEqual(false);
   });
 
-  it('should return true if user has cases read privilege', () => {
+  it('should return false if user has cases read privilege but viewing a non-alert', () => {
     mockCanUseCases.mockReturnValue({
       all: false,
       create: false,
@@ -55,8 +55,32 @@ describe('useShowRelatedCases', () => {
       delete: false,
       push: false,
     });
+    const getFieldsData = (field: string) => {
+      switch (field) {
+        case 'event.kind':
+          return 'event';
+      }
+    };
+    const hookResult = renderHook(() => useShowRelatedCases({ getFieldsData }));
+    expect(hookResult.result.current).toEqual(false);
+  });
 
-    const hookResult = renderHook(() => useShowRelatedCases());
+  it('should return true if user has cases read privilege and viewing an alert', () => {
+    mockCanUseCases.mockReturnValue({
+      all: false,
+      create: false,
+      read: true,
+      update: false,
+      delete: false,
+      push: false,
+    });
+    const getFieldsData = (field: string) => {
+      switch (field) {
+        case 'event.kind':
+          return 'signal';
+      }
+    };
+    const hookResult = renderHook(() => useShowRelatedCases({ getFieldsData }));
 
     expect(hookResult.result.current).toEqual(true);
   });

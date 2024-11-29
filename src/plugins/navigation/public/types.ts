@@ -1,24 +1,34 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AggregateQuery, Query } from '@kbn/es-query';
-import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { AggregateQuery, Query } from '@kbn/es-query';
+import type { Observable } from 'rxjs';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { SolutionNavigationDefinition } from '@kbn/core-chrome-browser';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
+import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/public';
 
+import { PanelContentProvider } from '@kbn/shared-ux-chrome-navigation';
 import { TopNavMenuProps, TopNavMenuExtensionsRegistrySetup, createTopNav } from './top_nav_menu';
-import { RegisteredTopNavMenuData } from './top_nav_menu/top_nav_menu_data';
+import type { RegisteredTopNavMenuData } from './top_nav_menu/top_nav_menu_data';
 
 export interface NavigationPublicSetup {
   registerMenuItem: TopNavMenuExtensionsRegistrySetup['register'];
 }
 
 export type SolutionNavigation = Omit<SolutionNavigationDefinition, 'sideNavComponentGetter'>;
+export type AddSolutionNavigationArg = Omit<SolutionNavigation, 'sideNavComponent'> & {
+  /** Data test subj for the side navigation */
+  dataTestSubj?: string;
+  /** Panel content provider for the side navigation */
+  panelContentProvider?: PanelContentProvider;
+};
 
 export interface NavigationPublicStart {
   ui: {
@@ -30,32 +40,20 @@ export interface NavigationPublicStart {
     ) => ReturnType<typeof createTopNav>;
   };
   /** Add a solution navigation to the header nav switcher. */
-  addSolutionNavigation: (solutionNavigation: SolutionNavigation) => void;
-  /**
-   * Use this handler verify if the solution navigation is enabled.
-   * @returns true if the solution navigation is enabled, false otherwise.
-   */
-  isSolutionNavigationEnabled: () => boolean;
+  addSolutionNavigation: (solutionNavigationAgg: AddSolutionNavigationArg) => void;
+  /** Flag to indicate if the solution navigation is enabled.*/
+  isSolutionNavEnabled$: Observable<boolean>;
 }
 
 export interface NavigationPublicSetupDependencies {
   cloud?: CloudSetup;
+  spaces?: SpacesPluginSetup;
 }
 
 export interface NavigationPublicStartDependencies {
   unifiedSearch: UnifiedSearchPublicPluginStart;
   cloud?: CloudStart;
+  spaces?: SpacesPluginStart;
 }
 
-export type SolutionNavigationOptInStatus = 'visible' | 'hidden' | 'ask';
-
-export type SolutionType = 'es' | 'oblt' | 'security';
-
-export interface ConfigSchema {
-  solutionNavigation: {
-    featureOn: boolean;
-    enabled: boolean;
-    optInStatus: SolutionNavigationOptInStatus;
-    defaultSolution: SolutionType | 'ask';
-  };
-}
+export type SolutionType = 'es' | 'oblt' | 'security' | 'analytics';

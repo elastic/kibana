@@ -7,6 +7,7 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 import { kqlQuery } from '@kbn/observability-plugin/server';
+import { profilingFetchTopNFunctionsFromStacktraces } from '@kbn/observability-plugin/common';
 import { IDLE_SOCKET_TIMEOUT, RouteRegisterParameters } from '.';
 import { getRoutePaths } from '../../common';
 import { handleRouteHandlerError } from '../utils/handle_route_error_handler';
@@ -33,7 +34,12 @@ export function registerTopNFunctionsSearchRoute({
   router.get(
     {
       path: paths.TopNFunctions,
-      options: { tags: ['access:profiling'], timeout: { idleSocket: IDLE_SOCKET_TIMEOUT } },
+      security: {
+        authz: {
+          requiredPrivileges: ['profiling'],
+        },
+      },
+      options: { timeout: { idleSocket: IDLE_SOCKET_TIMEOUT } },
       validate: { query: querySchema },
     },
     async (context, request, response) => {
@@ -45,29 +51,45 @@ export function registerTopNFunctionsSearchRoute({
         const endSecs = timeTo / 1000;
 
         const esClient = await getClient(context);
-        const topNFunctions = await profilingDataAccess.services.fetchFunctions({
-          core,
-          esClient,
-          startIndex,
-          endIndex,
-          totalSeconds: endSecs - startSecs,
-          query: {
-            bool: {
-              filter: [
-                ...kqlQuery(kuery),
-                {
-                  range: {
-                    ['@timestamp']: {
-                      gte: String(startSecs),
-                      lt: String(endSecs),
-                      format: 'epoch_second',
-                    },
+
+        const query = {
+          bool: {
+            filter: [
+              ...kqlQuery(kuery),
+              {
+                range: {
+                  ['@timestamp']: {
+                    gte: String(startSecs),
+                    lt: String(endSecs),
+                    format: 'epoch_second',
                   },
                 },
-              ],
-            },
+              },
+            ],
           },
-        });
+        };
+
+        const useStacktracesAPI = await core.uiSettings.client.get<boolean>(
+          profilingFetchTopNFunctionsFromStacktraces
+        );
+        const totalSeconds = endSecs - startSecs;
+
+        const topNFunctions = useStacktracesAPI
+          ? await profilingDataAccess.services.fetchFunctions({
+              core,
+              esClient,
+              startIndex,
+              endIndex,
+              totalSeconds,
+              query,
+            })
+          : await profilingDataAccess.services.fetchESFunctions({
+              core,
+              esClient,
+              query,
+              aggregationField: 'service.name',
+              totalSeconds,
+            });
 
         return response.ok({
           body: topNFunctions,

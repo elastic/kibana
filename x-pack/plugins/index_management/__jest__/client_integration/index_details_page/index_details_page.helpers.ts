@@ -13,11 +13,12 @@ import {
 } from '@kbn/test-jest-helpers';
 import { HttpSetup } from '@kbn/core/public';
 import { act } from 'react-dom/test-utils';
-
+import { keys } from '@elastic/eui';
 import { IndexDetailsTabId } from '../../../common/constants';
 import { IndexDetailsPage } from '../../../public/application/sections/home/index_list/details_page';
 import { WithAppDependencies } from '../helpers';
 import { testIndexName } from './mocks';
+import { MappingField } from '../index_template_wizard/template_form.helpers';
 
 let routerMock: typeof reactRouterMock;
 const getTestBedConfig = (initialEntry?: string): AsyncTestBedConfig => ({
@@ -39,13 +40,28 @@ export interface IndexDetailsPageTestBed extends TestBed {
     getIndexDetailsTabs: () => string[];
     getActiveTabContent: () => string;
     mappings: {
+      addNewMappingFieldNameAndType: (mappingFields?: MappingField[]) => Promise<void>;
+      clickFilterByFieldType: () => Promise<void>;
+      selectFilterFieldType: (fieldType: string) => Promise<void>;
+      clickAddFieldButton: () => Promise<void>;
+      clickSaveMappingsButton: () => Promise<void>;
       getCodeBlockContent: () => string;
       getDocsLinkHref: () => string;
       isErrorDisplayed: () => boolean;
+      isSaveMappingsErrorDisplayed: () => boolean;
       clickErrorReloadButton: () => Promise<void>;
-      getTreeViewContent: () => string;
+      getTreeViewContent: (fieldName: string) => string;
       clickToggleViewButton: () => Promise<void>;
       isSearchBarDisabled: () => boolean;
+      setSearchBarValue: (searchValue: string) => Promise<void>;
+      findSearchResult: () => string;
+      isSemanticTextBannerVisible: () => boolean;
+      selectSemanticTextField: (name: string, type: string) => Promise<void>;
+      isReferenceFieldVisible: () => void;
+      selectInferenceIdButtonExists: () => void;
+      openSelectInferencePopover: () => void;
+      expectDefaultInferenceModelToExists: () => void;
+      expectCustomInferenceModelToExists: (customInference: string) => void;
     };
     settings: {
       getCodeBlockContent: () => string;
@@ -91,6 +107,7 @@ export interface IndexDetailsPageTestBed extends TestBed {
       getDataStreamDetailsContent: () => string;
       reloadDataStreamDetails: () => Promise<void>;
       addDocCodeBlockExists: () => boolean;
+      indexErrorCalloutExists: () => boolean;
     };
   };
 }
@@ -180,6 +197,9 @@ export const setup = async ({
     addDocCodeBlockExists: () => {
       return exists('codeBlockControlsPanel');
     },
+    indexErrorCalloutExists: () => {
+      return exists('indexErrorCallout');
+    },
   };
 
   const mappings = {
@@ -198,17 +218,127 @@ export const setup = async ({
       });
       component.update();
     },
-    getTreeViewContent: () => {
-      return find('@timestampField-fieldName').text();
+    getTreeViewContent: (fieldName: string) => {
+      expect(exists(fieldName)).toBe(true);
+      return find(fieldName).text();
     },
+
     clickToggleViewButton: async () => {
       await act(async () => {
+        expect(exists('indexDetailsMappingsToggleViewButton')).toBe(true);
         find('indexDetailsMappingsToggleViewButton').simulate('click');
       });
       component.update();
     },
+    clickFilterByFieldType: async () => {
+      expect(exists('indexDetailsMappingsFilterByFieldTypeButton')).toBe(true);
+      await act(async () => {
+        find('indexDetailsMappingsFilterByFieldTypeButton').simulate('click');
+      });
+      component.update();
+    },
+    selectFilterFieldType: async (fieldType: string) => {
+      expect(testBed.exists(fieldType)).toBe(true);
+      await act(async () => {
+        find(fieldType).simulate('click');
+      });
+      component.update();
+    },
     isSearchBarDisabled: () => {
-      return find('DocumentFieldsSearch').prop('disabled');
+      return find('indexDetailsMappingsFieldSearch').prop('disabled');
+    },
+    setSearchBarValue: async (searchValue: string) => {
+      await act(async () => {
+        testBed
+          .find('indexDetailsMappingsFieldSearch')
+          .simulate('change', { target: { value: searchValue } });
+      });
+      component.update();
+    },
+    findSearchResult: () => {
+      expect(testBed.exists('fieldName')).toBe(true);
+      return testBed.find('fieldName').text();
+    },
+    isSemanticTextBannerVisible: () => {
+      return exists('indexDetailsMappingsSemanticTextBanner');
+    },
+    clickAddFieldButton: async () => {
+      expect(exists('indexDetailsMappingsAddField')).toBe(true);
+      await act(async () => {
+        find('indexDetailsMappingsAddField').simulate('click');
+      });
+      component.update();
+    },
+    clickSaveMappingsButton: async () => {
+      expect(exists('indexDetailsMappingsSaveMappings')).toBe(true);
+      expect(find('indexDetailsMappingsSaveMappings').props().disabled).toBeFalsy();
+      await act(async () => {
+        find('indexDetailsMappingsSaveMappings').simulate('click');
+      });
+      component.update();
+    },
+    isSaveMappingsErrorDisplayed: () => {
+      return exists('indexDetailsSaveMappingsError');
+    },
+    addNewMappingFieldNameAndType: async (mappingFields?: MappingField[]) => {
+      const { form } = testBed;
+      if (mappingFields) {
+        for (const field of mappingFields) {
+          const { name, type } = field;
+          await act(async () => {
+            form.setInputValue('nameParameterInput', name);
+            find('createFieldForm').simulate('change', [
+              {
+                label: type,
+                value: type,
+              },
+            ]);
+          });
+
+          await act(async () => {
+            expect(exists('createFieldForm.addButton')).toBe(true);
+            expect(find('createFieldForm.addButton').props().disabled).toBeFalsy();
+            find('createFieldForm.addButton').simulate('click');
+          });
+
+          component.update();
+        }
+      }
+    },
+    selectSemanticTextField: async (name: string, type: string) => {
+      expect(exists('comboBoxSearchInput')).toBe(true);
+
+      const { form } = testBed;
+      form.setInputValue('nameParameterInput', name);
+      form.setInputValue('comboBoxSearchInput', type);
+      await act(async () => {
+        find('comboBoxSearchInput').simulate('keydown', { key: keys.ENTER });
+      });
+      // select semantic_text field
+      await act(async () => {
+        expect(exists('fieldTypesOptions-semantic_text')).toBe(true);
+        find('fieldTypesOptions-semantic_text').simulate('click');
+        expect(exists('fieldTypesOptions-semantic_text')).toBe(false);
+      });
+    },
+    isReferenceFieldVisible: () => {
+      expect(exists('referenceFieldSelect')).toBe(true);
+    },
+    selectInferenceIdButtonExists: () => {
+      expect(exists('selectInferenceId')).toBe(true);
+      expect(exists('inferenceIdButton')).toBe(true);
+      find('inferenceIdButton').simulate('click');
+    },
+    openSelectInferencePopover: () => {
+      expect(exists('learn-how-to-create-inference-endpoints')).toBe(true);
+      expect(exists('manageInferenceEndpointButton')).toBe(true);
+    },
+    expectDefaultInferenceModelToExists: () => {
+      expect(exists('custom-inference_elser_model_2')).toBe(true);
+      expect(exists('custom-inference_e5')).toBe(true);
+    },
+    expectCustomInferenceModelToExists: (customInference: string) => {
+      expect(exists(customInference)).toBe(true);
     },
   };
 

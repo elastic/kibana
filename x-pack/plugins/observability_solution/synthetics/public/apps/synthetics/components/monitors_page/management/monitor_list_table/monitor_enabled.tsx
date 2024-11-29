@@ -14,7 +14,7 @@ import {
   useCanEditSynthetics,
   useCanUsePublicLocations,
 } from '../../../../../../hooks/use_capabilities';
-import { useMonitorEnableHandler } from '../../../../hooks';
+import { useEnablement, useMonitorEnableHandler } from '../../../../hooks';
 import { NoPermissionsTooltip } from '../../../common/components/permissions';
 import * as labels from './labels';
 
@@ -36,6 +36,8 @@ export const MonitorEnabled = ({
   const canEditSynthetics = useCanEditSynthetics();
 
   const canUsePublicLocations = useCanUsePublicLocations(monitor?.[ConfigKey.LOCATIONS]);
+
+  const { isServiceAllowed } = useEnablement();
 
   const monitorName = monitor[ConfigKey.NAME];
   const statusLabels = useMemo(() => {
@@ -75,7 +77,9 @@ export const MonitorEnabled = ({
           <SwitchWithCursor
             compressed={true}
             checked={enabled}
-            disabled={isLoading || !canEditSynthetics || !canUsePublicLocations}
+            disabled={
+              isLoading || !canEditSynthetics || !canUsePublicLocations || !isServiceAllowed
+            }
             showLabel={false}
             label={enabledDisableLabel}
             title={enabledDisableLabel}

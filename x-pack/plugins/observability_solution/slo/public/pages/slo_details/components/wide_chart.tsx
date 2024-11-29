@@ -14,8 +14,6 @@ import {
   Position,
   ScaleType,
   Settings,
-  Tooltip,
-  TooltipType,
 } from '@elastic/charts';
 import { EuiIcon, EuiLoadingChart, useEuiTheme } from '@elastic/eui';
 import numeral from '@elastic/numeral';
@@ -24,7 +22,11 @@ import moment from 'moment';
 import React, { useRef } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '../../../utils/kibana_react';
+import { useAnnotations } from '@kbn/observability-plugin/public';
+import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { getBrushTimeBounds } from '../../../utils/slo/duration';
+import { TimeBounds } from '../types';
+import { useKibana } from '../../../hooks/use_kibana';
 import { ChartData } from '../../../typings';
 
 type ChartType = 'area' | 'line';
@@ -36,9 +38,11 @@ export interface Props {
   chart: ChartType;
   state: State;
   isLoading: boolean;
+  slo: SLOWithSummaryResponse;
+  onBrushed?: (timeBounds: TimeBounds) => void;
 }
 
-export function WideChart({ chart, data, id, isLoading, state }: Props) {
+export function WideChart({ chart, data, id, isLoading, state, onBrushed, slo }: Props) {
   const { charts, uiSettings } = useKibana().services;
   const baseTheme = charts.theme.useChartsBaseTheme();
   const { euiTheme } = useEuiTheme();
@@ -47,6 +51,15 @@ export function WideChart({ chart, data, id, isLoading, state }: Props) {
 
   const color = state === 'error' ? euiTheme.colors.danger : euiTheme.colors.success;
   const ChartComponent = chart === 'area' ? AreaSeries : LineSeries;
+
+  const { ObservabilityAnnotations, annotations, onAnnotationClick, wrapOnBrushEnd } =
+    useAnnotations({
+      slo,
+      domain: {
+        min: 'now-30d',
+        max: 'now',
+      },
+    });
 
   const chartRef = useRef(null);
   const handleCursorUpdate = useActiveCursor(charts.activeCursor, chartRef, {
@@ -58,12 +71,24 @@ export function WideChart({ chart, data, id, isLoading, state }: Props) {
   }
 
   return (
-    <Chart size={{ height: 150, width: '100%' }} ref={chartRef}>
-      <Tooltip type={TooltipType.VerticalCursor} />
+    <Chart size={{ height: 200, width: '100%' }} ref={chartRef}>
+      <ObservabilityAnnotations annotations={annotations} />
       <Settings
+        theme={{
+          chartMargins: { top: 30 },
+        }}
         baseTheme={baseTheme}
         showLegend={false}
-        noResults={<EuiIcon type="visualizeApp" size="l" color="subdued" title="no results" />}
+        noResults={
+          <EuiIcon
+            type="visualizeApp"
+            size="l"
+            color="subdued"
+            title={i18n.translate('xpack.slo.wideChart.euiIcon.noResultsLabel', {
+              defaultMessage: 'no results',
+            })}
+          />
+        }
         onPointerUpdate={handleCursorUpdate}
         externalPointerEvents={{
           tooltip: { visible: true },
@@ -71,6 +96,10 @@ export function WideChart({ chart, data, id, isLoading, state }: Props) {
         pointerUpdateDebounce={0}
         pointerUpdateTrigger={'x'}
         locale={i18n.getLocale()}
+        onBrushEnd={wrapOnBrushEnd((brushArea) => {
+          onBrushed?.(getBrushTimeBounds(brushArea));
+        })}
+        onAnnotationClick={onAnnotationClick}
       />
       <Axis
         id="bottom"
@@ -98,7 +127,7 @@ export function WideChart({ chart, data, id, isLoading, state }: Props) {
           line: {
             strokeWidth: 1,
           },
-          point: { visible: false },
+          point: { visible: 'never' },
         }}
         xAccessor="key"
         xScaleType={ScaleType.Time}

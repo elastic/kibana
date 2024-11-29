@@ -22,7 +22,6 @@ import {
   updateFleetProxy,
   getFleetProxyRelatedSavedObjects,
 } from '../../services/fleet_proxies';
-import { defaultFleetErrorHandler } from '../../errors';
 import type {
   GetOneFleetProxyRequestSchema,
   PostFleetProxyRequestSchema,
@@ -44,11 +43,11 @@ async function bumpRelatedPolicies(
     fleetServerHosts.some((host) => host.is_default) ||
     outputs.some((output) => output.is_default || output.is_default_monitoring)
   ) {
-    await agentPolicyService.bumpAllAgentPolicies(soClient, esClient);
+    await agentPolicyService.bumpAllAgentPolicies(esClient);
   } else {
     await pMap(
       outputs,
-      (output) => agentPolicyService.bumpAllAgentPoliciesForOutput(soClient, esClient, output.id),
+      (output) => agentPolicyService.bumpAllAgentPoliciesForOutput(esClient, output.id),
       {
         concurrency: 20,
       }
@@ -56,11 +55,7 @@ async function bumpRelatedPolicies(
     await pMap(
       fleetServerHosts,
       (fleetServerHost) =>
-        agentPolicyService.bumpAllAgentPoliciesForFleetServerHosts(
-          soClient,
-          esClient,
-          fleetServerHost.id
-        ),
+        agentPolicyService.bumpAllAgentPoliciesForFleetServerHosts(esClient, fleetServerHost.id),
       {
         concurrency: 20,
       }
@@ -69,11 +64,7 @@ async function bumpRelatedPolicies(
     await pMap(
       downloadSources,
       (downloadSource) =>
-        agentPolicyService.bumpAllAgentPoliciesForDownloadSource(
-          soClient,
-          esClient,
-          downloadSource.id
-        ),
+        agentPolicyService.bumpAllAgentPoliciesForDownloadSource(esClient, downloadSource.id),
       {
         concurrency: 20,
       }
@@ -88,18 +79,14 @@ export const postFleetProxyHandler: RequestHandler<
 > = async (context, request, response) => {
   const coreContext = await context.core;
   const soClient = coreContext.savedObjects.client;
-  try {
-    const { id, ...data } = request.body;
-    const proxy = await createFleetProxy(soClient, { ...data, is_preconfigured: false }, { id });
+  const { id, ...data } = request.body;
+  const proxy = await createFleetProxy(soClient, { ...data, is_preconfigured: false }, { id });
 
-    const body = {
-      item: proxy,
-    };
+  const body = {
+    item: proxy,
+  };
 
-    return response.ok({ body });
-  } catch (error) {
-    return defaultFleetErrorHandler({ error, response });
-  }
+  return response.ok({ body });
 };
 
 export const putFleetProxyHandler: RequestHandler<
@@ -109,7 +96,7 @@ export const putFleetProxyHandler: RequestHandler<
 > = async (context, request, response) => {
   try {
     const proxyId = request.params.itemId;
-    const coreContext = await await context.core;
+    const coreContext = await context.core;
     const soClient = coreContext.savedObjects.client;
     const esClient = coreContext.elasticsearch.client.asInternalUser;
 
@@ -133,26 +120,22 @@ export const putFleetProxyHandler: RequestHandler<
       });
     }
 
-    return defaultFleetErrorHandler({ error, response });
+    throw error;
   }
 };
 
 export const getAllFleetProxyHandler: RequestHandler = async (context, request, response) => {
   const soClient = (await context.core).savedObjects.client;
 
-  try {
-    const res = await listFleetProxies(soClient);
-    const body = {
-      items: res.items,
-      page: res.page,
-      perPage: res.perPage,
-      total: res.total,
-    };
+  const res = await listFleetProxies(soClient);
+  const body = {
+    items: res.items,
+    page: res.page,
+    perPage: res.perPage,
+    total: res.total,
+  };
 
-    return response.ok({ body });
-  } catch (error) {
-    return defaultFleetErrorHandler({ error, response });
-  }
+  return response.ok({ body });
 };
 
 export const deleteFleetProxyHandler: RequestHandler<
@@ -185,7 +168,7 @@ export const deleteFleetProxyHandler: RequestHandler<
       });
     }
 
-    return defaultFleetErrorHandler({ error, response });
+    throw error;
   }
 };
 
@@ -207,6 +190,6 @@ export const getFleetProxyHandler: RequestHandler<
       });
     }
 
-    return defaultFleetErrorHandler({ error, response });
+    throw error;
   }
 };

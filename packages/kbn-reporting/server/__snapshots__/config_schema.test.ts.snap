@@ -7,7 +7,6 @@ Object {
   },
   "csv": Object {
     "checkForFormulas": true,
-    "enablePanelActionDownload": true,
     "escapeFormulaValues": false,
     "maxConcurrentShardRequests": 5,
     "maxSizeBytes": ByteSizeValue {
@@ -70,7 +69,6 @@ Object {
   },
   "csv": Object {
     "checkForFormulas": true,
-    "enablePanelActionDownload": true,
     "escapeFormulaValues": false,
     "maxConcurrentShardRequests": 5,
     "maxSizeBytes": ByteSizeValue {

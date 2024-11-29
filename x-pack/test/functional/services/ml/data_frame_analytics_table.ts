@@ -147,11 +147,15 @@ export function MachineLearningDataFrameAnalyticsTableProvider({
     }
 
     public async assertJobRowViewButtonExists(analyticsId: string) {
-      await testSubjects.existOrFail(this.rowSelector(analyticsId, 'mlAnalyticsJobViewButton'));
+      await testSubjects.existOrFail(this.rowSelector(analyticsId, 'mlAnalyticsJobViewButton'), {
+        allowHidden: true, // Table action may be only visible on row hover
+      });
     }
 
     public async assertJobRowMapButtonExists(analyticsId: string) {
-      await testSubjects.existOrFail(this.rowSelector(analyticsId, 'mlAnalyticsJobMapButton'));
+      await testSubjects.existOrFail(this.rowSelector(analyticsId, 'mlAnalyticsJobMapButton'), {
+        allowHidden: true, // Table action may be only visible on row hover
+      });
     }
 
     public async assertJobRowViewButtonEnabled(analyticsId: string, expectedValue: boolean) {
@@ -432,7 +436,7 @@ export function MachineLearningDataFrameAnalyticsTableProvider({
       const vars: Record<string, string> = {};
 
       for (const row of $('tr').toArray()) {
-        const [name, value] = $(row).find('td').toArray();
+        const [name, value] = $(row).find('td').find('.euiTableCellContent').toArray();
 
         vars[$(name).text().trim()] = $(value).text().trim();
       }

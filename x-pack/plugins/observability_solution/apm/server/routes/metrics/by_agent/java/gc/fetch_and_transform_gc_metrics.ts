@@ -163,10 +163,7 @@ export async function fetchAndTransformGcMetrics({
         : null;
 
       // convert to milliseconds if we're calculating time, but not for rate
-      const y =
-        unconvertedY !== null && rateOrTime === TIME
-          ? unconvertedY * 1000
-          : unconvertedY;
+      const y = unconvertedY !== null && rateOrTime === TIME ? unconvertedY * 1000 : unconvertedY;
 
       return {
         y,
@@ -174,9 +171,7 @@ export async function fetchAndTransformGcMetrics({
       };
     });
 
-    const values = data
-      .map((coordinate) => coordinate.y)
-      .filter((y) => y !== null);
+    const values = data.map((coordinate) => coordinate.y).filter((y) => y !== null);
 
     const overallValue = sum(values) / values.length;
 

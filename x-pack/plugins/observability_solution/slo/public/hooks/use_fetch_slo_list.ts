@@ -5,23 +5,26 @@
  * 2.0.
  */
 
+import { buildQueryFromFilters, Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { FindSLOResponse } from '@kbn/slo-schema';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useMemo } from 'react';
-import { buildQueryFromFilters, Filter } from '@kbn/es-query';
-import { useKibana } from '../utils/kibana_react';
-import { SearchState } from '../pages/slos/hooks/use_url_search_state';
-import { useCreateDataView } from './use_create_data_view';
-import { DEFAULT_SLO_PAGE_SIZE, SLO_SUMMARY_DESTINATION_INDEX_NAME } from '../../common/constants';
-
+import {
+  DEFAULT_SLO_PAGE_SIZE,
+  SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
+} from '../../common/constants';
+import { SearchState, SortDirection, SortField } from '../pages/slos/hooks/use_url_search_state';
+import { useKibana } from './use_kibana';
 import { sloKeys } from './query_key_factory';
+import { useCreateDataView } from './use_create_data_view';
+import { usePluginContext } from './use_plugin_context';
 
 export interface SLOListParams {
   kqlQuery?: string;
   page?: number;
-  sortBy?: string;
-  sortDirection?: 'asc' | 'desc';
+  sortBy?: SortField;
+  sortDirection?: SortDirection;
   perPage?: number;
   filters?: Filter[];
   lastRefresh?: number;
@@ -52,13 +55,14 @@ export function useFetchSloList({
   disabled = false,
 }: SLOListParams = {}): UseFetchSloListResponse {
   const {
-    http,
     notifications: { toasts },
   } = useKibana().services;
+  const { sloClient } = usePluginContext();
+
   const queryClient = useQueryClient();
 
   const { dataView } = useCreateDataView({
-    indexPatternString: SLO_SUMMARY_DESTINATION_INDEX_NAME,
+    indexPatternString: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
   });
 
   const filters = useMemo(() => {
@@ -92,14 +96,17 @@ export function useFetchSloList({
       lastRefresh,
     }),
     queryFn: async ({ signal }) => {
-      return await http.get<FindSLOResponse>(`/api/observability/slos`, {
-        query: {
-          ...(kqlQuery && { kqlQuery }),
-          ...(sortBy && { sortBy }),
-          ...(sortDirection && { sortDirection }),
-          ...(page !== undefined && { page }),
-          ...(perPage !== undefined && { perPage }),
-          ...(filters && { filters }),
+      return await sloClient.fetch('GET /api/observability/slos 2023-10-31', {
+        params: {
+          query: {
+            ...(kqlQuery && { kqlQuery }),
+            ...(sortBy && { sortBy }),
+            ...(sortDirection && { sortDirection }),
+            ...(page !== undefined && { page: String(page) }),
+            ...(perPage !== undefined && { perPage: String(perPage) }),
+            ...(filters && { filters }),
+            hideStale: true,
+          },
         },
         signal,
       });
@@ -111,6 +118,7 @@ export function useFetchSloList({
       if (String(error) === 'Error: Forbidden') {
         return false;
       }
+
       return failureCount < 4;
     },
     onSuccess: ({ results }: FindSLOResponse) => {

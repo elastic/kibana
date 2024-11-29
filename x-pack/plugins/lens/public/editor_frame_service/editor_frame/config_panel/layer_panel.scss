@@ -78,7 +78,7 @@
   }
 }
 
-.domDragDrop-isReplacing {
+.domDroppable--replacing {
   .dimensionTrigger__textLabel {
     text-decoration: line-through;
   }
@@ -87,8 +87,8 @@
 // Added .lnsLayerPanel__dimension specificity required for animation style override
 .lnsLayerPanel__dimension .lnsLayerPanel__dimensionLink {
   &:focus {
-    @include passDownFocusRing('.dimensionTrigger__textLabel');
     background-color: transparent;
     text-decoration-thickness: $euiBorderWidthThin !important;
+    @include passDownFocusRing('.dimensionTrigger__textLabel');
   }
 }

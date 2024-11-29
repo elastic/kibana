@@ -19,10 +19,7 @@ function getRangeType(min?: number, max?: number) {
   }
 }
 
-export function getRangeTypeMessage(
-  min?: number | string,
-  max?: number | string
-) {
+export function getRangeTypeMessage(min?: number | string, max?: number | string) {
   return i18n.translate('xpack.apm.agentConfig.range.errorText', {
     defaultMessage: `{rangeType, select,
         between {Must be between {min} and {max}}

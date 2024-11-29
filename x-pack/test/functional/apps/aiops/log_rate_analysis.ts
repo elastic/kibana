@@ -69,11 +69,23 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       );
       await aiops.logRateAnalysisPage.assertSearchPanelExists();
 
-      await ml.testExecution.logTestStep('displays empty prompt');
-      await aiops.logRateAnalysisPage.assertNoWindowParametersEmptyPromptExists();
+      await ml.testExecution.logTestStep('displays prompt');
+      if (testData.expected.prompt === 'empty') {
+        await aiops.logRateAnalysisPage.assertNoWindowParametersEmptyPromptExists();
+      } else if (testData.expected.prompt === 'change-point') {
+        await aiops.logRateAnalysisPage.assertChangePointDetectedPromptExists();
+      } else {
+        throw new Error('Invalid prompt');
+      }
 
       await ml.testExecution.logTestStep('clicks the document count chart to start analysis');
       await aiops.logRateAnalysisPage.clickDocumentCountChart(testData.chartClickCoordinates);
+
+      if (!testData.autoRun) {
+        await aiops.logRateAnalysisPage.assertNoAutoRunButtonExists();
+        await aiops.logRateAnalysisPage.clickNoAutoRunButton();
+      }
+
       await aiops.logRateAnalysisPage.assertAnalysisSectionExists();
 
       if (testData.brushDeviationTargetTimestamp) {
@@ -155,6 +167,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         testData.dataGenerator
       );
 
+      if (testData.editedQuery && testData.query) {
+        await aiops.logRateAnalysisPage.setQueryInput(testData.editedQuery);
+        await aiops.logRateAnalysisPage.assertRerunAnalysisButtonExists(true);
+        await aiops.logRateAnalysisPage.setQueryInput(testData.query);
+      }
+
       // At this stage the baseline and deviation brush position should be stored in
       // the url state and a full browser refresh should restore the analysis.
       await browser.refresh();
@@ -203,6 +221,27 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await aiops.logRateAnalysisResultsGroupsTable.expandRow();
         await aiops.logRateAnalysisResultsGroupsTable.scrollAnalysisTableIntoView();
 
+        await ml.testExecution.logTestStep('open the column filter');
+        await aiops.logRateAnalysisPage.assertFilterPopoverButtonExists(
+          'aiopsColumnFilterButton',
+          false
+        );
+        await aiops.logRateAnalysisPage.clickFilterPopoverButton('aiopsColumnFilterButton', true);
+        await aiops.logRateAnalysisPage.assertFieldSelectorFieldNameList(
+          testData.expected.columnSelectorPopover
+        );
+
+        await ml.testExecution.logTestStep('filter columns');
+        await aiops.logRateAnalysisPage.setFieldSelectorSearch(testData.columnSelectorSearch);
+        await aiops.logRateAnalysisPage.assertFieldSelectorFieldNameList([
+          testData.columnSelectorSearch,
+        ]);
+        await aiops.logRateAnalysisPage.clickFieldSelectorListItem(
+          'aiopsFieldSelectorFieldNameListItem'
+        );
+        await aiops.logRateAnalysisPage.assertFieldFilterApplyButtonExists(false);
+        await aiops.logRateAnalysisPage.clickFieldFilterApplyButton('aiopsColumnFilterButton');
+
         const analysisTable = await aiops.logRateAnalysisResultsTable.parseAnalysisTable();
 
         const actualAnalysisTable = orderBy(analysisTable, ['fieldName', 'fieldValue']);
@@ -219,8 +258,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         );
 
         await ml.testExecution.logTestStep('open the field filter');
-        await aiops.logRateAnalysisPage.assertFieldFilterPopoverButtonExists(false);
-        await aiops.logRateAnalysisPage.clickFieldFilterPopoverButton(true);
+        await aiops.logRateAnalysisPage.assertFilterPopoverButtonExists(
+          'aiopsFieldFilterButton',
+          false
+        );
+        await aiops.logRateAnalysisPage.clickFilterPopoverButton('aiopsFieldFilterButton', true);
         await aiops.logRateAnalysisPage.assertFieldSelectorFieldNameList(
           testData.expected.fieldSelectorPopover
         );
@@ -237,7 +279,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         if (testData.fieldSelectorApplyAvailable) {
           await ml.testExecution.logTestStep('regroup results');
-          await aiops.logRateAnalysisPage.clickFieldFilterApplyButton();
+          await aiops.logRateAnalysisPage.clickFieldFilterApplyButton('aiopsFieldFilterButton');
 
           const filteredAnalysisGroupsTable =
             await aiops.logRateAnalysisResultsGroupsTable.parseAnalysisTable();
@@ -279,7 +321,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
   }
 
-  describe('log rate analysis', async function () {
+  describe('log rate analysis', function () {
     for (const testData of logRateAnalysisTestData) {
       describe(`with '${testData.sourceIndexOrSavedSearch}'`, function () {
         before(async () => {
@@ -304,6 +346,24 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           // Start navigation from the base of the ML app.
           await ml.navigation.navigateToMl();
           await elasticChart.setNewChartUiDebugFlag(true);
+        });
+
+        it(`${testData.suiteTitle} attaches log rate analysis to a dashboard`, async () => {
+          await aiops.logRateAnalysisPage.navigateToDataViewSelection();
+
+          await ml.testExecution.logTestStep(
+            `${testData.suiteTitle} loads the log rate analysis page with selected data source`
+          );
+          await ml.jobSourceSelection.selectSourceForLogRateAnalysis(
+            testData.sourceIndexOrSavedSearch
+          );
+
+          await ml.testExecution.logTestStep(
+            `${testData.suiteTitle} starting dashboard attachment process`
+          );
+          await aiops.logRateAnalysisPage.attachToDashboard();
+
+          await ml.navigation.navigateToMl();
         });
 
         runTests(testData);

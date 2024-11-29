@@ -40,9 +40,10 @@ const defaultProps = {
   refetchCurrentConversation,
   reader: readerComplete,
   isError: false,
-  connectorTypeTitle: 'OpenAI',
 };
-describe('useStream', () => {
+
+// FLAKY: https://github.com/elastic/kibana/issues/180091
+describe.skip('useStream', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });

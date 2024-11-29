@@ -8,7 +8,7 @@
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { termQuery } from '@kbn/observability-plugin/server';
 import { ApmDocumentType } from '../../../../common/document_type';
-import { TRANSACTION_TYPE } from '../../../../common/es_fields/apm';
+import { TRANSACTION_NAME, TRANSACTION_TYPE } from '../../../../common/es_fields/apm';
 import { RollupInterval } from '../../../../common/rollup';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { getOutcomeAggregation } from '../../../lib/helpers/transaction_error_rate';
@@ -21,6 +21,7 @@ export async function getTransactionFailureRate({
   intervalString,
   filter,
   transactionType,
+  transactionName,
 }: {
   apmEventClient: APMEventClient;
   start: number;
@@ -29,6 +30,7 @@ export async function getTransactionFailureRate({
   bucketSize: number;
   filter: QueryDslQueryContainer[];
   transactionType?: string;
+  transactionName?: string;
 }) {
   return (
     await fetchSeries({
@@ -40,8 +42,12 @@ export async function getTransactionFailureRate({
       documentType: ApmDocumentType.TransactionMetric,
       rollupInterval: RollupInterval.OneMinute,
       intervalString,
-      filter: filter.concat(...termQuery(TRANSACTION_TYPE, transactionType)),
-      groupBy: 'transaction.type',
+      filter: [
+        ...filter,
+        ...termQuery(TRANSACTION_TYPE, transactionType),
+        ...termQuery(TRANSACTION_NAME, transactionName),
+      ],
+      groupByFields: [TRANSACTION_TYPE, TRANSACTION_NAME],
       aggs: {
         ...getOutcomeAggregation(ApmDocumentType.TransactionMetric),
         value: {
@@ -50,8 +56,7 @@ export async function getTransactionFailureRate({
               successful_or_failed: 'successful_or_failed>_count',
               successful: 'successful>_count',
             },
-            script:
-              '100 * (1 - (params.successful / params.successful_or_failed))',
+            script: '100 * (1 - (params.successful / params.successful_or_failed))',
           },
         },
       },

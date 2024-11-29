@@ -23,8 +23,7 @@ interface Args {
   latestApmPackageVersion: string;
 }
 
-type MigrationCheckAPIReturnType =
-  APIReturnType<'GET /internal/apm/fleet/migration_check'>;
+type MigrationCheckAPIReturnType = APIReturnType<'GET /internal/apm/fleet/migration_check'>;
 
 export default {
   title: 'app/settings/Schema',
@@ -99,14 +98,11 @@ export default {
           get: async (): Promise<MigrationCheckAPIReturnType> => {
             return {
               has_cloud_agent_policy: args?.hasCloudAgentPolicy || true,
-              has_cloud_apm_package_policy:
-                args?.hasCloudApmPackagePolicy || true,
-              cloud_apm_migration_enabled:
-                args?.cloudApmMigrationEnabled || true,
+              has_cloud_apm_package_policy: args?.hasCloudApmPackagePolicy || true,
+              cloud_apm_migration_enabled: args?.cloudApmMigrationEnabled || true,
               has_required_role: args?.hasRequiredRole,
               has_apm_integrations: args?.hasApmIntegrations || true,
-              latest_apm_package_version:
-                args?.latestApmPackageVersion || '8.6',
+              latest_apm_package_version: args?.latestApmPackageVersion || '8.6',
               cloud_apm_package_policy: undefined,
             };
           },
@@ -114,9 +110,7 @@ export default {
       } as unknown as CoreStart;
 
       return (
-        <MockApmPluginStorybook
-          apmContext={{ core: coreMock } as unknown as ApmPluginContextValue}
-        >
+        <MockApmPluginStorybook apmContext={{ core: coreMock } as unknown as ApmPluginContextValue}>
           <StoryComponent />
         </MockApmPluginStorybook>
       );

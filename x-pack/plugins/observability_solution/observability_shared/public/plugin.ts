@@ -18,18 +18,36 @@ import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { BehaviorSubject } from 'rxjs';
 import { createLazyObservabilityPageTemplate } from './components/page_template';
 import { createNavigationRegistry } from './components/page_template/helpers/navigation_registry';
+import { registerProfilingComponent } from './components/profiling/helpers/component_registry';
+export { updateGlobalNavigation } from './services/update_global_navigation';
 import {
-  type FlamegraphLocator,
+  AssetDetailsFlyoutLocatorDefinition,
+  AssetDetailsLocatorDefinition,
+  HostsLocatorDefinition,
+  InventoryLocatorDefinition,
+  MetricsExplorerLocatorDefinition,
   FlamegraphLocatorDefinition,
-} from './locators/profiling/flamegraph_locator';
-import {
-  type StacktracesLocator,
   StacktracesLocatorDefinition,
-} from './locators/profiling/stacktraces_locator';
-import {
-  type TopNFunctionsLocator,
   TopNFunctionsLocatorDefinition,
-} from './locators/profiling/topn_functions_locator';
+  ServiceOverviewLocatorDefinition,
+  TransactionDetailsByNameLocatorDefinition,
+  ServiceEntityLocatorDefinition,
+  TransactionDetailsByTraceIdLocatorDefinition,
+  type AssetDetailsFlyoutLocator,
+  type AssetDetailsLocator,
+  type InventoryLocator,
+  type HostsLocator,
+  type FlamegraphLocator,
+  type StacktracesLocator,
+  type TopNFunctionsLocator,
+  type ServiceOverviewLocator,
+  type TransactionDetailsByNameLocator,
+  type MetricsExplorerLocator,
+  type ServiceEntityLocator,
+  type TransactionDetailsByTraceIdLocator,
+  type EntitiesInventoryLocator,
+  EntitiesInventoryLocatorDefinition,
+} from '../common';
 import { updateGlobalNavigation } from './services/update_global_navigation';
 export interface ObservabilitySharedSetup {
   share: SharePluginSetup;
@@ -39,7 +57,6 @@ export interface ObservabilitySharedStart {
   spaces?: SpacesPluginStart;
   cases: CasesPublicStart;
   guidedOnboarding?: GuidedOnboardingPluginStart;
-  setIsSidebarEnabled: (isEnabled: boolean) => void;
   embeddable: EmbeddableStart;
   share: SharePluginStart;
 }
@@ -49,11 +66,25 @@ export type ObservabilitySharedPluginStart = ReturnType<ObservabilitySharedPlugi
 export type ProfilingLocators = ObservabilitySharedPluginSetup['locators']['profiling'];
 
 interface ObservabilitySharedLocators {
+  infra: {
+    assetDetailsLocator: AssetDetailsLocator;
+    assetDetailsFlyoutLocator: AssetDetailsFlyoutLocator;
+    hostsLocator: HostsLocator;
+    inventoryLocator: InventoryLocator;
+    metricsExplorerLocator: MetricsExplorerLocator;
+  };
   profiling: {
     flamegraphLocator: FlamegraphLocator;
     topNFunctionsLocator: TopNFunctionsLocator;
     stacktracesLocator: StacktracesLocator;
   };
+  apm: {
+    serviceOverview: ServiceOverviewLocator;
+    transactionDetailsByName: TransactionDetailsByNameLocator;
+    transactionDetailsByTraceId: TransactionDetailsByTraceIdLocator;
+    serviceEntity: ServiceEntityLocator;
+  };
+  entitiesInventory: EntitiesInventoryLocator;
 }
 
 export class ObservabilitySharedPlugin implements Plugin {
@@ -65,7 +96,14 @@ export class ObservabilitySharedPlugin implements Plugin {
   }
 
   public setup(coreSetup: CoreSetup, pluginsSetup: ObservabilitySharedSetup) {
+    coreSetup.getStartServices().then(([coreStart]) => {
+      coreStart.chrome
+        .getChromeStyle$()
+        .subscribe((style) => this.isSidebarEnabled$.next(style === 'classic'));
+    });
+
     return {
+      registerProfilingComponent,
       locators: this.createLocators(pluginsSetup.share.url),
       navigation: {
         registerSections: this.navigationRegistry.registerSections,
@@ -93,7 +131,6 @@ export class ObservabilitySharedPlugin implements Plugin {
         registerSections: this.navigationRegistry.registerSections,
       },
       updateGlobalNavigation,
-      setIsSidebarEnabled: (isEnabled: boolean) => this.isSidebarEnabled$.next(isEnabled),
     };
   }
 
@@ -101,11 +138,31 @@ export class ObservabilitySharedPlugin implements Plugin {
 
   private createLocators(urlService: BrowserUrlService): ObservabilitySharedLocators {
     return {
+      infra: {
+        assetDetailsLocator: urlService.locators.create(new AssetDetailsLocatorDefinition()),
+        assetDetailsFlyoutLocator: urlService.locators.create(
+          new AssetDetailsFlyoutLocatorDefinition()
+        ),
+        hostsLocator: urlService.locators.create(new HostsLocatorDefinition()),
+        inventoryLocator: urlService.locators.create(new InventoryLocatorDefinition()),
+        metricsExplorerLocator: urlService.locators.create(new MetricsExplorerLocatorDefinition()),
+      },
       profiling: {
         flamegraphLocator: urlService.locators.create(new FlamegraphLocatorDefinition()),
         topNFunctionsLocator: urlService.locators.create(new TopNFunctionsLocatorDefinition()),
         stacktracesLocator: urlService.locators.create(new StacktracesLocatorDefinition()),
       },
+      apm: {
+        serviceOverview: urlService.locators.create(new ServiceOverviewLocatorDefinition()),
+        transactionDetailsByName: urlService.locators.create(
+          new TransactionDetailsByNameLocatorDefinition()
+        ),
+        transactionDetailsByTraceId: urlService.locators.create(
+          new TransactionDetailsByTraceIdLocatorDefinition()
+        ),
+        serviceEntity: urlService.locators.create(new ServiceEntityLocatorDefinition()),
+      },
+      entitiesInventory: urlService.locators.create(new EntitiesInventoryLocatorDefinition()),
     };
   }
 }

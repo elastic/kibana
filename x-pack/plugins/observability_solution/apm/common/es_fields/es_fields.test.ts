@@ -10,12 +10,13 @@ import { AllowUnknownProperties } from '../../typings/common';
 import { APMError } from '../../typings/es_schemas/ui/apm_error';
 import { Span } from '../../typings/es_schemas/ui/span';
 import { Transaction } from '../../typings/es_schemas/ui/transaction';
-import * as apmFieldnames from './apm';
-import * as infraMetricsFieldnames from './infra_metrics';
+import * as allApmFieldNames from './apm';
+import * as infraMetricsFieldNames from './infra_metrics';
 
+const { AT_TIMESTAMP, ...apmFieldNames } = allApmFieldNames;
 const fieldnames = {
-  ...apmFieldnames,
-  ...infraMetricsFieldnames,
+  ...apmFieldNames,
+  ...infraMetricsFieldNames,
 };
 
 describe('Transaction', () => {
@@ -194,9 +195,7 @@ describe('Error', () => {
   matchSnapshot(errorDoc);
 });
 
-function matchSnapshot(
-  obj: AllowUnknownProperties<Span | Transaction | APMError>
-) {
+function matchSnapshot(obj: AllowUnknownProperties<Span | Transaction | APMError>) {
   Object.entries(fieldnames).forEach(([key, longKey]) => {
     const value = get(obj, longKey);
     it(key, () => {

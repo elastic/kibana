@@ -34,22 +34,16 @@ interface Props {
   onCancel: () => void;
 }
 
-type ApiResponse =
-  APIReturnType<'GET /internal/apm/settings/anomaly-detection/environments'>;
+type ApiResponse = APIReturnType<'GET /internal/apm/settings/anomaly-detection/environments'>;
 const INITIAL_DATA: ApiResponse = { environments: [] };
 
-export function AddEnvironments({
-  currentEnvironments,
-  onCreateJobSuccess,
-  onCancel,
-}: Props) {
+export function AddEnvironments({ currentEnvironments, onCreateJobSuccess, onCancel }: Props) {
   const { notifications, application } = useApmPluginContext().core;
   const { anomalyDetectionJobsRefetch } = useAnomalyDetectionJobsContext();
   const canCreateJob = !!application.capabilities.ml.canCreateJob;
   const { toasts } = notifications;
   const { data = INITIAL_DATA, status } = useFetcher(
-    (callApmApi) =>
-      callApmApi(`GET /internal/apm/settings/anomaly-detection/environments`),
+    (callApmApi) => callApmApi(`GET /internal/apm/settings/anomaly-detection/environments`),
     [],
     { preservePreviousData: false }
   );
@@ -62,17 +56,10 @@ export function AddEnvironments({
 
   const [isSaving, setIsSaving] = useState(false);
 
-  const [selectedOptions, setSelected] = useState<
-    Array<EuiComboBoxOptionOption<string>>
-  >([]);
+  const [selectedOptions, setSelected] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
 
   if (!canCreateJob) {
-    return (
-      <EuiEmptyPrompt
-        iconType="warning"
-        body={<>{ML_ERRORS.MISSING_WRITE_PRIVILEGES}</>}
-      />
-    );
+    return <EuiEmptyPrompt iconType="warning" body={<>{ML_ERRORS.MISSING_WRITE_PRIVILEGES}</>} />;
   }
 
   const isLoading = status === FETCH_STATUS.LOADING;
@@ -80,32 +67,25 @@ export function AddEnvironments({
     <>
       <EuiTitle size="s">
         <h2>
-          {i18n.translate(
-            'xpack.apm.settings.anomalyDetection.addEnvironments.titleText',
-            { defaultMessage: 'Select environments' }
-          )}
+          {i18n.translate('xpack.apm.settings.anomalyDetection.addEnvironments.titleText', {
+            defaultMessage: 'Select environments',
+          })}
         </h2>
       </EuiTitle>
 
       <EuiSpacer size="l" />
 
       <EuiText>
-        {i18n.translate(
-          'xpack.apm.settings.anomalyDetection.addEnvironments.descriptionText',
-          {
-            defaultMessage:
-              'Select the service environments that you want to enable anomaly detection in. Anomalies will surface for all services and transaction types within the selected environments.',
-          }
-        )}
+        {i18n.translate('xpack.apm.settings.anomalyDetection.addEnvironments.descriptionText', {
+          defaultMessage:
+            'Select the service environments that you want to enable anomaly detection in. Anomalies will surface for all services and transaction types within the selected environments.',
+        })}
       </EuiText>
       <EuiSpacer size="l" />
       <EuiFormRow
-        label={i18n.translate(
-          'xpack.apm.settings.anomalyDetection.addEnvironments.selectorLabel',
-          {
-            defaultMessage: 'Environments',
-          }
-        )}
+        label={i18n.translate('xpack.apm.settings.anomalyDetection.addEnvironments.selectorLabel', {
+          defaultMessage: 'Environments',
+        })}
         fullWidth
       >
         <EuiComboBox
@@ -158,9 +138,7 @@ export function AddEnvironments({
             onClick={async () => {
               setIsSaving(true);
 
-              const selectedEnvironments = selectedOptions.map(
-                ({ value }) => value as string
-              );
+              const selectedEnvironments = selectedOptions.map(({ value }) => value as string);
               const success = await createJobs({
                 environments: selectedEnvironments,
                 toasts,

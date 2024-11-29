@@ -1,5 +1,9 @@
 {
-  "type": "shared-common",
+  "type": "shared-server",
   "id": "@kbn/core-doc-links-server",
-  "owner": "@elastic/kibana-core"
+  "owner": [
+    "@elastic/kibana-core"
+  ],
+  "group": "platform",
+  "visibility": "shared"
 }

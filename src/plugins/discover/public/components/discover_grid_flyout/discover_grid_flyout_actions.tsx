@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useState } from 'react';
@@ -17,13 +18,14 @@ import {
   EuiContextMenuPanel,
   EuiContextMenuItem,
   EuiContextMenuItemIcon,
-  useIsWithinBreakpoints,
   EuiText,
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiPopoverProps,
   EuiToolTip,
   useEuiTheme,
+  useResizeObserver,
+  useIsWithinBreakpoints,
 } from '@elastic/eui';
 import type { FlyoutActionItem } from '../../customizations';
 
@@ -35,10 +37,33 @@ export interface DiscoverGridFlyoutActionsProps {
 
 export function DiscoverGridFlyoutActions({ flyoutActions }: DiscoverGridFlyoutActionsProps) {
   const { euiTheme } = useEuiTheme();
+  const [ref, setRef] = useState<HTMLDivElement | HTMLSpanElement | null>(null);
+  const dimensions = useResizeObserver(ref);
+  const isMobileScreen = useIsWithinBreakpoints(['xs', 's']);
+  const isLargeFlyout = dimensions?.width ? dimensions.width > euiTheme.base * 30 : false;
+  return (
+    <div ref={setRef}>
+      <FlyoutActions
+        flyoutActions={flyoutActions}
+        isMobileScreen={isMobileScreen}
+        isLargeFlyout={isLargeFlyout}
+      />
+    </div>
+  );
+}
+
+function FlyoutActions({
+  flyoutActions,
+  isMobileScreen,
+  isLargeFlyout,
+}: {
+  flyoutActions: DiscoverGridFlyoutActionsProps['flyoutActions'];
+  isMobileScreen: boolean;
+  isLargeFlyout: boolean;
+}) {
+  const { euiTheme } = useEuiTheme();
   const [isMoreFlyoutActionsPopoverOpen, setIsMoreFlyoutActionsPopoverOpen] =
     useState<boolean>(false);
-  const isMobileScreen = useIsWithinBreakpoints(['xs', 's']);
-  const isLargeScreen = useIsWithinBreakpoints(['xl']);
 
   if (isMobileScreen) {
     return (
@@ -72,7 +97,7 @@ export function DiscoverGridFlyoutActions({ flyoutActions }: DiscoverGridFlyoutA
     flyoutActions.length
   );
   const showFlyoutIconsOnly =
-    remainingFlyoutActions.length > 0 || (!isLargeScreen && visibleFlyoutActions.length > 1);
+    remainingFlyoutActions.length > 0 || (!isLargeFlyout && visibleFlyoutActions.length > 1);
 
   return (
     <EuiFlexGroup
@@ -91,12 +116,10 @@ export function DiscoverGridFlyoutActions({ flyoutActions }: DiscoverGridFlyoutA
     >
       <EuiFlexItem grow={false}>
         <EuiText size="s">
-          <strong>
-            {i18n.translate('discover.grid.tableRow.actionsLabel', {
-              defaultMessage: 'Actions',
-            })}
-            :
-          </strong>
+          {i18n.translate('discover.grid.tableRow.actionsLabel', {
+            defaultMessage: 'Actions',
+          })}
+          :
         </EuiText>
       </EuiFlexItem>
       {visibleFlyoutActions.map((action) => (

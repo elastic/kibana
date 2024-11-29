@@ -5,13 +5,24 @@
  * 2.0.
  */
 
-import { renderQuery } from '../../../management/hooks/test_utils';
-import { useAssetCriticalityPrivileges } from './use_asset_criticality';
+import {
+  renderMutation,
+  renderQuery,
+  renderWrappedHook,
+} from '../../../management/hooks/test_utils';
+import type { Entity } from './use_asset_criticality';
+import { useAssetCriticalityPrivileges, useAssetCriticalityData } from './use_asset_criticality';
 
 const mockFetchAssetCriticalityPrivileges = jest.fn().mockResolvedValue({});
+const mockFetchAssetCriticality = jest.fn().mockResolvedValue({});
+const mockDeleteAssetCriticality = jest.fn().mockResolvedValue({});
+const mockCreateAssetCriticality = jest.fn().mockResolvedValue({});
 jest.mock('../../api/api', () => ({
   useEntityAnalyticsRoutes: () => ({
     fetchAssetCriticalityPrivileges: mockFetchAssetCriticalityPrivileges,
+    fetchAssetCriticality: mockFetchAssetCriticality,
+    deleteAssetCriticality: mockDeleteAssetCriticality,
+    createAssetCriticality: mockCreateAssetCriticality,
   }),
 }));
 
@@ -35,30 +46,63 @@ describe('useAssetCriticality', () => {
     jest.clearAllMocks();
   });
 
-  it('does not call privileges API when hasEntityAnalyticsCapability is false', async () => {
-    mockUseHasSecurityCapability.mockReturnValue(false);
-    mockUseUiSettings.mockReturnValue([true]);
+  describe('useAssetCriticalityPrivileges', () => {
+    it('does not call privileges API when hasEntityAnalyticsCapability is false', async () => {
+      mockUseHasSecurityCapability.mockReturnValue(false);
+      mockUseUiSettings.mockReturnValue([true]);
 
-    await renderQuery(() => useAssetCriticalityPrivileges('test_entity_name'), 'isSuccess');
+      await renderQuery(() => useAssetCriticalityPrivileges('test_entity_name'), 'isSuccess');
 
-    expect(mockFetchAssetCriticalityPrivileges).not.toHaveBeenCalled();
+      expect(mockFetchAssetCriticalityPrivileges).not.toHaveBeenCalled();
+    });
+
+    it('calls privileges API when hasEntityAnalyticsCapability and UiSettings are enabled', async () => {
+      mockUseHasSecurityCapability.mockReturnValue(true);
+      mockUseUiSettings.mockReturnValue([true]);
+
+      await renderQuery(() => useAssetCriticalityPrivileges('test_entity_name'), 'isSuccess');
+
+      expect(mockFetchAssetCriticalityPrivileges).toHaveBeenCalled();
+    });
   });
 
-  it('calls privileges API when hasEntityAnalyticsCapability and UiSettings are enabled', async () => {
-    mockUseHasSecurityCapability.mockReturnValue(true);
-    mockUseUiSettings.mockReturnValue([true]);
+  describe('useAssetCriticalityData', () => {
+    it('calls delete api when the mutation is called with unassigned criticality level', async () => {
+      mockFetchAssetCriticalityPrivileges.mockResolvedValue({ has_all_required: true });
+      mockDeleteAssetCriticality.mockResolvedValue({});
+      mockCreateAssetCriticality.mockResolvedValue({});
+      const entity: Entity = { name: 'test_entity_name', type: 'host' };
 
-    await renderQuery(() => useAssetCriticalityPrivileges('test_entity_name'), 'isSuccess');
+      const { mutation } = await renderWrappedHook(() => useAssetCriticalityData({ entity }));
 
-    expect(mockFetchAssetCriticalityPrivileges).toHaveBeenCalled();
-  });
+      await renderMutation(async () =>
+        mutation.mutate({
+          idField: 'test_entity_type.name',
+          idValue: 'test_entity_name',
+          criticalityLevel: 'unassigned',
+        })
+      );
 
-  it('does not call privileges API when UI Settings is disabled', async () => {
-    mockUseHasSecurityCapability.mockReturnValue(true);
-    mockUseUiSettings.mockReturnValue([false]);
+      expect(mockDeleteAssetCriticality).toHaveBeenCalled();
+    });
 
-    await renderQuery(() => useAssetCriticalityPrivileges('test_entity_name'), 'isSuccess');
+    it('calls create api when the mutation is called with assigned criticality level', async () => {
+      mockFetchAssetCriticalityPrivileges.mockResolvedValue({ has_all_required: true });
+      mockDeleteAssetCriticality.mockResolvedValue({});
+      mockCreateAssetCriticality.mockResolvedValue({});
+      const entity: Entity = { name: 'test_entity_name', type: 'host' };
 
-    expect(mockFetchAssetCriticalityPrivileges).not.toHaveBeenCalled();
+      const { mutation } = await renderWrappedHook(() => useAssetCriticalityData({ entity }));
+
+      await renderMutation(async () =>
+        mutation.mutate({
+          idField: 'test_entity_type.name',
+          idValue: 'test_entity_name',
+          criticalityLevel: 'critical',
+        })
+      );
+
+      expect(mockCreateAssetCriticality).toHaveBeenCalled();
+    });
   });
 });

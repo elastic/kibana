@@ -6,56 +6,120 @@
  */
 
 import type { FC } from 'react';
-import React, { useMemo, useState } from 'react';
+import React, { Fragment, useCallback, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
+  EuiAccordion,
   EuiButton,
   EuiButtonEmpty,
-  EuiButtonGroup,
   EuiCallOut,
-  EuiDescribedFormGroup,
-  EuiFieldNumber,
+  EuiCheckableCard,
   EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiForm,
+  EuiFormFieldset,
+  EuiFormHelpText,
   EuiFormRow,
+  EuiHorizontalRule,
   EuiLink,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
+  euiPaletteCool,
+  EuiPanel,
+  EuiRange,
   EuiSelect,
   EuiSpacer,
+  EuiSwitch,
+  EuiText,
 } from '@elastic/eui';
-import type { I18nStart, OverlayStart, ThemeServiceStart } from '@kbn/core/public';
+import type { CoreStart, OverlayStart } from '@kbn/core/public';
 import { css } from '@emotion/react';
-import { numberValidator } from '@kbn/ml-agg-utils';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { getNewJobLimits, isCloudTrial } from '../services/ml_server_info';
-import {
-  composeValidators,
-  dictionaryValidator,
-  requiredValidator,
-} from '../../../common/util/validators';
+import { dictionaryValidator } from '@kbn/ml-validators';
+import type { NLPSettings } from '../../../common/constants/app';
+import type { TrainedModelDeploymentStatsResponse } from '../../../common/types/trained_models';
+import { type CloudInfo, getNewJobLimits } from '../services/ml_server_info';
 import type { ModelItem } from './models_list';
+import type { MlStartTrainedModelDeploymentRequestNew } from './deployment_params_mapper';
+import { DeploymentParamsMapper } from './deployment_params_mapper';
 
 interface DeploymentSetupProps {
-  config: ThreadingParams;
-  onConfigChange: (config: ThreadingParams) => void;
-  errors: Partial<Record<keyof ThreadingParams, Record<string, unknown>>>;
+  config: DeploymentParamsUI;
+  onConfigChange: (config: DeploymentParamsUI) => void;
+  errors: Partial<
+    Record<
+      keyof DeploymentParamsUI | 'min_number_of_allocations' | 'max_number_of_allocations',
+      Record<string, unknown>
+    >
+  >;
   isUpdate?: boolean;
-  deploymentsParams?: Record<string, ThreadingParams>;
+  deploymentsParams?: Record<string, DeploymentParamsUI>;
+  cloudInfo: CloudInfo;
+  // Indicates if running in serverless
+  showNodeInfo: boolean;
+  disableAdaptiveResourcesControl?: boolean;
+  deploymentParamsMapper: DeploymentParamsMapper;
 }
 
-export interface ThreadingParams {
-  numOfAllocations: number;
-  threadsPerAllocations?: number;
-  priority?: 'low' | 'normal';
+/**
+ * Interface for deployment params in the UI.
+ */
+export interface DeploymentParamsUI {
+  /**
+   * Deployment ID
+   */
   deploymentId?: string;
+  /**
+   * Indicates the use case deployment is optimized for.
+   * For ingest, use 1 thread
+   * For search, use N threads, where N = no. of physical cores of an ML node
+   */
+  optimized: 'optimizedForIngest' | 'optimizedForSearch';
+  /**
+   * Adaptive resources
+   */
+  adaptiveResources: boolean;
+  /**
+   * Level of vCPU usage.
+   * When adaptive resources are enabled, corresponds to the min-max range.
+   * When adaptive resources are disabled (and for on-prem deployments), set to a static number of allocations.
+   */
+  vCPUUsage: 'low' | 'medium' | 'high';
 }
 
-const THREADS_MAX_EXPONENT = 5;
+const sliderPalette = euiPaletteCool(3);
+
+/**
+ * Dict for vCPU levels.
+ */
+const vCpuLevelMap = {
+  low: {
+    value: 0.5,
+    label: i18n.translate('xpack.ml.trainedModels.modelsList.startDeployment.lowCpuLabel', {
+      defaultMessage: 'Low',
+    }),
+    color: sliderPalette[0],
+  },
+  medium: {
+    value: 1.5,
+    label: i18n.translate('xpack.ml.trainedModels.modelsList.startDeployment.mediumCpuLabel', {
+      defaultMessage: 'Medium',
+    }),
+    color: sliderPalette[1],
+  },
+  high: {
+    value: 2.5,
+    label: i18n.translate('xpack.ml.trainedModels.modelsList.startDeployment.highCpuLabel', {
+      defaultMessage: 'High',
+    }),
+    color: sliderPalette[2],
+  },
+};
 
 /**
  * Form for setting threading params.
@@ -66,289 +130,516 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
   errors,
   isUpdate,
   deploymentsParams,
+  disableAdaptiveResourcesControl,
+  deploymentParamsMapper,
+  cloudInfo,
+  showNodeInfo,
 }) => {
-  const {
-    total_ml_processors: totalMlProcessors,
-    max_single_ml_node_processors: maxSingleMlNodeProcessors,
-  } = getNewJobLimits();
-
-  const numOfAllocation = config.numOfAllocations;
-  const threadsPerAllocations = config.threadsPerAllocations;
+  const deploymentIdUpdated = useRef(false);
 
   const defaultDeploymentId = useMemo(() => {
     return config.deploymentId;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const threadsPerAllocationsOptions = useMemo(
+  const customTicks = useMemo(
     () =>
-      new Array(THREADS_MAX_EXPONENT)
-        .fill(null)
-        .map((v, i) => Math.pow(2, i))
-        .filter(maxSingleMlNodeProcessors ? (v) => v <= maxSingleMlNodeProcessors : (v) => true)
-        .map((value) => {
-          const id = value.toString();
-
-          return {
-            id,
-            label: id,
-            value,
-            'data-test-subj': `mlModelsStartDeploymentModalThreadsPerAllocation_${id}`,
-          };
-        }),
-    [maxSingleMlNodeProcessors]
+      Object.values(vCpuLevelMap).map((v) => {
+        return {
+          label: v.label,
+          value: v.value,
+        };
+      }),
+    []
   );
 
-  const disableThreadingControls = config.priority === 'low';
+  const customColorsLevels = useMemo(
+    () => [
+      {
+        min: 0.5,
+        max: 1.1,
+        color: vCpuLevelMap.low.color,
+      },
+      {
+        min: 1.1,
+        max: 1.9,
+        color: vCpuLevelMap.medium.color,
+      },
+      {
+        min: 1.9,
+        max: 2.5,
+        color: vCpuLevelMap.high.color,
+      },
+    ],
+    []
+  );
+
+  const optimizedOptions = useMemo(
+    () => [
+      {
+        id: 'optimizedForIngest',
+        value: 'optimizedForIngest' as const,
+        label: (
+          <EuiText size={'s'}>
+            <strong>
+              <FormattedMessage
+                id="xpack.ml.trainedModels.modelsList.startDeployment.optimizedForIngestLabel"
+                defaultMessage="Ingest"
+              />
+            </strong>
+          </EuiText>
+        ),
+        description: (
+          <FormattedMessage
+            id="xpack.ml.trainedModels.modelsList.startDeployment.optimizedForIngestDescription"
+            defaultMessage="Optimized for higher throughput during ingest"
+          />
+        ),
+        'data-test-subj': `mlModelsStartDeploymentModalOptimizedForIngest`,
+      },
+      {
+        id: 'optimizedForSearch',
+        value: 'optimizedForSearch' as const,
+        label: (
+          <FormattedMessage
+            id="xpack.ml.trainedModels.modelsList.startDeployment.optimizedForSearchLabel"
+            defaultMessage="Search"
+          />
+        ),
+        description: (
+          <FormattedMessage
+            id="xpack.ml.trainedModels.modelsList.startDeployment.optimizedForSearchDescription"
+            defaultMessage="Optimized for lower latency during search"
+          />
+        ),
+        'data-test-subj': `mlModelsStartDeploymentModalOptimizedForSearch`,
+      },
+    ],
+    []
+  );
+
+  const helperText = useMemo<string | undefined>(() => {
+    const vcpuRange = deploymentParamsMapper.getVCPURange(config.vCPUUsage);
+
+    if (cloudInfo.isCloud && cloudInfo.isMlAutoscalingEnabled && showNodeInfo) {
+      // Running in cloud with ML autoscaling enabled
+      if (config.adaptiveResources) {
+        // With adaptive resources
+        switch (config.vCPUUsage) {
+          case 'low':
+            return i18n.translate(
+              'xpack.ml.trainedModels.modelsList.startDeployment.cloudAutoscaling.lowCpuAdaptiveHelp',
+              {
+                defaultMessage:
+                  'This level limits resources to the minimum required for ELSER to run if supported by your Cloud console selection. It may not be sufficient for a production application.',
+              }
+            );
+          case 'medium':
+            return i18n.translate(
+              'xpack.ml.trainedModels.modelsList.startDeployment.cloudAutoscaling.mediumCpuAdaptiveHelp',
+              {
+                defaultMessage:
+                  'Your model will scale up to a maximum of {maxVCPUs} vCPUs. Even if the Cloud console provides more, the model will not exceed {maxVCPUs}, leaving additional resources for other models.',
+                values: { maxVCPUs: vcpuRange.max },
+              }
+            );
+          case 'high':
+            return i18n.translate(
+              'xpack.ml.trainedModels.modelsList.startDeployment.cloudAutoscaling.highCpuAdaptiveHelp',
+              {
+                defaultMessage:
+                  'Your model may scale up to the maximum number of vCPUs available for this deployment from the Cloud console if needed. If the maximum is {minVCPUs} vCPUs or fewer, this level is equivalent to the medium level.',
+                // use an upper bound of medium level
+                values: { minVCPUs: vcpuRange.min - 1 },
+              }
+            );
+        }
+      } else {
+        // Without adaptive resources
+        switch (config.vCPUUsage) {
+          case 'low':
+            return i18n.translate(
+              'xpack.ml.trainedModels.modelsList.startDeployment.cloudAutoscaling.lowCpuStaticHelp',
+              {
+                defaultMessage:
+                  'This level sets resources to the minimum required for ELSER to run if supported by your Cloud console selection. It may not be sufficient for a production application.',
+              }
+            );
+          case 'medium':
+            return i18n.translate(
+              'xpack.ml.trainedModels.modelsList.startDeployment.cloudAutoscaling.mediumCpuStaticHelp',
+              {
+                defaultMessage:
+                  'Your model will consume {staticVCPUs} vCPUs, even when not in use, if provided by the Cloud console.',
+                values: { staticVCPUs: vcpuRange.static },
+              }
+            );
+          case 'high':
+            return i18n.translate(
+              'xpack.ml.trainedModels.modelsList.startDeployment.cloudAutoscaling.highCpuStaticHelp',
+              {
+                defaultMessage:
+                  'Your model will consume {staticVCPUs} vCPUs, even when not in use, if provided by the Cloud console.',
+                values: { staticVCPUs: vcpuRange.static },
+              }
+            );
+        }
+      }
+    } else if (
+      (cloudInfo.isCloud && !cloudInfo.isMlAutoscalingEnabled && showNodeInfo) ||
+      (!cloudInfo.isCloud && showNodeInfo)
+    ) {
+      // Running in cloud with autoscaling disabled or on-prem
+      if (config.adaptiveResources) {
+        // With adaptive resources
+        switch (config.vCPUUsage) {
+          case 'low':
+            return i18n.translate(
+              'xpack.ml.trainedModels.modelsList.startDeployment.hardwareLimits.lowCpuAdaptiveHelp',
+              {
+                defaultMessage:
+                  'This level limits resources to {maxVCPUs, plural, one {vCPU} other {# vCPUs}}, which may be suitable for development, testing, and demos depending on your parameters. It is not recommended for production use.',
+                values: { maxVCPUs: vcpuRange.max },
+              }
+            );
+          case 'medium':
+            return i18n.translate(
+              'xpack.ml.trainedModels.modelsList.startDeployment.hardwareLimits.mediumCpuAdaptiveHelp',
+              {
+                defaultMessage:
+                  'This level limits resources to {maxVCPUs, plural, one {vCPU} other {# vCPUs}}, which may be suitable for development, testing, and demos depending on your parameters. It is not recommended for production use.',
+                values: { maxVCPUs: vcpuRange.max },
+              }
+            );
+          case 'high':
+            return i18n.translate(
+              'xpack.ml.trainedModels.modelsList.startDeployment.hardwareLimits.highCpuAdaptiveHelp',
+              {
+                defaultMessage:
+                  'This level may use {maxVCPUs, plural, one {vCPU} other {# vCPUs}} - the maximum number of vCPUs available for this deployment. If the maximum is 2 vCPUs or fewer, this level is equivalent to the medium or low level.',
+                values: { maxVCPUs: vcpuRange.max },
+              }
+            );
+        }
+      } else {
+        // Without adaptive resources
+        switch (config.vCPUUsage) {
+          case 'low':
+            return i18n.translate(
+              'xpack.ml.trainedModels.modelsList.startDeployment.hardwareLimits.lowCpuStaticHelp',
+              {
+                defaultMessage:
+                  'This level sets resources to the minimum required for ELSER to run. It may not be sufficient for a production application.',
+              }
+            );
+          case 'medium':
+            return i18n.translate(
+              'xpack.ml.trainedModels.modelsList.startDeployment.hardwareLimits.mediumCpuStaticHelp',
+              {
+                defaultMessage:
+                  'Your model will consume {staticVCPUs} vCPUs, even when not in use.',
+                values: { staticVCPUs: vcpuRange.static },
+              }
+            );
+          case 'high':
+            return i18n.translate(
+              'xpack.ml.trainedModels.modelsList.startDeployment.hardwareLimits.highCpuStaticHelp',
+              {
+                defaultMessage:
+                  'Your model will consume {staticVCPUs} vCPUs - the maximum available number.',
+                values: { staticVCPUs: vcpuRange.static },
+              }
+            );
+        }
+      }
+    } else if (!showNodeInfo) {
+      // Running in serverless
+      const vcuRange = deploymentParamsMapper.getVCURange(config.vCPUUsage);
+
+      if (config.adaptiveResources) {
+        // With adaptive resources
+        switch (config.vCPUUsage) {
+          case 'low':
+            return i18n.translate(
+              'xpack.ml.trainedModels.modelsList.startDeployment.serverless.lowCpuAdaptiveHelp',
+              {
+                defaultMessage:
+                  'This level limits resources to {vcus, plural, one {VCU} other {# VCUs}}, which may be suitable for development, testing, and demos depending on your parameters. It is not recommended for production use.',
+                values: { vcus: vcuRange.max },
+              }
+            );
+          case 'medium':
+            return i18n.translate(
+              'xpack.ml.trainedModels.modelsList.startDeployment.serverless.mediumCpuAdaptiveHelp',
+              {
+                defaultMessage:
+                  'Your model will scale up to a maximum of {vcus, plural, one {VCU} other {# VCUs}} per hour based on your search or ingest load. It will automatically scale down when demand decreases, and you only pay for the resources you use.',
+                values: { vcus: vcuRange.max },
+              }
+            );
+          case 'high':
+            return i18n.translate(
+              'xpack.ml.trainedModels.modelsList.startDeployment.serverless.highCpuAdaptiveHelp',
+              {
+                defaultMessage:
+                  'Your model will scale up to a maximum of {vcus, plural, one {VCU} other {# VCUs}} per hour based on your search or ingest load. It will automatically scale down when demand decreases, and you only pay for the resources you use.',
+                values: { vcus: vcuRange.max },
+              }
+            );
+        }
+      } else {
+        // Static allocations are allowed for Search projects
+        switch (config.vCPUUsage) {
+          case 'low':
+            return i18n.translate(
+              'xpack.ml.trainedModels.modelsList.startDeployment.serverless.lowCpuStaticHelp',
+              {
+                defaultMessage:
+                  'This level set resources to {staticVCUs, plural, one {VCU} other {# VCUs}}, which may be suitable for development, testing, and demos depending on your parameters. It is not recommended for production use.',
+                values: { staticVCUs: vcuRange.static },
+              }
+            );
+          case 'medium':
+          case 'high':
+            return i18n.translate(
+              'xpack.ml.trainedModels.modelsList.startDeployment.serverless.mediumCpuStaticHelp',
+              {
+                defaultMessage:
+                  'Your model will consume {staticVCUs, plural, one {VCU} other {# VCUs}}, even when not in use.',
+                values: { staticVCUs: vcuRange.static },
+              }
+            );
+        }
+      }
+    }
+  }, [
+    cloudInfo.isCloud,
+    cloudInfo.isMlAutoscalingEnabled,
+    config.adaptiveResources,
+    config.vCPUUsage,
+    deploymentParamsMapper,
+    showNodeInfo,
+  ]);
 
   return (
     <EuiForm component={'form'} id={'startDeploymentForm'}>
-      <EuiDescribedFormGroup
-        titleSize={'xxs'}
-        title={
-          <h3>
-            <FormattedMessage
-              id="xpack.ml.trainedModels.modelsList.startDeployment.deploymentIdLabel"
-              defaultMessage="Deployment ID"
-            />
-          </h3>
-        }
-        description={
+      <EuiFormRow
+        fullWidth
+        label={
           <FormattedMessage
-            id="xpack.ml.trainedModels.modelsList.startDeployment.deploymentIdHelp"
-            defaultMessage="Specify unique identifier for the model deployment."
+            id="xpack.ml.trainedModels.modelsList.startDeployment.deploymentIdLabel"
+            defaultMessage="Deployment ID"
+          />
+        }
+        hasChildLabel={false}
+        isInvalid={!!errors.deploymentId}
+        error={
+          <FormattedMessage
+            id="xpack.ml.trainedModels.modelsList.startDeployment.deploymentIdError"
+            defaultMessage="Deployment with this ID already exists."
           />
         }
       >
-        <EuiFormRow
-          label={
-            <FormattedMessage
-              id="xpack.ml.trainedModels.modelsList.startDeployment.deploymentIdLabel"
-              defaultMessage="Deployment ID"
-            />
-          }
-          hasChildLabel={false}
-          isInvalid={!!errors.deploymentId}
-          error={
-            <FormattedMessage
-              id="xpack.ml.trainedModels.modelsList.startDeployment.deploymentIdError"
-              defaultMessage="Deployment with this ID already exists."
-            />
-          }
+        {!isUpdate ? (
+          <EuiFieldText
+            fullWidth
+            placeholder={defaultDeploymentId}
+            isInvalid={!!errors.deploymentId}
+            value={config.deploymentId ?? ''}
+            onChange={(e) => {
+              deploymentIdUpdated.current = true;
+              onConfigChange({ ...config, deploymentId: e.target.value });
+            }}
+            data-test-subj={'mlModelsStartDeploymentModalDeploymentId'}
+          />
+        ) : (
+          <EuiSelect
+            fullWidth
+            options={Object.keys(deploymentsParams!).map((v) => {
+              return { text: v, value: v };
+            })}
+            value={config.deploymentId}
+            onChange={(e) => {
+              const update = e.target.value;
+              const targetDeployment = deploymentsParams![update];
+              onConfigChange({
+                ...targetDeployment,
+              });
+            }}
+            data-test-subj={'mlModelsStartDeploymentModalDeploymentSelectId'}
+          />
+        )}
+      </EuiFormRow>
+
+      <EuiSpacer size="m" />
+
+      <EuiFormRow hasChildLabel={true} fullWidth>
+        <EuiFormFieldset
+          legend={{
+            children: (
+              <FormattedMessage
+                id="xpack.ml.trainedModels.modelsList.startDeployment.optimizeThreadsPerAllocationLabel"
+                defaultMessage="Optimize this model deployment for your use case:"
+              />
+            ),
+          }}
         >
-          {!isUpdate ? (
-            <EuiFieldText
-              placeholder={defaultDeploymentId}
-              isInvalid={!!errors.deploymentId}
-              value={config.deploymentId ?? ''}
-              onChange={(e) => {
-                onConfigChange({ ...config, deploymentId: e.target.value });
-              }}
-              data-test-subj={'mlModelsStartDeploymentModalDeploymentId'}
-            />
-          ) : (
-            <EuiSelect
+          {optimizedOptions.map((v) => {
+            return (
+              <Fragment key={v.value}>
+                <EuiCheckableCard
+                  id={v.value}
+                  disabled={isUpdate}
+                  label={
+                    <EuiText size={'s'}>
+                      <EuiFlexGroup alignItems={'baseline'} gutterSize={'s'}>
+                        <EuiFlexItem grow={false}>
+                          <strong>{v.label}</strong>
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={false}>{v.description}</EuiFlexItem>
+                      </EuiFlexGroup>
+                    </EuiText>
+                  }
+                  value={v.value}
+                  checked={config.optimized === v.value}
+                  onChange={() => {
+                    onConfigChange({
+                      ...config,
+                      ...(deploymentIdUpdated.current
+                        ? {}
+                        : {
+                            // rename deployment ID based on the optimized value
+                            deploymentId: config.deploymentId?.replace(
+                              /_[a-zA-Z]+$/,
+                              v.value === 'optimizedForIngest' ? '_ingest' : '_search'
+                            ),
+                          }),
+                      optimized: v.value,
+                    });
+                  }}
+                  data-test-subj={`mlModelsStartDeploymentModalOptimized_${v.value}`}
+                />
+                <EuiSpacer size="m" />
+              </Fragment>
+            );
+          })}
+        </EuiFormFieldset>
+      </EuiFormRow>
+
+      <EuiAccordion
+        id={'modelDeploymentAdvancedSettings'}
+        buttonContent={
+          <FormattedMessage
+            id="xpack.ml.trainedModels.modelsList.startDeployment.advancedSettingsLabel"
+            defaultMessage="Advanced configurations"
+          />
+        }
+        initialIsOpen={isUpdate}
+        data-test-subj={'mlModelsStartDeploymentModalAdvancedConfiguration'}
+      >
+        <EuiSpacer size={'m'} />
+
+        <EuiPanel hasBorder hasShadow={false}>
+          <EuiFormRow
+            hasChildLabel={false}
+            fullWidth
+            label={
+              showNodeInfo ? (
+                <FormattedMessage
+                  id="xpack.ml.trainedModels.modelsList.startDeployment.vCpuUsageLabel"
+                  defaultMessage="vCPUs usage level"
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.ml.trainedModels.modelsList.startDeployment.vCUUsageLabel"
+                  defaultMessage="VCU usage level"
+                />
+              )
+            }
+          >
+            <EuiRange
               fullWidth
-              options={Object.keys(deploymentsParams!).map((v) => {
-                return { text: v, value: v };
-              })}
-              value={config.deploymentId}
+              id={'vCpuLevel'}
+              min={0.5}
+              max={2.5}
+              step={1}
+              tickInterval={1}
+              value={vCpuLevelMap[config.vCPUUsage].value}
               onChange={(e) => {
-                const update = e.target.value;
+                const result = Object.entries(vCpuLevelMap).find(
+                  ([, val]) => val.value === Number(e.currentTarget.value)
+                );
                 onConfigChange({
                   ...config,
-                  deploymentId: update,
-                  numOfAllocations: deploymentsParams![update].numOfAllocations,
+                  vCPUUsage: result![0]! as DeploymentParamsUI['vCPUUsage'],
                 });
               }}
-              data-test-subj={'mlModelsStartDeploymentModalDeploymentSelectId'}
-            />
-          )}
-        </EuiFormRow>
-      </EuiDescribedFormGroup>
-
-      {config.priority !== undefined ? (
-        <EuiDescribedFormGroup
-          titleSize={'xxs'}
-          title={
-            <h3>
-              <FormattedMessage
-                id="xpack.ml.trainedModels.modelsList.startDeployment.priorityLabel"
-                defaultMessage="Priority"
-              />
-            </h3>
-          }
-          description={
-            <FormattedMessage
-              id="xpack.ml.trainedModels.modelsList.startDeployment.priorityHelp"
-              defaultMessage="Select low priority for demonstrations where each model will be very lightly used."
-            />
-          }
-        >
-          <EuiFormRow
-            label={
-              <FormattedMessage
-                id="xpack.ml.trainedModels.modelsList.startDeployment.priorityLabel"
-                defaultMessage="Priority"
-              />
-            }
-            hasChildLabel={false}
-          >
-            <EuiButtonGroup
-              legend={i18n.translate(
-                'xpack.ml.trainedModels.modelsList.startDeployment.priorityLegend',
-                {
-                  defaultMessage: 'Priority selector',
-                }
-              )}
-              name={'priority'}
-              isFullWidth
-              idSelected={config.priority}
-              onChange={(optionId: string) => {
-                onConfigChange({ ...config, priority: optionId as ThreadingParams['priority'] });
-              }}
-              options={[
-                {
-                  id: 'low',
-                  value: 'low',
-                  label: i18n.translate(
-                    'xpack.ml.trainedModels.modelsList.startDeployment.lowPriorityLabel',
-                    {
-                      defaultMessage: 'low',
-                    }
-                  ),
-                  'data-test-subj': 'mlModelsStartDeploymentModalLowPriority',
-                },
-                {
-                  id: 'normal',
-                  value: 'normal',
-                  label: i18n.translate(
-                    'xpack.ml.trainedModels.modelsList.startDeployment.normalPriorityLabel',
-                    {
-                      defaultMessage: 'normal',
-                    }
-                  ),
-                  'data-test-subj': 'mlModelsStartDeploymentModalNormalPriority',
-                },
-              ]}
-              data-test-subj={'mlModelsStartDeploymentModalPriority'}
-            />
-          </EuiFormRow>
-        </EuiDescribedFormGroup>
-      ) : null}
-
-      <EuiDescribedFormGroup
-        titleSize={'xxs'}
-        title={
-          <h3>
-            <FormattedMessage
-              id="xpack.ml.trainedModels.modelsList.startDeployment.numbersOfAllocationsLabel"
-              defaultMessage="Number of allocations"
-            />
-          </h3>
-        }
-        description={
-          <FormattedMessage
-            id="xpack.ml.trainedModels.modelsList.startDeployment.numbersOfAllocationsHelp"
-            defaultMessage="Increase to improve document ingest throughput."
-          />
-        }
-      >
-        <EuiFormRow
-          label={
-            <FormattedMessage
-              id="xpack.ml.trainedModels.modelsList.startDeployment.numbersOfAllocationsLabel"
-              defaultMessage="Number of allocations"
-            />
-          }
-          hasChildLabel={false}
-          isDisabled={disableThreadingControls}
-          isInvalid={!!errors.numOfAllocations}
-          error={
-            errors?.numOfAllocations?.min ? (
-              <FormattedMessage
-                id="xpack.ml.trainedModels.modelsList.startDeployment.numbersOfAllocationsMinError"
-                defaultMessage="At least one allocation is required."
-              />
-            ) : errors?.numOfAllocations?.max ? (
-              <FormattedMessage
-                id="xpack.ml.trainedModels.modelsList.startDeployment.numbersOfAllocationsMaxError"
-                defaultMessage="Cannot exceed {max} - the total number of ML processors."
-                values={{ max: totalMlProcessors }}
-              />
-            ) : null
-          }
-        >
-          <EuiFieldNumber
-            disabled={disableThreadingControls}
-            isInvalid={!!errors.numOfAllocations}
-            fullWidth
-            min={1}
-            max={totalMlProcessors}
-            step={1}
-            name={'numOfAllocations'}
-            value={disableThreadingControls ? 1 : numOfAllocation}
-            onChange={(event) => {
-              onConfigChange({ ...config, numOfAllocations: Number(event.target.value) });
-            }}
-            data-test-subj={'mlModelsStartDeploymentModalNumOfAllocations'}
-          />
-        </EuiFormRow>
-      </EuiDescribedFormGroup>
-
-      {threadsPerAllocations !== undefined ? (
-        <EuiDescribedFormGroup
-          titleSize={'xxs'}
-          title={
-            <h3>
-              <FormattedMessage
-                id="xpack.ml.trainedModels.modelsList.startDeployment.threadsPerAllocationLabel"
-                defaultMessage="Threads per allocation"
-              />
-            </h3>
-          }
-          description={
-            <FormattedMessage
-              id="xpack.ml.trainedModels.modelsList.startDeployment.threadsPerAllocationHelp"
-              defaultMessage="Increase to improve inference latency."
-            />
-          }
-        >
-          <EuiFormRow
-            label={
-              <FormattedMessage
-                id="xpack.ml.trainedModels.modelsList.startDeployment.threadsPerAllocationLabel"
-                defaultMessage="Threads per allocation"
-              />
-            }
-            hasChildLabel={false}
-            isDisabled={disableThreadingControls}
-          >
-            <EuiButtonGroup
-              isDisabled={disableThreadingControls}
-              legend={i18n.translate(
-                'xpack.ml.trainedModels.modelsList.startDeployment.threadsPerAllocationLegend',
-                {
-                  defaultMessage: 'Threads per allocation selector',
-                }
-              )}
-              name={'threadsPerAllocation'}
-              isFullWidth
-              idSelected={
-                disableThreadingControls
-                  ? '1'
-                  : threadsPerAllocationsOptions.find((v) => v.value === threadsPerAllocations)!.id
+              showTicks
+              ticks={customTicks}
+              levels={customColorsLevels}
+              aria-label={
+                showNodeInfo
+                  ? i18n.translate('xpack.ml.trainedModels.modelsList.startDeployment.vCpuLevel', {
+                      defaultMessage: 'vCPUs level selector',
+                    })
+                  : i18n.translate('xpack.ml.trainedModels.modelsList.startDeployment.vCULevel', {
+                      defaultMessage: 'VCUs level selector',
+                    })
               }
-              onChange={(optionId) => {
-                const value = threadsPerAllocationsOptions.find((v) => v.id === optionId)!.value;
-                onConfigChange({ ...config, threadsPerAllocations: value });
-              }}
-              options={threadsPerAllocationsOptions}
-              data-test-subj={'mlModelsStartDeploymentModalThreadsPerAllocation'}
+              aria-describedby={'vCpuRangeHelp'}
+              data-test-subj={'mlModelsStartDeploymentModalVCPULevel'}
             />
           </EuiFormRow>
-        </EuiDescribedFormGroup>
-      ) : null}
+
+          <EuiSpacer size={'s'} />
+
+          <EuiFormHelpText id={'vCpuRangeHelp'}>
+            <EuiCallOut size="s" data-test-subj="mlModelsStartDeploymentModalVCPUHelperText">
+              {helperText}
+            </EuiCallOut>
+          </EuiFormHelpText>
+        </EuiPanel>
+
+        {!disableAdaptiveResourcesControl ? (
+          <>
+            <EuiSpacer size={'m'} />
+
+            <EuiSwitch
+              label={
+                <FormattedMessage
+                  id="xpack.ml.trainedModels.modelsList.startDeployment.adaptiveAllocationEnabledLabel"
+                  defaultMessage="Adaptive resources (recommended)"
+                />
+              }
+              checked={!!config.adaptiveResources}
+              onChange={(event) => {
+                onConfigChange({
+                  ...config,
+                  adaptiveResources: event.target.checked,
+                });
+              }}
+              aria-describedby={'adaptiveResourcesHelp'}
+              data-test-subj={'mlModelsStartDeploymentModalAdaptiveResources'}
+            />
+
+            <EuiSpacer size={'s'} />
+
+            <EuiFormHelpText
+              id={'adaptiveResourcesHelp'}
+              data-test-subj={'mlModelsStartDeploymentModalVCPULevelHelpText'}
+            >
+              <FormattedMessage
+                id={'xpack.ml.trainedModels.modelsList.startDeployment.adaptiveResourcesHelp'}
+                defaultMessage={
+                  'Adjust resources to optimize for load and savings. If disabled, the deployments will not auto-scale.'
+                }
+              />
+            </EuiFormHelpText>
+
+            <EuiSpacer size={'m'} />
+          </>
+        ) : null}
+      </EuiAccordion>
     </EuiForm>
   );
 };
@@ -356,10 +647,14 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
 interface StartDeploymentModalProps {
   model: ModelItem;
   startModelDeploymentDocUrl: string;
-  onConfigChange: (config: ThreadingParams) => void;
+  onConfigChange: (config: DeploymentParamsUI) => void;
   onClose: () => void;
-  initialParams?: ThreadingParams;
+  initialParams?: DeploymentParamsUI;
   modelAndDeploymentIds?: string[];
+  cloudInfo: CloudInfo;
+  deploymentParamsMapper: DeploymentParamsMapper;
+  showNodeInfo: boolean;
+  nlpSettings: NLPSettings;
 }
 
 /**
@@ -372,19 +667,36 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
   startModelDeploymentDocUrl,
   initialParams,
   modelAndDeploymentIds,
+  cloudInfo,
+  deploymentParamsMapper,
+  showNodeInfo,
+  nlpSettings,
 }) => {
   const isUpdate = !!initialParams;
 
-  const { total_ml_processors: totalMlProcessors } = getNewJobLimits();
+  const getDefaultParams = useCallback((): DeploymentParamsUI => {
+    const uiParams = model.stats?.deployment_stats.map((v) =>
+      deploymentParamsMapper.mapApiToUiDeploymentParams(v)
+    );
 
-  const [config, setConfig] = useState<ThreadingParams>(
-    initialParams ?? {
-      numOfAllocations: 1,
-      threadsPerAllocations: 1,
-      priority: isCloudTrial() ? 'low' : 'normal',
-      deploymentId: model.model_id,
-    }
-  );
+    const defaultVCPUUsage: DeploymentParamsUI['vCPUUsage'] = showNodeInfo ? 'medium' : 'low';
+
+    return uiParams?.some((v) => v.optimized === 'optimizedForIngest')
+      ? {
+          deploymentId: `${model.model_id}_search`,
+          optimized: 'optimizedForSearch',
+          vCPUUsage: defaultVCPUUsage,
+          adaptiveResources: true,
+        }
+      : {
+          deploymentId: `${model.model_id}_ingest`,
+          optimized: 'optimizedForIngest',
+          vCPUUsage: defaultVCPUUsage,
+          adaptiveResources: true,
+        };
+  }, [deploymentParamsMapper, model.model_id, model.stats?.deployment_stats, showNodeInfo]);
+
+  const [config, setConfig] = useState<DeploymentParamsUI>(initialParams ?? getDefaultParams());
 
   const deploymentIdValidator = useMemo(() => {
     if (isUpdate) {
@@ -402,26 +714,14 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
     ]);
   }, [modelAndDeploymentIds, model.deployment_ids, model.model_id, isUpdate]);
 
-  const numOfAllocationsValidator = composeValidators(
-    requiredValidator(),
-    numberValidator({ min: 1, max: totalMlProcessors, integerOnly: true })
-  );
-
-  const numOfAllocationsErrors = numOfAllocationsValidator(config.numOfAllocations);
   const deploymentIdErrors = deploymentIdValidator(config.deploymentId ?? '');
 
-  const errors = {
-    ...(numOfAllocationsErrors ? { numOfAllocations: numOfAllocationsErrors } : {}),
+  const errors: DeploymentSetupProps['errors'] = {
     ...(deploymentIdErrors ? { deploymentId: deploymentIdErrors } : {}),
   };
 
   return (
-    <EuiModal
-      onClose={onClose}
-      initialFocus="[name=numOfAllocations]"
-      maxWidth={false}
-      data-test-subj="mlModelsStartDeploymentModal"
-    >
+    <EuiModal onClose={onClose} data-test-subj="mlModelsStartDeploymentModal" maxWidth={640}>
       <EuiModalHeader>
         <EuiModalHeaderTitle size="s">
           {isUpdate ? (
@@ -441,34 +741,43 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
       </EuiModalHeader>
 
       <EuiModalBody>
-        <EuiCallOut
-          size={'s'}
-          title={
-            <FormattedMessage
-              id="xpack.ml.trainedModels.modelsList.startDeployment.maxNumOfProcessorsWarning"
-              defaultMessage="The product of the number of allocations and threads per allocation should be less than the total number of processors on your ML nodes."
-            />
-          }
-          iconType="iInCircle"
-          color={'primary'}
-        />
-        <EuiSpacer size={'m'} />
-
         <DeploymentSetup
+          deploymentParamsMapper={deploymentParamsMapper}
+          cloudInfo={cloudInfo}
+          showNodeInfo={showNodeInfo}
           config={config}
           onConfigChange={setConfig}
           errors={errors}
           isUpdate={isUpdate}
-          deploymentsParams={model.stats?.deployment_stats.reduce<Record<string, ThreadingParams>>(
-            (acc, curr) => {
-              acc[curr.deployment_id] = { numOfAllocations: curr.number_of_allocations };
-              return acc;
-            },
-            {}
-          )}
+          disableAdaptiveResourcesControl={
+            showNodeInfo ? false : !nlpSettings.modelDeployment.allowStaticAllocations
+          }
+          deploymentsParams={model.stats?.deployment_stats.reduce<
+            Record<string, DeploymentParamsUI>
+          >((acc, curr) => {
+            acc[curr.deployment_id] = deploymentParamsMapper.mapApiToUiDeploymentParams(curr);
+            return acc;
+          }, {})}
         />
 
-        <EuiSpacer size={'m'} />
+        <EuiHorizontalRule margin="m" />
+
+        {cloudInfo.cloudUrl && showNodeInfo ? (
+          <>
+            <FormattedMessage
+              id="xpack.ml.trainedModels.modelsList.startDeployment.adaptiveResourcesCloudHelp"
+              defaultMessage="Autoscaling uses the base vCPU values from Cloud Console when determining the size to meet the usage needs."
+            />
+            &nbsp;
+            <EuiLink href={cloudInfo.cloudUrl} target="_blank" external>
+              <FormattedMessage
+                id="xpack.ml.trainedModels.modelsList.startDeployment.cloudConsoleLink"
+                defaultMessage="Go to cloud console"
+              />
+            </EuiLink>
+            <EuiHorizontalRule margin="m" />
+          </>
+        ) : null}
       </EuiModalBody>
 
       <EuiModalFooter>
@@ -529,41 +838,52 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
 export const getUserInputModelDeploymentParamsProvider =
   (
     overlays: OverlayStart,
-    theme: ThemeServiceStart,
-    i18nStart: I18nStart,
-    startModelDeploymentDocUrl: string
+    startServices: Pick<CoreStart, 'analytics' | 'i18n' | 'theme'>,
+    startModelDeploymentDocUrl: string,
+    cloudInfo: CloudInfo,
+    showNodeInfo: boolean,
+    nlpSettings: NLPSettings
   ) =>
   (
     model: ModelItem,
-    initialParams?: ThreadingParams,
+    initialParams?: TrainedModelDeploymentStatsResponse,
     deploymentIds?: string[]
-  ): Promise<ThreadingParams | void> => {
+  ): Promise<MlStartTrainedModelDeploymentRequestNew | void> => {
+    const deploymentParamsMapper = new DeploymentParamsMapper(
+      model.model_id,
+      getNewJobLimits(),
+      cloudInfo,
+      showNodeInfo,
+      nlpSettings
+    );
+
+    const params = initialParams
+      ? deploymentParamsMapper.mapApiToUiDeploymentParams(initialParams)
+      : undefined;
+
     return new Promise(async (resolve) => {
       try {
         const modalSession = overlays.openModal(
           toMountPoint(
             <StartUpdateDeploymentModal
+              nlpSettings={nlpSettings}
+              showNodeInfo={showNodeInfo}
+              deploymentParamsMapper={deploymentParamsMapper}
+              cloudInfo={cloudInfo}
               startModelDeploymentDocUrl={startModelDeploymentDocUrl}
-              initialParams={initialParams}
+              initialParams={params}
               modelAndDeploymentIds={deploymentIds}
               model={model}
               onConfigChange={(config) => {
                 modalSession.close();
-
-                const resultConfig = { ...config };
-                if (resultConfig.priority === 'low') {
-                  resultConfig.numOfAllocations = 1;
-                  resultConfig.threadsPerAllocations = 1;
-                }
-
-                resolve(resultConfig);
+                resolve(deploymentParamsMapper.mapUiToApiDeploymentParams(config));
               }}
               onClose={() => {
                 modalSession.close();
                 resolve();
               }}
             />,
-            { theme, i18n: i18nStart }
+            startServices
           )
         );
       } catch (e) {

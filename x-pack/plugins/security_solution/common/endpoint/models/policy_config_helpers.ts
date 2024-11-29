@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { get, set } from 'lodash';
+import { get } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
+import { DefaultPolicyNotificationMessage } from './policy_config';
 import type { PolicyConfig } from '../types';
-import { PolicyOperatingSystem, ProtectionModes } from '../types';
+import { PolicyOperatingSystem, ProtectionModes, AntivirusRegistrationModes } from '../types';
 
 interface PolicyProtectionReference {
   keyPath: string;
@@ -22,7 +24,29 @@ const allOsValues = [
   PolicyOperatingSystem.windows,
 ];
 
-const getPolicyProtectionsReference = (): PolicyProtectionReference[] => [
+const getPolicyPopupReference = (): Array<{
+  keyPath: string;
+  osList: PolicyOperatingSystem[];
+}> => [
+  {
+    keyPath: 'popup.malware.message',
+    osList: [...allOsValues],
+  },
+  {
+    keyPath: 'popup.memory_protection.message',
+    osList: [...allOsValues],
+  },
+  {
+    keyPath: 'popup.behavior_protection.message',
+    osList: [...allOsValues],
+  },
+  {
+    keyPath: 'popup.ransomware.message',
+    osList: [PolicyOperatingSystem.windows],
+  },
+];
+
+export const getPolicyProtectionsReference = (): PolicyProtectionReference[] => [
   {
     keyPath: 'malware.mode',
     osList: [...allOsValues],
@@ -103,7 +127,10 @@ const disableCommonProtections = (policy: PolicyConfig) => {
   }, policy);
 };
 
-const getDisabledCommonProtectionsForOS = (policy: PolicyConfig, os: PolicyOperatingSystem) => ({
+const getDisabledCommonProtectionsForOS = (
+  policy: PolicyConfig,
+  os: PolicyOperatingSystem
+): Partial<PolicyConfig['windows']> => ({
   behavior_protection: {
     ...policy[os].behavior_protection,
     mode: ProtectionModes.off,
@@ -115,6 +142,7 @@ const getDisabledCommonProtectionsForOS = (policy: PolicyConfig, os: PolicyOpera
   malware: {
     ...policy[os].malware,
     blocklist: false,
+    on_write_scan: false,
     mode: ProtectionModes.off,
   },
 });
@@ -139,6 +167,11 @@ const getDisabledWindowsSpecificProtections = (policy: PolicyConfig) => ({
     ...policy.windows.ransomware,
     mode: ProtectionModes.off,
   },
+  antivirus_registration: {
+    ...policy.windows.antivirus_registration,
+    mode: AntivirusRegistrationModes.disabled,
+    enabled: false,
+  },
   attack_surface_reduction: {
     ...policy.windows.attack_surface_reduction,
     credential_hardening: {
@@ -161,6 +194,7 @@ const getDisabledWindowsSpecificPopups = (policy: PolicyConfig) => ({
 export const ensureOnlyEventCollectionIsAllowed = (policy: PolicyConfig): PolicyConfig => {
   const updatedPolicy = disableProtections(policy);
 
+  set(updatedPolicy, 'windows.antivirus_registration.mode', AntivirusRegistrationModes.disabled);
   set(updatedPolicy, 'windows.antivirus_registration.enabled', false);
 
   return updatedPolicy;
@@ -193,4 +227,35 @@ export const isPolicySetToEventCollectionOnly = (
     isOnlyCollectingEvents: !hasEnabledProtection,
     message,
   };
+};
+
+export function isBillablePolicy(policy: PolicyConfig) {
+  if (!policy.meta.serverless) return false;
+
+  return !isPolicySetToEventCollectionOnly(policy).isOnlyCollectingEvents;
+}
+
+export const checkIfPopupMessagesContainCustomNotifications = (policy: PolicyConfig): boolean => {
+  const popupRefs = getPolicyPopupReference();
+
+  return popupRefs.some(({ keyPath, osList }) => {
+    return osList.some((osValue) => {
+      const fullKeyPathForOs = `${osValue}.${keyPath}`;
+      const currentValue = get(policy, fullKeyPathForOs);
+      return currentValue !== '' && currentValue !== DefaultPolicyNotificationMessage;
+    });
+  });
+};
+
+export const resetCustomNotifications = (
+  customNotification = DefaultPolicyNotificationMessage
+): Partial<PolicyConfig> => {
+  const popupRefs = getPolicyPopupReference();
+
+  return popupRefs.reduce((acc, { keyPath, osList }) => {
+    osList.forEach((osValue) => {
+      set(acc, `${osValue}.${keyPath}`, customNotification);
+    });
+    return acc;
+  }, {});
 };

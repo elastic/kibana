@@ -74,16 +74,29 @@ export { analyzeMarkdown } from './impl/assistant/use_conversation/helpers';
 /** Default Elastic AI Assistant logo, can be removed once included in EUI **/
 export { AssistantAvatar } from './impl/assistant/assistant_avatar/assistant_avatar';
 
+export { ConnectorSelectorInline } from './impl/connectorland/connector_selector_inline/connector_selector_inline';
+
+export {
+  /** The Attack discovery local storage key */
+  ATTACK_DISCOVERY_STORAGE_KEY,
+  DEFAULT_ASSISTANT_NAMESPACE,
+  /** The default maximum number of alerts to be sent as context when generating Attack discoveries */
+  DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS,
+  DEFAULT_LATEST_ALERTS,
+  DEFEND_INSIGHTS_STORAGE_KEY,
+  KNOWLEDGE_BASE_LOCAL_STORAGE_KEY,
+  /** The local storage key that specifies the maximum number of alerts to send as context */
+  MAX_ALERTS_LOCAL_STORAGE_KEY,
+  /** The local storage key that specifies whether the settings tour should be shown */
+  SHOW_SETTINGS_TOUR_LOCAL_STORAGE_KEY,
+} from './impl/assistant_context/constants';
+
+export { useLoadConnectors } from './impl/connectorland/use_load_connectors';
+
 export {
   ELASTIC_AI_ASSISTANT_TITLE,
   WELCOME_CONVERSATION_TITLE,
 } from './impl/assistant/use_conversation/translations';
-
-/** i18n translations of system prompts */
-export * as SYSTEM_PROMPTS from './impl/content/prompts/system/translations';
-
-/** i18n translations of user prompts */
-export * as USER_PROMPTS from './impl/content/prompts/user/translations';
 
 export type {
   /** for rendering results in a code block */
@@ -99,12 +112,11 @@ export type {
   AssistantTelemetry,
   /** Conversation Interface */
   Conversation,
-  /** Message Interface */
-  Message,
+  /** Message interface on the client */
+  ClientMessage,
+  /** Function type to return messages UI */
+  GetAssistantMessages,
 } from './impl/assistant_context/types';
-
-/** Interface for defining system/user prompts */
-export type { Prompt } from './impl/assistant/types';
 
 /**
  * This interface is used to pass context to the assistant,
@@ -128,21 +140,24 @@ export type { PromptContext } from './impl/assistant/prompt_context/types';
  */
 export type { PromptContextTemplate } from './impl/assistant/prompt_context/types';
 
-/**
- * This interface is used to pass a default or base set of Quick Prompts to the Elastic Assistant that
- * can be displayed when corresponding PromptContext's are registered.
- */
-export type { QuickPrompt } from './impl/assistant/quick_prompts/types';
-
-/**
- * Knowledge Base API Responses
- */
-export type { DeleteKnowledgeBaseResponse } from './impl/assistant/api';
-export type { GetKnowledgeBaseStatusResponse } from './impl/assistant/api';
-export type { PostKnowledgeBaseResponse } from './impl/assistant/api';
-
 export { useFetchCurrentUserConversations } from './impl/assistant/api/conversations/use_fetch_current_user_conversations';
-export * from './impl/assistant/api/conversations/use_bulk_actions_conversations';
+export * from './impl/assistant/api/conversations/bulk_update_actions_conversations';
 export { getConversationById } from './impl/assistant/api/conversations/conversations';
 
 export { mergeBaseWithPersistedConversations } from './impl/assistant/helpers';
+
+export { UpgradeButtons } from './impl/upgrade/upgrade_buttons';
+export { getUserConversations, getPrompts, bulkUpdatePrompts } from './impl/assistant/api';
+
+export {
+  /** A range slider component, typically used to configure the number of alerts sent as context */
+  AlertsRange,
+  /** This event occurs when the `AlertsRange` slider is changed */
+  type SingleRangeChangeEvent,
+} from './impl/knowledge_base/alerts_range';
+export {
+  /** A label instructing the user to send fewer alerts */
+  SELECT_FEWER_ALERTS,
+  /** Your anonymization settings will apply to these alerts (label) */
+  YOUR_ANONYMIZATION_SETTINGS,
+} from './impl/knowledge_base/translations';

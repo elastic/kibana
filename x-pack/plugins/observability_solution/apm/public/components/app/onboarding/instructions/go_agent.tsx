@@ -10,16 +10,11 @@ import { EuiCodeBlock, EuiMarkdownFormat, EuiSpacer } from '@elastic/eui';
 import { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 import React from 'react';
 import { AgentConfigInstructions } from '../agent_config_instructions';
-import {
-  INSTRUCTION_VARIANT,
-  AgentInstructions,
-} from '../instruction_variants';
+import { INSTRUCTION_VARIANT, AgentInstructions } from '../instruction_variants';
 import { ApiKeyCallout } from './api_key_callout';
 import { agentStatusCheckInstruction } from '../agent_status_instructions';
 
-export const createGoAgentInstructions = (
-  commonOptions: AgentInstructions
-): EuiStepProps[] => {
+export const createGoAgentInstructions = (commonOptions: AgentInstructions): EuiStepProps[] => {
   const {
     baseUrl,
     apmServerUrl,

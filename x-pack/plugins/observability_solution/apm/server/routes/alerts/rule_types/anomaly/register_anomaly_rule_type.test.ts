@@ -35,17 +35,13 @@ describe('Transaction duration anomaly alert', () => {
 
       await executor({ params });
 
-      expect(
-        services.scopedClusterClient.asCurrentUser.search
-      ).not.toHaveBeenCalled();
+      expect(services.scopedClusterClient.asCurrentUser.search).not.toHaveBeenCalled();
 
-      expect(services.alertFactory.create).not.toHaveBeenCalled();
+      expect(services.alertsClient.report).not.toHaveBeenCalled();
     });
 
     it('ml jobs are not available', async () => {
-      jest
-        .spyOn(GetServiceAnomalies, 'getMLJobs')
-        .mockReturnValue(Promise.resolve([]));
+      jest.spyOn(GetServiceAnomalies, 'getMLJobs').mockReturnValue(Promise.resolve([]));
 
       const { services, dependencies, executor } = createRuleTypeMocks();
 
@@ -65,11 +61,9 @@ describe('Transaction duration anomaly alert', () => {
       };
 
       await executor({ params });
-      expect(
-        services.scopedClusterClient.asCurrentUser.search
-      ).not.toHaveBeenCalled();
+      expect(services.scopedClusterClient.asCurrentUser.search).not.toHaveBeenCalled();
 
-      expect(services.alertFactory.create).not.toHaveBeenCalled();
+      expect(services.alertsClient.report).not.toHaveBeenCalled();
     });
 
     it('anomaly is less than threshold', async () => {
@@ -102,9 +96,7 @@ describe('Transaction duration anomaly alert', () => {
                           metrics: {
                             record_score: 0,
                             job_id: '1',
-                            detector_index: getAnomalyDetectorIndex(
-                              AnomalyDetectorType.txLatency
-                            ),
+                            detector_index: getAnomalyDetectorIndex(AnomalyDetectorType.txLatency),
                           },
                         },
                       ],
@@ -132,10 +124,8 @@ describe('Transaction duration anomaly alert', () => {
 
       await executor({ params });
 
-      expect(
-        services.scopedClusterClient.asCurrentUser.search
-      ).not.toHaveBeenCalled();
-      expect(services.alertFactory.create).not.toHaveBeenCalled();
+      expect(services.scopedClusterClient.asCurrentUser.search).not.toHaveBeenCalled();
+      expect(services.alertsClient.report).not.toHaveBeenCalled();
     });
   });
 
@@ -154,8 +144,9 @@ describe('Transaction duration anomaly alert', () => {
         ] as unknown as ApmMlJob[])
       );
 
-      const { services, dependencies, executor, scheduleActions } =
-        createRuleTypeMocks();
+      const { services, dependencies, executor } = createRuleTypeMocks();
+
+      services.alertsClient.report.mockReturnValue({ uuid: 'test-uuid' });
 
       const ml = {
         mlSystemProvider: () => ({
@@ -173,9 +164,7 @@ describe('Transaction duration anomaly alert', () => {
                             job_id: '1',
                             partition_field_value: 'foo',
                             by_field_value: 'type-foo',
-                            detector_index: getAnomalyDetectorIndex(
-                              AnomalyDetectorType.txLatency
-                            ),
+                            detector_index: getAnomalyDetectorIndex(AnomalyDetectorType.txLatency),
                           },
                         },
                       ],
@@ -191,9 +180,7 @@ describe('Transaction duration anomaly alert', () => {
                             job_id: '2',
                             parttition_field_value: 'bar',
                             by_field_value: 'type-bar',
-                            detector_index: getAnomalyDetectorIndex(
-                              AnomalyDetectorType.txLatency
-                            ),
+                            detector_index: getAnomalyDetectorIndex(AnomalyDetectorType.txLatency),
                           },
                         },
                       ],
@@ -221,23 +208,38 @@ describe('Transaction duration anomaly alert', () => {
 
       await executor({ params });
 
-      expect(services.alertFactory.create).toHaveBeenCalledTimes(1);
+      expect(services.alertsClient.report).toHaveBeenCalledTimes(1);
 
-      expect(services.alertFactory.create).toHaveBeenCalledWith(
-        'apm.anomaly_foo_development_type-foo'
-      );
+      expect(services.alertsClient.report).toHaveBeenCalledWith({
+        actionGroup: 'threshold_met',
+        id: 'apm.anomaly_foo_development_type-foo',
+      });
 
-      expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
-        serviceName: 'foo',
-        transactionType: 'type-foo',
-        environment: 'development',
-        threshold: 'minor',
-        triggerValue: 'critical',
-        reason:
-          'critical latency anomaly with a score of 80, was detected in the last 5 mins for foo.',
-        viewInAppUrl:
-          'http://localhost:5601/eyr/app/apm/services/foo?transactionType=type-foo&environment=development',
-        alertDetailsUrl: 'mockedAlertsLocator > getLocation',
+      expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
+        context: {
+          alertDetailsUrl: 'http://localhost:5601/eyr/app/observability/alerts/test-uuid',
+          environment: 'development',
+          reason:
+            'critical latency anomaly with a score of 80, was detected in the last 5 mins for foo.',
+          serviceName: 'foo',
+          threshold: 'minor',
+          transactionType: 'type-foo',
+          triggerValue: 'critical',
+          viewInAppUrl:
+            'http://localhost:5601/eyr/app/apm/services/foo?transactionType=type-foo&environment=development',
+        },
+        id: 'apm.anomaly_foo_development_type-foo',
+        payload: {
+          'kibana.alert.evaluation.threshold': 25,
+          'kibana.alert.evaluation.value': 80,
+          'kibana.alert.reason':
+            'critical latency anomaly with a score of 80, was detected in the last 5 mins for foo.',
+          'kibana.alert.severity': 'critical',
+          'processor.event': 'transaction',
+          'service.environment': 'development',
+          'service.name': 'foo',
+          'transaction.type': 'type-foo',
+        },
       });
     });
   });

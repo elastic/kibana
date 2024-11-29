@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Tag } from './types';
+import type { Tag } from './types';
 
 export const tagNameMinLength = 2;
 export const tagNameMaxLength = 50;

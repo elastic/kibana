@@ -9,7 +9,7 @@ import { useConversation } from '.';
 import { act, renderHook } from '@testing-library/react-hooks';
 import { TestProviders } from '../../mock/test_providers/test_providers';
 import React from 'react';
-import { ConversationRole } from '../../assistant_context/types';
+import { MessageRole } from '@kbn/elastic-assistant-common';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { WELCOME_CONVERSATION } from './sample_conversations';
 import {
@@ -21,12 +21,12 @@ import {
 jest.mock('../api/conversations');
 const message = {
   content: 'You are a robot',
-  role: 'user' as ConversationRole,
+  role: 'user' as MessageRole,
   timestamp: '10/04/2023, 1:00:36 PM',
 };
 const anotherMessage = {
   content: 'I am a robot',
-  role: 'assistant' as ConversationRole,
+  role: 'assistant' as MessageRole,
   timestamp: '10/04/2023, 1:00:46 PM',
 };
 
@@ -36,7 +36,7 @@ const mockConvo = {
   messages: [message, anotherMessage],
   apiConfig: {
     connectorId: '123',
-    connectorTypeTitle: 'OpenAI',
+    actionTypeId: '.gen-ai',
     defaultSystemPromptId: 'default-system-prompt',
   },
 };
@@ -56,7 +56,7 @@ describe('useConversation', () => {
   it('should create a new conversation when called with valid conversationId and message', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(() => useConversation(), {
-        wrapper: ({ children }) => (
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
           <TestProviders providerContext={{ http: httpMock }}>{children}</TestProviders>
         ),
       });
@@ -64,14 +64,8 @@ describe('useConversation', () => {
       createConversation.mockResolvedValue(mockConvo);
 
       const createResult = await result.current.createConversation({
-        id: mockConvo.id,
-        messages: mockConvo.messages,
-        replacements: [],
-        apiConfig: {
-          connectorId: '123',
-          connectorTypeTitle: 'OpenAI',
-          defaultSystemPromptId: 'default-system-prompt',
-        },
+        ...mockConvo,
+        replacements: {},
         title: mockConvo.title,
         category: 'assistant',
       });
@@ -83,7 +77,7 @@ describe('useConversation', () => {
   it('should delete an existing conversation when called with valid conversationId', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(() => useConversation(), {
-        wrapper: ({ children }) => (
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
           <TestProviders providerContext={{ http: httpMock }}>{children}</TestProviders>
         ),
       });
@@ -101,7 +95,7 @@ describe('useConversation', () => {
   it('should update the apiConfig for an existing conversation when called with a valid conversationId and apiConfig', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(() => useConversation(), {
-        wrapper: ({ children }) => (
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
           <TestProviders providerContext={{ http: httpMock }}>{children}</TestProviders>
         ),
       });
@@ -122,7 +116,7 @@ describe('useConversation', () => {
   it('should remove the last message from a conversation when called with valid conversationId', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(() => useConversation(), {
-        wrapper: ({ children }) => (
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
           <TestProviders providerContext={{ http: httpMock }}>{children}</TestProviders>
         ),
       });

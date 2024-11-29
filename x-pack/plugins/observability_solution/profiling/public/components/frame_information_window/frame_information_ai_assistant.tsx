@@ -8,6 +8,7 @@
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { Message } from '@kbn/observability-ai-assistant-plugin/public';
+import { EuiFlexItem } from '@elastic/eui';
 import { Frame } from '.';
 import { useProfilingDependencies } from '../contexts/profiling_dependencies/use_profiling_dependencies';
 
@@ -16,24 +17,19 @@ interface Props {
 }
 
 export function FrameInformationAIAssistant({ frame }: Props) {
-  const {
-    observabilityAIAssistant: {
-      ObservabilityAIAssistantContextualInsight,
-      getContextualInsightMessages,
-    },
-  } = useProfilingDependencies().start;
+  const { observabilityAIAssistant } = useProfilingDependencies().start;
 
   const promptMessages = useMemo<Message[] | undefined>(() => {
-    if (frame?.functionName && frame.exeFileName) {
+    if (observabilityAIAssistant && frame?.functionName && frame.exeFileName) {
       const functionName = frame.functionName;
       const library = frame.exeFileName;
 
-      return getContextualInsightMessages({
+      return observabilityAIAssistant.getContextualInsightMessages({
         message: `I am trying to understand what this function does. Can you help me?`,
         instructions: `The library is: ${library}
         The function is: ${functionName}
 
-        Your have two tasks. Your first task is to desribe what the library is and what its use cases are, and to
+        You have two tasks. Your first task is to desribe what the library is and what its use cases are, and to
         describe what the function does. The output format should look as follows:
 
         Library description: Provide a concise description of the library
@@ -78,17 +74,19 @@ export function FrameInformationAIAssistant({ frame }: Props) {
     }
 
     return undefined;
-  }, [frame?.functionName, frame?.exeFileName, getContextualInsightMessages]);
+  }, [frame?.functionName, frame?.exeFileName, observabilityAIAssistant]);
 
   return (
     <>
-      {ObservabilityAIAssistantContextualInsight && promptMessages ? (
-        <ObservabilityAIAssistantContextualInsight
-          messages={promptMessages}
-          title={i18n.translate('xpack.profiling.frameInformationWindow.optimizeFunction', {
-            defaultMessage: 'Optimize function',
-          })}
-        />
+      {observabilityAIAssistant?.ObservabilityAIAssistantContextualInsight && promptMessages ? (
+        <EuiFlexItem>
+          <observabilityAIAssistant.ObservabilityAIAssistantContextualInsight
+            messages={promptMessages}
+            title={i18n.translate('xpack.profiling.frameInformationWindow.optimizeFunction', {
+              defaultMessage: 'Optimize function',
+            })}
+          />
+        </EuiFlexItem>
       ) : null}
     </>
   );

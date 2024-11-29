@@ -10,6 +10,7 @@ import type { FC } from 'react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { Redirect } from 'react-router-dom';
+import { dynamic } from '@kbn/shared-ux-utility';
 import { DataSourceContextProvider } from '../../../contexts/ml/data_source_context';
 import type { NavigateToPath } from '../../../contexts/kibana';
 import { useMlKibana } from '../../../contexts/kibana';
@@ -17,9 +18,7 @@ import { basicResolvers } from '../../resolvers';
 import type { MlRoute, PageProps } from '../../router';
 import { createPath, PageLoader } from '../../router';
 import { useRouteResolver } from '../../use_resolver';
-import { Page } from '../../../jobs/new_job/pages/new_job';
 import { JOB_TYPE } from '../../../../../common/constants/new_job';
-import { mlJobService } from '../../../services/job_service';
 import {
   loadNewJobCapabilities,
   ANOMALY_DETECTOR,
@@ -32,6 +31,10 @@ import { ML_PAGES } from '../../../../../common/constants/locator';
 interface WizardPageProps extends PageProps {
   jobType: JOB_TYPE;
 }
+
+const Page = dynamic(async () => ({
+  default: (await import('../../../jobs/new_job/pages/new_job')).Page,
+}));
 
 const getBaseBreadcrumbs = (navigateToPath: NavigateToPath, basePath: string) => [
   getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
@@ -202,22 +205,23 @@ const PageWrapper: FC<WizardPageProps> = ({ location, jobType }) => {
     services: {
       data: { dataViews: dataViewsService },
       savedSearch: savedSearchService,
+      mlServices: { mlApi },
     },
   } = useMlKibana();
-
   const { context, results } = useRouteResolver('full', ['canGetJobs', 'canCreateJob'], {
     ...basicResolvers(),
     // TODO useRouteResolver should be responsible for the redirect
-    privileges: () => checkCreateJobsCapabilitiesResolver(redirectToJobsManagementPage),
+    privileges: () => checkCreateJobsCapabilitiesResolver(mlApi, redirectToJobsManagementPage),
     jobCaps: () =>
       loadNewJobCapabilities(
         index,
         savedSearchId,
+        mlApi,
         dataViewsService,
         savedSearchService,
         ANOMALY_DETECTOR
       ),
-    existingJobsAndGroups: mlJobService.getJobAndGroupIds,
+    existingJobsAndGroups: () => mlApi.jobs.getAllJobAndGroupIds(),
   });
 
   return (

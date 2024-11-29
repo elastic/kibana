@@ -6,15 +6,11 @@
  */
 
 import { journey, step, before, after } from '@elastic/synthetics';
-import { recordVideo } from '../../helpers/record_video';
 import { syntheticsAppPageProvider } from '../page_objects/synthetics_app';
 import { SyntheticsServices } from './services/synthetics_services';
 
 journey(`StepDetailsPage`, async ({ page, params }) => {
-  recordVideo(page);
-
-  page.setDefaultTimeout(60 * 1000);
-  const syntheticsApp = syntheticsAppPageProvider({ page, kibanaUrl: params.kibanaUrl });
+  const syntheticsApp = syntheticsAppPageProvider({ page, kibanaUrl: params.kibanaUrl, params });
 
   const services = new SyntheticsServices(params);
 

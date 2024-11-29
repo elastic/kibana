@@ -20,12 +20,10 @@ export function fromESFormat(customLinkES: CustomLinkES): CustomLink {
     '@timestamp': timestamp,
     label,
     url,
-    filters: Object.entries(filters).map(
-      ([key, value]: [string, string[]]) => ({
-        key: key as FilterKey,
-        value: isEmpty(value) ? '' : value.join(),
-      })
-    ),
+    filters: Object.entries(filters).map(([key, value]: [string, string[]]) => ({
+      key: key as FilterKey,
+      value: isEmpty(value) ? '' : value.join(),
+    })),
   };
 }
 

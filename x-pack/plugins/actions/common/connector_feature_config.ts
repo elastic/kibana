@@ -27,6 +27,7 @@ export const UptimeConnectorFeatureId = 'uptime';
 export const SecurityConnectorFeatureId = 'siem';
 export const GenerativeAIForSecurityConnectorFeatureId = 'generativeAIForSecurity';
 export const GenerativeAIForObservabilityConnectorFeatureId = 'generativeAIForObservability';
+export const GenerativeAIForSearchPlaygroundConnectorFeatureId = 'generativeAIForSearchPlayground';
 
 const compatibilityGenerativeAIForSecurity = i18n.translate(
   'xpack.actions.availableConnectorFeatures.compatibility.generativeAIForSecurity',
@@ -42,10 +43,23 @@ const compatibilityGenerativeAIForObservability = i18n.translate(
   }
 );
 
+const compatibilityGenerativeAIForSearchPlayground = i18n.translate(
+  'xpack.actions.availableConnectorFeatures.compatibility.generativeAIForSearchPlayground',
+  {
+    defaultMessage: 'Generative AI for Search',
+  }
+);
+
 const compatibilityAlertingRules = i18n.translate(
   'xpack.actions.availableConnectorFeatures.compatibility.alertingRules',
   {
     defaultMessage: 'Alerting Rules',
+  }
+);
+const compatibilitySecuritySolution = i18n.translate(
+  'xpack.actions.availableConnectorFeatures.compatibility.securitySolution',
+  {
+    defaultMessage: 'Security Solution',
   }
 );
 
@@ -85,7 +99,7 @@ export const SecuritySolutionFeature: ConnectorFeatureConfig = {
   name: i18n.translate('xpack.actions.availableConnectorFeatures.securitySolution', {
     defaultMessage: 'Security Solution',
   }),
-  compatibility: compatibilityAlertingRules,
+  compatibility: compatibilitySecuritySolution,
 };
 
 export const GenerativeAIForSecurityFeature: ConnectorFeatureConfig = {
@@ -100,6 +114,12 @@ export const GenerativeAIForObservabilityFeature: ConnectorFeatureConfig = {
   compatibility: compatibilityGenerativeAIForObservability,
 };
 
+export const GenerativeAIForSearchPlaygroundFeature: ConnectorFeatureConfig = {
+  id: GenerativeAIForSearchPlaygroundConnectorFeatureId,
+  name: compatibilityGenerativeAIForSearchPlayground,
+  compatibility: compatibilityGenerativeAIForSearchPlayground,
+};
+
 const AllAvailableConnectorFeatures = {
   [AlertingConnectorFeature.id]: AlertingConnectorFeature,
   [CasesConnectorFeature.id]: CasesConnectorFeature,
@@ -107,6 +127,7 @@ const AllAvailableConnectorFeatures = {
   [SecuritySolutionFeature.id]: SecuritySolutionFeature,
   [GenerativeAIForSecurityFeature.id]: GenerativeAIForSecurityFeature,
   [GenerativeAIForObservabilityFeature.id]: GenerativeAIForObservabilityFeature,
+  [GenerativeAIForSearchPlaygroundFeature.id]: GenerativeAIForSearchPlaygroundFeature,
 };
 
 export function areValidFeatures(ids: string[]) {

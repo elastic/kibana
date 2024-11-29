@@ -12,26 +12,24 @@ import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { isTab } from '@kbn/timelines-plugin/public';
-import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { timelineActions, timelineSelectors } from '../../store';
 import { timelineDefaults } from '../../store/defaults';
-import { defaultHeaders } from './body/column_headers/default_headers';
 import type { CellValueElementProps } from './cell_rendering';
-import { SourcererScopeName } from '../../../common/store/sourcerer/model';
+import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { TimelineModalHeader } from '../modal/header';
-import type { TimelineId, RowRenderer, TimelineTabs } from '../../../../common/types/timeline';
-import { TimelineType } from '../../../../common/api/timeline';
+import type { TimelineId, RowRenderer } from '../../../../common/types/timeline';
+import { TimelineTypeEnum } from '../../../../common/api/timeline';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import type { State } from '../../../common/store';
 import { EVENTS_COUNT_BUTTON_CLASS_NAME, onTimelineTabKeyPressed } from './helpers';
 import * as i18n from './translations';
-import { TabsContent } from './tabs_content';
+import { TabsContent } from './tabs';
 import { HideShowContainer, TimelineContainer } from './styles';
 import { useTimelineFullScreen } from '../../../common/containers/use_full_screen';
 import { EXIT_FULL_SCREEN_CLASS_NAME } from '../../../common/components/exit_full_screen';
 import { useResolveConflict } from '../../../common/hooks/use_resolve_conflict';
 import { sourcererSelectors } from '../../../common/store';
-import { TimelineTour } from './tour';
+import { defaultUdtHeaders } from './body/column_headers/default_headers';
 
 const TimelineTemplateBadge = styled.div`
   background: ${({ theme }) => theme.eui.euiColorVis3_behindText};
@@ -72,6 +70,7 @@ const StatefulTimelineComponent: React.FC<Props> = ({
   openToggleRef,
 }) => {
   const dispatch = useDispatch();
+
   const containerElement = useRef<HTMLDivElement | null>(null);
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const selectedPatternsSourcerer = useSelector((state: State) => {
@@ -89,9 +88,6 @@ const StatefulTimelineComponent: React.FC<Props> = ({
     description,
     sessionViewConfig,
     initialized,
-    show: isOpen,
-    isLoading,
-    activeTab,
   } = useDeepEqualSelector((state) =>
     pick(
       [
@@ -104,16 +100,11 @@ const StatefulTimelineComponent: React.FC<Props> = ({
         'sessionViewConfig',
         'initialized',
         'show',
-        'isLoading',
         'activeTab',
       ],
       getTimeline(state, timelineId) ?? timelineDefaults
     )
   );
-
-  const {
-    kibanaSecuritySolutionsPrivileges: { crud: canEditTimeline },
-  } = useUserPrivileges();
 
   const { timelineFullScreen } = useTimelineFullScreen();
 
@@ -122,10 +113,11 @@ const StatefulTimelineComponent: React.FC<Props> = ({
       dispatch(
         timelineActions.createTimeline({
           id: timelineId,
-          columns: defaultHeaders,
+          columns: defaultUdtHeaders,
           dataViewId: selectedDataViewIdSourcerer,
           indexNames: selectedPatternsSourcerer,
           show: false,
+          excludedRowRendererIds: timelineDefaults.excludedRowRendererIds,
         })
       );
     }
@@ -203,20 +195,6 @@ const StatefulTimelineComponent: React.FC<Props> = ({
   const timelineContext = useMemo(() => ({ timelineId }), [timelineId]);
   const resolveConflictComponent = useResolveConflict();
 
-  const showTimelineTour = isOpen && !isLoading && canEditTimeline;
-
-  const handleSwitchToTab = useCallback(
-    (tab: TimelineTabs) => {
-      dispatch(
-        timelineActions.setActiveTabTimeline({
-          id: timelineId,
-          activeTab: tab,
-        })
-      );
-    },
-    [timelineId, dispatch]
-  );
-
   return (
     <TimelineContext.Provider value={timelineContext}>
       <TimelineContainer
@@ -227,7 +205,7 @@ const StatefulTimelineComponent: React.FC<Props> = ({
       >
         <TimelineSavingProgress timelineId={timelineId} />
         <TimelineBody data-test-subj="timeline-body">
-          {timelineType === TimelineType.template && (
+          {timelineType === TimelineTypeEnum.template && (
             <TimelineTemplateBadge className="timeline-template-badge">
               {i18n.TIMELINE_TEMPLATE}
             </TimelineTemplateBadge>
@@ -252,13 +230,6 @@ const StatefulTimelineComponent: React.FC<Props> = ({
           />
         </TimelineBody>
       </TimelineContainer>
-      {showTimelineTour ? (
-        <TimelineTour
-          activeTab={activeTab}
-          switchToTab={handleSwitchToTab}
-          timelineType={timelineType}
-        />
-      ) : null}
     </TimelineContext.Provider>
   );
 };

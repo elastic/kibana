@@ -9,6 +9,12 @@ import { schema } from '@kbn/config-schema';
 
 export const PostHealthCheckRequestSchema = {
   body: schema.object({
-    host: schema.uri({ scheme: ['http', 'https'] }),
+    id: schema.string(),
   }),
 };
+
+export const PostHealthCheckResponseSchema = schema.object({
+  status: schema.string(),
+  name: schema.maybe(schema.string()),
+  host_id: schema.maybe(schema.string()),
+});

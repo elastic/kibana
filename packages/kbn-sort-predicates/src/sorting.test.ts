@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { getSortingCriteria } from './sorting';
@@ -46,6 +47,56 @@ function testSorting({
 }
 
 describe('Data sorting criteria', () => {
+  describe('null rows', () => {
+    // in these tests it needs to skip the testSorting utility in order to pass null rows
+    // mind that [].sort() will never pass `undefined` values to the comparison function
+    // so we test it with null values instead
+    it('should not crash with null rows with strings', () => {
+      const datatable = ['a', 'b', 'c', 'd', '12'];
+      const datatableWithNulls = datatable.flatMap((v) => [{ a: v }, null]);
+      const criteria = getSortingCriteria('string', 'a', getMockFormatter());
+      expect(
+        datatableWithNulls
+          .sort((a, b) => criteria(a, b, 'asc'))
+          .map((row) => (row == null ? row : row.a))
+      ).toEqual(['12', 'a', 'b', 'c', 'd', ...Array(datatable.length).fill(null)]);
+      expect(
+        datatableWithNulls
+          .sort((a, b) => criteria(a, b, 'desc'))
+          .map((row) => (row == null ? row : row.a))
+      ).toEqual(['d', 'c', 'b', 'a', '12', ...Array(datatable.length).fill(null)]);
+    });
+
+    it('should not crash with null rows with version', () => {
+      const datatable = ['1.21.0', '1.1.0', '1.112.0', '1.0.0', '__other__'];
+      const datatableWithNulls = datatable.flatMap((v) => [{ a: v }, null]);
+      const criteria = getSortingCriteria('version', 'a', getMockFormatter());
+      expect(
+        datatableWithNulls
+          .sort((a, b) => criteria(a, b, 'asc'))
+          .map((row) => (row == null ? row : row.a))
+      ).toEqual([
+        '1.0.0',
+        '1.1.0',
+        '1.21.0',
+        '1.112.0',
+        ...Array(datatable.length).fill(null),
+        '__other__',
+      ]);
+      expect(
+        datatableWithNulls
+          .sort((a, b) => criteria(a, b, 'desc'))
+          .map((row) => (row == null ? row : row.a))
+      ).toEqual([
+        '1.112.0',
+        '1.21.0',
+        '1.1.0',
+        '1.0.0',
+        ...Array(datatable.length).fill(null),
+        '__other__',
+      ]);
+    });
+  });
   describe('Date values', () => {
     for (const direction of ['asc', 'desc'] as const) {
       it(`should provide the date criteria for date values (${direction})`, () => {
@@ -229,7 +280,7 @@ describe('Data sorting criteria', () => {
     it('should sort non-version stuff to the end', () => {
       testSorting({
         input: ['1.21.0', undefined, '1.1.0', null, '1.112.0', '__other__', '1.0.0'],
-        output: ['1.0.0', '1.1.0', '1.21.0', '1.112.0', undefined, null, '__other__'],
+        output: ['1.0.0', '1.1.0', '1.21.0', '1.112.0', null, undefined, '__other__'],
         direction: 'asc',
         type: 'version',
         reverseOutput: false,
@@ -237,7 +288,7 @@ describe('Data sorting criteria', () => {
 
       testSorting({
         input: ['1.21.0', undefined, '1.1.0', null, '1.112.0', '__other__', '1.0.0'],
-        output: ['1.112.0', '1.21.0', '1.1.0', '1.0.0', undefined, null, '__other__'],
+        output: ['1.112.0', '1.21.0', '1.1.0', '1.0.0', null, undefined, '__other__'],
         direction: 'desc',
         type: 'version',
         reverseOutput: false,

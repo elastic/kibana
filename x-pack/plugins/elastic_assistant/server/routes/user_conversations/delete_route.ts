@@ -7,13 +7,14 @@
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
-  ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID,
   DeleteConversationRequestParams,
+  API_VERSIONS,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { ElasticAssistantPluginRouter } from '../../types';
 import { buildResponse } from '../utils';
+import { performChecks } from '../helpers';
 
 export const deleteConversationRoute = (router: ElasticAssistantPluginRouter) => {
   router.versioned
@@ -26,7 +27,7 @@ export const deleteConversationRoute = (router: ElasticAssistantPluginRouter) =>
     })
     .addVersion(
       {
-        version: ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
+        version: API_VERSIONS.public.v1,
         validate: {
           request: {
             params: buildRouteValidationWithZod(DeleteConversationRequestParams),
@@ -38,16 +39,19 @@ export const deleteConversationRoute = (router: ElasticAssistantPluginRouter) =>
         try {
           const { id } = request.params;
 
-          const ctx = await context.resolve(['core', 'elasticAssistant']);
+          const ctx = await context.resolve(['core', 'elasticAssistant', 'licensing']);
+          const checkResponse = performChecks({
+            context: ctx,
+            request,
+            response,
+          });
+          if (!checkResponse.isSuccess) {
+            return checkResponse.response;
+          }
           const dataClient = await ctx.elasticAssistant.getAIAssistantConversationsDataClient();
 
-          const authenticatedUser = ctx.elasticAssistant.getCurrentUser();
-          if (authenticatedUser == null) {
-            return assistantResponse.error({
-              body: `Authenticated user not found`,
-              statusCode: 401,
-            });
-          }
+          const authenticatedUser = checkResponse.currentUser;
+
           const existingConversation = await dataClient?.getConversation({ id, authenticatedUser });
           if (existingConversation == null) {
             return assistantResponse.error({

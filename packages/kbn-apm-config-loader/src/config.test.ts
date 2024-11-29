@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import type { AgentConfigOptions, Labels } from 'elastic-apm-node';
 import {
   packageMock,
@@ -146,11 +148,41 @@ describe('ApmConfiguration', () => {
     );
   });
 
+  it('flattens the `globalLabels` object', () => {
+    const kibanaConfig = {
+      elastic: {
+        apm: {
+          globalLabels: {
+            keyOne: 'k1',
+            objectOne: {
+              objectOneKeyOne: 'o1k1',
+              objectOneKeyTwo: {
+                objectOneKeyTwoSubkeyOne: 'o1k2s1',
+              },
+            },
+          },
+        },
+      },
+    };
+    const config = new ApmConfiguration(mockedRootDir, kibanaConfig, true);
+    expect(config.getConfig('serviceName')).toEqual(
+      expect.objectContaining({
+        globalLabels: {
+          git_rev: 'sha',
+          keyOne: 'k1',
+          'objectOne.objectOneKeyOne': 'o1k1',
+          'objectOne.objectOneKeyTwo.objectOneKeyTwoSubkeyOne': 'o1k2s1',
+        },
+      })
+    );
+  });
+
   describe('env vars', () => {
     beforeEach(() => {
       delete process.env.ELASTIC_APM_ENVIRONMENT;
       delete process.env.ELASTIC_APM_SECRET_TOKEN;
       delete process.env.ELASTIC_APM_API_KEY;
+      delete process.env.ELASTIC_APM_KIBANA_FRONTEND_ACTIVE;
       delete process.env.ELASTIC_APM_SERVER_URL;
       delete process.env.NODE_ENV;
     });
@@ -183,6 +215,18 @@ describe('ApmConfiguration', () => {
             environment: 'ci',
           })
         );
+      });
+    });
+
+    it('ELASTIC_APM_KIBANA_FRONTEND_ACTIVE', () => {
+      process.env.ELASTIC_APM_KIBANA_FRONTEND_ACTIVE = 'false';
+      const config = new ApmConfiguration(mockedRootDir, {}, false);
+      const serverConfig = config.getConfig('servicesOverrides');
+      // @ts-ignore
+      expect(serverConfig.servicesOverrides).toEqual({
+        'kibana-frontend': {
+          active: false,
+        },
       });
     });
 

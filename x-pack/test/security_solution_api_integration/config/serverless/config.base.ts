@@ -5,19 +5,20 @@
  * 2.0.
  */
 import { FtrConfigProviderContext } from '@kbn/test';
+import { services } from './services';
+import { PRECONFIGURED_ACTION_CONNECTORS } from '../shared';
+
 export interface CreateTestConfigOptions {
   testFiles: string[];
   junit: { reportName: string };
   kbnTestServerArgs?: string[];
   kbnTestServerEnv?: Record<string, string>;
 }
-import { services } from '../../../../test_serverless/api_integration/services';
-import { PRECONFIGURED_ACTION_CONNECTORS } from '../shared';
 
 export function createTestConfig(options: CreateTestConfigOptions) {
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
     const svlSharedConfig = await readConfigFile(
-      require.resolve('../../../../test_serverless/shared/config.base.ts')
+      require.resolve('@kbn/test-suites-serverless/shared/config.base')
     );
     return {
       ...svlSharedConfig.getAll(),
@@ -42,7 +43,7 @@ export function createTestConfig(options: CreateTestConfigOptions) {
 
       mochaOpts: {
         ...svlSharedConfig.get('mochaOpts'),
-        grep: '/^(?!.*@brokenInServerless).*@serverless.*/',
+        grep: '/^(?!.*(^|\\s)@skipInServerless(\\s|$)).*@serverless.*/',
       },
     };
   };

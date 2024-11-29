@@ -21,7 +21,8 @@ The `manage_security` cluster privilege is required to access all Security featu
 [float]
 === Users
 
-To create and manage users, open the main menu, then click *Stack Management > Users*.
+To create and manage users, go to the *Users* management page using the navigation menu or the 
+<<kibana-navigation-search,global search field>>.
 You can also change their passwords and roles. For more information about
 authentication and built-in users, see
 {ref}/setting-up-authentication.html[Setting up user authentication].
@@ -29,8 +30,9 @@ authentication and built-in users, see
 [float]
 === Roles
 
-To manage roles, open the main menu, then click *Stack Management > Roles*, or use
-the <<role-management-api>>. For more information on configuring roles for {kib}, see <<xpack-security-authorization, Granting access to {kib}>>.
+To manage roles, go to the *Roles* management page using the navigation menu or the 
+<<kibana-navigation-search,global search field>>, or use
+the {api-kibana}/group/endpoint-roles[role APIs]. For more information on configuring roles for {kib}, see <<xpack-security-authorization,Granting access to {kib}>>.
 
 For a more holistic overview of configuring roles for the entire stack,
 see {ref}/authorization.html[User authorization].
@@ -43,6 +45,7 @@ cause Kibana's authorization to behave unexpectedly.
 ============================================================================
 
 include::authorization/index.asciidoc[]
-include::authorization/kibana-privileges.asciidoc[]
+include::authorization/kibana-privileges.asciidoc[leveloffset=+2]
 include::api-keys/index.asciidoc[]
 include::role-mappings/index.asciidoc[]
+include::fips-140-2.asciidoc[]

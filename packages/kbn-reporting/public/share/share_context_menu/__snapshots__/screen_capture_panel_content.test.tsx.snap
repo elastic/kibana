@@ -9,16 +9,14 @@ exports[`ScreenCapturePanelContent properly renders a view with "canvas" layout 
     class="euiText emotion-euiText-s"
   >
     <p>
-      <span>
-        Analytical Apps can take a minute or two to generate based upon the size of your test-object-type.
-      </span>
+      Analytical Apps can take a minute or two to generate based upon the size of your test-object-type.
     </p>
   </div>
   <div
     class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
   />
   <div
-    class="euiFormRow"
+    class="euiFormRow emotion-euiFormRow"
     id="generated-id-row"
   >
     <div
@@ -31,48 +29,42 @@ exports[`ScreenCapturePanelContent properly renders a view with "canvas" layout 
           aria-checked="false"
           aria-describedby="generated-id-help-0"
           aria-labelledby="generated-id"
-          class="euiSwitch__button"
+          class="euiSwitch__button emotion-euiSwitch__button"
           data-test-subj="reportModeToggle"
           id="generated-id"
           role="switch"
           type="button"
         >
           <span
-            class="euiSwitch__body"
+            class="euiSwitch__body emotion-euiSwitch__body-off"
           >
             <span
-              class="euiSwitch__thumb"
-            />
-            <span
-              class="euiSwitch__track"
+              class="euiSwitch__icons emotion-euiSwitch__icons-off-enabled"
             >
               <span
-                class="euiSwitch__icon"
-                data-euiicon-type="cross"
+                data-euiicon-type="check"
               />
               <span
-                class="euiSwitch__icon euiSwitch__icon--checked"
-                data-euiicon-type="check"
+                data-euiicon-type="cross"
               />
             </span>
           </span>
+          <span
+            class="euiSwitch__thumb emotion-euiSwitch__thumb-off"
+          />
         </button>
         <span
-          class="euiSwitch__label"
+          class="euiSwitch__label emotion-euiSwitch__label"
           id="generated-id"
         >
-          <span>
-            Full page layout
-          </span>
+          Full page layout
         </span>
       </div>
       <div
-        class="euiFormHelpText euiFormRow__text"
+        class="euiFormHelpText euiFormRow__text emotion-euiFormHelpText"
         id="generated-id-help-0"
       >
-        <span>
-          Remove borders and footer logo
-        </span>
+        Remove borders and footer logo
       </div>
     </div>
   </div>
@@ -84,13 +76,11 @@ exports[`ScreenCapturePanelContent properly renders a view with "canvas" layout 
     <span
       class="emotion-euiButtonDisplayContent"
     >
-      <span>
-        Generate Analytical App
-      </span>
+      Generate Analytical App
     </span>
   </button>
   <hr
-    class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginSmall emotion-euiHorizontalRule-full-s"
+    class="euiHorizontalRule emotion-euiHorizontalRule-full-s"
     style="width: auto; margin-left: -16px; margin-right: -16px;"
   />
   <div
@@ -136,7 +126,6 @@ exports[`ScreenCapturePanelContent properly renders a view with "canvas" layout 
       inert=""
       role="group"
       style="block-size: 0;"
-      tabindex="-1"
     >
       <div
         class="euiAccordion__children emotion-euiAccordion__children"
@@ -148,9 +137,7 @@ exports[`ScreenCapturePanelContent properly renders a view with "canvas" layout 
           class="euiText emotion-euiText-s"
         >
           <p>
-            <span>
-              Alternatively, copy this POST URL to call generation from outside Kibana or from Watcher.
-            </span>
+            Alternatively, copy this POST URL to call generation from outside Kibana or from Watcher.
           </p>
         </div>
         <div
@@ -181,9 +168,7 @@ exports[`ScreenCapturePanelContent properly renders a view with "canvas" layout 
               class="euiText emotion-euiText-s"
             >
               <p>
-                <span>
-                  Save your work before copying this URL.
-                </span>
+                Save your work before copying this URL.
               </p>
             </div>
             <div
@@ -206,16 +191,14 @@ exports[`ScreenCapturePanelContent properly renders a view with "print" layout o
     class="euiText emotion-euiText-s"
   >
     <p>
-      <span>
-        Analytical Apps can take a minute or two to generate based upon the size of your test-object-type.
-      </span>
+      Analytical Apps can take a minute or two to generate based upon the size of your test-object-type.
     </p>
   </div>
   <div
     class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
   />
   <div
-    class="euiFormRow"
+    class="euiFormRow emotion-euiFormRow"
     id="generated-id-row"
   >
     <div
@@ -228,48 +211,42 @@ exports[`ScreenCapturePanelContent properly renders a view with "print" layout o
           aria-checked="false"
           aria-describedby="generated-id-help-0"
           aria-labelledby="generated-id"
-          class="euiSwitch__button"
+          class="euiSwitch__button emotion-euiSwitch__button"
           data-test-subj="usePrintLayout"
           id="generated-id"
           role="switch"
           type="button"
         >
           <span
-            class="euiSwitch__body"
+            class="euiSwitch__body emotion-euiSwitch__body-off"
           >
             <span
-              class="euiSwitch__thumb"
-            />
-            <span
-              class="euiSwitch__track"
+              class="euiSwitch__icons emotion-euiSwitch__icons-off-enabled"
             >
               <span
-                class="euiSwitch__icon"
-                data-euiicon-type="cross"
+                data-euiicon-type="check"
               />
               <span
-                class="euiSwitch__icon euiSwitch__icon--checked"
-                data-euiicon-type="check"
+                data-euiicon-type="cross"
               />
             </span>
           </span>
+          <span
+            class="euiSwitch__thumb emotion-euiSwitch__thumb-off"
+          />
         </button>
         <span
-          class="euiSwitch__label"
+          class="euiSwitch__label emotion-euiSwitch__label"
           id="generated-id"
         >
-          <span>
-            Optimize for printing
-          </span>
+          Optimize for printing
         </span>
       </div>
       <div
-        class="euiFormHelpText euiFormRow__text"
+        class="euiFormHelpText euiFormRow__text emotion-euiFormHelpText"
         id="generated-id-help-0"
       >
-        <span>
-          Uses multiple pages, showing at most 2 visualizations per page
-        </span>
+        Uses multiple pages, showing at most 2 visualizations per page
       </div>
     </div>
   </div>
@@ -281,13 +258,11 @@ exports[`ScreenCapturePanelContent properly renders a view with "print" layout o
     <span
       class="emotion-euiButtonDisplayContent"
     >
-      <span>
-        Generate Analytical App
-      </span>
+      Generate Analytical App
     </span>
   </button>
   <hr
-    class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginSmall emotion-euiHorizontalRule-full-s"
+    class="euiHorizontalRule emotion-euiHorizontalRule-full-s"
     style="width: auto; margin-left: -16px; margin-right: -16px;"
   />
   <div
@@ -333,7 +308,6 @@ exports[`ScreenCapturePanelContent properly renders a view with "print" layout o
       inert=""
       role="group"
       style="block-size: 0;"
-      tabindex="-1"
     >
       <div
         class="euiAccordion__children emotion-euiAccordion__children"
@@ -345,9 +319,7 @@ exports[`ScreenCapturePanelContent properly renders a view with "print" layout o
           class="euiText emotion-euiText-s"
         >
           <p>
-            <span>
-              Alternatively, copy this POST URL to call generation from outside Kibana or from Watcher.
-            </span>
+            Alternatively, copy this POST URL to call generation from outside Kibana or from Watcher.
           </p>
         </div>
         <div
@@ -378,9 +350,7 @@ exports[`ScreenCapturePanelContent properly renders a view with "print" layout o
               class="euiText emotion-euiText-s"
             >
               <p>
-                <span>
-                  Save your work before copying this URL.
-                </span>
+                Save your work before copying this URL.
               </p>
             </div>
             <div
@@ -403,9 +373,7 @@ exports[`ScreenCapturePanelContent renders the default view properly 1`] = `
     class="euiText emotion-euiText-s"
   >
     <p>
-      <span>
-        Analytical Apps can take a minute or two to generate based upon the size of your test-object-type.
-      </span>
+      Analytical Apps can take a minute or two to generate based upon the size of your test-object-type.
     </p>
   </div>
   <div
@@ -419,13 +387,11 @@ exports[`ScreenCapturePanelContent renders the default view properly 1`] = `
     <span
       class="emotion-euiButtonDisplayContent"
     >
-      <span>
-        Generate Analytical App
-      </span>
+      Generate Analytical App
     </span>
   </button>
   <hr
-    class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginSmall emotion-euiHorizontalRule-full-s"
+    class="euiHorizontalRule emotion-euiHorizontalRule-full-s"
     style="width: auto; margin-left: -16px; margin-right: -16px;"
   />
   <div
@@ -471,7 +437,6 @@ exports[`ScreenCapturePanelContent renders the default view properly 1`] = `
       inert=""
       role="group"
       style="block-size: 0;"
-      tabindex="-1"
     >
       <div
         class="euiAccordion__children emotion-euiAccordion__children"
@@ -483,9 +448,7 @@ exports[`ScreenCapturePanelContent renders the default view properly 1`] = `
           class="euiText emotion-euiText-s"
         >
           <p>
-            <span>
-              Alternatively, copy this POST URL to call generation from outside Kibana or from Watcher.
-            </span>
+            Alternatively, copy this POST URL to call generation from outside Kibana or from Watcher.
           </p>
         </div>
         <div
@@ -516,9 +479,7 @@ exports[`ScreenCapturePanelContent renders the default view properly 1`] = `
               class="euiText emotion-euiText-s"
             >
               <p>
-                <span>
-                  Save your work before copying this URL.
-                </span>
+                Save your work before copying this URL.
               </p>
             </div>
             <div

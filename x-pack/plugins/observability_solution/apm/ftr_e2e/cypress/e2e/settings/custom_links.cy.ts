@@ -40,48 +40,92 @@ const deleteAllCustomLinks = () => {
 };
 
 describe('Custom links', () => {
-  beforeEach(() => {
-    cy.loginAsEditorUser();
+  before(() => {
     deleteAllCustomLinks();
   });
 
-  it('shows empty message and create button', () => {
-    cy.visitKibana(basePath);
-    cy.contains('No links found');
-    cy.contains('Create custom link');
+  describe('when logged in as a viewer with write settings access', () => {
+    beforeEach(() => {
+      cy.loginAsApmReadPrivilegesWithWriteSettingsUser();
+    });
+
+    it('shows empty message and create button', () => {
+      cy.visitKibana(basePath);
+      cy.contains('No links found');
+      cy.contains('Create custom link').should('be.not.disabled');
+    });
+
+    it('creates custom link', () => {
+      cy.visitKibana(basePath);
+      const emptyPrompt = cy.getByTestSubj('customLinksEmptyPrompt');
+      cy.contains('Create custom link').click();
+      cy.contains('Create link');
+      cy.contains('Save').should('be.disabled');
+      cy.get('input[name="label"]').type('foo');
+      cy.get('input[name="url"]').type('https://foo.com');
+      cy.contains('Save').should('not.be.disabled');
+      cy.contains('Save').click();
+      emptyPrompt.should('not.exist');
+      cy.contains('foo');
+      cy.contains('https://foo.com');
+    });
   });
 
-  it('creates custom link', () => {
-    cy.visitKibana(basePath);
-    const emptyPrompt = cy.getByTestSubj('customLinksEmptyPrompt');
-    cy.contains('Create custom link').click();
-    cy.contains('Create link');
-    cy.contains('Save').should('be.disabled');
-    cy.get('input[name="label"]').type('foo');
-    cy.get('input[name="url"]').type('https://foo.com');
-    cy.contains('Save').should('not.be.disabled');
-    cy.contains('Save').click();
-    emptyPrompt.should('not.exist');
-    cy.contains('foo');
-    cy.contains('https://foo.com');
-    cy.getByTestSubj('editCustomLink').click();
-    cy.contains('Delete').click();
+  describe('when logged in as a viewer', () => {
+    beforeEach(() => {
+      cy.loginAsViewerUser();
+    });
+
+    it('shows disabled create button and edit button', () => {
+      cy.visitKibana(basePath);
+      cy.contains('Create custom link').should('be.disabled');
+      cy.getByTestSubj('editCustomLink').should('not.exist');
+    });
   });
 
-  it('clears filter values when field is selected', () => {
-    cy.visitKibana(basePath);
+  describe('when logged in as an editor without write settings access', () => {
+    beforeEach(() => {
+      cy.loginAsApmAllPrivilegesWithoutWriteSettingsUser();
+    });
 
-    // wait for empty prompt
-    cy.getByTestSubj('customLinksEmptyPrompt').should('be.visible');
+    it('shows disabled create button and edit button', () => {
+      cy.visitKibana(basePath);
+      cy.contains('Create custom link').should('be.disabled');
+      cy.getByTestSubj('editCustomLink').should('not.exist');
+    });
+  });
 
-    cy.contains('Create custom link').click();
-    cy.getByTestSubj('filter-0').select('service.name');
-    cy.get(
-      '[data-test-subj="service.name.value"] [data-test-subj="comboBoxSearchInput"]'
-    ).type('foo');
-    cy.getByTestSubj('filter-0').select('service.environment');
-    cy.get(
-      '[data-test-subj="service.environment.value"] [data-test-subj="comboBoxInput"]'
-    ).should('not.contain', 'foo');
+  describe('when logged in as an editor', () => {
+    beforeEach(() => {
+      cy.loginAsEditorUser();
+    });
+
+    it('shows create button', () => {
+      cy.visitKibana(basePath);
+      cy.contains('Create custom link').should('not.be.disabled');
+    });
+
+    it('deletes custom link', () => {
+      cy.visitKibana(basePath);
+      cy.getByTestSubj('editCustomLink').click();
+      cy.contains('Delete').click();
+    });
+
+    it('clears filter values when field is selected', () => {
+      cy.visitKibana(basePath);
+
+      // wait for empty prompt
+      cy.getByTestSubj('customLinksEmptyPrompt').should('be.visible');
+
+      cy.contains('Create custom link').click();
+      cy.getByTestSubj('filter-0').select('service.name');
+      cy.get('[data-test-subj="service.name.value"] [data-test-subj="comboBoxSearchInput"]').type(
+        'foo'
+      );
+      cy.getByTestSubj('filter-0').select('service.environment');
+      cy.get(
+        '[data-test-subj="service.environment.value"] [data-test-subj="comboBoxInput"]'
+      ).should('not.contain', 'foo');
+    });
   });
 });

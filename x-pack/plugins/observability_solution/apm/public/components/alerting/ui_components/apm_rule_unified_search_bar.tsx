@@ -22,10 +22,7 @@ export function ApmRuleUnifiedSearchBar({
   placeholder?: string;
   value?: string;
   isClearable?: boolean;
-  ruleParams:
-    | TransactionDurationRuleParams
-    | ErrorRateRuleParams
-    | ErrorCountRuleParams;
+  ruleParams: TransactionDurationRuleParams | ErrorRateRuleParams | ErrorCountRuleParams;
   setRuleParams: (key: string, value: any) => void;
 }) {
   const { services } = useKibana<ApmPluginStartDeps>();
@@ -37,8 +34,7 @@ export function ApmRuleUnifiedSearchBar({
   } = services;
 
   const { dataView } = useAdHocApmDataView();
-  const searchbarPlaceholder =
-    'Search for APM data… (e.g. service.name: service-1)';
+  const searchbarPlaceholder = 'Search for APM data… (e.g. service.name: service-1)';
 
   const handleSubmit = (payload: { query?: Query }) => {
     const { query } = payload;

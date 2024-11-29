@@ -5,55 +5,40 @@
  * 2.0.
  */
 
+import { chain, sumBy } from 'lodash';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { rangeQuery } from '@kbn/observability-plugin/server';
-import { DataStreamType } from '../../common/types';
+import { extractIndexNameFromBackingIndex } from '../../common/utils';
+import { reduceAsyncChunks } from '../utils/reduce_async_chunks';
+
+interface IndexStatsResponse {
+  docsCountPerDataStream: { [indexName: string]: number };
+}
 
 class IndexStatsService {
-  public async getIndexStats(
+  public async getIndicesDocCounts(
     esClient: ElasticsearchClient,
-    type: DataStreamType
-  ): Promise<{
-    doc_count: number;
-    size_in_bytes: number;
-  }> {
+    dataStreams: string[]
+  ): Promise<IndexStatsResponse> {
     try {
-      const index = `${type}-*-*`;
+      const { indices } = await reduceAsyncChunks(dataStreams, (indexChunk) =>
+        esClient.indices.stats({ index: indexChunk, metric: ['docs'] })
+      );
 
-      const indexStats = await esClient.indices.stats({ index });
+      const docsCountPerDataStream = chain(indices || {})
+        .map((indexStats, indexName) => ({
+          indexName,
+          totalDocs: indexStats.total?.docs ? indexStats.total?.docs?.count : 0,
+        }))
+        .groupBy((object) => extractIndexNameFromBackingIndex(object.indexName))
+        .mapValues((group) => sumBy(group, 'totalDocs'))
+        .value();
+
       return {
-        doc_count: indexStats._all.total?.docs ? indexStats._all.total?.docs?.count : 0,
-        size_in_bytes: indexStats._all.total?.store
-          ? indexStats._all.total?.store.size_in_bytes
-          : 0,
+        docsCountPerDataStream,
       };
     } catch (e) {
       if (e.statusCode === 404) {
-        return { doc_count: 0, size_in_bytes: 0 };
-      }
-      throw e;
-    }
-  }
-
-  public async getIndexDocCount(
-    esClient: ElasticsearchClient,
-    type: DataStreamType,
-    start: number,
-    end: number
-  ): Promise<number> {
-    try {
-      const index = `${type}-*-*`;
-
-      const query = rangeQuery(start, end)[0];
-      const docCount = await esClient.count({
-        index,
-        query,
-      });
-
-      return docCount.count;
-    } catch (e) {
-      if (e.statusCode === 404) {
-        return 0;
+        return { docsCountPerDataStream: {} };
       }
       throw e;
     }

@@ -7,23 +7,47 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
+import { useMisconfigurationPreview } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview';
+import { useVulnerabilitiesPreview } from '@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_preview';
 import type { Anomalies } from '../../../../common/components/ml/types';
-import { LeftPanelContext } from '../context';
+import { DocumentDetailsContext } from '../../shared/context';
 import { TestProviders } from '../../../../common/mock';
 import { HostDetails } from './host_details';
 import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
 import { mockAnomalies } from '../../../../common/components/ml/mock';
 import { useHostDetails } from '../../../../explore/hosts/containers/hosts/details';
 import { useHostRelatedUsers } from '../../../../common/containers/related_entities/related_users';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { RiskSeverity } from '../../../../../common/search_strategy';
 import {
   HOST_DETAILS_TEST_ID,
   HOST_DETAILS_INFO_TEST_ID,
   HOST_DETAILS_RELATED_USERS_TABLE_TEST_ID,
+  HOST_DETAILS_LINK_TEST_ID,
+  HOST_DETAILS_RELATED_USERS_LINK_TEST_ID,
+  HOST_DETAILS_RELATED_USERS_IP_LINK_TEST_ID,
+  HOST_DETAILS_MISCONFIGURATIONS_TEST_ID,
+  HOST_DETAILS_VULNERABILITIES_TEST_ID,
+  HOST_DETAILS_ALERT_COUNT_TEST_ID,
 } from './test_ids';
 import { EXPANDABLE_PANEL_CONTENT_TEST_ID } from '../../../shared/components/test_ids';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
-import { mockContextValue } from '../mocks/mock_context';
+import { mockContextValue } from '../../shared/mocks/mock_context';
+import { mockFlyoutApi } from '../../shared/mocks/mock_flyout_context';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { HostPreviewPanelKey } from '../../../entity_details/host_right';
+import { HOST_PREVIEW_BANNER } from '../../right/components/host_entity_overview';
+import { UserPreviewPanelKey } from '../../../entity_details/user_right';
+import { USER_PREVIEW_BANNER } from '../../right/components/user_entity_overview';
+import { NetworkPanelKey, NETWORK_PREVIEW_BANNER } from '../../../network_details';
+import { useAlertsByStatus } from '../../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
+
+jest.mock('@kbn/expandable-flyout');
+jest.mock('@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview');
+jest.mock('@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_preview');
+
+jest.mock('../../../../common/hooks/use_experimental_features');
+const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
 
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
@@ -63,8 +87,10 @@ jest.mock('../../../../helper_hooks', () => ({
   useHasSecurityCapability: () => mockUseHasSecurityCapability(),
 }));
 
-jest.mock('../../../../common/containers/sourcerer', () => ({
-  useSourcererDataView: jest.fn().mockReturnValue({ selectedPatterns: ['index'] }),
+jest.mock('../../../../sourcerer/containers', () => ({
+  useSourcererDataView: jest
+    .fn()
+    .mockReturnValue({ selectedPatterns: ['index'], sourcererDataView: {} }),
 }));
 
 jest.mock('../../../../common/components/ml/anomaly/anomaly_table_provider', () => ({
@@ -87,6 +113,19 @@ const mockUseHostsRelatedUsers = useHostRelatedUsers as jest.Mock;
 
 jest.mock('../../../../entity_analytics/api/hooks/use_risk_score');
 const mockUseRiskScore = useRiskScore as jest.Mock;
+
+jest.mock(
+  '../../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status'
+);
+const mockAlertData = {
+  open: {
+    total: 2,
+    severities: [
+      { key: 'high', value: 1, label: 'High' },
+      { key: 'low', value: 1, label: 'Low' },
+    ],
+  },
+};
 
 const timestamp = '2022-07-25T08:20:18.966Z';
 
@@ -120,31 +159,53 @@ const mockRiskScoreResponse = {
 const mockRelatedUsersResponse = {
   inspect: jest.fn(),
   refetch: jest.fn(),
-  relatedUsers: [{ user: 'test user', ip: ['100.XXX.XXX'], risk: RiskSeverity.low }],
+  relatedUsers: [{ user: 'test user', ip: ['100.XXX.XXX'], risk: RiskSeverity.Low }],
   loading: false,
 };
 
-const renderHostDetails = (contextValue: LeftPanelContext) =>
+const renderHostDetails = (contextValue: DocumentDetailsContext) =>
   render(
     <TestProviders>
-      <LeftPanelContext.Provider value={contextValue}>
+      <DocumentDetailsContext.Provider value={contextValue}>
         <HostDetails {...defaultProps} />
-      </LeftPanelContext.Provider>
+      </DocumentDetailsContext.Provider>
     </TestProviders>
   );
 
 describe('<HostDetails />', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
     mockUseMlUserPermissions.mockReturnValue({ isPlatinumOrTrialLicense: false, capabilities: {} });
     mockUseHostDetails.mockReturnValue(mockHostDetailsResponse);
     mockUseRiskScore.mockReturnValue(mockRiskScoreResponse);
     mockUseHostsRelatedUsers.mockReturnValue(mockRelatedUsersResponse);
+    mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+    (useMisconfigurationPreview as jest.Mock).mockReturnValue({});
+    (useVulnerabilitiesPreview as jest.Mock).mockReturnValue({});
+    (useAlertsByStatus as jest.Mock).mockReturnValue({ isLoading: false, items: {} });
   });
 
   it('should render host details correctly', () => {
-    const { getByTestId } = renderHostDetails(mockContextValue);
+    const { getByTestId, queryByTestId } = renderHostDetails(mockContextValue);
     expect(getByTestId(EXPANDABLE_PANEL_CONTENT_TEST_ID(HOST_DETAILS_TEST_ID))).toBeInTheDocument();
+    expect(queryByTestId(HOST_DETAILS_LINK_TEST_ID)).not.toBeInTheDocument();
+  });
+
+  it('should render host name as clicable link when preview is not disabled', () => {
+    mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
+    const { getByTestId } = renderHostDetails(mockContextValue);
+    expect(getByTestId(HOST_DETAILS_LINK_TEST_ID)).toBeInTheDocument();
+
+    getByTestId(HOST_DETAILS_LINK_TEST_ID).click();
+    expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
+      id: HostPreviewPanelKey,
+      params: {
+        hostName: defaultProps.hostName,
+        scopeId: defaultProps.scopeId,
+        banner: HOST_PREVIEW_BANNER,
+      },
+    });
   });
 
   describe('Host overview', () => {
@@ -181,7 +242,7 @@ describe('<HostDetails />', () => {
 
   describe('Related users', () => {
     it('should render the related user table with correct dates and indices', () => {
-      const { getByTestId } = renderHostDetails(mockContextValue);
+      const { getByTestId, queryByTestId } = renderHostDetails(mockContextValue);
       expect(mockUseHostsRelatedUsers).toBeCalledWith({
         from: timestamp,
         hostName: 'test host',
@@ -189,6 +250,7 @@ describe('<HostDetails />', () => {
         skip: false,
       });
       expect(getByTestId(HOST_DETAILS_RELATED_USERS_TABLE_TEST_ID)).toBeInTheDocument();
+      expect(queryByTestId(HOST_DETAILS_RELATED_USERS_LINK_TEST_ID)).not.toBeInTheDocument();
     });
 
     it('should render user risk score column when license and capabilities are valid', () => {
@@ -232,6 +294,69 @@ describe('<HostDetails />', () => {
       expect(getByTestId(HOST_DETAILS_RELATED_USERS_TABLE_TEST_ID).textContent).toContain(
         'No users identified'
       );
+    });
+
+    it('should render user name as clicable link when preview is not disabled', () => {
+      mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
+      const { getAllByTestId } = renderHostDetails(mockContextValue);
+      expect(getAllByTestId(HOST_DETAILS_RELATED_USERS_LINK_TEST_ID).length).toBe(1);
+
+      getAllByTestId(HOST_DETAILS_RELATED_USERS_LINK_TEST_ID)[0].click();
+      expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
+        id: UserPreviewPanelKey,
+        params: {
+          userName: 'test user',
+          scopeId: defaultProps.scopeId,
+          banner: USER_PREVIEW_BANNER,
+        },
+      });
+
+      getAllByTestId(HOST_DETAILS_RELATED_USERS_IP_LINK_TEST_ID)[0].click();
+      expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
+        id: NetworkPanelKey,
+        params: {
+          ip: '100.XXX.XXX',
+          flowTarget: 'source',
+          banner: NETWORK_PREVIEW_BANNER,
+        },
+      });
+    });
+  });
+
+  describe('distribution bar insights', () => {
+    it('should not render if no data is available', () => {
+      const { queryByTestId } = renderHostDetails(mockContextValue);
+      expect(queryByTestId(HOST_DETAILS_MISCONFIGURATIONS_TEST_ID)).not.toBeInTheDocument();
+      expect(queryByTestId(HOST_DETAILS_VULNERABILITIES_TEST_ID)).not.toBeInTheDocument();
+      expect(queryByTestId(HOST_DETAILS_ALERT_COUNT_TEST_ID)).not.toBeInTheDocument();
+    });
+
+    it('should render alert count when data is available', () => {
+      (useAlertsByStatus as jest.Mock).mockReturnValue({
+        isLoading: false,
+        items: mockAlertData,
+      });
+
+      const { getByTestId } = renderHostDetails(mockContextValue);
+      expect(getByTestId(HOST_DETAILS_ALERT_COUNT_TEST_ID)).toBeInTheDocument();
+    });
+
+    it('should render misconfiguration when data is available', () => {
+      (useMisconfigurationPreview as jest.Mock).mockReturnValue({
+        data: { count: { passed: 1, failed: 2 } },
+      });
+
+      const { getByTestId } = renderHostDetails(mockContextValue);
+      expect(getByTestId(HOST_DETAILS_MISCONFIGURATIONS_TEST_ID)).toBeInTheDocument();
+    });
+
+    it('should render vulnerabilities when data is available', () => {
+      (useVulnerabilitiesPreview as jest.Mock).mockReturnValue({
+        data: { count: { CRITICAL: 0, HIGH: 1, MEDIUM: 1, LOW: 0, UNKNOWN: 0 } },
+      });
+
+      const { getByTestId } = renderHostDetails(mockContextValue);
+      expect(getByTestId(HOST_DETAILS_VULNERABILITIES_TEST_ID)).toBeInTheDocument();
     });
   });
 });

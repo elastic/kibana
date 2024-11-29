@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useMemo, useState, ReactNode } from 'react';
@@ -75,6 +76,7 @@ export function ClustersTable({ clusters }: Props) {
         return (
           <>
             <EuiButtonIcon
+              data-test-subj={`inspectorRequestToggleClusterDetails${name}`}
               onClick={() => toggleDetails(name)}
               aria-label={
                 name in expandedRows
@@ -137,7 +139,6 @@ export function ClustersTable({ clusters }: Props) {
           ? items.sort(Comparators.property(sortField, Comparators.default(sortDirection)))
           : items
       }
-      isExpandable={true}
       itemIdToExpandedRowMap={expandedRows}
       itemId="name"
       columns={columns}

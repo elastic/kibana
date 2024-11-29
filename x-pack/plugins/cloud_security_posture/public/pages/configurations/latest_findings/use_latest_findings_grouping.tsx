@@ -4,24 +4,29 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { getGroupingQuery } from '@kbn/securitysolution-grouping';
+import { getGroupingQuery } from '@kbn/grouping';
 import {
   GroupingAggregation,
   GroupPanelRenderer,
-  GroupStatsRenderer,
+  GetGroupStats,
   isNoneGroup,
   NamedAggregation,
   parseGroupingQuery,
-} from '@kbn/securitysolution-grouping/src';
+} from '@kbn/grouping/src';
 import { useMemo } from 'react';
 import { buildEsQuery, Filter } from '@kbn/es-query';
 import {
+  CDR_3RD_PARTY_RETENTION_POLICY,
+  buildMutedRulesFilter,
+} from '@kbn/cloud-security-posture-common';
+import { useGetCspBenchmarkRulesStatesApi } from '@kbn/cloud-security-posture/src/hooks/use_get_benchmark_rules_state_api';
+import {
+  CDR_MISCONFIGURATION_GROUPING_RUNTIME_MAPPING_FIELDS,
   FINDINGS_GROUPING_OPTIONS,
   LOCAL_STORAGE_FINDINGS_GROUPING_KEY,
 } from '../../../common/constants';
 import { useDataViewContext } from '../../../common/contexts/data_view_context';
 import { Evaluation } from '../../../../common/types_old';
-import { LATEST_FINDINGS_RETENTION_POLICY } from '../../../../common/constants';
 import {
   FindingsGroupingAggregation,
   FindingsRootGroupingAggregation,
@@ -36,8 +41,6 @@ import {
 } from './constants';
 import { useCloudSecurityGrouping } from '../../../components/cloud_security_grouping';
 import { getFilters } from '../utils/get_filters';
-import { useGetCspBenchmarkRulesStatesApi } from './use_get_benchmark_rules_state_api';
-import { buildMutedRulesFilter } from '../../../../common/utils/rules_states';
 
 const getTermAggregation = (key: keyof FindingsGroupingAggregation, field: string) => ({
   [key]: {
@@ -88,7 +91,6 @@ const getAggregationsByGroupField = (field: string): NamedAggregation[] => {
         ...aggMetrics,
         getTermAggregation('resourceName', 'resource.id'),
         getTermAggregation('resourceSubType', 'resource.sub_type'),
-        getTermAggregation('resourceType', 'resource.type'),
       ];
     case FINDINGS_GROUPING_OPTIONS.RULE_NAME:
       return [
@@ -113,6 +115,28 @@ const getAggregationsByGroupField = (field: string): NamedAggregation[] => {
 };
 
 /**
+ * Get runtime mappings for the given group field
+ * Some fields require additional runtime mappings to aggregate additional information
+ * Fallback to keyword type to support custom fields grouping
+ */
+const getRuntimeMappingsByGroupField = (
+  field: string
+): Record<string, { type: 'keyword' }> | undefined => {
+  if (CDR_MISCONFIGURATION_GROUPING_RUNTIME_MAPPING_FIELDS?.[field]) {
+    return CDR_MISCONFIGURATION_GROUPING_RUNTIME_MAPPING_FIELDS[field].reduce(
+      (acc, runtimeField) => ({
+        ...acc,
+        [runtimeField]: {
+          type: 'keyword',
+        },
+      }),
+      {}
+    );
+  }
+  return {};
+};
+
+/**
  * Type Guard for checking if the given source is a FindingsRootGroupingAggregation
  */
 export const isFindingsRootGroupingAggregation = (
@@ -130,13 +154,13 @@ export const isFindingsRootGroupingAggregation = (
  */
 export const useLatestFindingsGrouping = ({
   groupPanelRenderer,
-  groupStatsRenderer,
+  getGroupStats,
   groupingLevel = 0,
   groupFilters = [],
   selectedGroup,
 }: {
   groupPanelRenderer?: GroupPanelRenderer<FindingsGroupingAggregation>;
-  groupStatsRenderer?: GroupStatsRenderer<FindingsGroupingAggregation>;
+  getGroupStats?: GetGroupStats<FindingsGroupingAggregation>;
   groupingLevel?: number;
   groupFilters?: Filter[];
   selectedGroup?: string;
@@ -150,6 +174,7 @@ export const useLatestFindingsGrouping = ({
     query,
     onChangeGroupsItemsPerPage,
     onChangeGroupsPage,
+    urlQuery,
     setUrlQuery,
     uniqueValue,
     isNoneSelected,
@@ -164,7 +189,7 @@ export const useLatestFindingsGrouping = ({
     getDefaultQuery,
     unit: FINDINGS_UNIT,
     groupPanelRenderer,
-    groupStatsRenderer,
+    getGroupStats,
     groupingLocalStorageKey: LOCAL_STORAGE_FINDINGS_GROUPING_KEY,
     groupingLevel,
     groupsUnit: MISCONFIGURATIONS_GROUPS_UNIT,
@@ -180,12 +205,13 @@ export const useLatestFindingsGrouping = ({
     additionalFilters: query ? [query, additionalFilters] : [additionalFilters],
     groupByField: currentSelectedGroup,
     uniqueValue,
-    from: `now-${LATEST_FINDINGS_RETENTION_POLICY}`,
+    from: `now-${CDR_3RD_PARTY_RETENTION_POLICY}`,
     to: 'now',
     pageNumber: activePageIndex * pageSize,
     size: pageSize,
     sort: [{ groupByField: { order: 'desc' } }, { complianceScore: { order: 'asc' } }],
     statsAggregations: getAggregationsByGroupField(currentSelectedGroup),
+    runtimeMappings: getRuntimeMappingsByGroupField(currentSelectedGroup),
     rootAggregations: [
       {
         failedFindings: {
@@ -261,6 +287,7 @@ export const useLatestFindingsGrouping = ({
     selectedGroup,
     onChangeGroupsItemsPerPage,
     onChangeGroupsPage,
+    urlQuery,
     setUrlQuery,
     isGroupSelected: !isNoneSelected,
     isGroupLoading: !data,

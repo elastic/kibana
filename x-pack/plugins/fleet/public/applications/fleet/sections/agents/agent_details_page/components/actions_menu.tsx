@@ -33,7 +33,8 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
   assignFlyoutOpenByDefault?: boolean;
   onCancelReassign?: () => void;
 }> = memo(({ agent, assignFlyoutOpenByDefault = false, onCancelReassign, agentPolicy }) => {
-  const hasFleetAllPrivileges = useAuthz().fleet.all;
+  const authz = useAuthz();
+  const hasFleetAllPrivileges = authz.fleet.allAgents;
   const refreshAgent = useAgentRefresh();
   const [isReassignFlyoutOpen, setIsReassignFlyoutOpen] = useState(assignFlyoutOpenByDefault);
   const [isUnenrollModalOpen, setIsUnenrollModalOpen] = useState(false);
@@ -62,79 +63,55 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
     }
   }, [onCancelReassign, setIsReassignFlyoutOpen]);
 
-  const menuItems = [];
-
-  if (!agentPolicy?.is_managed) {
-    menuItems.push(
-      <EuiContextMenuItem
-        icon="pencil"
-        onClick={() => {
-          setIsReassignFlyoutOpen(true);
-        }}
-        disabled={!agent.active && !agentPolicy}
-        key="reassignPolicy"
-      >
-        <FormattedMessage
-          id="xpack.fleet.agentList.reassignActionText"
-          defaultMessage="Assign to new policy"
-        />
-      </EuiContextMenuItem>,
-      <EuiContextMenuItem
-        icon="trash"
-        disabled={!hasFleetAllPrivileges || !agent.active}
-        onClick={() => {
-          setIsUnenrollModalOpen(true);
-        }}
-        key="unenrollAgent"
-      >
-        {isUnenrolling ? (
-          <FormattedMessage
-            id="xpack.fleet.agentList.forceUnenrollOneButton"
-            defaultMessage="Force unenroll"
-          />
-        ) : (
-          <FormattedMessage
-            id="xpack.fleet.agentList.unenrollOneButton"
-            defaultMessage="Unenroll agent"
-          />
-        )}
-      </EuiContextMenuItem>,
-      <EuiContextMenuItem
-        icon="refresh"
-        disabled={!isAgentUpgradeable(agent)}
-        onClick={() => {
-          setIsUpgradeModalOpen(true);
-        }}
-        key="upgradeAgent"
-        data-test-subj="upgradeBtn"
-      >
-        <FormattedMessage
-          id="xpack.fleet.agentList.upgradeOneButton"
-          defaultMessage="Upgrade agent"
-        />
-      </EuiContextMenuItem>
-    );
-  }
-
-  if (isAgentUpdating) {
-    menuItems.push(
-      <EuiContextMenuItem
-        icon="refresh"
-        onClick={() => {
-          setIsUpgradeModalOpen(true);
-        }}
-        key="restartUpgradeAgent"
-        data-test-subj="restartUpgradeBtn"
-      >
-        <FormattedMessage
-          id="xpack.fleet.agentList.restartUpgradeOneButton"
-          defaultMessage="Restart upgrade"
-        />
-      </EuiContextMenuItem>
-    );
-  }
-
-  menuItems.push(
+  const menuItems = [
+    ...(hasFleetAllPrivileges && !agentPolicy?.is_managed
+      ? [
+          <EuiContextMenuItem
+            icon="pencil"
+            onClick={() => {
+              setIsReassignFlyoutOpen(true);
+            }}
+            disabled={(!agent.active && !agentPolicy) || agentPolicy?.supports_agentless === true}
+            key="reassignPolicy"
+          >
+            <FormattedMessage
+              id="xpack.fleet.agentList.reassignActionText"
+              defaultMessage="Assign to new policy"
+            />
+          </EuiContextMenuItem>,
+          <EuiContextMenuItem
+            icon="refresh"
+            disabled={!isAgentUpgradeable(agent)}
+            onClick={() => {
+              setIsUpgradeModalOpen(true);
+            }}
+            key="upgradeAgent"
+            data-test-subj="upgradeBtn"
+          >
+            <FormattedMessage
+              id="xpack.fleet.agentList.upgradeOneButton"
+              defaultMessage="Upgrade agent"
+            />
+          </EuiContextMenuItem>,
+        ]
+      : []),
+    ...(hasFleetAllPrivileges && isAgentUpdating
+      ? [
+          <EuiContextMenuItem
+            icon="refresh"
+            onClick={() => {
+              setIsUpgradeModalOpen(true);
+            }}
+            key="restartUpgradeAgent"
+            data-test-subj="restartUpgradeBtn"
+          >
+            <FormattedMessage
+              id="xpack.fleet.agentList.restartUpgradeOneButton"
+              defaultMessage="Restart upgrade"
+            />
+          </EuiContextMenuItem>,
+        ]
+      : []),
     <EuiContextMenuItem
       icon="inspect"
       onClick={() => {
@@ -148,27 +125,50 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
         id="xpack.fleet.agentList.viewAgentDetailsJsonText"
         defaultMessage="View agent JSON"
       />
-    </EuiContextMenuItem>
-  );
-
-  if (diagnosticFileUploadEnabled) {
-    menuItems.push(
-      <EuiContextMenuItem
-        icon="download"
-        disabled={!hasFleetAllPrivileges || !isAgentRequestDiagnosticsSupported(agent)}
-        onClick={() => {
-          setIsRequestDiagnosticsModalOpen(true);
-        }}
-        data-test-subj="requestAgentDiagnosticsBtn"
-        key="requestDiagnostics"
-      >
-        <FormattedMessage
-          id="xpack.fleet.agentList.diagnosticsOneButton"
-          defaultMessage="Request diagnostics .zip"
-        />
-      </EuiContextMenuItem>
-    );
-  }
+    </EuiContextMenuItem>,
+    ...(authz.fleet.readAgents && diagnosticFileUploadEnabled
+      ? [
+          <EuiContextMenuItem
+            icon="download"
+            disabled={!isAgentRequestDiagnosticsSupported(agent)}
+            onClick={() => {
+              setIsRequestDiagnosticsModalOpen(true);
+            }}
+            data-test-subj="requestAgentDiagnosticsBtn"
+            key="requestDiagnostics"
+          >
+            <FormattedMessage
+              id="xpack.fleet.agentList.diagnosticsOneButton"
+              defaultMessage="Request diagnostics .zip"
+            />
+          </EuiContextMenuItem>,
+        ]
+      : []),
+    ...(hasFleetAllPrivileges && !agentPolicy?.is_managed
+      ? [
+          <EuiContextMenuItem
+            icon="trash"
+            disabled={!hasFleetAllPrivileges || !agent.active}
+            onClick={() => {
+              setIsUnenrollModalOpen(true);
+            }}
+            key="unenrollAgent"
+          >
+            {isUnenrolling ? (
+              <FormattedMessage
+                id="xpack.fleet.agentList.forceUnenrollOneButton"
+                defaultMessage="Force unenroll"
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.fleet.agentList.unenrollOneButton"
+                defaultMessage="Unenroll agent"
+              />
+            )}
+          </EuiContextMenuItem>,
+        ]
+      : []),
+  ];
 
   return (
     <>

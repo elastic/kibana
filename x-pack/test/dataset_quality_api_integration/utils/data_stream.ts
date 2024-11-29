@@ -7,7 +7,20 @@
 
 import { Client } from '@elastic/elasticsearch';
 
-export async function getDataStreamSettingsOfFirstIndex(es: Client, name: string) {
+export async function rolloverDataStream(es: Client, name: string) {
+  return es.indices.rollover({ alias: name });
+}
+
+export async function getDataStreamSettingsOfEarliestIndex(es: Client, name: string) {
   const matchingIndexesObj = await es.indices.getSettings({ index: name });
-  return Object.values(matchingIndexesObj ?? {})[0]?.settings;
+
+  const matchingIndexes = Object.keys(matchingIndexesObj ?? {});
+  matchingIndexes.sort((a, b) => {
+    return (
+      Number(matchingIndexesObj[a].settings?.index?.creation_date) -
+      Number(matchingIndexesObj[b].settings?.index?.creation_date)
+    );
+  });
+
+  return matchingIndexesObj[matchingIndexes[0]].settings;
 }

@@ -32,16 +32,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       },
     });
 
-  describe('When virtual columns loads', () => {
+  describe.skip('When virtual columns loads', () => {
     before(async () => {
       await synthtrace.index(generateLogsData({ from, to }));
-      await PageObjects.svlCommonPage.login();
+      await PageObjects.svlCommonPage.loginWithPrivilegedRole();
       await navigateToLogsExplorer();
     });
 
     after(async () => {
       await synthtrace.clean();
-      await PageObjects.svlCommonPage.forceLogout();
     });
 
     describe('field list initialisation', () => {

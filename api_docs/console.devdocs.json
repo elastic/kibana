@@ -20,9 +20,9 @@
           " implements ",
           {
             "pluginId": "@kbn/core-plugins-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCorePluginsBrowserPluginApi",
-            "section": "def-common.Plugin",
+            "section": "def-public.Plugin",
             "text": "Plugin"
           },
           "<",
@@ -79,9 +79,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-plugins-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCorePluginsBrowserPluginApi",
-                    "section": "def-common.PluginInitializerContext",
+                    "section": "def-public.PluginInitializerContext",
                     "text": "PluginInitializerContext"
                   },
                   "<object>"
@@ -105,9 +105,9 @@
               "({ notifications, getStartServices, http }: ",
               {
                 "pluginId": "@kbn/core-lifecycle-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                "section": "def-common.CoreSetup",
+                "section": "def-public.CoreSetup",
                 "text": "CoreSetup"
               },
               "<object, unknown>, { devTools, home, share, usageCollection }: ",
@@ -141,9 +141,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-lifecycle-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                    "section": "def-common.CoreSetup",
+                    "section": "def-public.CoreSetup",
                     "text": "CoreSetup"
                   },
                   "<object, unknown>"
@@ -188,9 +188,9 @@
               "(core: ",
               {
                 "pluginId": "@kbn/core-lifecycle-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                "section": "def-common.CoreStart",
+                "section": "def-public.CoreStart",
                 "text": "CoreStart"
               },
               ", deps: ",
@@ -224,9 +224,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-lifecycle-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                    "section": "def-common.CoreStart",
+                    "section": "def-public.CoreStart",
                     "text": "CoreStart"
                   }
                 ],
@@ -532,32 +532,114 @@
       },
       {
         "parentPluginId": "console",
-        "id": "def-public.EmbeddableConsoleProps",
+        "id": "def-public.EmbeddedConsoleView",
         "type": "Interface",
         "tags": [],
-        "label": "EmbeddableConsoleProps",
-        "description": [
-          "\nEmbeddableConsoleProps are optional props used when rendering the embeddable developer console."
-        ],
+        "label": "EmbeddedConsoleView",
+        "description": [],
         "path": "src/plugins/console/public/types/embeddable_console.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "console",
-            "id": "def-public.EmbeddableConsoleProps.size",
+            "id": "def-public.EmbeddedConsoleView.ActivationButton",
             "type": "CompoundType",
             "tags": [],
-            "label": "size",
-            "description": [
-              "\nThe default height of the content area."
-            ],
+            "label": "ActivationButton",
+            "description": [],
             "signature": [
-              "\"m\" | \"s\" | \"l\" | undefined"
+              "React.ComponentClass<",
+              {
+                "pluginId": "console",
+                "scope": "public",
+                "docId": "kibConsolePluginApi",
+                "section": "def-public.EmbeddedConsoleViewButtonProps",
+                "text": "EmbeddedConsoleViewButtonProps"
+              },
+              ", any> | React.FunctionComponent<",
+              {
+                "pluginId": "console",
+                "scope": "public",
+                "docId": "kibConsolePluginApi",
+                "section": "def-public.EmbeddedConsoleViewButtonProps",
+                "text": "EmbeddedConsoleViewButtonProps"
+              },
+              ">"
             ],
             "path": "src/plugins/console/public/types/embeddable_console.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "console",
+            "id": "def-public.EmbeddedConsoleView.ViewContent",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "ViewContent",
+            "description": [],
+            "signature": [
+              "React.ComponentClass<{}, any> | React.FunctionComponent<{}>"
+            ],
+            "path": "src/plugins/console/public/types/embeddable_console.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "console",
+        "id": "def-public.EmbeddedConsoleViewButtonProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "EmbeddedConsoleViewButtonProps",
+        "description": [],
+        "path": "src/plugins/console/public/types/embeddable_console.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "console",
+            "id": "def-public.EmbeddedConsoleViewButtonProps.activeView",
+            "type": "boolean",
+            "tags": [],
+            "label": "activeView",
+            "description": [],
+            "path": "src/plugins/console/public/types/embeddable_console.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "console",
+            "id": "def-public.EmbeddedConsoleViewButtonProps.onClick",
+            "type": "Function",
+            "tags": [],
+            "label": "onClick",
+            "description": [],
+            "signature": [
+              "(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void"
+            ],
+            "path": "src/plugins/console/public/types/embeddable_console.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "console",
+                "id": "def-public.EmbeddedConsoleViewButtonProps.onClick.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "event",
+                "description": [],
+                "signature": [
+                  "E"
+                ],
+                "path": "node_modules/@types/react/ts5.0/index.d.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           }
         ],
         "initialIsOpen": false
@@ -681,6 +763,24 @@
         },
         {
           "parentPluginId": "console",
+          "id": "def-public.ConsolePluginStart.openEmbeddedConsoleAlternateView",
+          "type": "Function",
+          "tags": [],
+          "label": "openEmbeddedConsoleAlternateView",
+          "description": [
+            "\nopenEmbeddedConsoleAlternateView is available if the embedded console can be rendered.\nCalling this function will open the embedded console to the alternative view. If there is no alternative view registered\nthis will open the embedded console."
+          ],
+          "signature": [
+            "(() => void) | undefined"
+          ],
+          "path": "src/plugins/console/public/types/plugin_dependencies.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "console",
           "id": "def-public.ConsolePluginStart.EmbeddableConsole",
           "type": "Function",
           "tags": [],
@@ -689,19 +789,60 @@
             "\nEmbeddableConsole is a functional component used to render a portable version of the dev tools console on any page in Kibana"
           ],
           "signature": [
-            "React.FC<",
-            {
-              "pluginId": "console",
-              "scope": "public",
-              "docId": "kibConsolePluginApi",
-              "section": "def-public.EmbeddableConsoleProps",
-              "text": "EmbeddableConsoleProps"
-            },
-            "> | undefined"
+            "React.FC<{}> | undefined"
           ],
           "path": "src/plugins/console/public/types/plugin_dependencies.ts",
           "deprecated": false,
           "trackAdoption": false
+        },
+        {
+          "parentPluginId": "console",
+          "id": "def-public.ConsolePluginStart.registerEmbeddedConsoleAlternateView",
+          "type": "Function",
+          "tags": [],
+          "label": "registerEmbeddedConsoleAlternateView",
+          "description": [
+            "\nRegister an alternate view for the Embedded Console\n\nWhen registering an alternate view ensure that the content component you register is lazy loaded."
+          ],
+          "signature": [
+            "((view: ",
+            {
+              "pluginId": "console",
+              "scope": "public",
+              "docId": "kibConsolePluginApi",
+              "section": "def-public.EmbeddedConsoleView",
+              "text": "EmbeddedConsoleView"
+            },
+            " | null) => void) | undefined"
+          ],
+          "path": "src/plugins/console/public/types/plugin_dependencies.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "console",
+              "id": "def-public.ConsolePluginStart.registerEmbeddedConsoleAlternateView.$1",
+              "type": "CompoundType",
+              "tags": [],
+              "label": "view",
+              "description": [],
+              "signature": [
+                {
+                  "pluginId": "console",
+                  "scope": "public",
+                  "docId": "kibConsolePluginApi",
+                  "section": "def-public.EmbeddedConsoleView",
+                  "text": "EmbeddedConsoleView"
+                },
+                " | null"
+              ],
+              "path": "src/plugins/console/public/types/plugin_dependencies.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": false
+            }
+          ],
+          "returnComment": []
         }
       ],
       "lifecycle": "start",

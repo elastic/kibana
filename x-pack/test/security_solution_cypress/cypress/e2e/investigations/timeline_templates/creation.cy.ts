@@ -16,7 +16,7 @@ import {
 } from '../../../screens/timeline';
 import { TIMELINES_DESCRIPTION, TIMELINES_USERNAME } from '../../../screens/timelines';
 import { createTimeline } from '../../../tasks/api_calls/timelines';
-import { deleteTimelines } from '../../../tasks/api_calls/common';
+import { deleteTimelines } from '../../../tasks/api_calls/timelines';
 
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
@@ -48,7 +48,8 @@ import { GLOBAL_SEARCH_BAR_FILTER_ITEM_AT } from '../../../screens/search_bar';
 
 const mockTimeline = getTimeline();
 
-describe('Timeline Templates', { tags: ['@ess', '@serverless'] }, () => {
+// FLAKY: https://github.com/elastic/kibana/issues/183579
+describe.skip('Timeline Templates', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     login();
     deleteTimelines();
@@ -82,7 +83,7 @@ describe('Timeline Templates', { tags: ['@ess', '@serverless'] }, () => {
     closeTimeline();
 
     cy.wait('@timeline').then(({ response }) => {
-      const { createdBy, savedObjectId } = response?.body.data.persistTimeline.timeline;
+      const { createdBy, savedObjectId } = response?.body;
 
       cy.log('Verify template shows on the table in the templates tab');
 
@@ -121,7 +122,7 @@ describe('Timeline Templates', { tags: ['@ess', '@serverless'] }, () => {
     addNameToTimelineAndSave(savedName);
 
     cy.wait('@timeline').then(({ response }) => {
-      const { createdBy, savedObjectId } = response?.body.data.persistTimeline.timeline;
+      const { createdBy, savedObjectId } = response?.body;
 
       cy.log('Check that the template has been created correctly');
 

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -14,6 +15,7 @@ import {
   getThemeStylesheetPathsMock,
   getScriptPathsMock,
   getBrowserLoggingConfigMock,
+  getApmConfigMock,
 } from './rendering_service.test.mocks';
 
 import { load } from 'cheerio';
@@ -78,6 +80,10 @@ function renderTestCases(
       uiSettings.client.getRegistered.mockReturnValue({
         registered: { name: 'title' },
       });
+    });
+
+    afterEach(() => {
+      mockRenderingSetupDeps.featureFlags.getOverrides.mockReset();
     });
 
     it('renders "core" page', async () => {
@@ -218,12 +224,10 @@ function renderTestCases(
       expect(getThemeStylesheetPathsMock).toHaveBeenCalledTimes(2);
       expect(getThemeStylesheetPathsMock).toHaveBeenCalledWith({
         darkMode: true,
-        themeVersion: 'v8',
         baseHref: '/mock-server-basepath',
       });
       expect(getThemeStylesheetPathsMock).toHaveBeenCalledWith({
         darkMode: false,
-        themeVersion: 'v8',
         baseHref: '/mock-server-basepath',
       });
     });
@@ -234,6 +238,19 @@ function renderTestCases(
       (mockRenderingPrebootDeps.http.staticAssets.getHrefBase as jest.Mock).mockImplementation(
         () => 'http://foo.bar:1773'
       );
+      const [render] = await getRender();
+      const content = await render(createKibanaRequest(), uiSettings, {
+        isAnonymousPage: false,
+      });
+      const dom = load(content);
+      const data = JSON.parse(dom('kbn-injected-metadata').attr('data') ?? '""');
+      expect(data).toMatchSnapshot(INJECTED_METADATA);
+    });
+
+    it('renders feature flags overrides', async () => {
+      mockRenderingSetupDeps.featureFlags.getOverrides.mockReturnValueOnce({
+        'my-overridden-flag': 1234,
+      });
       const [render] = await getRender();
       const content = await render(createKibanaRequest(), uiSettings, {
         isAnonymousPage: false,
@@ -257,6 +274,61 @@ function renderTestCases(
       const dom = load(content);
       const data = JSON.parse(dom('kbn-injected-metadata').attr('data') ?? '""');
       expect(data.logging).toEqual(loggingConfig);
+    });
+
+    it('renders "core" with APM config injected', async () => {
+      const someApmConfig = { someConfig: 9000 };
+      getApmConfigMock.mockReturnValue(someApmConfig);
+
+      const request = createKibanaRequest();
+
+      const [render] = await getRender();
+      const content = await render(createKibanaRequest(), uiSettings, {
+        isAnonymousPage: false,
+      });
+
+      expect(getApmConfigMock).toHaveBeenCalledTimes(1);
+      expect(getApmConfigMock).toHaveBeenCalledWith(request.url.pathname);
+
+      const dom = load(content);
+      const data = JSON.parse(dom('kbn-injected-metadata').attr('data') ?? '""');
+      expect(data.apmConfig).toEqual(someApmConfig);
+    });
+
+    it('use the correct translation url when CDN is enabled', async () => {
+      const userSettings = { 'theme:darkMode': { userValue: true } };
+      uiSettings.client.getUserProvided.mockResolvedValue(userSettings);
+
+      const [render, deps] = await getRender();
+
+      (deps.http.staticAssets.getHrefBase as jest.Mock).mockReturnValueOnce('http://foo.bar:1773');
+      (deps.http.staticAssets.isUsingCdn as jest.Mock).mockReturnValueOnce(true);
+
+      const content = await render(createKibanaRequest(), uiSettings, {
+        isAnonymousPage: false,
+      });
+      const dom = load(content);
+      const data = JSON.parse(dom('kbn-injected-metadata').attr('data') ?? '""');
+      expect(data.i18n.translationsUrl).toEqual('http://foo.bar:1773/translations/en.json');
+    });
+
+    it('use the correct translation url when CDN is disabled', async () => {
+      const userSettings = { 'theme:darkMode': { userValue: true } };
+      uiSettings.client.getUserProvided.mockResolvedValue(userSettings);
+
+      const [render, deps] = await getRender();
+
+      (deps.http.staticAssets.getHrefBase as jest.Mock).mockReturnValueOnce('http://foo.bar:1773');
+      (deps.http.staticAssets.isUsingCdn as jest.Mock).mockReturnValueOnce(false);
+
+      const content = await render(createKibanaRequest(), uiSettings, {
+        isAnonymousPage: false,
+      });
+      const dom = load(content);
+      const data = JSON.parse(dom('kbn-injected-metadata').attr('data') ?? '""');
+      expect(data.i18n.translationsUrl).toEqual(
+        '/mock-server-basepath/translations/MOCK_HASH/en.json'
+      );
     });
   });
 }
@@ -306,7 +378,6 @@ function renderDarkModeTestCases(
 
         expect(getThemeStylesheetPathsMock).toHaveBeenCalledWith({
           darkMode: true,
-          themeVersion: 'v8',
           baseHref: '/mock-server-basepath',
         });
       });
@@ -331,7 +402,6 @@ function renderDarkModeTestCases(
 
         expect(getThemeStylesheetPathsMock).toHaveBeenCalledWith({
           darkMode: false,
-          themeVersion: 'v8',
           baseHref: '/mock-server-basepath',
         });
       });
@@ -354,7 +424,6 @@ function renderDarkModeTestCases(
 
         expect(getThemeStylesheetPathsMock).toHaveBeenCalledWith({
           darkMode: false,
-          themeVersion: 'v8',
           baseHref: '/mock-server-basepath',
         });
       });
@@ -377,7 +446,6 @@ function renderDarkModeTestCases(
 
         expect(getThemeStylesheetPathsMock).toHaveBeenCalledWith({
           darkMode: true,
-          themeVersion: 'v8',
           baseHref: '/mock-server-basepath',
         });
       });
@@ -400,7 +468,6 @@ function renderDarkModeTestCases(
 
         expect(getThemeStylesheetPathsMock).toHaveBeenCalledWith({
           darkMode: false,
-          themeVersion: 'v8',
           baseHref: '/mock-server-basepath',
         });
       });
@@ -423,7 +490,6 @@ function renderDarkModeTestCases(
 
         expect(getThemeStylesheetPathsMock).toHaveBeenCalledWith({
           darkMode: false,
-          themeVersion: 'v8',
           baseHref: '/mock-server-basepath',
         });
       });
@@ -446,7 +512,6 @@ function renderDarkModeTestCases(
 
         expect(getThemeStylesheetPathsMock).toHaveBeenCalledWith({
           darkMode: true,
-          themeVersion: 'v8',
           baseHref: '/mock-server-basepath',
         });
       });
@@ -475,6 +540,7 @@ describe('RenderingService', () => {
     getThemeStylesheetPathsMock.mockReturnValue(['/style-1.css', '/style-2.css']);
     getScriptPathsMock.mockReturnValue(['/script-1.js']);
     getBrowserLoggingConfigMock.mockReset().mockReturnValue({});
+    getApmConfigMock.mockReset().mockReturnValue({ stubApmConfig: true });
   });
 
   describe('preboot()', () => {

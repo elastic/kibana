@@ -63,13 +63,20 @@ export class LogTextStreamLoadingItemView extends React.PureComponent<
       onStreamStart,
     } = this.props;
 
-    const shouldShowCta = !hasMore && !isStreaming;
+    const shouldShowCta = !hasMore && !isStreaming && !isLoading;
 
     const extra = (
-      <LoadingItemViewExtra justifyContent="center" alignItems="center" gutterSize="m">
-        {isLoading || isStreaming ? (
+      <LoadingItemViewExtra
+        justifyContent="center"
+        alignItems="center"
+        gutterSize="m"
+        {...(shouldShowCta ? { role: 'row' } : {})}
+      >
+        {(isLoading || isStreaming) && (
           <ProgressSpinner kind={isStreaming ? 'streaming' : 'loading'} />
-        ) : shouldShowCta ? (
+        )}
+
+        {shouldShowCta && (
           <ProgressCta
             position={position}
             onStreamStart={onStreamStart}
@@ -77,7 +84,7 @@ export class LogTextStreamLoadingItemView extends React.PureComponent<
             startDateExpression={startDateExpression}
             endDateExpression={endDateExpression}
           />
-        ) : null}
+        )}
       </LoadingItemViewExtra>
     );
 
@@ -110,7 +117,7 @@ type ProgressMessageProps = Pick<
 const ProgressMessage: React.FC<ProgressMessageProps> = ({ timestamp, position, isStreaming }) => {
   const formattedTimestamp =
     isStreaming && position === 'end' ? (
-      <FormattedRelative units="second" value={timestamp} updateInterval={1} />
+      <FormattedRelative value={timestamp} updateIntervalInSeconds={1} />
     ) : (
       <FormattedTime value={timestamp} {...TIMESTAMP_FORMAT} />
     );
@@ -181,9 +188,15 @@ const ProgressCta: React.FC<ProgressCtaProps> = ({
 
   if (rangeEdge === 'now' && position === 'end') {
     return (
-      <EuiButton data-test-subj="infraProgressCtaStreamLiveButton" onClick={onStreamStart} size="s">
-        <FormattedMessage id="xpack.logsShared.logs.streamLive" defaultMessage="Stream live" />
-      </EuiButton>
+      <div role="cell">
+        <EuiButton
+          data-test-subj="infraProgressCtaStreamLiveButton"
+          onClick={onStreamStart}
+          size="s"
+        >
+          <FormattedMessage id="xpack.logsShared.logs.streamLive" defaultMessage="Stream live" />
+        </EuiButton>
+      </div>
     );
   }
 
@@ -197,18 +210,20 @@ const ProgressCta: React.FC<ProgressCtaProps> = ({
   }
 
   return (
-    <EuiButton
-      data-test-subj="infraProgressCtaButton"
-      onClick={() => {
-        if (typeof onExtendRange === 'function') {
-          onExtendRange(extendedRange.value);
-        }
-      }}
-      iconType={iconType}
-      size="s"
-    >
-      <ProgressExtendMessage amount={extendedRange.diffAmount} unit={extendedRange.diffUnit} />
-    </EuiButton>
+    <div role="cell">
+      <EuiButton
+        data-test-subj="infraProgressCtaButton"
+        onClick={() => {
+          if (typeof onExtendRange === 'function') {
+            onExtendRange(extendedRange.value);
+          }
+        }}
+        iconType={iconType}
+        size="s"
+      >
+        <ProgressExtendMessage amount={extendedRange.diffAmount} unit={extendedRange.diffUnit} />
+      </EuiButton>
+    </div>
   );
 };
 

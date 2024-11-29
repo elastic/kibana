@@ -124,8 +124,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         numFailureRetries: '7',
         expected: {
           fullTimeRange: {
-            start: 'Jun 12, 2019 @ 00:04:19.000',
-            end: 'Jul 12, 2019 @ 23:45:36.000',
+            start: 'Jun 12, 2023 @ 00:04:19.000',
+            end: 'Jul 12, 2023 @ 23:45:36.000',
           },
           pivotAdvancedEditorValueArr: ['{', '  "group_by": {', '    "category": {'],
           pivotAdvancedEditorValue: {
@@ -302,6 +302,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           {
             identifier: 'percentiles(products.base_price)',
             label: 'products.base_price.percentiles',
+            form: {
+              transformPercentilesAggPercentsSelector: [1, 25, 50, 75, 100],
+            },
           },
           {
             identifier: 'filter(customer_phone)',
@@ -327,8 +330,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         numFailureRetries: '-1',
         expected: {
           fullTimeRange: {
-            start: 'Jun 12, 2019 @ 00:04:19.000',
-            end: 'Jul 12, 2019 @ 23:45:36.000',
+            start: 'Jun 12, 2023 @ 00:04:19.000',
+            end: 'Jul 12, 2023 @ 23:45:36.000',
           },
           pivotAdvancedEditorValueArr: ['{', '  "group_by": {', '    "geoip.country_iso_code": {'],
           pivotAdvancedEditorValue: {
@@ -406,8 +409,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         numFailureRetries: '0',
         expected: {
           fullTimeRange: {
-            start: 'Jun 12, 2019 @ 00:04:19.000',
-            end: 'Jul 12, 2019 @ 23:45:36.000',
+            start: 'Jun 12, 2023 @ 00:04:19.000',
+            end: 'Jul 12, 2023 @ 23:45:36.000',
           },
           pivotAdvancedEditorValueArr: ['{', '  "group_by": {', '    "customer_gender": {'],
           pivotAdvancedEditorValue: {
@@ -472,8 +475,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         numFailureRetries: '101',
         expected: {
           fullTimeRange: {
-            start: 'Jun 12, 2019 @ 00:04:19.000',
-            end: 'Jul 12, 2019 @ 23:45:36.000',
+            start: 'Jun 12, 2023 @ 00:04:19.000',
+            end: 'Jul 12, 2023 @ 23:45:36.000',
           },
           latestPreview: {
             column: 0,
@@ -492,11 +495,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           transformPreview: {
             column: 0,
             values: [
-              'July 12th 2019, 22:16:19',
-              'July 12th 2019, 22:50:53',
-              'July 12th 2019, 23:06:43',
-              'July 12th 2019, 23:15:22',
-              'July 12th 2019, 23:31:12',
+              'July 12th 2023, 22:16:19',
+              'July 12th 2023, 22:50:53',
+              'July 12th 2023, 23:06:43',
+              'July 12th 2023, 23:15:22',
+              'July 12th 2023, 23:31:12',
             ],
           },
           discoverQueryHits: '10',
@@ -561,6 +564,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           await transform.testExecution.logTestStep('again displays an empty index preview');
           await transform.wizard.assertIndexPreviewEmpty();
+          await transform.datePicker.assertDatePickerDataTierOptionsVisible(true);
 
           await transform.testExecution.logTestStep(
             `clicks the 'Use full data' button to auto-select time range`

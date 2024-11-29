@@ -4,15 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  Route,
-  RouteMatch,
-  useMatchRoutes,
-} from '@kbn/typed-react-router-config';
+import { Route, RouteMatch, useMatchRoutes } from '@kbn/typed-react-router-config';
 import { ChromeBreadcrumb } from '@kbn/core/public';
 import { compact, isEqual } from 'lodash';
 import React, { createContext, useMemo, useState } from 'react';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
+import { useKibana } from '../kibana_context/use_kibana';
 
 export interface Breadcrumb {
   title: string;
@@ -25,16 +22,13 @@ interface BreadcrumbApi {
   getBreadcrumbs(matches: RouteMatch[]): Breadcrumb[];
 }
 
-export const BreadcrumbsContext = createContext<BreadcrumbApi | undefined>(
-  undefined
-);
+export const BreadcrumbsContext = createContext<BreadcrumbApi | undefined>(undefined);
 
-export function BreadcrumbsContextProvider({
-  children,
-}: {
-  children: React.ReactElement;
-}) {
+export function BreadcrumbsContextProvider({ children }: { children: React.ReactElement }) {
   const [, forceUpdate] = useState({});
+  const {
+    services: { serverless },
+  } = useKibana();
 
   const breadcrumbs = useMemo(() => {
     return new Map<Route, Breadcrumb[]>();
@@ -82,11 +76,7 @@ export function BreadcrumbsContextProvider({
       };
     });
 
-  useBreadcrumbs(formattedBreadcrumbs);
+  useBreadcrumbs(formattedBreadcrumbs, { serverless, absoluteProjectStyleBreadcrumbs: false });
 
-  return (
-    <BreadcrumbsContext.Provider value={api}>
-      {children}
-    </BreadcrumbsContext.Provider>
-  );
+  return <BreadcrumbsContext.Provider value={api}>{children}</BreadcrumbsContext.Provider>;
 }

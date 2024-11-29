@@ -29,9 +29,7 @@ export function getIntervalAndTimeRange({
 }) {
   const end = Date.now();
   const start =
-    end -
-    moment.duration(windowSize, windowUnit).asMilliseconds() *
-      ALERT_PREVIEW_BUCKET_SIZE;
+    end - moment.duration(windowSize, windowUnit).asMilliseconds() * ALERT_PREVIEW_BUCKET_SIZE;
 
   return {
     interval: `${windowSize}${windowUnit}`,

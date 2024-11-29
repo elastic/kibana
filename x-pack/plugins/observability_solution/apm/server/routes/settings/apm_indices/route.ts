@@ -10,10 +10,7 @@ import { SavedObject } from '@kbn/core/server';
 import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import { saveApmIndices } from '@kbn/apm-data-access-plugin/server/saved_objects/apm_indices';
 import { createApmServerRoute } from '../../apm_routes/create_apm_server_route';
-import {
-  getApmIndexSettings,
-  ApmIndexSettingsResponse,
-} from './get_apm_indices';
+import { getApmIndexSettings, ApmIndexSettingsResponse } from './get_apm_indices';
 
 // get list of apm indices and values
 const apmIndexSettingsRoute = createApmServerRoute({
@@ -46,7 +43,7 @@ type SaveApmIndicesBodySchema = {
 const saveApmIndicesRoute = createApmServerRoute({
   endpoint: 'POST /internal/apm/settings/apm-indices/save',
   options: {
-    tags: ['access:apm', 'access:apm_write'],
+    tags: ['access:apm', 'access:apm_settings_write'],
   },
   params: t.type({
     body: t.partial({

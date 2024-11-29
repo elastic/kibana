@@ -13,12 +13,13 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { formatHumanReadableDateTime } from '@kbn/ml-date-utils';
+import { useTimeBuckets } from '@kbn/ml-time-buckets';
 import { useGroupActions } from './actions';
 import type { Group, GroupsDictionary } from './anomaly_detection_panel';
 import { JobSelectorBadge } from '../../../components/job_selector/job_selector_badge';
 import { toLocaleString } from '../../../util/string_utils';
 import { SwimlaneContainer } from '../../../explorer/swimlane_container';
-import { useTimeBuckets } from '../../../components/custom_hooks/use_time_buckets';
+import { useMlKibana } from '../../../contexts/kibana';
 
 export enum AnomalyDetectionListColumns {
   id = 'id',
@@ -43,7 +44,10 @@ export const AnomalyDetectionTable: FC<Props> = ({ items, chartsService }) => {
   const [sortField, setSortField] = useState<string>(AnomalyDetectionListColumns.id);
   const [sortDirection, setSortDirection] = useState<Direction>('asc');
 
-  const timeBuckets = useTimeBuckets();
+  const {
+    services: { uiSettings },
+  } = useMlKibana();
+  const timeBuckets = useTimeBuckets(uiSettings);
 
   const columns: Array<EuiBasicTableColumn<Group>> = [
     {
@@ -182,9 +186,6 @@ export const AnomalyDetectionTable: FC<Props> = ({ items, chartsService }) => {
       allowNeutralSort={false}
       className="mlAnomalyDetectionTable"
       columns={columns}
-      hasActions={true}
-      isExpandable={false}
-      isSelectable={false}
       items={groupsList}
       itemId={AnomalyDetectionListColumns.id}
       onTableChange={onTableChange}

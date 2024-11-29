@@ -39,19 +39,19 @@ export const SolutionSideNavPanelStyles = (
         // bottom inset to match timeline bar top shadow
         inset 0 -6px ${euiTheme.size.xs} -${euiTheme.size.xs} rgb(0 0 0 / 15%);
       `}
+`;
 
-  .solutionSideNavPanelLink {
-    &:focus-within {
-      background-color: transparent;
-      a {
-        text-decoration: auto;
-      }
+export const SolutionSideNavPanelItemStyles = (euiTheme: EuiThemeComputed<{}>) => css`
+  &:focus-within {
+    background-color: transparent;
+    a {
+      text-decoration: auto;
     }
-    &:hover {
-      background-color: ${transparentize(euiTheme.colors.primary, 0.1)};
-      a {
-        text-decoration: underline;
-      }
+  }
+  &:hover {
+    background-color: ${transparentize(euiTheme.colors.lightShade, 0.5)};
+    a {
+      text-decoration: underline;
     }
   }
 `;
@@ -69,7 +69,7 @@ export const SolutionSideNavCategoryTitleStyles = (euiTheme: EuiThemeComputed<{}
   font-weight: ${euiTheme.font.weight.medium};
 `;
 
-export const SolutionSideNavPanelLinksGroupStyles = (euiTheme: EuiThemeComputed<{}>) => css`
+export const SolutionSideNavPanelLinksGroupStyles = () => css`
   padding-left: 0;
   padding-right: 0;
 `;

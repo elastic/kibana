@@ -8,8 +8,8 @@
 import React from 'react';
 import { EuiFormLabel, EuiText, EuiLink, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { availableControlsPanels } from '../../hooks/use_control_panels_url_state';
 import { Popover } from '../common/popover';
+import { availableControlsPanels } from './control_panels_config';
 
 const helpMessages = {
   [availableControlsPanels.SERVICE_NAME]: (
@@ -46,8 +46,8 @@ const TitleWithPopoverMessage = ({
   embeddableId: string;
 }) => {
   return (
-    <EuiFormLabel className="controlFrame__formControlLayoutLabel" htmlFor={embeddableId}>
-      <EuiFlexGroup alignItems="center" gutterSize="xs">
+    <EuiFormLabel htmlFor={embeddableId}>
+      <EuiFlexGroup responsive={false} alignItems="center" gutterSize="xs">
         <EuiFlexItem grow={false}>{title}</EuiFlexItem>
         <EuiFlexItem grow={false}>
           <Popover>{helpMessage}</Popover>
@@ -62,8 +62,6 @@ export const ControlTitle = ({ title, embeddableId }: { title?: string; embeddab
   return helpMessage ? (
     <TitleWithPopoverMessage title={title} helpMessage={helpMessage} embeddableId={embeddableId} />
   ) : (
-    <EuiFormLabel className="controlFrame__formControlLayoutLabel" htmlFor={embeddableId}>
-      {title}
-    </EuiFormLabel>
+    <EuiFormLabel htmlFor={embeddableId}>{title}</EuiFormLabel>
   );
 };

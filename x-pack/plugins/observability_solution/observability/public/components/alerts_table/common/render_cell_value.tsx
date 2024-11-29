@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { EuiLink } from '@elastic/eui';
-import { GetRenderCellValue } from '@kbn/triggers-actions-ui-plugin/public';
 import React from 'react';
 import {
   ALERT_DURATION,
@@ -20,15 +19,16 @@ import {
   ALERT_EVALUATION_VALUES,
   ALERT_RULE_NAME,
   ALERT_RULE_CATEGORY,
+  ALERT_START,
+  ALERT_RULE_EXECUTION_TIMESTAMP,
 } from '@kbn/rule-data-utils';
 import { isEmpty } from 'lodash';
-import type { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
-
+import type { EventNonEcsData } from '../../../../common/typings';
+import type { ObservabilityRuleTypeRegistry } from '../../..';
 import { asDuration } from '../../../../common/utils/formatters';
 import { AlertSeverityBadge } from '../../alert_severity_badge';
 import { AlertStatusIndicator } from '../../alert_status_indicator';
 import { parseAlert } from '../../../pages/alerts/helpers/parse_alert';
-import type { ObservabilityRuleTypeRegistry } from '../../../rules/create_observability_rule_type_registry';
 import { CellTooltip } from './cell_tooltip';
 import { TimestampTooltip } from './timestamp_tooltip';
 
@@ -36,7 +36,7 @@ export const getMappedNonEcsValue = ({
   data,
   fieldName,
 }: {
-  data: TimelineNonEcsData[];
+  data: EventNonEcsData[];
   fieldName: string;
 }): string[] | undefined => {
   const item = data.find((d) => d.field === fieldName);
@@ -64,70 +64,75 @@ const getRenderValue = (mappedNonEcsValue: any) => {
   return '--';
 };
 
+interface GetRenderCellValueParams {
+  columnId: string;
+  data?: EventNonEcsData[];
+  setFlyoutAlert?: (alertId: string) => void;
+  observabilityRuleTypeRegistry?: ObservabilityRuleTypeRegistry;
+}
+
 /**
  * This implementation of `EuiDataGrid`'s `renderCellValue`
  * accepts `EuiDataGridCellValueElementProps`, plus `data`
  * from the TGrid
  */
-
 export const getRenderCellValue = ({
+  columnId,
+  data,
   setFlyoutAlert,
   observabilityRuleTypeRegistry,
-}: {
-  setFlyoutAlert: (alertId: string) => void;
-  observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
-}): ReturnType<GetRenderCellValue> => {
-  return ({ columnId, data }) => {
-    if (!data) return null;
-    const mappedNonEcsValue = getMappedNonEcsValue({
-      data,
-      fieldName: columnId,
-    });
-    const value = getRenderValue(mappedNonEcsValue);
+}: GetRenderCellValueParams) => {
+  if (!data) return null;
+  const mappedNonEcsValue = getMappedNonEcsValue({
+    data,
+    fieldName: columnId,
+  });
+  const value = getRenderValue(mappedNonEcsValue);
 
-    switch (columnId) {
-      case ALERT_STATUS:
-        if (value !== ALERT_STATUS_ACTIVE && value !== ALERT_STATUS_RECOVERED) {
-          // NOTE: This should only be needed to narrow down the type.
-          // Status should be either "active" or "recovered".
-          return null;
-        }
-        return <AlertStatusIndicator alertStatus={value} />;
-      case TIMESTAMP:
-        return <TimestampTooltip time={new Date(value ?? '').getTime()} timeUnit="milliseconds" />;
-      case ALERT_DURATION:
-        return asDuration(Number(value));
-      case ALERT_SEVERITY:
-        return <AlertSeverityBadge severityLevel={value ?? undefined} />;
-      case ALERT_EVALUATION_VALUE:
-        const valuesField = getMappedNonEcsValue({
-          data,
-          fieldName: ALERT_EVALUATION_VALUES,
-        });
-        const values = getRenderValue(valuesField);
-        return valuesField ? values : value;
-      case ALERT_REASON:
-        const dataFieldEs = data.reduce((acc, d) => ({ ...acc, [d.field]: d.value }), {});
-        const alert = parseAlert(observabilityRuleTypeRegistry)(dataFieldEs);
-
-        return (
-          <EuiLink
-            data-test-subj="o11yGetRenderCellValueLink"
-            css={{ display: 'contents' }}
-            onClick={() => setFlyoutAlert && setFlyoutAlert(alert.fields[ALERT_UUID])}
-          >
-            {alert.reason}
-          </EuiLink>
-        );
-      case ALERT_RULE_NAME:
-        const ruleCategory = getMappedNonEcsValue({
-          data,
-          fieldName: ALERT_RULE_CATEGORY,
-        });
-        const tooltipContent = getRenderValue(ruleCategory);
-        return <CellTooltip value={value} tooltipContent={tooltipContent} />;
-      default:
-        return <>{value}</>;
-    }
-  };
+  switch (columnId) {
+    case ALERT_STATUS:
+      if (value !== ALERT_STATUS_ACTIVE && value !== ALERT_STATUS_RECOVERED) {
+        // NOTE: This should only be needed to narrow down the type.
+        // Status should be either "active" or "recovered".
+        return null;
+      }
+      return <AlertStatusIndicator alertStatus={value} />;
+    case TIMESTAMP:
+    case ALERT_START:
+    case ALERT_RULE_EXECUTION_TIMESTAMP:
+      return <TimestampTooltip time={new Date(value ?? '').getTime()} timeUnit="milliseconds" />;
+    case ALERT_DURATION:
+      return asDuration(Number(value));
+    case ALERT_SEVERITY:
+      return <AlertSeverityBadge severityLevel={value ?? undefined} />;
+    case ALERT_EVALUATION_VALUE:
+      const valuesField = getMappedNonEcsValue({
+        data,
+        fieldName: ALERT_EVALUATION_VALUES,
+      });
+      const values = getRenderValue(valuesField);
+      return valuesField ? values : value;
+    case ALERT_REASON:
+      const dataFieldEs = data.reduce((acc, d) => ({ ...acc, [d.field]: d.value }), {});
+      if (!observabilityRuleTypeRegistry) return <>{value}</>;
+      const alert = parseAlert(observabilityRuleTypeRegistry)(dataFieldEs);
+      return (
+        <EuiLink
+          data-test-subj="o11yGetRenderCellValueLink"
+          css={{ ':hover': { textDecoration: 'none' } }}
+          onClick={() => setFlyoutAlert && setFlyoutAlert(alert.fields[ALERT_UUID])}
+        >
+          {alert.reason}
+        </EuiLink>
+      );
+    case ALERT_RULE_NAME:
+      const ruleCategory = getMappedNonEcsValue({
+        data,
+        fieldName: ALERT_RULE_CATEGORY,
+      });
+      const tooltipContent = getRenderValue(ruleCategory);
+      return <CellTooltip value={value} tooltipContent={tooltipContent} />;
+    default:
+      return <>{value}</>;
+  }
 };

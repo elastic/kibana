@@ -61,21 +61,15 @@ journey('UX LongTaskMetrics', async ({ page, params }) => {
     // wait for first metric to be shown
     await page.waitForSelector(`text="237 ms"`);
 
-    let metric = await (
-      await page.waitForSelector(byTestId(longestMetric))
-    ).innerText();
+    let metric = await (await page.waitForSelector(byTestId(longestMetric))).innerText();
 
     expect(metric).toBe(longestMetricValue);
 
-    metric = await (
-      await page.waitForSelector(byTestId(countMetric))
-    ).innerText();
+    metric = await (await page.waitForSelector(byTestId(countMetric))).innerText();
 
     expect(metric).toBe(countMetricValue);
 
-    metric = await (
-      await page.waitForSelector(byTestId(sumMetric))
-    ).innerText();
+    metric = await (await page.waitForSelector(byTestId(sumMetric))).innerText();
 
     expect(metric).toBe(sumMetricValue);
   });

@@ -56,23 +56,24 @@ export const useSimpleMonitor = ({ monitorData }: { monitorData?: SimpleFormData
   }, [monitorData]);
 
   useEffect(() => {
+    const { coreStart, toasts } = kibanaService;
     const newMonitor = data as UpsertMonitorResponse;
     const hasErrors = data && 'attributes' in data && data.attributes.errors?.length > 0;
     if (hasErrors && !loading) {
       showSyncErrors(
         (data as { attributes: { errors: ServiceLocationErrors } })?.attributes.errors ?? [],
         serviceLocations,
-        kibanaService.toasts
+        coreStart
       );
     }
 
     if (!loading && status === FETCH_STATUS.FAILURE) {
-      kibanaService.toasts.addDanger({
+      toasts.addDanger({
         title: MONITOR_FAILURE_LABEL,
         toastLifeTimeMs: 3000,
       });
     } else if (!loading && (newMonitor as EncryptedSyntheticsSavedMonitor)?.id) {
-      kibanaService.toasts.addSuccess({
+      toasts.addSuccess({
         title: MONITOR_SUCCESS_LABEL,
         toastLifeTimeMs: 3000,
       });

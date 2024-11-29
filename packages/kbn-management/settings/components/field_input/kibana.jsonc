@@ -1,5 +1,9 @@
 {
-  "type": "shared-common",
+  "type": "shared-browser",
   "id": "@kbn/management-settings-components-field-input",
-  "owner": "@elastic/kibana-management"
+  "owner": [
+    "@elastic/kibana-management"
+  ],
+  "group": "platform",
+  "visibility": "shared"
 }

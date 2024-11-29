@@ -9,10 +9,6 @@ export * from './observed_details';
 
 export * from './managed_details';
 
-export * from './kpi/total_users';
-
-export * from './kpi/authentications';
-
 export * from './all';
 
 export * from './authentications';

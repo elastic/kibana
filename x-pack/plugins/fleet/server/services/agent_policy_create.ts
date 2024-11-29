@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import type {
+  AuthenticatedUser,
+  ElasticsearchClient,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 
-import type { AuthenticatedUser } from '@kbn/security-plugin/common';
-
+import { getDefaultFleetServerpolicyId } from '../../common/services/agent_policies_helpers';
 import type { HTTPAuthorizationHeader } from '../../common/http_authorization_header';
 
 import {
@@ -23,24 +26,27 @@ import { agentPolicyService, packagePolicyService } from '.';
 import { incrementPackageName } from './package_policies';
 import { bulkInstallPackages } from './epm/packages';
 import { ensureDefaultEnrollmentAPIKeyForAgentPolicy } from './api_keys';
-
-const FLEET_SERVER_POLICY_ID = 'fleet-server-policy';
+import { agentlessAgentService } from './agents/agentless_agent';
 
 async function getFleetServerAgentPolicyId(
   soClient: SavedObjectsClientContract
 ): Promise<string | undefined> {
   let agentPolicyId;
-  // creating first fleet server policy with id 'fleet-server-policy'
+  // creating first fleet server policy with id '(space-)?fleet-server-policy'
   let agentPolicy;
   try {
-    agentPolicy = await agentPolicyService.get(soClient, FLEET_SERVER_POLICY_ID, false);
+    agentPolicy = await agentPolicyService.get(
+      soClient,
+      getDefaultFleetServerpolicyId(soClient.getCurrentNamespace()),
+      false
+    );
   } catch (err) {
     if (!err.isBoom || err.output.statusCode !== 404) {
       throw err;
     }
   }
   if (!agentPolicy) {
-    agentPolicyId = FLEET_SERVER_POLICY_ID;
+    agentPolicyId = getDefaultFleetServerpolicyId(soClient.getCurrentNamespace());
   }
   return agentPolicyId;
 }
@@ -65,12 +71,13 @@ async function createPackagePolicy(
         force: true,
         user: options.user,
       });
+
       throw error;
     });
-
   if (!newPackagePolicy) return;
 
   newPackagePolicy.policy_id = agentPolicy.id;
+  newPackagePolicy.policy_ids = [agentPolicy.id];
   newPackagePolicy.namespace = agentPolicy.namespace;
   newPackagePolicy.name = await incrementPackageName(soClient, packageToInstall);
 
@@ -114,7 +121,7 @@ export async function createAgentPolicyWithPackages({
     packagesToInstall.push(FLEET_SERVER_PACKAGE);
 
     agentPolicyId = agentPolicyId || (await getFleetServerAgentPolicyId(soClient));
-    if (agentPolicyId === FLEET_SERVER_POLICY_ID) {
+    if (agentPolicyId === getDefaultFleetServerpolicyId(spaceId)) {
       // setting first fleet server policy to default, so that fleet server can enroll without setting policy_id
       newPolicy.is_default_fleet_server = true;
     }
@@ -167,6 +174,11 @@ export async function createAgentPolicyWithPackages({
 
   await ensureDefaultEnrollmentAPIKeyForAgentPolicy(soClient, esClient, agentPolicy.id);
   await agentPolicyService.deployPolicy(soClient, agentPolicy.id);
+
+  // Create the agentless agent
+  if (agentPolicy.supports_agentless) {
+    await agentlessAgentService.createAgentlessAgent(esClient, soClient, agentPolicy);
+  }
 
   return agentPolicy;
 }

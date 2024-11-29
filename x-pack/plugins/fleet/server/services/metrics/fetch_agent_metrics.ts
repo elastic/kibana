@@ -50,17 +50,9 @@ export const fetchAgentMetrics = async (
     return;
   }
 
-  const fleetAgentsIndexExists = await esClient.indices
-    .get({
-      index: AGENTS_INDEX,
-    })
-    .catch((error) => {
-      if (error.statusCode === 404) {
-        return;
-      }
-
-      throw error;
-    });
+  const fleetAgentsIndexExists = await esClient.indices.exists({
+    index: AGENTS_INDEX,
+  });
 
   if (!fleetAgentsIndexExists) {
     return;
@@ -72,6 +64,7 @@ export const fetchAgentMetrics = async (
     upgrading_step: await getUpgradingSteps(esClient, abortController),
     unhealthy_reason: await getUnhealthyReason(esClient, abortController),
   };
+
   return usage;
 };
 

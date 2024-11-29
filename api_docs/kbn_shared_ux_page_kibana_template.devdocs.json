@@ -35,14 +35,14 @@
           {
             "parentPluginId": "@kbn/shared-ux-page-kibana-template",
             "id": "def-public.KibanaPageTemplate.$1",
-            "type": "CompoundType",
+            "type": "Uncategorized",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "P & { children?: React.ReactNode; }"
+              "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -56,7 +56,7 @@
             "signature": [
               "any"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -75,7 +75,7 @@
         "signature": [
           "({ children, ...dependencies }: React.PropsWithChildren<",
           "NoDataCardKibanaDependencies",
-          ">) => JSX.Element"
+          ">) => React.JSX.Element"
         ],
         "path": "packages/shared-ux/page/kibana_template/impl/src/services.tsx",
         "deprecated": false,
@@ -86,7 +86,7 @@
             "id": "def-public.KibanaPageTemplateKibanaProvider.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  children,\n  ...dependencies\n}",
+            "label": "{ children, ...dependencies }",
             "description": [],
             "signature": [
               "React.PropsWithChildren<",
@@ -114,7 +114,7 @@
         "signature": [
           "({ children, ...services }: React.PropsWithChildren<",
           "NoDataCardServices",
-          ">) => JSX.Element"
+          ">) => React.JSX.Element"
         ],
         "path": "packages/shared-ux/page/kibana_template/impl/src/services.tsx",
         "deprecated": false,
@@ -171,17 +171,19 @@
         "description": [],
         "signature": [
           "_EuiPageOuterProps",
-          " & Omit<any, \"border\" | \"component\"> & ",
+          " & Omit<",
+          "_EuiPageInnerProps",
+          "<\"main\">, \"border\" | \"component\"> & ",
           "_EuiPageRestrictWidth",
           " & ",
           "_EuiPageBottomBorder",
-          " & { contentBorder?: any; minHeight?: ",
+          " & { contentBorder?: boolean | undefined; minHeight?: ",
           "Property",
           ".MinHeight<string | number> | undefined; offset?: number | undefined; mainProps?: (",
           "CommonProps",
           " & React.HTMLAttributes<HTMLElement>) | undefined; component?: ",
           "ComponentTypes",
-          " | undefined; } & { isEmptyState?: boolean | undefined; solutionNav?: ",
+          " | undefined; } & { isEmptyState?: boolean | undefined; emptyPageBody?: React.ReactNode; solutionNav?: ",
           {
             "pluginId": "@kbn/shared-ux-page-solution-nav",
             "scope": "common",

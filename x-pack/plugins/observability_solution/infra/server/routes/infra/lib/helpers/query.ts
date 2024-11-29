@@ -5,92 +5,103 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
-import { ISearchClient } from '@kbn/data-plugin/common';
-import { ESSearchRequest } from '@kbn/es-types';
-import { catchError, map, Observable } from 'rxjs';
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
+import { termQuery } from '@kbn/observability-plugin/server';
+import { ApmDocumentType, type TimeRangeMetadata } from '@kbn/apm-data-access-plugin/common';
+import { estypes } from '@elastic/elasticsearch';
+import { castArray } from 'lodash';
+import type { ApmDataAccessServicesWrapper } from '../../../../lib/helpers/get_apm_data_access_client';
 import {
-  GetInfraMetricsRequestBodyPayload,
-  InfraAssetMetricType,
-} from '../../../../../common/http_api/infra';
-import { INVENTORY_MODEL_NODE_TYPE } from '../constants';
+  EVENT_MODULE,
+  METRICSET_MODULE,
+  SYSTEM_INTEGRATION,
+} from '../../../../../common/constants';
+import type { InfraAssetMetricType } from '../../../../../common/http_api/infra';
 
-export const createFilters = ({
-  params,
-  extraFilter,
-  hostNamesShortList = [],
-}: {
-  params: GetInfraMetricsRequestBodyPayload;
-  hostNamesShortList?: string[];
-  extraFilter?: estypes.QueryDslQueryContainer;
-}) => {
-  const extrafilterClause = extraFilter?.bool?.filter;
-  const extraFilterList = !!extrafilterClause
-    ? Array.isArray(extrafilterClause)
-      ? extrafilterClause
-      : [extrafilterClause]
-    : [];
-  const hostNamesFilter =
-    hostNamesShortList.length > 0
-      ? [
-          {
-            terms: {
-              'host.name': hostNamesShortList,
-            },
-          },
-        ]
-      : [];
-
-  return [
-    ...hostNamesFilter,
-    ...extraFilterList,
-    {
-      range: {
-        '@timestamp': {
-          gte: new Date(params.range.from).getTime(),
-          lte: new Date(params.range.to).getTime(),
-          format: 'epoch_millis',
-        },
-      },
+export const getFilterByIntegration = (
+  integration: typeof SYSTEM_INTEGRATION,
+  extraFilter: estypes.QueryDslQueryContainer[] = []
+) => {
+  return {
+    bool: {
+      should: [
+        ...termQuery(EVENT_MODULE, integration),
+        ...termQuery(METRICSET_MODULE, integration),
+        ...extraFilter,
+      ],
+      minimum_should_match: 1,
     },
-    {
-      exists: {
-        field: 'host.name',
-      },
-    },
-  ];
+  };
 };
 
-export const runQuery = <T>(
-  serchClient: ISearchClient,
-  queryRequest: ESSearchRequest,
-  decoder: (aggregation: Record<string, estypes.AggregationsAggregate> | undefined) => T | undefined
-): Observable<T | undefined> => {
-  return serchClient
-    .search({
-      params: queryRequest,
-    })
-    .pipe(
-      map((res) => decoder(res.rawResponse.aggregations)),
-      catchError((err) => {
-        const error = {
-          message: err.message,
-          statusCode: err.statusCode,
-          attributes: err.errBody?.error,
-        };
+const getApmDocumentsFilter = async ({
+  apmDataAccessServices,
+  apmDocumentSources,
+  start,
+  end,
+}: {
+  apmDataAccessServices: ApmDataAccessServicesWrapper;
+  apmDocumentSources: TimeRangeMetadata['sources'];
+  start: number;
+  end: number;
+}) => {
+  const { preferredSource, documentTypeConfig } = apmDataAccessServices.getDocumentTypeConfig({
+    start,
+    end,
+    documentTypes: [ApmDocumentType.TransactionMetric],
+    documentSources: apmDocumentSources,
+  });
 
-        throw error;
-      })
-    );
+  return 'getQuery' in documentTypeConfig
+    ? documentTypeConfig.getQuery(preferredSource.source.rollupInterval)
+    : undefined;
+};
+
+export const getDocumentsFilter = async ({
+  apmDataAccessServices,
+  apmDocumentSources,
+  from,
+  to,
+}: {
+  apmDataAccessServices?: ApmDataAccessServicesWrapper;
+  apmDocumentSources?: TimeRangeMetadata['sources'];
+  from: number;
+  to: number;
+}) => {
+  const apmDocumentsFilter =
+    apmDataAccessServices && apmDocumentSources
+      ? await getApmDocumentsFilter({
+          apmDataAccessServices,
+          apmDocumentSources,
+          start: from,
+          end: to,
+        })
+      : undefined;
+
+  const filters: estypes.QueryDslQueryContainer[] = [
+    getFilterByIntegration('system', apmDocumentsFilter && castArray(apmDocumentsFilter)),
+  ];
+
+  return filters;
 };
 
 export const getInventoryModelAggregations = (
+  assetType: 'host',
   metrics: InfraAssetMetricType[]
-): Record<string, estypes.AggregationsAggregationContainer> => {
-  const inventoryModel = findInventoryModel(INVENTORY_MODEL_NODE_TYPE);
-  return metrics.reduce(
-    (acc, metric) => Object.assign(acc, inventoryModel.metrics.snapshot?.[metric]),
+) => {
+  const inventoryModel = findInventoryModel(assetType);
+  return metrics.reduce<
+    Partial<
+      Record<
+        InfraAssetMetricType,
+        (typeof inventoryModel.metrics.snapshot)[keyof typeof inventoryModel.metrics.snapshot]
+      >
+    >
+  >(
+    (acc, metric) =>
+      inventoryModel.metrics.snapshot?.[metric]
+        ? Object.assign(acc, inventoryModel.metrics.snapshot[metric])
+        : acc,
     {}
   );
 };

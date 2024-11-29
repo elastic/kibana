@@ -7,10 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import {
-  PROCESSOR_EVENT,
-  SPAN_DESTINATION_SERVICE_RESOURCE,
-} from './es_fields/apm';
+import { PROCESSOR_EVENT, SPAN_DESTINATION_SERVICE_RESOURCE } from './es_fields/apm';
 import { environmentQuery } from './utils/environment_query';
 
 export const unifiedSearchBarPlaceholder = i18n.translate(
@@ -30,9 +27,7 @@ export const getSearchBarBoolFilter = ({
   return [
     { term: { [PROCESSOR_EVENT]: ProcessorEvent.metric } },
     { exists: { field: SPAN_DESTINATION_SERVICE_RESOURCE } },
-    ...(dependencyName
-      ? [{ term: { [SPAN_DESTINATION_SERVICE_RESOURCE]: dependencyName } }]
-      : []),
+    ...(dependencyName ? [{ term: { [SPAN_DESTINATION_SERVICE_RESOURCE]: dependencyName } }] : []),
     ...environmentQuery(environment),
   ];
 };

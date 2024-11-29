@@ -23,18 +23,18 @@ const serviceInventoryHref = url.format({
 
 const mainApiRequestsToIntercept = [
   {
+    method: 'GET',
     endpoint: '/internal/apm/services?*',
     aliasName: 'servicesRequest',
   },
   {
+    method: 'POST',
     endpoint: '/internal/apm/services/detailed_statistics?*',
     aliasName: 'detailedStatisticsRequest',
   },
 ];
 
-const mainAliasNames = mainApiRequestsToIntercept.map(
-  ({ aliasName }) => `@${aliasName}`
-);
+const mainAliasNames = mainApiRequestsToIntercept.map(({ aliasName }) => `@${aliasName}`);
 
 describe('Service inventory', () => {
   before(() => {
@@ -52,8 +52,13 @@ describe('Service inventory', () => {
 
   describe('When navigating to the service inventory', () => {
     beforeEach(() => {
+      mainApiRequestsToIntercept.forEach(({ aliasName, endpoint, method }) =>
+        cy.intercept(method, endpoint).as(aliasName)
+      );
       cy.loginAsViewerUser();
-      cy.visitKibana(serviceInventoryHref);
+      cy.visitKibana(serviceInventoryHref, {
+        localStorageOptions: [['apm.dismissedEntitiesInventoryCallout', 'false']],
+      });
     });
 
     it('has no detectable a11y violations on load', () => {
@@ -81,9 +86,8 @@ describe('Service inventory', () => {
 
   describe('Calls APIs', () => {
     beforeEach(() => {
-      cy.intercept('GET', '/internal/apm/services?*').as('servicesRequest');
-      cy.intercept('POST', '/internal/apm/services/detailed_statistics?*').as(
-        'detailedStatisticsRequest'
+      mainApiRequestsToIntercept.forEach(({ aliasName, endpoint, method }) =>
+        cy.intercept(method, endpoint).as(aliasName)
       );
 
       cy.loginAsViewerUser();
@@ -93,9 +97,11 @@ describe('Service inventory', () => {
     it('with the correct environment when changing the environment', () => {
       cy.wait(mainAliasNames);
 
-      cy.getByTestSubj('environmentFilter').type('production');
-
-      cy.contains('button', 'production').click();
+      cy.getByTestSubj('environmentFilter').find('input').click();
+      cy.getByTestSubj('comboBoxOptionsList environmentFilter-optionsList').should('be.visible');
+      cy.getByTestSubj('comboBoxOptionsList environmentFilter-optionsList')
+        .contains('button', 'production')
+        .click();
 
       cy.expectAPIsToHaveBeenCalledWith({
         apisIntercepted: mainAliasNames,
@@ -115,18 +121,14 @@ describe('Service inventory', () => {
     });
   });
 
-  // Skipping this until we enable the table search on the Service inventory view
-  describe.skip('Table search', () => {
+  describe('Table search', () => {
     beforeEach(() => {
-      cy.updateAdvancedSettings({
-        'observability:apmEnableTableSearchBar': true,
-      });
-
       cy.loginAsEditorUser();
     });
 
-    it('filters for java service on the table', () => {
+    it('Uses the fast filter to search for services', () => {
       cy.visitKibana(serviceInventoryHref);
+      cy.get('[data-test-subj="tableSearchInput"]').should('exist');
       cy.contains('opbeans-node');
       cy.contains('opbeans-java');
       cy.contains('opbeans-rum');
@@ -166,47 +168,21 @@ describe('Service inventory', () => {
       cy.intercept('POST', '/internal/apm/services/detailed_statistics?*').as(
         'detailedStatisticsRequest'
       );
-      cy.intercept('GET', '/internal/apm/services?*').as(
-        'mainStatisticsRequest'
-      );
+      cy.intercept('GET', '/internal/apm/services?*').as('mainStatisticsRequest');
 
-      cy.visitKibana(
-        `${serviceInventoryHref}&pageSize=10&sortField=serviceName&sortDirection=asc`
-      );
+      cy.visitKibana(`${serviceInventoryHref}&pageSize=10&sortField=serviceName&sortDirection=asc`);
       cy.wait('@mainStatisticsRequest');
       cy.contains('Services');
       cy.get('.euiPagination__list').children().should('have.length', 5);
       cy.wait('@detailedStatisticsRequest').then((payload) => {
         expect(payload.request.body.serviceNames).eql(
-          JSON.stringify([
-            '0',
-            '1',
-            '10',
-            '11',
-            '12',
-            '13',
-            '14',
-            '15',
-            '16',
-            '17',
-          ])
+          JSON.stringify(['0', '1', '10', '11', '12', '13', '14', '15', '16', '17'])
         );
       });
       cy.getByTestSubj('pagination-button-1').click();
       cy.wait('@detailedStatisticsRequest').then((payload) => {
         expect(payload.request.body.serviceNames).eql(
-          JSON.stringify([
-            '18',
-            '19',
-            '2',
-            '20',
-            '21',
-            '22',
-            '23',
-            '24',
-            '25',
-            '26',
-          ])
+          JSON.stringify(['18', '19', '2', '20', '21', '22', '23', '24', '25', '26'])
         );
       });
     });

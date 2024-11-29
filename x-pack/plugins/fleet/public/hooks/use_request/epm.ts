@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { useState } from 'react';
 
@@ -20,6 +20,7 @@ import type {
   GetLimitedPackagesResponse,
   GetInfoResponse,
   InstallPackageResponse,
+  DeletePackageRequest,
   DeletePackageResponse,
   UpdatePackageRequest,
   UpdatePackageResponse,
@@ -54,13 +55,16 @@ export function useGetReplacementCustomIntegrationsQuery() {
 }
 
 export function useGetCategoriesQuery(query: GetCategoriesRequest['query'] = {}) {
-  return useQuery<GetCategoriesResponse, RequestError>(['categories', query], () =>
-    sendRequestForRq<GetCategoriesResponse>({
-      path: epmRouteService.getCategoriesPath(),
-      method: 'get',
-      query,
-      version: API_VERSIONS.public.v1,
-    })
+  return useQuery<GetCategoriesResponse, RequestError>(
+    ['categories', query],
+    () =>
+      sendRequestForRq<GetCategoriesResponse>({
+        path: epmRouteService.getCategoriesPath(),
+        method: 'get',
+        query,
+        version: API_VERSIONS.public.v1,
+      }),
+    { retry: (_, error) => !isRegistryConnectionError(error), refetchOnWindowFocus: false }
   );
 }
 
@@ -96,6 +100,8 @@ export const useGetPackagesQuery = (
         query,
       }),
     enabled: options?.enabled,
+    retry: (_, error) => !isRegistryConnectionError(error),
+    refetchOnWindowFocus: false,
   });
 };
 
@@ -123,6 +129,7 @@ export const useGetPackageInfoByKeyQuery = (
     ignoreUnverified?: boolean;
     prerelease?: boolean;
     full?: boolean;
+    withMetadata?: boolean;
   },
   // Additional options for the useQuery hook
   queryOptions: {
@@ -150,7 +157,12 @@ export const useGetPackageInfoByKeyQuery = (
           ...(ignoreUnverifiedQueryParam && { ignoreUnverified: ignoreUnverifiedQueryParam }),
         },
       }),
-    { enabled: queryOptions.enabled, refetchOnMount: queryOptions.refetchOnMount }
+    {
+      enabled: queryOptions.enabled,
+      refetchOnMount: queryOptions.refetchOnMount,
+      retry: (_, error) => !isRegistryConnectionError(error),
+      refetchOnWindowFocus: false,
+    }
   );
 
   const confirm = async () => {
@@ -259,16 +271,17 @@ export const sendBulkInstallPackages = (
   });
 };
 
-export const sendRemovePackage = (pkgName: string, pkgVersion: string, force: boolean = false) => {
+export function sendRemovePackage(
+  { pkgName, pkgVersion }: DeletePackageRequest['params'],
+  query?: DeletePackageRequest['query']
+) {
   return sendRequest<DeletePackageResponse>({
     path: epmRouteService.getRemovePath(pkgName, pkgVersion),
     method: 'delete',
     version: API_VERSIONS.public.v1,
-    body: {
-      force,
-    },
+    query,
   });
-};
+}
 
 export const sendRequestReauthorizeTransforms = (
   pkgName: string,
@@ -289,6 +302,11 @@ interface UpdatePackageArgs {
   body: UpdatePackageRequest['body'];
 }
 
+interface InstallKibanaAssetsArgs {
+  pkgName: string;
+  pkgVersion: string;
+}
+
 export const useUpdatePackageMutation = () => {
   return useMutation<UpdatePackageResponse, RequestError, UpdatePackageArgs>(
     ({ pkgName, pkgVersion, body }: UpdatePackageArgs) =>
@@ -299,6 +317,22 @@ export const useUpdatePackageMutation = () => {
         body,
       })
   );
+};
+
+export const useInstallKibanaAssetsMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<any, RequestError, InstallKibanaAssetsArgs>({
+    mutationFn: ({ pkgName, pkgVersion }: InstallKibanaAssetsArgs) =>
+      sendRequestForRq({
+        path: epmRouteService.getInstallKibanaAssetsPath(pkgName, pkgVersion),
+        method: 'post',
+        version: API_VERSIONS.public.v1,
+      }),
+    onSuccess: (data, { pkgName, pkgVersion }) => {
+      return queryClient.invalidateQueries([pkgName, pkgVersion]);
+    },
+  });
 };
 
 export const sendUpdatePackage = (
@@ -337,4 +371,8 @@ export function useGetInputsTemplatesQuery(
         version: API_VERSIONS.public.v1,
       })
   );
+}
+
+function isRegistryConnectionError(error: RequestError) {
+  return error.statusCode === 502;
 }

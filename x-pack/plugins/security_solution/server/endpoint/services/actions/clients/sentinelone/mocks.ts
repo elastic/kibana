@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { SentinelOneGetAgentsResponse } from '@kbn/stack-connectors-plugin/common/sentinelone/types';
+import type {
+  SentinelOneGetAgentsResponse,
+  SentinelOneGetActivitiesResponse,
+  SentinelOneGetRemoteScriptsResponse,
+} from '@kbn/stack-connectors-plugin/common/sentinelone/types';
 import {
   SENTINELONE_CONNECTOR_ID,
   SUB_ACTION,
@@ -13,11 +17,13 @@ import {
 import type { ActionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
 import type { ConnectorWithExtraFindData } from '@kbn/actions-plugin/server/application/connector/types';
 import { merge } from 'lodash';
+import { SentinelOneDataGenerator } from '../../../../../../common/endpoint/data_generators/sentinelone_data_generator';
+import type { NormalizedExternalConnectorClient } from '../../..';
 import type { ResponseActionsClientOptionsMock } from '../mocks';
 import { responseActionsClientMock } from '../mocks';
 
 export interface SentinelOneActionsClientOptionsMock extends ResponseActionsClientOptionsMock {
-  connectorActions: ActionsClientMock;
+  connectorActions: NormalizedExternalConnectorClient;
 }
 
 const createSentinelOneAgentDetailsMock = (
@@ -126,6 +132,105 @@ const createSentinelOneAgentDetailsMock = (
   );
 };
 
+const createSentinelOneGetRemoteScriptsApiResponseMock =
+  (): SentinelOneGetRemoteScriptsResponse => {
+    return {
+      errors: null,
+      data: [
+        {
+          bucketName: 'us-east-1-prod-remote-scripts',
+          createdAt: '2022-07-17T14:02:45.309427Z',
+          createdByUser: 'SentinelOne',
+          createdByUserId: '-1',
+          creator: 'SentinelOne',
+          creatorId: '-1',
+          fileName:
+            '-1/-1/75cYNKCLYJ7kEsjtBSrha0dXTSANJeMmBDQpXlRzPQA%3D/multi-operations-script-bash.sh',
+          fileSize: 13701,
+          id: '1466645476786791838',
+          inputExample: '--terminate --processes ping,chrome --force',
+          inputInstructions: '--terminate --processes <processes-name-templates> [-f|--force]',
+          inputRequired: true,
+          isAvailableForArs: false,
+          isAvailableForLite: false,
+          mgmtId: -1,
+          osTypes: ['macos', 'linux'],
+          outputFilePaths: null,
+          package: null,
+          scopeId: '-1',
+          scopeLevel: 'sentinel',
+          scopeName: null,
+          scopePath: 'Global',
+          scriptDescription: null,
+          scriptName: 'Terminate Processes (Linux/macOS)',
+          scriptRuntimeTimeoutSeconds: 3600,
+          scriptType: 'action',
+          shortFileName: 'multi-operations-script-bash.sh',
+          signature: '75cYNKCLYJ7kEsjtBSrha0dXTSANJeMmBDQpXlRzPQA=',
+          signatureType: 'SHA-256',
+          supportedDestinations: null,
+          updatedAt: '2024-06-30T06:37:53.904005Z',
+          updater: null,
+          updaterId: null,
+          version: '1.0.0',
+        },
+      ],
+      pagination: { nextCursor: null, totalItems: 1 },
+    };
+  };
+
+const createSentinelOneGetActivitiesApiResponseMock = (): SentinelOneGetActivitiesResponse => {
+  return {
+    errors: undefined,
+    pagination: {
+      nextCursor: null,
+      totalItems: 1,
+    },
+    data: [
+      {
+        accountId: '1392053568574369781',
+        accountName: 'Elastic',
+        activityType: 81,
+        activityUuid: 'ee9227f5-8f59-4f6d-bd46-3b74f93fd939',
+        agentId: '1913920934584665209',
+        agentUpdatedVersion: null,
+        comments: null,
+        createdAt: '2024-04-16T19:21:08.492444Z',
+        data: {
+          accountName: 'Elastic',
+          commandBatchUuid: '7011777f-77e7-4a01-a674-e5f767808895',
+          computerName: 'ptavares-sentinelone-1371',
+          externalIp: '108.77.84.191',
+          fullScopeDetails: 'Group Default Group in Site Default site of Account Elastic',
+          fullScopeDetailsPath: 'Global / Elastic / Default site / Default Group',
+          groupName: 'Default Group',
+          groupType: 'Manual',
+          ipAddress: '108.77.84.191',
+          scopeLevel: 'Group',
+          scopeName: 'Default Group',
+          siteName: 'Default site',
+          username: 'Defend Workflows Automation',
+          uuid: 'c06d63d9-9fa2-046d-e91e-dc94cf6695d8',
+        },
+        description: null,
+        groupId: '1392053568591146999',
+        groupName: 'Default Group',
+        hash: null,
+        id: '1929937418124016884',
+        osFamily: null,
+        primaryDescription:
+          'The management user Defend Workflows Automation initiated a fetch file command to the agent ptavares-sentinelone-1371 (108.77.84.191).',
+        secondaryDescription: 'IP address: 108.77.84.191',
+        siteId: '1392053568582758390',
+        siteName: 'Default site',
+        threatId: null,
+        updatedAt: '2024-04-16T19:21:08.492450Z',
+        userId: '1796254913836217560',
+      },
+    ],
+  };
+};
+
 const createSentinelOneGetAgentsApiResponseMock = (
   data: SentinelOneGetAgentsResponse['data'] = [createSentinelOneAgentDetailsMock()]
 ): SentinelOneGetAgentsResponse => {
@@ -164,6 +269,33 @@ const createConnectorActionsClientMock = (): ActionsClientMock => {
             data: createSentinelOneGetAgentsApiResponseMock(),
           });
 
+        case SUB_ACTION.GET_ACTIVITIES:
+          return responseActionsClientMock.createConnectorActionExecuteResponse({
+            data: createSentinelOneGetActivitiesApiResponseMock(),
+          });
+
+        case SUB_ACTION.GET_REMOTE_SCRIPTS:
+          return responseActionsClientMock.createConnectorActionExecuteResponse({
+            data: createSentinelOneGetRemoteScriptsApiResponseMock(),
+          });
+
+        case SUB_ACTION.EXECUTE_SCRIPT:
+          return responseActionsClientMock.createConnectorActionExecuteResponse({
+            data: {
+              data: {
+                affected: 1,
+                parentTaskId: 'task-789',
+              },
+            },
+          });
+
+        case SUB_ACTION.GET_REMOTE_SCRIPT_STATUS:
+          return responseActionsClientMock.createConnectorActionExecuteResponse({
+            data: new SentinelOneDataGenerator(
+              'seed'
+            ).generateSentinelOneApiRemoteScriptStatusResponse({ status: 'completed' }),
+          });
+
         default:
           return responseActionsClientMock.createConnectorActionExecuteResponse();
       }
@@ -176,7 +308,9 @@ const createConnectorActionsClientMock = (): ActionsClientMock => {
 const createConstructorOptionsMock = (): SentinelOneActionsClientOptionsMock => {
   return {
     ...responseActionsClientMock.createConstructorOptions(),
-    connectorActions: createConnectorActionsClientMock(),
+    connectorActions: responseActionsClientMock.createNormalizedExternalConnectorClient(
+      createConnectorActionsClientMock()
+    ),
   };
 };
 
@@ -185,4 +319,6 @@ export const sentinelOneMock = {
   createSentinelOneAgentDetails: createSentinelOneAgentDetailsMock,
   createConnectorActionsClient: createConnectorActionsClientMock,
   createConstructorOptions: createConstructorOptionsMock,
+  createSentinelOneActivitiesApiResponse: createSentinelOneGetActivitiesApiResponseMock,
+  createSentinelOneGetRemoteScriptsApiResponse: createSentinelOneGetRemoteScriptsApiResponseMock,
 };

@@ -18,7 +18,9 @@ const Label = euiStyled.div`
 `;
 
 interface Props {
-  error: APMError;
+  error: {
+    error: Pick<APMError['error'], 'log' | 'exception' | 'culprit'>;
+  };
 }
 export function SampleSummary({ error }: Props) {
   const logMessage = error.error.log?.message;
@@ -49,9 +51,7 @@ export function SampleSummary({ error }: Props) {
         </Label>
       </EuiText>
       <EuiSpacer size="xs" />
-      <EuiCodeBlock isCopyable>
-        {excMessage || NOT_AVAILABLE_LABEL}
-      </EuiCodeBlock>
+      <EuiCodeBlock isCopyable>{excMessage || NOT_AVAILABLE_LABEL}</EuiCodeBlock>
       <EuiSpacer />
       <EuiText size="s">
         <Label>

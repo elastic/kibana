@@ -5,16 +5,14 @@
  * 2.0.
  */
 
-import { v4 as uuidV4 } from 'uuid';
 import type {
   BulkOperationContainer,
   BulkOperationType,
   BulkResponseItem,
   Script,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { Logger, ElasticsearchClient } from '@kbn/core/server';
+import type { AuthenticatedUser, Logger, ElasticsearchClient } from '@kbn/core/server';
 import { UUID } from '@kbn/elastic-assistant-common';
-import { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 
 export interface BulkOperationError {
   message: string;
@@ -24,11 +22,11 @@ export interface BulkOperationError {
   };
 }
 
-interface WriterBulkResponse {
+export interface WriterBulkResponse {
   errors: BulkOperationError[];
   docs_created: string[];
   docs_deleted: string[];
-  docs_updated: string[];
+  docs_updated: unknown[];
   took: number;
 }
 
@@ -36,7 +34,10 @@ interface BulkParams<TUpdateParams extends { id: string }, TCreateParams> {
   documentsToCreate?: TCreateParams[];
   documentsToUpdate?: TUpdateParams[];
   documentsToDelete?: string[];
-  getUpdateScript: (document: TUpdateParams, updatedAt: string) => Script;
+  getUpdateScript?: (
+    document: TUpdateParams,
+    updatedAt: string
+  ) => { script?: Script; doc?: TUpdateParams };
   authenticatedUser?: AuthenticatedUser;
 }
 
@@ -69,22 +70,28 @@ export class DocumentsDataWriter implements DocumentsDataWriter {
         return { errors: [], docs_created: [], docs_deleted: [], docs_updated: [], took: 0 };
       }
 
-      const { errors, items, took } = await this.options.esClient.bulk({
-        refresh: 'wait_for',
-        body: await this.buildBulkOperations(params),
-      });
+      const { errors, items, took } = await this.options.esClient.bulk(
+        {
+          refresh: 'wait_for',
+          body: await this.buildBulkOperations(params),
+        },
+        {
+          // Increasing timeout to 2min as KB docs were failing to load after 30s
+          requestTimeout: 120000,
+        }
+      );
 
       return {
         errors: errors ? this.formatErrorsResponse(items) : [],
         docs_created: items
           .filter((item) => item.create?.status === 201 || item.create?.status === 200)
-          .map((item) => item.create?._id ?? ''),
+          .map((item) => item.create?._id),
         docs_deleted: items
           .filter((item) => item.delete?.status === 201 || item.delete?.status === 200)
-          .map((item) => item.delete?._id ?? ''),
+          .map((item) => item.delete?._id),
         docs_updated: items
           .filter((item) => item.update?.status === 201 || item.update?.status === 200)
-          .map((item) => item.update?._id ?? ''),
+          .map((item) => item.update?.get?._source),
         took,
       } as WriterBulkResponse;
     } catch (e) {
@@ -106,14 +113,24 @@ export class DocumentsDataWriter implements DocumentsDataWriter {
     }
   };
 
-  private getUpdateDocumentsQuery = async <TUpdateParams extends { id: string }>(
-    documentsToUpdate: TUpdateParams[],
-    getUpdateScript: (document: TUpdateParams, updatedAt: string) => Script,
-    authenticatedUser?: AuthenticatedUser
-  ) => {
-    const updatedAt = new Date().toISOString();
-    const filterByUser = authenticatedUser
-      ? [
+  getFilterByUser = (authenticatedUser: AuthenticatedUser) => ({
+    filter: {
+      bool: {
+        should: [
+          {
+            bool: {
+              must_not: {
+                nested: {
+                  path: 'users',
+                  query: {
+                    exists: {
+                      field: 'users',
+                    },
+                  },
+                },
+              },
+            },
+          },
           {
             nested: {
               path: 'users',
@@ -130,8 +147,20 @@ export class DocumentsDataWriter implements DocumentsDataWriter {
               },
             },
           },
-        ]
-      : [];
+        ],
+      },
+    },
+  });
+
+  private getUpdateDocumentsQuery = async <TUpdateParams extends { id: string }>(
+    documentsToUpdate: TUpdateParams[],
+    getUpdateScript: (
+      document: TUpdateParams,
+      updatedAt: string
+    ) => { script?: Script; doc?: TUpdateParams },
+    authenticatedUser?: AuthenticatedUser
+  ) => {
+    const updatedAt = new Date().toISOString();
 
     const responseToUpdate = await this.options.esClient.search({
       body: {
@@ -149,8 +178,8 @@ export class DocumentsDataWriter implements DocumentsDataWriter {
                   ],
                 },
               },
-              ...filterByUser,
             ],
+            ...(authenticatedUser ? this.getFilterByUser(authenticatedUser) : {}),
           },
         },
       },
@@ -170,12 +199,10 @@ export class DocumentsDataWriter implements DocumentsDataWriter {
         update: {
           _id: document.id,
           _index: responseToUpdate?.hits.hits.find((c) => c._id === document.id)?._index,
+          _source: true,
         },
       },
-      {
-        script: getUpdateScript(document, updatedAt),
-        upsert: { counter: 1 },
-      },
+      getUpdateScript(document, updatedAt),
     ]);
   };
 
@@ -183,27 +210,6 @@ export class DocumentsDataWriter implements DocumentsDataWriter {
     documentsToDelete: string[],
     authenticatedUser?: AuthenticatedUser
   ) => {
-    const filterByUser = authenticatedUser
-      ? [
-          {
-            nested: {
-              path: 'users',
-              query: {
-                bool: {
-                  must: [
-                    {
-                      match: authenticatedUser.profile_uid
-                        ? { 'users.id': authenticatedUser.profile_uid }
-                        : { 'users.name': authenticatedUser.username },
-                    },
-                  ],
-                },
-              },
-            },
-          },
-        ]
-      : [];
-
     const responseToDelete = await this.options.esClient.search({
       body: {
         query: {
@@ -220,8 +226,8 @@ export class DocumentsDataWriter implements DocumentsDataWriter {
                   ],
                 },
               },
-              ...filterByUser,
             ],
+            ...(authenticatedUser ? this.getFilterByUser(authenticatedUser) : {}),
           },
         },
       },
@@ -245,13 +251,13 @@ export class DocumentsDataWriter implements DocumentsDataWriter {
   private buildBulkOperations = async <TUpdateParams extends { id: string }, TCreateParams>(
     params: BulkParams<TUpdateParams, TCreateParams>
   ): Promise<BulkOperationContainer[]> => {
-    const documentCreateBody =
-      params.authenticatedUser && params.documentsToCreate
-        ? params.documentsToCreate.flatMap((document) => [
-            { create: { _index: this.options.index, _id: uuidV4() } },
-            document,
-          ])
-        : [];
+    const documentCreateBody = params.documentsToCreate
+      ? params.documentsToCreate.flatMap((document) => [
+          // Do not pre-gen _id for bulk create operations to avoid `version_conflict_engine_exception`
+          { create: { _index: this.options.index } },
+          document,
+        ])
+      : [];
 
     const documentDeletedBody =
       params.documentsToDelete && params.documentsToDelete.length > 0
@@ -259,7 +265,7 @@ export class DocumentsDataWriter implements DocumentsDataWriter {
         : [];
 
     const documentUpdatedBody =
-      params.documentsToUpdate && params.documentsToUpdate.length > 0
+      params.documentsToUpdate && params.documentsToUpdate.length > 0 && params.getUpdateScript
         ? await this.getUpdateDocumentsQuery(
             params.documentsToUpdate,
             params.getUpdateScript,

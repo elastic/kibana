@@ -14,9 +14,7 @@ import { CriticalPathFlamegraph } from '../../shared/critical_path_flamegraph';
 import { TechnicalPreviewBadge } from '../../shared/technical_preview_badge';
 import { TabContentProps } from './transaction_details_tabs';
 
-function TransactionDetailAggregatedCriticalPath({
-  traceSamplesFetchResult,
-}: TabContentProps) {
+function TransactionDetailAggregatedCriticalPath({ traceSamplesFetchResult }: TabContentProps) {
   const {
     path: { serviceName },
     query: { rangeFrom, rangeTo, transactionName },
@@ -28,11 +26,7 @@ function TransactionDetailAggregatedCriticalPath({
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const traceIds = useMemo(() => {
-    return (
-      traceSamplesFetchResult.data?.traceSamples.map(
-        (sample) => sample.traceId
-      ) ?? []
-    );
+    return traceSamplesFetchResult.data?.traceSamples.map((sample) => sample.traceId) ?? [];
   }, [traceSamplesFetchResult.data]);
 
   return (
@@ -53,19 +47,12 @@ export const aggregatedCriticalPathTab = {
   label: (
     <EuiFlexGroup gutterSize="s" direction="row">
       <EuiFlexItem grow={false}>
-        {i18n.translate(
-          'xpack.apm.transactionDetails.tabs.aggregatedCriticalPathLabel',
-          {
-            defaultMessage: 'Aggregated critical path',
-          }
-        )}
+        {i18n.translate('xpack.apm.transactionDetails.tabs.aggregatedCriticalPathLabel', {
+          defaultMessage: 'Aggregated critical path',
+        })}
       </EuiFlexItem>
       <EuiFlexItem>
-        <TechnicalPreviewBadge
-          icon="beaker"
-          size="s"
-          style={{ verticalAlign: 'middle' }}
-        />
+        <TechnicalPreviewBadge icon="beaker" size="s" style={{ verticalAlign: 'middle' }} />
       </EuiFlexItem>
     </EuiFlexGroup>
   ),

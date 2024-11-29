@@ -6,30 +6,64 @@
  */
 
 import { CASES_URL } from '@kbn/cases-plugin/common';
-import { Case } from '@kbn/cases-plugin/common/types/domain';
-import { CasePostRequest } from '@kbn/cases-plugin/common/types/api';
+import { Case, CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
+import {
+  CasePostRequest,
+  CasesFindResponse,
+  CasePatchRequest,
+} from '@kbn/cases-plugin/common/types/api';
 import type SuperTest from 'supertest';
+import { ToolingLog } from '@kbn/tooling-log';
 import { User } from '../authentication/types';
 
 import { superUser } from '../authentication/users';
 import { getSpaceUrlPrefix, setupAuth } from './helpers';
+import { waitFor } from '../../../../common/utils/security_solution/detections_response';
 
 export const createCase = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  supertest: SuperTest.Agent,
   params: CasePostRequest,
   expectedHttpCode: number = 200,
   auth: { user: User; space: string | null } | null = { user: superUser, space: null },
-  headers: Record<string, unknown> = {}
+  headers: Record<string, string | string[]> = {}
 ): Promise<Case> => {
   const apiCall = supertest.post(`${getSpaceUrlPrefix(auth?.space)}${CASES_URL}`);
 
-  setupAuth({ apiCall, headers, auth });
+  void setupAuth({ apiCall, headers, auth });
 
   const { body: theCase } = await apiCall
     .set('kbn-xsrf', 'true')
     .set('x-elastic-internal-origin', 'foo')
     .set(headers)
     .send(params)
+    .expect(expectedHttpCode);
+
+  return theCase;
+};
+
+export const waitForCases = async (supertest: SuperTest.Agent, log: ToolingLog): Promise<void> => {
+  await waitFor(
+    async () => {
+      const response = await getCases(supertest);
+      const cases = response;
+      return cases != null && cases.cases.length > 0 && cases?.cases[0]?.totalAlerts > 0;
+    },
+    'waitForCaseToAttachAlert',
+    log
+  );
+};
+
+export const getCases = async (
+  supertest: SuperTest.Agent,
+  expectedHttpCode: number = 200,
+  headers: Record<string, string | string[]> = {}
+): Promise<CasesFindResponse> => {
+  const { body: theCase } = await supertest
+    .get(`${CASES_URL}/_find`)
+    .set('kbn-xsrf', 'true')
+    .set('x-elastic-internal-origin', 'foo')
+    .set('elastic-api-version', '2023-10-31')
+    .set(headers)
     .expect(expectedHttpCode);
 
   return theCase;
@@ -44,7 +78,7 @@ export const deleteCases = async ({
   expectedHttpCode = 204,
   auth = { user: superUser, space: null },
 }: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: SuperTest.Agent;
   caseIDs: string[];
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null };
@@ -60,4 +94,33 @@ export const deleteCases = async ({
     .expect(expectedHttpCode);
 
   return body;
+};
+
+export const updateCaseStatus = async ({
+  supertest,
+  caseId,
+  version = '2',
+  status = 'open' as CaseStatuses,
+  expectedHttpCode = 204,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: SuperTest.Agent;
+  caseId: string;
+  version?: string;
+  status?: CaseStatuses;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+}) => {
+  const updateRequest: CasePatchRequest = {
+    status,
+    version,
+    id: caseId,
+  };
+
+  const { body: updatedCase } = await supertest
+    .patch(`/api/cases/${caseId}`)
+    .auth(auth.user.username, auth.user.password)
+    .set('kbn-xsrf', 'xxx')
+    .send(updateRequest);
+  return updatedCase;
 };

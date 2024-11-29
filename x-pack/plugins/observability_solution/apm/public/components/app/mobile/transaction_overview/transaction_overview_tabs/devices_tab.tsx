@@ -21,20 +21,16 @@ function DevicesTab({
   comparisonEnabled,
   offset,
 }: TabContentProps) {
-  const {
-    mainStatistics,
-    mainStatisticsStatus,
-    detailedStatistics,
-    detailedStatisticsStatus,
-  } = useMobileStatisticsFetcher({
-    field: DEVICE_MODEL_IDENTIFIER,
-    environment,
-    kuery,
-    start,
-    end,
-    comparisonEnabled,
-    offset,
-  });
+  const { mainStatistics, mainStatisticsStatus, detailedStatistics, detailedStatisticsStatus } =
+    useMobileStatisticsFetcher({
+      field: DEVICE_MODEL_IDENTIFIER,
+      environment,
+      kuery,
+      start,
+      end,
+      comparisonEnabled,
+      offset,
+    });
 
   return (
     <StatsList

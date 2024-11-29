@@ -24,7 +24,11 @@ export const Stat: FC<StatProps> = ({ stat }) => {
   return (
     <span css={{ marginRight: euiTheme.size.s }}>
       <span>{stat.label}</span>:{' '}
-      <strong data-test-subj={stat['data-test-subj']}>{stat.value}</strong>
+      <strong>
+        <span data-test-subj={`mlStatsBarStat ${stat.label.toLowerCase()} value`}>
+          {stat.value}
+        </span>
+      </strong>
     </span>
   );
 };

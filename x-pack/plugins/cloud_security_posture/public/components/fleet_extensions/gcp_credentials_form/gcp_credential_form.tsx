@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect, useRef } from 'react';
+import React, { Suspense, useEffect, useRef } from 'react';
 import semverLt from 'semver/functions/lt';
 import semverCoerce from 'semver/functions/coerce';
 import semverValid from 'semver/functions/valid';
@@ -15,25 +15,23 @@ import {
   EuiForm,
   EuiFormRow,
   EuiHorizontalRule,
+  EuiLink,
+  EuiLoadingSpinner,
   EuiSelect,
   EuiSpacer,
   EuiText,
-  EuiTextArea,
   EuiTitle,
 } from '@elastic/eui';
-import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
+import { LazyPackagePolicyInputVarField, type NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
 import { GcpCredentialsType } from '../../../../common/types_old';
-import {
-  CLOUDBEAT_GCP,
-  SETUP_ACCESS_CLOUD_SHELL,
-  SETUP_ACCESS_MANUAL,
-} from '../../../../common/constants';
+import { CLOUDBEAT_GCP } from '../../../../common/constants';
 import { CspRadioOption, RadioGroup } from '../csp_boxed_radio_group';
 import {
+  findVariableDef,
   getCspmCloudShellDefaultValue,
   getPosturePolicy,
   NewPackagePolicyPostureInput,
@@ -47,8 +45,20 @@ import {
   GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ,
 } from '../../test_subjects';
 
-type SetupFormatGCP = 'google_cloud_shell' | 'manual';
-export const GCPSetupInfoContent = () => (
+export const GCP_SETUP_ACCESS = {
+  CLOUD_SHELL: 'google_cloud_shell',
+  MANUAL: 'manual',
+} as const;
+
+export const GCP_CREDENTIALS_TYPE = {
+  CREDENTIALS_FILE: 'credentials-file',
+  CREDENTIALS_JSON: 'credentials-json',
+  CREDENTIALS_NONE: 'credentials-none',
+} as const;
+
+type SetupFormatGCP = typeof GCP_SETUP_ACCESS.CLOUD_SHELL | typeof GCP_SETUP_ACCESS.MANUAL;
+
+export const GCPSetupInfoContent = ({ isAgentless }: { isAgentless: boolean }) => (
   <>
     <EuiHorizontalRule margin="xl" />
     <EuiTitle size="xs">
@@ -61,12 +71,40 @@ export const GCPSetupInfoContent = () => (
     </EuiTitle>
     <EuiSpacer size="l" />
     <EuiText color={'subdued'} size="s">
-      <FormattedMessage
-        id="xpack.csp.gcpIntegration.setupInfoContent"
-        defaultMessage="The integration will need elevated access to run some CIS benchmark rules. Select your preferred
-    method of providing the GCP credentials this integration will use. You can follow these
-    step-by-step instructions to generate the necessary credentials."
-      />
+      {isAgentless ? (
+        <FormattedMessage
+          id="xpack.csp.gcpIntegration.agentlessSetupInfoContent"
+          defaultMessage="The integration will need elevated access to run some CIS benchmark rules.You can follow these
+    step-by-step instructions to generate the necessary credentials. Refer to our {gettingStartedLink} guide for details."
+          values={{
+            gettingStartedLink: (
+              <EuiLink href={cspIntegrationDocsNavigation.cspm.gcpGetStartedPath} target="_blank">
+                <FormattedMessage
+                  id="xpack.csp.azureIntegration.gettingStarted.agentlessSetupInfoContentLink"
+                  defaultMessage="Getting Started"
+                />
+              </EuiLink>
+            ),
+          }}
+        />
+      ) : (
+        <FormattedMessage
+          id="xpack.csp.gcpIntegration.setupInfoContent"
+          defaultMessage="The integration will need elevated access to run some CIS benchmark rules. Select your preferred
+method of providing the GCP credentials this integration will use. You can follow these
+step-by-step instructions to generate the necessary credentials. Refer to our {gettingStartedLink} guide for details."
+          values={{
+            gettingStartedLink: (
+              <EuiLink href={cspIntegrationDocsNavigation.cspm.gcpGetStartedPath} target="_blank">
+                <FormattedMessage
+                  id="xpack.csp.azureIntegration.gettingStarted.setupInfoContentLink"
+                  defaultMessage="Getting Started"
+                />
+              </EuiLink>
+            ),
+          }}
+        />
+      )}
     </EuiText>
   </>
 );
@@ -173,19 +211,22 @@ const credentialOptionsList = [
     text: i18n.translate('xpack.csp.gcpIntegration.credentialsFileOption', {
       defaultMessage: 'Credentials File',
     }),
-    value: 'credentials-file',
+    value: GCP_CREDENTIALS_TYPE.CREDENTIALS_FILE,
     'data-test-subj': 'credentials_file_option_test_id',
   },
   {
     text: i18n.translate('xpack.csp.gcpIntegration.credentialsJsonOption', {
       defaultMessage: 'Credentials JSON',
     }),
-    value: 'credentials-json',
+    value: GCP_CREDENTIALS_TYPE.CREDENTIALS_JSON,
     'data-test-subj': 'credentials_json_option_test_id',
   },
 ];
 
-type GcpFields = Record<string, { label: string; type?: 'password' | 'text'; value?: string }>;
+type GcpFields = Record<
+  string,
+  { label: string; type?: 'password' | 'text'; value?: string; isSecret?: boolean }
+>;
 interface GcpInputFields {
   fields: GcpFields;
 }
@@ -214,7 +255,8 @@ export const gcpField: GcpInputFields = {
       label: i18n.translate('xpack.csp.findings.gcpIntegration.gcpInputText.credentialJSONText', {
         defaultMessage: 'JSON blob containing the credentials and key used to subscribe',
       }),
-      type: 'text',
+      type: 'password',
+      isSecret: true,
     },
     'gcp.credentials.type': {
       label: i18n.translate(
@@ -230,7 +272,7 @@ export const gcpField: GcpInputFields = {
 
 const getSetupFormatOptions = (): CspRadioOption[] => [
   {
-    id: SETUP_ACCESS_CLOUD_SHELL,
+    id: GCP_SETUP_ACCESS.CLOUD_SHELL,
     label: i18n.translate('xpack.csp.gcpIntegration.setupFormatOptions.googleCloudShell', {
       defaultMessage: 'Google Cloud Shell',
     }),
@@ -238,7 +280,7 @@ const getSetupFormatOptions = (): CspRadioOption[] => [
     testId: GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ.CLOUD_SHELL,
   },
   {
-    id: SETUP_ACCESS_MANUAL,
+    id: GCP_SETUP_ACCESS.MANUAL,
     label: i18n.translate('xpack.csp.gcpIntegration.setupFormatOptions.manual', {
       defaultMessage: 'Manual',
     }),
@@ -255,6 +297,7 @@ export interface GcpFormProps {
   setIsValid: (isValid: boolean) => void;
   onChange: any;
   disabled: boolean;
+  isEditPage?: boolean;
 }
 
 export const getInputVarsFields = (input: NewPackagePolicyInput, fields: GcpFields) =>
@@ -279,13 +322,13 @@ const getSetupFormatFromInput = (
   const credentialsType = input.streams[0].vars?.setup_access?.value;
   // Google Cloud shell is the default value
   if (!credentialsType) {
-    return SETUP_ACCESS_CLOUD_SHELL;
+    return GCP_SETUP_ACCESS.CLOUD_SHELL;
   }
-  if (credentialsType !== SETUP_ACCESS_CLOUD_SHELL) {
-    return SETUP_ACCESS_MANUAL;
+  if (credentialsType !== GCP_SETUP_ACCESS.CLOUD_SHELL) {
+    return GCP_SETUP_ACCESS.MANUAL;
   }
 
-  return SETUP_ACCESS_CLOUD_SHELL;
+  return GCP_SETUP_ACCESS.CLOUD_SHELL;
 };
 
 const getGoogleCloudShellUrl = (newPolicy: NewPackagePolicy) => {
@@ -328,7 +371,7 @@ const useCloudShellUrl = ({
   useEffect(() => {
     const policyInputCloudShellUrl = getGoogleCloudShellUrl(newPolicy);
 
-    if (setupFormat === SETUP_ACCESS_MANUAL) {
+    if (setupFormat === GCP_SETUP_ACCESS.MANUAL) {
       if (!!policyInputCloudShellUrl) {
         updateCloudShellUrl(newPolicy, updatePolicy, undefined);
       }
@@ -349,7 +392,7 @@ const useCloudShellUrl = ({
 
 export const getGcpCredentialsType = (
   input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_gcp' }>
-): GcpCredentialsType | undefined => input.streams[0].vars?.setup_access.value;
+): GcpCredentialsType | undefined => input.streams[0].vars?.['gcp.credentials.type'].value;
 
 export const GcpCredentialsForm = ({
   input,
@@ -359,6 +402,7 @@ export const GcpCredentialsForm = ({
   setIsValid,
   onChange,
   disabled,
+  isEditPage,
 }: GcpFormProps) => {
   /* Create a subset of properties from GcpField to use for hiding value of credentials json and credentials file when user switch from Manual to Cloud Shell, we wanna keep Project and Organization ID */
   const subsetOfGcpField = (({ ['gcp.credentials.file']: a, ['gcp.credentials.json']: b }) => ({
@@ -371,7 +415,7 @@ export const GcpCredentialsForm = ({
   const integrationVersionNumberOnly = semverCoerce(validSemantic) || '';
   const isInvalid = semverLt(integrationVersionNumberOnly, MIN_VERSION_GCP_CIS);
   const fieldsSnapshot = useRef({});
-  const lastSetupAccessType = useRef<string | undefined>(undefined);
+  const lastCredentialsType = useRef<string | undefined>(undefined);
   const setupFormat = getSetupFormatFromInput(input);
   const accountType = input.streams?.[0]?.vars?.['gcp.account_type']?.value;
   const isOrganization = accountType === 'organization-account';
@@ -395,18 +439,22 @@ export const GcpCredentialsForm = ({
     setupFormat,
   });
   const onSetupFormatChange = (newSetupFormat: SetupFormatGCP) => {
-    if (newSetupFormat === 'google_cloud_shell') {
+    if (newSetupFormat === GCP_SETUP_ACCESS.CLOUD_SHELL) {
       // We need to store the current manual fields to restore them later
       fieldsSnapshot.current = Object.fromEntries(
         fieldsToHide.map((field) => [field.id, { value: field.value }])
       );
       // We need to store the last manual credentials type to restore it later
-      lastSetupAccessType.current = getGcpCredentialsType(input);
+      lastCredentialsType.current = getGcpCredentialsType(input);
 
       updatePolicy(
         getPosturePolicy(newPolicy, input.type, {
           setup_access: {
-            value: 'google_cloud_shell',
+            value: GCP_SETUP_ACCESS.CLOUD_SHELL,
+            type: 'text',
+          },
+          'gcp.credentials.type': {
+            value: GCP_CREDENTIALS_TYPE.CREDENTIALS_NONE,
             type: 'text',
           },
           // Clearing fields from previous setup format to prevent exposing credentials
@@ -418,8 +466,12 @@ export const GcpCredentialsForm = ({
       updatePolicy(
         getPosturePolicy(newPolicy, input.type, {
           setup_access: {
+            value: GCP_SETUP_ACCESS.MANUAL,
+            type: 'text',
+          },
+          'gcp.credentials.type': {
             // Restoring last manual credentials type
-            value: lastSetupAccessType.current || SETUP_ACCESS_MANUAL,
+            value: lastCredentialsType.current || GCP_CREDENTIALS_TYPE.CREDENTIALS_FILE,
             type: 'text',
           },
           // Restoring fields from manual setup format if any
@@ -444,11 +496,11 @@ export const GcpCredentialsForm = ({
   }
   return (
     <>
-      <GCPSetupInfoContent />
+      <GCPSetupInfoContent isAgentless={false} />
       <EuiSpacer size="l" />
       <RadioGroup
         disabled={disabled}
-        size="s"
+        size="m"
         options={getSetupFormatOptions()}
         idSelected={setupFormat}
         onChange={(idSelected: SetupFormatGCP) =>
@@ -456,7 +508,7 @@ export const GcpCredentialsForm = ({
         }
       />
       <EuiSpacer size="l" />
-      {setupFormat === SETUP_ACCESS_CLOUD_SHELL ? (
+      {setupFormat === GCP_SETUP_ACCESS.CLOUD_SHELL ? (
         <GoogleCloudShellSetup
           disabled={disabled}
           fields={fields}
@@ -473,11 +525,13 @@ export const GcpCredentialsForm = ({
             updatePolicy(getPosturePolicy(newPolicy, input.type, { [key]: { value } }))
           }
           isOrganization={isOrganization}
+          packageInfo={packageInfo}
+          isEditPage={isEditPage}
         />
       )}
 
       <EuiSpacer size="s" />
-      <ReadDocumentation url={cspIntegrationDocsNavigation.cspm.getStartedPath} />
+      <ReadDocumentation url={cspIntegrationDocsNavigation.cspm.gcpGetStartedPath} />
       <EuiSpacer />
     </>
   );
@@ -488,11 +542,15 @@ export const GcpInputVarFields = ({
   onChange,
   isOrganization,
   disabled,
+  packageInfo,
+  isEditPage,
 }: {
   fields: Array<GcpFields[keyof GcpFields] & { value: string; id: string }>;
   onChange: (key: string, value: string) => void;
   isOrganization: boolean;
   disabled: boolean;
+  packageInfo: PackageInfo;
+  isEditPage?: boolean;
 }) => {
   const getFieldById = (id: keyof GcpInputFields['fields']) => {
     return fields.find((element) => element.id === id);
@@ -565,15 +623,41 @@ export const GcpInputVarFields = ({
           </EuiFormRow>
         )}
         {credentialsTypeValue === credentialJSONValue && credentialJSONFields && (
-          <EuiFormRow fullWidth label={gcpField.fields['gcp.credentials.json'].label}>
-            <EuiTextArea
-              data-test-subj={CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_JSON}
-              id={credentialJSONFields.id}
-              fullWidth
-              value={credentialJSONFields.value || ''}
-              onChange={(event) => onChange(credentialJSONFields.id, event.target.value)}
-            />
-          </EuiFormRow>
+          <div
+            css={css`
+              width: 100%;
+              .euiFormControlLayout,
+              .euiFormControlLayout__childrenWrapper,
+              .euiFormRow,
+              input {
+                max-width: 100%;
+                width: 100%;
+              }
+            `}
+          >
+            <EuiSpacer size="m" />
+            <EuiFormRow fullWidth label={gcpField.fields['gcp.credentials.json'].label}>
+              <Suspense fallback={<EuiLoadingSpinner size="l" />}>
+                <LazyPackagePolicyInputVarField
+                  data-test-subj={CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_JSON}
+                  varDef={{
+                    ...findVariableDef(packageInfo, credentialJSONFields.id)!,
+                    required: true,
+                    type: 'textarea',
+                    secret: true,
+                    full_width: true,
+                  }}
+                  value={credentialJSONFields.value || ''}
+                  onChange={(value) => {
+                    onChange(credentialJSONFields.id, value);
+                  }}
+                  errors={[]}
+                  forceShowErrors={false}
+                  isEditPage={isEditPage}
+                />
+              </Suspense>
+            </EuiFormRow>
+          </div>
         )}
       </EuiForm>
     </div>

@@ -1,22 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { EuiErrorBoundary, EuiFlexGroup, EuiPanel, htmlIdGenerator } from '@elastic/eui';
 import { PanelLoader } from '@kbn/panel-loader';
 import {
-  apiPublishesPhaseEvents,
   apiHasParentApi,
   apiPublishesViewMode,
-  useBatchedPublishingSubjects,
+  useBatchedOptionalPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import classNames from 'classnames';
-import React, { useEffect, useMemo, useState } from 'react';
-import { Subscription } from 'rxjs';
+import React, { useMemo, useState } from 'react';
+import { PresentationPanelHoverActions } from './panel_header/presentation_panel_hover_actions';
 import { PresentationPanelHeader } from './panel_header/presentation_panel_header';
 import { PresentationPanelError } from './presentation_panel_error';
 import { DefaultPresentationPanelApi, PresentationPanelInternalProps } from './types';
@@ -28,6 +28,7 @@ export const PresentationPanelInternal = <
   index,
   hideHeader,
   showShadow,
+  showBorder,
 
   showBadges,
   showNotifications,
@@ -36,8 +37,6 @@ export const PresentationPanelInternal = <
 
   Component,
   componentProps,
-
-  onPanelStatusChange,
 }: PresentationPanelInternalProps<ApiType, ComponentPropsType>) => {
   const [api, setApi] = useState<ApiType | null>(null);
   const headerId = useMemo(() => htmlIdGenerator()(), []);
@@ -54,15 +53,17 @@ export const PresentationPanelInternal = <
     hidePanelTitle,
     panelDescription,
     defaultPanelTitle,
+    defaultPanelDescription,
     rawViewMode,
     parentHidePanelTitle,
-  ] = useBatchedPublishingSubjects(
+  ] = useBatchedOptionalPublishingSubjects(
     api?.dataLoading,
     api?.blockingError,
     api?.panelTitle,
     api?.hidePanelTitle,
     api?.panelDescription,
     api?.defaultPanelTitle,
+    api?.defaultPanelDescription,
     viewModeSubject,
     api?.parentApi?.hidePanelTitle
   );
@@ -76,74 +77,69 @@ export const PresentationPanelInternal = <
   const hideTitle =
     Boolean(hidePanelTitle) ||
     Boolean(parentHidePanelTitle) ||
-    (viewMode === 'view' && !Boolean(panelTitle ?? defaultPanelTitle));
-
-  useEffect(() => {
-    let subscription: Subscription;
-    if (api && onPanelStatusChange && apiPublishesPhaseEvents(api)) {
-      subscription = api.onPhaseChange.subscribe((phase) => {
-        if (phase) onPanelStatusChange(phase);
-      });
-    }
-    return () => subscription?.unsubscribe();
-  }, [api, onPanelStatusChange]);
+    !Boolean(panelTitle ?? defaultPanelTitle);
 
   const contentAttrs = useMemo(() => {
     const attrs: { [key: string]: boolean } = {};
-    if (dataLoading) attrs['data-loading'] = true;
+    if (dataLoading) {
+      attrs['data-loading'] = true;
+    } else {
+      attrs['data-render-complete'] = true;
+    }
     if (blockingError) attrs['data-error'] = true;
     return attrs;
   }, [dataLoading, blockingError]);
 
   return (
-    <EuiPanel
-      role="figure"
-      paddingSize="none"
-      className={classNames('embPanel', {
-        'embPanel--editing': viewMode === 'edit',
-      })}
-      hasShadow={showShadow}
-      aria-labelledby={headerId}
-      data-test-embeddable-id={api?.uuid}
-      data-test-subj="embeddablePanel"
+    <PresentationPanelHoverActions
+      {...{ index, api, getActions, actionPredicate, viewMode, showNotifications, showBorder }}
     >
-      {!hideHeader && api && (
-        <PresentationPanelHeader
-          api={api}
-          index={index}
-          headerId={headerId}
-          viewMode={viewMode}
-          hideTitle={hideTitle}
-          showBadges={showBadges}
-          getActions={getActions}
-          actionPredicate={actionPredicate}
-          panelDescription={panelDescription}
-          showNotifications={showNotifications}
-          panelTitle={panelTitle ?? defaultPanelTitle}
-        />
-      )}
-      {blockingError && api && (
-        <EuiFlexGroup
-          alignItems="center"
-          className="eui-fullHeight embPanel__error"
-          data-test-subj="embeddableError"
-          justifyContent="center"
-        >
-          <PresentationPanelError api={api} error={blockingError} />
-        </EuiFlexGroup>
-      )}
-      {!initialLoadComplete && <PanelLoader />}
-      <div className={blockingError ? 'embPanel__content--hidden' : 'embPanel__content'}>
-        <EuiErrorBoundary>
-          <Component
-            {...(componentProps as React.ComponentProps<typeof Component>)}
-            {...contentAttrs}
-            ref={(newApi) => {
-              if (newApi && !api) setApi(newApi);
-            }}
+      <EuiPanel
+        role="figure"
+        paddingSize="none"
+        className={classNames('embPanel', {
+          'embPanel--editing': viewMode === 'edit',
+        })}
+        hasShadow={showShadow}
+        aria-labelledby={headerId}
+        data-test-subj="embeddablePanel"
+        {...contentAttrs}
+      >
+        {!hideHeader && api && (
+          <PresentationPanelHeader
+            api={api}
+            headerId={headerId}
+            viewMode={viewMode}
+            hideTitle={hideTitle}
+            showBadges={showBadges}
+            getActions={getActions}
+            showNotifications={showNotifications}
+            panelTitle={panelTitle ?? defaultPanelTitle}
+            panelDescription={panelDescription ?? defaultPanelDescription}
           />
-        </EuiErrorBoundary>
-      </div>
-    </EuiPanel>
+        )}
+        {blockingError && api && (
+          <EuiFlexGroup
+            alignItems="center"
+            className="eui-fullHeight embPanel__error"
+            data-test-subj="embeddableError"
+            justifyContent="center"
+          >
+            <PresentationPanelError api={api} error={blockingError} />
+          </EuiFlexGroup>
+        )}
+        {!initialLoadComplete && <PanelLoader />}
+        <div className={blockingError ? 'embPanel__content--hidden' : 'embPanel__content'}>
+          <EuiErrorBoundary>
+            <Component
+              {...(componentProps as React.ComponentProps<typeof Component>)}
+              ref={(newApi) => {
+                if (newApi && !api) setApi(newApi);
+              }}
+            />
+          </EuiErrorBoundary>
+        </div>
+      </EuiPanel>
+    </PresentationPanelHoverActions>
   );
 };

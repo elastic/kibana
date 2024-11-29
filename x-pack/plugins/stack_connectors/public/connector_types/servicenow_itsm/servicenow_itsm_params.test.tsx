@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { act, waitFor } from '@testing-library/react';
+import { act, render, waitFor, screen } from '@testing-library/react';
 import { merge } from 'lodash';
 
 import { ActionConnector, ActionConnectorMode } from '@kbn/triggers-actions-ui-plugin/public/types';
@@ -15,6 +15,8 @@ import { useGetChoices } from '../lib/servicenow/use_get_choices';
 import ServiceNowITSMParamsFields from './servicenow_itsm_params';
 import { Choice } from '../lib/servicenow/types';
 import { ACTION_GROUP_RECOVERED } from '../lib/servicenow/helpers';
+import userEvent from '@testing-library/user-event';
+import { I18nProvider } from '@kbn/i18n-react';
 
 jest.mock('../lib/servicenow/use_get_choices');
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
@@ -35,6 +37,7 @@ const actionParams = {
       externalId: null,
       correlation_id: 'alertID',
       correlation_display: 'Alerting',
+      additional_fields: null,
     },
     comments: [],
   },
@@ -301,6 +304,16 @@ describe('ServiceNowITSMParamsFields renders', () => {
       expect(wrapper.find('input[data-test-subj="short_descriptionInput"]').exists()).toBeFalsy();
     });
 
+    test('shows incident details when action group is undefined', () => {
+      const newProps = {
+        ...defaultProps,
+        selectedActionGroupId: undefined,
+      };
+      const wrapper = mountWithIntl(<ServiceNowITSMParamsFields {...newProps} />);
+      expect(wrapper.find('input[data-test-subj="short_descriptionInput"]').exists()).toBeTruthy();
+      expect(wrapper.find('input[data-test-subj="correlation_idInput"]').exists()).toBeTruthy();
+    });
+
     test('A short description change triggers editAction', () => {
       const wrapper = mountWithIntl(
         <ServiceNowITSMParamsFields
@@ -364,7 +377,21 @@ describe('ServiceNowITSMParamsFields renders', () => {
 
       const wrapper = mountWithIntl(<ServiceNowITSMParamsFields {...newProps} />);
 
-      expect(wrapper.find('.euiFormErrorText').text()).toBe('correlation_id_error');
+      expect(wrapper.find('div.euiFormErrorText').text()).toBe('correlation_id_error');
+    });
+
+    it('updates additional fields', async () => {
+      const newValue = JSON.stringify({ bar: 'test' });
+      render(<ServiceNowITSMParamsFields {...defaultProps} />, {
+        wrapper: ({ children }) => <I18nProvider>{children}</I18nProvider>,
+      });
+
+      await userEvent.click(await screen.findByTestId('additional_fieldsJsonEditor'));
+      await userEvent.paste(newValue);
+
+      await waitFor(() => {
+        expect(editAction.mock.calls[0][1].incident.additional_fields).toEqual(newValue);
+      });
     });
   });
 

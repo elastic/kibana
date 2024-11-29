@@ -51,7 +51,10 @@ import type { FieldVisConfig } from '../../../common/components/stats_table/type
 import type { TotalFieldsStats } from '../../../common/components/stats_table/components/field_count_stats';
 import type { OverallStats } from '../../types/overall_stats';
 import { IndexBasedDataVisualizerExpandedRow } from '../../../common/components/expanded_row/index_based_expanded_row';
-import { DATA_VISUALIZER_INDEX_VIEWER } from '../../constants/index_data_visualizer_viewer';
+import {
+  DATA_VISUALIZER_INDEX_VIEWER,
+  DATA_VISUALIZER_INDEX_VIEWER_ID,
+} from '../../constants/index_data_visualizer_viewer';
 import type {
   DataVisualizerIndexBasedAppState,
   DataVisualizerIndexBasedPageUrlState,
@@ -70,7 +73,7 @@ import {
   RANDOM_SAMPLER_OPTION,
   type RandomSamplerOption,
 } from '../../constants/random_sampler';
-import type { DataVisualizerGridInput } from '../../embeddables/grid_embeddable/types';
+import type { FieldStatisticTableEmbeddableProps } from '../../embeddables/grid_embeddable/types';
 
 const defaultSearchQuery = {
   match_all: {},
@@ -151,6 +154,10 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     dataVisualizerProps.currentSavedSearch
   );
 
+  const [localQueryString, setLocalQueryString] = useState<Query['query'] | undefined>(
+    dataVisualizerListState.searchString
+  );
+
   const { currentDataView, currentSessionId, getAdditionalLinks } = dataVisualizerProps;
 
   const dataViewFields: DataViewField[] = currentDataView.fields;
@@ -214,14 +221,14 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     });
   };
 
-  const input: Required<DataVisualizerGridInput, 'dataView'> = useMemo(() => {
+  const input: Required<FieldStatisticTableEmbeddableProps, 'dataView'> = useMemo(() => {
     return {
       dataView: currentDataView,
       savedSearch: currentSavedSearch,
       sessionId: currentSessionId,
       visibleFieldNames,
       allowEditDataView: true,
-      id: 'index_data_visualizer',
+      id: DATA_VISUALIZER_INDEX_VIEWER_ID,
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentDataView.id, currentSavedSearch?.id, visibleFieldNames, currentSessionId]);
@@ -461,6 +468,43 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     },
   });
 
+  const queryNeedsUpdate = useMemo(
+    () => (localQueryString !== dataVisualizerListState.searchString ? true : undefined),
+    [dataVisualizerListState.searchString, localQueryString]
+  );
+
+  const onQueryChange = useCallback((query: Query['query'] | undefined) => {
+    setLocalQueryString(query);
+  }, []);
+
+  const handleRefresh = useCallback(() => {
+    if (queryNeedsUpdate) {
+      const newQuery = buildEsQuery(
+        currentDataView,
+        {
+          query: localQueryString || '',
+          language: searchQueryLanguage,
+        },
+        data.query.filterManager.getFilters() ?? [],
+        uiSettings ? getEsQueryConfig(uiSettings) : undefined
+      );
+      setDataVisualizerListState({
+        ...dataVisualizerListState,
+        searchString: localQueryString,
+        searchQuery: newQuery,
+      });
+    }
+  }, [
+    queryNeedsUpdate,
+    currentDataView,
+    localQueryString,
+    searchQueryLanguage,
+    data.query.filterManager,
+    uiSettings,
+    setDataVisualizerListState,
+    dataVisualizerListState,
+  ]);
+
   return (
     <EuiPageTemplate
       offset={0}
@@ -511,6 +555,8 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
                 isAutoRefreshOnly={!hasValidTimeField}
                 showRefresh={!hasValidTimeField}
                 width="full"
+                needsUpdate={queryNeedsUpdate}
+                onRefresh={handleRefresh}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -534,6 +580,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
                 setVisibleFieldNames={setVisibleFieldNames}
                 showEmptyFields={showEmptyFields}
                 onAddFilter={onAddFilter}
+                onQueryChange={onQueryChange}
               />
 
               {overallStats?.totalCount !== undefined && (

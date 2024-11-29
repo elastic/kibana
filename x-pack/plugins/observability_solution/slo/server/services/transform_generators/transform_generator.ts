@@ -9,61 +9,30 @@ import {
   MappingRuntimeFields,
   TransformPutTransformRequest,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { DataView, DataViewsService } from '@kbn/data-views-plugin/common';
 import { ALL_VALUE, timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
 import { TransformSettings } from '../../assets/transform_templates/slo_transform_template';
-import { SLO } from '../../domain/models';
+import { SLODefinition } from '../../domain/models';
 
 export abstract class TransformGenerator {
-  public abstract getTransformParams(slo: SLO, spaceId: string): TransformPutTransformRequest;
+  constructor(
+    protected spaceId: string,
+    protected dataViewService: DataViewsService,
+    protected isServerless: boolean = false
+  ) {}
 
-  public buildCommonRuntimeMappings(slo: SLO): MappingRuntimeFields {
-    const groupings = [slo.groupBy].flat().filter((value) => !!value);
-    const hasGroupings = !groupings.includes(ALL_VALUE) && groupings.length;
-    return {
-      'slo.id': {
-        type: 'keyword',
-        script: {
-          source: `emit('${slo.id}')`,
-        },
-      },
-      'slo.revision': {
-        type: 'long',
-        script: {
-          source: `emit(${slo.revision})`,
-        },
-      },
-      ...(hasGroupings
-        ? {
-            'slo.instanceId': {
-              type: 'keyword',
-              script: {
-                source: this.buildInstanceId(slo),
-              },
-            },
-          }
-        : {
-            'slo.instanceId': {
-              type: 'keyword',
-              script: {
-                source: `emit('${ALL_VALUE}')`,
-              },
-            },
-          }),
-    };
+  public abstract getTransformParams(slo: SLODefinition): Promise<TransformPutTransformRequest>;
+
+  public buildCommonRuntimeMappings(dataView?: DataView): MappingRuntimeFields {
+    return dataView?.getRuntimeMappings?.() ?? {};
   }
 
-  public buildInstanceId(slo: SLO): string {
-    const groups = [slo.groupBy].flat().filter((value) => !!value);
-    const groupings = groups.map((group) => `'${group}:'+doc['${group}'].value`).join(`+'|'+`);
-    return `emit(${groupings})`;
-  }
-
-  public buildDescription(slo: SLO): string {
+  public buildDescription(slo: SLODefinition): string {
     return `Rolled-up SLI data for SLO: ${slo.name} [id: ${slo.id}, revision: ${slo.revision}]`;
   }
 
   public buildCommonGroupBy(
-    slo: SLO,
+    slo: SLODefinition,
     sourceIndexTimestampField: string | undefined = '@timestamp',
     extraGroupByFields = {}
   ) {
@@ -76,28 +45,19 @@ export abstract class TransformGenerator {
 
     const groupings =
       !groups.includes(ALL_VALUE) && groups.length
-        ? groups.reduce(
-            (acc, field) => {
-              return {
-                ...acc,
-                [`slo.groupings.${field}`]: {
-                  terms: {
-                    field,
-                  },
+        ? groups.reduce((acc, field) => {
+            return {
+              ...acc,
+              [`slo.groupings.${field}`]: {
+                terms: {
+                  field,
                 },
-              };
-            },
-            {
-              'slo.instanceId': {
-                terms: { field: 'slo.instanceId' },
               },
-            }
-          )
-        : { 'slo.instanceId': { terms: { field: 'slo.instanceId' } } };
+            };
+          }, {})
+        : {};
 
     return {
-      'slo.id': { terms: { field: 'slo.id' } },
-      'slo.revision': { terms: { field: 'slo.revision' } },
       ...groupings,
       ...extraGroupByFields,
       // @timestamp field defined in the destination index
@@ -110,8 +70,20 @@ export abstract class TransformGenerator {
     };
   }
 
+  public async getIndicatorDataView(dataViewId?: string): Promise<DataView | undefined> {
+    let dataView: DataView | undefined;
+    if (dataViewId) {
+      try {
+        dataView = await this.dataViewService.get(dataViewId);
+      } catch (e) {
+        // If the data view is not found, we will continue without it
+      }
+    }
+    return dataView;
+  }
+
   public buildSettings(
-    slo: SLO,
+    slo: SLODefinition,
     sourceIndexTimestampField: string | undefined = '@timestamp'
   ): TransformSettings {
     return {

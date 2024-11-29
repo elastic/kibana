@@ -7,6 +7,7 @@
 
 import { Meta, Story } from '@storybook/react';
 import React from 'react';
+import { EntityDataStreamType } from '@kbn/observability-shared-plugin/common';
 import { ServiceOverview } from '.';
 import { MockApmPluginStorybook } from '../../../context/apm_plugin/mock_apm_plugin_storybook';
 import { APMServiceContextValue } from '../../../context/apm_service/apm_service_context';
@@ -21,24 +22,27 @@ const stories: Meta<{}> = {
       const serviceName = 'testServiceName';
       const transactionType = 'type';
       const transactionTypeStatus = FETCH_STATUS.SUCCESS;
+      const serviceEntitySummary = {
+        dataStreamTypes: [EntityDataStreamType.METRICS, EntityDataStreamType.LOGS],
+      };
 
       mockApmApiCallResponse(
         `GET /api/apm/services/{serviceName}/annotation/search 2023-10-31`,
         () => ({ annotations: [] })
       );
-      mockApmApiCallResponse(
-        `GET /internal/apm/fallback_to_transactions`,
-        () => ({ fallbackToTransactions: false })
-      );
-      mockApmApiCallResponse(
-        `GET /internal/apm/services/{serviceName}/dependencies`,
-        () => ({ serviceDependencies: [] })
-      );
+      mockApmApiCallResponse(`GET /internal/apm/fallback_to_transactions`, () => ({
+        fallbackToTransactions: false,
+      }));
+      mockApmApiCallResponse(`GET /internal/apm/services/{serviceName}/dependencies`, () => ({
+        serviceDependencies: [],
+      }));
 
       const serviceContextValue = {
         serviceName,
         transactionType,
         transactionTypeStatus,
+        serviceEntitySummary,
+        transactionTypes: ['type'],
       } as unknown as APMServiceContextValue;
 
       return (

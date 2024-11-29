@@ -31,7 +31,7 @@ export const fetchSyncJobsStats = async (
       scroll: '10s',
       stored_fields: [],
     });
-    const ids = connectorIdsResult.hits.hits.map((hit) => hit._id);
+    const ids = connectorIdsResult.hits.hits.map((hit) => hit._id!);
     const orphanedJobsCountResponse = await client.asCurrentUser.count({
       index: CONNECTORS_JOBS_INDEX,
       query: getOrphanedJobsCountQuery(ids, isCrawler),

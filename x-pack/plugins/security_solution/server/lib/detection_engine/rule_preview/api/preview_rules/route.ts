@@ -19,28 +19,31 @@ import type {
 import { parseDuration, DISABLE_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common';
 import type { ExecutorType } from '@kbn/alerting-plugin/server/types';
 import type { Alert } from '@kbn/alerting-plugin/server';
-
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import {
   DEFAULT_PREVIEW_INDEX,
   DETECTION_ENGINE_RULES_PREVIEW,
+  SERVER_APP_ID,
 } from '../../../../../../common/constants';
 import { validateCreateRuleProps } from '../../../../../../common/api/detection_engine/rule_management';
 import { RuleExecutionStatusEnum } from '../../../../../../common/api/detection_engine/rule_monitoring';
 import type {
-  PreviewResponse,
+  RulePreviewResponse,
   RulePreviewLogs,
 } from '../../../../../../common/api/detection_engine';
-import { PreviewRulesSchema } from '../../../../../../common/api/detection_engine';
+import {
+  RulePreviewRequestBody,
+  RulePreviewRequestQuery,
+} from '../../../../../../common/api/detection_engine';
+import type { RulePreviewLoggedRequest } from '../../../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
 
 import type { StartPlugins, SetupPlugins } from '../../../../../plugin';
 import { buildSiemResponse } from '../../../routes/utils';
-import { convertCreateAPIToInternalSchema } from '../../../rule_management';
 import type { RuleParams } from '../../../rule_schema';
 import { createPreviewRuleExecutionLogger } from './preview_rule_execution_logger';
 import { parseInterval } from '../../../rule_types/utils/utils';
 import { buildMlAuthz } from '../../../../machine_learning/authz';
 import { throwAuthzError } from '../../../../machine_learning/validation';
-import { buildRouteValidationWithZod } from '../../../../../utils/build_validation/route_validation';
 import { routeLimitedConcurrencyTag } from '../../../../../utils/route_limited_concurrency_tag';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 
@@ -65,11 +68,13 @@ import { createSecurityRuleTypeWrapper } from '../../../rule_types/create_securi
 import { assertUnreachable } from '../../../../../../common/utility_types';
 import { wrapScopedClusterClient } from './wrap_scoped_cluster_client';
 import { wrapSearchSourceClient } from './wrap_search_source_client';
+import { applyRuleDefaults } from '../../../rule_management/logic/detection_rules_client/mergers/apply_rule_defaults';
+import { convertRuleResponseToAlertingRule } from '../../../rule_management/logic/detection_rules_client/converters/convert_rule_response_to_alerting_rule';
 
 const PREVIEW_TIMEOUT_SECONDS = 60;
 const MAX_ROUTE_CONCURRENCY = 10;
 
-export const previewRulesRoute = async (
+export const previewRulesRoute = (
   router: SecuritySolutionPluginRouter,
   config: ConfigType,
   ml: SetupPlugins['ml'],
@@ -78,22 +83,33 @@ export const previewRulesRoute = async (
   securityRuleTypeOptions: CreateSecurityRuleTypeWrapperProps,
   previewRuleDataClient: IRuleDataClient,
   getStartServices: StartServicesAccessor<StartPlugins>,
-  logger: Logger
+  logger: Logger,
+  isServerless: boolean
 ) => {
   router.versioned
     .post({
       path: DETECTION_ENGINE_RULES_PREVIEW,
       access: 'public',
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
       options: {
-        tags: ['access:securitySolution', routeLimitedConcurrencyTag(MAX_ROUTE_CONCURRENCY)],
+        tags: [routeLimitedConcurrencyTag(MAX_ROUTE_CONCURRENCY)],
       },
     })
     .addVersion(
       {
         version: '2023-10-31',
-        validate: { request: { body: buildRouteValidationWithZod(PreviewRulesSchema) } },
+        validate: {
+          request: {
+            body: buildRouteValidationWithZod(RulePreviewRequestBody),
+            query: buildRouteValidationWithZod(RulePreviewRequestQuery),
+          },
+        },
       },
-      async (context, request, response): Promise<IKibanaResponse<PreviewResponse>> => {
+      async (context, request, response): Promise<IKibanaResponse<RulePreviewResponse>> => {
         const siemResponse = buildSiemResponse(response);
         const validationErrors = validateCreateRuleProps(request.body);
         const coreContext = await context.core;
@@ -106,6 +122,7 @@ export const previewRulesRoute = async (
           const searchSourceClient = await data.search.searchSource.asScoped(request);
           const savedObjectsClient = coreContext.savedObjects.client;
           const siemClient = (await context.securitySolution).getAppClient();
+          const actionsClient = (await context.actions).getActionsClient();
 
           const timeframeEnd = request.body.timeframeEnd;
           let invocationCount = request.body.invocationCount;
@@ -119,7 +136,10 @@ export const previewRulesRoute = async (
             });
           }
 
-          const internalRule = convertCreateAPIToInternalSchema(request.body);
+          const internalRule = convertRuleResponseToAlertingRule(
+            applyRuleDefaults(request.body),
+            actionsClient
+          );
           const previewRuleParams = internalRule.params;
 
           const mlAuthz = buildMlAuthz({
@@ -138,7 +158,9 @@ export const previewRulesRoute = async (
           const username = security?.authc.getCurrentUser(request)?.username;
           const loggedStatusChanges: Array<RuleExecutionContext & StatusChangeArgs> = [];
           const previewRuleExecutionLogger = createPreviewRuleExecutionLogger(loggedStatusChanges);
-          const runState: Record<string, unknown> = {};
+          const runState: Record<string, unknown> = {
+            isLoggedRequestsEnabled: request.query.enable_logged_requests,
+          };
           const logs: RulePreviewLogs[] = [];
           let isAborted = false;
 
@@ -219,6 +241,7 @@ export const previewRulesRoute = async (
             }
           ) => {
             let statePreview = runState as TState;
+            let loggedRequests = [];
 
             const abortController = new AbortController();
             setTimeout(() => {
@@ -238,6 +261,8 @@ export const previewRulesRoute = async (
               createdAt: new Date(),
               createdBy: username ?? 'preview-created-by',
               producer: 'preview-producer',
+              consumer: SERVER_APP_ID,
+              enabled: true,
               revision: 0,
               ruleTypeId,
               ruleTypeName,
@@ -261,7 +286,7 @@ export const previewRulesRoute = async (
             while (invocationCount > 0 && !isAborted) {
               invocationStartTime = moment();
 
-              ({ state: statePreview } = (await executor({
+              ({ state: statePreview, loggedRequests } = (await executor({
                 executionId: uuidv4(),
                 params,
                 previousStartedAt,
@@ -276,16 +301,19 @@ export const previewRulesRoute = async (
                     abortController,
                     scopedClusterClient: coreContext.elasticsearch.client,
                   }),
-                  searchSourceClient: wrapSearchSourceClient({
-                    abortController,
-                    searchSourceClient,
-                  }),
+                  getSearchSourceClient: async () =>
+                    wrapSearchSourceClient({
+                      abortController,
+                      searchSourceClient,
+                    }),
+                  getMaintenanceWindowIds: async () => [],
                   uiSettingsClient: coreContext.uiSettings.client,
-                  dataViews: dataViewsService,
+                  getDataViews: async () => dataViewsService,
                   share,
                 },
                 spaceId,
                 startedAt: startedAt.toDate(),
+                startedAtOverridden: true,
                 state: statePreview,
                 logger,
                 flappingSettings: DISABLE_FLAPPING_SETTINGS,
@@ -293,7 +321,8 @@ export const previewRulesRoute = async (
                   const date = startedAt.toISOString();
                   return { dateStart: date, dateEnd: date };
                 },
-              })) as { state: TState });
+                isServerless,
+              })) as { state: TState; loggedRequests: RulePreviewLoggedRequest[] });
 
               const errors = loggedStatusChanges
                 .filter((item) => item.newStatus === RuleExecutionStatusEnum.failed)
@@ -308,6 +337,7 @@ export const previewRulesRoute = async (
                 warnings,
                 startedAt: startedAt.toDate().toISOString(),
                 duration: moment().diff(invocationStartTime, 'milliseconds'),
+                ...(loggedRequests ? { requests: loggedRequests } : {}),
               });
 
               loggedStatusChanges.length = 0;
@@ -430,7 +460,7 @@ export const previewRulesRoute = async (
               );
               break;
             case 'esql':
-              if (!config.settings.ESQLEnabled || config.experimentalFeatures.esqlRulesDisabled) {
+              if (config.experimentalFeatures.esqlRulesDisabled) {
                 throw Error('ES|QL rule type is not supported');
               }
               const esqlAlertType = previewRuleTypeWrapper(createEsqlAlertType(ruleOptions));

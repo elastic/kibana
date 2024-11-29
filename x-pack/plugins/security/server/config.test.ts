@@ -8,6 +8,7 @@
 jest.mock('crypto', () => ({
   randomBytes: jest.fn(),
   constants: jest.requireActual('crypto').constants,
+  createHash: jest.requireActual('crypto').createHash,
 }));
 
 jest.mock('@kbn/utils', () => ({
@@ -61,6 +62,9 @@ describe('config schema', () => {
         },
         "cookieName": "sid",
         "encryptionKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "fipsMode": Object {
+          "enabled": false,
+        },
         "loginAssistanceMessage": "",
         "public": Object {},
         "secureCookies": false,
@@ -115,6 +119,9 @@ describe('config schema', () => {
         },
         "cookieName": "sid",
         "encryptionKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "fipsMode": Object {
+          "enabled": false,
+        },
         "loginAssistanceMessage": "",
         "public": Object {},
         "secureCookies": false,
@@ -168,6 +175,9 @@ describe('config schema', () => {
           "selector": Object {},
         },
         "cookieName": "sid",
+        "fipsMode": Object {
+          "enabled": false,
+        },
         "loginAssistanceMessage": "",
         "public": Object {},
         "secureCookies": false,
@@ -224,9 +234,12 @@ describe('config schema', () => {
           "selector": Object {},
         },
         "cookieName": "sid",
+        "fipsMode": Object {
+          "enabled": false,
+        },
         "loginAssistanceMessage": "",
         "public": Object {},
-        "roleManagementEnabled": false,
+        "roleManagementEnabled": true,
         "secureCookies": false,
         "session": Object {
           "cleanupInterval": "PT1H",
@@ -2002,6 +2015,57 @@ describe('createConfig()', () => {
         },
       })
     ).toThrow('[audit.appender.1.layout]: expected at least one defined value but got [undefined]');
+  });
+
+  it('allows filtering audit events', () => {
+    expect(
+      ConfigSchema.validate({
+        audit: {
+          enabled: true,
+          appender: {
+            type: 'file',
+            fileName: '/path/to/file.txt',
+            layout: {
+              type: 'json',
+            },
+          },
+          ignore_filters: [
+            {
+              actions: ['authentication_success', 'authorization_failure'],
+              categories: ['database'],
+              outcomes: ['unknown'],
+              spaces: ['default'],
+              types: ['index'],
+              users: ['elastic'],
+            },
+          ],
+        },
+      }).audit.ignore_filters
+    ).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "actions": Array [
+            "authentication_success",
+            "authorization_failure",
+          ],
+          "categories": Array [
+            "database",
+          ],
+          "outcomes": Array [
+            "unknown",
+          ],
+          "spaces": Array [
+            "default",
+          ],
+          "types": Array [
+            "index",
+          ],
+          "users": Array [
+            "elastic",
+          ],
+        },
+      ]
+    `);
   });
 
   describe('#getExpirationTimeouts', () => {

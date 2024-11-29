@@ -6,7 +6,7 @@
  */
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiButtonEmpty, EuiBadge, EuiText, EuiLoadingSpinner, EuiLink } from '@elastic/eui';
+import { EuiBadge, EuiText, EuiLink } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { RulesTableEmptyColumnName } from '../rules_table_empty_column_name';
 import { SHOW_RELATED_INTEGRATIONS_SETTING } from '../../../../../../common/constants';
@@ -25,6 +25,7 @@ import type {
   RuleResponse,
 } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import { getNormalizedSeverity } from '../helpers';
+import { PrebuiltRulesInstallButton } from './add_prebuilt_rules_install_button';
 
 export type TableColumn = EuiBasicTableColumn<RuleResponse>;
 
@@ -109,32 +110,21 @@ const INTEGRATIONS_COLUMN: TableColumn = {
 const createInstallButtonColumn = (
   installOneRule: AddPrebuiltRulesTableActions['installOneRule'],
   loadingRules: RuleSignatureId[],
-  isDisabled: boolean
+  isDisabled: boolean,
+  isInstallingAllRules: boolean
 ): TableColumn => ({
   field: 'rule_id',
   name: <RulesTableEmptyColumnName name={i18n.INSTALL_RULE_BUTTON} />,
-  render: (ruleId: RuleSignatureId, record: Rule) => {
-    const isRuleInstalling = loadingRules.includes(ruleId);
-    const isInstallButtonDisabled = isRuleInstalling || isDisabled;
-    return (
-      <EuiButtonEmpty
-        size="s"
-        disabled={isInstallButtonDisabled}
-        onClick={() => installOneRule(ruleId)}
-        data-test-subj={`installSinglePrebuiltRuleButton-${ruleId}`}
-        aria-label={i18n.INSTALL_RULE_BUTTON_ARIA_LABEL(record.name)}
-      >
-        {isRuleInstalling ? (
-          <EuiLoadingSpinner
-            size="s"
-            data-test-subj={`installSinglePrebuiltRuleButton-loadingSpinner-${ruleId}`}
-          />
-        ) : (
-          i18n.INSTALL_RULE_BUTTON
-        )}
-      </EuiButtonEmpty>
-    );
-  },
+  render: (ruleId: RuleSignatureId, record: Rule) => (
+    <PrebuiltRulesInstallButton
+      ruleId={ruleId}
+      record={record}
+      installOneRule={installOneRule}
+      loadingRules={loadingRules}
+      isDisabled={isDisabled}
+      isInstallingAllRules={isInstallingAllRules}
+    />
+  ),
   width: '10%',
   align: 'center',
 });
@@ -144,11 +134,11 @@ export const useAddPrebuiltRulesTableColumns = (): TableColumn[] => {
   const hasCRUDPermissions = hasUserCRUDPermission(canUserCRUD);
   const [showRelatedIntegrations] = useUiSetting$<boolean>(SHOW_RELATED_INTEGRATIONS_SETTING);
   const {
-    state: { loadingRules, isRefetching, isUpgradingSecurityPackages },
+    state: { loadingRules, isRefetching, isUpgradingSecurityPackages, isInstallingAllRules },
     actions: { installOneRule },
   } = useAddPrebuiltRulesTableContext();
 
-  const isDisabled = isRefetching || isUpgradingSecurityPackages;
+  const isDisabled = isRefetching || isUpgradingSecurityPackages || isInstallingAllRules;
 
   return useMemo(
     () => [
@@ -176,9 +166,23 @@ export const useAddPrebuiltRulesTableColumns = (): TableColumn[] => {
         width: '12%',
       },
       ...(hasCRUDPermissions
-        ? [createInstallButtonColumn(installOneRule, loadingRules, isDisabled)]
+        ? [
+            createInstallButtonColumn(
+              installOneRule,
+              loadingRules,
+              isDisabled,
+              isInstallingAllRules
+            ),
+          ]
         : []),
     ],
-    [hasCRUDPermissions, installOneRule, loadingRules, isDisabled, showRelatedIntegrations]
+    [
+      hasCRUDPermissions,
+      installOneRule,
+      loadingRules,
+      isDisabled,
+      showRelatedIntegrations,
+      isInstallingAllRules,
+    ]
   );
 };

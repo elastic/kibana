@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildSiemResponse } from '../../../routes/utils';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
@@ -17,16 +16,15 @@ import { createInstalledIntegrationSet } from './installed_integration_set';
 /**
  * Returns an array of installed Fleet integrations and their packages.
  */
-export const getInstalledIntegrationsRoute = (
-  router: SecuritySolutionPluginRouter,
-  logger: Logger
-) => {
+export const getInstalledIntegrationsRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
     .get({
       access: 'internal',
       path: GET_INSTALLED_INTEGRATIONS_URL,
-      options: {
-        tags: ['access:securitySolution'],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
       },
     })
     .addVersion(
@@ -50,7 +48,7 @@ export const getInstalledIntegrationsRoute = (
           });
 
           const packagePolicies = await fleet.packagePolicy.list(
-            fleet.internalReadonlySoClient,
+            fleet.savedObjects.createInternalScopedSoClient(),
             {}
           );
           packagePolicies.items.forEach((policy) => {

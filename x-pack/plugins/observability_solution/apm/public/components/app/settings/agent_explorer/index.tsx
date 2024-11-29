@@ -23,10 +23,7 @@ import {
   OtelAgentLatestVersion,
 } from '../../../../../common/agent_explorer';
 import { isOpenTelemetryAgentName } from '../../../../../common/agent_name';
-import {
-  SERVICE_LANGUAGE_NAME,
-  SERVICE_NAME,
-} from '../../../../../common/es_fields/apm';
+import { SERVICE_LANGUAGE_NAME, SERVICE_NAME } from '../../../../../common/es_fields/apm';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { EnvironmentsContextProvider } from '../../../../context/environments_context/environments_context';
 import { useApmParams } from '../../../../hooks/use_apm_params';
@@ -50,13 +47,7 @@ const getOtelLatestAgentVersion = (
     : otelLatestVersion?.sdk_latest_version;
 };
 
-function useAgentExplorerFetcher({
-  start,
-  end,
-}: {
-  start: string;
-  end: string;
-}) {
+function useAgentExplorerFetcher({ start, end }: { start: string; end: string }) {
   const {
     query: { environment, serviceName, agentLanguage, kuery },
   } = useApmParams('/settings/agent-explorer');
@@ -110,8 +101,7 @@ export function AgentExplorer() {
     useLatestAgentVersionsFetcher(latestAgentVersionEnabled);
 
   const isLoading = agents.status === FETCH_STATUS.LOADING;
-  const isLatestAgentVersionsLoading =
-    latestAgentVersionsStatus === FETCH_STATUS.LOADING;
+  const isLatestAgentVersionsLoading = latestAgentVersionsStatus === FETCH_STATUS.LOADING;
 
   const agentItems = (agents.data?.items ?? []).map((agent) => ({
     ...agent,
@@ -120,11 +110,8 @@ export function AgentExplorer() {
           agent.agentTelemetryAutoVersion,
           latestAgentVersions?.data?.[agent.agentName] as OtelAgentLatestVersion
         )
-      : (
-          latestAgentVersions?.data?.[
-            agent.agentName
-          ] as ElasticApmAgentLatestVersion
-        )?.latest_version,
+      : (latestAgentVersions?.data?.[agent.agentName] as ElasticApmAgentLatestVersion)
+          ?.latest_version,
   }));
 
   const noItemsMessage = (
@@ -162,37 +149,27 @@ export function AgentExplorer() {
       <EuiFlexItem grow={false}>
         <EuiText color="subdued">
           {i18n.translate('xpack.apm.settings.agentExplorer.descriptionText', {
-            defaultMessage:
-              'Agent Explorer provides an inventory and details of deployed Agents.',
+            defaultMessage: 'Agent Explorer provides an inventory and details of deployed Agents.',
           })}
         </EuiText>
       </EuiFlexItem>
       <EuiSpacer />
       <EuiFlexItem grow={false}>
-        <UnifiedSearchBar
-          showDatePicker={false}
-          showSubmitButton={false}
-          isClearable={false}
-        />
+        <UnifiedSearchBar showDatePicker={false} showSubmitButton={false} isClearable={false} />
       </EuiFlexItem>
       <EuiSpacer size="xs" />
       <EuiFlexItem>
         <EuiFlexGroup justifyContent="flexEnd" responsive={true}>
           <EuiFlexItem grow={false}>
-            <EnvironmentsContextProvider
-              customTimeRange={{ rangeFrom, rangeTo }}
-            >
+            <EnvironmentsContextProvider customTimeRange={{ rangeFrom, rangeTo }}>
               <ApmEnvironmentFilter />
             </EnvironmentsContextProvider>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <SuggestionsSelect
-              prepend={i18n.translate(
-                'xpack.apm.agentExplorer.serviceNameSelect.label',
-                {
-                  defaultMessage: 'Service name',
-                }
-              )}
+              prepend={i18n.translate('xpack.apm.agentExplorer.serviceNameSelect.label', {
+                defaultMessage: 'Service name',
+              })}
               defaultValue={serviceName}
               fieldName={SERVICE_NAME}
               onChange={(value) => {
@@ -200,12 +177,9 @@ export function AgentExplorer() {
                   query: { serviceName: value ?? '' },
                 });
               }}
-              placeholder={i18n.translate(
-                'xpack.apm.agentExplorer.serviceNameSelect.placeholder',
-                {
-                  defaultMessage: 'All',
-                }
-              )}
+              placeholder={i18n.translate('xpack.apm.agentExplorer.serviceNameSelect.placeholder', {
+                defaultMessage: 'All',
+              })}
               start={start}
               end={end}
               dataTestSubj="agentExplorerServiceNameSelect"
@@ -213,12 +187,9 @@ export function AgentExplorer() {
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <SuggestionsSelect
-              prepend={i18n.translate(
-                'xpack.apm.agentExplorer.agentLanguageSelect.label',
-                {
-                  defaultMessage: 'Agent language',
-                }
-              )}
+              prepend={i18n.translate('xpack.apm.agentExplorer.agentLanguageSelect.label', {
+                defaultMessage: 'Agent language',
+              })}
               defaultValue={agentLanguage}
               fieldName={SERVICE_LANGUAGE_NAME}
               onChange={(value) => {

@@ -17,13 +17,13 @@ export interface RRuleAttributes {
   count?: number;
   interval?: number;
   wkst?: WeekdayStr;
-  byweekday?: Array<string | number>;
-  bymonth?: number[];
-  bysetpos?: number[];
-  bymonthday?: number[];
-  byyearday?: number[];
-  byweekno?: number[];
-  byhour?: number[];
-  byminute?: number[];
-  bysecond?: number[];
+  byweekday?: Array<string | number> | null;
+  bymonth?: number[] | null;
+  bysetpos?: number[] | null;
+  bymonthday?: number[] | null;
+  byyearday?: number[] | null;
+  byweekno?: number[] | null;
+  byhour?: number[] | null;
+  byminute?: number[] | null;
+  bysecond?: number[] | null;
 }

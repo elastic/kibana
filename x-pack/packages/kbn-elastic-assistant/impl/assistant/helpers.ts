@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import { merge } from 'lodash/fp';
+import { isEmpty, some } from 'lodash';
 import { AIConnector } from '../connectorland/connector_selector';
 import { FetchConnectorExecuteResponse, FetchConversationsResponse } from './api';
 import { Conversation } from '../..';
-import type { Message } from '../assistant_context/types';
-import { enterpriseMessaging, WELCOME_CONVERSATION } from './use_conversation/sample_conversations';
+import type { ClientMessage } from '../assistant_context/types';
 
-export const getMessageFromRawResponse = (rawResponse: FetchConnectorExecuteResponse): Message => {
+export const getMessageFromRawResponse = (
+  rawResponse: FetchConnectorExecuteResponse
+): ClientMessage => {
   const { response, isStream, isError } = rawResponse;
-  const dateTimeString = new Date().toLocaleString(); // TODO: Pull from response
+  const dateTimeString = new Date().toISOString(); // TODO: Pull from response
   if (rawResponse) {
     return {
       role: 'assistant',
@@ -39,88 +40,53 @@ export const mergeBaseWithPersistedConversations = (
   baseConversations: Record<string, Conversation>,
   conversationsData: FetchConversationsResponse
 ): Record<string, Conversation> => {
-  const userConversations = (conversationsData?.data ?? []).reduce<Record<string, Conversation>>(
-    (transformed, conversation) => {
-      transformed[conversation.title] = conversation;
-      return transformed;
-    },
-    {}
-  );
-  return merge(baseConversations, userConversations);
-};
-
-export const getBlockBotConversation = (
-  conversation: Conversation,
-  isAssistantEnabled: boolean
-): Conversation => {
-  if (!isAssistantEnabled) {
-    if (
-      conversation.messages.length === 0 ||
-      conversation.messages[conversation.messages.length - 1].content !==
-        enterpriseMessaging[0].content
-    ) {
-      return {
-        ...conversation,
-        messages: [...conversation.messages, ...enterpriseMessaging],
-      };
+  return [...(conversationsData?.data ?? []), ...Object.values(baseConversations)].reduce<
+    Record<string, Conversation>
+  >((transformed, conversation) => {
+    if (!isEmpty(conversation.id)) {
+      transformed[conversation.id] = conversation;
+    } else {
+      if (!some(Object.values(transformed), ['title', conversation.title])) {
+        transformed[conversation.title] = conversation;
+      }
     }
-    return conversation;
-  }
-
-  return {
-    ...conversation,
-    messages: [...conversation.messages, ...WELCOME_CONVERSATION.messages],
-  };
+    return transformed;
+  }, {});
 };
-
 /**
  * Returns a default connector if there is only one connector
  * @param connectors
  */
 export const getDefaultConnector = (
   connectors: AIConnector[] | undefined
-): AIConnector | undefined => (connectors?.length === 1 ? connectors[0] : undefined);
+): AIConnector | undefined => {
+  const validConnectors = connectors?.filter((connector) => !connector.isMissingSecrets);
+  if (validConnectors?.length) {
+    return validConnectors[0];
+  }
+
+  return undefined;
+};
 
 interface OptionalRequestParams {
   alertsIndexPattern?: string;
-  allow?: string[];
-  allowReplacement?: string[];
   size?: number;
 }
 
 export const getOptionalRequestParams = ({
-  isEnabledRAGAlerts,
   alertsIndexPattern,
-  allow,
-  allowReplacement,
   size,
 }: {
-  isEnabledRAGAlerts: boolean;
   alertsIndexPattern?: string;
-  allow?: string[];
-  allowReplacement?: string[];
   size?: number;
 }): OptionalRequestParams => {
   const optionalAlertsIndexPattern = alertsIndexPattern ? { alertsIndexPattern } : undefined;
-  const optionalAllow = allow ? { allow } : undefined;
-  const optionalAllowReplacement = allowReplacement ? { allowReplacement } : undefined;
   const optionalSize = size ? { size } : undefined;
-
-  // the settings toggle must be enabled:
-  if (!isEnabledRAGAlerts) {
-    return {}; // don't send any optional params
-  }
 
   return {
     ...optionalAlertsIndexPattern,
-    ...optionalAllow,
-    ...optionalAllowReplacement,
     ...optionalSize,
   };
 };
 
-export const llmTypeDictionary: Record<string, string> = {
-  'Amazon Bedrock': 'bedrock',
-  'Azure OpenAI': 'openai',
-  OpenAI: 'openai',
-};
+export const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));

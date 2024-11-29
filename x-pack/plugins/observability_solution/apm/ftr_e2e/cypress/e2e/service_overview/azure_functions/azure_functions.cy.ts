@@ -17,8 +17,7 @@ const serviceOverviewHref = url.format({
 });
 
 const apiToIntercept = {
-  endpoint:
-    '/internal/apm/services/synth-dotnet/transactions/charts/coldstart_rate?*',
+  endpoint: '/internal/apm/services/synth-dotnet/transactions/charts/coldstart_rate?*',
   name: 'coldStartRequest',
 };
 

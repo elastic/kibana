@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { identity, range } from 'lodash';
@@ -20,10 +21,12 @@ import {
   savedObjectsClientMock,
   uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
-import { ISearchClient, ISearchStartSearchSource } from '@kbn/data-plugin/common';
+import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
+import { stubLogstashFieldSpecMap } from '@kbn/data-views-plugin/common/field.stub';
+import type { ISearchClient, IKibanaSearchResponse } from '@kbn/search-types';
+import { ISearchStartSearchSource } from '@kbn/data-plugin/common';
 import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import type { IScopedSearchClient } from '@kbn/data-plugin/server';
-import type { IKibanaSearchResponse } from '@kbn/data-plugin/common';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import { CancellationToken } from '@kbn/reporting-common';
@@ -44,7 +47,6 @@ const getMockConfig = (opts: Partial<CsvConfigType> = {}): CsvConfigType => ({
   maxSizeBytes: 180000,
   useByteOrderMarkEncoding: false,
   scroll: { size: 500, duration: '30s', strategy: 'pit' },
-  enablePanelActionDownload: true,
   maxConcurrentShardRequests: 5,
   ...opts,
 });
@@ -71,6 +73,7 @@ describe('CsvGenerator', () => {
 
   const mockSearchSourceService: jest.Mocked<ISearchStartSearchSource> = {
     create: jest.fn().mockReturnValue(searchSourceMock),
+    createLazy: jest.fn().mockReturnValue(searchSourceMock),
     createEmpty: jest.fn().mockReturnValue(searchSourceMock),
     telemetry: jest.fn(),
     inject: jest.fn(),
@@ -132,20 +135,31 @@ describe('CsvGenerator', () => {
 
     mockConfig = getMockConfig();
 
+    const dataView = createStubDataView({
+      spec: {
+        id: 'test',
+        title: 'logstash-*',
+        fields: {
+          ...stubLogstashFieldSpecMap,
+          bytes: {
+            ...stubLogstashFieldSpecMap.bytes,
+            customLabel: 'bytes_custom_label',
+          },
+        },
+      },
+      opts: {
+        metaFields: ['_id', '_index', '_type', '_score'],
+      },
+    });
+
+    dataView.getFormatterForField = jest.fn();
+
     searchSourceMock.getField = jest.fn((key: string) => {
       switch (key) {
         case 'pit':
           return { id: mockCursorId };
         case 'index':
-          return {
-            fields: {
-              getByName: jest.fn(() => []),
-              getByType: jest.fn(() => []),
-            },
-            metaFields: ['_id', '_index', '_type', '_score'],
-            getFormatterForField: jest.fn(),
-            getIndexPattern: () => 'logstash-*',
-          };
+          return dataView;
       }
     });
 
@@ -184,13 +198,14 @@ describe('CsvGenerator', () => {
               date: `["2020-12-31T00:14:28.000Z"]`,
               ip: `["110.135.176.89"]`,
               message: `["This is a great message!"]`,
+              bytes: `[100]`,
             },
           } as unknown as estypes.SearchHit,
         ]),
       })
     );
     const generateCsv = new CsvGenerator(
-      createMockJob({ columns: ['date', 'ip', 'message'] }),
+      createMockJob({ columns: ['date', 'ip', 'message', 'bytes'] }),
       mockConfig,
       mockTaskInstanceFields,
       {

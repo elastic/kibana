@@ -6,11 +6,11 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import {
   CountIndexPatternColumn,
   PersistedIndexPatternLayer,
-  PieVisualizationState,
   TermsIndexPatternColumn,
   TypedLensByValueInput,
 } from '@kbn/lens-plugin/public';
@@ -19,10 +19,7 @@ import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { v4 as uuidv4 } from 'uuid';
 import { TRANSACTION_PAGE_LOAD } from '../../../../../common/transaction_types';
-import {
-  PROCESSOR_EVENT,
-  TRANSACTION_TYPE,
-} from '../../../../../common/elasticsearch_fieldnames';
+import { PROCESSOR_EVENT, TRANSACTION_TYPE } from '../../../../../common/elasticsearch_fieldnames';
 import { getEsFilter } from '../../../../services/data/get_es_filter';
 import { useKibanaServices } from '../../../../hooks/use_kibana_services';
 import type { UxUIFilters } from '../../../../../typings/ui_filters';
@@ -73,14 +70,20 @@ export function VisitorBreakdownChart({
   );
 
   const filterHandler = useCallback(
-    (event) => {
+    (event: any) => {
       onFilter(metric, event);
     },
     [onFilter, metric]
   );
 
   if (!LensEmbeddableComponent) {
-    return <EuiText>No lens component</EuiText>;
+    return (
+      <EuiText>
+        {i18n.translate('xpack.ux.visitorBreakdownChart.noLensComponentTextLabel', {
+          defaultMessage: 'No lens component',
+        })}
+      </EuiText>
+    );
   }
 
   return (
@@ -100,7 +103,7 @@ export function VisitorBreakdownChart({
   );
 }
 
-const visConfig: PieVisualizationState = {
+const visConfig = {
   layers: [
     {
       layerId: 'layer1',
@@ -109,7 +112,7 @@ const visConfig: PieVisualizationState = {
       categoryDisplay: 'default',
       legendDisplay: 'hide',
       numberDisplay: 'percent',
-      showValuesInLegend: true,
+      legendStats: ['value'],
       nestedLegend: false,
       layerType: 'data',
     },

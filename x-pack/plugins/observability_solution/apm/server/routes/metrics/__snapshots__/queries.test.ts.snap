@@ -174,6 +174,7 @@ Object {
               "agent.name": Array [
                 "java",
                 "opentelemetry/java",
+                "otlp/java",
               ],
             },
           },
@@ -206,15 +207,14 @@ Object {
     */
     double CGROUP_LIMIT_MAX_VALUE = 9223372036854771712L;
 
-    String limitKey = 'system.process.cgroup.memory.mem.limit.bytes';
+    //Should use cgroupLimit when value is not empty and not equals to the max limit value.
+    double cgroupLimit = $('system.process.cgroup.memory.mem.limit.bytes', 0);
+    double total = (double)((cgroupLimit != 0 && cgroupLimit != CGROUP_LIMIT_MAX_VALUE) ? cgroupLimit : $('system.memory.total', 0));
+    if (total <= 0) {
+      return null;
+    }
 
-    //Should use cgropLimit when value is not empty and not equals to the max limit value.
-    boolean useCgroupLimit = doc.containsKey(limitKey) && !doc[limitKey].empty && doc[limitKey].value != CGROUP_LIMIT_MAX_VALUE;
-
-    double total = useCgroupLimit ? doc[limitKey].value : doc['system.memory.total'].value;
-
-    double used = doc['system.process.cgroup.memory.mem.usage.bytes'].value;
-
+    double used = (double)$('system.process.cgroup.memory.mem.usage.bytes', 0);
     return used / total;
     ",
           },
@@ -231,15 +231,14 @@ Object {
     */
     double CGROUP_LIMIT_MAX_VALUE = 9223372036854771712L;
 
-    String limitKey = 'system.process.cgroup.memory.mem.limit.bytes';
+    //Should use cgroupLimit when value is not empty and not equals to the max limit value.
+    double cgroupLimit = $('system.process.cgroup.memory.mem.limit.bytes', 0);
+    double total = (double)((cgroupLimit != 0 && cgroupLimit != CGROUP_LIMIT_MAX_VALUE) ? cgroupLimit : $('system.memory.total', 0));
+    if (total <= 0) {
+      return null;
+    }
 
-    //Should use cgropLimit when value is not empty and not equals to the max limit value.
-    boolean useCgroupLimit = doc.containsKey(limitKey) && !doc[limitKey].empty && doc[limitKey].value != CGROUP_LIMIT_MAX_VALUE;
-
-    double total = useCgroupLimit ? doc[limitKey].value : doc['system.memory.total'].value;
-
-    double used = doc['system.process.cgroup.memory.mem.usage.bytes'].value;
-
+    double used = (double)$('system.process.cgroup.memory.mem.usage.bytes', 0);
     return used / total;
     ",
           },
@@ -258,15 +257,14 @@ Object {
     */
     double CGROUP_LIMIT_MAX_VALUE = 9223372036854771712L;
 
-    String limitKey = 'system.process.cgroup.memory.mem.limit.bytes';
+    //Should use cgroupLimit when value is not empty and not equals to the max limit value.
+    double cgroupLimit = $('system.process.cgroup.memory.mem.limit.bytes', 0);
+    double total = (double)((cgroupLimit != 0 && cgroupLimit != CGROUP_LIMIT_MAX_VALUE) ? cgroupLimit : $('system.memory.total', 0));
+    if (total <= 0) {
+      return null;
+    }
 
-    //Should use cgropLimit when value is not empty and not equals to the max limit value.
-    boolean useCgroupLimit = doc.containsKey(limitKey) && !doc[limitKey].empty && doc[limitKey].value != CGROUP_LIMIT_MAX_VALUE;
-
-    double total = useCgroupLimit ? doc[limitKey].value : doc['system.memory.total'].value;
-
-    double used = doc['system.process.cgroup.memory.mem.usage.bytes'].value;
-
+    double used = (double)$('system.process.cgroup.memory.mem.usage.bytes', 0);
     return used / total;
     ",
               },
@@ -283,15 +281,14 @@ Object {
     */
     double CGROUP_LIMIT_MAX_VALUE = 9223372036854771712L;
 
-    String limitKey = 'system.process.cgroup.memory.mem.limit.bytes';
+    //Should use cgroupLimit when value is not empty and not equals to the max limit value.
+    double cgroupLimit = $('system.process.cgroup.memory.mem.limit.bytes', 0);
+    double total = (double)((cgroupLimit != 0 && cgroupLimit != CGROUP_LIMIT_MAX_VALUE) ? cgroupLimit : $('system.memory.total', 0));
+    if (total <= 0) {
+      return null;
+    }
 
-    //Should use cgropLimit when value is not empty and not equals to the max limit value.
-    boolean useCgroupLimit = doc.containsKey(limitKey) && !doc[limitKey].empty && doc[limitKey].value != CGROUP_LIMIT_MAX_VALUE;
-
-    double total = useCgroupLimit ? doc[limitKey].value : doc['system.memory.total'].value;
-
-    double used = doc['system.process.cgroup.memory.mem.usage.bytes'].value;
-
+    double used = (double)$('system.process.cgroup.memory.mem.usage.bytes', 0);
     return used / total;
     ",
               },
@@ -444,6 +441,7 @@ Object {
               "agent.name": Array [
                 "java",
                 "opentelemetry/java",
+                "otlp/java",
               ],
             },
           },
@@ -526,6 +524,7 @@ Object {
               "agent.name": Array [
                 "java",
                 "opentelemetry/java",
+                "otlp/java",
               ],
             },
           },
@@ -724,6 +723,7 @@ Object {
               "agent.name": Array [
                 "java",
                 "opentelemetry/java",
+                "otlp/java",
               ],
             },
           },
@@ -756,15 +756,14 @@ Object {
     */
     double CGROUP_LIMIT_MAX_VALUE = 9223372036854771712L;
 
-    String limitKey = 'system.process.cgroup.memory.mem.limit.bytes';
+    //Should use cgroupLimit when value is not empty and not equals to the max limit value.
+    double cgroupLimit = $('system.process.cgroup.memory.mem.limit.bytes', 0);
+    double total = (double)((cgroupLimit != 0 && cgroupLimit != CGROUP_LIMIT_MAX_VALUE) ? cgroupLimit : $('system.memory.total', 0));
+    if (total <= 0) {
+      return null;
+    }
 
-    //Should use cgropLimit when value is not empty and not equals to the max limit value.
-    boolean useCgroupLimit = doc.containsKey(limitKey) && !doc[limitKey].empty && doc[limitKey].value != CGROUP_LIMIT_MAX_VALUE;
-
-    double total = useCgroupLimit ? doc[limitKey].value : doc['system.memory.total'].value;
-
-    double used = doc['system.process.cgroup.memory.mem.usage.bytes'].value;
-
+    double used = (double)$('system.process.cgroup.memory.mem.usage.bytes', 0);
     return used / total;
     ",
           },
@@ -781,15 +780,14 @@ Object {
     */
     double CGROUP_LIMIT_MAX_VALUE = 9223372036854771712L;
 
-    String limitKey = 'system.process.cgroup.memory.mem.limit.bytes';
+    //Should use cgroupLimit when value is not empty and not equals to the max limit value.
+    double cgroupLimit = $('system.process.cgroup.memory.mem.limit.bytes', 0);
+    double total = (double)((cgroupLimit != 0 && cgroupLimit != CGROUP_LIMIT_MAX_VALUE) ? cgroupLimit : $('system.memory.total', 0));
+    if (total <= 0) {
+      return null;
+    }
 
-    //Should use cgropLimit when value is not empty and not equals to the max limit value.
-    boolean useCgroupLimit = doc.containsKey(limitKey) && !doc[limitKey].empty && doc[limitKey].value != CGROUP_LIMIT_MAX_VALUE;
-
-    double total = useCgroupLimit ? doc[limitKey].value : doc['system.memory.total'].value;
-
-    double used = doc['system.process.cgroup.memory.mem.usage.bytes'].value;
-
+    double used = (double)$('system.process.cgroup.memory.mem.usage.bytes', 0);
     return used / total;
     ",
           },
@@ -808,15 +806,14 @@ Object {
     */
     double CGROUP_LIMIT_MAX_VALUE = 9223372036854771712L;
 
-    String limitKey = 'system.process.cgroup.memory.mem.limit.bytes';
+    //Should use cgroupLimit when value is not empty and not equals to the max limit value.
+    double cgroupLimit = $('system.process.cgroup.memory.mem.limit.bytes', 0);
+    double total = (double)((cgroupLimit != 0 && cgroupLimit != CGROUP_LIMIT_MAX_VALUE) ? cgroupLimit : $('system.memory.total', 0));
+    if (total <= 0) {
+      return null;
+    }
 
-    //Should use cgropLimit when value is not empty and not equals to the max limit value.
-    boolean useCgroupLimit = doc.containsKey(limitKey) && !doc[limitKey].empty && doc[limitKey].value != CGROUP_LIMIT_MAX_VALUE;
-
-    double total = useCgroupLimit ? doc[limitKey].value : doc['system.memory.total'].value;
-
-    double used = doc['system.process.cgroup.memory.mem.usage.bytes'].value;
-
+    double used = (double)$('system.process.cgroup.memory.mem.usage.bytes', 0);
     return used / total;
     ",
               },
@@ -833,15 +830,14 @@ Object {
     */
     double CGROUP_LIMIT_MAX_VALUE = 9223372036854771712L;
 
-    String limitKey = 'system.process.cgroup.memory.mem.limit.bytes';
+    //Should use cgroupLimit when value is not empty and not equals to the max limit value.
+    double cgroupLimit = $('system.process.cgroup.memory.mem.limit.bytes', 0);
+    double total = (double)((cgroupLimit != 0 && cgroupLimit != CGROUP_LIMIT_MAX_VALUE) ? cgroupLimit : $('system.memory.total', 0));
+    if (total <= 0) {
+      return null;
+    }
 
-    //Should use cgropLimit when value is not empty and not equals to the max limit value.
-    boolean useCgroupLimit = doc.containsKey(limitKey) && !doc[limitKey].empty && doc[limitKey].value != CGROUP_LIMIT_MAX_VALUE;
-
-    double total = useCgroupLimit ? doc[limitKey].value : doc['system.memory.total'].value;
-
-    double used = doc['system.process.cgroup.memory.mem.usage.bytes'].value;
-
+    double used = (double)$('system.process.cgroup.memory.mem.usage.bytes', 0);
     return used / total;
     ",
               },
@@ -1006,6 +1002,7 @@ Object {
               "agent.name": Array [
                 "java",
                 "opentelemetry/java",
+                "otlp/java",
               ],
             },
           },
@@ -1094,6 +1091,7 @@ Object {
               "agent.name": Array [
                 "java",
                 "opentelemetry/java",
+                "otlp/java",
               ],
             },
           },
@@ -1270,6 +1268,7 @@ Object {
               "agent.name": Array [
                 "java",
                 "opentelemetry/java",
+                "otlp/java",
               ],
             },
           },
@@ -1302,15 +1301,14 @@ Object {
     */
     double CGROUP_LIMIT_MAX_VALUE = 9223372036854771712L;
 
-    String limitKey = 'system.process.cgroup.memory.mem.limit.bytes';
+    //Should use cgroupLimit when value is not empty and not equals to the max limit value.
+    double cgroupLimit = $('system.process.cgroup.memory.mem.limit.bytes', 0);
+    double total = (double)((cgroupLimit != 0 && cgroupLimit != CGROUP_LIMIT_MAX_VALUE) ? cgroupLimit : $('system.memory.total', 0));
+    if (total <= 0) {
+      return null;
+    }
 
-    //Should use cgropLimit when value is not empty and not equals to the max limit value.
-    boolean useCgroupLimit = doc.containsKey(limitKey) && !doc[limitKey].empty && doc[limitKey].value != CGROUP_LIMIT_MAX_VALUE;
-
-    double total = useCgroupLimit ? doc[limitKey].value : doc['system.memory.total'].value;
-
-    double used = doc['system.process.cgroup.memory.mem.usage.bytes'].value;
-
+    double used = (double)$('system.process.cgroup.memory.mem.usage.bytes', 0);
     return used / total;
     ",
           },
@@ -1327,15 +1325,14 @@ Object {
     */
     double CGROUP_LIMIT_MAX_VALUE = 9223372036854771712L;
 
-    String limitKey = 'system.process.cgroup.memory.mem.limit.bytes';
+    //Should use cgroupLimit when value is not empty and not equals to the max limit value.
+    double cgroupLimit = $('system.process.cgroup.memory.mem.limit.bytes', 0);
+    double total = (double)((cgroupLimit != 0 && cgroupLimit != CGROUP_LIMIT_MAX_VALUE) ? cgroupLimit : $('system.memory.total', 0));
+    if (total <= 0) {
+      return null;
+    }
 
-    //Should use cgropLimit when value is not empty and not equals to the max limit value.
-    boolean useCgroupLimit = doc.containsKey(limitKey) && !doc[limitKey].empty && doc[limitKey].value != CGROUP_LIMIT_MAX_VALUE;
-
-    double total = useCgroupLimit ? doc[limitKey].value : doc['system.memory.total'].value;
-
-    double used = doc['system.process.cgroup.memory.mem.usage.bytes'].value;
-
+    double used = (double)$('system.process.cgroup.memory.mem.usage.bytes', 0);
     return used / total;
     ",
           },
@@ -1354,15 +1351,14 @@ Object {
     */
     double CGROUP_LIMIT_MAX_VALUE = 9223372036854771712L;
 
-    String limitKey = 'system.process.cgroup.memory.mem.limit.bytes';
+    //Should use cgroupLimit when value is not empty and not equals to the max limit value.
+    double cgroupLimit = $('system.process.cgroup.memory.mem.limit.bytes', 0);
+    double total = (double)((cgroupLimit != 0 && cgroupLimit != CGROUP_LIMIT_MAX_VALUE) ? cgroupLimit : $('system.memory.total', 0));
+    if (total <= 0) {
+      return null;
+    }
 
-    //Should use cgropLimit when value is not empty and not equals to the max limit value.
-    boolean useCgroupLimit = doc.containsKey(limitKey) && !doc[limitKey].empty && doc[limitKey].value != CGROUP_LIMIT_MAX_VALUE;
-
-    double total = useCgroupLimit ? doc[limitKey].value : doc['system.memory.total'].value;
-
-    double used = doc['system.process.cgroup.memory.mem.usage.bytes'].value;
-
+    double used = (double)$('system.process.cgroup.memory.mem.usage.bytes', 0);
     return used / total;
     ",
               },
@@ -1379,15 +1375,14 @@ Object {
     */
     double CGROUP_LIMIT_MAX_VALUE = 9223372036854771712L;
 
-    String limitKey = 'system.process.cgroup.memory.mem.limit.bytes';
+    //Should use cgroupLimit when value is not empty and not equals to the max limit value.
+    double cgroupLimit = $('system.process.cgroup.memory.mem.limit.bytes', 0);
+    double total = (double)((cgroupLimit != 0 && cgroupLimit != CGROUP_LIMIT_MAX_VALUE) ? cgroupLimit : $('system.memory.total', 0));
+    if (total <= 0) {
+      return null;
+    }
 
-    //Should use cgropLimit when value is not empty and not equals to the max limit value.
-    boolean useCgroupLimit = doc.containsKey(limitKey) && !doc[limitKey].empty && doc[limitKey].value != CGROUP_LIMIT_MAX_VALUE;
-
-    double total = useCgroupLimit ? doc[limitKey].value : doc['system.memory.total'].value;
-
-    double used = doc['system.process.cgroup.memory.mem.usage.bytes'].value;
-
+    double used = (double)$('system.process.cgroup.memory.mem.usage.bytes', 0);
     return used / total;
     ",
               },
@@ -1530,6 +1525,7 @@ Object {
               "agent.name": Array [
                 "java",
                 "opentelemetry/java",
+                "otlp/java",
               ],
             },
           },
@@ -1607,6 +1603,7 @@ Object {
               "agent.name": Array [
                 "java",
                 "opentelemetry/java",
+                "otlp/java",
               ],
             },
           },

@@ -16,8 +16,9 @@ import {
   EuiEmptyPrompt,
   EuiButton,
   EuiLoadingSpinner,
+  EuiToolTip,
 } from '@elastic/eui';
-import { ApiKey } from '@kbn/security-plugin/common/model';
+import { ApiKey } from '@kbn/security-plugin-types-common';
 import { useFetcher, FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { PermissionDenied } from './prompts/permission_denied';
 import { ApiKeysNotEnabled } from './prompts/api_keys_not_enabled';
@@ -33,14 +34,14 @@ const INITIAL_DATA = {
 };
 
 export function AgentKeys() {
-  const { toasts } = useApmPluginContext().core.notifications;
-
+  const { core } = useApmPluginContext();
+  const { toasts } = core.notifications;
+  const canSave = core.application.capabilities.apm['settings:save'] as boolean;
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
-  const [createdAgentKey, setCreatedAgentKey] =
-    useState<CreateApiKeyResponse>();
+  const [createdAgentKey, setCreatedAgentKey] = useState<CreateApiKeyResponse>();
 
   const {
-    data: { areApiKeysEnabled, canManage } = INITIAL_DATA,
+    data: { areApiKeysEnabled, canManage: canManageAgentKeys } = INITIAL_DATA,
     status: privilegesStatus,
   } = useFetcher(
     (callApmApi) => {
@@ -56,14 +57,15 @@ export function AgentKeys() {
     refetch: refetchAgentKeys,
   } = useFetcher(
     (callApmApi) => {
-      if (areApiKeysEnabled && canManage) {
+      if (areApiKeysEnabled && canManageAgentKeys) {
         return callApmApi('GET /internal/apm/agent_keys');
       }
     },
-    [areApiKeysEnabled, canManage],
+    [areApiKeysEnabled, canManageAgentKeys],
     { showToastOnError: false }
   );
 
+  const canManage = canManageAgentKeys && canSave;
   const agentKeys = data?.agentKeys;
 
   return (
@@ -86,12 +88,9 @@ export function AgentKeys() {
               fill={true}
               iconType="plusInCircle"
             >
-              {i18n.translate(
-                'xpack.apm.settings.agentKeys.createAgentKeyButton',
-                {
-                  defaultMessage: 'Create APM agent key',
-                }
-              )}
+              {i18n.translate('xpack.apm.settings.agentKeys.createAgentKeyButton', {
+                defaultMessage: 'Create APM agent key',
+              })}
             </EuiButton>
           </EuiFlexItem>
         )}
@@ -124,8 +123,7 @@ export function AgentKeys() {
           onError={(keyName: string, message: string) => {
             toasts.addDanger(
               i18n.translate('xpack.apm.settings.agentKeys.crate.failed', {
-                defaultMessage:
-                  'Error creating APM agent key "{keyName}". Error: "{message}"',
+                defaultMessage: 'Error creating APM agent key "{keyName}". Error: "{message}"',
                 values: { keyName, message },
               })
             );
@@ -134,14 +132,8 @@ export function AgentKeys() {
         />
       )}
       <AgentKeysContent
-        loading={
-          privilegesStatus === FETCH_STATUS.LOADING ||
-          status === FETCH_STATUS.LOADING
-        }
-        requestFailed={
-          privilegesStatus === FETCH_STATUS.FAILURE ||
-          status === FETCH_STATUS.FAILURE
-        }
+        loading={privilegesStatus === FETCH_STATUS.LOADING || status === FETCH_STATUS.LOADING}
+        requestFailed={privilegesStatus === FETCH_STATUS.FAILURE || status === FETCH_STATUS.FAILURE}
         canManage={canManage}
         areApiKeysEnabled={areApiKeysEnabled}
         agentKeys={agentKeys}
@@ -180,12 +172,9 @@ function AgentKeysContent({
           titleSize="xs"
           title={
             <h2>
-              {i18n.translate(
-                'xpack.apm.settings.agentKeys.agentKeysLoadingPromptTitle',
-                {
-                  defaultMessage: 'Loading APM agent keys...',
-                }
-              )}
+              {i18n.translate('xpack.apm.settings.agentKeys.agentKeysLoadingPromptTitle', {
+                defaultMessage: 'Loading APM agent keys...',
+              })}
             </h2>
           }
         />
@@ -198,12 +187,9 @@ function AgentKeysContent({
           iconType="warning"
           title={
             <h2>
-              {i18n.translate(
-                'xpack.apm.settings.agentKeys.agentKeysErrorPromptTitle',
-                {
-                  defaultMessage: 'Could not load APM agent keys.',
-                }
-              )}
+              {i18n.translate('xpack.apm.settings.agentKeys.agentKeysErrorPromptTitle', {
+                defaultMessage: 'Could not load APM agent keys.',
+              })}
             </h2>
           }
         />
@@ -239,19 +225,29 @@ function AgentKeysContent({
           </p>
         }
         actions={
-          <EuiButton
-            data-test-subj="apmAgentKeysContentCreateApmAgentKeyButton"
-            onClick={onCreateAgentClick}
-            fill={true}
-            iconType="plusInCircle"
+          <EuiToolTip
+            content={
+              !canManage &&
+              i18n.translate(
+                'xpack.apm.settings.agentKeys.noPermissionCreateAgentKeyTooltipLabel',
+                {
+                  defaultMessage: "Your user role doesn't have permissions to create agent keys.",
+                }
+              )
+            }
           >
-            {i18n.translate(
-              'xpack.apm.settings.agentKeys.createAgentKeyButton',
-              {
+            <EuiButton
+              data-test-subj="apmAgentKeysContentCreateApmAgentKeyButton"
+              onClick={onCreateAgentClick}
+              fill={true}
+              iconType="plusInCircle"
+              isDisabled={!canManage}
+            >
+              {i18n.translate('xpack.apm.settings.agentKeys.createAgentKeyButton', {
                 defaultMessage: 'Create APM agent key',
-              }
-            )}
-          </EuiButton>
+              })}
+            </EuiButton>
+          </EuiToolTip>
         }
       />
     );
@@ -259,7 +255,7 @@ function AgentKeysContent({
 
   if (agentKeys && !isEmpty(agentKeys)) {
     return (
-      <AgentKeysTable agentKeys={agentKeys ?? []} onKeyDelete={onKeyDelete} />
+      <AgentKeysTable agentKeys={agentKeys ?? []} canManage={canManage} onKeyDelete={onKeyDelete} />
     );
   }
 

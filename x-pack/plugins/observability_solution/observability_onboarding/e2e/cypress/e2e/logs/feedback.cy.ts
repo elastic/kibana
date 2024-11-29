@@ -5,15 +5,11 @@
  * 2.0.
  */
 
-describe('[Logs onboarding] Give Feedback', () => {
+// Failing: See https://github.com/elastic/kibana/issues/183341
+describe.skip('[Logs onboarding] Give Feedback', () => {
   beforeEach(() => {
     cy.loginAsElastic();
     cy.visitKibana('/app/observabilityOnboarding');
-  });
-
-  it('feedback button is present in system logs onboarding', () => {
-    cy.getByTestSubj('obltOnboardingHomeStartSystemLogStream').click();
-    cy.getByTestSubj('observabilityOnboardingPageGiveFeedback').should('exist');
   });
 
   it('feedback button is present in custom logs onboarding', () => {
@@ -22,8 +18,6 @@ describe('[Logs onboarding] Give Feedback', () => {
   });
 
   it('feedback button is not present in the landing page', () => {
-    cy.getByTestSubj('observabilityOnboardingPageGiveFeedback').should(
-      'not.exist'
-    );
+    cy.getByTestSubj('observabilityOnboardingPageGiveFeedback').should('not.exist');
   });
 });

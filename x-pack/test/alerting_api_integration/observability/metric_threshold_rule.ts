@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import moment from 'moment';
 import expect from '@kbn/expect';
 import { cleanup, generate, Dataset, PartialConfig } from '@kbn/data-forge';
 import {
   Aggregators,
-  Comparator,
   InfraRuleType,
   MetricThresholdParams,
 } from '@kbn/infra-plugin/common/alerting/metrics';
+import { COMPARATORS } from '@kbn/alerting-comparators';
 import {
   waitForDocumentInIndex,
   waitForAlertInIndex,
@@ -33,7 +32,6 @@ export default function ({ getService }: FtrProviderContext) {
   describe('Metric threshold rule >', () => {
     let ruleId: string;
     let alertId: string;
-    let startedAt: string;
     let actionId: string;
     let dataForgeConfig: PartialConfig;
     let dataForgeIndices: string[];
@@ -86,7 +84,7 @@ export default function ({ getService }: FtrProviderContext) {
             criteria: [
               {
                 aggType: Aggregators.AVERAGE,
-                comparator: Comparator.GT,
+                comparator: COMPARATORS.GREATER_THAN,
                 threshold: [0.5],
                 timeSize: 5,
                 timeUnit: 'm',
@@ -159,7 +157,6 @@ export default function ({ getService }: FtrProviderContext) {
           logger,
         });
         alertId = (resp.hits.hits[0]._source as any)['kibana.alert.uuid'];
-        startedAt = (resp.hits.hits[0]._source as any)['kibana.alert.start'];
         expect(resp.hits.hits[0]._source).property(
           'kibana.alert.rule.category',
           'Metric threshold'
@@ -210,7 +207,6 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should set correct action parameter: ruleType', async () => {
-        const rangeFrom = moment(startedAt).subtract('5', 'minute').toISOString();
         const resp = await waitForDocumentInIndex<{
           ruleType: string;
           alertDetailsUrl: string;
@@ -224,10 +220,10 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(resp.hits.hits[0]._source?.ruleType).eql('metrics.alert.threshold');
         expect(resp.hits.hits[0]._source?.alertDetailsUrl).eql(
-          `https://localhost:5601/app/observability/alerts?_a=(kuery:%27kibana.alert.uuid:%20%22${alertId}%22%27%2CrangeFrom:%27${rangeFrom}%27%2CrangeTo:now%2Cstatus:all)`
+          `https://localhost:5601/app/observability/alerts/${alertId}`
         );
         expect(resp.hits.hits[0]._source?.reason).eql(
-          `system.cpu.user.pct is 90% in the last 5 mins. Alert when > 50%.`
+          `system.cpu.user.pct is 90% in the last 5 mins. Alert when above 50%.`
         );
       });
     });

@@ -27,7 +27,7 @@ import type {
   CanDeleteMLSpaceAwareItemsResponse,
   MlSavedObjectType,
 } from '../../../../common/types/saved_objects';
-import { useMlApiContext } from '../../contexts/kibana';
+import { useMlApi } from '../../contexts/kibana';
 import { useToastNotificationService } from '../../services/toast_notification_service';
 import { ManagedJobsWarningCallout } from '../../jobs/jobs_list/components/confirm_modals/managed_jobs_warning_callout';
 
@@ -252,7 +252,7 @@ export const DeleteSpaceAwareItemCheckModal: FC<Props> = ({
 
   const {
     savedObjects: { canDeleteMLSpaceAwareItems, removeItemFromCurrentSpace },
-  } = useMlApiContext();
+  } = useMlApi();
   const { displayErrorToast, displaySuccessToast } = useToastNotificationService();
 
   // delay showing the modal to avoid flickering
@@ -368,6 +368,7 @@ export const DeleteSpaceAwareItemCheckModal: FC<Props> = ({
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiButton
+                    data-test-subj="mlDeleteSpaceAwareItemCheckModalOverlayCloseButton"
                     size="s"
                     onClick={
                       itemCheckRespSummary?.canTakeAnyAction &&

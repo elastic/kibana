@@ -26,6 +26,9 @@
     "@kbn/config-schema",
     "@kbn/serverless",
     "@kbn/shared-ux-error-boundary",
+    "@kbn/deeplinks-management",
+    "@kbn/react-kibana-context-render",
+    "@kbn/core-chrome-browser",
   ],
   "exclude": [
     "target/**/*"

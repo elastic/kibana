@@ -42,9 +42,7 @@ async function renderTooltipAnchor({
 
   const history = createMemoryHistory({
     initialEntries: [
-      `/services?environment=${
-        environment || ENVIRONMENT_ALL.value
-      }&rangeFrom=now-15m&rangeTo=now`,
+      `/services?environment=${environment || ENVIRONMENT_ALL.value}&rangeFrom=now-15m&rangeTo=now`,
     ],
   });
 
@@ -63,14 +61,12 @@ async function renderTooltipAnchor({
 
     // wait for tooltip text to be in the DOM
     await waitFor(() => {
-      const toolTipText =
-        baseElement.querySelector('.euiToolTipPopover')?.textContent;
+      const toolTipText = baseElement.querySelector('.euiToolTipPopover')?.textContent;
       expect(toolTipText).not.toBe(undefined);
     });
   }
 
-  const toolTipText =
-    baseElement.querySelector('.euiToolTipPopover')?.textContent;
+  const toolTipText = baseElement.querySelector('.euiToolTipPopover')?.textContent;
 
   return { toolTipText, toolTipAnchor };
 }
@@ -83,9 +79,7 @@ describe('MissingJobsAlert', () => {
       });
 
       expect(toolTipAnchor).toBeInTheDocument();
-      expect(toolTipText).toBe(
-        'Anomaly detection is not yet enabled. Click to continue setup.'
-      );
+      expect(toolTipText).toBe('Anomaly detection is not yet enabled. Click to continue setup.');
     });
   });
 
@@ -174,9 +168,7 @@ describe('MissingJobsAlert', () => {
       });
 
       expect(toolTipAnchor).toBeInTheDocument();
-      expect(toolTipText).toBe(
-        'Updates available for existing anomaly detection jobs.'
-      );
+      expect(toolTipText).toBe('Updates available for existing anomaly detection jobs.');
     });
   });
 

@@ -5,22 +5,14 @@
  * 2.0.
  */
 
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-} from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { AnomalyDetectionSetupState } from '../../../../common/anomaly_detection/get_anomaly_detection_setup_state';
 import { useMlManageJobsHref } from '../../../hooks/use_ml_manage_jobs_href';
-import { LegacyAPMLink } from '../links/apm/apm_link';
+import { useAPMHref } from '../links/apm/apm_link';
 
-export function shouldDisplayMlCallout(
-  anomalyDetectionSetupState: AnomalyDetectionSetupState
-) {
+export function shouldDisplayMlCallout(anomalyDetectionSetupState: AnomalyDetectionSetupState) {
   return (
     anomalyDetectionSetupState === AnomalyDetectionSetupState.NoJobs ||
     anomalyDetectionSetupState === AnomalyDetectionSetupState.UpgradeableJobs ||
@@ -43,7 +35,7 @@ export function MLCallout({
   append?: React.ReactElement;
 }) {
   const [loading, setLoading] = useState(false);
-
+  const apmGetLearnMoreHref = useAPMHref({ path: '/settings/anomaly-detection' });
   const mlManageJobsHref = useMlManageJobsHref();
 
   let properties:
@@ -56,19 +48,19 @@ export function MLCallout({
       }
     | undefined;
 
-  const getLearnMoreLink = (color: 'primary' | 'success') => (
-    <EuiButton data-test-subj="apmGetLearnMoreLinkButton" color={color}>
-      <LegacyAPMLink
-        path="/settings/anomaly-detection"
-        style={{ whiteSpace: 'nowrap' }}
+  const getLearnMoreLink = (color: 'primary' | 'success') => {
+    return (
+      <EuiButton
+        data-test-subj="apmGetLearnMoreLinkButton"
         color={color}
+        href={apmGetLearnMoreHref}
       >
         {i18n.translate('xpack.apm.mlCallout.learnMoreButton', {
           defaultMessage: `Learn more`,
         })}
-      </LegacyAPMLink>
-    </EuiButton>
-  );
+      </EuiButton>
+    );
+  };
 
   switch (anomalyDetectionSetupState) {
     case AnomalyDetectionSetupState.NoJobs:
@@ -102,10 +94,9 @@ export function MLCallout({
 
     case AnomalyDetectionSetupState.UpgradeableJobs:
       properties = {
-        title: i18n.translate(
-          'xpack.apm.mlCallout.updateAvailableCalloutTitle',
-          { defaultMessage: 'Updates available' }
-        ),
+        title: i18n.translate('xpack.apm.mlCallout.updateAvailableCalloutTitle', {
+          defaultMessage: 'Updates available',
+        }),
         text: i18n.translate('xpack.apm.mlCallout.updateAvailableCalloutText', {
           defaultMessage:
             'We have updated the anomaly detection jobs that provide insights into degraded performance and added detectors for throughput and failed transaction rate. If you choose to upgrade, we will create the new jobs and close the existing legacy jobs. The data shown in the APM app will automatically switch to the new. Please note that the option to migrate all existing jobs will not be available if you choose to create a new job.',
@@ -124,12 +115,9 @@ export function MLCallout({
               });
             }}
           >
-            {i18n.translate(
-              'xpack.apm.mlCallout.updateAvailableCalloutButtonText',
-              {
-                defaultMessage: 'Update jobs',
-              }
-            )}
+            {i18n.translate('xpack.apm.mlCallout.updateAvailableCalloutButtonText', {
+              defaultMessage: 'Update jobs',
+            })}
           </EuiButton>
         ) : (
           getLearnMoreLink('success')
@@ -149,14 +137,10 @@ export function MLCallout({
         icon: 'iInCircle',
         color: 'primary',
         primaryAction: (
-          <EuiButton
-            data-test-subj="apmMLCalloutReviewJobsButton"
-            href={mlManageJobsHref}
-          >
-            {i18n.translate(
-              'xpack.apm.settings.anomaly_detection.legacy_jobs.button',
-              { defaultMessage: 'Review jobs' }
-            )}
+          <EuiButton data-test-subj="apmMLCalloutReviewJobsButton" href={mlManageJobsHref}>
+            {i18n.translate('xpack.apm.settings.anomaly_detection.legacy_jobs.button', {
+              defaultMessage: 'Review jobs',
+            })}
           </EuiButton>
         ),
       };
@@ -193,11 +177,7 @@ export function MLCallout({
   ) : null;
 
   return (
-    <EuiCallOut
-      title={properties.title}
-      iconType={properties.icon}
-      color={properties.color}
-    >
+    <EuiCallOut title={properties.title} iconType={properties.icon} color={properties.color}>
       <p>{properties.text}</p>
       {actions}
     </EuiCallOut>

@@ -9,10 +9,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { CommonCorrelationsQueryParams } from '../../../../common/correlations/types';
-import {
-  SPAN_DURATION,
-  TRANSACTION_DURATION,
-} from '../../../../common/es_fields/apm';
+import { SPAN_DURATION, TRANSACTION_DURATION } from '../../../../common/es_fields/apm';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { getCommonCorrelationsQuery } from './get_common_correlations_query';
 
@@ -50,10 +47,7 @@ export const fetchDurationFractions = async ({
       aggs: {
         latency_ranges: {
           range: {
-            field:
-              eventType === ProcessorEvent.span
-                ? SPAN_DURATION
-                : TRANSACTION_DURATION,
+            field: eventType === ProcessorEvent.span ? SPAN_DURATION : TRANSACTION_DURATION,
             ranges,
           },
         },
@@ -71,9 +65,7 @@ export const fetchDurationFractions = async ({
   // Compute (doc count per bucket/total doc count)
   return {
     fractions:
-      aggregations?.latency_ranges.buckets.map(
-        (bucket) => bucket.doc_count / totalDocCount
-      ) ?? [],
+      aggregations?.latency_ranges.buckets.map((bucket) => bucket.doc_count / totalDocCount) ?? [],
     totalDocCount,
   };
 };

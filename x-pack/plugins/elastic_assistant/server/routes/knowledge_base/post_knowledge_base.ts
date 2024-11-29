@@ -5,39 +5,36 @@
  * 2.0.
  */
 
-import { transformError } from '@kbn/securitysolution-es-utils';
-
 import {
   ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
   CreateKnowledgeBaseRequestParams,
   CreateKnowledgeBaseResponse,
+  ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_URL,
+  CreateKnowledgeBaseRequestQuery,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
-import { IKibanaResponse, KibanaRequest } from '@kbn/core/server';
+import { IKibanaResponse } from '@kbn/core/server';
 import { buildResponse } from '../../lib/build_response';
-import { ElasticAssistantPluginRouter, GetElser } from '../../types';
-import { KNOWLEDGE_BASE } from '../../../common/constants';
-import { ElasticsearchStore } from '../../lib/langchain/elasticsearch_store/elasticsearch_store';
-import { ESQL_DOCS_LOADED_QUERY, ESQL_RESOURCE, KNOWLEDGE_BASE_INDEX_PATTERN } from './constants';
-import { getKbResource } from './get_kb_resource';
-import { loadESQL } from '../../lib/langchain/content_loaders/esql_loader';
+import { ElasticAssistantPluginRouter } from '../../types';
+
+// Since we're awaiting on ELSER setup, this could take a bit (especially if ML needs to autoscale)
+// Consider just returning if attempt was successful, and switch to client polling
+const ROUTE_HANDLER_TIMEOUT = 10 * 60 * 1000; // 10 * 60 seconds = 10 minutes
 
 /**
  * Load Knowledge Base index, pipeline, and resources (collection of documents)
  * @param router
  */
-export const postKnowledgeBaseRoute = (
-  router: ElasticAssistantPluginRouter,
-  getElser: GetElser
-) => {
+export const postKnowledgeBaseRoute = (router: ElasticAssistantPluginRouter) => {
   router.versioned
     .post({
       access: 'internal',
-      path: KNOWLEDGE_BASE,
+      path: ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_URL,
       options: {
-        // Note: Relying on current user privileges to scope an esClient.
-        // Add `access:kbnElasticAssistant` to limit API access to only users with assistant privileges
-        tags: [],
+        tags: ['access:elasticAssistant'],
+        timeout: {
+          idleSocket: ROUTE_HANDLER_TIMEOUT,
+        },
       },
     })
     .addVersion(
@@ -46,71 +43,37 @@ export const postKnowledgeBaseRoute = (
         validate: {
           request: {
             params: buildRouteValidationWithZod(CreateKnowledgeBaseRequestParams),
+            query: buildRouteValidationWithZod(CreateKnowledgeBaseRequestQuery),
           },
         },
       },
-      async (
-        context,
-        request: KibanaRequest<CreateKnowledgeBaseRequestParams>,
-        response
-      ): Promise<IKibanaResponse<CreateKnowledgeBaseResponse>> => {
+      async (context, request, response): Promise<IKibanaResponse<CreateKnowledgeBaseResponse>> => {
         const resp = buildResponse(response);
-        const assistantContext = await context.elasticAssistant;
-        const logger = assistantContext.logger;
-        const telemetry = assistantContext.telemetry;
+        const ctx = await context.resolve(['core', 'elasticAssistant', 'licensing']);
+        const assistantContext = ctx.elasticAssistant;
+        const core = ctx.core;
+        const soClient = core.savedObjects.getClient();
+        const ignoreSecurityLabs = request.query.ignoreSecurityLabs;
 
         try {
-          const core = await context.core;
-          // Get a scoped esClient for creating the Knowledge Base index, pipeline, and documents
-          const esClient = core.elasticsearch.client.asCurrentUser;
-          const elserId = await getElser(request, core.savedObjects.getClient());
-          const kbResource = getKbResource(request);
-          const esStore = new ElasticsearchStore(
-            esClient,
-            KNOWLEDGE_BASE_INDEX_PATTERN,
-            logger,
-            telemetry,
-            elserId,
-            kbResource
-          );
-
-          // Pre-check on index/pipeline
-          let indexExists = await esStore.indexExists();
-          let pipelineExists = await esStore.pipelineExists();
-
-          // Load if not exists
-          if (!pipelineExists) {
-            pipelineExists = await esStore.createPipeline();
-          }
-          if (!indexExists) {
-            indexExists = await esStore.createIndex();
-          }
-
-          // If specific resource is requested, load it
-          if (kbResource === ESQL_RESOURCE) {
-            const esqlExists = (await esStore.similaritySearch(ESQL_DOCS_LOADED_QUERY)).length > 0;
-            if (!esqlExists) {
-              const loadedKnowledgeBase = await loadESQL(esStore, logger);
-              return response.custom({ body: { success: loadedKnowledgeBase }, statusCode: 201 });
-            } else {
-              return response.ok({ body: { success: true } });
-            }
-          }
-
-          const wasSuccessful = indexExists && pipelineExists;
-
-          if (wasSuccessful) {
-            return response.ok({ body: { success: true } });
-          } else {
+          const knowledgeBaseDataClient =
+            await assistantContext.getAIAssistantKnowledgeBaseDataClient({
+              modelIdOverride: request.query.modelId,
+            });
+          if (!knowledgeBaseDataClient) {
             return response.custom({ body: { success: false }, statusCode: 500 });
           }
-        } catch (err) {
-          logger.log(err);
-          const error = transformError(err);
 
+          await knowledgeBaseDataClient.setupKnowledgeBase({
+            soClient,
+            ignoreSecurityLabs,
+          });
+
+          return response.ok({ body: { success: true } });
+        } catch (error) {
           return resp.error({
             body: error.message,
-            statusCode: error.statusCode,
+            statusCode: 500,
           });
         }
       }

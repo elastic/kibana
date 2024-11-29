@@ -142,7 +142,9 @@ export async function deleteFleetServerHost(
     );
   }
 
-  await agentPolicyService.removeFleetServerHostFromAll(soClient, esClient, id);
+  await agentPolicyService.removeFleetServerHostFromAll(esClient, id, {
+    force: options?.fromPreconfiguration,
+  });
 
   return await soClient.delete(FLEET_SERVER_HOST_SAVED_OBJECT_TYPE, id);
 }
@@ -225,7 +227,7 @@ export async function bulkGetFleetServerHosts(
 
 export async function getFleetServerHostsForAgentPolicy(
   soClient: SavedObjectsClientContract,
-  agentPolicy: AgentPolicy
+  agentPolicy: Pick<AgentPolicy, 'fleet_server_host_id'>
 ) {
   if (agentPolicy.fleet_server_host_id) {
     return getFleetServerHost(soClient, agentPolicy.fleet_server_host_id);

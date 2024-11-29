@@ -8,9 +8,9 @@
 import { cloneDeep, isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
-import { isOfAggregateQueryType } from '@kbn/es-query';
+import { AggregateQuery, isOfAggregateQueryType, Query } from '@kbn/es-query';
 import { useStore } from 'react-redux';
-import { TopNavMenuData } from '@kbn/navigation-plugin/public';
+import { TopNavMenuData, TopNavMenuProps } from '@kbn/navigation-plugin/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -37,7 +37,6 @@ import {
 } from '../utils';
 import { combineQueryAndFilters, getLayerMetaInfo } from './show_underlying_data';
 import { changeIndexPattern } from '../state_management/lens_slice';
-import { LensByReferenceInput } from '../embeddable';
 import { DEFAULT_LENS_LAYOUT_DIMENSIONS, getShareURL } from './share_action';
 import { getDatasourceLayers } from '../state_management/utils';
 
@@ -103,7 +102,6 @@ function getSaveButtonMeta({
 
 function getLensTopNavConfig(options: {
   isByValueMode: boolean;
-  allowByValue: boolean;
   actions: LensTopNavActions;
   savingToLibraryPermitted: boolean;
   savingToDashboardPermitted: boolean;
@@ -115,7 +113,6 @@ function getLensTopNavConfig(options: {
 }): TopNavMenuData[] {
   const {
     actions,
-    allowByValue,
     savingToLibraryPermitted,
     savingToDashboardPermitted,
     contextOriginatingApp,
@@ -130,7 +127,7 @@ function getLensTopNavConfig(options: {
 
   const enableSaveButton =
     savingToLibraryPermitted ||
-    (allowByValue && savingToDashboardPermitted && !isByValueMode && !showSaveAndReturn);
+    (savingToDashboardPermitted && !isByValueMode && !showSaveAndReturn);
 
   const saveButtonLabel = isByValueMode
     ? i18n.translate('xpack.lens.app.addToLibrary', {
@@ -163,7 +160,7 @@ function getLensTopNavConfig(options: {
 
   if (actions.getUnderlyingDataUrl.visible) {
     const exploreDataInDiscoverLabel = i18n.translate('xpack.lens.app.exploreDataInDiscover', {
-      defaultMessage: 'Explore data in Discover',
+      defaultMessage: 'Explore in Discover',
     });
 
     topNavMenu.push({
@@ -281,25 +278,23 @@ export const LensTopNavMenu = ({
   initialContextIsEmbedded,
   topNavMenuEntryGenerators,
   initialContext,
-  theme$,
   indexPatternService,
   currentDoc,
-  onTextBasedSavedAndExit,
   getUserMessages,
   shortUrlService,
   isCurrentStateDirty,
+  startServices,
 }: LensTopNavMenuProps) => {
   const {
     data,
     navigation,
     uiSettings,
     application,
-    attributeService,
     share,
-    dashboardFeatureFlag,
     dataViewFieldEditor,
     dataViewEditor,
     dataViews: dataViewsService,
+    notifications,
   } = useKibana<LensAppServices>().services;
 
   const {
@@ -532,21 +527,15 @@ export const LensTopNavMenu = ({
 
   const topNavConfig = useMemo(() => {
     const showReplaceInDashboard =
-      initialContext?.originatingApp === 'dashboards' &&
-      !(initialInput as LensByReferenceInput)?.savedObjectId;
+      initialContext?.originatingApp === 'dashboards' && !initialInput?.savedObjectId;
     const showReplaceInCanvas =
-      initialContext?.originatingApp === 'canvas' &&
-      !(initialInput as LensByReferenceInput)?.savedObjectId;
+      initialContext?.originatingApp === 'canvas' && !initialInput?.savedObjectId;
     const contextFromEmbeddable =
       initialContext && 'isEmbeddable' in initialContext && initialContext.isEmbeddable;
+
     const showSaveAndReturn =
       !(showReplaceInDashboard || showReplaceInCanvas) &&
-      (Boolean(
-        isLinkedToOriginatingApp &&
-          // Temporarily required until the 'by value' paradigm is default.
-          (dashboardFeatureFlag.allowByValueEmbeddables || Boolean(initialInput))
-      ) ||
-        Boolean(initialContextIsEmbedded));
+      (isLinkedToOriginatingApp || Boolean(initialContextIsEmbedded));
 
     const hasData = Boolean(activeData && Object.keys(activeData).length);
     const csvEnabled = Boolean(isSaveable && hasData);
@@ -555,7 +544,6 @@ export const LensTopNavMenu = ({
     const showShareMenu = csvEnabled || shareUrlEnabled;
     const baseMenuEntries = getLensTopNavConfig({
       isByValueMode: getIsByValueMode(),
-      allowByValue: dashboardFeatureFlag.allowByValueEmbeddables,
       savingToLibraryPermitted,
       savingToDashboardPermitted,
       isSaveable,
@@ -584,6 +572,8 @@ export const LensTopNavMenu = ({
               return;
             }
 
+            const activeVisualization = visualizationMap[visualization.activeId];
+
             const {
               shareableUrl,
               savedObjectURL,
@@ -606,12 +596,22 @@ export const LensTopNavMenu = ({
               isCurrentStateDirty
             );
 
-            const sharingData = {
-              activeData,
-              columnsSorting: visualizationMap[visualization.activeId].getSortedColumns?.(
+            const datasourceLayers = getDatasourceLayers(
+              datasourceStates,
+              datasourceMap,
+              dataViews.indexPatterns
+            );
+
+            const exportDatatables =
+              activeVisualization.getExportDatatables?.(
                 visualization.state,
-                getDatasourceLayers(datasourceStates, datasourceMap, dataViews.indexPatterns)
-              ),
+                datasourceLayers,
+                activeData
+              ) ?? [];
+            const datatables =
+              exportDatatables.length > 0 ? exportDatatables : Object.values(activeData ?? {});
+            const sharingData = {
+              datatables,
               csvEnabled,
               reportingDisabled: !csvEnabled,
               title: title || defaultLensTitle,
@@ -621,25 +621,30 @@ export const LensTopNavMenu = ({
               },
               layout: {
                 dimensions:
-                  visualizationMap[visualization.activeId].getReportingLayout?.(
-                    visualization.state
-                  ) ?? DEFAULT_LENS_LAYOUT_DIMENSIONS,
+                  activeVisualization.getReportingLayout?.(visualization.state) ??
+                  DEFAULT_LENS_LAYOUT_DIMENSIONS,
               },
             };
 
             share.toggleShareContextMenu({
               anchorElement,
               allowEmbed: false,
-              allowShortUrl: false, // we'll manage this implicitly via the new service
-              shareableUrl: shareableUrl || '',
-              shareableUrlForSavedObject: savedObjectURL.href,
+              allowShortUrl: false,
+              delegatedShareUrlHandler: () => {
+                return isCurrentStateDirty || !currentDoc?.savedObjectId
+                  ? shareableUrl!
+                  : savedObjectURL.href;
+              },
               objectId: currentDoc?.savedObjectId,
               objectType: 'lens',
-              objectTypeTitle: i18n.translate('xpack.lens.app.share.panelTitle', {
-                defaultMessage: 'visualization',
-              }),
+              objectTypeMeta: {
+                title: i18n.translate('xpack.lens.app.shareModal.title', {
+                  defaultMessage: 'Share this Lens visualization',
+                }),
+              },
               sharingData,
-              isDirty: isCurrentStateDirty,
+              // only want to know about changes when savedObjectURL.href
+              isDirty: isCurrentStateDirty || !currentDoc?.savedObjectId,
               // disable the menu if both shortURL permission and the visualization has not been saved
               // TODO: improve here the disabling state with more specific checks
               disabledShareUrl: Boolean(!shareUrlEnabled && !currentDoc?.savedObjectId),
@@ -647,6 +652,7 @@ export const LensTopNavMenu = ({
               onClose: () => {
                 anchorElement?.focus();
               },
+              toasts: notifications.toasts,
             });
           },
         },
@@ -680,8 +686,7 @@ export const LensTopNavMenu = ({
                   panelTimeRange: contextFromEmbeddable ? initialContext.panelTimeRange : undefined,
                 },
                 {
-                  saveToLibrary:
-                    (initialInput && attributeService.inputIsRefType(initialInput)) ?? false,
+                  saveToLibrary: Boolean(initialInput?.savedObjectId),
                 }
               );
             }
@@ -752,7 +757,7 @@ export const LensTopNavMenu = ({
             toggleSettingsMenuOpen({
               lensStore,
               anchorElement,
-              theme$,
+              startServices,
             }),
         },
       },
@@ -762,7 +767,6 @@ export const LensTopNavMenu = ({
     initialContext,
     initialInput,
     isLinkedToOriginatingApp,
-    dashboardFeatureFlag.allowByValueEmbeddables,
     initialContextIsEmbedded,
     activeData,
     isSaveable,
@@ -776,6 +780,8 @@ export const LensTopNavMenu = ({
     lensInspector,
     title,
     share,
+    visualization,
+    visualizationMap,
     shortUrlService,
     data,
     filters,
@@ -783,28 +789,28 @@ export const LensTopNavMenu = ({
     activeDatasourceId,
     datasourceStates,
     datasourceMap,
-    visualizationMap,
-    visualization,
     currentDoc,
     adHocDataViews,
-    defaultLensTitle,
     isCurrentStateDirty,
+    dataViews.indexPatterns,
+    defaultLensTitle,
     onAppLeave,
     runSave,
-    attributeService,
     setIsSaveModalVisible,
     goBackToOriginatingApp,
     redirectToOrigin,
     discoverLocator,
     indexPatterns,
     uiSettings,
-    dataViews.indexPatterns,
     isOnTextBasedMode,
     lensStore,
-    theme$,
+    notifications.toasts,
+    startServices,
   ]);
 
-  const onQuerySubmitWrapped = useCallback(
+  const onQuerySubmitWrapped = useCallback<
+    Required<TopNavMenuProps<AggregateQuery>>['onQuerySubmit']
+  >(
     (payload) => {
       const { dateRange, query: newQuery } = payload;
       const currentRange = data.query.timefilter.timefilter.getTime();
@@ -820,8 +826,8 @@ export const LensTopNavMenu = ({
       }
       if (newQuery) {
         if (!isEqual(newQuery, query)) {
-          dispatchSetState({ query: newQuery });
-          // check if query is text-based (sql, essql etc) and switchAndCleanDatasource
+          dispatchSetState({ query: newQuery as Query });
+          // check if query is text-based (esql etc) and switchAndCleanDatasource
           if (isOfAggregateQueryType(newQuery) && !isOnTextBasedMode) {
             setIsOnTextBasedMode(true);
             dispatch(
@@ -847,14 +853,16 @@ export const LensTopNavMenu = ({
     ]
   );
 
-  const onSavedWrapped = useCallback(
+  const onSavedWrapped = useCallback<Required<TopNavMenuProps<AggregateQuery>>['onSaved']>(
     (newSavedQuery) => {
       dispatchSetState({ savedQuery: newSavedQuery });
     },
     [dispatchSetState]
   );
 
-  const onSavedQueryUpdatedWrapped = useCallback(
+  const onSavedQueryUpdatedWrapped = useCallback<
+    Required<TopNavMenuProps<AggregateQuery>>['onSavedQueryUpdated']
+  >(
     (newSavedQuery) => {
       // If the user tries to load the same saved query that is already loaded,
       // we will receive the same object reference which was previously frozen
@@ -910,10 +918,10 @@ export const LensTopNavMenu = ({
   const editField = useMemo(
     () =>
       canEditDataView
-        ? async (fieldName?: string, uiAction: 'edit' | 'add' = 'edit') => {
+        ? async (fieldName?: string, _uiAction: 'edit' | 'add' = 'edit') => {
             if (currentIndexPattern?.id) {
               const indexPatternInstance = await data.dataViews.get(currentIndexPattern?.id);
-              closeFieldEditor.current = dataViewFieldEditor.openEditor({
+              closeFieldEditor.current = await dataViewFieldEditor.openEditor({
                 ctx: {
                   dataView: indexPatternInstance,
                 },
@@ -1068,6 +1076,7 @@ export const LensTopNavMenu = ({
   return (
     <AggregateQueryTopNavMenu
       setMenuMountPoint={setHeaderActionMenu}
+      popoverBreakpoints={['xs', 's', 'm']}
       config={topNavConfig}
       saveQueryMenuVisibility={
         application.capabilities.visualize.saveQuery
@@ -1112,7 +1121,6 @@ export const LensTopNavMenu = ({
         )
       }
       textBasedLanguageModeErrors={textBasedLanguageModeErrors}
-      onTextBasedSavedAndExit={onTextBasedSavedAndExit}
       showFilterBar={true}
       data-test-subj="lnsApp_topNav"
       screenTitle={'lens'}

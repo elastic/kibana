@@ -13,19 +13,13 @@ import {
   getQueryConversationParams,
   getUpdateConversationSchemaMock,
 } from '../../__mocks__/conversations_schema.mock';
+import { authenticatedUser } from '../../__mocks__/user';
 import { updateConversationRoute } from './update_route';
-import { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 
 describe('Update conversation route', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
-  const mockUser1 = {
-    username: 'my_username',
-    authentication_realm: {
-      type: 'my_realm_type',
-      name: 'my_realm_name',
-    },
-  } as AuthenticatedUser;
+  const mockUser1 = authenticatedUser;
 
   beforeEach(() => {
     server = serverMock.create();
@@ -120,8 +114,8 @@ describe('Update conversation route', () => {
           excludeFromLastConversationStorage: true,
           ...getUpdateConversationSchemaMock(),
           apiConfig: {
+            actionTypeId: '.bedrock',
             connectorId: '123',
-            connectorTypeTitle: 'OpenAI',
             defaultSystemPromptId: 'test',
           },
         },

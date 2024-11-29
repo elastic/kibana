@@ -4,9 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { mlServicesMock } from '../../../../../machine_learning/mocks';
-import { buildMlAuthz } from '../../../../../machine_learning/authz';
 import {
   getEmptyFindResult,
   getRuleMock,
@@ -16,33 +13,35 @@ import {
   typicalMlRulePayload,
 } from '../../../../routes/__mocks__/request_responses';
 import { requestContextMock, serverMock, requestMock } from '../../../../routes/__mocks__';
+import { getRulesSchemaMock } from '../../../../../../../common/api/detection_engine/model/rule_schema/rule_response_schema.mock';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
 import { updateRuleRoute } from './route';
 import {
+  getCreateEqlRuleSchemaMock,
+  getCreateEsqlRulesSchemaMock,
+  getCreateNewTermsRulesSchemaMock,
   getCreateRulesSchemaMock,
   getUpdateRulesSchemaMock,
 } from '../../../../../../../common/api/detection_engine/model/rule_schema/mocks';
 import { getQueryRuleParams } from '../../../../rule_schema/mocks';
 import { ResponseActionTypesEnum } from '../../../../../../../common/api/detection_engine';
-
-jest.mock('../../../../../machine_learning/authz');
+import { HttpAuthzError } from '../../../../../machine_learning/validation';
 
 describe('Update rule route', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
-  let ml: ReturnType<typeof mlServicesMock.createSetupContract>;
 
   beforeEach(() => {
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
-    ml = mlServicesMock.createSetupContract();
 
     clients.rulesClient.get.mockResolvedValue(getRuleMock(getQueryRuleParams())); // existing rule
     clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit()); // rule exists
     clients.rulesClient.update.mockResolvedValue(getRuleMock(getQueryRuleParams())); // successful update
+    clients.detectionRulesClient.updateRule.mockResolvedValue(getRulesSchemaMock());
     clients.appClient.getSignalsIndex.mockReturnValue('.siem-signals-test-index');
 
-    updateRuleRoute(server.router, ml);
+    updateRuleRoute(server.router);
   });
 
   describe('status codes', () => {
@@ -99,10 +98,8 @@ describe('Update rule route', () => {
     });
 
     it('returns a 403 if mlAuthz fails', async () => {
-      (buildMlAuthz as jest.Mock).mockReturnValueOnce({
-        validateRuleType: jest
-          .fn()
-          .mockResolvedValue({ valid: false, message: 'mocked validation message' }),
+      clients.detectionRulesClient.updateRule.mockImplementationOnce(async () => {
+        throw new HttpAuthzError('mocked validation message');
       });
       const request = requestMock.create({
         method: 'put',
@@ -185,10 +182,6 @@ describe('Update rule route', () => {
     });
   });
   describe('rule containing response actions', () => {
-    beforeEach(() => {
-      // @ts-expect-error We're writting to a read only property just for the purpose of the test
-      clients.config.experimentalFeatures.endpointResponseActionsEnabled = true;
-    });
     const getResponseAction = (command: string = 'isolate', config?: object) => ({
       action_type_id: '.endpoint',
       params: {
@@ -199,19 +192,29 @@ describe('Update rule route', () => {
     });
     const defaultAction = getResponseAction();
 
-    test('is successful', async () => {
-      const request = requestMock.create({
-        method: 'post',
-        path: DETECTION_ENGINE_RULES_URL,
-        body: {
-          ...getCreateRulesSchemaMock(),
-          response_actions: [defaultAction],
-        },
-      });
+    const ruleTypes: Array<[string, () => object]> = [
+      ['query', () => getCreateRulesSchemaMock()],
+      ['esql', getCreateEsqlRulesSchemaMock],
+      ['eql', getCreateEqlRuleSchemaMock],
+      ['new_terms', getCreateNewTermsRulesSchemaMock],
+    ];
 
-      const response = await server.inject(request, requestContextMock.convertContext(context));
-      expect(response.status).toEqual(200);
-    });
+    test.each(ruleTypes)(
+      'is successful for %s rule',
+      async (ruleType: string, schemaMock: (ruleId: string) => object) => {
+        const request = requestMock.create({
+          method: 'post',
+          path: DETECTION_ENGINE_RULES_URL,
+          body: {
+            ...schemaMock(`rule-${ruleType}`),
+            response_actions: [defaultAction],
+          },
+        });
+
+        const response = await server.inject(request, requestContextMock.convertContext(context));
+        expect(response.status).toEqual(200);
+      }
+    );
 
     test('fails when isolate rbac is set to false', async () => {
       (context.securitySolution.getEndpointAuthz as jest.Mock).mockReturnValue(() => ({

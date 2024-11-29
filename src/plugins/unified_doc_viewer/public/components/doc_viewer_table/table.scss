@@ -41,13 +41,17 @@
 
 .kbnDocViewer__tableActionsCell,
 .kbnDocViewer__tableFieldNameCell {
-  align-items: flex-start;
-  padding: $euiSizeXS;
+  .euiTableCellContent {
+    align-items: flex-start;
+    padding: $euiSizeXS;
+  }
 }
 
 .kbnDocViewer__tableValueCell {
-  flex-direction: column;
-  align-items: flex-start;
+  .euiTableCellContent {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 }
 
 .kbnDocViewer__value {
@@ -57,4 +61,49 @@
   line-height: $euiLineHeight;
   color: $euiColorFullShade;
   vertical-align: top;
+
+  &--highlighted {
+    font-weight: $euiFontWeightBold;
+  }
+
+  .euiDataGridRowCell__popover & {
+    font-size: $euiFontSizeS;
+  }
+}
+
+.kbnDocViewer__fieldsGrid {
+  &.euiDataGrid--noControls.euiDataGrid--bordersHorizontal .euiDataGridHeader {
+    border-top: none;
+  }
+
+  &.euiDataGrid--headerUnderline .euiDataGridHeader {
+    border-bottom: $euiBorderThin;
+  }
+
+  &.euiDataGrid--rowHoverHighlight .euiDataGridRow:hover {
+    background-color: tintOrShade($euiColorLightShade, 50%, 0);
+  }
+
+  & [data-gridcell-column-id='name'] .euiDataGridRowCell__content {
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+
+  & [data-gridcell-column-id='pin_field'] .euiDataGridRowCell__content {
+    padding: calc($euiSizeXS / 2) 0 0 $euiSizeXS;
+  }
+
+  .kbnDocViewer__fieldsGrid__pinAction {
+    opacity: 0;
+  }
+
+  & [data-gridcell-column-id='pin_field']:focus-within {
+    .kbnDocViewer__fieldsGrid__pinAction {
+      opacity: 1;
+    }
+  }
+
+  .euiDataGridRow:hover .kbnDocViewer__fieldsGrid__pinAction {
+    opacity: 1;
+  }
 }

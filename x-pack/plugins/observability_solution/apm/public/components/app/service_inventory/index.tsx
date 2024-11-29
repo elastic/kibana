@@ -6,30 +6,28 @@
  */
 
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { usePerformanceContext } from '@kbn/ebt-tools';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { APIReturnType } from '../../../services/rest/create_call_apm_api';
-import { useStateDebounced } from '../../../hooks/use_debounce';
 import { ApmDocumentType } from '../../../../common/document_type';
-import {
-  ServiceInventoryFieldName,
-  ServiceListItem,
-} from '../../../../common/service_inventory';
+import { ServiceInventoryFieldName, ServiceListItem } from '../../../../common/service_inventory';
 import { useAnomalyDetectionJobsContext } from '../../../context/anomaly_detection_jobs/use_anomaly_detection_jobs_context';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useApmParams } from '../../../hooks/use_apm_params';
+import { useStateDebounced } from '../../../hooks/use_debounce';
 import { FETCH_STATUS, isFailure, isPending } from '../../../hooks/use_fetcher';
 import { useLocalStorage } from '../../../hooks/use_local_storage';
 import { usePreferredDataSourceAndBucketSize } from '../../../hooks/use_preferred_data_source_and_bucket_size';
 import { useProgressiveFetcher } from '../../../hooks/use_progressive_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
+import { APIReturnType } from '../../../services/rest/create_call_apm_api';
+import { SortFunction } from '../../shared/managed_table';
 import { MLCallout, shouldDisplayMlCallout } from '../../shared/ml_callout';
 import { SearchBar } from '../../shared/search_bar/search_bar';
 import { isTimeComparison } from '../../shared/time_comparison/get_comparison_options';
-import { ServiceList } from './service_list';
+import { ApmServicesTable } from './service_list/apm_services_table';
 import { orderServiceItems } from './service_list/order_service_items';
-import { SortFunction } from '../../shared/managed_table';
-import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 
 type MainStatisticsApiResponse = APIReturnType<'GET /internal/apm/services'>;
 
@@ -121,14 +119,7 @@ function useServicesDetailedStatisticsFetcher({
   renderedItems: ServiceListItem[];
 }) {
   const {
-    query: {
-      rangeFrom,
-      rangeTo,
-      environment,
-      kuery,
-      offset,
-      comparisonEnabled,
-    },
+    query: { rangeFrom, rangeTo, environment, kuery, offset, comparisonEnabled },
   } = useApmParams('/services');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
@@ -161,10 +152,7 @@ function useServicesDetailedStatisticsFetcher({
               kuery,
               start,
               end,
-              offset:
-                comparisonEnabled && isTimeComparison(offset)
-                  ? offset
-                  : undefined,
+              offset: comparisonEnabled && isTimeComparison(offset) ? offset : undefined,
               documentType: dataSourceOptions.source.documentType,
               rollupInterval: dataSourceOptions.source.rollupInterval,
               bucketSizeInSeconds: dataSourceOptions.bucketSizeInSeconds,
@@ -188,16 +176,12 @@ function useServicesDetailedStatisticsFetcher({
 
 export function ServiceInventory() {
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useStateDebounced('');
-
+  const { onPageReady } = usePerformanceContext();
   const [renderedItems, setRenderedItems] = useState<ServiceListItem[]>([]);
-
-  const mainStatisticsFetch =
-    useServicesMainStatisticsFetcher(debouncedSearchQuery);
+  const mainStatisticsFetch = useServicesMainStatisticsFetcher(debouncedSearchQuery);
   const { mainStatisticsData, mainStatisticsStatus } = mainStatisticsFetch;
 
-  const displayHealthStatus = mainStatisticsData.items.some(
-    (item) => 'healthStatus' in item
-  );
+  const displayHealthStatus = mainStatisticsData.items.some((item) => 'healthStatus' in item);
 
   const serviceOverflowCount = mainStatisticsData?.serviceOverflowCount ?? 0;
 
@@ -226,8 +210,7 @@ export function ServiceInventory() {
   );
 
   const displayMlCallout =
-    !userHasDismissedCallout &&
-    shouldDisplayMlCallout(anomalyDetectionSetupState);
+    !userHasDismissedCallout && shouldDisplayMlCallout(anomalyDetectionSetupState);
 
   const noItemsMessage = useMemo(() => {
     return (
@@ -266,10 +249,14 @@ export function ServiceInventory() {
     [tiebreakerField]
   );
 
-  const { setScreenContext } =
-    useApmPluginContext().observabilityAIAssistant.service;
+  // TODO verify this with AI team
+  const setScreenContext = useApmPluginContext().observabilityAIAssistant?.service.setScreenContext;
 
   useEffect(() => {
+    if (!setScreenContext) {
+      return;
+    }
+
     if (isFailure(mainStatisticsStatus)) {
       return setScreenContext({
         screenDescription: 'The services have failed to load',
@@ -293,18 +280,25 @@ export function ServiceInventory() {
     });
   }, [mainStatisticsStatus, mainStatisticsData.items, setScreenContext]);
 
+  useEffect(() => {
+    if (
+      mainStatisticsStatus === FETCH_STATUS.SUCCESS &&
+      comparisonFetch.status === FETCH_STATUS.SUCCESS
+    ) {
+      onPageReady();
+    }
+  }, [mainStatisticsStatus, comparisonFetch.status, onPageReady]);
+
   return (
     <>
       <SearchBar showTimeComparison />
       <EuiFlexGroup direction="column" gutterSize="m">
         {displayMlCallout && mlCallout}
         <EuiFlexItem>
-          <ServiceList
+          <ApmServicesTable
             status={mainStatisticsStatus}
             items={mainStatisticsData.items}
-            comparisonDataLoading={
-              comparisonFetch.status === FETCH_STATUS.LOADING
-            }
+            comparisonDataLoading={comparisonFetch.status === FETCH_STATUS.LOADING}
             displayHealthStatus={displayHealthStatus}
             displayAlerts={displayAlerts}
             initialSortField={initialSortField}

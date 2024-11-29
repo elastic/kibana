@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -23,7 +23,7 @@ interface DetectorTitleProps {
   deleteDetector?: (dtrIds: number) => void;
 }
 
-export const DetectorTitle: FC<DetectorTitleProps> = ({
+export const DetectorTitle: FC<PropsWithChildren<DetectorTitleProps>> = ({
   index,
   agg,
   field,
@@ -51,7 +51,12 @@ export const DetectorTitle: FC<DetectorTitleProps> = ({
             onClick={() => deleteDetector(index)}
             iconType="cross"
             size="s"
-            aria-label="Next"
+            aria-label={i18n.translate(
+              'xpack.ml.newJob.wizard.pickFieldsStep.nextButtonAriaLabel',
+              {
+                defaultMessage: 'Next',
+              }
+            )}
           />
         )}
       </EuiFlexItem>

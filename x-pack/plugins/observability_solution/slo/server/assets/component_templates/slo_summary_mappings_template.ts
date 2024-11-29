@@ -35,6 +35,34 @@ export const getSLOSummaryMappingsTemplate = (
             },
           },
         },
+        // Synthetics specific fields
+        monitor: {
+          properties: {
+            id: {
+              type: 'keyword',
+            },
+            config_id: {
+              type: 'keyword',
+            },
+            name: {
+              type: 'keyword',
+            },
+          },
+        },
+        observer: {
+          properties: {
+            name: {
+              type: 'keyword',
+            },
+            geo: {
+              properties: {
+                name: {
+                  type: 'keyword',
+                },
+              },
+            },
+          },
+        },
         // SLO field mappings
         slo: {
           properties: {
@@ -149,6 +177,45 @@ export const getSLOSummaryMappingsTemplate = (
         },
         spaceId: {
           type: 'keyword',
+        },
+        fiveMinuteBurnRate: {
+          properties: {
+            goodEvents: {
+              type: 'long',
+            },
+            totalEvents: {
+              type: 'long',
+            },
+            value: {
+              type: 'double',
+            },
+          },
+        },
+        oneHourBurnRate: {
+          properties: {
+            goodEvents: {
+              type: 'long',
+            },
+            totalEvents: {
+              type: 'long',
+            },
+            value: {
+              type: 'double',
+            },
+          },
+        },
+        oneDayBurnRate: {
+          properties: {
+            goodEvents: {
+              type: 'long',
+            },
+            totalEvents: {
+              type: 'long',
+            },
+            value: {
+              type: 'double',
+            },
+          },
         },
       },
     },

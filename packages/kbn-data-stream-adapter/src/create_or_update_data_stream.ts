@@ -1,16 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { IndicesDataStream } from '@elastic/elasticsearch/lib/api/types';
 import type { IndicesSimulateIndexTemplateResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { get } from 'lodash';
-import { retryTransientEsErrors } from './retry_transient_es_errors';
+import { retryTransientEsErrors } from '@kbn/index-adapter';
 
 interface UpdateIndexMappingsOpts {
   logger: Logger;
@@ -167,7 +168,7 @@ export async function createDataStream({
   esClient,
   name,
 }: CreateDataStreamParams): Promise<void> {
-  logger.info(`Creating data stream - ${name}`);
+  logger.debug(`Checking data stream exists - ${name}`);
 
   // check if data stream exists
   let dataStreamExists = false;
@@ -188,6 +189,7 @@ export async function createDataStream({
   if (dataStreamExists) {
     return;
   }
+  logger.info(`Installing data stream - ${name}`);
 
   try {
     await retryTransientEsErrors(() => esClient.indices.createDataStream({ name }), { logger });

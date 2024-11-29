@@ -10,18 +10,18 @@ import type { IKibanaResponse, KibanaResponseFactory, Logger } from '@kbn/core/s
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
+  API_VERSIONS,
   ELASTIC_AI_ASSISTANT_ANONYMIZATION_FIELDS_URL_BULK_ACTION,
-  ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
 } from '@kbn/elastic-assistant-common';
 
 import {
   AnonymizationFieldResponse,
-  BulkActionSkipResult,
-  BulkCrudActionResponse,
-  BulkCrudActionResults,
+  AnonymizationFieldsBulkActionSkipResult,
+  AnonymizationFieldsBulkCrudActionResponse,
+  AnonymizationFieldsBulkCrudActionResults,
   BulkCrudActionSummary,
-  PerformBulkActionRequestBody,
-  PerformBulkActionResponse,
+  PerformAnonymizationFieldsBulkActionRequestBody,
+  PerformAnonymizationFieldsBulkActionResponse,
 } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { ANONYMIZATION_FIELDS_TABLE_MAX_PAGE_SIZE } from '../../../common/constants';
@@ -29,14 +29,16 @@ import { ElasticAssistantPluginRouter } from '../../types';
 import { buildResponse } from '../utils';
 import {
   getUpdateScript,
+  transformESSearchToAnonymizationFields,
   transformESToAnonymizationFields,
   transformToCreateScheme,
   transformToUpdateScheme,
 } from '../../ai_assistant_data_clients/anonymization_fields/helpers';
 import {
-  SearchEsAnonymizationFieldsSchema,
+  EsAnonymizationFieldsSchema,
   UpdateAnonymizationFieldSchema,
 } from '../../ai_assistant_data_clients/anonymization_fields/types';
+import { performChecks } from '../helpers';
 
 export interface BulkOperationError {
   message: string;
@@ -45,8 +47,6 @@ export interface BulkOperationError {
     id: string;
   };
 }
-
-export type BulkActionError = BulkOperationError | unknown;
 
 const buildBulkResponse = (
   response: KibanaResponseFactory,
@@ -61,9 +61,9 @@ const buildBulkResponse = (
     updated?: AnonymizationFieldResponse[];
     created?: AnonymizationFieldResponse[];
     deleted?: string[];
-    skipped?: BulkActionSkipResult[];
+    skipped?: AnonymizationFieldsBulkActionSkipResult[];
   }
-): IKibanaResponse<BulkCrudActionResponse> => {
+): IKibanaResponse<AnonymizationFieldsBulkCrudActionResponse> => {
   const numSucceeded = updated.length + created.length + deleted.length;
   const numSkipped = skipped.length;
   const numFailed = errors.length;
@@ -75,7 +75,7 @@ const buildBulkResponse = (
     total: numSucceeded + numFailed + numSkipped,
   };
 
-  const results: BulkCrudActionResults = {
+  const results: AnonymizationFieldsBulkCrudActionResults = {
     updated,
     created,
     deleted,
@@ -83,7 +83,7 @@ const buildBulkResponse = (
   };
 
   if (numFailed > 0) {
-    return response.custom<BulkCrudActionResponse>({
+    return response.custom<AnonymizationFieldsBulkCrudActionResponse>({
       headers: { 'content-type': 'application/json' },
       body: {
         message: summary.succeeded > 0 ? 'Bulk edit partially failed' : 'Bulk edit failed',
@@ -101,7 +101,7 @@ const buildBulkResponse = (
     });
   }
 
-  const responseBody: BulkCrudActionResponse = {
+  const responseBody: AnonymizationFieldsBulkCrudActionResponse = {
     success: true,
     anonymization_fields_count: summary.total,
     attributes: { results, summary },
@@ -119,7 +119,7 @@ export const bulkActionAnonymizationFieldsRoute = (
       access: 'public',
       path: ELASTIC_AI_ASSISTANT_ANONYMIZATION_FIELDS_URL_BULK_ACTION,
       options: {
-        tags: ['access:elasticAssistant'],
+        tags: ['access:securitySolution-updateAIAssistantAnonymization'],
         timeout: {
           idleSocket: moment.duration(15, 'minutes').asMilliseconds(),
         },
@@ -127,14 +127,18 @@ export const bulkActionAnonymizationFieldsRoute = (
     })
     .addVersion(
       {
-        version: ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
+        version: API_VERSIONS.public.v1,
         validate: {
           request: {
-            body: buildRouteValidationWithZod(PerformBulkActionRequestBody),
+            body: buildRouteValidationWithZod(PerformAnonymizationFieldsBulkActionRequestBody),
           },
         },
       },
-      async (context, request, response): Promise<IKibanaResponse<PerformBulkActionResponse>> => {
+      async (
+        context,
+        request,
+        response
+      ): Promise<IKibanaResponse<PerformAnonymizationFieldsBulkActionResponse>> => {
         const { body } = request;
         const assistantResponse = buildResponse(response);
 
@@ -155,31 +159,33 @@ export const bulkActionAnonymizationFieldsRoute = (
         // when route is finished by timeout, aborted$ is not getting fired
         request.events.completed$.subscribe(() => abortController.abort());
         try {
-          const ctx = await context.resolve(['core', 'elasticAssistant']);
+          const ctx = await context.resolve(['core', 'elasticAssistant', 'licensing']);
+          // Perform license and authenticated user checks
+          const checkResponse = performChecks({
+            context: ctx,
+            request,
+            response,
+          });
 
-          const authenticatedUser = ctx.elasticAssistant.getCurrentUser();
-          if (authenticatedUser == null) {
-            return assistantResponse.error({
-              body: `Authenticated user not found`,
-              statusCode: 401,
-            });
+          if (!checkResponse.isSuccess) {
+            return checkResponse.response;
           }
+          const authenticatedUser = checkResponse.currentUser;
+
           const dataClient =
             await ctx.elasticAssistant.getAIAssistantAnonymizationFieldsDataClient();
 
           if (body.create && body.create.length > 0) {
-            const result = await dataClient?.findDocuments<SearchEsAnonymizationFieldsSchema>({
+            const result = await dataClient?.findDocuments<EsAnonymizationFieldsSchema>({
               perPage: 100,
               page: 1,
-              filter: `users:{ id: "${authenticatedUser?.profile_uid}" } AND (${body.create
-                .map((c) => `field:${c.field}`)
-                .join(' OR ')})`,
+              filter: `(${body.create.map((c) => `field:${c.field}`).join(' OR ')})`,
               fields: ['field'],
             });
             if (result?.data != null && result.total > 0) {
               return assistantResponse.error({
                 statusCode: 409,
-                body: `anonymization for field: "${result.data.hits.hits
+                body: `anonymization field: "${result.data.hits.hits
                   .map((c) => c._id)
                   .join(',')}" already exists`,
               });
@@ -187,7 +193,7 @@ export const bulkActionAnonymizationFieldsRoute = (
           }
 
           const writer = await dataClient?.getWriter();
-          const changedAt = new Date().toISOString();
+          const createdAt = new Date().toISOString();
           const {
             errors,
             docs_created: docsCreated,
@@ -195,34 +201,30 @@ export const bulkActionAnonymizationFieldsRoute = (
             docs_deleted: docsDeleted,
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           } = await writer!.bulk({
-            documentsToCreate: body.create?.map((f) =>
-              transformToCreateScheme(authenticatedUser, changedAt, f)
+            documentsToCreate: body.create?.map((doc) =>
+              transformToCreateScheme(authenticatedUser, createdAt, doc)
             ),
             documentsToDelete: body.delete?.ids,
-            documentsToUpdate: body.update?.map((f) =>
-              transformToUpdateScheme(authenticatedUser, changedAt, f)
+            documentsToUpdate: body.update?.map((doc) =>
+              transformToUpdateScheme(authenticatedUser, createdAt, doc)
             ),
             getUpdateScript: (document: UpdateAnonymizationFieldSchema) =>
               getUpdateScript({ anonymizationField: document, isPatch: true }),
-            authenticatedUser,
           });
-
-          const created = await dataClient?.findDocuments<SearchEsAnonymizationFieldsSchema>({
-            page: 1,
-            perPage: 1000,
-            filter: docsCreated.map((c) => `id:${c}`).join(' OR '),
-            fields: ['id'],
-          });
-          const updated = await dataClient?.findDocuments<SearchEsAnonymizationFieldsSchema>({
-            page: 1,
-            perPage: 1000,
-            filter: docsUpdated.map((c) => `id:${c}`).join(' OR '),
-            fields: ['id'],
-          });
+          const created =
+            docsCreated.length > 0
+              ? await dataClient?.findDocuments<EsAnonymizationFieldsSchema>({
+                  page: 1,
+                  perPage: 1000,
+                  filter: docsCreated.map((c) => `_id:${c}`).join(' OR '),
+                })
+              : undefined;
 
           return buildBulkResponse(response, {
-            updated: updated?.data ? transformESToAnonymizationFields(updated.data) : [],
-            created: created?.data ? transformESToAnonymizationFields(created.data) : [],
+            updated: docsUpdated
+              ? transformESToAnonymizationFields(docsUpdated as EsAnonymizationFieldsSchema[])
+              : [],
+            created: created?.data ? transformESSearchToAnonymizationFields(created?.data) : [],
             deleted: docsDeleted ?? [],
             errors,
           });

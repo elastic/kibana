@@ -26,8 +26,18 @@ import {
 } from '../../../types';
 import { RuleForm } from './rule_form';
 import { coreMock } from '@kbn/core/public/mocks';
-import { ALERTS_FEATURE_ID, RecoveredActionGroup } from '@kbn/alerting-plugin/common';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ALERTING_FEATURE_ID, RecoveredActionGroup } from '@kbn/alerting-plugin/common';
 import { useKibana } from '../../../common/lib/kibana';
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+      cacheTime: 0,
+    },
+  },
+});
 
 const toMapById = [
   (acc: Map<unknown, unknown>, val: { id: unknown }) => acc.set(val.id, val),
@@ -60,6 +70,12 @@ jest.mock('../../lib/capabilities', () => ({
   hasSaveRulesCapability: jest.fn(() => true),
   hasShowActionsCapability: jest.fn(() => true),
   hasExecuteActionsCapability: jest.fn(() => true),
+}));
+jest.mock('@kbn/alerts-ui-shared/src/common/apis/fetch_flapping_settings', () => ({
+  fetchFlappingSettings: jest.fn().mockResolvedValue({
+    lookBackWindow: 20,
+    statusChangeThreshold: 20,
+  }),
 }));
 
 describe('rule_form', () => {
@@ -143,9 +159,9 @@ describe('rule_form', () => {
         defaultActionGroupId: 'testActionGroup',
         minimumLicenseRequired: 'basic',
         recoveryActionGroup: RecoveredActionGroup,
-        producer: ALERTS_FEATURE_ID,
+        producer: ALERTING_FEATURE_ID,
         authorizedConsumers: {
-          [ALERTS_FEATURE_ID]: { read: true, all: true },
+          [ALERTING_FEATURE_ID]: { read: true, all: true },
           test: { read: true, all: true },
         },
         actionVariables: {
@@ -166,9 +182,9 @@ describe('rule_form', () => {
         defaultActionGroupId: 'testActionGroup',
         minimumLicenseRequired: 'gold',
         recoveryActionGroup: RecoveredActionGroup,
-        producer: ALERTS_FEATURE_ID,
+        producer: ALERTING_FEATURE_ID,
         authorizedConsumers: {
-          [ALERTS_FEATURE_ID]: { read: true, all: true },
+          [ALERTING_FEATURE_ID]: { read: true, all: true },
           test: { read: true, all: true },
         },
         actionVariables: {
@@ -193,6 +209,9 @@ describe('rule_form', () => {
       // eslint-disable-next-line react-hooks/rules-of-hooks
       useKibanaMock().services.application.capabilities = {
         ...capabilities,
+        rulesSettings: {
+          writeFlappingSettingsUI: true,
+        },
         rules: {
           show: true,
           save: true,
@@ -212,7 +231,7 @@ describe('rule_form', () => {
       const initialRule = {
         name: 'test',
         params: {},
-        consumer: ALERTS_FEATURE_ID,
+        consumer: ALERTING_FEATURE_ID,
         schedule: {
           interval: schedule,
         },
@@ -225,19 +244,21 @@ describe('rule_form', () => {
       } as unknown as Rule;
 
       wrapper = mountWithIntl(
-        <RuleForm
-          rule={initialRule}
-          config={{
-            isUsingSecurity: true,
-            minimumScheduleInterval: { value: '1m', enforce: enforceMinimum },
-          }}
-          dispatch={() => {}}
-          errors={{ name: [], 'schedule.interval': [], ruleTypeId: [], actionConnectors: [] }}
-          operation="create"
-          actionTypeRegistry={actionTypeRegistry}
-          ruleTypeRegistry={ruleTypeRegistry}
-          onChangeMetaData={jest.fn()}
-        />
+        <QueryClientProvider client={queryClient}>
+          <RuleForm
+            rule={initialRule}
+            config={{
+              isUsingSecurity: true,
+              minimumScheduleInterval: { value: '1m', enforce: enforceMinimum },
+            }}
+            dispatch={() => {}}
+            errors={{ name: [], 'schedule.interval': [], ruleTypeId: [], actionConnectors: [] }}
+            operation="create"
+            actionTypeRegistry={actionTypeRegistry}
+            ruleTypeRegistry={ruleTypeRegistry}
+            onChangeMetaData={jest.fn()}
+          />
+        </QueryClientProvider>
       );
 
       await act(async () => {
@@ -298,9 +319,9 @@ describe('rule_form', () => {
           defaultActionGroupId: 'testActionGroup',
           minimumLicenseRequired: 'basic',
           recoveryActionGroup: RecoveredActionGroup,
-          producer: ALERTS_FEATURE_ID,
+          producer: ALERTING_FEATURE_ID,
           authorizedConsumers: {
-            [ALERTS_FEATURE_ID]: { read: true, all: true },
+            [ALERTING_FEATURE_ID]: { read: true, all: true },
             test: { read: true, all: true },
           },
           actionVariables: {
@@ -321,9 +342,9 @@ describe('rule_form', () => {
           defaultActionGroupId: 'testActionGroup',
           minimumLicenseRequired: 'gold',
           recoveryActionGroup: RecoveredActionGroup,
-          producer: ALERTS_FEATURE_ID,
+          producer: ALERTING_FEATURE_ID,
           authorizedConsumers: {
-            [ALERTS_FEATURE_ID]: { read: true, all: true },
+            [ALERTING_FEATURE_ID]: { read: true, all: true },
             test: { read: true, all: true },
           },
           actionVariables: {
@@ -346,6 +367,9 @@ describe('rule_form', () => {
       // eslint-disable-next-line react-hooks/rules-of-hooks
       useKibanaMock().services.application.capabilities = {
         ...capabilities,
+        rulesSettings: {
+          writeFlappingSettingsUI: true,
+        },
         rules: {
           show: true,
           save: true,
@@ -365,7 +389,7 @@ describe('rule_form', () => {
       const initialRule = {
         name: 'test',
         params: {},
-        consumer: ALERTS_FEATURE_ID,
+        consumer: ALERTING_FEATURE_ID,
         schedule: {
           interval: schedule,
         },
@@ -381,28 +405,30 @@ describe('rule_form', () => {
       } as unknown as Rule;
 
       wrapper = mountWithIntl(
-        <RuleForm
-          canShowConsumerSelection
-          rule={{
-            ...initialRule,
-            ...initialRuleOverwrite,
-          }}
-          config={{
-            isUsingSecurity: true,
-            minimumScheduleInterval: { value: '1m', enforce: enforceMinimum },
-          }}
-          dispatch={() => {}}
-          errors={{ name: [], 'schedule.interval': [], ruleTypeId: [], actionConnectors: [] }}
-          operation="create"
-          actionTypeRegistry={actionTypeRegistry}
-          ruleTypeRegistry={ruleTypeRegistry}
-          connectorFeatureId={featureId}
-          onChangeMetaData={jest.fn()}
-          validConsumers={validConsumers}
-          setConsumer={mockSetConsumer}
-          useRuleProducer={useRuleProducer}
-          selectedConsumer={selectedConsumer}
-        />
+        <QueryClientProvider client={queryClient}>
+          <RuleForm
+            canShowConsumerSelection
+            rule={{
+              ...initialRule,
+              ...initialRuleOverwrite,
+            }}
+            config={{
+              isUsingSecurity: true,
+              minimumScheduleInterval: { value: '1m', enforce: enforceMinimum },
+            }}
+            dispatch={() => {}}
+            errors={{ name: [], 'schedule.interval': [], ruleTypeId: [], actionConnectors: [] }}
+            operation="create"
+            actionTypeRegistry={actionTypeRegistry}
+            ruleTypeRegistry={ruleTypeRegistry}
+            connectorFeatureId={featureId}
+            onChangeMetaData={jest.fn()}
+            validConsumers={validConsumers}
+            setConsumer={mockSetConsumer}
+            useRuleProducer={useRuleProducer}
+            selectedConsumer={selectedConsumer}
+          />
+        </QueryClientProvider>
       );
 
       await act(async () => {
@@ -556,7 +582,7 @@ describe('rule_form', () => {
             defaultActionGroupId: 'threshold.fired',
             minimumLicenseRequired: 'basic',
             recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
-            producer: ALERTS_FEATURE_ID,
+            producer: ALERTING_FEATURE_ID,
             authorizedConsumers: {
               alerts: { read: true, all: true },
               apm: { read: true, all: true },
@@ -629,7 +655,7 @@ describe('rule_form', () => {
             defaultActionGroupId: 'threshold.fired',
             minimumLicenseRequired: 'basic',
             recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
-            producer: ALERTS_FEATURE_ID,
+            producer: ALERTING_FEATURE_ID,
             authorizedConsumers: {
               infrastructure: { read: true, all: true },
               logs: { read: true, all: true },
@@ -707,7 +733,7 @@ describe('rule_form', () => {
             defaultActionGroupId: 'threshold.fired',
             minimumLicenseRequired: 'basic',
             recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
-            producer: ALERTS_FEATURE_ID,
+            producer: ALERTING_FEATURE_ID,
             authorizedConsumers: {
               infrastructure: { read: true, all: true },
               logs: { read: true, all: true },
@@ -766,7 +792,7 @@ describe('rule_form', () => {
             defaultActionGroupId: 'threshold.fired',
             minimumLicenseRequired: 'basic',
             recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
-            producer: ALERTS_FEATURE_ID,
+            producer: ALERTING_FEATURE_ID,
             authorizedConsumers: {
               infrastructure: { read: true, all: true },
               logs: { read: true, all: true },
@@ -825,7 +851,7 @@ describe('rule_form', () => {
             defaultActionGroupId: 'threshold.fired',
             minimumLicenseRequired: 'basic',
             recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
-            producer: ALERTS_FEATURE_ID,
+            producer: ALERTING_FEATURE_ID,
             authorizedConsumers: {
               infrastructure: { read: true, all: true },
               logs: { read: true, all: true },
@@ -943,7 +969,7 @@ describe('rule_form', () => {
             defaultActionGroupId: 'threshold.fired',
             minimumLicenseRequired: 'basic',
             recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
-            producer: ALERTS_FEATURE_ID,
+            producer: ALERTING_FEATURE_ID,
             authorizedConsumers: {
               infrastructure: { read: true, all: true },
               logs: { read: true, all: true },
@@ -1021,9 +1047,9 @@ describe('rule_form', () => {
               defaultActionGroupId: 'testActionGroup',
               minimumLicenseRequired: 'basic',
               recoveryActionGroup: RecoveredActionGroup,
-              producer: ALERTS_FEATURE_ID,
+              producer: ALERTING_FEATURE_ID,
               authorizedConsumers: {
-                [ALERTS_FEATURE_ID]: { read: true, all: true },
+                [ALERTING_FEATURE_ID]: { read: true, all: true },
                 test: { read: true, all: true },
               },
             },
@@ -1041,7 +1067,7 @@ describe('rule_form', () => {
               recoveryActionGroup: RecoveredActionGroup,
               producer: 'test',
               authorizedConsumers: {
-                [ALERTS_FEATURE_ID]: { read: true, all: true },
+                [ALERTING_FEATURE_ID]: { read: true, all: true },
                 test: { read: true, all: true },
               },
             },
@@ -1057,6 +1083,9 @@ describe('rule_form', () => {
       // eslint-disable-next-line react-hooks/rules-of-hooks
       useKibanaMock().services.application.capabilities = {
         ...capabilities,
+        rulesSettings: {
+          writeFlappingSettingsUI: true,
+        },
         rules: {
           show: true,
           save: true,
@@ -1105,19 +1134,21 @@ describe('rule_form', () => {
       } as unknown as Rule;
 
       wrapper = mountWithIntl(
-        <RuleForm
-          rule={initialRule}
-          config={{
-            isUsingSecurity: true,
-            minimumScheduleInterval: { value: '1m', enforce: false },
-          }}
-          dispatch={() => {}}
-          errors={{ name: [], 'schedule.interval': [], ruleTypeId: [], actionConnectors: [] }}
-          operation="create"
-          actionTypeRegistry={actionTypeRegistry}
-          ruleTypeRegistry={ruleTypeRegistry}
-          onChangeMetaData={jest.fn()}
-        />
+        <QueryClientProvider client={queryClient}>
+          <RuleForm
+            rule={initialRule}
+            config={{
+              isUsingSecurity: true,
+              minimumScheduleInterval: { value: '1m', enforce: false },
+            }}
+            dispatch={() => {}}
+            errors={{ name: [], 'schedule.interval': [], ruleTypeId: [], actionConnectors: [] }}
+            operation="create"
+            actionTypeRegistry={actionTypeRegistry}
+            ruleTypeRegistry={ruleTypeRegistry}
+            onChangeMetaData={jest.fn()}
+          />
+        </QueryClientProvider>
       );
 
       await act(async () => {
@@ -1152,7 +1183,7 @@ describe('rule_form', () => {
         name: 'test',
         ruleTypeId: ruleType.id,
         params: {},
-        consumer: ALERTS_FEATURE_ID,
+        consumer: ALERTING_FEATURE_ID,
         schedule: {
           interval: '1m',
         },
@@ -1164,19 +1195,21 @@ describe('rule_form', () => {
       } as unknown as Rule;
 
       wrapper = mountWithIntl(
-        <RuleForm
-          rule={initialRule}
-          config={{
-            isUsingSecurity: true,
-            minimumScheduleInterval: { value: '1m', enforce: false },
-          }}
-          dispatch={() => {}}
-          errors={{ name: [], 'schedule.interval': [], ruleTypeId: [], actionConnectors: [] }}
-          operation="create"
-          actionTypeRegistry={actionTypeRegistry}
-          ruleTypeRegistry={ruleTypeRegistry}
-          onChangeMetaData={jest.fn()}
-        />
+        <QueryClientProvider client={queryClient}>
+          <RuleForm
+            rule={initialRule}
+            config={{
+              isUsingSecurity: true,
+              minimumScheduleInterval: { value: '1m', enforce: false },
+            }}
+            dispatch={() => {}}
+            errors={{ name: [], 'schedule.interval': [], ruleTypeId: [], actionConnectors: [] }}
+            operation="create"
+            actionTypeRegistry={actionTypeRegistry}
+            ruleTypeRegistry={ruleTypeRegistry}
+            onChangeMetaData={jest.fn()}
+          />
+        </QueryClientProvider>
       );
 
       await act(async () => {

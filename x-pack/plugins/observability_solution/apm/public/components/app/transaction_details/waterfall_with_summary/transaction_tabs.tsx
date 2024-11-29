@@ -43,10 +43,7 @@ export function TransactionTabs({
   showCriticalPath,
   onShowCriticalPathChange,
 }: Props) {
-  const tabs: Record<
-    TransactionTab,
-    { label: string; component: React.ReactNode }
-  > = useMemo(
+  const tabs: Record<TransactionTab, { label: string; component: React.ReactNode }> = useMemo(
     () => ({
       [TransactionTab.timeline]: {
         label: i18n.translate('xpack.apm.propertiesTable.tabs.timelineLabel', {
@@ -66,9 +63,7 @@ export function TransactionTabs({
         label: i18n.translate('xpack.apm.propertiesTable.tabs.metadataLabel', {
           defaultMessage: 'Metadata',
         }),
-        component: (
-          <>{transaction && <MetadataTabContent transaction={transaction} />}</>
-        ),
+        component: <>{transaction && <MetadataTabContent transaction={transaction} />}</>,
       },
       [TransactionTab.logs]: {
         label: i18n.translate('xpack.apm.propertiesTable.tabs.logsLabel', {
@@ -181,10 +176,9 @@ function LogsTabContent({
         {
           type: 'field',
           field: 'service.name',
-          header: i18n.translate(
-            'xpack.apm.propertiesTable.tabs.logs.serviceName',
-            { defaultMessage: 'Service Name' }
-          ),
+          header: i18n.translate('xpack.apm.propertiesTable.tabs.logs.serviceName', {
+            defaultMessage: 'Service Name',
+          }),
           width: 200,
         },
         { type: 'message' },

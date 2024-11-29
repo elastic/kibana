@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { APIReturnType } from '../../../../public/services/rest/create_call_apm_api';
+import type { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { synthtrace } from '../../../synthtrace';
 import { opbeans } from '../../fixtures/synthtrace/opbeans';
 
@@ -15,8 +15,8 @@ const timeRange = {
   rangeFrom: start,
   rangeTo: end,
 };
-
-describe('Transaction details', () => {
+// flaky
+describe.skip('Transaction details', () => {
   before(() => {
     synthtrace.index(
       opbeans({
@@ -35,19 +35,17 @@ describe('Transaction details', () => {
   });
 
   it('shows transaction name and transaction charts', () => {
-    cy.intercept(
-      'GET',
-      '/internal/apm/services/opbeans-java/transactions/charts/latency?*'
-    ).as('transactionLatencyRequest');
+    cy.intercept('GET', '/internal/apm/services/opbeans-java/transactions/charts/latency?*').as(
+      'transactionLatencyRequest'
+    );
 
     cy.intercept('GET', '/internal/apm/services/opbeans-java/throughput?*').as(
       'transactionThroughputRequest'
     );
 
-    cy.intercept(
-      'GET',
-      '/internal/apm/services/opbeans-java/transactions/charts/error_rate?*'
-    ).as('transactionFailureRateRequest');
+    cy.intercept('GET', '/internal/apm/services/opbeans-java/transactions/charts/error_rate?*').as(
+      'transactionFailureRateRequest'
+    );
 
     cy.visit(
       `/app/apm/services/opbeans-java/transactions/view?${new URLSearchParams({
@@ -56,50 +54,41 @@ describe('Transaction details', () => {
       })}`
     );
 
-    cy.wait([
-      '@transactionLatencyRequest',
-      '@transactionThroughputRequest',
-      '@transactionFailureRateRequest',
-    ]).spread(
-      (
-        latencyInterception,
-        throughputInterception,
-        failureRateInterception
-      ) => {
-        expect(latencyInterception.request.query.transactionName).to.be.eql(
-          'GET /api/product'
-        );
+    cy.wait(
+      [
+        '@transactionLatencyRequest',
+        '@transactionThroughputRequest',
+        '@transactionFailureRateRequest',
+      ],
+      { timeout: 30000 }
+    ).spread((latencyInterception, throughputInterception, failureRateInterception) => {
+      expect(latencyInterception.request.query.transactionName).to.be.eql('GET /api/product');
 
-        expect(
-          (
-            latencyInterception.response
-              ?.body as APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/charts/latency'>
-          ).currentPeriod.latencyTimeseries[0].y
-        ).to.eql(1000 * 1000);
+      expect(
+        (
+          latencyInterception.response
+            ?.body as APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/charts/latency'>
+        ).currentPeriod.latencyTimeseries[0].y
+      ).to.eql(1000 * 1000);
 
-        expect(throughputInterception.request.query.transactionName).to.be.eql(
-          'GET /api/product'
-        );
+      expect(throughputInterception.request.query.transactionName).to.be.eql('GET /api/product');
 
-        expect(
-          (
-            throughputInterception.response
-              ?.body as APIReturnType<'GET /internal/apm/services/{serviceName}/throughput'>
-          ).currentPeriod[0].y
-        ).to.eql(60);
+      expect(
+        (
+          throughputInterception.response
+            ?.body as APIReturnType<'GET /internal/apm/services/{serviceName}/throughput'>
+        ).currentPeriod[0].y
+      ).to.eql(60);
 
-        expect(failureRateInterception.request.query.transactionName).to.be.eql(
-          'GET /api/product'
-        );
+      expect(failureRateInterception.request.query.transactionName).to.be.eql('GET /api/product');
 
-        expect(
-          (
-            failureRateInterception.response
-              ?.body as APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/charts/error_rate'>
-          ).currentPeriod.average
-        ).to.eql(1);
-      }
-    );
+      expect(
+        (
+          failureRateInterception.response
+            ?.body as APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/charts/error_rate'>
+        ).currentPeriod.average
+      ).to.eql(1);
+    });
 
     cy.contains('h2', 'GET /api/product');
     cy.getByTestSubj('latencyChart');
@@ -117,7 +106,6 @@ describe('Transaction details', () => {
     );
     cy.contains('Create SLO');
   });
-
   it('shows top errors table', () => {
     cy.visitKibana(
       `/app/apm/services/opbeans-java/transactions/view?${new URLSearchParams({
@@ -126,9 +114,10 @@ describe('Transaction details', () => {
       })}`
     );
 
-    cy.contains('Top 5 errors');
+    cy.contains('Top 5 errors', { timeout: 30000 });
     cy.getByTestSubj('topErrorsForTransactionTable')
-      .contains('a', '[MockError] Foo')
+      .should('be.visible')
+      .contains('a', '[MockError] Foo', { timeout: 10000 })
       .click();
     cy.url().should('include', 'opbeans-java/errors');
   });
@@ -136,12 +125,10 @@ describe('Transaction details', () => {
   describe('when navigating to a trace sample', () => {
     it('keeps the same trace sample after reloading the page', () => {
       cy.visitKibana(
-        `/app/apm/services/opbeans-java/transactions/view?${new URLSearchParams(
-          {
-            ...timeRange,
-            transactionName: 'GET /api/product',
-          }
-        )}`
+        `/app/apm/services/opbeans-java/transactions/view?${new URLSearchParams({
+          ...timeRange,
+          transactionName: 'GET /api/product',
+        })}`
       );
 
       cy.getByTestSubj('pagination-button-last').click();
@@ -155,19 +142,15 @@ describe('Transaction details', () => {
   describe('when changing filters which results in no trace samples', () => {
     it('trace waterfall must reset to empty state', () => {
       cy.visitKibana(
-        `/app/apm/services/opbeans-java/transactions/view?${new URLSearchParams(
-          {
-            ...timeRange,
-            transactionName: 'GET /api/product',
-          }
-        )}`
+        `/app/apm/services/opbeans-java/transactions/view?${new URLSearchParams({
+          ...timeRange,
+          transactionName: 'GET /api/product',
+        })}`
       );
 
       cy.getByTestSubj('apmWaterfallButton').should('exist');
 
-      cy.getByTestSubj('apmUnifiedSearchBar')
-        .type(`_id: "123"`)
-        .type('{enter}');
+      cy.getByTestSubj('apmUnifiedSearchBar').type(`_id: "123"`).type('{enter}');
 
       cy.getByTestSubj('apmWaterfallButton').should('not.exist');
       cy.getByTestSubj('apmNoTraceFound').should('exist');

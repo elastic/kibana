@@ -1,0 +1,15 @@
+{
+  "profiling.stacktraces": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_profiling/stacktraces"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/observability/current/universal-profiling.html",
+    "availability": {
+      "stack": false,
+      "serverless": false
+    }
+  }
+}

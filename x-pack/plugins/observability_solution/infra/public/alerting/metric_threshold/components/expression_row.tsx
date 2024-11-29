@@ -17,38 +17,26 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { omit } from 'lodash';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { PropsWithChildren, useCallback, useMemo, useState } from 'react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import {
   AggregationType,
-  builtInComparators,
   IErrorObject,
   OfExpression,
   ThresholdExpression,
   WhenExpression,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { DataViewBase } from '@kbn/es-query';
 import useToggle from 'react-use/lib/useToggle';
-import { Aggregators, Comparator } from '../../../../common/alerting/metrics';
+import { COMPARATORS } from '@kbn/alerting-comparators';
+import { convertToBuiltInComparators } from '@kbn/observability-plugin/common';
+import { Aggregators } from '../../../../common/alerting/metrics';
+import { useMetricsDataViewContext } from '../../../containers/metrics_source';
 import { decimalToPct, pctToDecimal } from '../../../../common/utils/corrected_percent_convert';
-import { DerivedIndexPattern } from '../../../containers/metrics_source';
 import { AGGREGATION_TYPES, MetricExpression } from '../types';
 import { CustomEquationEditor } from './custom_equation';
 import { CUSTOM_EQUATION } from '../i18n_strings';
 
-const customComparators = {
-  ...builtInComparators,
-  [Comparator.OUTSIDE_RANGE]: {
-    text: i18n.translate('xpack.infra.metrics.alertFlyout.outsideRangeLabel', {
-      defaultMessage: 'Is not between',
-    }),
-    value: Comparator.OUTSIDE_RANGE,
-    requiredValues: 2,
-  },
-};
-
 interface ExpressionRowProps {
-  fields: DerivedIndexPattern['fields'];
   expressionId: number;
   expression: MetricExpression;
   errors: IErrorObject;
@@ -56,15 +44,9 @@ interface ExpressionRowProps {
   addExpression(): void;
   remove(id: number): void;
   setRuleParams(id: number, params: MetricExpression): void;
-  dataView: DataViewBase;
 }
 
-const StyledExpressionRow = euiStyled(EuiFlexGroup)`
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  margin: 0 -4px;
-`;
+const NegativeHorizontalMarginDiv = euiStyled.div`margin: 0 -4px;`;
 
 const StyledExpression = euiStyled.div`
   padding: 0 4px;
@@ -74,25 +56,22 @@ const StyledHealth = euiStyled(EuiHealth)`
   margin-left: 4px;
 `;
 
-export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
+export const ExpressionRow = ({
+  children,
+  setRuleParams,
+  expression,
+  errors,
+  expressionId,
+  remove,
+  canDelete,
+}: PropsWithChildren<ExpressionRowProps>) => {
   const [isExpanded, toggle] = useToggle(true);
-
-  const {
-    dataView,
-    children,
-    setRuleParams,
-    expression,
-    errors,
-    expressionId,
-    remove,
-    fields,
-    canDelete,
-  } = props;
+  const { metricsView } = useMetricsDataViewContext();
 
   const {
     aggType = AGGREGATION_TYPES.MAX,
     metric,
-    comparator = Comparator.GT,
+    comparator = COMPARATORS.GREATER_THAN,
     threshold = [],
     warningThreshold = [],
     warningComparator,
@@ -126,26 +105,26 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
 
   const updateComparator = useCallback(
     (c?: string) => {
-      setRuleParams(expressionId, { ...expression, comparator: c as Comparator });
+      setRuleParams(expressionId, { ...expression, comparator: c as COMPARATORS });
     },
     [expressionId, expression, setRuleParams]
   );
 
   const updateWarningComparator = useCallback(
     (c?: string) => {
-      setRuleParams(expressionId, { ...expression, warningComparator: c as Comparator });
+      setRuleParams(expressionId, { ...expression, warningComparator: c as COMPARATORS });
     },
     [expressionId, expression, setRuleParams]
   );
 
   const convertThreshold = useCallback(
-    (enteredThreshold) =>
+    (enteredThreshold: any) =>
       isMetricPct ? enteredThreshold.map((v: number) => pctToDecimal(v)) : enteredThreshold,
     [isMetricPct]
   );
 
   const updateThreshold = useCallback(
-    (enteredThreshold) => {
+    (enteredThreshold: any) => {
       const t = convertThreshold(enteredThreshold);
       if (t.join() !== expression.threshold.join()) {
         setRuleParams(expressionId, { ...expression, threshold: t });
@@ -155,7 +134,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
   );
 
   const updateWarningThreshold = useCallback(
-    (enteredThreshold) => {
+    (enteredThreshold: any) => {
       const t = convertThreshold(enteredThreshold);
       if (t.join() !== expression.warningThreshold?.join()) {
         setRuleParams(expressionId, { ...expression, warningThreshold: t });
@@ -186,7 +165,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
   ]);
 
   const handleCustomMetricChange = useCallback(
-    (exp) => {
+    (exp: any) => {
       setRuleParams(expressionId, exp);
     },
     [expressionId, setRuleParams]
@@ -214,14 +193,14 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
     />
   );
 
-  const normalizedFields = fields.map((f) => ({
+  const normalizedFields = (metricsView?.fields ?? []).map((f) => ({
     normalizedType: f.type,
     name: f.name,
   }));
 
   return (
     <>
-      <EuiFlexGroup gutterSize="xs">
+      <EuiFlexGroup gutterSize="xs" data-test-subj="metricThresholdExpressionRow">
         <EuiFlexItem grow={false}>
           <EuiButtonIcon
             iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
@@ -233,7 +212,12 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
           />
         </EuiFlexItem>
         <EuiFlexItem grow>
-          <StyledExpressionRow style={{ gap: aggType !== 'custom' ? 24 : 12 }}>
+          <EuiFlexGroup
+            component={NegativeHorizontalMarginDiv}
+            gutterSize={aggType !== 'custom' ? 'l' : 'm'}
+            alignItems="center"
+            wrap
+          >
             <StyledExpression>
               <WhenExpression
                 customAggTypesOptions={aggregationType}
@@ -278,7 +262,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
             {!displayWarningThreshold && (
               <>
                 <EuiSpacer size={'xs'} />
-                <StyledExpressionRow>
+                <EuiFlexGroup component={NegativeHorizontalMarginDiv} alignItems="center">
                   <EuiButtonEmpty
                     data-test-subj="infraExpressionRowAddWarningThresholdButton"
                     color={'primary'}
@@ -292,13 +276,13 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
                       defaultMessage="Add warning threshold"
                     />
                   </EuiButtonEmpty>
-                </StyledExpressionRow>
+                </EuiFlexGroup>
               </>
             )}
-          </StyledExpressionRow>
+          </EuiFlexGroup>
           {displayWarningThreshold && (
             <>
-              <StyledExpressionRow>
+              <EuiFlexGroup component={NegativeHorizontalMarginDiv} alignItems="center">
                 {criticalThresholdExpression}
                 <StyledHealth color="danger">
                   <FormattedMessage
@@ -306,8 +290,8 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
                     defaultMessage="Alert"
                   />
                 </StyledHealth>
-              </StyledExpressionRow>
-              <StyledExpressionRow>
+              </EuiFlexGroup>
+              <EuiFlexGroup component={NegativeHorizontalMarginDiv} alignItems="center">
                 {warningThresholdExpression}
                 <StyledHealth color="warning">
                   <FormattedMessage
@@ -328,22 +312,21 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
                   iconType={'minusInCircleFilled'}
                   onClick={toggleWarningThreshold}
                 />
-              </StyledExpressionRow>
+              </EuiFlexGroup>
             </>
           )}
           {aggType === Aggregators.CUSTOM && (
             <>
               <EuiSpacer size={'m'} />
-              <StyledExpressionRow>
+              <EuiFlexGroup component={NegativeHorizontalMarginDiv} alignItems="center">
                 <CustomEquationEditor
                   expression={expression}
                   fields={normalizedFields}
                   aggregationTypes={aggregationType}
                   onChange={handleCustomMetricChange}
                   errors={errors}
-                  dataView={dataView}
                 />
-              </StyledExpressionRow>
+              </EuiFlexGroup>
               <EuiSpacer size={'s'} />
             </>
           )}
@@ -380,14 +363,18 @@ const ThresholdElement: React.FC<{
     if (isMetricPct) return threshold.map((v) => decimalToPct(v));
     return threshold;
   }, [threshold, isMetricPct]);
-
+  const thresholdComparator = useCallback(() => {
+    if (!comparator) return COMPARATORS.GREATER_THAN;
+    // Check if the rule had the legacy OUTSIDE_RANGE inside its params.
+    // Then, change it on-the-fly to NOT_BETWEEN
+    return convertToBuiltInComparators(comparator);
+  }, [comparator]);
   return (
     <>
       <StyledExpression>
         <ThresholdExpression
-          thresholdComparator={comparator || Comparator.GT}
+          thresholdComparator={thresholdComparator()}
           threshold={displayedThreshold}
-          customComparators={customComparators}
           onChangeSelectedThresholdComparator={updateComparator}
           onChangeSelectedThreshold={updateThreshold}
           errors={errors}

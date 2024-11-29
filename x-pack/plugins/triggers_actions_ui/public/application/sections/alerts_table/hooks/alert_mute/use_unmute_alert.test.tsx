@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks/dom';
 import * as api from '../../../../lib/rule_api/unmute_alert';
-import { waitFor } from '@testing-library/react';
+import { waitFor, renderHook } from '@testing-library/react';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { AppMockRenderer, createAppMockRenderer } from '../../../test_utils';
 import { useUnmuteAlert } from './use_unmute_alert';
-import { AlertsTableQueryContext } from '../../contexts/alerts_table_context';
+import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
 
 jest.mock('../../../../lib/rule_api/mute_alert');
 jest.mock('../../../../../common/lib/kibana');
@@ -25,7 +24,7 @@ describe('useUnmuteAlert', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    appMockRender = createAppMockRenderer(AlertsTableQueryContext);
+    appMockRender = createAppMockRenderer(AlertsQueryContext);
   });
 
   it('calls the api when invoked with the correct parameters', async () => {

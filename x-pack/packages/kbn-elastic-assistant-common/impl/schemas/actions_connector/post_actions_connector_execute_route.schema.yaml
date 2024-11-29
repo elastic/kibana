@@ -1,12 +1,13 @@
 openapi: 3.0.0
 info:
   title: Execute Connector API endpoint
-  version: '1'
+  version: "1"
 paths:
   /internal/elastic_assistant/actions/connector/{connectorId}/_execute:
     post:
-      operationId: ExecuteConnector
       x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: ExecuteConnector
       description: Execute Elastic Assistant connector by id
       summary: Execute Elastic Assistant connector
       tags:
@@ -25,13 +26,13 @@ paths:
             schema:
               type: object
               required:
+                - actionTypeId
                 - params
-                - llmType
                 - replacements
                 - subAction
               properties:
                 conversationId:
-                  $ref: '../conversations/common_attributes.schema.yaml#/components/schemas/UUID'
+                  $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
                 message:
                   type: string
                 model:
@@ -41,6 +42,8 @@ paths:
                   enum:
                     - invokeAI
                     - invokeStream
+                actionTypeId:
+                  type: string
                 alertsIndexPattern:
                   type: string
                 allow:
@@ -51,37 +54,30 @@ paths:
                   type: array
                   items:
                     type: string
-                isEnabledKnowledgeBase:
-                  type: boolean
-                isEnabledRAGAlerts:
-                  type: boolean
                 replacements:
-                  type: array
-                  items:
-                    $ref: '../conversations/common_attributes.schema.yaml#/components/schemas/Replacement'
+                  $ref: '../conversations/common_attributes.schema.yaml#/components/schemas/Replacements'
                 size:
                   type: number
-                llmType:
+                langSmithProject:
                   type: string
-                  enum:
-                    - bedrock
-                    - openai
+                langSmithApiKey:
+                  type: string
       responses:
         '200':
-          description: Successful response
+          description: Successful static response
           content:
             application/json:
               schema:
                 type: object
+                required:
+                  - data
+                  - connector_id
+                  - status
                 properties:
                   data:
                     type: string
                   connector_id:
                     type: string
-                  replacements:
-                    type: array
-                    items:
-                      $ref: '../conversations/common_attributes.schema.yaml#/components/schemas/Replacement'
                   status:
                     type: string
                   trace_data:
@@ -107,4 +103,3 @@ paths:
                     type: string
                   message:
                     type: string
-

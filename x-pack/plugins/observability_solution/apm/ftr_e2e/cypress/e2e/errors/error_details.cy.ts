@@ -6,6 +6,8 @@
  */
 
 import { getErrorGroupingKey } from '@kbn/apm-synthtrace-client/src/lib/apm/instance';
+import { generateLongIdWithSeed } from '@kbn/apm-synthtrace-client/src/lib/utils/generate_id';
+
 import url from 'url';
 import { synthtrace } from '../../../synthtrace';
 import { checkA11y } from '../../support/commands';
@@ -69,7 +71,7 @@ describe('Error details', () => {
     });
 
     describe('when error has data', () => {
-      const errorGroupingKey = getErrorGroupingKey('Error 1');
+      const errorGroupingKey = generateLongIdWithSeed('Error 1');
       const errorGroupingKeyShort = errorGroupingKey.slice(0, 5);
       const errorDetailsPageHref = url.format({
         pathname: `/app/apm/services/opbeans-java/errors/${errorGroupingKey}`,
@@ -88,9 +90,7 @@ describe('Error details', () => {
       it('shows top erroneous transactions table', () => {
         cy.visitKibana(errorDetailsPageHref);
         cy.contains('Top 5 affected transactions');
-        cy.getByTestSubj('topErroneousTransactionsTable')
-          .contains('a', 'GET /apple 🍎')
-          .click();
+        cy.getByTestSubj('topErroneousTransactionsTable').contains('a', 'GET /apple 🍎').click();
         cy.url().should('include', 'opbeans-java/transactions/view');
       });
 

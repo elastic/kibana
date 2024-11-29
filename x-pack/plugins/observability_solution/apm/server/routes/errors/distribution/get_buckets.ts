@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  rangeQuery,
-  kqlQuery,
-  termQuery,
-} from '@kbn/observability-plugin/server';
+import { rangeQuery, kqlQuery, termQuery } from '@kbn/observability-plugin/server';
 import { ApmDocumentType } from '../../../../common/document_type';
 import { ERROR_GROUP_ID, SERVICE_NAME } from '../../../../common/es_fields/apm';
 import { RollupInterval } from '../../../../common/rollup';
@@ -77,16 +73,11 @@ export async function getBuckets({
     },
   };
 
-  const resp = await apmEventClient.search(
-    'get_error_distribution_buckets',
-    params
-  );
+  const resp = await apmEventClient.search('get_error_distribution_buckets', params);
 
-  const buckets = (resp.aggregations?.distribution.buckets || []).map(
-    (bucket) => ({
-      x: bucket.key,
-      y: bucket.doc_count,
-    })
-  );
+  const buckets = (resp.aggregations?.distribution.buckets || []).map((bucket) => ({
+    x: bucket.key,
+    y: bucket.doc_count,
+  }));
   return { buckets };
 }

@@ -6,22 +6,24 @@
  */
 
 import React from 'react';
-import type { TimeRangeBounds } from '../util/time_buckets';
 
-interface Props {
+import type { TimeRangeBounds } from '@kbn/ml-time-buckets';
+
+interface TimeSeriesExplorerProps {
   appStateHandler: (action: string, payload: any) => void;
   autoZoomDuration: number | undefined;
   bounds: TimeRangeBounds | undefined;
-  dateFormatTz: string;
   lastRefresh: number;
-  selectedJobId: string | undefined;
-  selectedDetectorIndex: number;
-  selectedEntities: Record<string, string> | undefined;
+  previousRefresh?: number;
+  dateFormatTz: string;
+  selectedJobId: string;
+  selectedDetectorIndex?: number;
+  selectedEntities?: Record<string, string>;
   selectedForecastId?: string;
-  tableInterval: string;
-  tableSeverity: number;
+  tableInterval?: string;
+  tableSeverity?: number;
   zoom?: { from?: string; to?: string };
 }
 
 // eslint-disable-next-line react/prefer-stateless-function
-declare class TimeSeriesExplorer extends React.Component<Props> {}
+declare class TimeSeriesExplorer extends React.Component<TimeSeriesExplorerProps> {}

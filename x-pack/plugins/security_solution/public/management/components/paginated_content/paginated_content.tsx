@@ -29,6 +29,7 @@ import { v4 as generateUUI } from 'uuid';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 import type { MaybeImmutable } from '../../../../common/endpoint/types';
 import { MANAGEMENT_DEFAULT_PAGE, MANAGEMENT_DEFAULT_PAGE_SIZE } from '../../common/constants';
+import type { ArtifactEntryCardDecoratorProps } from '../artifact_entry_card';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type ComponentWithAnyProps = ComponentType<any>;
@@ -52,6 +53,8 @@ export interface PaginatedContentProps<T, C extends ComponentWithAnyProps> exten
   error?: ReactNode;
   /** Classname applied to the area that holds the content items */
   contentClassName?: string;
+  // Artifact specific decorations to display in the cards
+  CardDecorator: React.ComponentType<ArtifactEntryCardDecoratorProps> | undefined;
   /**
    * Children can be used to define custom content if the default creation of items is not sufficient
    * to accommodate a use case.
@@ -139,6 +142,7 @@ export const PaginatedContent = memo(
     'data-test-subj': dataTestSubj,
     'aria-label': ariaLabel,
     className,
+    CardDecorator,
     children,
   }: PaginatedContentProps<T, C>) => {
     const [itemKeys] = useState<WeakMap<T, string>>(new WeakMap());
@@ -159,7 +163,9 @@ export const PaginatedContent = memo(
       }
     }, [pageCount, onChange, pagination, loading]);
 
-    const handleItemsPerPageChange: EuiTablePaginationProps['onChangeItemsPerPage'] = useCallback(
+    const handleItemsPerPageChange = useCallback<
+      NonNullable<EuiTablePaginationProps['onChangeItemsPerPage']>
+    >(
       (pageSize) => {
         if (pagination?.pageIndex) {
           const pageIndex = Math.floor(
@@ -178,7 +184,7 @@ export const PaginatedContent = memo(
       [onChange, pagination]
     );
 
-    const handlePageChange: EuiTablePaginationProps['onChangePage'] = useCallback(
+    const handlePageChange = useCallback<NonNullable<EuiTablePaginationProps['onChangePage']>>(
       (pageIndex) => {
         onChange({ pageIndex, pageSize: pagination?.pageSize || MANAGEMENT_DEFAULT_PAGE_SIZE });
       },
@@ -223,21 +229,22 @@ export const PaginatedContent = memo(
             }
           }
 
-          return <Item {...itemComponentProps(item)} key={key} />;
+          return <Item {...itemComponentProps(item)} key={key} Decorator={CardDecorator} />;
         });
       }
       if (!loading)
         return noItemsMessage || <DefaultNoItemsFound data-test-subj={getTestId('noResults')} />;
     }, [
-      ItemComponent,
       error,
-      getTestId,
-      itemComponentProps,
-      itemId,
-      itemKeys,
+      ItemComponent,
       items,
-      noItemsMessage,
       loading,
+      noItemsMessage,
+      getTestId,
+      itemId,
+      itemComponentProps,
+      CardDecorator,
+      itemKeys,
     ]);
 
     return (

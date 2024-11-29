@@ -5,16 +5,20 @@
  * 2.0.
  */
 
-import { EuiHealth } from '@elastic/eui';
+import { EuiHealth, EuiText } from '@elastic/eui';
 import React, { ReactNode } from 'react';
-import { InfoIndicators, QualityIndicators } from '../common';
+import type { QualityIndicators, InfoIndicators } from '../../../common/types';
 
 export function QualityIndicator({
   quality,
   description,
+  isColoredDescription,
+  textSize = 's',
 }: {
   quality: QualityIndicators;
   description: string | ReactNode;
+  isColoredDescription?: boolean;
+  textSize?: 'xs' | 's' | 'm';
 }) {
   const qualityColors: Record<QualityIndicators, InfoIndicators> = {
     poor: 'danger',
@@ -22,5 +26,11 @@ export function QualityIndicator({
     good: 'success',
   };
 
-  return <EuiHealth color={qualityColors[quality]}>{description}</EuiHealth>;
+  return (
+    <EuiHealth color={qualityColors[quality]} textSize={textSize}>
+      <EuiText size="relative" color={isColoredDescription ? qualityColors[quality] : 'white'}>
+        {description}
+      </EuiText>
+    </EuiHealth>
+  );
 }

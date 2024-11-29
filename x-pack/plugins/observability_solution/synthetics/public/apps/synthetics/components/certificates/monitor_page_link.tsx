@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { EuiLink } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
@@ -13,7 +13,10 @@ interface DetailPageLinkProps {
   configId: string;
 }
 
-export const MonitorPageLink: FC<DetailPageLinkProps> = ({ children, configId }) => {
+export const MonitorPageLink: FC<PropsWithChildren<DetailPageLinkProps>> = ({
+  children,
+  configId,
+}) => {
   const basePath = useKibana().services.http?.basePath.get();
   return (
     <EuiLink

@@ -8,7 +8,7 @@
 import { render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../common/mock';
-import { SecuritySolutionTemplateWrapper } from '.';
+import { SecuritySolutionTemplateWrapper, type SecuritySolutionTemplateWrapperProps } from '.';
 import { SecurityPageName } from '../../types';
 
 const mockUseShowTimeline = jest.fn((): [boolean] => [false]);
@@ -22,32 +22,11 @@ jest.mock('./timeline', () => ({
   Timeline: () => <div>{'Timeline'}</div>,
 }));
 
-jest.mock('../../../common/components/navigation/use_security_solution_navigation', () => {
-  return {
-    useSecuritySolutionNavigation: () => ({
-      icon: 'logoSecurity',
-      items: [
-        {
-          id: 'investigate',
-          name: 'Investigate',
-          items: [
-            {
-              'data-href': 'some-data-href',
-              'data-test-subj': 'navigation-cases',
-              disabled: false,
-              href: 'some-href',
-              id: 'cases',
-              isSelected: true,
-              name: 'Cases',
-            },
-          ],
-          tabIndex: undefined,
-        },
-      ],
-      name: 'Security',
-    }),
-  };
-});
+const navProps = { icon: 'logoSecurity', items: [], name: 'Security' };
+const mockUseSecuritySolutionNavigation = jest.fn();
+jest.mock('../../../common/components/navigation/use_security_solution_navigation', () => ({
+  useSecuritySolutionNavigation: () => mockUseSecuritySolutionNavigation(),
+}));
 
 const mockUseRouteSpy = jest.fn((): [{ pageName: string }] => [
   { pageName: SecurityPageName.alerts },
@@ -56,19 +35,52 @@ jest.mock('../../../common/utils/route/use_route_spy', () => ({
   useRouteSpy: () => mockUseRouteSpy(),
 }));
 
-const renderComponent = () => {
-  return render(
+const renderComponent = ({
+  children = <div>{'child of wrapper'}</div>,
+  ...props
+}: SecuritySolutionTemplateWrapperProps = {}) =>
+  render(
     <TestProviders>
-      <SecuritySolutionTemplateWrapper>
-        <div>{'child of wrapper'}</div>
-      </SecuritySolutionTemplateWrapper>
+      <SecuritySolutionTemplateWrapper {...props}>{children}</SecuritySolutionTemplateWrapper>
     </TestProviders>
   );
-};
 
 describe('SecuritySolutionTemplateWrapper', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseSecuritySolutionNavigation.mockReturnValue(navProps);
+  });
+
+  describe('when navigation props are defined (classic nav)', () => {
+    beforeEach(() => {
+      mockUseSecuritySolutionNavigation.mockReturnValue(navProps);
+    });
+    it('should render the children', async () => {
+      const { queryByText } = renderComponent();
+      expect(queryByText('child of wrapper')).toBeInTheDocument();
+    });
+  });
+
+  describe('when navigation props are null (project nav)', () => {
+    beforeEach(() => {
+      mockUseSecuritySolutionNavigation.mockReturnValue(null);
+    });
+
+    it('should render the children', async () => {
+      const { queryByText } = renderComponent();
+      expect(queryByText('child of wrapper')).toBeInTheDocument();
+    });
+  });
+
+  describe('when navigation props are undefined (loading)', () => {
+    beforeEach(() => {
+      mockUseSecuritySolutionNavigation.mockReturnValue(undefined);
+    });
+
+    it('should not render the children', async () => {
+      const { queryByText } = renderComponent();
+      expect(queryByText('child of wrapper')).not.toBeInTheDocument();
+    });
   });
 
   it('Should render with bottom bar when user allowed', async () => {
@@ -90,5 +102,17 @@ describe('SecuritySolutionTemplateWrapper', () => {
       expect(getByText('child of wrapper')).toBeInTheDocument();
       expect(queryByText('Timeline')).not.toBeInTheDocument();
     });
+  });
+
+  it('Should render emptyPageBody when isEmptyState is true', async () => {
+    mockUseShowTimeline.mockReturnValue([false]);
+
+    const { getByText } = renderComponent({
+      isEmptyState: true,
+      emptyPageBody: <div>{'empty page body'}</div>,
+      children: null,
+    });
+
+    expect(getByText('empty page body')).toBeInTheDocument();
   });
 });

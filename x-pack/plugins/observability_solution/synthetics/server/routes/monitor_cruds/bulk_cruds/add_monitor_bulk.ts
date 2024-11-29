@@ -10,12 +10,9 @@ import { SavedObjectsBulkResponse } from '@kbn/core-saved-objects-api-server';
 import { v4 as uuidV4 } from 'uuid';
 import { NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import { SavedObjectError } from '@kbn/core-saved-objects-common';
-import { PrivateLocationAttributes } from '../../../runtime_types/private_locations';
 import { SyntheticsServerSetup } from '../../../types';
 import { RouteContext } from '../../types';
-import { deleteMonitorIfCreated } from '../add_monitor';
 import { formatTelemetryEvent, sendTelemetryEvents } from '../../telemetry/monitor_upgrade_sender';
-import { deleteMonitor } from '../delete_monitor';
 import { formatSecrets } from '../../../synthetics_service/utils';
 import { syntheticsMonitorType } from '../../../../common/types/saved_objects';
 import {
@@ -24,7 +21,9 @@ import {
   MonitorFields,
   ServiceLocationErrors,
   SyntheticsMonitor,
+  type SyntheticsPrivateLocations,
 } from '../../../../common/runtime_types';
+import { DeleteMonitorAPI } from '../services/delete_monitor_api';
 
 export const createNewSavedObjectMonitorBulk = async ({
   soClient,
@@ -61,7 +60,7 @@ export const syncNewMonitorBulk = async ({
 }: {
   routeContext: RouteContext;
   normalizedMonitors: SyntheticsMonitor[];
-  privateLocations: PrivateLocationAttributes[];
+  privateLocations: SyntheticsPrivateLocations;
   spaceId: string;
 }) => {
   const { server, savedObjectsClient, syntheticsMonitorClient } = routeContext;
@@ -86,12 +85,7 @@ export const syncNewMonitorBulk = async ({
         monitorsToCreate,
         soClient: savedObjectsClient,
       }),
-      syntheticsMonitorClient.addMonitors(
-        monitorsToCreate,
-        savedObjectsClient,
-        privateLocations,
-        spaceId
-      ),
+      syntheticsMonitorClient.addMonitors(monitorsToCreate, privateLocations, spaceId),
     ]);
 
     let failedMonitors: FailedMonitorConfig[] = [];
@@ -152,15 +146,10 @@ const rollBackNewMonitorBulk = async (
 ) => {
   const { server } = routeContext;
   try {
-    await pMap(
-      monitorsToCreate,
-      async (monitor) =>
-        deleteMonitor({
-          routeContext,
-          monitorId: monitor.id,
-        }),
-      { concurrency: 100, stopOnError: false }
-    );
+    const deleteMonitorAPI = new DeleteMonitorAPI(routeContext);
+    await deleteMonitorAPI.execute({
+      monitorIds: monitorsToCreate.map(({ id }) => id),
+    });
   } catch (e) {
     // ignore errors here
     server.logger.error(e);
@@ -183,5 +172,31 @@ const sendNewMonitorTelemetry = (
         stackVersion: server.stackVersion,
       })
     );
+  }
+};
+
+export const deleteMonitorIfCreated = async ({
+  newMonitorId,
+  routeContext,
+}: {
+  routeContext: RouteContext;
+  newMonitorId: string;
+}) => {
+  const { server, savedObjectsClient } = routeContext;
+  try {
+    const encryptedMonitor = await savedObjectsClient.get<EncryptedSyntheticsMonitorAttributes>(
+      syntheticsMonitorType,
+      newMonitorId
+    );
+    if (encryptedMonitor) {
+      const deleteMonitorAPI = new DeleteMonitorAPI(routeContext);
+
+      await deleteMonitorAPI.deleteMonitorBulk({
+        monitors: [encryptedMonitor],
+      });
+    }
+  } catch (e) {
+    // ignore errors here
+    server.logger.error(e);
   }
 };

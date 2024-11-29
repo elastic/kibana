@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -116,6 +117,7 @@ describe('SavedObjectsRepository Encryption Extension', () => {
 
     // create a mock saved objects encryption extension
     mockEncryptionExt = savedObjectsExtensionsMock.createEncryptionExtension();
+    mockEncryptionExt.encryptAttributes.mockImplementation((desc, attrs) => Promise.resolve(attrs));
 
     mockGetCurrentTime.mockReturnValue(mockTimestamp);
     mockGetSearchDsl.mockClear();
@@ -247,7 +249,6 @@ describe('SavedObjectsRepository Encryption Extension', () => {
         expect.objectContaining({
           ...encryptedSO,
           id: expect.objectContaining(/index-pattern:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
-          attributes: undefined,
         }),
         encryptedSO.attributes // original attributes
       );
@@ -260,6 +261,7 @@ describe('SavedObjectsRepository Encryption Extension', () => {
 
     it(`fails if non-UUID ID is specified for encrypted type`, async () => {
       mockEncryptionExt.isEncryptableType.mockReturnValue(true);
+      mockEncryptionExt.shouldEnforceRandomId.mockReturnValue(true);
       mockEncryptionExt.decryptOrStripResponseAttributes.mockResolvedValue({
         ...encryptedSO,
         ...decryptedStrippedAttributes,
@@ -288,6 +290,25 @@ describe('SavedObjectsRepository Encryption Extension', () => {
           version: mockVersion,
         })
       ).resolves.not.toThrowError();
+    });
+
+    it('allows to opt-out of random ID enforcement', async () => {
+      mockEncryptionExt.isEncryptableType.mockReturnValue(true);
+      mockEncryptionExt.shouldEnforceRandomId.mockReturnValue(false);
+      mockEncryptionExt.decryptOrStripResponseAttributes.mockResolvedValue({
+        ...encryptedSO,
+        ...decryptedStrippedAttributes,
+      });
+
+      const result = await repository.create(encryptedSO.type, encryptedSO.attributes, {
+        id: encryptedSO.id,
+        version: mockVersion,
+      });
+
+      expect(client.create).toHaveBeenCalled();
+      expect(mockEncryptionExt.isEncryptableType).toHaveBeenCalledWith(encryptedSO.type);
+      expect(mockEncryptionExt.shouldEnforceRandomId).toHaveBeenCalledWith(encryptedSO.type);
+      expect(result.id).toBe(encryptedSO.id);
     });
 
     describe('namespace', () => {
@@ -482,6 +503,7 @@ describe('SavedObjectsRepository Encryption Extension', () => {
 
     it(`fails if non-UUID ID is specified for encrypted type`, async () => {
       mockEncryptionExt.isEncryptableType.mockReturnValue(true);
+      mockEncryptionExt.shouldEnforceRandomId.mockReturnValue(true);
       const result = await bulkCreateSuccess(client, repository, [
         encryptedSO, // Predefined IDs are not allowed for saved objects with encrypted attributes unless the ID is a UUID
       ]);
@@ -527,6 +549,25 @@ describe('SavedObjectsRepository Encryption Extension', () => {
       expect(result.saved_objects).not.toBeUndefined();
       expect(result.saved_objects.length).toBe(1);
       expect(result.saved_objects[0].error).toBeUndefined();
+    });
+
+    it('allows to opt-out of random ID enforcement', async () => {
+      mockEncryptionExt.isEncryptableType.mockReturnValue(true);
+      mockEncryptionExt.shouldEnforceRandomId.mockReturnValue(false);
+      mockEncryptionExt.decryptOrStripResponseAttributes.mockResolvedValue({
+        ...encryptedSO,
+        ...decryptedStrippedAttributes,
+      });
+
+      const result = await bulkCreateSuccess(client, repository, [
+        { ...encryptedSO, version: mockVersion },
+      ]);
+
+      expect(client.bulk).toHaveBeenCalled();
+      expect(result.saved_objects).not.toBeUndefined();
+      expect(result.saved_objects.length).toBe(1);
+      expect(result.saved_objects[0].error).toBeUndefined();
+      expect(result.saved_objects[0].id).toBe(encryptedSO.id);
     });
   });
 

@@ -13,7 +13,7 @@ import { TABLE_CELL } from '../../../screens/alerts_details';
 import { kqlSearch } from '../../../tasks/security_header';
 import { mockRiskEngineEnabled } from '../../../tasks/entity_analytics';
 
-describe('All hosts table', { tags: ['@ess', '@serverless'] }, () => {
+describe('All hosts table', { tags: ['@ess'] }, () => {
   describe('with legacy risk score', () => {
     before(() => {
       cy.task('esArchiverLoad', { archiveName: 'risk_hosts' });
@@ -32,11 +32,11 @@ describe('All hosts table', { tags: ['@ess', '@serverless'] }, () => {
       kqlSearch('host.name: "siem-kibana" {enter}');
 
       cy.get('[data-test-subj="tableHeaderCell_node.risk_4"]').should('exist');
-      cy.get(`${TABLE_CELL} .euiTableCellContent`).eq(4).should('have.text', 'Low');
+      cy.get(TABLE_CELL).eq(4).should('have.text', 'Low');
     });
   });
 
-  describe('with new risk score', () => {
+  describe('with new risk score', { tags: ['@serverless'] }, () => {
     before(() => {
       cy.task('esArchiverLoad', { archiveName: 'risk_scores_new' });
     });
@@ -55,7 +55,7 @@ describe('All hosts table', { tags: ['@ess', '@serverless'] }, () => {
       kqlSearch('host.name: "siem-kibana" {enter}');
 
       cy.get('[data-test-subj="tableHeaderCell_node.risk_4"]').should('exist');
-      cy.get(`${TABLE_CELL} .euiTableCellContent`).eq(4).should('have.text', 'Critical');
+      cy.get(TABLE_CELL).eq(4).should('have.text', 'Critical');
     });
   });
 });

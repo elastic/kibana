@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
@@ -135,27 +136,31 @@ export const applicationUsageSchema = {
   canvas: commonSchema,
   enterpriseSearch: commonSchema,
   enterpriseSearchContent: commonSchema,
+  searchInferenceEndpoints: commonSchema,
   enterpriseSearchAnalytics: commonSchema,
   enterpriseSearchApplications: commonSchema,
   enterpriseSearchAISearch: commonSchema,
+  enterpriseSearchSemanticSearch: commonSchema,
   enterpriseSearchVectorSearch: commonSchema,
   enterpriseSearchElasticsearch: commonSchema,
+  entity_manager: commonSchema,
   appSearch: commonSchema,
   workplaceSearch: commonSchema,
   searchExperiences: commonSchema,
   graph: commonSchema,
   logs: commonSchema,
   metrics: commonSchema,
-  infra: commonSchema, // It's a forward app so we'll likely never report it
   fleet: commonSchema,
   integrations: commonSchema,
   ingestManager: commonSchema,
+  inventory: commonSchema,
   lens: commonSchema,
   maps: commonSchema,
   ml: commonSchema,
   monitoring: commonSchema,
   'observability-log-explorer': commonSchema,
   'observability-logs-explorer': commonSchema,
+  'last-used-logs-viewer': commonSchema,
   'observability-overview': commonSchema,
   observabilityOnboarding: commonSchema,
   observabilityAIAssistant: commonSchema,
@@ -178,6 +183,7 @@ export const applicationUsageSchema = {
    */
   siem: commonSchema,
   space_selector: commonSchema,
+  streams: commonSchema,
   uptime: commonSchema,
   synthetics: commonSchema,
   ux: commonSchema,

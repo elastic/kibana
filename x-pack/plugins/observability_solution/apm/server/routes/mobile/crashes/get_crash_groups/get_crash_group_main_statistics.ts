@@ -6,12 +6,10 @@
  */
 
 import { AggregationsAggregateOrder } from '@elastic/elasticsearch/lib/api/types';
-import {
-  kqlQuery,
-  rangeQuery,
-  termQuery,
-} from '@kbn/observability-plugin/server';
+import { kqlQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import { asMutableArray } from '../../../../../common/utils/as_mutable_array';
 import {
   ERROR_CULPRIT,
   ERROR_TYPE,
@@ -23,6 +21,7 @@ import {
   SERVICE_NAME,
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
+  AT_TIMESTAMP,
 } from '../../../../../common/es_fields/apm';
 import { environmentQuery } from '../../../../../common/utils/environment_query';
 import { getErrorName } from '../../../../lib/helpers/get_error_name';
@@ -72,74 +71,92 @@ export async function getMobileCrashGroupMainStatistics({
     ? { [maxTimestampAggKey]: sortDirection }
     : { _count: sortDirection };
 
-  const response = await apmEventClient.search(
-    'get_crash_group_main_statistics',
-    {
-      apm: {
-        events: [ProcessorEvent.error],
-      },
-      body: {
-        track_total_hits: false,
-        size: 0,
-        query: {
-          bool: {
-            filter: [
-              ...termQuery(SERVICE_NAME, serviceName),
-              ...termQuery(TRANSACTION_NAME, transactionName),
-              ...termQuery(TRANSACTION_TYPE, transactionType),
-              ...rangeQuery(start, end),
-              ...environmentQuery(environment),
-              ...termQuery(ERROR_TYPE, 'crash'),
-              ...kqlQuery(kuery),
-            ],
-          },
+  const requiredFields = asMutableArray([ERROR_GROUP_ID, AT_TIMESTAMP] as const);
+
+  const optionalFields = asMutableArray([
+    ERROR_CULPRIT,
+    ERROR_LOG_MESSAGE,
+    ERROR_EXC_MESSAGE,
+    ERROR_EXC_HANDLED,
+    ERROR_EXC_TYPE,
+  ] as const);
+
+  const response = await apmEventClient.search('get_crash_group_main_statistics', {
+    apm: {
+      events: [ProcessorEvent.error],
+    },
+    body: {
+      track_total_hits: false,
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            ...termQuery(SERVICE_NAME, serviceName),
+            ...termQuery(TRANSACTION_NAME, transactionName),
+            ...termQuery(TRANSACTION_TYPE, transactionType),
+            ...rangeQuery(start, end),
+            ...environmentQuery(environment),
+            ...termQuery(ERROR_TYPE, 'crash'),
+            ...kqlQuery(kuery),
+          ],
         },
-        aggs: {
-          crash_groups: {
-            terms: {
-              field: ERROR_GROUP_ID,
-              size: maxNumberOfErrorGroups,
-              order,
-            },
-            aggs: {
-              sample: {
-                top_hits: {
-                  size: 1,
-                  _source: [
-                    ERROR_LOG_MESSAGE,
-                    ERROR_EXC_MESSAGE,
-                    ERROR_EXC_HANDLED,
-                    ERROR_EXC_TYPE,
-                    ERROR_CULPRIT,
-                    ERROR_GROUP_ID,
-                    '@timestamp',
-                  ],
-                  sort: {
-                    '@timestamp': 'desc',
-                  },
+      },
+      aggs: {
+        crash_groups: {
+          terms: {
+            field: ERROR_GROUP_ID,
+            size: maxNumberOfErrorGroups,
+            order,
+          },
+          aggs: {
+            sample: {
+              top_hits: {
+                size: 1,
+                fields: [...requiredFields, ...optionalFields],
+                _source: [ERROR_LOG_MESSAGE, ERROR_EXC_MESSAGE, ERROR_EXC_HANDLED, ERROR_EXC_TYPE],
+                sort: {
+                  [AT_TIMESTAMP]: 'desc',
                 },
               },
-              ...(sortByLatestOccurrence
-                ? { [maxTimestampAggKey]: { max: { field: '@timestamp' } } }
-                : {}),
             },
+            ...(sortByLatestOccurrence
+              ? { [maxTimestampAggKey]: { max: { field: AT_TIMESTAMP } } }
+              : {}),
           },
         },
       },
-    }
-  );
+    },
+  });
 
   return (
-    response.aggregations?.crash_groups.buckets.map((bucket) => ({
-      groupId: bucket.key as string,
-      name: getErrorName(bucket.sample.hits.hits[0]._source),
-      lastSeen: new Date(
-        bucket.sample.hits.hits[0]?._source['@timestamp']
-      ).getTime(),
-      occurrences: bucket.doc_count,
-      culprit: bucket.sample.hits.hits[0]?._source.error.culprit,
-      handled: bucket.sample.hits.hits[0]?._source.error.exception?.[0].handled,
-      type: bucket.sample.hits.hits[0]?._source.error.exception?.[0].type,
-    })) ?? []
+    response.aggregations?.crash_groups.buckets.map((bucket) => {
+      const errorSource =
+        'error' in bucket.sample.hits.hits[0]._source
+          ? bucket.sample.hits.hits[0]._source
+          : undefined;
+
+      const event = unflattenKnownApmEventFields(bucket.sample.hits.hits[0].fields, requiredFields);
+
+      const mergedEvent = {
+        ...event,
+        error: {
+          ...(event.error ?? {}),
+          exception:
+            (errorSource?.error.exception?.length ?? 0) > 1
+              ? errorSource?.error.exception
+              : event?.error.exception && [event.error.exception],
+        },
+      };
+
+      return {
+        groupId: event.error?.grouping_key,
+        name: getErrorName(mergedEvent),
+        lastSeen: new Date(mergedEvent[AT_TIMESTAMP]).getTime(),
+        occurrences: bucket.doc_count,
+        culprit: mergedEvent.error.culprit,
+        handled: mergedEvent.error.exception?.[0].handled,
+        type: mergedEvent.error.exception?.[0].type,
+      };
+    }) ?? []
   );
 }

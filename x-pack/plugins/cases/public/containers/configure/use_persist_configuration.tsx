@@ -27,12 +27,13 @@ export const usePersistConfiguration = () => {
   const { showErrorToast, showSuccessToast } = useCasesToast();
 
   return useMutation(
-    ({ id, version, closureType, customFields, connector }: Request) => {
+    ({ id, version, closureType, customFields, templates, connector }: Request) => {
       if (isEmpty(id) || isEmpty(version)) {
         return postCaseConfigure({
           closure_type: closureType,
           connector,
           customFields: customFields ?? [],
+          templates: templates ?? [],
           owner: owner[0],
         });
       }
@@ -42,6 +43,7 @@ export const usePersistConfiguration = () => {
         closure_type: closureType,
         connector,
         customFields: customFields ?? [],
+        templates: templates ?? [],
       });
     },
     {

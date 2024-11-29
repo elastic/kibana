@@ -9,7 +9,7 @@ import { isEmpty } from 'lodash';
 
 import { HttpSetup } from '@kbn/core/public';
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common/constants';
-import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
+import type { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common';
 import { usePluginContext } from './use_plugin_context';
 
 import { useDataFetcher } from './use_data_fetcher';
@@ -44,12 +44,14 @@ export const useFetchAlertDetail = (id: string): [boolean, AlertData | null] => 
     shouldExecuteApiCall,
   });
 
-  const data = rawAlert
-    ? {
-        formatted: parseAlert(observabilityRuleTypeRegistry)(rawAlert),
-        raw: rawAlert,
-      }
-    : null;
+  const data = useMemo(() => {
+    return rawAlert
+      ? {
+          formatted: parseAlert(observabilityRuleTypeRegistry)(rawAlert),
+          raw: rawAlert,
+        }
+      : null;
+  }, [observabilityRuleTypeRegistry, rawAlert]);
 
   return [loading, data];
 };

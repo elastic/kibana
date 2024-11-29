@@ -9,7 +9,7 @@ import { AssetCriticalityDataClient } from './asset_criticality_data_client';
 import type { SecuritySolutionRequestHandlerContext } from '../../../types';
 
 /**
- * As internal user we check for existence of asset crititcality resources
+ * As internal user we check for existence of asset criticality resources
  * and initialise it if it does not exist
  * @param context
  * @param logger
@@ -25,6 +25,7 @@ export const checkAndInitAssetCriticalityResources = async (
   const assetCriticalityDataClient = new AssetCriticalityDataClient({
     esClient,
     logger,
+    auditLogger: securityContext.getAuditLogger(),
     namespace: securityContext.getSpaceId(),
   });
 

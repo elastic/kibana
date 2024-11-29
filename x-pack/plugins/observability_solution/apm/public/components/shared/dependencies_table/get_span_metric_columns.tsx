@@ -5,18 +5,9 @@
  * 2.0.
  */
 import React from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiToolTip,
-  RIGHT_ALIGNMENT,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip, RIGHT_ALIGNMENT } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  ChartType,
-  getTimeSeriesColor,
-} from '../charts/helper/get_timeseries_color';
+import { ChartType, getTimeSeriesColor } from '../charts/helper/get_timeseries_color';
 import { ListMetric } from '../list_metric';
 import { ITableColumn } from '../managed_table';
 import { FETCH_STATUS, isPending } from '../../../hooks/use_fetcher';
@@ -116,28 +107,22 @@ export function getSpanMetricColumns({
     {
       field: 'failureRate',
       name: (
-        <EuiToolTip
-          content={i18n.translate(
-            'xpack.apm.dependenciesTable.columnErrorRateTip',
-            {
+        <>
+          {i18n.translate('xpack.apm.dependenciesTable.columnErrorRate', {
+            defaultMessage: 'Failed transaction rate',
+          })}
+          &nbsp;
+          <EuiIconTip
+            size="s"
+            color="subdued"
+            type="questionInCircle"
+            content={i18n.translate('xpack.apm.dependenciesTable.columnErrorRateTip', {
               defaultMessage:
                 "The percentage of failed transactions for the selected service. HTTP server transactions with a 4xx status code (client error) aren't considered failures because the caller, not the server, caused the failure.",
-            }
-          )}
-        >
-          <>
-            {i18n.translate('xpack.apm.dependenciesTable.columnErrorRate', {
-              defaultMessage: 'Failed transaction rate',
             })}
-            &nbsp;
-            <EuiIcon
-              size="s"
-              color="subdued"
-              type="questionInCircle"
-              className="eui-alignCenter"
-            />
-          </>
-        </EuiToolTip>
+            className="eui-alignCenter"
+          />
+        </>
       ),
       align: RIGHT_ALIGNMENT,
       render: (_, { failureRate, currentStats, previousStats }) => {
@@ -163,28 +148,22 @@ export function getSpanMetricColumns({
     {
       field: 'impact',
       name: (
-        <EuiToolTip
-          content={i18n.translate(
-            'xpack.apm.dependenciesTable.columnImpactTip',
-            {
+        <>
+          {i18n.translate('xpack.apm.dependenciesTable.columnImpact', {
+            defaultMessage: 'Impact',
+          })}
+          &nbsp;
+          <EuiIconTip
+            size="s"
+            color="subdued"
+            type="questionInCircle"
+            className="eui-alignCenter"
+            content={i18n.translate('xpack.apm.dependenciesTable.columnImpactTip', {
               defaultMessage:
                 'The most used and slowest endpoints in your service. Calculated by multiplying latency by throughput.',
-            }
-          )}
-        >
-          <>
-            {i18n.translate('xpack.apm.dependenciesTable.columnImpact', {
-              defaultMessage: 'Impact',
             })}
-            &nbsp;
-            <EuiIcon
-              size="s"
-              color="subdued"
-              type="questionInCircle"
-              className="eui-alignCenter"
-            />
-          </>
-        </EuiToolTip>
+          />
+        </>
       ),
       align: RIGHT_ALIGNMENT,
       render: (_, { impact, previousStats }) => {
@@ -195,11 +174,7 @@ export function getSpanMetricColumns({
             </EuiFlexItem>
             {previousStats && isFiniteNumber(previousStats.impact) && (
               <EuiFlexItem>
-                <ImpactBar
-                  value={previousStats.impact}
-                  size="s"
-                  color="subdued"
-                />
+                <ImpactBar value={previousStats.impact} size="s" color="subdued" />
               </EuiFlexItem>
             )}
           </EuiFlexGroup>

@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
@@ -105,10 +107,7 @@ export function useContextAppFetch({
       setState(createError('anchorStatus', FailureReason.UNKNOWN, error));
       toastNotifications.addDanger({
         title: errorTitle,
-        text: toMountPoint(<Markdown readOnly>{error.message}</Markdown>, {
-          theme: services.core.theme,
-          i18n: services.core.i18n,
-        }),
+        text: toMountPoint(<Markdown readOnly>{error.message}</Markdown>, services),
       });
     }
   }, [
@@ -160,10 +159,7 @@ export function useContextAppFetch({
         setState(createError(statusKey, FailureReason.UNKNOWN, error));
         toastNotifications.addDanger({
           title: errorTitle,
-          text: toMountPoint(<Markdown readOnly>{error.message}</Markdown>, {
-            theme: services.core.theme,
-            i18n: services.core.i18n,
-          }),
+          text: toMountPoint(<Markdown readOnly>{error.message}</Markdown>, services),
         });
       }
     },
@@ -190,8 +186,10 @@ export function useContextAppFetch({
     [fetchSurroundingRows]
   );
 
-  const fetchAllRows = useCallback(() => {
-    fetchAnchorRow().then((anchor) => anchor && fetchContextRows(anchor));
+  const fetchAllRows = useCallback(async () => {
+    const anchor = await fetchAnchorRow();
+    if (!anchor) return;
+    return await fetchContextRows(anchor);
   }, [fetchAnchorRow, fetchContextRows]);
 
   const resetFetchedState = useCallback(() => {

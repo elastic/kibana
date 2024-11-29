@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { SPACES } from '../../common/lib/spaces';
 import {
-  testCaseFailures,
   getTestScenarios,
+  testCaseFailures,
 } from '../../../saved_object_api_integration/common/lib/saved_object_test_utils';
-import { TestUser } from '../../../saved_object_api_integration/common/lib/types';
+import type { TestUser } from '../../../saved_object_api_integration/common/lib/types';
+import type { FtrProviderContext } from '../../common/ftr_provider_context';
 import { MULTI_NAMESPACE_SAVED_OBJECT_TEST_CASES as CASES } from '../../common/lib/saved_object_test_cases';
-import {
-  updateObjectsSpacesTestSuiteFactory,
-  UpdateObjectsSpacesTestDefinition,
+import { SPACES } from '../../common/lib/spaces';
+import type {
   UpdateObjectsSpacesTestCase,
+  UpdateObjectsSpacesTestDefinition,
 } from '../../common/suites/update_objects_spaces';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { updateObjectsSpacesTestSuiteFactory } from '../../common/suites/update_objects_spaces';
 
 const {
   DEFAULT: { spaceId: DEFAULT_SPACE_ID },

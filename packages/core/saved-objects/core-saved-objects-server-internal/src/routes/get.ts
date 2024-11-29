@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { schema } from '@kbn/config-schema';
+import type { RouteAccess, RouteDeprecationInfo } from '@kbn/core-http-server';
 import { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-internal';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import type { Logger } from '@kbn/logging';
@@ -21,16 +23,24 @@ interface RouteDependencies {
   config: SavedObjectConfig;
   coreUsageData: InternalCoreUsageDataSetup;
   logger: Logger;
+  access: RouteAccess;
+  deprecationInfo: RouteDeprecationInfo;
 }
 
 export const registerGetRoute = (
   router: InternalSavedObjectRouter,
-  { config, coreUsageData, logger }: RouteDependencies
+  { config, coreUsageData, logger, access, deprecationInfo }: RouteDependencies
 ) => {
   const { allowHttpApiAccess } = config;
   router.get(
     {
       path: '/{type}/{id}',
+      options: {
+        summary: `Get a saved object`,
+        tags: ['oas-tag:saved objects'],
+        access,
+        deprecated: deprecationInfo,
+      },
       validate: {
         params: schema.object({
           type: schema.string(),
@@ -38,17 +48,17 @@ export const registerGetRoute = (
         }),
       },
     },
-    catchAndReturnBoomErrors(async (context, req, res) => {
+    catchAndReturnBoomErrors(async (context, request, response) => {
       logWarnOnExternalRequest({
         method: 'get',
         path: '/api/saved_objects/{type}/{id}',
-        req,
+        request,
         logger,
       });
-      const { type, id } = req.params;
+      const { type, id } = request.params;
 
       const usageStatsClient = coreUsageData.getClient();
-      usageStatsClient.incrementSavedObjectsGet({ request: req }).catch(() => {});
+      usageStatsClient.incrementSavedObjectsGet({ request, types: [type] }).catch(() => {});
 
       const { savedObjects } = await context.core;
 
@@ -59,7 +69,7 @@ export const registerGetRoute = (
       const object = await savedObjects.client.get(type, id, {
         migrationVersionCompatibility: 'compatible',
       });
-      return res.ok({ body: object });
+      return response.ok({ body: object });
     })
   );
 };

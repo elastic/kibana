@@ -434,7 +434,7 @@ Array [
                     "reporting",
                   ],
                 },
-                "name": "Download CSV reports from Saved Search panels",
+                "name": "Generate CSV reports from Saved Search panels",
                 "savedObject": Object {
                   "all": Array [],
                   "read": Array [],
@@ -546,6 +546,8 @@ Array [
         },
       },
       "api": Array [
+        "bulkGetUserProfiles",
+        "dashboardUsageStats",
         "store_search_session",
       ],
       "app": Array [
@@ -555,9 +557,11 @@ Array [
       "cases": Object {
         "all": Array [],
         "create": Array [],
+        "createComment": Array [],
         "delete": Array [],
         "push": Array [],
         "read": Array [],
+        "reopenCase": Array [],
         "settings": Array [],
         "update": Array [],
       },
@@ -600,6 +604,10 @@ Array [
   },
   Object {
     "privilege": Object {
+      "api": Array [
+        "bulkGetUserProfiles",
+        "dashboardUsageStats",
+      ],
       "app": Array [
         "dashboards",
         "kibana",
@@ -710,9 +718,11 @@ Array [
       "cases": Object {
         "all": Array [],
         "create": Array [],
+        "createComment": Array [],
         "delete": Array [],
         "push": Array [],
         "read": Array [],
+        "reopenCase": Array [],
         "settings": Array [],
         "update": Array [],
       },
@@ -1007,6 +1017,17 @@ Array [
     },
     "privilegeId": "all",
   },
+  Object {
+    "privilege": Object {
+      "disabled": true,
+      "savedObject": Object {
+        "all": Array [],
+        "read": Array [],
+      },
+      "ui": Array [],
+    },
+    "privilegeId": "read",
+  },
 ]
 `;
 
@@ -1033,9 +1054,11 @@ Array [
       "cases": Object {
         "all": Array [],
         "create": Array [],
+        "createComment": Array [],
         "delete": Array [],
         "push": Array [],
         "read": Array [],
+        "reopenCase": Array [],
         "settings": Array [],
         "update": Array [],
       },
@@ -1162,6 +1185,8 @@ Array [
         },
       },
       "api": Array [
+        "bulkGetUserProfiles",
+        "dashboardUsageStats",
         "store_search_session",
       ],
       "app": Array [
@@ -1171,9 +1196,11 @@ Array [
       "cases": Object {
         "all": Array [],
         "create": Array [],
+        "createComment": Array [],
         "delete": Array [],
         "push": Array [],
         "read": Array [],
+        "reopenCase": Array [],
         "settings": Array [],
         "update": Array [],
       },
@@ -1216,6 +1243,10 @@ Array [
   },
   Object {
     "privilege": Object {
+      "api": Array [
+        "bulkGetUserProfiles",
+        "dashboardUsageStats",
+      ],
       "app": Array [
         "dashboards",
         "kibana",
@@ -1326,9 +1357,11 @@ Array [
       "cases": Object {
         "all": Array [],
         "create": Array [],
+        "createComment": Array [],
         "delete": Array [],
         "push": Array [],
         "read": Array [],
+        "reopenCase": Array [],
         "settings": Array [],
         "update": Array [],
       },
@@ -1623,6 +1656,17 @@ Array [
     },
     "privilegeId": "all",
   },
+  Object {
+    "privilege": Object {
+      "disabled": true,
+      "savedObject": Object {
+        "all": Array [],
+        "read": Array [],
+      },
+      "ui": Array [],
+    },
+    "privilegeId": "read",
+  },
 ]
 `;
 
@@ -1649,9 +1693,11 @@ Array [
       "cases": Object {
         "all": Array [],
         "create": Array [],
+        "createComment": Array [],
         "delete": Array [],
         "push": Array [],
         "read": Array [],
+        "reopenCase": Array [],
         "settings": Array [],
         "update": Array [],
       },

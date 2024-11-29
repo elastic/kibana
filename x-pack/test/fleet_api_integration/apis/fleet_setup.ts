@@ -6,8 +6,15 @@
  */
 
 import expect from '@kbn/expect';
+import { v4 as uuidV4 } from 'uuid';
+import { INGEST_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import { LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common/constants';
+import pRetry from 'p-retry';
+import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
+
 import { FtrProviderContext } from '../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../helpers';
+import { SpaceTestApiClient } from './space_awareness/api_helper';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -48,35 +55,105 @@ export default function (providerContext: FtrProviderContext) {
       }
     });
 
-    it('should not create a fleet_enroll role if one does not already exist', async () => {
-      const { body: apiResponse } = await supertest
-        .post(`/api/fleet/setup`)
-        .set('kbn-xsrf', 'xxxx')
-        .expect(200);
-
-      expect(apiResponse.isInitialized).to.be(true);
-
-      try {
-        await es.security.getUser({
-          username: 'fleet_enroll',
-        });
-      } catch (e) {
-        expect(e.meta?.statusCode).to.eql(404);
-      }
-    });
-
     it('should install default packages', async () => {
       await supertest.post(`/api/fleet/setup`).set('kbn-xsrf', 'xxxx').expect(200);
 
       const { body: apiResponse } = await supertest
         .get(`/api/fleet/epm/packages?prerelease=true`)
         .expect(200);
-      const installedPackages = apiResponse.response
+      const installedPackages = apiResponse.items
         .filter((p: any) => p.status === 'installed')
         .map((p: any) => p.name)
         .sort();
 
       expect(installedPackages).to.eql(['endpoint']);
+    });
+
+    describe('upgrade managed package policies', () => {
+      const apiClient = new SpaceTestApiClient(supertest);
+      before(async () => {
+        const pkgRes = await apiClient.getPackage({
+          pkgName: 'synthetics',
+        });
+        await apiClient.installPackage({
+          pkgName: 'synthetics',
+          pkgVersion: pkgRes.item.version,
+          force: true,
+        });
+        await apiClient.updatePackage({
+          pkgName: 'synthetics',
+          pkgVersion: pkgRes.item.version,
+          data: {
+            keepPoliciesUpToDate: true,
+          },
+        });
+
+        const agentPolicyRes = await apiClient.createAgentPolicy();
+
+        await es.bulk({
+          index: INGEST_SAVED_OBJECT_INDEX,
+          refresh: 'wait_for',
+          operations: [...new Array(10).keys()].flatMap((_, index) => [
+            {
+              create: {
+                _id: `${LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE}:${uuidV4()}`,
+              },
+            },
+            {
+              type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+              [LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE]: {
+                name: `test-${index}`,
+                policy_ids: [agentPolicyRes.item.id],
+                inputs: [],
+                package: {
+                  name: 'synthetics',
+                  version: '1.2.1',
+                },
+              },
+            },
+          ]),
+        });
+
+        await apiClient.getPackage({
+          pkgName: 'synthetics',
+        });
+      });
+      it('should upgrade managed package policies', async () => {
+        await apiClient.setup();
+
+        await pRetry(
+          async () => {
+            const res = await es.search({
+              index: INGEST_SAVED_OBJECT_INDEX,
+              track_total_hits: true,
+              query: {
+                bool: {
+                  must: {
+                    term: {
+                      [`${LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.version`]: '1.2.1',
+                    },
+                  },
+                  filter: {
+                    term: {
+                      [`${LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name`]: 'synthetics',
+                    },
+                  },
+                },
+              },
+            });
+            if ((res.hits.total as SearchTotalHits).value > 0) {
+              throw new Error(
+                `Managed package policies not upgraded ${
+                  (res.hits.total as SearchTotalHits).value
+                }.`
+              );
+            }
+          },
+          {
+            maxRetryTime: 20 * 1000,
+          }
+        );
+      });
     });
   });
 }

@@ -15,14 +15,21 @@ export const getUpdateScript = ({
   isPatch?: boolean;
 }) => {
   return {
-    source: `
+    script: {
+      source: `
     if (params.assignEmpty == true || params.containsKey('api_config')) {
       if (ctx._source.api_config != null) {
         if (params.assignEmpty == true || params.api_config.containsKey('connector_id')) {
           ctx._source.api_config.connector_id = params.api_config.connector_id;
+          ctx._source.api_config.remove('model');
+          ctx._source.api_config.remove('provider');
         }
-        if (params.assignEmpty == true || params.api_config.containsKey('connector_type_title')) {
-          ctx._source.api_config.connector_type_title = params.api_config.connector_type_title;
+        // an update to apiConfig that does not contain defaultSystemPromptId should remove it
+        if (params.assignEmpty == true || (params.containsKey('api_config') && !params.api_config.containsKey('default_system_prompt_id'))) {
+          ctx._source.api_config.remove('default_system_prompt_id');
+        }
+        if (params.assignEmpty == true || params.api_config.containsKey('action_type_id')) {
+          ctx._source.api_config.action_type_id = params.api_config.action_type_id;
         }
         if (params.assignEmpty == true || params.api_config.containsKey('default_system_prompt_id')) {
           ctx._source.api_config.default_system_prompt_id = params.api_config.default_system_prompt_id;
@@ -64,11 +71,12 @@ export const getUpdateScript = ({
     }
     ctx._source.updated_at = params.updated_at;
   `,
-    lang: 'painless',
-    params: {
-      ...conversation, // when assigning undefined in painless, it will remove property and wil set it to null
-      // for patch we don't want to remove unspecified value in payload
-      assignEmpty: !(isPatch ?? true),
+      lang: 'painless',
+      params: {
+        ...conversation, // when assigning undefined in painless, it will remove property and wil set it to null
+        // for patch we don't want to remove unspecified value in payload
+        assignEmpty: !(isPatch ?? true),
+      },
     },
   };
 };

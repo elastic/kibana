@@ -27,6 +27,7 @@ import {
   profilingAzureCostDiscountRate,
   profilingCostPervCPUPerHour,
   profilingShowErrorFrames,
+  profilingFetchTopNFunctionsFromStacktraces,
 } from '@kbn/observability-plugin/common';
 import { useEditableSettings, useUiTracker } from '@kbn/observability-shared-plugin/public';
 import { isEmpty } from 'lodash';
@@ -53,7 +54,7 @@ const costSettings = [
   profilingAzureCostDiscountRate,
   profilingCostPervCPUPerHour,
 ];
-const miscSettings = [profilingShowErrorFrames];
+const miscSettings = [profilingShowErrorFrames, profilingFetchTopNFunctionsFromStacktraces];
 
 export function Settings() {
   const trackProfilingEvent = useUiTracker({ app: 'profiling' });
@@ -64,7 +65,7 @@ export function Settings() {
   } = useProfilingDependencies();
 
   const { fields, handleFieldChange, unsavedChanges, saveAll, isSaving, cleanUnsavedChanges } =
-    useEditableSettings('profiling', [...co2Settings, ...costSettings, ...miscSettings]);
+    useEditableSettings([...co2Settings, ...costSettings, ...miscSettings]);
 
   async function handleSave() {
     try {

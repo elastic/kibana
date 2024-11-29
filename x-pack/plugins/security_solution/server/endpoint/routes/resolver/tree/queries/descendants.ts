@@ -26,8 +26,16 @@ export class DescendantsQuery extends BaseResolverQuery {
     timeRange,
     isInternalRequest,
     shouldExcludeColdAndFrozenTiers,
+    agentId,
   }: ResolverQueryParams) {
-    super({ schema, indexPatterns, timeRange, isInternalRequest, shouldExcludeColdAndFrozenTiers });
+    super({
+      schema,
+      indexPatterns,
+      timeRange,
+      isInternalRequest,
+      shouldExcludeColdAndFrozenTiers,
+      agentId,
+    });
   }
 
   private query(nodes: NodeID[], size: number): JsonObject {
@@ -47,6 +55,9 @@ export class DescendantsQuery extends BaseResolverQuery {
             {
               terms: { [this.schema.parent]: nodes },
             },
+            ...(this.schema.agentId && this.agentId
+              ? [{ term: { 'agent.id': this.agentId } }]
+              : []),
             {
               exists: {
                 field: this.schema.id,
@@ -65,10 +76,10 @@ export class DescendantsQuery extends BaseResolverQuery {
               },
             },
             {
-              term: { 'event.category': 'process' },
+              terms: { 'event.category': ['process'] },
             },
             {
-              term: { 'event.kind': 'event' },
+              terms: { 'event.kind': ['event', 'alert'] },
             },
           ],
         },
@@ -79,7 +90,7 @@ export class DescendantsQuery extends BaseResolverQuery {
   private queryWithAncestryArray(nodes: NodeID[], ancestryField: string, size: number): JsonObject {
     return {
       _source: false,
-      fields: this.resolverFields,
+      fields: [...this.resolverFields, ancestryField],
       size,
       collapse: {
         field: this.schema.id,
@@ -98,7 +109,10 @@ export class DescendantsQuery extends BaseResolverQuery {
                */
               source: `
                 Map ancestryToIndex = [:];
-                List sourceAncestryArray = params._source.${ancestryField};
+                if (doc['${ancestryField}'].size() == 0) {
+                  return -1;
+                }
+                List sourceAncestryArray = doc['${ancestryField}'];
                 int length = sourceAncestryArray.length;
                 for (int i = 0; i < length; i++) {
                   ancestryToIndex[sourceAncestryArray[i]] = i;
@@ -128,6 +142,9 @@ export class DescendantsQuery extends BaseResolverQuery {
                 [ancestryField]: nodes,
               },
             },
+            ...(this.schema.agentId && this.agentId
+              ? [{ term: { 'agent.id': this.agentId } }]
+              : []),
             {
               exists: {
                 field: this.schema.id,

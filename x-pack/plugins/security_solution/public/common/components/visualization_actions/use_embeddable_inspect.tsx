@@ -5,18 +5,19 @@
  * 2.0.
  */
 
+import type { LensEmbeddableInput } from '@kbn/lens-plugin/public';
 import { useCallback } from 'react';
-import type { OnEmbeddableLoaded } from './types';
+import type { OnEmbeddableLoaded, Request } from './types';
 
 import { getRequestsAndResponses } from './utils';
 
 export const useEmbeddableInspect = (onEmbeddableLoad?: OnEmbeddableLoaded) => {
-  const setInspectData = useCallback(
+  const setInspectData = useCallback<NonNullable<LensEmbeddableInput['onLoad']>>(
     (isLoading, adapters) => {
       if (!adapters) {
         return;
       }
-      const data = getRequestsAndResponses(adapters?.requests?.getRequests());
+      const data = getRequestsAndResponses(adapters?.requests?.getRequests() as Request[]);
 
       onEmbeddableLoad?.({
         requests: data.requests,

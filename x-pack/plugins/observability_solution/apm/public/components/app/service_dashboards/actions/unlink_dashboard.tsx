@@ -45,26 +45,19 @@ export function UnlinkDashboard({
         });
 
         notifications.toasts.addSuccess({
-          title: i18n.translate(
-            'xpack.apm.serviceDashboards.unlinkSuccess.toast.title',
-            {
-              defaultMessage: 'Unlinked "{dashboardName}" dashboard',
-              values: { dashboardName: currentDashboard?.title },
-            }
-          ),
+          title: i18n.translate('xpack.apm.serviceDashboards.unlinkSuccess.toast.title', {
+            defaultMessage: 'Unlinked "{dashboardName}" dashboard',
+            values: { dashboardName: currentDashboard?.title },
+          }),
         });
         onRefresh();
       } catch (error) {
         console.error(error);
         notifications.toasts.addDanger({
-          title: i18n.translate(
-            'xpack.apm.serviceDashboards.unlinkFailure.toast.title',
-            {
-              defaultMessage:
-                'Error while unlinking "{dashboardName}" dashboard',
-              values: { dashboardName: currentDashboard?.title },
-            }
-          ),
+          title: i18n.translate('xpack.apm.serviceDashboards.unlinkFailure.toast.title', {
+            defaultMessage: 'Error while unlinking "{dashboardName}" dashboard',
+            values: { dashboardName: currentDashboard?.title },
+          }),
           text: error.body.message,
         });
       }
@@ -85,7 +78,7 @@ export function UnlinkDashboard({
       <EuiButtonEmpty
         color="danger"
         size="s"
-        iconType={'unlink'}
+        iconType="unlink"
         data-test-subj="apmUnLinkServiceDashboardMenu"
         onClick={() => setIsModalVisible(true)}
       >
@@ -113,13 +106,9 @@ export function UnlinkDashboard({
           defaultFocusedButton="confirm"
         >
           <p>
-            {i18n.translate(
-              'xpack.apm.serviceDashboards.unlinkEmptyButtonLabel.confirm.body',
-              {
-                defaultMessage:
-                  'You are about to unlink the dashboard from the service context',
-              }
-            )}
+            {i18n.translate('xpack.apm.serviceDashboards.unlinkEmptyButtonLabel.confirm.body', {
+              defaultMessage: 'You are about to unlink the dashboard from the service context',
+            })}
           </p>
         </EuiConfirmModal>
       )}

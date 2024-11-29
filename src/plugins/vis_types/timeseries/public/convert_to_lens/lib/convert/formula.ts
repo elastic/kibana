@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { v4 as uuidv4 } from 'uuid';
@@ -65,7 +66,7 @@ const convertFormulaScriptForPercentileAggs = (
 ) => {
   variables.forEach((variable) => {
     const [_, meta] = variable?.field?.split('[') ?? [];
-    const metaValue = Number(meta?.replace(']', ''));
+    const metaValue = Number(meta?.replace(/\]/g, ''));
     if (!metaValue) {
       return;
     }
@@ -162,7 +163,7 @@ export const convertOtherAggsToFormulaColumn = (
   const metric = metrics[metrics.length - 1];
   const [fieldId, meta] = metric?.field?.split('[') ?? [];
   const subFunctionMetric = metrics.find(({ id }) => id === fieldId);
-  const metaValue = meta ? Number(meta?.replace(']', '')) : undefined;
+  const metaValue = meta ? Number(meta?.replace(/\]/g, '')) : undefined;
 
   if (!subFunctionMetric) {
     return null;

@@ -12,38 +12,32 @@ const links: AssetDetailsProps['links'] = ['alertRule', 'nodeDetails'];
 const tabs: Tab[] = [
   {
     id: ContentTabIds.OVERVIEW,
-    name: i18n.translate('xpack.infra.nodeDetails.tabs.overview.title', {
+    name: i18n.translate('xpack.infra.assetDetails.tabs.overview', {
       defaultMessage: 'Overview',
     }),
   },
   {
     id: ContentTabIds.METADATA,
-    name: i18n.translate('xpack.infra.metrics.nodeDetails.tabs.metadata', {
+    name: i18n.translate('xpack.infra.assetDetails.tabs.metadata', {
       defaultMessage: 'Metadata',
     }),
   },
   {
     id: ContentTabIds.PROCESSES,
-    name: i18n.translate('xpack.infra.metrics.nodeDetails.tabs.processes', {
+    name: i18n.translate('xpack.infra.assetDetails.tabs.processes', {
       defaultMessage: 'Processes',
     }),
   },
   {
     id: ContentTabIds.LOGS,
-    name: i18n.translate('xpack.infra.nodeDetails.tabs.logs', {
+    name: i18n.translate('xpack.infra.assetDetails.tabs.logs', {
       defaultMessage: 'Logs',
     }),
   },
   {
     id: ContentTabIds.ANOMALIES,
-    name: i18n.translate('xpack.infra.nodeDetails.tabs.anomalies', {
+    name: i18n.translate('xpack.infra.assetDetails.tabs.anomalies', {
       defaultMessage: 'Anomalies',
-    }),
-  },
-  {
-    id: ContentTabIds.LINK_TO_APM,
-    name: i18n.translate('xpack.infra.infra.nodeDetails.apmTabLabel', {
-      defaultMessage: 'APM',
     }),
   },
 ];
@@ -66,5 +60,4 @@ export const assetDetailsProps: AssetDetailsProps = {
   },
   tabs,
   links,
-  metricAlias: 'metrics-*',
 };

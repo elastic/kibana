@@ -33,6 +33,8 @@ import { Status } from '../../../../../common/types/api';
 
 import { FetchAvailableIndicesAPILogic } from '../../api/index/fetch_available_indices_api_logic';
 
+import { formatApiName } from '../../utils/format_api_name';
+
 import { AttachIndexLogic } from './attach_index_logic';
 
 const CREATE_NEW_INDEX_GROUP_LABEL = i18n.translate(
@@ -77,6 +79,7 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
     isFullMatch: boolean;
     searchValue: string;
   }>();
+  const [sanitizedName, setSanitizedName] = useState<string>(formatApiName(connector.name));
 
   const { makeRequest } = useActions(FetchAvailableIndicesAPILogic);
   const { data, status } = useValues(FetchAvailableIndicesAPILogic);
@@ -128,8 +131,8 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
   useEffect(() => {
     setConnector(connector);
     makeRequest({});
-    if (!connector.index_name && connector.name) {
-      checkIndexExists({ indexName: connector.name });
+    if (!connector.index_name && connector.name && sanitizedName) {
+      checkIndexExists({ indexName: sanitizedName });
     }
   }, [connector.id]);
 
@@ -139,6 +142,10 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
       checkIndexExists({ indexName: query.searchValue });
     }
   }, [query]);
+
+  useEffect(() => {
+    setSanitizedName(formatApiName(connector.name));
+  }, [connector.name]);
 
   const { hash } = useLocation();
   useEffect(() => {
@@ -215,6 +222,12 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
               )}
               isLoading={isLoading}
               options={groupedOptions}
+              onKeyDown={(event) => {
+                // Index name should not contain spaces
+                if (event.key === ' ') {
+                  event.preventDefault();
+                }
+              }}
               onSearchChange={(searchValue) => {
                 setQuery({
                   isFullMatch: options.some((option) => option.label === searchValue),
@@ -246,6 +259,8 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
           <EuiButton
+            data-test-subj="entSearchContent-connector-connectorDetail-saveConfigurationButton"
+            data-telemetry-id="entSearchContent-connector-connectorDetail-saveConfigurationButton"
             onClick={() => onSave()}
             disabled={!selectedIndex || selectedIndex.label === connector.index_name}
             isLoading={isSaveLoading}
@@ -279,29 +294,31 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
           <EuiFlexGroup justifyContent="center">
             <EuiFlexItem grow={false}>
               <EuiButton
+                data-telemetry-id="entSearchContent-connector-connectorDetail-createAttachIndexButton"
+                data-test-subj="entSearchContent-connector-connectorDetail-createAttachIndexButton"
                 iconType="sparkles"
                 color="primary"
                 fill
                 onClick={() => {
-                  createIndex({ indexName: connector.name, language: null });
-                  setSelectedIndex({ label: connector.name });
+                  createIndex({ indexName: sanitizedName, language: null });
+                  setSelectedIndex({ label: sanitizedName });
                 }}
                 isLoading={isSaveLoading || isExistLoading}
-                disabled={indexExists[connector.name]}
+                disabled={indexExists[sanitizedName]}
               >
                 {i18n.translate(
                   'xpack.enterpriseSearch.attachIndexBox.createSameIndexButtonLabel',
                   {
                     defaultMessage: 'Create and attach an index named {indexName}',
-                    values: { indexName: connector.name },
+                    values: { indexName: sanitizedName },
                   }
                 )}
               </EuiButton>
-              {indexExists[connector.name] ? (
+              {indexExists[sanitizedName] ? (
                 <EuiText size="xs">
                   {i18n.translate('xpack.enterpriseSearch.attachIndexBox.indexNameExistsError', {
                     defaultMessage: 'Index with name {indexName} already exists',
-                    values: { indexName: connector.name },
+                    values: { indexName: sanitizedName },
                   })}
                 </EuiText>
               ) : (

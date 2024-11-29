@@ -11,7 +11,7 @@ import { RiskScoreEntity } from '../../../common/search_strategy';
 import { ENTITY_ANALYTICS } from '../../app/translations';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { SecurityPageName } from '../../app/types';
-import { useSourcererDataView } from '../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../sourcerer/containers';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { HeaderPage } from '../../common/components/header_page';
 import { EmptyPrompt } from '../../common/components/empty_prompt';
@@ -23,16 +23,24 @@ import { RiskScoreUpdatePanel } from '../components/risk_score_update_panel';
 import { useHasSecurityCapability } from '../../helper_hooks';
 import { EntityAnalyticsHeader } from '../components/entity_analytics_header';
 import { EntityAnalyticsAnomalies } from '../components/entity_analytics_anomalies';
+
+import { EntityStoreDashboardPanels } from '../components/entity_store/components/dashboard_entity_store_panels';
 import { EntityAnalyticsRiskScores } from '../components/entity_analytics_risk_score';
+import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 
 const EntityAnalyticsComponent = () => {
+  const [skipEmptyPrompt, setSkipEmptyPrompt] = React.useState(false);
+  const onSkip = React.useCallback(() => setSkipEmptyPrompt(true), [setSkipEmptyPrompt]);
   const { data: riskScoreEngineStatus } = useRiskEngineStatus();
   const { indicesExist, loading: isSourcererLoading, sourcererDataView } = useSourcererDataView();
   const isRiskScoreModuleLicenseAvailable = useHasSecurityCapability('entity-analytics');
-
+  const isEntityStoreFeatureFlagDisabled = useIsExperimentalFeatureEnabled('entityStoreDisabled');
+  const showEmptyPrompt = !indicesExist && !skipEmptyPrompt;
   return (
     <>
-      {indicesExist ? (
+      {showEmptyPrompt ? (
+        <EmptyPrompt onSkip={onSkip} />
+      ) : (
         <>
           <FiltersGlobal>
             <SiemSearchBar id={InputsModelId.global} sourcererDataView={sourcererDataView} />
@@ -55,13 +63,21 @@ const EntityAnalyticsComponent = () => {
                   <EntityAnalyticsHeader />
                 </EuiFlexItem>
 
-                <EuiFlexItem>
-                  <EntityAnalyticsRiskScores riskEntity={RiskScoreEntity.host} />
-                </EuiFlexItem>
+                {!isEntityStoreFeatureFlagDisabled ? (
+                  <EuiFlexItem>
+                    <EntityStoreDashboardPanels />
+                  </EuiFlexItem>
+                ) : (
+                  <>
+                    <EuiFlexItem>
+                      <EntityAnalyticsRiskScores riskEntity={RiskScoreEntity.host} />
+                    </EuiFlexItem>
 
-                <EuiFlexItem>
-                  <EntityAnalyticsRiskScores riskEntity={RiskScoreEntity.user} />
-                </EuiFlexItem>
+                    <EuiFlexItem>
+                      <EntityAnalyticsRiskScores riskEntity={RiskScoreEntity.user} />
+                    </EuiFlexItem>
+                  </>
+                )}
 
                 <EuiFlexItem>
                   <EntityAnalyticsAnomalies />
@@ -70,8 +86,6 @@ const EntityAnalyticsComponent = () => {
             )}
           </SecuritySolutionPageWrapper>
         </>
-      ) : (
-        <EmptyPrompt />
       )}
 
       <SpyRoute pageName={SecurityPageName.entityAnalytics} />

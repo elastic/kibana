@@ -21,9 +21,7 @@ describe('TransactionSummary', () => {
     };
 
     it('renders', () => {
-      expect(() =>
-        shallow(<TransactionSummary {...props} />)
-      ).not.toThrowError();
+      expect(() => shallow(<TransactionSummary {...props} />)).not.toThrowError();
     });
   });
   describe('renders RUM transaction without request info', () => {
@@ -36,9 +34,7 @@ describe('TransactionSummary', () => {
     };
 
     it('renders', () => {
-      expect(() =>
-        shallow(<TransactionSummary {...props} />)
-      ).not.toThrowError();
+      expect(() => shallow(<TransactionSummary {...props} />)).not.toThrowError();
     });
   });
 });

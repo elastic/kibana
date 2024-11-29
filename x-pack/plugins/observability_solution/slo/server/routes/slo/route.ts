@@ -7,110 +7,121 @@
 
 import { errors } from '@elastic/elasticsearch';
 import { failedDependency, forbidden } from '@hapi/boom';
+import { KibanaRequest } from '@kbn/core-http-server';
 import {
+  PutSLOSettingsParams,
   createSLOParamsSchema,
   deleteSLOInstancesParamsSchema,
   deleteSLOParamsSchema,
   fetchHistoricalSummaryParamsSchema,
-  findSloDefinitionsParamsSchema,
-  findSLOParamsSchema,
+  fetchSLOHealthParamsSchema,
   findSLOGroupsParamsSchema,
+  findSLOParamsSchema,
+  findSloDefinitionsParamsSchema,
   getPreviewDataParamsSchema,
   getSLOBurnRatesParamsSchema,
   getSLOInstancesParamsSchema,
   getSLOParamsSchema,
   manageSLOParamsSchema,
+  putSLOServerlessSettingsParamsSchema,
+  putSLOSettingsParamsSchema,
   resetSLOParamsSchema,
   updateSLOParamsSchema,
 } from '@kbn/slo-schema';
-import type { IndicatorTypes } from '../../domain/models';
+import { getOverviewParamsSchema } from '@kbn/slo-schema/src/rest_specs/routes/get_overview';
+import { executeWithErrorHandler } from '../../errors';
 import {
   CreateSLO,
+  DefaultBurnRatesClient,
   DefaultSummaryClient,
   DefaultSummaryTransformManager,
   DefaultTransformManager,
   DeleteSLO,
   DeleteSLOInstances,
   FindSLO,
+  FindSLOGroups,
   GetSLO,
+  GetSLOHealth,
   KibanaSavedObjectsSLORepository,
   UpdateSLO,
-  FindSLOGroups,
 } from '../../services';
-import { FetchHistoricalSummary } from '../../services/fetch_historical_summary';
 import { FindSLODefinitions } from '../../services/find_slo_definitions';
 import { getBurnRates } from '../../services/get_burn_rates';
 import { getGlobalDiagnosis } from '../../services/get_diagnosis';
 import { GetPreviewData } from '../../services/get_preview_data';
 import { GetSLOInstances } from '../../services/get_slo_instances';
+import { GetSLOSuggestions } from '../../services/get_slo_suggestions';
+import { GetSLOsOverview } from '../../services/get_slos_overview';
 import { DefaultHistoricalSummaryClient } from '../../services/historical_summary_client';
 import { ManageSLO } from '../../services/manage_slo';
 import { ResetSLO } from '../../services/reset_slo';
+import { SloDefinitionClient } from '../../services/slo_definition_client';
+import { getSloSettings, storeSloSettings } from '../../services/slo_settings';
 import { DefaultSummarySearchClient } from '../../services/summary_search_client';
 import { DefaultSummaryTransformGenerator } from '../../services/summary_transform_generator/summary_transform_generator';
-import {
-  ApmTransactionDurationTransformGenerator,
-  ApmTransactionErrorRateTransformGenerator,
-  SyntheticsAvailabilityTransformGenerator,
-  HistogramTransformGenerator,
-  KQLCustomTransformGenerator,
-  MetricCustomTransformGenerator,
-  TimesliceMetricTransformGenerator,
-  TransformGenerator,
-} from '../../services/transform_generators';
-import type { SloRequestHandlerContext } from '../../types';
+import { createTransformGenerators } from '../../services/transform_generators';
 import { createSloServerRoute } from '../create_slo_server_route';
+import { SLORoutesDependencies } from '../types';
 
-const transformGenerators: Record<IndicatorTypes, TransformGenerator> = {
-  'sli.apm.transactionDuration': new ApmTransactionDurationTransformGenerator(),
-  'sli.apm.transactionErrorRate': new ApmTransactionErrorRateTransformGenerator(),
-  'sli.synthetics.availability': new SyntheticsAvailabilityTransformGenerator(),
-  'sli.kql.custom': new KQLCustomTransformGenerator(),
-  'sli.metric.custom': new MetricCustomTransformGenerator(),
-  'sli.histogram.custom': new HistogramTransformGenerator(),
-  'sli.metric.timeslice': new TimesliceMetricTransformGenerator(),
-};
-
-const assertPlatinumLicense = async (context: SloRequestHandlerContext) => {
-  const licensing = await context.licensing;
-  const hasCorrectLicense = licensing.license.hasAtLeast('platinum');
+const assertPlatinumLicense = async (plugins: SLORoutesDependencies['plugins']) => {
+  const licensing = await plugins.licensing.start();
+  const hasCorrectLicense = (await licensing.getLicense()).hasAtLeast('platinum');
 
   if (!hasCorrectLicense) {
     throw forbidden('Platinum license or higher is needed to make use of this feature.');
   }
 };
 
+const getSpaceId = async (plugins: SLORoutesDependencies['plugins'], request: KibanaRequest) => {
+  const spaces = await plugins.spaces.start();
+  return (await spaces?.spacesService?.getActiveSpace(request))?.id ?? 'default';
+};
+
 const createSLORoute = createSloServerRoute({
   endpoint: 'POST /api/observability/slos 2023-10-31',
-  options: {
-    tags: ['access:slo_write'],
-    access: 'public',
+  options: { access: 'public' },
+  security: {
+    authz: {
+      requiredPrivileges: ['slo_write'],
+    },
   },
   params: createSLOParamsSchema,
-  handler: async ({ context, params, logger, dependencies, request }) => {
-    await assertPlatinumLicense(context);
+  handler: async ({ context, response, params, logger, request, plugins, corePlugins }) => {
+    await assertPlatinumLicense(plugins);
 
-    const spaceId =
-      (await dependencies.spaces?.spacesService?.getActiveSpace(request))?.id ?? 'default';
-
-    const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-    const basePath = dependencies.pluginsSetup.core.http.basePath;
-    const soClient = (await context.core).savedObjects.client;
+    const sloContext = await context.slo;
+    const dataViews = await plugins.dataViews.start();
+    const core = await context.core;
+    const scopedClusterClient = core.elasticsearch.client;
+    const esClient = core.elasticsearch.client.asCurrentUser;
+    const soClient = core.savedObjects.client;
+    const basePath = corePlugins.http.basePath;
     const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
+
+    const [spaceId, dataViewsService] = await Promise.all([
+      getSpaceId(plugins, request),
+      dataViews.dataViewsServiceFactory(soClient, esClient),
+    ]);
+
+    const transformGenerators = createTransformGenerators(
+      spaceId,
+      dataViewsService,
+      sloContext.isServerless
+    );
+
     const transformManager = new DefaultTransformManager(
       transformGenerators,
-      esClient,
-      logger,
-      spaceId
+      scopedClusterClient,
+      logger
     );
     const summaryTransformManager = new DefaultSummaryTransformManager(
       new DefaultSummaryTransformGenerator(),
-      esClient,
+      scopedClusterClient,
       logger
     );
-
     const createSLO = new CreateSLO(
       esClient,
+      scopedClusterClient,
       repository,
       transformManager,
       summaryTransformManager,
@@ -119,42 +130,52 @@ const createSLORoute = createSloServerRoute({
       basePath
     );
 
-    const response = await createSLO.execute(params.body);
-
-    return response;
+    return await executeWithErrorHandler(() => createSLO.execute(params.body));
   },
 });
 
 const inspectSLORoute = createSloServerRoute({
-  endpoint: 'POST /internal/api/observability/slos/_inspect 2023-10-31',
-  options: {
-    tags: ['access:slo_write'],
-    access: 'public',
+  endpoint: 'POST /internal/observability/slos/_inspect',
+  options: { access: 'internal' },
+  security: {
+    authz: {
+      requiredPrivileges: ['slo_write'],
+    },
   },
   params: createSLOParamsSchema,
-  handler: async ({ context, params, logger, dependencies, request }) => {
-    await assertPlatinumLicense(context);
+  handler: async ({ context, params, logger, request, plugins, corePlugins }) => {
+    await assertPlatinumLicense(plugins);
 
-    const spaceId =
-      (await dependencies.spaces?.spacesService?.getActiveSpace(request))?.id ?? 'default';
-    const basePath = dependencies.pluginsSetup.core.http.basePath;
-    const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-    const soClient = (await context.core).savedObjects.client;
+    const sloContext = await context.slo;
+    const dataViews = await plugins.dataViews.start();
+    const spaceId = await getSpaceId(plugins, request);
+    const basePath = corePlugins.http.basePath;
+    const core = await context.core;
+    const scopedClusterClient = core.elasticsearch.client;
+    const esClient = core.elasticsearch.client.asCurrentUser;
+    const soClient = core.savedObjects.client;
     const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
+    const dataViewsService = await dataViews.dataViewsServiceFactory(soClient, esClient);
+
+    const transformGenerators = createTransformGenerators(
+      spaceId,
+      dataViewsService,
+      sloContext.isServerless
+    );
     const transformManager = new DefaultTransformManager(
       transformGenerators,
-      esClient,
-      logger,
-      spaceId
+      scopedClusterClient,
+      logger
     );
     const summaryTransformManager = new DefaultSummaryTransformManager(
       new DefaultSummaryTransformGenerator(),
-      esClient,
+      scopedClusterClient,
       logger
     );
 
     const createSLO = new CreateSLO(
       esClient,
+      scopedClusterClient,
       repository,
       transformManager,
       summaryTransformManager,
@@ -163,37 +184,47 @@ const inspectSLORoute = createSloServerRoute({
       basePath
     );
 
-    return createSLO.inspect(params.body);
+    return await executeWithErrorHandler(() => createSLO.inspect(params.body));
   },
 });
 
 const updateSLORoute = createSloServerRoute({
   endpoint: 'PUT /api/observability/slos/{id} 2023-10-31',
-  options: {
-    tags: ['access:slo_write'],
-    access: 'public',
+  options: { access: 'public' },
+  security: {
+    authz: {
+      requiredPrivileges: ['slo_write'],
+    },
   },
   params: updateSLOParamsSchema,
-  handler: async ({ context, request, params, logger, dependencies }) => {
-    await assertPlatinumLicense(context);
+  handler: async ({ context, request, params, logger, plugins, corePlugins }) => {
+    await assertPlatinumLicense(plugins);
 
-    const spaceId =
-      (await dependencies.spaces?.spacesService?.getActiveSpace(request))?.id ?? 'default';
+    const spaceId = await getSpaceId(plugins, request);
+    const dataViews = await plugins.dataViews.start();
 
-    const basePath = dependencies.pluginsSetup.core.http.basePath;
-    const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-    const soClient = (await context.core).savedObjects.client;
-
+    const sloContext = await context.slo;
+    const basePath = corePlugins.http.basePath;
+    const core = await context.core;
+    const scopedClusterClient = core.elasticsearch.client;
+    const esClient = core.elasticsearch.client.asCurrentUser;
+    const soClient = core.savedObjects.client;
+    const dataViewsService = await dataViews.dataViewsServiceFactory(soClient, esClient);
     const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
+
+    const transformGenerators = createTransformGenerators(
+      spaceId,
+      dataViewsService,
+      sloContext.isServerless
+    );
     const transformManager = new DefaultTransformManager(
       transformGenerators,
-      esClient,
-      logger,
-      spaceId
+      scopedClusterClient,
+      logger
     );
     const summaryTransformManager = new DefaultSummaryTransformManager(
       new DefaultSummaryTransformGenerator(),
-      esClient,
+      scopedClusterClient,
       logger
     );
 
@@ -202,45 +233,57 @@ const updateSLORoute = createSloServerRoute({
       transformManager,
       summaryTransformManager,
       esClient,
+      scopedClusterClient,
       logger,
       spaceId,
       basePath
     );
 
-    const response = await updateSLO.execute(params.path.id, params.body);
-
-    return response;
+    return await executeWithErrorHandler(() => updateSLO.execute(params.path.id, params.body));
   },
 });
 
 const deleteSLORoute = createSloServerRoute({
   endpoint: 'DELETE /api/observability/slos/{id} 2023-10-31',
-  options: {
-    tags: ['access:slo_write'],
-    access: 'public',
+  options: { access: 'public' },
+  security: {
+    authz: {
+      requiredPrivileges: ['slo_write'],
+    },
   },
   params: deleteSLOParamsSchema,
-  handler: async ({ request, context, params, logger, dependencies }) => {
-    await assertPlatinumLicense(context);
+  handler: async ({ request, response, context, params, logger, plugins }) => {
+    await assertPlatinumLicense(plugins);
 
-    const spaceId =
-      (await dependencies.spaces?.spacesService?.getActiveSpace(request))?.id ?? 'default';
+    const spaceId = await getSpaceId(plugins, request);
+    const dataViews = await plugins.dataViews.start();
 
-    const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-    const soClient = (await context.core).savedObjects.client;
-    const rulesClient = dependencies.getRulesClientWithRequest(request);
+    const sloContext = await context.slo;
+    const core = await context.core;
+    const scopedClusterClient = core.elasticsearch.client;
+    const esClient = core.elasticsearch.client.asCurrentUser;
+    const soClient = core.savedObjects.client;
 
+    const alerting = await plugins.alerting.start();
+    const rulesClient = await alerting.getRulesClientWithRequest(request);
+
+    const dataViewsService = await dataViews.dataViewsServiceFactory(soClient, esClient);
+
+    const transformGenerators = createTransformGenerators(
+      spaceId,
+      dataViewsService,
+      sloContext.isServerless
+    );
     const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
     const transformManager = new DefaultTransformManager(
       transformGenerators,
-      esClient,
-      logger,
-      spaceId
+      scopedClusterClient,
+      logger
     );
 
     const summaryTransformManager = new DefaultSummaryTransformManager(
       new DefaultSummaryTransformGenerator(),
-      esClient,
+      scopedClusterClient,
       logger
     );
 
@@ -249,140 +292,179 @@ const deleteSLORoute = createSloServerRoute({
       transformManager,
       summaryTransformManager,
       esClient,
+      scopedClusterClient,
       rulesClient
     );
 
-    await deleteSLO.execute(params.path.id);
+    await executeWithErrorHandler(() => deleteSLO.execute(params.path.id));
+    return response.noContent();
   },
 });
 
 const getSLORoute = createSloServerRoute({
   endpoint: 'GET /api/observability/slos/{id} 2023-10-31',
-  options: {
-    tags: ['access:slo_read'],
-    access: 'public',
+  options: { access: 'public' },
+  security: {
+    authz: {
+      requiredPrivileges: ['slo_read'],
+    },
   },
   params: getSLOParamsSchema,
-  handler: async ({ context, params, logger }) => {
-    await assertPlatinumLicense(context);
+  handler: async ({ request, context, params, logger, plugins }) => {
+    await assertPlatinumLicense(plugins);
+
+    const spaceId = await getSpaceId(plugins, request);
 
     const soClient = (await context.core).savedObjects.client;
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
     const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
-    const summaryClient = new DefaultSummaryClient(esClient);
-    const getSLO = new GetSLO(repository, summaryClient);
+    const burnRatesClient = new DefaultBurnRatesClient(esClient);
+    const summaryClient = new DefaultSummaryClient(esClient, burnRatesClient);
+    const defintionClient = new SloDefinitionClient(repository, esClient, logger);
+    const getSLO = new GetSLO(defintionClient, summaryClient);
 
-    const response = await getSLO.execute(params.path.id, params.query);
-
-    return response;
+    return await executeWithErrorHandler(() =>
+      getSLO.execute(params.path.id, spaceId, params.query)
+    );
   },
 });
 
 const enableSLORoute = createSloServerRoute({
   endpoint: 'POST /api/observability/slos/{id}/enable 2023-10-31',
-  options: {
-    tags: ['access:slo_write'],
-    access: 'public',
+  options: { access: 'public' },
+  security: {
+    authz: {
+      requiredPrivileges: ['slo_write'],
+    },
   },
   params: manageSLOParamsSchema,
-  handler: async ({ request, context, params, logger, dependencies }) => {
-    await assertPlatinumLicense(context);
+  handler: async ({ request, response, context, params, logger, plugins }) => {
+    await assertPlatinumLicense(plugins);
 
-    const spaceId =
-      (await dependencies.spaces?.spacesService?.getActiveSpace(request))?.id ?? 'default';
-
-    const soClient = (await context.core).savedObjects.client;
-    const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-
+    const spaceId = await getSpaceId(plugins, request);
+    const dataViews = await plugins.dataViews.start();
+    const sloContext = await context.slo;
+    const core = await context.core;
+    const scopedClusterClient = core.elasticsearch.client;
+    const soClient = core.savedObjects.client;
+    const esClient = core.elasticsearch.client.asCurrentUser;
+    const dataViewsService = await dataViews.dataViewsServiceFactory(soClient, esClient);
     const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
+
+    const transformGenerators = createTransformGenerators(
+      spaceId,
+      dataViewsService,
+      sloContext.isServerless
+    );
+
     const transformManager = new DefaultTransformManager(
       transformGenerators,
-      esClient,
-      logger,
-      spaceId
+      scopedClusterClient,
+      logger
     );
     const summaryTransformManager = new DefaultSummaryTransformManager(
       new DefaultSummaryTransformGenerator(),
-      esClient,
+      scopedClusterClient,
       logger
     );
 
     const manageSLO = new ManageSLO(repository, transformManager, summaryTransformManager);
 
-    const response = await manageSLO.enable(params.path.id);
+    await executeWithErrorHandler(() => manageSLO.enable(params.path.id));
 
-    return response;
+    return response.noContent();
   },
 });
 
 const disableSLORoute = createSloServerRoute({
   endpoint: 'POST /api/observability/slos/{id}/disable 2023-10-31',
-  options: {
-    tags: ['access:slo_write'],
-    access: 'public',
+  options: { access: 'public' },
+  security: {
+    authz: {
+      requiredPrivileges: ['slo_write'],
+    },
   },
   params: manageSLOParamsSchema,
-  handler: async ({ request, context, params, logger, dependencies }) => {
-    await assertPlatinumLicense(context);
+  handler: async ({ response, request, context, params, logger, plugins }) => {
+    await assertPlatinumLicense(plugins);
 
-    const spaceId =
-      (await dependencies.spaces?.spacesService?.getActiveSpace(request))?.id ?? 'default';
+    const spaceId = await getSpaceId(plugins, request);
+    const dataViews = await plugins.dataViews.start();
 
-    const soClient = (await context.core).savedObjects.client;
-    const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-
+    const sloContext = await context.slo;
+    const core = await context.core;
+    const scopedClusterClient = core.elasticsearch.client;
+    const soClient = core.savedObjects.client;
+    const esClient = core.elasticsearch.client.asCurrentUser;
+    const dataViewsService = await dataViews.dataViewsServiceFactory(soClient, esClient);
     const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
+
+    const transformGenerators = createTransformGenerators(
+      spaceId,
+      dataViewsService,
+      sloContext.isServerless
+    );
     const transformManager = new DefaultTransformManager(
       transformGenerators,
-      esClient,
-      logger,
-      spaceId
+      scopedClusterClient,
+      logger
     );
     const summaryTransformManager = new DefaultSummaryTransformManager(
       new DefaultSummaryTransformGenerator(),
-      esClient,
+      scopedClusterClient,
       logger
     );
 
     const manageSLO = new ManageSLO(repository, transformManager, summaryTransformManager);
 
-    const response = await manageSLO.disable(params.path.id);
-
-    return response;
+    await executeWithErrorHandler(() => manageSLO.disable(params.path.id));
+    return response.noContent();
   },
 });
 
 const resetSLORoute = createSloServerRoute({
   endpoint: 'POST /api/observability/slos/{id}/_reset 2023-10-31',
-  options: {
-    tags: ['access:slo_write'],
-    access: 'public',
+  options: { access: 'public' },
+  security: {
+    authz: {
+      requiredPrivileges: ['slo_write'],
+    },
   },
   params: resetSLOParamsSchema,
-  handler: async ({ context, request, params, logger, dependencies }) => {
-    await assertPlatinumLicense(context);
+  handler: async ({ context, request, params, logger, plugins, corePlugins }) => {
+    await assertPlatinumLicense(plugins);
 
-    const spaceId =
-      (await dependencies.spaces?.spacesService?.getActiveSpace(request))?.id ?? 'default';
-    const soClient = (await context.core).savedObjects.client;
-    const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-    const basePath = dependencies.pluginsSetup.core.http.basePath;
+    const sloContext = await context.slo;
+    const dataViews = await plugins.dataViews.start();
+    const spaceId = await getSpaceId(plugins, request);
+    const core = await context.core;
+    const scopedClusterClient = core.elasticsearch.client;
+    const soClient = core.savedObjects.client;
+    const esClient = core.elasticsearch.client.asCurrentUser;
+    const basePath = corePlugins.http.basePath;
 
+    const dataViewsService = await dataViews.dataViewsServiceFactory(soClient, esClient);
     const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
+
+    const transformGenerators = createTransformGenerators(
+      spaceId,
+      dataViewsService,
+      sloContext.isServerless
+    );
     const transformManager = new DefaultTransformManager(
       transformGenerators,
-      esClient,
-      logger,
-      spaceId
+      scopedClusterClient,
+      logger
     );
     const summaryTransformManager = new DefaultSummaryTransformManager(
       new DefaultSummaryTransformGenerator(),
-      esClient,
+      scopedClusterClient,
       logger
     );
 
     const resetSLO = new ResetSLO(
       esClient,
+      scopedClusterClient,
       repository,
       transformManager,
       summaryTransformManager,
@@ -391,144 +473,165 @@ const resetSLORoute = createSloServerRoute({
       basePath
     );
 
-    const response = await resetSLO.execute(params.path.id);
-
-    return response;
+    return await executeWithErrorHandler(() => resetSLO.execute(params.path.id));
   },
 });
 
 const findSLORoute = createSloServerRoute({
   endpoint: 'GET /api/observability/slos 2023-10-31',
-  options: {
-    tags: ['access:slo_read'],
-    access: 'public',
+  options: { access: 'public' },
+  security: {
+    authz: {
+      requiredPrivileges: ['slo_read'],
+    },
   },
   params: findSLOParamsSchema,
-  handler: async ({ context, request, params, logger, dependencies }) => {
-    await assertPlatinumLicense(context);
+  handler: async ({ context, request, params, logger, plugins }) => {
+    await assertPlatinumLicense(plugins);
 
-    const spaceId =
-      (await dependencies.spaces?.spacesService?.getActiveSpace(request))?.id ?? 'default';
+    const spaceId = await getSpaceId(plugins, request);
     const soClient = (await context.core).savedObjects.client;
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
     const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
-    const summarySearchClient = new DefaultSummarySearchClient(esClient, logger, spaceId);
+    const summarySearchClient = new DefaultSummarySearchClient(esClient, soClient, logger, spaceId);
+
     const findSLO = new FindSLO(repository, summarySearchClient);
 
-    const response = await findSLO.execute(params?.query ?? {});
-
-    return response;
+    return await executeWithErrorHandler(() => findSLO.execute(params?.query ?? {}));
   },
 });
 
 const findSLOGroupsRoute = createSloServerRoute({
-  endpoint: 'GET /internal/api/observability/slos/_groups',
-  options: {
-    tags: ['access:slo_read'],
-    access: 'internal',
+  endpoint: 'GET /internal/observability/slos/_groups',
+  options: { access: 'internal' },
+  security: {
+    authz: {
+      requiredPrivileges: ['slo_read'],
+    },
   },
   params: findSLOGroupsParamsSchema,
-  handler: async ({ context, request, params, logger, dependencies }) => {
-    await assertPlatinumLicense(context);
-    const spaceId =
-      (await dependencies.spaces?.spacesService.getActiveSpace(request))?.id ?? 'default';
+  handler: async ({ context, request, params, logger, plugins }) => {
+    await assertPlatinumLicense(plugins);
+
+    const spaceId = await getSpaceId(plugins, request);
+    const soClient = (await context.core).savedObjects.client;
     const coreContext = context.core;
     const esClient = (await coreContext).elasticsearch.client.asCurrentUser;
-    const findSLOGroups = new FindSLOGroups(esClient, logger, spaceId);
-    const response = await findSLOGroups.execute(params?.query ?? {});
-    return response;
+    const findSLOGroups = new FindSLOGroups(esClient, soClient, logger, spaceId);
+    return await executeWithErrorHandler(() => findSLOGroups.execute(params?.query ?? {}));
+  },
+});
+
+const getSLOSuggestionsRoute = createSloServerRoute({
+  endpoint: 'GET /internal/observability/slos/suggestions',
+  options: { access: 'internal' },
+  security: {
+    authz: {
+      requiredPrivileges: ['slo_read'],
+    },
+  },
+  handler: async ({ context, plugins }) => {
+    await assertPlatinumLicense(plugins);
+
+    const soClient = (await context.core).savedObjects.client;
+    const getSLOSuggestions = new GetSLOSuggestions(soClient);
+    return await executeWithErrorHandler(() => getSLOSuggestions.execute());
   },
 });
 
 const deleteSloInstancesRoute = createSloServerRoute({
   endpoint: 'POST /api/observability/slos/_delete_instances 2023-10-31',
-  options: {
-    tags: ['access:slo_write'],
+  options: { access: 'public' },
+  security: {
+    authz: {
+      requiredPrivileges: ['slo_write'],
+    },
   },
   params: deleteSLOInstancesParamsSchema,
-  handler: async ({ context, params }) => {
-    await assertPlatinumLicense(context);
+  handler: async ({ response, context, params, plugins }) => {
+    await assertPlatinumLicense(plugins);
 
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
     const deleteSloInstances = new DeleteSLOInstances(esClient);
 
-    await deleteSloInstances.execute(params.body);
+    await executeWithErrorHandler(() => deleteSloInstances.execute(params.body));
+    return response.noContent();
   },
 });
 
 const findSloDefinitionsRoute = createSloServerRoute({
   endpoint: 'GET /api/observability/slos/_definitions 2023-10-31',
-  options: {
-    tags: ['access:slo_read'],
+  options: { access: 'public' },
+  security: {
+    authz: {
+      requiredPrivileges: ['slo_read'],
+    },
   },
   params: findSloDefinitionsParamsSchema,
-  handler: async ({ context, params, logger }) => {
-    await assertPlatinumLicense(context);
+  handler: async ({ context, params, logger, plugins }) => {
+    await assertPlatinumLicense(plugins);
 
     const soClient = (await context.core).savedObjects.client;
     const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
     const findSloDefinitions = new FindSLODefinitions(repository);
 
-    const response = await findSloDefinitions.execute(params?.query ?? {});
-
-    return response;
+    return await executeWithErrorHandler(() => findSloDefinitions.execute(params?.query ?? {}));
   },
 });
 
 const fetchHistoricalSummary = createSloServerRoute({
   endpoint: 'POST /internal/observability/slos/_historical_summary',
-  options: {
-    tags: ['access:slo_read'],
+  options: { access: 'internal' },
+  security: {
+    authz: {
+      requiredPrivileges: ['slo_read'],
+    },
   },
   params: fetchHistoricalSummaryParamsSchema,
-  handler: async ({ context, params, logger }) => {
-    await assertPlatinumLicense(context);
+  handler: async ({ context, params, plugins }) => {
+    await assertPlatinumLicense(plugins);
 
-    const soClient = (await context.core).savedObjects.client;
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-    const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
     const historicalSummaryClient = new DefaultHistoricalSummaryClient(esClient);
 
-    const fetchSummaryData = new FetchHistoricalSummary(repository, historicalSummaryClient);
-
-    const response = await fetchSummaryData.execute(params.body);
-
-    return response;
+    return await executeWithErrorHandler(() => historicalSummaryClient.fetch(params.body));
   },
 });
 
 const getSLOInstancesRoute = createSloServerRoute({
   endpoint: 'GET /internal/observability/slos/{id}/_instances',
-  options: {
-    tags: ['access:slo_read'],
-    access: 'internal',
+  options: { access: 'internal' },
+  security: {
+    authz: {
+      requiredPrivileges: ['slo_read'],
+    },
   },
   params: getSLOInstancesParamsSchema,
-  handler: async ({ context, params, logger }) => {
-    await assertPlatinumLicense(context);
+  handler: async ({ context, params, logger, plugins }) => {
+    await assertPlatinumLicense(plugins);
 
     const soClient = (await context.core).savedObjects.client;
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
     const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
-
     const getSLOInstances = new GetSLOInstances(repository, esClient);
 
-    const response = await getSLOInstances.execute(params.path.id);
-
-    return response;
+    return await executeWithErrorHandler(() => getSLOInstances.execute(params.path.id));
   },
 });
 
 const getDiagnosisRoute = createSloServerRoute({
   endpoint: 'GET /internal/observability/slos/_diagnosis',
-  options: {
-    tags: [],
-    access: 'internal',
+  options: { access: 'internal' },
+  security: {
+    authz: {
+      enabled: false,
+      reason: 'The endpoint is used to diagnose SLOs and does not require any specific privileges.',
+    },
   },
   params: undefined,
-  handler: async ({ context }) => {
+  handler: async ({ context, plugins }) => {
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-    const licensing = await context.licensing;
+    const licensing = await plugins.licensing.start();
 
     try {
       const response = await getGlobalDiagnosis(esClient, licensing);
@@ -542,67 +645,184 @@ const getDiagnosisRoute = createSloServerRoute({
   },
 });
 
+const fetchSloHealthRoute = createSloServerRoute({
+  endpoint: 'POST /internal/observability/slos/_health',
+  options: { access: 'internal' },
+  security: {
+    authz: {
+      requiredPrivileges: ['slo_read'],
+    },
+  },
+  params: fetchSLOHealthParamsSchema,
+  handler: async ({ context, params, logger, plugins }) => {
+    await assertPlatinumLicense(plugins);
+
+    const core = await context.core;
+    const scopedClusterClient = core.elasticsearch.client;
+    const soClient = core.savedObjects.client;
+    const esClient = core.elasticsearch.client.asCurrentUser;
+    const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
+
+    const getSLOHealth = new GetSLOHealth(esClient, scopedClusterClient, repository);
+
+    return await executeWithErrorHandler(() => getSLOHealth.execute(params.body));
+  },
+});
+
 const getSloBurnRates = createSloServerRoute({
   endpoint: 'POST /internal/observability/slos/{id}/_burn_rates',
-  options: {
-    tags: ['access:slo_read'],
-    access: 'internal',
+  options: { access: 'internal' },
+  security: {
+    authz: {
+      requiredPrivileges: ['slo_read'],
+    },
   },
   params: getSLOBurnRatesParamsSchema,
-  handler: async ({ context, params, logger }) => {
-    await assertPlatinumLicense(context);
+  handler: async ({ request, context, params, logger, plugins }) => {
+    await assertPlatinumLicense(plugins);
+
+    const spaceId = await getSpaceId(plugins, request);
 
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
     const soClient = (await context.core).savedObjects.client;
-    const burnRates = await getBurnRates(
-      params.path.id,
-      params.body.instanceId,
-      params.body.windows,
-      {
-        soClient,
-        esClient,
-        logger,
-      }
+    const { instanceId, windows, remoteName } = params.body;
+
+    return await executeWithErrorHandler(() =>
+      getBurnRates({
+        instanceId,
+        spaceId,
+        windows,
+        remoteName,
+        sloId: params.path.id,
+        services: {
+          soClient,
+          esClient,
+          logger,
+        },
+      })
     );
-    return { burnRates };
   },
 });
 
 const getPreviewData = createSloServerRoute({
   endpoint: 'POST /internal/observability/slos/_preview',
-  options: {
-    tags: ['access:slo_read'],
-    access: 'internal',
+  options: { access: 'internal' },
+  security: {
+    authz: {
+      requiredPrivileges: ['slo_read'],
+    },
   },
   params: getPreviewDataParamsSchema,
-  handler: async ({ request, context, params, dependencies }) => {
-    await assertPlatinumLicense(context);
+  handler: async ({ request, context, params, plugins }) => {
+    await assertPlatinumLicense(plugins);
 
-    const spaceId =
-      (await dependencies.spaces?.spacesService?.getActiveSpace(request))?.id ?? 'default';
+    const spaceId = await getSpaceId(plugins, request);
+    const dataViews = await plugins.dataViews.start();
 
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-    const service = new GetPreviewData(esClient, spaceId);
+    const soClient = (await context.core).savedObjects.client;
+    const dataViewsService = await dataViews.dataViewsServiceFactory(soClient, esClient);
+    const service = new GetPreviewData(esClient, spaceId, dataViewsService);
     return await service.execute(params.body);
   },
 });
 
-export const sloRouteRepository = {
-  ...createSLORoute,
-  ...inspectSLORoute,
-  ...deleteSLORoute,
-  ...deleteSloInstancesRoute,
-  ...disableSLORoute,
-  ...enableSLORoute,
-  ...fetchHistoricalSummary,
-  ...findSloDefinitionsRoute,
-  ...findSLORoute,
-  ...getSLORoute,
-  ...updateSLORoute,
-  ...getDiagnosisRoute,
-  ...getSloBurnRates,
-  ...getPreviewData,
-  ...getSLOInstancesRoute,
-  ...resetSLORoute,
-  ...findSLOGroupsRoute,
+const getSloSettingsRoute = createSloServerRoute({
+  endpoint: 'GET /internal/slo/settings',
+  options: { access: 'internal' },
+  security: {
+    authz: {
+      requiredPrivileges: ['slo_read'],
+    },
+  },
+  handler: async ({ context, plugins }) => {
+    await assertPlatinumLicense(plugins);
+
+    const soClient = (await context.core).savedObjects.client;
+
+    return await executeWithErrorHandler(() => getSloSettings(soClient));
+  },
+});
+
+const putSloSettings = (isServerless?: boolean) =>
+  createSloServerRoute({
+    endpoint: 'PUT /internal/slo/settings',
+    options: { access: 'internal' },
+    security: {
+      authz: {
+        requiredPrivileges: ['slo_write'],
+      },
+    },
+    params: isServerless ? putSLOServerlessSettingsParamsSchema : putSLOSettingsParamsSchema,
+    handler: async ({ context, params, plugins }) => {
+      await assertPlatinumLicense(plugins);
+
+      const soClient = (await context.core).savedObjects.client;
+      return await executeWithErrorHandler(() =>
+        storeSloSettings(soClient, params.body as PutSLOSettingsParams)
+      );
+    },
+  });
+
+const getSLOsOverview = createSloServerRoute({
+  endpoint: 'GET /internal/observability/slos/overview',
+  options: { access: 'internal' },
+  security: {
+    authz: {
+      requiredPrivileges: ['slo_read'],
+    },
+  },
+  params: getOverviewParamsSchema,
+  handler: async ({ context, params, request, logger, plugins }) => {
+    await assertPlatinumLicense(plugins);
+
+    const soClient = (await context.core).savedObjects.client;
+    const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+
+    const ruleRegistry = await plugins.ruleRegistry.start();
+    const racClient = await ruleRegistry.getRacClientWithRequest(request);
+
+    const spaceId = await getSpaceId(plugins, request);
+
+    const alerting = await plugins.alerting.start();
+    const rulesClient = await alerting.getRulesClientWithRequest(request);
+
+    const slosOverview = new GetSLOsOverview(
+      soClient,
+      esClient,
+      spaceId,
+      logger,
+      rulesClient,
+      racClient
+    );
+
+    return await executeWithErrorHandler(() => slosOverview.execute(params?.query ?? {}));
+  },
+});
+
+export const getSloRouteRepository = (isServerless?: boolean) => {
+  return {
+    ...fetchSloHealthRoute,
+    ...getSloSettingsRoute,
+    ...putSloSettings(isServerless),
+    ...createSLORoute,
+    ...inspectSLORoute,
+    ...deleteSLORoute,
+    ...deleteSloInstancesRoute,
+    ...disableSLORoute,
+    ...enableSLORoute,
+    ...fetchHistoricalSummary,
+    ...findSloDefinitionsRoute,
+    ...findSLORoute,
+    ...getSLORoute,
+    ...updateSLORoute,
+    ...getDiagnosisRoute,
+    ...getSloBurnRates,
+    ...getPreviewData,
+    ...getSLOInstancesRoute,
+    ...resetSLORoute,
+    ...findSLOGroupsRoute,
+    ...getSLOSuggestionsRoute,
+    ...getSLOsOverview,
+  };
 };

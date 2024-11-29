@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { useCallback, useMemo } from 'react';
-import { useDispatch } from 'react-redux';
 
 import { i18n } from '@kbn/i18n';
 import { ALERT_RULE_EXCEPTIONS_LIST, ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
@@ -18,13 +17,13 @@ import { useApi } from '@kbn/securitysolution-list-hooks';
 
 import type { Filter } from '@kbn/es-query';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import { isEmpty } from 'lodash';
 import { createHistoryEntry } from '../../../../common/utils/global_query_string/helpers';
 import { useKibana } from '../../../../common/lib/kibana';
 import { TimelineId } from '../../../../../common/types/timeline';
-import { TimelineType } from '../../../../../common/api/timeline';
-import { timelineActions } from '../../../../timelines/store';
+import { TimelineTypeEnum } from '../../../../../common/api/timeline';
 import { sendAlertToTimelineAction } from '../actions';
-import { dispatchUpdateTimeline } from '../../../../timelines/components/open_timeline/helpers';
+import { useUpdateTimeline } from '../../../../timelines/components/open_timeline/use_update_timeline';
 import { useCreateTimeline } from '../../../../timelines/hooks/use_create_timeline';
 import type { CreateTimelineProps } from '../types';
 import { ACTION_INVESTIGATE_IN_TIMELINE } from '../translations';
@@ -32,6 +31,7 @@ import { getField } from '../../../../helpers';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
 import { ALERTS_ACTIONS } from '../../../../common/lib/apm/user_actions';
+import { defaultUdtHeaders } from '../../../../timelines/components/timeline/body/column_headers/default_headers';
 
 interface UseInvestigateInTimelineActionProps {
   ecsRowData?: Ecs | Ecs[] | null;
@@ -96,7 +96,6 @@ export const useInvestigateInTimeline = ({
   const {
     data: { search: searchStrategyClient },
   } = useKibana().services;
-  const dispatch = useDispatch();
   const { startTransaction } = useStartTransaction();
 
   const { services } = useKibana();
@@ -131,40 +130,44 @@ export const useInvestigateInTimeline = ({
     [addError, getExceptionFilterFromIds]
   );
 
-  const updateTimelineIsLoading = useCallback(
-    (payload) => dispatch(timelineActions.updateIsLoading(payload)),
-    [dispatch]
-  );
-
   const clearActiveTimeline = useCreateTimeline({
     timelineId: TimelineId.active,
-    timelineType: TimelineType.default,
+    timelineType: TimelineTypeEnum.default,
   });
 
+  const updateTimeline = useUpdateTimeline();
+
   const createTimeline = useCallback(
-    ({ from: fromTimeline, timeline, to: toTimeline, ruleNote }: CreateTimelineProps) => {
-      clearActiveTimeline();
-      updateTimelineIsLoading({ id: TimelineId.active, isLoading: false });
-      dispatchUpdateTimeline(dispatch)({
+    async ({ from: fromTimeline, timeline, to: toTimeline, ruleNote }: CreateTimelineProps) => {
+      const newColumns = timeline.columns;
+      const newColumnsOverride =
+        !newColumns || isEmpty(newColumns) ? defaultUdtHeaders : newColumns;
+
+      await clearActiveTimeline();
+      updateTimeline({
         duplicate: true,
         from: fromTimeline,
         id: TimelineId.active,
         notes: [],
         timeline: {
           ...timeline,
+          columns: newColumnsOverride,
           indexNames: timeline.indexNames ?? [],
           show: true,
+          excludedRowRendererIds:
+            timeline.timelineType !== TimelineTypeEnum.template
+              ? timeline.excludedRowRendererIds
+              : [],
         },
         to: toTimeline,
         ruleNote,
-      })();
+      });
     },
-    [dispatch, updateTimelineIsLoading, clearActiveTimeline]
+    [updateTimeline, clearActiveTimeline]
   );
 
   const investigateInTimelineAlertClick = useCallback(async () => {
     createHistoryEntry();
-
     startTransaction({ name: ALERTS_ACTIONS.INVESTIGATE_IN_TIMELINE });
     if (onInvestigateInTimelineAlertClick) {
       onInvestigateInTimelineAlertClick();
@@ -174,7 +177,6 @@ export const useInvestigateInTimeline = ({
         createTimeline,
         ecsData: ecsRowData,
         searchStrategyClient,
-        updateTimelineIsLoading,
         getExceptionFilter,
       });
     }
@@ -184,7 +186,6 @@ export const useInvestigateInTimeline = ({
     ecsRowData,
     onInvestigateInTimelineAlertClick,
     searchStrategyClient,
-    updateTimelineIsLoading,
     getExceptionFilter,
   ]);
 

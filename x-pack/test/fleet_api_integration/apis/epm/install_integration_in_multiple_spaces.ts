@@ -9,8 +9,7 @@ import expect from '@kbn/expect';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import pRetry from 'p-retry';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { skipIfNoDockerRegistry } from '../../helpers';
-import { setupFleetAndAgents } from '../agents/services';
+import { skipIfNoDockerRegistry, isDockerRegistryEnabledOrSkipped } from '../../helpers';
 
 const testSpaceId = 'fleet_test_space';
 
@@ -18,10 +17,9 @@ export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const kibanaServer = getService('kibanaServer');
   const supertest = getService('supertest');
-  const dockerServers = getService('dockerServers');
   const esArchiver = getService('esArchiver');
-  const server = dockerServers.get('registry');
   const es = getService('es');
+  const fleetAndAgents = getService('fleetAndAgents');
 
   const pkgName = 'system';
   const pkgVersion = '1.27.0';
@@ -72,12 +70,14 @@ export default function (providerContext: FtrProviderContext) {
       })
       .catch(() => {});
 
-  describe('When installing system integration in multiple spaces', async () => {
+  describe('When installing system integration in multiple spaces', () => {
     skipIfNoDockerRegistry(providerContext);
-    setupFleetAndAgents(providerContext);
 
     before(async () => {
-      if (!server.enabled) return;
+      await fleetAndAgents.setup();
+      if (!isDockerRegistryEnabledOrSkipped(providerContext)) {
+        return;
+      }
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
       await installPackage(pkgName, pkgVersion);
 

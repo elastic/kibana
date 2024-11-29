@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { waitFor, renderHook } from '@testing-library/react';
 import { DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from './constants';
 import { useGetCases } from './use_get_cases';
 import * as api from './api';
@@ -31,11 +31,14 @@ describe('useGetCases', () => {
 
   it('calls getCases with correct arguments', async () => {
     const spyOnGetCases = jest.spyOn(api, 'getCases');
-    const { waitForNextUpdate } = renderHook(() => useGetCases(), {
+    renderHook(() => useGetCases(), {
       wrapper: appMockRender.AppWrapper,
     });
 
-    await waitForNextUpdate();
+    await waitFor(() => {
+      expect(spyOnGetCases).toBeCalled();
+    });
+
     expect(spyOnGetCases).toBeCalledWith({
       filterOptions: { ...DEFAULT_FILTER_OPTIONS, owner: ['securitySolution'] },
       queryParams: DEFAULT_QUERY_PARAMS,
@@ -52,12 +55,13 @@ describe('useGetCases', () => {
     const addError = jest.fn();
     (useToasts as jest.Mock).mockReturnValue({ addSuccess, addError });
 
-    const { waitForNextUpdate } = renderHook(() => useGetCases(), {
+    renderHook(() => useGetCases(), {
       wrapper: appMockRender.AppWrapper,
     });
 
-    await waitForNextUpdate();
-    expect(addError).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(addError).toHaveBeenCalled();
+    });
   });
 
   it('should set all owners when no owner is provided', async () => {
@@ -65,7 +69,7 @@ describe('useGetCases', () => {
 
     appMockRender.coreStart.application.capabilities = {
       ...appMockRender.coreStart.application.capabilities,
-      observabilityCases: {
+      observabilityCasesV2: {
         create_cases: true,
         read_cases: true,
         update_cases: true,
@@ -74,7 +78,7 @@ describe('useGetCases', () => {
         delete_cases: true,
         cases_settings: true,
       },
-      securitySolutionCases: {
+      securitySolutionCasesV2: {
         create_cases: true,
         read_cases: true,
         update_cases: true,
@@ -86,11 +90,13 @@ describe('useGetCases', () => {
     };
 
     const spyOnGetCases = jest.spyOn(api, 'getCases');
-    const { waitForNextUpdate } = renderHook(() => useGetCases(), {
+    renderHook(() => useGetCases(), {
       wrapper: appMockRender.AppWrapper,
     });
 
-    await waitForNextUpdate();
+    await waitFor(() => {
+      expect(spyOnGetCases).toHaveBeenCalled();
+    });
 
     expect(spyOnGetCases).toBeCalledWith({
       filterOptions: { ...DEFAULT_FILTER_OPTIONS, owner: [...OWNERS] },
@@ -103,11 +109,13 @@ describe('useGetCases', () => {
     appMockRender = createAppMockRenderer({ owner: [] });
     const spyOnGetCases = jest.spyOn(api, 'getCases');
 
-    const { waitForNextUpdate } = renderHook(() => useGetCases(), {
+    renderHook(() => useGetCases(), {
       wrapper: appMockRender.AppWrapper,
     });
 
-    await waitForNextUpdate();
+    await waitFor(() => {
+      expect(spyOnGetCases).toHaveBeenCalled();
+    });
 
     expect(spyOnGetCases).toBeCalledWith({
       filterOptions: { ...DEFAULT_FILTER_OPTIONS, owner: ['cases'] },
@@ -120,11 +128,13 @@ describe('useGetCases', () => {
     appMockRender = createAppMockRenderer({ owner: ['observability'] });
     const spyOnGetCases = jest.spyOn(api, 'getCases');
 
-    const { waitForNextUpdate } = renderHook(() => useGetCases(), {
+    renderHook(() => useGetCases(), {
       wrapper: appMockRender.AppWrapper,
     });
 
-    await waitForNextUpdate();
+    await waitFor(() => {
+      expect(spyOnGetCases).toHaveBeenCalled();
+    });
 
     expect(spyOnGetCases).toBeCalledWith({
       filterOptions: { ...DEFAULT_FILTER_OPTIONS, owner: ['observability'] },
@@ -137,14 +147,13 @@ describe('useGetCases', () => {
     appMockRender = createAppMockRenderer({ owner: ['observability'] });
     const spyOnGetCases = jest.spyOn(api, 'getCases');
 
-    const { waitForNextUpdate } = renderHook(
-      () => useGetCases({ filterOptions: { owner: ['my-owner'] } }),
-      {
-        wrapper: appMockRender.AppWrapper,
-      }
-    );
+    renderHook(() => useGetCases({ filterOptions: { owner: ['my-owner'] } }), {
+      wrapper: appMockRender.AppWrapper,
+    });
 
-    await waitForNextUpdate();
+    await waitFor(() => {
+      expect(spyOnGetCases).toHaveBeenCalled();
+    });
 
     expect(spyOnGetCases).toBeCalledWith({
       filterOptions: { ...DEFAULT_FILTER_OPTIONS, owner: ['my-owner'] },

@@ -27,10 +27,7 @@ import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plug
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { ApmPluginStartDeps } from '../../../../plugin';
 import { clearCache } from '../../../../services/rest/call_api';
-import {
-  APIReturnType,
-  callApmApi,
-} from '../../../../services/rest/create_call_apm_api';
+import { APIReturnType, callApmApi } from '../../../../services/rest/create_call_apm_api';
 
 const APM_INDEX_LABELS = [
   {
@@ -41,10 +38,9 @@ const APM_INDEX_LABELS = [
   },
   {
     configurationName: 'onboarding',
-    label: i18n.translate(
-      'xpack.apm.settings.apmIndices.onboardingIndicesLabel',
-      { defaultMessage: 'Onboarding Indices' }
-    ),
+    label: i18n.translate('xpack.apm.settings.apmIndices.onboardingIndicesLabel', {
+      defaultMessage: 'Onboarding Indices',
+    }),
   },
   {
     configurationName: 'span',
@@ -54,10 +50,9 @@ const APM_INDEX_LABELS = [
   },
   {
     configurationName: 'transaction',
-    label: i18n.translate(
-      'xpack.apm.settings.apmIndices.transactionIndicesLabel',
-      { defaultMessage: 'Transaction Indices' }
-    ),
+    label: i18n.translate('xpack.apm.settings.apmIndices.transactionIndicesLabel', {
+      defaultMessage: 'Transaction Indices',
+    }),
   },
   {
     configurationName: 'metric',
@@ -67,11 +62,7 @@ const APM_INDEX_LABELS = [
   },
 ];
 
-async function saveApmIndices({
-  apmIndices,
-}: {
-  apmIndices: Record<string, string>;
-}) {
+async function saveApmIndices({ apmIndices }: { apmIndices: Record<string, string> }) {
   await callApmApi('POST /internal/apm/settings/apm-indices/save', {
     signal: null,
     params: {
@@ -80,10 +71,11 @@ async function saveApmIndices({
   });
 
   clearCache();
+  // Reload window to update APM data view with new indices
+  window.location.reload();
 }
 
-type ApiResponse =
-  APIReturnType<`GET /internal/apm/settings/apm-index-settings`>;
+type ApiResponse = APIReturnType<`GET /internal/apm/settings/apm-index-settings`>;
 
 // avoid infinite loop by initializing the state outside the component
 const INITIAL_STATE: ApiResponse = { apmIndexSettings: [] };
@@ -93,7 +85,10 @@ export function ApmIndices() {
   const { services } = useKibana<ApmPluginStartDeps>();
 
   const { notifications, application } = core;
-  const canSave = application.capabilities.apm.save;
+
+  const canSave =
+    application.capabilities.apm['settings:save'] &&
+    application.capabilities.savedObjectsManagement.edit;
 
   const [apmIndices, setApmIndices] = useState<Record<string, string>>({});
   const [isSaving, setIsSaving] = useState(false);
@@ -119,41 +114,30 @@ export function ApmIndices() {
   }, [data]);
 
   const handleApplyChangesEvent = async (
-    event:
-      | React.FormEvent<HTMLFormElement>
-      | React.MouseEvent<HTMLButtonElement>
+    event: React.FormEvent<HTMLFormElement> | React.MouseEvent<HTMLButtonElement>
   ) => {
     event.preventDefault();
     setIsSaving(true);
     try {
       await saveApmIndices({ apmIndices });
       notifications.toasts.addSuccess({
-        title: i18n.translate(
-          'xpack.apm.settings.apmIndices.applyChanges.succeeded.title',
-          { defaultMessage: 'Indices applied' }
-        ),
-        text: i18n.translate(
-          'xpack.apm.settings.apmIndices.applyChanges.succeeded.text',
-          {
-            defaultMessage:
-              'The indices changes were successfully applied. These changes are reflected immediately in the APM UI',
-          }
-        ),
+        title: i18n.translate('xpack.apm.settings.apmIndices.applyChanges.succeeded.title', {
+          defaultMessage: 'Indices applied',
+        }),
+        text: i18n.translate('xpack.apm.settings.apmIndices.applyChanges.succeeded.text', {
+          defaultMessage:
+            'The indices changes were successfully applied. These changes are reflected immediately in the APM UI',
+        }),
       });
     } catch (error: any) {
       notifications.toasts.addDanger({
-        title: i18n.translate(
-          'xpack.apm.settings.apmIndices.applyChanges.failed.title',
-          { defaultMessage: 'Indices could not be applied.' }
-        ),
-        text: i18n.translate(
-          'xpack.apm.settings.apmIndices.applyChanges.failed.text',
-          {
-            defaultMessage:
-              'Something went wrong when applying indices. Error: {errorMessage}',
-            values: { errorMessage: error.message },
-          }
-        ),
+        title: i18n.translate('xpack.apm.settings.apmIndices.applyChanges.failed.title', {
+          defaultMessage: 'Indices could not be applied.',
+        }),
+        text: i18n.translate('xpack.apm.settings.apmIndices.applyChanges.failed.text', {
+          defaultMessage: 'Something went wrong when applying indices. Error: {errorMessage}',
+          values: { errorMessage: error.message },
+        }),
       });
     }
     setIsSaving(false);
@@ -217,28 +201,21 @@ export function ApmIndices() {
           <EuiForm>
             {APM_INDEX_LABELS.map(({ configurationName, label }) => {
               const matchedConfiguration = data.apmIndexSettings.find(
-                ({ configurationName: configName }) =>
-                  configName === configurationName
+                ({ configurationName: configName }) => configName === configurationName
               );
-              const defaultValue = matchedConfiguration
-                ? matchedConfiguration.defaultValue
-                : '';
+              const defaultValue = matchedConfiguration ? matchedConfiguration.defaultValue : '';
               const savedUiIndexValue = apmIndices[configurationName] || '';
               return (
                 <EuiFormRow
                   key={configurationName}
                   label={label}
-                  helpText={i18n.translate(
-                    'xpack.apm.settings.apmIndices.helpText',
-                    {
-                      defaultMessage:
-                        'Overrides {configurationName}: {defaultValue}',
-                      values: {
-                        configurationName: `xpack.apm.indices.${configurationName}`,
-                        defaultValue,
-                      },
-                    }
-                  )}
+                  helpText={i18n.translate('xpack.apm.settings.apmIndices.helpText', {
+                    defaultMessage: 'Overrides {configurationName}: {defaultValue}',
+                    values: {
+                      configurationName: `xpack.apm.indices.${configurationName}`,
+                      defaultValue,
+                    },
+                  })}
                   fullWidth
                 >
                   <EuiFieldText
@@ -256,27 +233,20 @@ export function ApmIndices() {
             <EuiSpacer />
             <EuiFlexGroup justifyContent="flexEnd">
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  data-test-subj="apmApmIndicesCancelButton"
-                  onClick={refetch}
-                >
-                  {i18n.translate(
-                    'xpack.apm.settings.apmIndices.cancelButton',
-                    { defaultMessage: 'Cancel' }
-                  )}
+                <EuiButtonEmpty data-test-subj="apmApmIndicesCancelButton" onClick={refetch}>
+                  {i18n.translate('xpack.apm.settings.apmIndices.cancelButton', {
+                    defaultMessage: 'Cancel',
+                  })}
                 </EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiToolTip
                   content={
                     !canSave &&
-                    i18n.translate(
-                      'xpack.apm.settings.apmIndices.noPermissionTooltipLabel',
-                      {
-                        defaultMessage:
-                          "Your user role doesn't have permissions to change APM indices",
-                      }
-                    )
+                    i18n.translate('xpack.apm.settings.apmIndices.noPermissionTooltipLabel', {
+                      defaultMessage:
+                        "Your user role doesn't have permissions to change APM indices",
+                    })
                   }
                 >
                   <EuiButton
@@ -286,10 +256,9 @@ export function ApmIndices() {
                     isLoading={isSaving}
                     isDisabled={!canSave}
                   >
-                    {i18n.translate(
-                      'xpack.apm.settings.apmIndices.applyButton',
-                      { defaultMessage: 'Apply changes' }
-                    )}
+                    {i18n.translate('xpack.apm.settings.apmIndices.applyButton', {
+                      defaultMessage: 'Apply changes',
+                    })}
                   </EuiButton>
                 </EuiToolTip>
               </EuiFlexItem>

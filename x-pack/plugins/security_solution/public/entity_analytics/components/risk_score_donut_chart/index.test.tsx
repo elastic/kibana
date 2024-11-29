@@ -13,11 +13,11 @@ import { RiskScoreDonutChart } from '.';
 import { TestProviders } from '../../../common/mock';
 
 const severityCount: SeverityCount = {
-  [RiskSeverity.low]: 1,
-  [RiskSeverity.high]: 1,
-  [RiskSeverity.moderate]: 1,
-  [RiskSeverity.unknown]: 1,
-  [RiskSeverity.critical]: 1,
+  [RiskSeverity.Low]: 1,
+  [RiskSeverity.High]: 1,
+  [RiskSeverity.Moderate]: 1,
+  [RiskSeverity.Unknown]: 1,
+  [RiskSeverity.Critical]: 1,
 };
 
 describe('RiskScoreDonutChart', () => {

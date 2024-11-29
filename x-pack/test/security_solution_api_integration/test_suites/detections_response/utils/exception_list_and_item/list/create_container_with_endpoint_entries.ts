@@ -27,7 +27,7 @@ import { createExceptionList } from './create_exception_list';
  * @param osTypes The os types to optionally add or not to add to the container
  */
 export const createContainerWithEndpointEntries = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  supertest: SuperTest.Agent,
   log: ToolingLog,
   endpointEntries: Array<{
     entries: NonEmptyEntriesArray;

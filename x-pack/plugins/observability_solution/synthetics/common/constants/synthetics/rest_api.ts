@@ -7,15 +7,15 @@
 
 export enum SYNTHETICS_API_URLS {
   // public apis
+  SYNTHETICS_MONITORS = '/api/synthetics/monitors',
+  GET_SYNTHETICS_MONITOR = '/api/synthetics/monitors/{monitorId}',
   PRIVATE_LOCATIONS = `/api/synthetics/private_locations`,
   PARAMS = `/api/synthetics/params`,
 
   // Service end points
   INDEX_TEMPLATES = '/internal/synthetics/service/index_templates',
   SERVICE_LOCATIONS = '/internal/uptime/service/locations',
-  SYNTHETICS_MONITORS = '/internal/synthetics/service/monitors',
   SYNTHETICS_MONITOR_INSPECT = '/internal/synthetics/service/monitor/inspect',
-  GET_SYNTHETICS_MONITOR = '/internal/synthetics/service/monitor/{monitorId}',
   SYNTHETICS_ENABLEMENT = '/internal/synthetics/service/enablement',
   RUN_ONCE_MONITOR = '/internal/synthetics/service/monitors/run_once',
   TRIGGER_MONITOR = '/internal/synthetics/service/monitors/trigger',
@@ -23,9 +23,9 @@ export enum SYNTHETICS_API_URLS {
   SYNTHETICS_PROJECT_APIKEY = '/internal/synthetics/service/api_key',
   SYNTHETICS_HAS_INTEGRATION_MONITORS = '/internal/synthetics/fleet/has_integration_monitors',
 
-  SYNTHETICS_OVERVIEW = '/internal/synthetics/overview',
   PINGS = '/internal/synthetics/pings',
-  PING_STATUSES = '/internal/synthetics/ping_statuses',
+  MONITOR_STATUS_HEATMAP = '/internal/synthetics/ping_heatmap',
+  OVERVIEW_TRENDS = '/internal/synthetics/overview_trends',
   OVERVIEW_STATUS = `/internal/synthetics/overview_status`,
   INDEX_SIZE = `/internal/synthetics/index_size`,
   AGENT_POLICIES = `/internal/synthetics/agent_policies`,
@@ -52,5 +52,5 @@ export enum SYNTHETICS_API_URLS {
   SYNTHETICS_MONITORS_PROJECT_UPDATE = '/api/synthetics/project/{projectName}/monitors/_bulk_update',
   SYNTHETICS_MONITORS_PROJECT_DELETE = '/api/synthetics/project/{projectName}/monitors/_bulk_delete',
 
-  DYNAMIC_SETTINGS = `/api/uptime/settings`,
+  DYNAMIC_SETTINGS = `/api/synthetics/settings`,
 }

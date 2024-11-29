@@ -1,21 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import fastIsEqual from 'fast-deep-equal';
 import { cloneDeep } from 'lodash';
 import * as Rx from 'rxjs';
 import { merge } from 'rxjs';
-import { debounceTime, distinctUntilChanged, map, skip } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, map, skip } from 'rxjs';
 import { RenderCompleteDispatcher } from '@kbn/kibana-utils-plugin/public';
+import { EmbeddableAppContext } from '@kbn/presentation-publishing';
 import { Adapters } from '../types';
 import { IContainer } from '../containers';
 import {
-  EmbeddableAppContext,
   EmbeddableError,
   EmbeddableOutput,
   IEmbeddable,
@@ -127,15 +128,17 @@ export abstract class Embeddable<
       dataLoading: this.dataLoading,
       filters$: this.filters$,
       blockingError: this.blockingError,
-      onPhaseChange: this.onPhaseChange,
+      phase$: this.phase$,
       setPanelTitle: this.setPanelTitle,
       linkToLibrary: this.linkToLibrary,
       hidePanelTitle: this.hidePanelTitle,
       timeRange$: this.timeRange$,
       isEditingEnabled: this.isEditingEnabled,
       panelDescription: this.panelDescription,
+      defaultPanelDescription: this.defaultPanelDescription,
       canLinkToLibrary: this.canLinkToLibrary,
       disabledActionIds: this.disabledActionIds,
+      setDisabledActionIds: this.setDisabledActionIds,
       unlinkFromLibrary: this.unlinkFromLibrary,
       setHidePanelTitle: this.setHidePanelTitle,
       defaultPanelTitle: this.defaultPanelTitle,
@@ -145,6 +148,8 @@ export abstract class Embeddable<
       canUnlinkFromLibrary: this.canUnlinkFromLibrary,
       isCompatibleWithUnifiedSearch: this.isCompatibleWithUnifiedSearch,
       savedObjectId: this.savedObjectId,
+      hasLockedHoverActions$: this.hasLockedHoverActions$,
+      lockHoverActions: this.lockHoverActions,
     } = api);
 
     setTimeout(() => {
@@ -167,7 +172,7 @@ export abstract class Embeddable<
   public panelTitle: LegacyEmbeddableAPI['panelTitle'];
   public dataLoading: LegacyEmbeddableAPI['dataLoading'];
   public filters$: LegacyEmbeddableAPI['filters$'];
-  public onPhaseChange: LegacyEmbeddableAPI['onPhaseChange'];
+  public phase$: LegacyEmbeddableAPI['phase$'];
   public linkToLibrary: LegacyEmbeddableAPI['linkToLibrary'];
   public blockingError: LegacyEmbeddableAPI['blockingError'];
   public setPanelTitle: LegacyEmbeddableAPI['setPanelTitle'];
@@ -176,7 +181,9 @@ export abstract class Embeddable<
   public isEditingEnabled: LegacyEmbeddableAPI['isEditingEnabled'];
   public canLinkToLibrary: LegacyEmbeddableAPI['canLinkToLibrary'];
   public panelDescription: LegacyEmbeddableAPI['panelDescription'];
+  public defaultPanelDescription: LegacyEmbeddableAPI['defaultPanelDescription'];
   public disabledActionIds: LegacyEmbeddableAPI['disabledActionIds'];
+  public setDisabledActionIds: LegacyEmbeddableAPI['setDisabledActionIds'];
   public unlinkFromLibrary: LegacyEmbeddableAPI['unlinkFromLibrary'];
   public setTimeRange: LegacyEmbeddableAPI['setTimeRange'];
   public defaultPanelTitle: LegacyEmbeddableAPI['defaultPanelTitle'];
@@ -186,8 +193,10 @@ export abstract class Embeddable<
   public canUnlinkFromLibrary: LegacyEmbeddableAPI['canUnlinkFromLibrary'];
   public isCompatibleWithUnifiedSearch: LegacyEmbeddableAPI['isCompatibleWithUnifiedSearch'];
   public savedObjectId: LegacyEmbeddableAPI['savedObjectId'];
+  public hasLockedHoverActions$: LegacyEmbeddableAPI['hasLockedHoverActions$'];
+  public lockHoverActions: LegacyEmbeddableAPI['lockHoverActions'];
 
-  public getEditHref(): string | undefined {
+  public async getEditHref(): Promise<string | undefined> {
     return this.getOutput().editUrl ?? undefined;
   }
 

@@ -12,6 +12,8 @@ import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiTitle, useEuiTheme } from '@elas
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { useNavigateFindings } from '@kbn/cloud-security-posture/src/hooks/use_navigate_findings';
+import type { NavFilter } from '@kbn/cloud-security-posture/src/utils/query_utils';
 import type {
   BenchmarkData,
   ComplianceDashboardDataV2,
@@ -20,8 +22,10 @@ import type {
 } from '../../../../common/types_old';
 import { RisksTable } from '../compliance_charts/risks_table';
 import { RULE_FAILED, RULE_PASSED } from '../../../../common/constants';
-import { LOCAL_STORAGE_DASHBOARD_BENCHMARK_SORT_KEY } from '../../../common/constants';
-import { NavFilter, useNavigateFindings } from '../../../common/hooks/use_navigate_findings';
+import {
+  LOCAL_STORAGE_DASHBOARD_BENCHMARK_SORT_KEY,
+  FINDINGS_GROUPING_OPTIONS,
+} from '../../../common/constants';
 import { dashboardColumnsGrow, getPolicyTemplateQuery } from './summary_section';
 import {
   DASHBOARD_TABLE_COLUMN_SCORE_TEST_ID,
@@ -59,13 +63,17 @@ export const BenchmarksSection = ({
 
   const navToFindingsByBenchmarkAndEvaluation = (
     benchmark: BenchmarkData,
-    evaluation: Evaluation
+    evaluation: Evaluation,
+    groupBy: string[] = [FINDINGS_GROUPING_OPTIONS.NONE]
   ) => {
-    navToFindings({
-      ...getPolicyTemplateQuery(dashboardType),
-      ...getBenchmarkIdQuery(benchmark),
-      'result.evaluation': evaluation,
-    });
+    navToFindings(
+      {
+        ...getPolicyTemplateQuery(dashboardType),
+        ...getBenchmarkIdQuery(benchmark),
+        'result.evaluation': evaluation,
+      },
+      groupBy
+    );
   };
 
   const navToFailedFindingsByBenchmarkAndSection = (
@@ -73,16 +81,21 @@ export const BenchmarksSection = ({
     ruleSection: string,
     resultEvaluation: 'passed' | 'failed' = RULE_FAILED
   ) => {
-    navToFindings({
-      ...getPolicyTemplateQuery(dashboardType),
-      ...getBenchmarkIdQuery(benchmark),
-      'rule.section': ruleSection,
-      'result.evaluation': resultEvaluation,
-    });
+    navToFindings(
+      {
+        ...getPolicyTemplateQuery(dashboardType),
+        ...getBenchmarkIdQuery(benchmark),
+        'rule.section': ruleSection,
+        'result.evaluation': resultEvaluation,
+      },
+      [FINDINGS_GROUPING_OPTIONS.NONE]
+    );
   };
 
   const navToFailedFindingsByBenchmark = (benchmark: BenchmarkData) => {
-    navToFindingsByBenchmarkAndEvaluation(benchmark, RULE_FAILED);
+    navToFindingsByBenchmarkAndEvaluation(benchmark, RULE_FAILED, [
+      FINDINGS_GROUPING_OPTIONS.RULE_SECTION,
+    ]);
   };
 
   const toggleBenchmarkSortingDirection = () => {
@@ -133,7 +146,7 @@ export const BenchmarksSection = ({
                   id="xpack.csp.dashboard.benchmarkSection.columnsHeader.complianceScoreTitle"
                   defaultMessage="Compliance Score"
                 />
-                <EuiIcon className="euiTableSortIcon" type={benchmarkSortingIcon} />
+                <EuiIcon type={benchmarkSortingIcon} />
               </div>
             </EuiTitle>
           </button>

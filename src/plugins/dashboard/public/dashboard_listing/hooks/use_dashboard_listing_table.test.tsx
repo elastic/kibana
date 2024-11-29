@@ -1,16 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { act, renderHook } from '@testing-library/react-hooks';
 
-import { useDashboardListingTable } from './use_dashboard_listing_table';
-import { pluginServices } from '../../services/plugin_services';
+import { renderHook, act } from '@testing-library/react';
+
+import { getDashboardBackupService } from '../../services/dashboard_backup_service';
+import { getDashboardContentManagementService } from '../../services/dashboard_content_management_service';
+import { coreServices } from '../../services/kibana_services';
 import { confirmCreateWithUnsaved } from '../confirm_overlays';
 import { DashboardSavedObjectUserContent } from '../types';
+import { useDashboardListingTable } from './use_dashboard_listing_table';
+
 const clearStateMock = jest.fn();
 const getDashboardUrl = jest.fn();
 const goToDashboard = jest.fn();
@@ -24,7 +29,6 @@ const getUiSettingsMock = jest.fn().mockImplementation((key) => {
   }
   return null;
 });
-const getPluginServices = pluginServices.getServices();
 
 jest.mock('@kbn/ebt-tools', () => ({
   reportPerformanceMetricEvent: jest.fn(),
@@ -43,20 +47,20 @@ jest.mock('../_dashboard_listing_strings', () => ({
 }));
 
 describe('useDashboardListingTable', () => {
+  const dashboardBackupService = getDashboardBackupService();
+  const dashboardContentManagementService = getDashboardContentManagementService();
+
   beforeEach(() => {
     jest.clearAllMocks();
 
-    getPluginServices.dashboardBackup.dashboardHasUnsavedEdits = jest.fn().mockReturnValue(true);
+    dashboardBackupService.dashboardHasUnsavedEdits = jest.fn().mockReturnValue(true);
 
-    getPluginServices.dashboardBackup.getDashboardIdsWithUnsavedChanges = jest
-      .fn()
-      .mockReturnValue([]);
+    dashboardBackupService.getDashboardIdsWithUnsavedChanges = jest.fn().mockReturnValue([]);
 
-    getPluginServices.dashboardBackup.clearState = clearStateMock;
-    getPluginServices.dashboardCapabilities.showWriteControls = true;
-    getPluginServices.dashboardContentManagement.deleteDashboards = deleteDashboards;
-    getPluginServices.settings.uiSettings.get = getUiSettingsMock;
-    getPluginServices.notifications.toasts.addError = jest.fn();
+    dashboardBackupService.clearState = clearStateMock;
+    dashboardContentManagementService.deleteDashboards = deleteDashboards;
+    coreServices.uiSettings.get = getUiSettingsMock;
+    coreServices.notifications.toasts.addError = jest.fn();
   });
 
   test('should return the correct initial hasInitialFetchReturned state', () => {
@@ -155,6 +159,8 @@ describe('useDashboardListingTable', () => {
         isReadonly: false,
         customValidators: expect.any(Object),
       },
+      createdByEnabled: true,
+      recentlyAccessed: expect.objectContaining({ get: expect.any(Function) }),
     };
 
     expect(tableListViewTableProps).toEqual(expectedProps);
@@ -228,8 +234,12 @@ describe('useDashboardListingTable', () => {
   });
 
   test('createItem should be undefined when showWriteControls equals false', () => {
-    getPluginServices.dashboardCapabilities.showWriteControls = false;
-
+    coreServices.application.capabilities = {
+      ...coreServices.application.capabilities,
+      dashboard: {
+        showWriteControls: false,
+      },
+    };
     const { result } = renderHook(() =>
       useDashboardListingTable({
         getDashboardUrl,
@@ -241,7 +251,8 @@ describe('useDashboardListingTable', () => {
   });
 
   test('deleteItems should be undefined when showWriteControls equals false', () => {
-    getPluginServices.dashboardCapabilities.showWriteControls = false;
+    (coreServices.application.capabilities as any).dashboard.showWriteControls = false;
+
     const { result } = renderHook(() =>
       useDashboardListingTable({
         getDashboardUrl,
@@ -253,7 +264,8 @@ describe('useDashboardListingTable', () => {
   });
 
   test('editItem should be undefined when showWriteControls equals false', () => {
-    getPluginServices.dashboardCapabilities.showWriteControls = false;
+    (coreServices.application.capabilities as any).dashboard.showWriteControls = false;
+
     const { result } = renderHook(() =>
       useDashboardListingTable({
         getDashboardUrl,

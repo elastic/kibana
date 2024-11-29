@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { shareReplay } from 'rxjs/operators';
+import { shareReplay } from 'rxjs';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { PluginOpaqueId } from '@kbn/core-base-common';
 import type { NodeInfo } from '@kbn/core-node-server';
@@ -211,14 +212,20 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
     docLinks: deps.docLinks,
     elasticsearch: {
       legacy: deps.elasticsearch.legacy,
+      publicBaseUrl: deps.elasticsearch.publicBaseUrl,
       setUnauthorizedErrorHandler: deps.elasticsearch.setUnauthorizedErrorHandler,
     },
     executionContext: {
       withContext: deps.executionContext.withContext,
       getAsLabels: deps.executionContext.getAsLabels,
     },
+    featureFlags: {
+      setProvider: deps.featureFlags.setProvider,
+      appendContext: deps.featureFlags.appendContext,
+    },
     http: {
       createCookieSessionStorageFactory: deps.http.createCookieSessionStorageFactory,
+      getDeprecatedRoutes: deps.http.getDeprecatedRoutes,
       registerRouteHandlerContext: <
         Context extends RequestHandlerContext,
         ContextName extends keyof Omit<Context, 'resolve'>
@@ -272,20 +279,24 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
       registerGlobal: deps.uiSettings.registerGlobal,
       setAllowlist: deps.uiSettings.setAllowlist,
     },
-    userSettings: {
-      setUserProfileSettings: deps.userSettings.setUserProfileSettings,
-    },
+    userSettings: {},
     getStartServices: () => plugin.startDependencies,
     deprecations: deps.deprecations.getRegistry(plugin.name),
     coreUsageData: {
       registerUsageCounter: deps.coreUsageData.registerUsageCounter,
+      registerDeprecatedUsageFetch: deps.coreUsageData.registerDeprecatedUsageFetch,
     },
     plugins: {
       onSetup: (...dependencyNames) => runtimeResolver.onSetup(plugin.name, dependencyNames),
       onStart: (...dependencyNames) => runtimeResolver.onStart(plugin.name, dependencyNames),
     },
     security: {
-      registerSecurityApi: (api) => deps.security.registerSecurityApi(api),
+      registerSecurityDelegate: (api) => deps.security.registerSecurityDelegate(api),
+      fips: deps.security.fips,
+    },
+    userProfile: {
+      registerUserProfileDelegate: (delegate) =>
+        deps.userProfile.registerUserProfileDelegate(delegate),
     },
   };
 }
@@ -328,6 +339,15 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>({
       getCapabilities: deps.elasticsearch.getCapabilities,
     },
     executionContext: deps.executionContext,
+    featureFlags: {
+      appendContext: deps.featureFlags.appendContext,
+      getBooleanValue: deps.featureFlags.getBooleanValue,
+      getStringValue: deps.featureFlags.getStringValue,
+      getNumberValue: deps.featureFlags.getNumberValue,
+      getBooleanValue$: deps.featureFlags.getBooleanValue$,
+      getStringValue$: deps.featureFlags.getStringValue$,
+      getNumberValue$: deps.featureFlags.getNumberValue$,
+    },
     http: {
       auth: deps.http.auth,
       basePath: deps.http.basePath,
@@ -365,6 +385,8 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>({
     },
     security: {
       authc: deps.security.authc,
+      audit: deps.security.audit,
     },
+    userProfile: deps.userProfile,
   };
 }

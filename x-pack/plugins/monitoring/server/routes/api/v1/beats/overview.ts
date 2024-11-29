@@ -14,7 +14,7 @@ import { getLatestStats, getStats } from '../../../../lib/beats';
 import { createValidationFunction } from '../../../../lib/create_route_validation_function';
 import { getMetrics } from '../../../../lib/details/get_metrics';
 import { handleError } from '../../../../lib/errors';
-import { getIndexPatterns } from '../../../../lib/cluster/get_index_patterns';
+import { getIndexPatterns } from '../../../../../common/get_index_patterns';
 import { MonitoringCore } from '../../../../types';
 import { metricSet } from './metric_set_overview';
 
@@ -28,6 +28,9 @@ export function beatsOverviewRoute(server: MonitoringCore) {
     validate: {
       params: validateParams,
       body: validateBody,
+    },
+    options: {
+      access: 'internal',
     },
     async handler(req) {
       const config = server.config;

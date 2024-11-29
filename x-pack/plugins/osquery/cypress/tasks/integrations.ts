@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import satisfies from 'semver/functions/satisfies';
 import { API_VERSIONS } from '../../common/constants';
 import { DEFAULT_POLICY } from '../screens/fleet';
 import {
@@ -25,7 +26,7 @@ export const addIntegration = (agentPolicy = DEFAULT_POLICY) => {
   cy.contains('Existing hosts').click();
   cy.getBySel('agentPolicySelect').click();
   cy.contains(agentPolicy).click();
-  cy.getBySel('agentPolicySelect').should('have.text', agentPolicy);
+  cy.getBySel('agentPolicySelect').should('contain.text', agentPolicy);
   cy.getBySel(CREATE_PACKAGE_POLICY_SAVE_BTN).click();
   // sometimes agent is assigned to default policy, sometimes not
   closeModalIfVisible();
@@ -53,6 +54,20 @@ export const integrationExistsWithinPolicyDetails = (integrationName: string) =>
   cy.contains('Actions').click();
   cy.contains('View policy').click();
   cy.contains(`name: ${integrationName}`);
+};
+
+export const checkDataStreamsInPolicyDetails = () => {
+  cy.getBySel('PackagePoliciesTableLink')
+    .invoke('text')
+    .then((text) => {
+      const version = extractSemanticVersion(text) as string;
+      const isVersionWithStreams = satisfies(version, '>=1.12.0');
+      if (isVersionWithStreams) {
+        cy.contains('dataset: osquery_manager.result').should('exist');
+      } else {
+        cy.contains('dataset: osquery_manager.result').should('not.exist');
+      }
+    });
 };
 
 export const interceptAgentPolicyId = (cb: (policyId: string) => void) => {
@@ -144,4 +159,13 @@ export const installPackageWithVersion = (integration: string, version: string) 
     body: '{ "force": true }',
     method: 'POST',
   });
+};
+
+const extractSemanticVersion = (str: string) => {
+  const match = str.match(/(Managerv\d+\.\d+\.\d+)/);
+  if (match && match[1]) {
+    return match[1].replace('Managerv', '');
+  } else {
+    return null; // Return null if no match found
+  }
 };

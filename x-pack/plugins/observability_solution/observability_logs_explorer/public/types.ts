@@ -11,16 +11,22 @@ import { DiscoverSetup, DiscoverStart } from '@kbn/discover-plugin/public';
 import { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/public';
 import { ServerlessPluginStart } from '@kbn/serverless/public';
 import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
-import { AppMountParameters, ScopedHistory } from '@kbn/core/public';
+import type {
+  AppMountParameters,
+  ScopedHistory,
+  AnalyticsServiceStart,
+  I18nStart,
+  ThemeServiceStart,
+} from '@kbn/core/public';
 import { LogsSharedClientStartExports } from '@kbn/logs-shared-plugin/public';
-import { DatasetQualityPluginStart } from '@kbn/dataset-quality-plugin/public';
 import { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
 import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import { LensPublicStart } from '@kbn/lens-plugin/public';
-import { SloPublicStart } from '@kbn/slo-plugin/public';
+import { SLOPublicStart } from '@kbn/slo-plugin/public';
+import { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
 import {
   ObservabilityLogsExplorerLocators,
   ObservabilityLogsExplorerLocationState,
@@ -44,9 +50,10 @@ export interface ObservabilityLogsExplorerStartDeps {
   discover: DiscoverStart;
   logsExplorer: LogsExplorerPluginStart;
   logsShared: LogsSharedClientStartExports;
-  observabilityAIAssistant: ObservabilityAIAssistantPublicStart;
+  logsDataAccess: LogsDataAccessPluginStart;
+  observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
   observabilityShared: ObservabilitySharedPluginStart;
-  slo: SloPublicStart;
+  slo: SLOPublicStart;
   serverless?: ServerlessPluginStart;
   triggersActionsUi?: TriggersAndActionsUIPublicPluginStart;
   unifiedSearch?: UnifiedSearchPublicPluginStart;
@@ -54,10 +61,15 @@ export interface ObservabilityLogsExplorerStartDeps {
   dataViewEditor?: DataViewEditorStart;
   lens?: LensPublicStart;
   share: SharePluginStart;
-  datasetQuality: DatasetQualityPluginStart;
 }
 
 export type ObservabilityLogsExplorerHistory =
   ScopedHistory<ObservabilityLogsExplorerLocationState>;
 export type ObservabilityLogsExplorerAppMountParameters =
   AppMountParameters<ObservabilityLogsExplorerLocationState>;
+
+export interface ObservabilityLogsExplorerStartServices {
+  analytics: AnalyticsServiceStart;
+  i18n: I18nStart;
+  theme: ThemeServiceStart;
+}

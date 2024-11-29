@@ -6,28 +6,33 @@
  */
 
 import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
+import { DataViewsService } from '@kbn/data-views-plugin/common';
 import {
   timesliceMetricComparatorMapping,
   TimesliceMetricIndicator,
   timesliceMetricIndicatorSchema,
   timeslicesBudgetingMethodSchema,
 } from '@kbn/slo-schema';
-
-import { InvalidTransformError } from '../../errors';
-import { getSLOTransformTemplate } from '../../assets/transform_templates/slo_transform_template';
 import { getElasticsearchQueryOrThrow, parseIndex, TransformGenerator } from '.';
 import {
-  SLO_DESTINATION_INDEX_NAME,
-  SLO_INGEST_PIPELINE_NAME,
+  getSLOPipelineId,
   getSLOTransformId,
+  SLO_DESTINATION_INDEX_NAME,
 } from '../../../common/constants';
-import { SLO } from '../../domain/models';
+import { getSLOTransformTemplate } from '../../assets/transform_templates/slo_transform_template';
+import { SLODefinition } from '../../domain/models';
+import { InvalidTransformError } from '../../errors';
 import { GetTimesliceMetricIndicatorAggregation } from '../aggregations';
+import { getFilterRange } from './common';
 
 const INVALID_EQUATION_REGEX = /[^A-Z|+|\-|\s|\d+|\.|\(|\)|\/|\*|>|<|=|\?|\:|&|\!|\|]+/g;
 
 export class TimesliceMetricTransformGenerator extends TransformGenerator {
-  public getTransformParams(slo: SLO): TransformPutTransformRequest {
+  constructor(spaceId: string, dataViewService: DataViewsService) {
+    super(spaceId, dataViewService);
+  }
+
+  public async getTransformParams(slo: SLODefinition): Promise<TransformPutTransformRequest> {
     if (!timesliceMetricIndicatorSchema.is(slo.indicator)) {
       throw new InvalidTransformError(`Cannot handle SLO of indicator type: ${slo.indicator.type}`);
     }
@@ -35,47 +40,44 @@ export class TimesliceMetricTransformGenerator extends TransformGenerator {
     return getSLOTransformTemplate(
       this.buildTransformId(slo),
       this.buildDescription(slo),
-      this.buildSource(slo, slo.indicator),
-      this.buildDestination(),
+      await this.buildSource(slo, slo.indicator),
+      this.buildDestination(slo),
       this.buildCommonGroupBy(slo, slo.indicator.params.timestampField),
       this.buildAggregations(slo, slo.indicator),
-      this.buildSettings(slo, slo.indicator.params.timestampField)
+      this.buildSettings(slo, slo.indicator.params.timestampField),
+      slo
     );
   }
 
-  private buildTransformId(slo: SLO): string {
+  private buildTransformId(slo: SLODefinition): string {
     return getSLOTransformId(slo.id, slo.revision);
   }
 
-  private buildSource(slo: SLO, indicator: TimesliceMetricIndicator) {
+  private async buildSource(slo: SLODefinition, indicator: TimesliceMetricIndicator) {
+    const dataView = await this.getIndicatorDataView(indicator.params.dataViewId);
+
     return {
       index: parseIndex(indicator.params.index),
-      runtime_mappings: this.buildCommonRuntimeMappings(slo),
+      runtime_mappings: this.buildCommonRuntimeMappings(dataView),
       query: {
         bool: {
           filter: [
-            {
-              range: {
-                [indicator.params.timestampField]: {
-                  gte: `now-${slo.timeWindow.duration.format()}/d`,
-                },
-              },
-            },
-            getElasticsearchQueryOrThrow(indicator.params.filter),
+            getFilterRange(slo, indicator.params.timestampField),
+            getElasticsearchQueryOrThrow(indicator.params.filter, dataView),
           ],
         },
       },
     };
   }
 
-  private buildDestination() {
+  private buildDestination(slo: SLODefinition) {
     return {
-      pipeline: SLO_INGEST_PIPELINE_NAME,
+      pipeline: getSLOPipelineId(slo.id, slo.revision),
       index: SLO_DESTINATION_INDEX_NAME,
     };
   }
 
-  private buildAggregations(slo: SLO, indicator: TimesliceMetricIndicator) {
+  private buildAggregations(slo: SLODefinition, indicator: TimesliceMetricIndicator) {
     if (indicator.params.metric.equation.match(INVALID_EQUATION_REGEX)) {
       throw new Error(`Invalid equation: ${indicator.params.metric.equation}`);
     }

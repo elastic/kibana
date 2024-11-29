@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { IntegrationType } from './types';
+import { IntegrationType } from '../api_types';
 
 export class Integration {
   name: IntegrationType['name'];
   title: string;
   version: string;
+  datasets: Record<string, string>;
   icons?: IntegrationType['icons'];
 
   private constructor(integration: Integration) {
@@ -18,6 +19,7 @@ export class Integration {
     this.title = integration.title || integration.name;
     this.version = integration.version || '1.0.0';
     this.icons = integration.icons;
+    this.datasets = integration.datasets || {};
   }
 
   public static create(integration: IntegrationType) {
@@ -25,6 +27,7 @@ export class Integration {
       ...integration,
       title: integration.title || integration.name,
       version: integration.version || '1.0.0',
+      datasets: integration.datasets || {},
     };
 
     return new Integration(integrationProps);

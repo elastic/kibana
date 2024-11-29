@@ -28,10 +28,9 @@ exports[`Table editing should show an input field 1`] = `
 exports[`Table editing should update the matches dynamically as input value is changed 1`] = `
 <div>
   <em>
-    <FormattedMessage
+    <MemoizedFormattedMessage
       defaultMessage="The source filter doesn't match any known fields."
       id="indexPatternManagement.editIndexPattern.source.table.notMatchedLabel"
-      values={Object {}}
     />
   </em>
 </div>
@@ -80,9 +79,10 @@ exports[`Table should render normally 1`] = `
     ]
   }
   loading={true}
+  onTableChange={[Function]}
   pagination={
     Object {
-      "initialPageSize": 10,
+      "pageSize": 10,
       "pageSizeOptions": Array [
         5,
         10,
@@ -91,9 +91,15 @@ exports[`Table should render normally 1`] = `
       ],
     }
   }
-  responsive={true}
   searchFormat="eql"
-  sorting={true}
+  sorting={
+    Object {
+      "sort": Object {
+        "direction": "asc",
+        "field": "clientId",
+      },
+    }
+  }
   tableLayout="fixed"
 />
 `;

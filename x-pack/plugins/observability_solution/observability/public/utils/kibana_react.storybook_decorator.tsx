@@ -28,7 +28,6 @@ export function KibanaReactStorybookDecorator(Story: ComponentType) {
   const config: ConfigSchema = {
     unsafe: {
       alertDetails: {
-        metrics: { enabled: false },
         uptime: { enabled: false },
         observability: { enabled: false },
       },
@@ -37,6 +36,7 @@ export function KibanaReactStorybookDecorator(Story: ComponentType) {
 
   const mockTheme: CoreTheme = {
     darkMode: false,
+    name: 'amsterdam',
   };
 
   const createTheme$Mock = () => {

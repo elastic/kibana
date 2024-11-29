@@ -1,14 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
-import { I18nProvider } from '@kbn/i18n-react';
-import { ThemeServiceStart } from '@kbn/core/public';
 import { css } from '@emotion/react';
 import React from 'react';
 import ReactDOM from 'react-dom';
@@ -23,7 +22,7 @@ import type {
   IInterpreterRenderHandlers,
 } from '@kbn/expressions-plugin/common';
 import { FormatFactory } from '@kbn/field-formats-plugin/common';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import {
@@ -41,6 +40,7 @@ import type {
   FilterEvent,
   GetCompatibleCellValueActions,
   MultiFilterEvent,
+  StartServices,
 } from '../types';
 
 export type GetStartDepsFn = () => Promise<{
@@ -51,19 +51,19 @@ export type GetStartDepsFn = () => Promise<{
   paletteService: PaletteRegistry;
   timeZone: string;
   useLegacyTimeAxis: boolean;
-  kibanaTheme: ThemeServiceStart;
   eventAnnotationService: EventAnnotationServiceType;
   usageCollection?: UsageCollectionStart;
   timeFormat: string;
+  startServices: StartServices;
 }>;
 
 interface XyChartRendererDeps {
   getStartDeps: GetStartDepsFn;
 }
 
-const extractCounterEvents = (
+export const extractCounterEvents = (
   originatingApp: string,
-  { layers, yAxisConfigs }: XYChartProps['args'],
+  { annotations, layers, yAxisConfigs }: XYChartProps['args'],
   canNavigateToLens: boolean,
   services: {
     getDataLayers: typeof getDataLayers;
@@ -78,7 +78,7 @@ const extractCounterEvents = (
         ? `${dataLayer.isHorizontal ? 'horizontal_bar' : 'vertical_bar'}`
         : dataLayer.seriesType;
 
-    const byTypes = layers.reduce(
+    const byTypes = layers.concat(annotations?.layers || []).reduce(
       (acc, item) => {
         if (
           !acc.mixedXY &&
@@ -260,37 +260,35 @@ export const getXyChartRenderer = ({
     });
 
     ReactDOM.render(
-      <KibanaThemeProvider theme$={deps.kibanaTheme.theme$}>
-        <I18nProvider>
-          <div css={chartContainerStyle} data-test-subj="xyVisChart">
-            <XYChartReportable
-              {...config}
-              data={deps.data}
-              formatFactory={deps.formatFactory}
-              chartsActiveCursorService={deps.activeCursor}
-              chartsThemeService={deps.theme}
-              paletteService={deps.paletteService}
-              timeZone={deps.timeZone}
-              timeFormat={deps.timeFormat}
-              eventAnnotationService={deps.eventAnnotationService}
-              useLegacyTimeAxis={deps.useLegacyTimeAxis}
-              minInterval={calculateMinInterval(deps.data.datatableUtilities, config)}
-              interactive={handlers.isInteractive()}
-              onClickValue={onClickValue}
-              onClickMultiValue={onClickMultiValue}
-              layerCellValueActions={layerCellValueActions}
-              onSelectRange={onSelectRange}
-              renderMode={handlers.getRenderMode()}
-              syncColors={config.syncColors}
-              syncTooltips={config.syncTooltips}
-              syncCursor={config.syncCursor}
-              uiState={handlers.uiState as PersistedState}
-              renderComplete={renderComplete}
-              setChartSize={setChartSize}
-            />
-          </div>
-        </I18nProvider>
-      </KibanaThemeProvider>,
+      <KibanaRenderContextProvider {...deps.startServices}>
+        <div css={chartContainerStyle} data-test-subj="xyVisChart">
+          <XYChartReportable
+            {...config}
+            data={deps.data}
+            formatFactory={deps.formatFactory}
+            chartsActiveCursorService={deps.activeCursor}
+            chartsThemeService={deps.theme}
+            paletteService={deps.paletteService}
+            timeZone={deps.timeZone}
+            timeFormat={deps.timeFormat}
+            eventAnnotationService={deps.eventAnnotationService}
+            useLegacyTimeAxis={deps.useLegacyTimeAxis}
+            minInterval={calculateMinInterval(deps.data.datatableUtilities, config)}
+            interactive={handlers.isInteractive()}
+            onClickValue={onClickValue}
+            onClickMultiValue={onClickMultiValue}
+            layerCellValueActions={layerCellValueActions}
+            onSelectRange={onSelectRange}
+            renderMode={handlers.getRenderMode()}
+            syncColors={config.syncColors}
+            syncTooltips={config.syncTooltips}
+            syncCursor={config.syncCursor}
+            uiState={handlers.uiState as PersistedState}
+            renderComplete={renderComplete}
+            setChartSize={setChartSize}
+          />
+        </div>
+      </KibanaRenderContextProvider>,
       domNode
     );
   },

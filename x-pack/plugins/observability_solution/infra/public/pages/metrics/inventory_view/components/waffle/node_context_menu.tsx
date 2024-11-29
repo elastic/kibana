@@ -21,13 +21,17 @@ import {
   ActionMenuDivider,
   useLinkProps,
 } from '@kbn/observability-shared-plugin/public';
-import { findInventoryModel, findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
-import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import {
+  findInventoryModel,
+  findInventoryFields,
+  type InventoryItemType,
+} from '@kbn/metrics-data-access-plugin/common';
+import { useAssetDetailsRedirect } from '@kbn/metrics-data-access-plugin/public';
 import { getLogsLocatorsFromUrlService } from '@kbn/logs-shared-plugin/common';
+import { uptimeOverviewLocatorID } from '@kbn/observability-plugin/common';
 import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import { AlertFlyout } from '../../../../../alerting/inventory/components/alert_flyout';
-import { InfraWaffleMapNode, InfraWaffleMapOptions } from '../../../../../lib/lib';
-import { useNodeDetailsRedirect } from '../../../../link_to';
+import { InfraWaffleMapNode, InfraWaffleMapOptions } from '../../../../../common/inventory/types';
 import { navigateToUptime } from '../../lib/navigate_to_uptime';
 
 interface Props {
@@ -39,13 +43,14 @@ interface Props {
 
 export const NodeContextMenu: React.FC<Props & { theme?: EuiTheme }> = withTheme(
   ({ options, currentTime, node, nodeType }) => {
-    const { getNodeDetailUrl } = useNodeDetailsRedirect();
+    const { getAssetDetailUrl } = useAssetDetailsRedirect();
     const [flyoutVisible, setFlyoutVisible] = useState(false);
     const inventoryModel = findInventoryModel(nodeType);
     const nodeDetailFrom = currentTime - inventoryModel.metrics.defaultTimeRangeInSeconds * 1000;
     const { services } = useKibanaContextForPlugin();
     const { application, share } = services;
     const { nodeLogsLocator } = getLogsLocatorsFromUrlService(share.url);
+    const uptimeLocator = share.url.locators.get(uptimeOverviewLocatorID);
     const uiCapabilities = application?.capabilities;
     // Due to the changing nature of the fields between APM and this UI,
     // We need to have some exceptions until 7.0 & ECS is finalized. Reference
@@ -60,7 +65,8 @@ export const NodeContextMenu: React.FC<Props & { theme?: EuiTheme }> = withTheme
       inventoryModel.crosslinkSupport.apm && uiCapabilities?.apm && uiCapabilities?.apm.show;
     const showUptimeLink =
       inventoryModel.crosslinkSupport.uptime &&
-      (['pod', 'container'].includes(nodeType) || node.ip);
+      (['pod', 'container'].includes(nodeType) || node.ip) &&
+      !!uptimeLocator;
     const showCreateAlertLink = uiCapabilities?.infrastructure?.save;
 
     const inventoryId = useMemo(() => {
@@ -87,17 +93,16 @@ export const NodeContextMenu: React.FC<Props & { theme?: EuiTheme }> = withTheme
       return { label: '', value: '' };
     }, [nodeType, node.ip, node.id]);
 
-    const nodeDetailMenuItemLinkProps = useLinkProps({
-      ...getNodeDetailUrl({
-        assetType: nodeType,
-        assetId: node.id,
-        search: {
-          from: nodeDetailFrom,
-          to: currentTime,
-          name: node.name,
-        },
-      }),
+    const nodeDetailMenuItemLinkProps = getAssetDetailUrl({
+      assetType: nodeType,
+      assetId: node.id,
+      search: {
+        from: nodeDetailFrom,
+        to: currentTime,
+        name: node.name,
+      },
     });
+
     const apmTracesMenuItemLinkProps = useLinkProps({
       app: 'apm',
       hash: 'traces',
@@ -125,7 +130,8 @@ export const NodeContextMenu: React.FC<Props & { theme?: EuiTheme }> = withTheme
         defaultMessage: '{inventoryName} metrics',
         values: { inventoryName: inventoryModel.singularDisplayName },
       }),
-      ...nodeDetailMenuItemLinkProps,
+      href: nodeDetailMenuItemLinkProps.href,
+      onClick: nodeDetailMenuItemLinkProps.onClick,
       isDisabled: !showDetail,
     };
 
@@ -144,7 +150,7 @@ export const NodeContextMenu: React.FC<Props & { theme?: EuiTheme }> = withTheme
         defaultMessage: '{inventoryName} in Uptime',
         values: { inventoryName: inventoryModel.singularDisplayName },
       }),
-      onClick: () => navigateToUptime(share.url.locators, nodeType, node),
+      onClick: () => (showUptimeLink ? navigateToUptime({ uptimeLocator, nodeType, node }) : {}),
       isDisabled: !showUptimeLink,
     };
 

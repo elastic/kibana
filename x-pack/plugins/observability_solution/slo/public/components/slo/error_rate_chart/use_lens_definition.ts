@@ -9,10 +9,11 @@ import { transparentize, useEuiTheme } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
-import { ALL_VALUE, SLOResponse } from '@kbn/slo-schema';
+import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import moment from 'moment';
 import { v4 as uuidv4 } from 'uuid';
 import { SLO_DESTINATION_INDEX_PATTERN } from '../../../../common/constants';
+import { getLensDefinitionInterval } from './utils';
 
 export interface TimeRange {
   from: Date;
@@ -24,16 +25,28 @@ export interface AlertAnnotation {
   total: number;
 }
 
-export function useLensDefinition(
-  slo: SLOResponse,
-  threshold: number,
-  alertTimeRange?: TimeRange,
-  annotations?: AlertAnnotation[],
-  showErrorRateAsLine?: boolean
-): TypedLensByValueInput['attributes'] {
+interface Props {
+  slo: SLOWithSummaryResponse;
+  threshold?: number;
+  dataTimeRange: TimeRange;
+  alertTimeRange?: TimeRange;
+  annotations?: AlertAnnotation[];
+  variant: 'success' | 'danger';
+}
+
+export function useLensDefinition({
+  slo,
+  threshold,
+  dataTimeRange,
+  alertTimeRange,
+  annotations,
+  variant,
+}: Props): TypedLensByValueInput['attributes'] {
   const { euiTheme } = useEuiTheme();
 
-  const interval = 'auto';
+  const lineColor = variant === 'danger' ? euiTheme.colors.danger : euiTheme.colors.success;
+
+  const interval = getLensDefinitionInterval(dataTimeRange, slo);
 
   return {
     title: 'SLO Error Rate',
@@ -76,31 +89,35 @@ export function useLensDefinition(
             layerId: '8730e8af-7dac-430e-9cef-3b9989ff0866',
             accessors: ['9f69a7b0-34b9-4b76-9ff7-26dc1a06ec14'],
             position: 'top',
-            seriesType: !!showErrorRateAsLine ? 'line' : 'area',
+            seriesType: 'line',
             showGridlines: false,
             layerType: 'data',
             xAccessor: '627ded04-eae0-4437-83a1-bbb6138d2c3b',
             yConfig: [
               {
                 forAccessor: '9f69a7b0-34b9-4b76-9ff7-26dc1a06ec14',
-                color: !!showErrorRateAsLine ? euiTheme.colors.primary : euiTheme.colors.danger,
+                color: lineColor,
               },
             ],
           },
-          {
-            layerId: '34298f84-681e-4fa3-8107-d6facb32ed92',
-            layerType: 'referenceLine',
-            accessors: ['0a42b72b-cd5a-4d59-81ec-847d97c268e6'],
-            yConfig: [
-              {
-                forAccessor: '0a42b72b-cd5a-4d59-81ec-847d97c268e6',
-                axisMode: 'left',
-                textVisibility: true,
-                color: euiTheme.colors.danger,
-                iconPosition: 'right',
-              },
-            ],
-          },
+          ...(threshold !== undefined
+            ? [
+                {
+                  layerId: '34298f84-681e-4fa3-8107-d6facb32ed92',
+                  layerType: 'referenceLine',
+                  accessors: ['0a42b72b-cd5a-4d59-81ec-847d97c268e6'],
+                  yConfig: [
+                    {
+                      forAccessor: '0a42b72b-cd5a-4d59-81ec-847d97c268e6',
+                      axisMode: 'left',
+                      textVisibility: true,
+                      color: euiTheme.colors.danger,
+                      iconPosition: 'right',
+                    },
+                  ],
+                },
+              ]
+            : []),
           ...(!!alertTimeRange
             ? [
                 {
@@ -382,66 +399,69 @@ export function useLensDefinition(
               incompleteColumns: {},
               sampling: 1,
             },
-            '34298f84-681e-4fa3-8107-d6facb32ed92': {
-              linkToLayers: [],
-              columns: {
-                '0a42b72b-cd5a-4d59-81ec-847d97c268e6X0': {
-                  label: `Part of ${threshold}x`,
-                  dataType: 'number',
-                  operationType: 'math',
-                  isBucketed: false,
-                  scale: 'ratio',
-                  params: {
-                    // @ts-ignore
-                    tinymathAst: {
-                      type: 'function',
-                      name: 'multiply',
-                      args: [
-                        {
-                          type: 'function',
-                          name: 'subtract',
-                          args: [1, slo.objective.target],
-                          location: {
-                            min: 1,
-                            max: 9,
+
+            ...(threshold !== undefined && {
+              '34298f84-681e-4fa3-8107-d6facb32ed92': {
+                linkToLayers: [],
+                columns: {
+                  '0a42b72b-cd5a-4d59-81ec-847d97c268e6X0': {
+                    label: `Part of ${threshold}x`,
+                    dataType: 'number',
+                    operationType: 'math',
+                    isBucketed: false,
+                    scale: 'ratio',
+                    params: {
+                      // @ts-ignore
+                      tinymathAst: {
+                        type: 'function',
+                        name: 'multiply',
+                        args: [
+                          {
+                            type: 'function',
+                            name: 'subtract',
+                            args: [1, slo.objective.target],
+                            location: {
+                              min: 1,
+                              max: 9,
+                            },
+                            text: `1 - ${slo.objective.target}`,
                           },
-                          text: `1 - ${slo.objective.target}`,
+                          threshold,
+                        ],
+                        location: {
+                          min: 0,
+                          max: 17,
                         },
-                        threshold,
-                      ],
-                      location: {
-                        min: 0,
-                        max: 17,
+                        text: `(1 - ${slo.objective.target}) * ${threshold}`,
                       },
-                      text: `(1 - ${slo.objective.target}) * ${threshold}`,
                     },
+                    references: [],
+                    customLabel: true,
                   },
-                  references: [],
-                  customLabel: true,
-                },
-                '0a42b72b-cd5a-4d59-81ec-847d97c268e6': {
-                  label: `${numeral(threshold).format('0.[00]')}x`,
-                  dataType: 'number',
-                  operationType: 'formula',
-                  isBucketed: false,
-                  scale: 'ratio',
-                  params: {
-                    // @ts-ignore
-                    formula: `(1 - ${slo.objective.target}) * ${threshold}`,
-                    isFormulaBroken: false,
+                  '0a42b72b-cd5a-4d59-81ec-847d97c268e6': {
+                    label: `${numeral(threshold).format('0.[00]')}x`,
+                    dataType: 'number',
+                    operationType: 'formula',
+                    isBucketed: false,
+                    scale: 'ratio',
+                    params: {
+                      // @ts-ignore
+                      formula: `(1 - ${slo.objective.target}) * ${threshold}`,
+                      isFormulaBroken: false,
+                    },
+                    references: ['0a42b72b-cd5a-4d59-81ec-847d97c268e6X0'],
+                    customLabel: true,
                   },
-                  references: ['0a42b72b-cd5a-4d59-81ec-847d97c268e6X0'],
-                  customLabel: true,
                 },
+                columnOrder: [
+                  '0a42b72b-cd5a-4d59-81ec-847d97c268e6',
+                  '0a42b72b-cd5a-4d59-81ec-847d97c268e6X0',
+                ],
+                sampling: 1,
+                ignoreGlobalFilters: false,
+                incompleteColumns: {},
               },
-              columnOrder: [
-                '0a42b72b-cd5a-4d59-81ec-847d97c268e6',
-                '0a42b72b-cd5a-4d59-81ec-847d97c268e6X0',
-              ],
-              sampling: 1,
-              ignoreGlobalFilters: false,
-              incompleteColumns: {},
-            },
+            }),
           },
         },
         indexpattern: {
@@ -466,7 +486,9 @@ export function useLensDefinition(
       adHocDataViews: {
         '32ca1ad4-81c0-4daf-b9d1-07118044bdc5': {
           id: '32ca1ad4-81c0-4daf-b9d1-07118044bdc5',
-          title: SLO_DESTINATION_INDEX_PATTERN,
+          title: !!slo.remote
+            ? `${slo.remote.remoteName}:${SLO_DESTINATION_INDEX_PATTERN}`
+            : SLO_DESTINATION_INDEX_PATTERN,
           timeFieldName: '@timestamp',
           sourceFilters: [],
           fieldFormats: {},

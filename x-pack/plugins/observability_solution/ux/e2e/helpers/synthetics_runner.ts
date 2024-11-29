@@ -55,10 +55,7 @@ export class SyntheticsRunner {
     });
   }
 
-  async loadTestFiles(
-    callback: (reload?: boolean) => Promise<void>,
-    reload = false
-  ) {
+  async loadTestFiles(callback: (reload?: boolean) => Promise<void>, reload = false) {
     console.log('Loading test files');
     await callback(reload);
     this.loadTestFilesCallback = callback;
@@ -113,9 +110,7 @@ export class SyntheticsRunner {
       throw new Error('Test files not loaded');
     }
     const { headless, match, pauseOnError } = this.params;
-    const noOfRuns = process.env.NO_OF_RUNS
-      ? Number(process.env.NO_OF_RUNS)
-      : 1;
+    const noOfRuns = process.env.NO_OF_RUNS ? Number(process.env.NO_OF_RUNS) : 1;
     console.log(`Running ${noOfRuns} times`);
     let results: PromiseType<ReturnType<typeof syntheticsRun>> = {};
     for (let i = 0; i < noOfRuns; i++) {
@@ -133,7 +128,7 @@ export class SyntheticsRunner {
             dir: '.journeys/videos',
           },
         },
-        match: match === 'undefined' ? '' : match,
+        grepOpts: { match: match === 'undefined' ? '' : match },
         pauseOnError,
         screenshots: 'only-on-failure',
         reporter: TestReporter,

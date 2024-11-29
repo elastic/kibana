@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useMemo, useReducer } from 'react';
-
+import { identity } from 'lodash';
 import { fireEvent, render, screen, within, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
@@ -16,6 +16,7 @@ import {
   ALERT_STATUS,
   ALERT_CASE_IDS,
 } from '@kbn/rule-data-utils';
+import { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import { AlertsTable } from './alerts_table';
 import {
   AlertsField,
@@ -29,16 +30,24 @@ import {
 } from '../../../types';
 import { EuiButton, EuiButtonIcon, EuiDataGridColumnCellAction, EuiFlexItem } from '@elastic/eui';
 import { bulkActionsReducer } from './bulk_actions/reducer';
-import { BrowserFields } from '@kbn/rule-registry-plugin/common';
+import { BrowserFields } from '@kbn/alerting-types';
 import { getCasesMockMap } from './cases/index.mock';
 import { getMaintenanceWindowMockMap } from './maintenance_windows/index.mock';
 import { createAppMockRenderer, getJsDomPerformanceFix } from '../test_utils';
 import { createCasesServiceMock } from './index.mock';
 import { useCaseViewNavigation } from './cases/use_case_view_navigation';
 import { act } from 'react-dom/test-utils';
-import { AlertsTableContext, AlertsTableQueryContext } from './contexts/alerts_table_context';
+import { AlertsTableContext } from './contexts/alerts_table_context';
+import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
 
 const mockCaseService = createCasesServiceMock();
+
+const mockFieldFormatsRegistry = {
+  deserialize: jest.fn().mockImplementation(() => ({
+    id: 'string',
+    convert: jest.fn().mockImplementation(identity),
+  })),
+} as unknown as FieldFormatsRegistry;
 
 jest.mock('@kbn/data-plugin/public');
 jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
@@ -213,25 +222,6 @@ afterAll(() => {
 });
 
 describe('AlertsTable', () => {
-  const fetchAlertsData = {
-    activePage: 0,
-    alerts,
-    alertsCount: alerts.length,
-    isInitializing: false,
-    isLoading: false,
-    getInspectQuery: jest.fn().mockImplementation(() => ({ request: {}, response: {} })),
-    onPageChange: jest.fn(),
-    onSortChange: jest.fn(),
-    refresh: jest.fn(),
-    sort: [],
-    ecsAlertsData,
-    oldAlertsData,
-  };
-
-  const useFetchAlertsData = () => {
-    return fetchAlertsData;
-  };
-
   const alertsTableConfiguration: AlertsTableConfigurationRegistry = {
     id: '',
     columns,
@@ -241,10 +231,9 @@ describe('AlertsTable', () => {
       body: jest.fn(),
       footer: jest.fn(),
     })),
-    getRenderCellValue: () =>
-      jest.fn().mockImplementation((props) => {
-        return `${props.colIndex}:${props.rowIndex}`;
-      }),
+    getRenderCellValue: jest.fn().mockImplementation((props) => {
+      return `${props.colIndex}:${props.rowIndex}`;
+    }),
     useBulkActions: () => [
       {
         id: 0,
@@ -263,6 +252,22 @@ describe('AlertsTable', () => {
       return {
         createFieldButton: () => (
           <EuiButton data-test-subj={TEST_ID.FIELD_BROWSER_CUSTOM_CREATE_BTN} />
+        ),
+      };
+    },
+    useActionsColumn: () => {
+      return {
+        renderCustomActionsRow: () => (
+          <EuiFlexItem grow={false}>
+            <EuiButtonIcon
+              iconType="analyzeEvent"
+              color="primary"
+              onClick={() => {}}
+              size="s"
+              data-test-subj="fake-action"
+              aria-label="fake-action"
+            />
+          </EuiFlexItem>
         ),
       };
     },
@@ -297,19 +302,29 @@ describe('AlertsTable', () => {
     columns,
     deletedEventIds: [],
     disabledCellActions: [],
-    pageSize: 1,
     pageSizeOptions: [1, 10, 20, 50, 100],
     leadingControlColumns: [],
     trailingControlColumns: [],
-    useFetchAlertsData,
     visibleColumns: columns.map((c) => c.id),
     'data-test-subj': 'testTable',
-    updatedAt: Date.now(),
     onToggleColumn: () => {},
     onResetColumns: () => {},
     onChangeVisibleColumns: () => {},
     browserFields,
     query: {},
+    pageIndex: 0,
+    pageSize: 1,
+    sort: [],
+    isLoading: false,
+    alerts,
+    oldAlertsData,
+    ecsAlertsData,
+    querySnapshot: { request: [], response: [] },
+    refetchAlerts: () => {},
+    alertsCount: alerts.length,
+    onSortChange: jest.fn(),
+    onPageChange: jest.fn(),
+    fieldFormats: mockFieldFormatsRegistry,
   };
 
   const defaultBulkActionsState = {
@@ -317,6 +332,7 @@ describe('AlertsTable', () => {
     isAllSelected: false,
     areAllVisibleRowsSelected: false,
     rowCount: 4,
+    updatedAt: Date.now(),
   };
 
   const useCaseViewNavigationMock = useCaseViewNavigation as jest.Mock;
@@ -325,7 +341,7 @@ describe('AlertsTable', () => {
   const AlertsTableWithProviders: React.FunctionComponent<
     AlertsTableProps & { initialBulkActionsState?: BulkActionsState }
   > = (props) => {
-    const renderer = useMemo(() => createAppMockRenderer(AlertsTableQueryContext), []);
+    const renderer = useMemo(() => createAppMockRenderer(AlertsQueryContext), []);
     const AppWrapper = renderer.AppWrapper;
 
     const initialBulkActionsState = useReducer(
@@ -354,41 +370,34 @@ describe('AlertsTable', () => {
   describe('Alerts table UI', () => {
     it('should support sorting', async () => {
       const renderResult = render(<AlertsTableWithProviders {...tableProps} />);
-      userEvent.click(
+      await userEvent.click(
         renderResult.container.querySelector('.euiDataGridHeaderCell__button')!,
-        undefined,
-        {
-          skipPointerEventsCheck: true,
-        }
+        { pointerEventsCheck: 0 }
       );
 
       await waitForEuiPopoverOpen();
 
-      userEvent.click(
+      await userEvent.click(
         renderResult.getByTestId(`dataGridHeaderCellActionGroup-${columns[0].id}`),
-        undefined,
-        {
-          skipPointerEventsCheck: true,
-        }
+        { pointerEventsCheck: 0 }
       );
 
-      userEvent.click(renderResult.getByTitle('Sort A-Z'), undefined, {
-        skipPointerEventsCheck: true,
-      });
+      await userEvent.click(renderResult.getByTitle('Sort A-Z'), { pointerEventsCheck: 0 });
 
-      expect(fetchAlertsData.onSortChange).toHaveBeenCalledWith([
+      expect(tableProps.onSortChange).toHaveBeenCalledWith([
         { direction: 'asc', id: 'kibana.alert.rule.name' },
       ]);
     });
 
     it('should support pagination', async () => {
-      const renderResult = render(<AlertsTableWithProviders {...tableProps} />);
-
-      userEvent.click(renderResult.getByTestId('pagination-button-1'), undefined, {
-        skipPointerEventsCheck: true,
+      const renderResult = render(
+        <AlertsTableWithProviders {...tableProps} pageIndex={0} pageSize={1} />
+      );
+      await userEvent.click(renderResult.getByTestId('pagination-button-1'), {
+        pointerEventsCheck: 0,
       });
 
-      expect(fetchAlertsData.onPageChange).toHaveBeenCalledWith({ pageIndex: 1, pageSize: 1 });
+      expect(tableProps.onPageChange).toHaveBeenCalledWith({ pageIndex: 1, pageSize: 1 });
     });
 
     it('should show when it was updated', () => {
@@ -405,7 +414,8 @@ describe('AlertsTable', () => {
       const props = {
         ...tableProps,
         showAlertStatusWithFlapping: true,
-        pageSize: alerts.length,
+        pageIndex: 0,
+        pageSize: 10,
         alertsTableConfiguration: {
           ...alertsTableConfiguration,
           getRenderCellValue: undefined,
@@ -431,6 +441,8 @@ describe('AlertsTable', () => {
               rowCellRender: () => <h2 data-test-subj="testCell">Test cell</h2>,
             },
           ],
+          pageIndex: 0,
+          pageSize: 1,
         };
         const wrapper = render(<AlertsTableWithProviders {...customTableProps} />);
         expect(wrapper.queryByTestId('testHeader')).not.toBe(null);
@@ -529,6 +541,10 @@ describe('AlertsTable', () => {
       it('should render no action column if there is neither the action nor the expand action config is set', () => {
         const customTableProps = {
           ...tableProps,
+          alertsTableConfiguration: {
+            ...alertsTableConfiguration,
+            useActionsColumn: undefined,
+          },
         };
 
         const { queryByTestId } = render(<AlertsTableWithProviders {...customTableProps} />);
@@ -544,7 +560,8 @@ describe('AlertsTable', () => {
           mockedFn = jest.fn();
           customTableProps = {
             ...tableProps,
-            pageSize: 2,
+            pageIndex: 0,
+            pageSize: 10,
             alertsTableConfiguration: {
               ...alertsTableConfiguration,
               useActionsColumn: () => {
@@ -623,7 +640,6 @@ describe('AlertsTable', () => {
       beforeEach(() => {
         customTableProps = {
           ...tableProps,
-          pageSize: 2,
           alertsTableConfiguration: {
             ...alertsTableConfiguration,
             useCellActions: mockedUseCellActions,
@@ -678,6 +694,42 @@ describe('AlertsTable', () => {
 
         expect(await screen.findByTestId(TEST_ID.FIELD_BROWSER_CUSTOM_CREATE_BTN)).toBeVisible();
       });
+
+      it('The column state is synced correctly between the column selector and the field selector', async () => {
+        const columnToHide = tableProps.columns[0];
+        render(
+          <AlertsTableWithProviders
+            {...tableProps}
+            toolbarVisibility={{
+              showColumnSelector: true,
+            }}
+            initialBulkActionsState={{
+              ...defaultBulkActionsState,
+              rowSelection: new Map(),
+            }}
+          />
+        );
+
+        const fieldBrowserBtn = await screen.findByTestId(TEST_ID.FIELD_BROWSER_BTN);
+        const columnSelectorBtn = await screen.findByTestId('dataGridColumnSelectorButton');
+
+        // Open the column visibility selector and hide the column
+        fireEvent.click(columnSelectorBtn);
+        const columnVisibilityToggle = await screen.findByTestId(
+          `dataGridColumnSelectorToggleColumnVisibility-${columnToHide.id}`
+        );
+        fireEvent.click(columnVisibilityToggle);
+
+        // Open the field browser
+        fireEvent.click(fieldBrowserBtn);
+        expect(await screen.findByTestId(TEST_ID.FIELD_BROWSER)).toBeVisible();
+
+        // The column should be checked in the field browser, independent of its visibility status
+        const columnCheckbox: HTMLInputElement = await screen.findByTestId(
+          `field-${columnToHide.id}-checkbox`
+        );
+        expect(columnCheckbox).toBeChecked();
+      });
     });
 
     describe('cases column', () => {
@@ -692,13 +744,20 @@ describe('AlertsTable', () => {
       });
 
       it('should show the cases titles correctly', async () => {
-        render(<AlertsTableWithProviders {...props} />);
+        render(<AlertsTableWithProviders {...props} pageIndex={0} pageSize={10} />);
         expect(await screen.findByText('Test case')).toBeInTheDocument();
         expect(await screen.findByText('Test case 2')).toBeInTheDocument();
       });
 
       it('show loading skeleton if it loads cases', async () => {
-        render(<AlertsTableWithProviders {...props} cases={{ ...props.cases, isLoading: true }} />);
+        render(
+          <AlertsTableWithProviders
+            {...props}
+            pageIndex={0}
+            pageSize={10}
+            cases={{ ...props.cases, isLoading: true }}
+          />
+        );
 
         expect((await screen.findAllByTestId('cases-cell-loading')).length).toBe(4);
       });
@@ -707,7 +766,7 @@ describe('AlertsTable', () => {
         render(<AlertsTableWithProviders {...props} />);
         expect(await screen.findByText('Test case')).toBeInTheDocument();
 
-        userEvent.hover(screen.getByText('Test case'));
+        await userEvent.hover(screen.getByText('Test case'));
 
         expect(await screen.findByTestId('cases-components-tooltip')).toBeInTheDocument();
       });

@@ -38,12 +38,12 @@ exports[`GaugeComponent renders the chart 1`] = `
             },
           },
           "isolatedPoint": Object {
-            "fill": "white",
+            "enabled": true,
+            "fill": "__use__series__color__",
             "opacity": 1,
-            "radius": 2,
             "stroke": "__use__series__color__",
-            "strokeWidth": 1,
-            "visible": true,
+            "strokeWidth": 0,
+            "visible": "auto",
           },
           "line": Object {
             "opacity": 1,
@@ -51,13 +51,14 @@ exports[`GaugeComponent renders the chart 1`] = `
             "visible": true,
           },
           "point": Object {
-            "fill": "#FFF",
+            "fill": "__use__series__color__",
             "opacity": 1,
             "radius": 3,
-            "stroke": "__use__series__color__",
-            "strokeWidth": 2,
-            "visible": false,
+            "stroke": "__use__empty__color__",
+            "strokeWidth": 0,
+            "visible": "never",
           },
+          "pointVisibilityMinDistance": 20,
         },
         "axes": Object {
           "axisLine": Object {
@@ -92,7 +93,7 @@ exports[`GaugeComponent renders the chart 1`] = `
                 0,
               ],
               "opacity": 1,
-              "stroke": "#eaedf3",
+              "stroke": "#E9EDF3",
               "strokeWidth": 1,
               "visible": true,
             },
@@ -116,11 +117,11 @@ exports[`GaugeComponent renders the chart 1`] = `
             ],
             "vertical": Object {
               "dash": Array [
-                4,
-                4,
+                0,
+                0,
               ],
               "opacity": 1,
-              "stroke": "#eaedf3",
+              "stroke": "#E9EDF3",
               "strokeWidth": 1,
               "visible": true,
             },
@@ -184,11 +185,11 @@ exports[`GaugeComponent renders the chart 1`] = `
         },
         "bubbleSeriesStyle": Object {
           "point": Object {
-            "fill": "white",
+            "fill": "__use__series__color__",
             "opacity": 1,
             "radius": 2,
-            "strokeWidth": 1,
-            "visible": true,
+            "strokeWidth": 0,
+            "visible": "always",
           },
         },
         "bulletGraph": Object {
@@ -391,11 +392,11 @@ exports[`GaugeComponent renders the chart 1`] = `
         },
         "highlighter": Object {
           "point": Object {
-            "fill": "__use__empty__color__",
-            "opacity": 1,
-            "radius": 10,
-            "stroke": "__use__series__color__",
-            "strokeWidth": 4,
+            "fill": "__use__series__color__",
+            "opacity": 0.5,
+            "radius": 5,
+            "stroke": "__use__empty__color__",
+            "strokeWidth": 0,
           },
         },
         "legend": Object {
@@ -406,6 +407,13 @@ exports[`GaugeComponent renders the chart 1`] = `
           "margin": 0,
           "spacingBuffer": 10,
           "verticalWidth": 200,
+        },
+        "lineAnnotation": Object {
+          "line": Object {
+            "opacity": 1,
+            "stroke": "#69707D",
+            "strokeWidth": 1,
+          },
         },
         "lineSeriesStyle": Object {
           "fit": Object {
@@ -420,12 +428,12 @@ exports[`GaugeComponent renders the chart 1`] = `
             },
           },
           "isolatedPoint": Object {
-            "fill": "white",
+            "enabled": true,
+            "fill": "__use__series__color__",
             "opacity": 1,
-            "radius": 2,
             "stroke": "__use__series__color__",
             "strokeWidth": 1,
-            "visible": true,
+            "visible": "auto",
           },
           "line": Object {
             "opacity": 1,
@@ -433,24 +441,28 @@ exports[`GaugeComponent renders the chart 1`] = `
             "visible": true,
           },
           "point": Object {
-            "fill": "#FFF",
+            "fill": "__use__series__color__",
             "opacity": 1,
             "radius": 3,
-            "stroke": "__use__series__color__",
-            "strokeWidth": 2,
-            "visible": true,
+            "stroke": "__use__empty__color__",
+            "strokeWidth": 0,
+            "visible": "auto",
           },
+          "pointVisibilityMinDistance": 40,
         },
         "metric": Object {
           "barBackground": "#EDF0F5",
           "border": "#EDF0F5",
           "emptyBackground": "transparent",
+          "iconAlign": "right",
           "minHeight": 64,
+          "minValueFontSize": 12,
           "nonFiniteText": "N/A",
-          "text": Object {
-            "darkColor": "#343741",
-            "lightColor": "#E0E5EE",
-          },
+          "textDarkColor": "#343741",
+          "textLightColor": "#E0E5EE",
+          "titlesTextAlign": "left",
+          "valueFontSize": "default",
+          "valuesTextAlign": "right",
         },
         "partition": Object {
           "circlePadding": 4,
@@ -505,6 +517,12 @@ exports[`GaugeComponent renders the chart 1`] = `
           "sectorLineStroke": "#FFF",
           "sectorLineWidth": 1.5,
         },
+        "rectAnnotation": Object {
+          "fill": "#69707D",
+          "opacity": 0.25,
+          "stroke": "#69707D",
+          "strokeWidth": 0,
+        },
         "scales": Object {
           "barsPadding": 0.25,
           "histogramPadding": 0.05,
@@ -546,28 +564,41 @@ exports[`GaugeComponent renders the chart 1`] = `
       ]
     }
   />
-  <Goal
-    actual={3}
-    bandFillColor={[Function]}
-    bands={
+  <Bullet
+    colorBands={
       Array [
-        0,
-        4,
+        "#D3DAE6",
+        "#D3DAE6",
       ]
     }
-    base={0}
-    domain={
+    data={
+      Array [
+        Array [
+          Object {
+            "domain": Array [
+              0,
+              4,
+            ],
+            "subtitle": undefined,
+            "target": undefined,
+            "tickFormatter": [Function],
+            "ticks": undefined,
+            "title": "Count of records",
+            "value": 3,
+            "valueFormatter": [Function],
+          },
+        ],
+      ]
+    }
+    id="bullet"
+    subtype="vertical"
+    valueLabels={
       Object {
-        "max": 4,
-        "min": 0,
+        "active": "Current",
+        "target": "Goal",
+        "value": "Count of records",
       }
     }
-    id="goal"
-    labelMajor="Count of records   "
-    labelMinor=""
-    subtype="verticalBullet"
-    tickValueFormatter={[Function]}
-    tooltipValueFormatter={[Function]}
   />
 </Chart>
 `;

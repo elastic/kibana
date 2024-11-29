@@ -21,7 +21,7 @@ import {
   isValidHex,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import type { StagedServiceGroup } from './save_modal';
 
 interface Props {
@@ -31,6 +31,7 @@ interface Props {
   onClickNext: (serviceGroup: StagedServiceGroup) => void;
   onDeleteGroup: () => void;
   isLoading: boolean;
+  titleId?: string;
 }
 
 export function GroupDetails({
@@ -40,15 +41,16 @@ export function GroupDetails({
   onClickNext,
   onDeleteGroup,
   isLoading,
+  titleId,
 }: Props) {
-  const [name, setName] = useState<string>(serviceGroup?.groupName || '');
-  const [color, setColor, colorPickerErrors] = useColorPickerState(
-    serviceGroup?.color || '#5094C4'
-  );
+  const initialColor = serviceGroup?.color || '#5094C4';
+  const [name, setName] = useState(serviceGroup?.groupName);
+  const [color, setColor, colorPickerErrors] = useColorPickerState(initialColor);
+  const [description, setDescription] = useState<string | undefined>(serviceGroup?.description);
 
-  const [description, setDescription] = useState<string | undefined>(
-    serviceGroup?.description
-  );
+  const isNamePristine = name === serviceGroup?.groupName;
+  const isColorPristine = color === initialColor;
+
   useEffect(() => {
     if (serviceGroup) {
       setName(serviceGroup.groupName);
@@ -67,25 +69,17 @@ export function GroupDetails({
   const isInvalidName = !name;
   const isInvalid = isInvalidName || isInvalidColor;
 
-  const inputRef = useRef<HTMLInputElement | null>(null);
-
-  useEffect(() => {
-    inputRef.current?.focus(); // autofocus on initial render
-  }, []);
-
   return (
     <>
       <EuiModalHeader>
-        <EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id={titleId}>
           {isEdit
-            ? i18n.translate(
-                'xpack.apm.serviceGroups.groupDetailsForm.edit.title',
-                { defaultMessage: 'Edit group' }
-              )
-            : i18n.translate(
-                'xpack.apm.serviceGroups.groupDetailsForm.create.title',
-                { defaultMessage: 'Create group' }
-              )}
+            ? i18n.translate('xpack.apm.serviceGroups.groupDetailsForm.edit.title', {
+                defaultMessage: 'Edit group',
+              })
+            : i18n.translate('xpack.apm.serviceGroups.groupDetailsForm.create.title', {
+                defaultMessage: 'Create group',
+              })}
         </EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
@@ -94,36 +88,43 @@ export function GroupDetails({
             <EuiFlexGroup>
               <EuiFlexItem>
                 <EuiFormRow
-                  label={i18n.translate(
-                    'xpack.apm.serviceGroups.groupDetailsForm.name',
-                    { defaultMessage: 'Name' }
-                  )}
-                  isInvalid={isInvalidName}
+                  label={i18n.translate('xpack.apm.serviceGroups.groupDetailsForm.name', {
+                    defaultMessage: 'Name',
+                  })}
+                  isInvalid={!isNamePristine && isInvalidName}
+                  error={
+                    !isNamePristine && isInvalidName
+                      ? i18n.translate(
+                          'xpack.apm.serviceGroups.groupDetailsForm.invalidNameError',
+                          {
+                            defaultMessage: 'Please provide a valid name value',
+                          }
+                        )
+                      : undefined
+                  }
                 >
                   <EuiFieldText
                     data-test-subj="apmGroupNameInput"
-                    value={name}
+                    value={name || ''}
                     onChange={(e) => {
                       setName(e.target.value);
                     }}
-                    inputRef={inputRef}
+                    isInvalid={!isNamePristine && isInvalidName}
                   />
                 </EuiFormRow>
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiFormRow
-                  label={i18n.translate(
-                    'xpack.apm.serviceGroups.groupDetailsForm.color',
-                    { defaultMessage: 'Color' }
-                  )}
-                  isInvalid={isInvalidColor}
+                  label={i18n.translate('xpack.apm.serviceGroups.groupDetailsForm.color', {
+                    defaultMessage: 'Color',
+                  })}
+                  isInvalid={!isColorPristine && isInvalidColor}
                   error={
-                    isInvalidColor
+                    !isColorPristine && isInvalidColor
                       ? i18n.translate(
                           'xpack.apm.serviceGroups.groupDetailsForm.invalidColorError',
                           {
-                            defaultMessage:
-                              'Please provide a valid HEX color value',
+                            defaultMessage: 'Please provide a valid HEX color value',
                           }
                         )
                       : undefined
@@ -132,7 +133,7 @@ export function GroupDetails({
                   <EuiColorPicker
                     onChange={setColor}
                     color={color}
-                    isInvalid={isInvalidColor}
+                    isInvalid={!isColorPristine && isInvalidColor}
                   />
                 </EuiFormRow>
               </EuiFlexItem>
@@ -141,23 +142,21 @@ export function GroupDetails({
           <EuiFlexItem>
             <EuiFormRow
               fullWidth
-              label={i18n.translate(
-                'xpack.apm.serviceGroups.groupDetailsForm.description',
-                { defaultMessage: 'Description' }
-              )}
+              label={i18n.translate('xpack.apm.serviceGroups.groupDetailsForm.description', {
+                defaultMessage: 'Description',
+              })}
               labelAppend={
                 <EuiText size="xs" color="subdued">
-                  {i18n.translate(
-                    'xpack.apm.serviceGroups.groupDetailsForm.description.optional',
-                    { defaultMessage: 'Optional' }
-                  )}
+                  {i18n.translate('xpack.apm.serviceGroups.groupDetailsForm.description.optional', {
+                    defaultMessage: 'Optional',
+                  })}
                 </EuiText>
               }
             >
               <EuiFieldText
                 data-test-subj="apmGroupDetailsFieldText"
                 fullWidth
-                value={description}
+                value={description || ''}
                 onChange={(e) => {
                   setDescription(e.target.value);
                 }}
@@ -177,13 +176,13 @@ export function GroupDetails({
                   onDeleteGroup();
                 }}
                 color="danger"
+                isLoading={isLoading}
                 isDisabled={isLoading}
                 data-test-subj="apmDeleteGroupButton"
               >
-                {i18n.translate(
-                  'xpack.apm.serviceGroups.groupDetailsForm.deleteGroup',
-                  { defaultMessage: 'Delete group' }
-                )}
+                {i18n.translate('xpack.apm.serviceGroups.groupDetailsForm.deleteGroup', {
+                  defaultMessage: 'Delete group',
+                })}
               </EuiButton>
             </EuiFlexItem>
           )}
@@ -191,12 +190,12 @@ export function GroupDetails({
             <EuiButtonEmpty
               data-test-subj="apmGroupDetailsCancelButton"
               onClick={onCloseModal}
+              isLoading={isLoading}
               isDisabled={isLoading}
             >
-              {i18n.translate(
-                'xpack.apm.serviceGroups.groupDetailsForm.cancel',
-                { defaultMessage: 'Cancel' }
-              )}
+              {i18n.translate('xpack.apm.serviceGroups.groupDetailsForm.cancel', {
+                defaultMessage: 'Cancel',
+              })}
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -207,18 +206,18 @@ export function GroupDetails({
               iconSide="right"
               onClick={() => {
                 onClickNext({
-                  groupName: name,
+                  groupName: name || '',
                   color,
                   description,
                   kuery: serviceGroup?.kuery ?? '',
                 });
               }}
+              isLoading={isLoading}
               isDisabled={isInvalid || isLoading}
             >
-              {i18n.translate(
-                'xpack.apm.serviceGroups.groupDetailsForm.selectServices',
-                { defaultMessage: 'Select services' }
-              )}
+              {i18n.translate('xpack.apm.serviceGroups.groupDetailsForm.selectServices', {
+                defaultMessage: 'Select services',
+              })}
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>

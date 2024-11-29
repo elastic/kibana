@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { ELASTIC_INTERNAL_ORIGIN_QUERY_PARAM } from '@kbn/core-http-common';
@@ -21,6 +22,7 @@ import { BaseParams, JobId, ManagementLinkFn, ReportApiJSON } from '@kbn/reporti
 import rison from '@kbn/rison';
 import moment from 'moment';
 import { stringify } from 'query-string';
+import { ReactElement } from 'react';
 import { Job } from '.';
 import { jobCompletionNotifications } from './job_completion_notifications';
 
@@ -41,7 +43,10 @@ interface IReportingAPI {
   // Helpers
   getReportURL(jobId: string): string;
   getReportingPublicJobPath<T>(exportType: string, jobParams: BaseParams & T): string; // Return a URL to queue a job, with the job params encoded in the query string of the URL. Used for copying POST URL
-  createReportingJob<T>(exportType: string, jobParams: BaseParams & T): Promise<Job>; // Sends a request to queue a job, with the job params in the POST body
+  createReportingJob<T>(
+    exportType: string,
+    jobParams: BaseParams & T
+  ): Promise<Job | undefined | ReactElement>; // Sends a request to queue a job, with the job params in the POST body
   getServerBasePath(): string; // Provides the raw server basePath to allow it to be stripped out from relativeUrls in job params
 
   // CRUD
@@ -172,30 +177,47 @@ export class ReportingAPIClient implements IReportingAPI {
     return `${this.http.basePath.prepend(PUBLIC_ROUTES.GENERATE_PREFIX)}/${exportType}?${params}`;
   }
 
-  /**
-   * Calls the internal API to generate a report job on-demand
-   */
-  public async createReportingJob(exportType: string, jobParams: BaseParams) {
+  public async createReportingShareJob(exportType: string, jobParams: BaseParams) {
     const jobParamsRison = rison.encode(jobParams);
-    const resp: { job: ReportApiJSON } = await this.http.post(
+    const resp: { job?: ReportApiJSON } | undefined = await this.http.post(
       `${INTERNAL_ROUTES.GENERATE_PREFIX}/${exportType}`,
       {
         method: 'POST',
         body: JSON.stringify({ jobParams: jobParamsRison }),
       }
     );
-    this.addPendingJobId(resp.job.id);
-    return new Job(resp.job);
+    if (resp?.job) {
+      this.addPendingJobId(resp.job.id);
+      return new Job(resp.job);
+    }
+  }
+  /**
+   * Calls the internal API to generate a report job on-demand
+   */
+  public async createReportingJob(exportType: string, jobParams: BaseParams) {
+    const jobParamsRison = rison.encode(jobParams);
+    try {
+      const resp: { job?: ReportApiJSON } | undefined = await this.http.post(
+        `${INTERNAL_ROUTES.GENERATE_PREFIX}/${exportType}`,
+        {
+          method: 'POST',
+          body: JSON.stringify({ jobParams: jobParamsRison }),
+        }
+      );
+      if (resp?.job) {
+        this.addPendingJobId(resp.job.id);
+        return new Job(resp.job);
+      }
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error(err);
+      throw new Error(`${err.body?.message}`);
+    }
   }
 
-  public async createImmediateReport(baseParams: BaseParams) {
-    const { objectType: _objectType, ...params } = baseParams; // objectType is not needed for immediate download api
-    return this.http.post(INTERNAL_ROUTES.DOWNLOAD_CSV, {
-      asResponse: true,
-      body: JSON.stringify(params),
-    });
-  }
-
+  /**
+   * Adds the browserTimezone and kibana version to report job params
+   */
   public getDecoratedJobParams<T extends AppParams>(baseParams: T): BaseParams {
     // If the TZ is set to the default "Browser", it will not be useful for
     // server-side export. We need to derive the timezone and pass it as a param
@@ -220,7 +242,7 @@ export class ReportingAPIClient implements IReportingAPI {
   public getServerBasePath = () => this.http.basePath.serverBasePath;
 
   public verifyBrowser() {
-    return this.http.post<DiagnoseResponse>(INTERNAL_ROUTES.DIAGNOSE.BROWSER);
+    return this.http.get<DiagnoseResponse>(INTERNAL_ROUTES.DIAGNOSE.BROWSER);
   }
 
   public verifyScreenCapture() {

@@ -14,16 +14,27 @@ import {
   ALERT_DESCRIPTION_DETAILS_TEST_ID,
 } from './test_ids';
 import { AlertDescription } from './alert_description';
-import { RightPanelContext } from '../context';
+import { DocumentDetailsContext } from '../../shared/context';
 import { mockGetFieldsData } from '../../shared/mocks/mock_get_fields_data';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
-import { DocumentDetailsPreviewPanelKey } from '../../preview';
 import { TestProviders } from '../../../../common/mock';
-import { i18n } from '@kbn/i18n';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { ExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { createTelemetryServiceMock } from '../../../../common/lib/telemetry/telemetry_service.mock';
+import { RulePreviewPanelKey, RULE_PREVIEW_BANNER } from '../../../rule_details/right';
 
-jest.mock('@kbn/expandable-flyout', () => ({ useExpandableFlyoutApi: jest.fn() }));
+const mockedTelemetry = createTelemetryServiceMock();
+jest.mock('../../../../common/lib/kibana', () => {
+  return {
+    useKibana: () => ({
+      services: {
+        telemetry: mockedTelemetry,
+      },
+    }),
+  };
+});
+
+jest.mock('@kbn/expandable-flyout');
 
 const ruleUuid = {
   category: 'kibana',
@@ -60,15 +71,15 @@ const panelContextValue = (dataFormattedForFieldBrowser: TimelineEventsDetailsIt
     scopeId: 'scopeId',
     dataFormattedForFieldBrowser,
     getFieldsData: mockGetFieldsData,
-  } as unknown as RightPanelContext);
+  } as unknown as DocumentDetailsContext);
 
-const renderDescription = (panelContext: RightPanelContext) =>
+const renderDescription = (panelContext: DocumentDetailsContext) =>
   render(
     <TestProviders>
       <IntlProvider locale="en">
-        <RightPanelContext.Provider value={panelContext}>
+        <DocumentDetailsContext.Provider value={panelContext}>
           <AlertDescription />
-        </RightPanelContext.Provider>
+        </DocumentDetailsContext.Provider>
       </IntlProvider>
     </TestProviders>
   );
@@ -139,21 +150,11 @@ describe('<AlertDescription />', () => {
       getByTestId(RULE_SUMMARY_BUTTON_TEST_ID).click();
 
       expect(flyoutContextValue.openPreviewPanel).toHaveBeenCalledWith({
-        id: DocumentDetailsPreviewPanelKey,
-        path: { tab: 'rule-preview' },
+        id: RulePreviewPanelKey,
         params: {
-          id: panelContext.eventId,
-          indexName: panelContext.indexName,
-          scopeId: panelContext.scopeId,
-          banner: {
-            title: i18n.translate(
-              'xpack.securitySolution.flyout.right.about.description.rulePreviewTitle',
-              { defaultMessage: 'Preview rule details' }
-            ),
-            backgroundColor: 'warning',
-            textColor: 'warning',
-          },
+          banner: RULE_PREVIEW_BANNER,
           ruleId: ruleUuid.values[0],
+          isPreviewMode: true,
         },
       });
     });

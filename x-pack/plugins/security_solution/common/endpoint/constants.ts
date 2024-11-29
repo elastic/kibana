@@ -18,6 +18,7 @@ export const ENDPOINT_ACTION_RESPONSES_INDEX = `${ENDPOINT_ACTION_RESPONSES_DS}-
 export const ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN = `${ENDPOINT_ACTION_RESPONSES_DS}-*`;
 
 export const eventsIndexPattern = 'logs-endpoint.events.*';
+export const FILE_EVENTS_INDEX_PATTERN = 'logs-endpoint.events.file-*';
 export const alertsIndexPattern = 'logs-endpoint.alerts-*';
 
 // metadata datastream
@@ -53,6 +54,10 @@ export const policyIndexPattern = 'metrics-endpoint.policy-*';
 export const telemetryIndexPattern = 'metrics-endpoint.telemetry-*';
 
 export const ENDPOINT_HEARTBEAT_INDEX = '.logs-endpoint.heartbeat-default';
+export const ENDPOINT_HEARTBEAT_INDEX_PATTERN = '.logs-endpoint.heartbeat-*';
+
+// Endpoint diagnostics index
+export const DEFAULT_DIAGNOSTIC_INDEX_PATTERN = '.logs-endpoint.diagnostic.collection-*' as const;
 
 // File storage indexes supporting endpoint Upload/download
 export const FILE_STORAGE_METADATA_INDEX = getFileMetadataIndexName('endpoint');
@@ -60,28 +65,24 @@ export const FILE_STORAGE_DATA_INDEX = getFileDataIndexName('endpoint');
 
 // Location from where all Endpoint related APIs are mounted
 export const BASE_ENDPOINT_ROUTE = '/api/endpoint';
+export const BASE_INTERNAL_ENDPOINT_ROUTE = `/internal${BASE_ENDPOINT_ROUTE}`;
 
 // Endpoint API routes
 export const HOST_METADATA_LIST_ROUTE = `${BASE_ENDPOINT_ROUTE}/metadata`;
 export const HOST_METADATA_GET_ROUTE = `${HOST_METADATA_LIST_ROUTE}/{id}`;
-export const METADATA_TRANSFORMS_STATUS_ROUTE = `${BASE_ENDPOINT_ROUTE}/metadata/transforms`;
+
+export const METADATA_TRANSFORMS_STATUS_INTERNAL_ROUTE = `${BASE_INTERNAL_ENDPOINT_ROUTE}/metadata/transforms`;
 
 export const BASE_POLICY_RESPONSE_ROUTE = `${BASE_ENDPOINT_ROUTE}/policy_response`;
 export const BASE_POLICY_ROUTE = `${BASE_ENDPOINT_ROUTE}/policy`;
-export const AGENT_POLICY_SUMMARY_ROUTE = `${BASE_POLICY_ROUTE}/summaries`;
 export const PROTECTION_UPDATES_NOTE_ROUTE = `${BASE_ENDPOINT_ROUTE}/protection_updates_note/{package_policy_id}`;
 
 /** Suggestions routes */
-export const SUGGESTIONS_ROUTE = `${BASE_ENDPOINT_ROUTE}/suggestions/{suggestion_type}`;
+export const SUGGESTIONS_INTERNAL_ROUTE = `${BASE_INTERNAL_ENDPOINT_ROUTE}/suggestions/{suggestion_type}`;
 
 /**
  * Action Response Routes
  */
-
-/** @deprecated use `ISOLATE_HOST_ROUTE_V2` instead */
-export const ISOLATE_HOST_ROUTE = `${BASE_ENDPOINT_ROUTE}/isolate`;
-/** @deprecated use `ISOLATE_HOST_ROUTE_V2` instead */
-export const UNISOLATE_HOST_ROUTE = `${BASE_ENDPOINT_ROUTE}/unisolate`;
 
 /** Base Actions route. Used to get a list of all actions and is root to other action related routes */
 export const BASE_ENDPOINT_ACTION_ROUTE = `${BASE_ENDPOINT_ROUTE}/action`;
@@ -94,6 +95,7 @@ export const SUSPEND_PROCESS_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/suspend_proc
 export const GET_FILE_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/get_file`;
 export const EXECUTE_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/execute`;
 export const UPLOAD_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/upload`;
+export const SCAN_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/scan`;
 
 /** Endpoint Actions Routes */
 export const ENDPOINT_ACTION_LOG_ROUTE = `${BASE_ENDPOINT_ROUTE}/action_log/{agent_id}`;
@@ -104,7 +106,7 @@ export const ACTION_AGENT_FILE_DOWNLOAD_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/{
 export const ACTION_STATE_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/state`;
 
 /** Endpoint Agent Routes */
-export const ENDPOINT_AGENT_STATUS_ROUTE = `/internal${BASE_ENDPOINT_ROUTE}/agent_status`;
+export const AGENT_STATUS_ROUTE = `/internal${BASE_ENDPOINT_ROUTE}/agent_status`;
 
 export const failedFleetActionErrorCode = '424';
 
@@ -123,3 +125,7 @@ export const ENDPOINT_SEARCH_STRATEGY = 'endpointSearchStrategy';
 
 /** Search strategy keys */
 export const ENDPOINT_PACKAGE_POLICIES_STATS_STRATEGY = 'endpointPackagePoliciesStatsStrategy';
+
+/** The list of OS types that support. Value usually found in ECS `host.os.type` */
+export const SUPPORTED_HOST_OS_TYPE = Object.freeze(['macos', 'windows', 'linux'] as const);
+export type SupportedHostOsType = (typeof SUPPORTED_HOST_OS_TYPE)[number];

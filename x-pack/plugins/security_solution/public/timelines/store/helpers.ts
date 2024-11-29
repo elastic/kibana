@@ -8,30 +8,30 @@
 import { getOr, omit, uniq, isEmpty, isEqualWith, cloneDeep, union } from 'lodash/fp';
 import { v4 as uuidv4 } from 'uuid';
 import type { Filter } from '@kbn/es-query';
-import type { SessionViewConfig, ExpandedDetailTimeline } from '../../../common/types';
+import type { SessionViewConfig } from '../../../common/types';
 import type { TimelineNonEcsData } from '../../../common/search_strategy';
-import type { Sort } from '../components/timeline/body/sort';
 import type {
   DataProvider,
   QueryOperator,
   QueryMatch,
 } from '../components/timeline/data_providers/data_provider';
+import { IS_OPERATOR, EXISTS_OPERATOR } from '../components/timeline/data_providers/data_provider';
 import {
-  DataProviderType,
-  IS_OPERATOR,
-  EXISTS_OPERATOR,
-} from '../components/timeline/data_providers/data_provider';
+  type DataProviderType,
+  DataProviderTypeEnum,
+  TimelineStatusEnum,
+  TimelineTypeEnum,
+} from '../../../common/api/timeline';
+import { TimelineId } from '../../../common/types/timeline';
 import type {
   ColumnHeaderOptions,
   TimelineEventsType,
   SerializedFilterQuery,
   TimelinePersistInput,
-  ToggleDetailPanel,
   SortColumnTimeline,
+  SortColumnTimeline as Sort,
 } from '../../../common/types/timeline';
-import type { RowRendererId, TimelineTypeLiteral } from '../../../common/api/timeline';
-import { TimelineId } from '../../../common/types/timeline';
-import { TimelineStatus, TimelineType } from '../../../common/api/timeline';
+import type { RowRendererId, TimelineType } from '../../../common/api/timeline';
 import { normalizeTimeRange } from '../../common/utils/normalize_time_range';
 import { getTimelineManageDefaults, timelineDefaults } from './defaults';
 import type { KqlMode, TimelineModel } from './model';
@@ -44,6 +44,7 @@ import {
 import { activeTimeline } from '../containers/active_timeline_context';
 import type { ResolveTimelineConfig } from '../components/open_timeline/types';
 import { getDisplayValue } from '../components/timeline/data_providers/helpers';
+import type { PrimitiveOrArrayOfPrimitives } from '../../common/lib/kuery';
 
 interface AddTimelineNoteParams {
   id: string;
@@ -130,12 +131,11 @@ export const addTimelineToStore = ({
     ...timelineById,
     [id]: {
       ...timeline,
-      isLoading: timelineById[id].isLoading,
       initialized: timeline.initialized ?? timelineById[id].initialized,
       resolveTimelineConfig,
       dateRange:
-        timeline.status === TimelineStatus.immutable &&
-        timeline.timelineType === TimelineType.template
+        timeline.status === TimelineStatusEnum.immutable &&
+        timeline.timelineType === TimelineTypeEnum.template
           ? {
               start: DEFAULT_FROM_MOMENT.toISOString(),
               end: DEFAULT_TO_MOMENT.toISOString(),
@@ -147,7 +147,7 @@ export const addTimelineToStore = ({
 
 interface AddNewTimelineParams extends TimelinePersistInput {
   timelineById: TimelineById;
-  timelineType: TimelineTypeLiteral;
+  timelineType: TimelineType;
 }
 
 /** Adds a new `Timeline` to the provided collection of `TimelineById` */
@@ -162,7 +162,7 @@ export const addNewTimeline = ({
   const { from: startDateRange, to: endDateRange } = normalizeTimeRange({ from: '', to: '' });
   const dateRange = maybeDateRange ?? { start: startDateRange, end: endDateRange };
   const templateTimelineInfo =
-    timelineType === TimelineType.template
+    timelineType === TimelineTypeEnum.template
       ? {
           templateTimelineId: uuidv4(),
           templateTimelineVersion: 1,
@@ -179,7 +179,6 @@ export const addNewTimeline = ({
       savedObjectId: null,
       version: null,
       isSaving: false,
-      isLoading: false,
       timelineType,
       ...templateTimelineInfo,
     },
@@ -841,7 +840,7 @@ const updateProviderProperties = ({
   operator: QueryOperator;
   providerId: string;
   timeline: TimelineModel;
-  value: string | number | Array<string | number>;
+  value: PrimitiveOrArrayOfPrimitives;
 }) =>
   timeline.dataProviders.map((provider) =>
     provider.id === providerId
@@ -875,7 +874,7 @@ const updateAndProviderProperties = ({
   operator: QueryOperator;
   providerId: string;
   timeline: TimelineModel;
-  value: string | number | Array<string | number>;
+  value: PrimitiveOrArrayOfPrimitives;
 }) =>
   timeline.dataProviders.map((provider) =>
     provider.id === providerId
@@ -909,7 +908,7 @@ interface UpdateTimelineProviderEditPropertiesParams {
   operator: QueryOperator;
   providerId: string;
   timelineById: TimelineById;
-  value: string | number | Array<string | number>;
+  value: PrimitiveOrArrayOfPrimitives;
 }
 
 export const updateTimelineProviderProperties = ({
@@ -972,14 +971,17 @@ const updateTypeAndProvider = (
               ? {
                   ...andProvider,
                   type,
-                  name: type === DataProviderType.template ? `${andProvider.queryMatch.field}` : '',
+                  name:
+                    type === DataProviderTypeEnum.template ? `${andProvider.queryMatch.field}` : '',
                   queryMatch: {
                     ...andProvider.queryMatch,
                     displayField: undefined,
                     displayValue: undefined,
                     value:
-                      type === DataProviderType.template ? `{${andProvider.queryMatch.field}}` : '',
-                    operator: (type === DataProviderType.template
+                      type === DataProviderTypeEnum.template
+                        ? `{${andProvider.queryMatch.field}}`
+                        : '',
+                    operator: (type === DataProviderTypeEnum.template
                       ? IS_OPERATOR
                       : EXISTS_OPERATOR) as QueryOperator,
                   },
@@ -996,13 +998,13 @@ const updateTypeProvider = (type: DataProviderType, providerId: string, timeline
       ? {
           ...provider,
           type,
-          name: type === DataProviderType.template ? `${provider.queryMatch.field}` : '',
+          name: type === DataProviderTypeEnum.template ? `${provider.queryMatch.field}` : '',
           queryMatch: {
             ...provider.queryMatch,
             displayField: undefined,
             displayValue: undefined,
-            value: type === DataProviderType.template ? `{${provider.queryMatch.field}}` : '',
-            operator: (type === DataProviderType.template
+            value: type === DataProviderTypeEnum.template ? `{${provider.queryMatch.field}}` : '',
+            operator: (type === DataProviderTypeEnum.template
               ? IS_OPERATOR
               : EXISTS_OPERATOR) as QueryOperator,
           },
@@ -1019,7 +1021,10 @@ export const updateTimelineProviderType = ({
 }: UpdateTimelineProviderTypeParams): TimelineById => {
   const timeline = timelineById[id];
 
-  if (timeline.timelineType !== TimelineType.template && type === DataProviderType.template) {
+  if (
+    timeline.timelineType !== TimelineTypeEnum.template &&
+    type === DataProviderTypeEnum.template
+  ) {
     // Not supported, timeline template cannot have template type providers
     return timelineById;
   }
@@ -1221,22 +1226,6 @@ export const updateExcludedRowRenderersIds = ({
       ...timeline,
       excludedRowRendererIds,
     },
-  };
-};
-
-export const updateTimelineDetailsPanel = (action: ToggleDetailPanel): ExpandedDetailTimeline => {
-  const { tabType, id, ...expandedDetails } = action;
-
-  const panelViewOptions = new Set(['eventDetail', 'hostDetail', 'networkDetail', 'userDetail']);
-  const expandedTabType = tabType ?? 'query';
-  const newExpandDetails = {
-    params: expandedDetails.params ? { ...expandedDetails.params } : {},
-    panelView: expandedDetails.panelView,
-  } as ExpandedDetailTimeline;
-  return {
-    [expandedTabType]: panelViewOptions.has(expandedDetails.panelView ?? '')
-      ? newExpandDetails
-      : {},
   };
 };
 
@@ -1522,6 +1511,33 @@ export const applyDeltaToTableColumnWidth = ({
     columnWithNewWidth,
     ...timeline.columns.slice(columnIndex + 1),
   ];
+
+  return {
+    ...timelineById,
+    [id]: {
+      ...timeline,
+      columns,
+    },
+  };
+};
+
+export const updateTimelineColumnWidth = ({
+  columnId,
+  id,
+  timelineById,
+  width,
+}: {
+  columnId: string;
+  id: string;
+  timelineById: TimelineById;
+  width?: number;
+}): TimelineById => {
+  const timeline = timelineById[id];
+
+  const columns = timeline.columns.map((x) => ({
+    ...x,
+    initialWidth: x.id === columnId ? width : x.initialWidth,
+  }));
 
   return {
     ...timelineById,

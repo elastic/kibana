@@ -5,41 +5,63 @@
  * 2.0.
  */
 
-import {
+import type {
   CoreSetup,
   CustomRequestHandlerContext,
   CoreStart,
-  RouteConfigOptions,
+  IScopedClusterClient,
+  IUiSettingsClient,
+  SavedObjectsClientContract,
 } from '@kbn/core/server';
-import { AlertingApiRequestHandlerContext } from '@kbn/alerting-plugin/server';
 import type { RacApiRequestHandlerContext } from '@kbn/rule-registry-plugin/server';
-import { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { RulesClientApi } from '@kbn/alerting-plugin/server/types';
 
 export type ApmPluginRequestHandlerContext = CustomRequestHandlerContext<{
-  licensing: LicensingApiRequestHandlerContext;
-  alerting: AlertingApiRequestHandlerContext;
-  rac: RacApiRequestHandlerContext;
+  licensing: Pick<LicensingApiRequestHandlerContext, 'license' | 'featureUsage'>;
+  alerting: {
+    // Pick<AlertingApiRequestHandlerContext, 'getRulesClient'> is a superset of this
+    // and incompatible with the start contract from the alerting plugin
+    getRulesClient: () => RulesClientApi;
+  };
+  rac: Pick<RacApiRequestHandlerContext, 'getAlertsClient'>;
 }>;
 
+// what is available in system connectors
+export type MinimalApmPluginRequestHandlerContext = Omit<
+  ApmPluginRequestHandlerContext,
+  'core' | 'resolve'
+> & {
+  core: Promise<{
+    elasticsearch: {
+      client: IScopedClusterClient;
+    };
+    uiSettings: {
+      client: IUiSettingsClient;
+    };
+    savedObjects: {
+      client: SavedObjectsClientContract;
+    };
+  }>;
+};
+
 export interface APMRouteCreateOptions {
-  options: {
-    tags: Array<
-      | 'access:apm'
-      | 'access:apm_write'
-      | 'access:ml:canGetJobs'
-      | 'access:ml:canCreateJob'
-      | 'access:ml:canCloseJob'
-      | 'access:ai_assistant'
-    >;
-    body?: { accepts: Array<'application/json' | 'multipart/form-data'> };
-    disableTelemetry?: boolean;
-  } & RouteConfigOptions<any>;
+  tags: Array<
+    | 'access:apm'
+    | 'access:apm_write'
+    | 'access:apm_settings_write'
+    | 'access:ml:canGetJobs'
+    | 'access:ml:canCreateJob'
+    | 'access:ml:canCloseJob'
+    | 'access:ai_assistant'
+    | 'oas-tag:APM agent keys'
+    | 'oas-tag:APM annotations'
+  >;
+  disableTelemetry?: boolean;
 }
 
-export type TelemetryUsageCounter = ReturnType<
-  UsageCollectionSetup['createUsageCounter']
->;
+export type TelemetryUsageCounter = ReturnType<UsageCollectionSetup['createUsageCounter']>;
 
 export interface APMCore {
   setup: CoreSetup;

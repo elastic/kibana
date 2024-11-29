@@ -24,7 +24,7 @@ import { DragDropIdentifier, ReorderProvider, DropType } from '@kbn/dom-drag-dro
 import { DimensionButton } from '@kbn/visualization-ui-components';
 import { LayerActions } from './layer_actions';
 import { isOperation, LayerAction, VisualizationDimensionGroupConfig } from '../../../types';
-import { LayerSettings } from './layer_settings';
+import { LayerHeader } from './layer_header';
 import { LayerPanelProps } from './types';
 import { DimensionContainer } from './dimension_container';
 import { EmptyDimensionButton } from './buttons/empty_dimension_button';
@@ -39,6 +39,7 @@ import {
 import { getSharedActions } from './layer_actions/layer_actions';
 import { FlyoutContainer } from '../../../shared_components/flyout_container';
 import { FakeDimensionButton } from './buttons/fake_dimension_button';
+import { getLongMessage } from '../../../user_messages_utils';
 
 export function LayerPanel(props: LayerPanelProps) {
   const [openDimension, setOpenDimension] = useState<{
@@ -48,8 +49,6 @@ export function LayerPanel(props: LayerPanelProps) {
   }>({});
 
   const [isPanelSettingsOpen, setPanelSettingsOpen] = useState(false);
-
-  const [hideTooltip, setHideTooltip] = useState<boolean>(false);
 
   const {
     framePublicAPI,
@@ -73,7 +72,7 @@ export function LayerPanel(props: LayerPanelProps) {
     core,
     onDropToDimension,
     setIsInlineFlyoutVisible,
-    shouldDisplayChartSwitch,
+    onlyAllowSwitchToSubtypes,
   } = props;
 
   const isInlineEditing = Boolean(props?.setIsInlineFlyoutVisible);
@@ -93,7 +92,7 @@ export function LayerPanel(props: LayerPanelProps) {
   const settingsPanelRef = useRef<HTMLDivElement | null>(null);
 
   const registerLayerRef = useCallback(
-    (el) => registerNewLayerRef(layerId, el),
+    (el: HTMLDivElement | null) => registerNewLayerRef(layerId, el),
     [layerId, registerNewLayerRef]
   );
 
@@ -368,7 +367,7 @@ export function LayerPanel(props: LayerPanelProps) {
           <header className="lnsLayerPanel__layerHeader">
             <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
               <EuiFlexItem grow className="lnsLayerPanel__layerSettingsWrapper">
-                <LayerSettings
+                <LayerHeader
                   layerConfigProps={{
                     ...layerVisualizationConfigProps,
                     setState: props.updateVisualization,
@@ -379,10 +378,10 @@ export function LayerPanel(props: LayerPanelProps) {
                         visualizationId: activeVisualization.id,
                       }),
                   }}
-                  activeVisualization={activeVisualization}
+                  activeVisualizationId={activeVisualization.id}
                   visualizationMap={visualizationMap}
                   datasourceMap={datasourceMap}
-                  shouldDisplayChartSwitch={shouldDisplayChartSwitch}
+                  onlyAllowSwitchToSubtypes={onlyAllowSwitchToSubtypes}
                 />
               </EuiFlexItem>
               {props.displayLayerSettings && (
@@ -520,6 +519,7 @@ export function LayerPanel(props: LayerPanelProps) {
                             props?.getUserMessages?.('dimensionButton', {
                               dimensionId: columnId,
                             }) ?? [];
+                          const firstMessage = messages.at(0);
 
                           return (
                             <DraggableDimensionButton
@@ -552,8 +552,6 @@ export function LayerPanel(props: LayerPanelProps) {
                               state={layerDatasourceState}
                               layerDatasource={layerDatasource}
                               datasourceLayers={framePublicAPI.datasourceLayers}
-                              onDragStart={() => setHideTooltip(true)}
-                              onDragEnd={() => setHideTooltip(false)}
                               onDrop={onDrop}
                               indexPatterns={dataViews.indexPatterns}
                             >
@@ -571,10 +569,15 @@ export function LayerPanel(props: LayerPanelProps) {
                                   props.onRemoveDimension({ columnId: id, layerId });
                                   removeButtonRef(id);
                                 }}
-                                message={{
-                                  severity: messages[0]?.severity,
-                                  content: messages[0]?.shortMessage || messages[0]?.longMessage,
-                                }}
+                                message={
+                                  firstMessage
+                                    ? {
+                                        severity: firstMessage.severity,
+                                        content:
+                                          firstMessage.shortMessage || getLongMessage(firstMessage),
+                                      }
+                                    : undefined
+                                }
                               >
                                 {layerDatasource ? (
                                   <>
@@ -591,7 +594,6 @@ export function LayerPanel(props: LayerPanelProps) {
                                     {activeVisualization?.DimensionTriggerComponent?.({
                                       columnId,
                                       label: columnLabelMap?.[columnId] ?? '',
-                                      hideTooltip,
                                     })}
                                   </>
                                 )}
@@ -682,9 +684,6 @@ export function LayerPanel(props: LayerPanelProps) {
               {layerDatasource?.LayerSettingsComponent && (
                 <layerDatasource.LayerSettingsComponent {...layerDatasourceConfigProps} />
               )}
-              {layerDatasource?.LayerSettingsComponent && visualizationLayerSettings.data ? (
-                <EuiSpacer size="m" />
-              ) : null}
               {activeVisualization?.LayerSettingsComponent && visualizationLayerSettings.data ? (
                 <activeVisualization.LayerSettingsComponent
                   {...{

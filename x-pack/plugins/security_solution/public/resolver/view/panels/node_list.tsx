@@ -13,7 +13,6 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiBadge, EuiButtonEmpty, EuiSpacer, EuiInMemoryTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SideEffectContext } from '../side_effect_context';
-import { StyledPanel } from '../styles';
 import {
   StyledLabelTitle,
   StyledAnalyzedEvent,
@@ -84,7 +83,6 @@ export const NodeList = memo(({ id }: { id: string }) => {
   const processTableView: ProcessTableView[] = useSelector(
     useCallback(
       (state: State) => {
-        // console.log('lol WAT');
         const { processNodePositions } = selectors.layout(state.analyzer[id]);
         const view: ProcessTableView[] = [];
         for (const treeNode of processNodePositions.keys()) {
@@ -124,7 +122,7 @@ export const NodeList = memo(({ id }: { id: string }) => {
   const showWarning = children === true || ancestors === true || generations === true;
   const rowProps = useMemo(() => ({ 'data-test-subj': 'resolver:node-list:item' }), []);
   return (
-    <StyledPanel hasBorder>
+    <>
       <Breadcrumbs breadcrumbs={breadcrumbs} />
       {showWarning && <LimitWarning numberDisplayed={numberOfProcesses} />}
       <EuiSpacer size="l" />
@@ -135,7 +133,7 @@ export const NodeList = memo(({ id }: { id: string }) => {
         columns={columns}
         sorting
       />
-    </StyledPanel>
+    </>
   );
 });
 

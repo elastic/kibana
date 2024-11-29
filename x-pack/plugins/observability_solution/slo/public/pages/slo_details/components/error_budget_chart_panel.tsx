@@ -14,19 +14,23 @@ import { i18n } from '@kbn/i18n';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React, { useState, useCallback } from 'react';
 import { SaveModalDashboardProps } from '@kbn/presentation-util-plugin/public';
-import { useKibana } from '../../../utils/kibana_react';
+import { TimeBounds } from '../types';
+import { SloTabId } from './slo_details';
+import { useKibana } from '../../../hooks/use_kibana';
 import { ChartData } from '../../../typings/slo';
 import { ErrorBudgetChart } from './error_budget_chart';
 import { ErrorBudgetHeader } from './error_budget_header';
-import { SLO_ERROR_BUDGET_EMBEDDABLE } from '../../../embeddable/slo/error_budget/slo_error_budget_embeddable';
+import { SLO_ERROR_BUDGET_ID } from '../../../embeddable/slo/error_budget/constants';
 const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
 export interface Props {
   data: ChartData[];
   isLoading: boolean;
   slo: SLOWithSummaryResponse;
+  selectedTabId: SloTabId;
+  onBrushed?: (timeBounds: TimeBounds) => void;
 }
 
-export function ErrorBudgetChartPanel({ data, isLoading, slo }: Props) {
+export function ErrorBudgetChartPanel({ data, isLoading, slo, selectedTabId, onBrushed }: Props) {
   const [isMouseOver, setIsMouseOver] = useState(false);
 
   const [isDashboardAttachmentReady, setDashboardAttachmentReady] = useState(false);
@@ -44,7 +48,7 @@ export function ErrorBudgetChartPanel({ data, isLoading, slo }: Props) {
 
       const state = {
         input: embeddableInput,
-        type: SLO_ERROR_BUDGET_EMBEDDABLE,
+        type: SLO_ERROR_BUDGET_ID,
       };
 
       const path = dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`;
@@ -81,9 +85,16 @@ export function ErrorBudgetChartPanel({ data, isLoading, slo }: Props) {
             showTitle={true}
             isMouseOver={isMouseOver}
             setDashboardAttachmentReady={setDashboardAttachmentReady}
+            selectedTabId={selectedTabId}
           />
 
-          <ErrorBudgetChart slo={slo} data={data} isLoading={isLoading} />
+          <ErrorBudgetChart
+            slo={slo}
+            data={data}
+            isLoading={isLoading}
+            selectedTabId={selectedTabId}
+            onBrushed={onBrushed}
+          />
         </EuiFlexGroup>
       </EuiPanel>
       {isDashboardAttachmentReady ? (

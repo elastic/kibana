@@ -39,22 +39,17 @@ import type { Datafeed, Job } from '../../common/types/anomaly_detection_jobs';
  * Routes for job service
  */
 export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
-  /**
-   * @apiGroup JobService
-   *
-   * @api {post} /internal/ml/jobs/force_start_datafeeds Start datafeeds
-   * @apiName ForceStartDatafeeds
-   * @apiDescription Starts one or more datafeeds
-   *
-   * @apiSchema (body) forceStartDatafeedSchema
-   */
   router.versioned
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/jobs/force_start_datafeeds`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canStartStopDatafeed'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canStartStopDatafeed'],
+        },
       },
+      summary: 'Starts datafeeds',
+      description: 'Starts one or more datafeeds.',
     })
     .addVersion(
       {
@@ -80,22 +75,17 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
       })
     );
 
-  /**
-   * @apiGroup JobService
-   *
-   * @api {post} /internal/ml/jobs/stop_datafeeds Stop datafeeds
-   * @apiName StopDatafeeds
-   * @apiDescription Stops one or more datafeeds
-   *
-   * @apiSchema (body) datafeedIdsSchema
-   */
   router.versioned
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/jobs/stop_datafeeds`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canStartStopDatafeed'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canStartStopDatafeed'],
+        },
       },
+      summary: 'Stops datafeeds',
+      description: 'Stops one or more datafeeds.',
     })
     .addVersion(
       {
@@ -121,60 +111,57 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
       })
     );
 
-  /**
-   * @apiGroup JobService
-   *
-   * @api {post} /internal/ml/jobs/delete_jobs Delete jobs
-   * @apiName DeleteJobs
-   * @apiDescription Deletes an existing anomaly detection job
-   *
-   * @apiSchema (body) jobIdsSchema
-   */
-  router.post(
-    {
+  router.versioned
+    .post({
       path: `${ML_INTERNAL_BASE_PATH}/jobs/delete_jobs`,
-      validate: {
-        body: deleteJobsSchema,
+      access: 'internal',
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canDeleteJob'],
+        },
       },
-      options: {
-        tags: ['access:ml:canDeleteJob'],
-      },
-    },
-    routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response, context }) => {
-      try {
-        const alerting = await context.alerting;
-        const rulesClient = alerting?.getRulesClient();
-        const { deleteJobs } = jobServiceProvider(client, mlClient, rulesClient);
-
-        const { jobIds, deleteUserAnnotations, deleteAlertingRules } = request.body;
-
-        const resp = await deleteJobs(jobIds, deleteUserAnnotations, deleteAlertingRules);
-
-        return response.ok({
-          body: resp,
-        });
-      } catch (e) {
-        return response.customError(wrapError(e));
-      }
+      summary: 'Deletes jobs',
+      description: 'Deletes an existing anomaly detection job.',
     })
-  );
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            body: deleteJobsSchema,
+          },
+        },
+      },
+      routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response, context }) => {
+        try {
+          const alerting = await context.alerting;
+          const rulesClient = alerting?.getRulesClient();
+          const { deleteJobs } = jobServiceProvider(client, mlClient, rulesClient);
 
-  /**
-   * @apiGroup JobService
-   *
-   * @api {post} /internal/ml/jobs/close_jobs Close jobs
-   * @apiName CloseJobs
-   * @apiDescription Closes one or more anomaly detection jobs
-   *
-   * @apiSchema (body) jobIdsSchema
-   */
+          const { jobIds, deleteUserAnnotations, deleteAlertingRules } = request.body;
+
+          const resp = await deleteJobs(jobIds, deleteUserAnnotations, deleteAlertingRules);
+
+          return response.ok({
+            body: resp,
+          });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
+      })
+    );
+
   router.versioned
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/jobs/close_jobs`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canCloseJob'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canCloseJob'],
+        },
       },
+      summary: 'Closes jobs',
+      description: 'Closes one or more anomaly detection jobs.',
     })
     .addVersion(
       {
@@ -200,22 +187,17 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
       })
     );
 
-  /**
-   * @apiGroup JobService
-   *
-   * @api {post} /internal/ml/jobs/reset_jobs Reset multiple jobs
-   * @apiName ResetJobs
-   * @apiDescription Resets one or more anomaly detection jobs
-   *
-   * @apiSchema (body) jobIdsSchema
-   */
   router.versioned
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/jobs/reset_jobs`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canResetJob'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canResetJob'],
+        },
       },
+      summary: 'Resets jobs',
+      description: 'Resets one or more anomaly detection jobs.',
     })
     .addVersion(
       {
@@ -241,22 +223,18 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
       })
     );
 
-  /**
-   * @apiGroup JobService
-   *
-   * @api {post} /internal/ml/jobs/force_stop_and_close_job Force stop and close job
-   * @apiName ForceStopAndCloseJob
-   * @apiDescription Force stops the datafeed and then force closes the anomaly detection job specified by job ID
-   *
-   * @apiSchema (body) jobIdSchema
-   */
   router.versioned
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/jobs/force_stop_and_close_job`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canCloseJob', 'access:ml:canStartStopDatafeed'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canCloseJob', 'ml:canStartStopDatafeed'],
+        },
       },
+      summary: 'Force stops and closes job',
+      description:
+        'Force stops the datafeed and then force closes the anomaly detection job specified by job ID',
     })
     .addVersion(
       {
@@ -282,27 +260,18 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
       })
     );
 
-  /**
-   * @apiGroup JobService
-   *
-   * @api {post} /internal/ml/jobs/jobs_summary Jobs summary
-   * @apiName JobsSummary
-   * @apiDescription Returns a list of anomaly detection jobs, with summary level information for every job.
-   *  For any supplied job IDs, full job information will be returned, which include the analysis configuration,
-   *  job stats, datafeed stats, and calendars.
-   *
-   * @apiSchema (body) optionalJobIdsSchema
-   *
-   * @apiSuccess {Array} jobsList list of jobs. For any supplied job IDs, the job object will contain a fullJob property
-   *    which includes the full configuration and stats for the job.
-   */
   router.versioned
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/jobs/jobs_summary`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetJobs'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetJobs'],
+        },
       },
+      summary: 'Jobs summary',
+      description:
+        'Returns a list of anomaly detection jobs, with summary level information for every job. For any supplied job IDs, full job information will be returned, which include the analysis configuration, job stats, datafeed stats, and calendars',
     })
     .addVersion(
       {
@@ -327,22 +296,18 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
       })
     );
 
-  /**
-   * @apiGroup JobService
-   *
-   * @api {post} /internal/ml/jobs/jobs_with_geo Jobs summary
-   * @apiName JobsSummary
-   * @apiDescription Returns a list of anomaly detection jobs with analysis config with fields supported by maps.
-   *
-   * @apiSuccess {Array} jobIds list of job ids.
-   */
   router.versioned
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/jobs/jobs_with_geo`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetJobs'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetJobs'],
+        },
       },
+      summary: 'Jobs with geo',
+      description:
+        'Returns a list of anomaly detection jobs with analysis config with fields supported by maps.',
     })
     .addVersion(
       {
@@ -369,22 +334,17 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
       })
     );
 
-  /**
-   * @apiGroup JobService
-   *
-   * @api {post} /internal/ml/jobs/jobs_with_time_range Jobs with time range
-   * @apiName JobsWithTimeRange
-   * @apiDescription Creates a list of jobs with data about the job's time range
-   *
-   * @apiSchema (body) jobsWithTimerangeSchema
-   */
   router.versioned
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/jobs/jobs_with_time_range`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetJobs'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetJobs'],
+        },
       },
+      summary: 'Jobs with time range',
+      description: "Creates a list of jobs with data about the job's time range.",
     })
     .addVersion(
       {
@@ -405,22 +365,17 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
       })
     );
 
-  /**
-   * @apiGroup JobService
-   *
-   * @api {post} /internal/ml/jobs/job_for_cloning Get job for cloning
-   * @apiName GetJobForCloning
-   * @apiDescription Get the job configuration with auto generated fields excluded for cloning
-   *
-   * @apiSchema (body) jobIdSchema
-   */
   router.versioned
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/jobs/job_for_cloning`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetJobs'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetJobs'],
+        },
       },
+      summary: 'Get job for cloning',
+      description: 'Get the job configuration with auto generated fields excluded for cloning',
     })
     .addVersion(
       {
@@ -446,22 +401,17 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
       })
     );
 
-  /**
-   * @apiGroup JobService
-   *
-   * @api {post} /internal/ml/jobs/jobs Create jobs list
-   * @apiName CreateFullJobsList
-   * @apiDescription Creates a list of jobs
-   *
-   * @apiSchema (body) optionalJobIdsSchema
-   */
   router.versioned
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/jobs/jobs`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetJobs'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetJobs'],
+        },
       },
+      summary: 'Create jobs list',
+      description: 'Creates a list of jobs.',
     })
     .addVersion(
       {
@@ -492,20 +442,17 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
       })
     );
 
-  /**
-   * @apiGroup JobService
-   *
-   * @api {get} /internal/ml/jobs/groups Get job groups
-   * @apiName GetAllGroups
-   * @apiDescription Returns array of group objects with job ids listed for each group
-   */
   router.versioned
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/jobs/groups`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetJobs'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetJobs'],
+        },
       },
+      summary: 'Get all groups',
+      description: 'Returns array of group objects with job ids listed for each group.',
     })
     .addVersion(
       {
@@ -526,22 +473,17 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
       })
     );
 
-  /**
-   * @apiGroup JobService
-   *
-   * @api {post} /internal/ml/jobs/update_groups Update job groups
-   * @apiName UpdateGroups
-   * @apiDescription Updates 'groups' property of an anomaly detection job
-   *
-   * @apiSchema (body) updateGroupsSchema
-   */
   router.versioned
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/jobs/update_groups`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canUpdateJob'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canUpdateJob'],
+        },
       },
+      summary: 'Update job groups',
+      description: 'Updates the groups property of an anomaly detection job.',
     })
     .addVersion(
       {
@@ -567,20 +509,17 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
       })
     );
 
-  /**
-   * @apiGroup JobService
-   *
-   * @api {get} /internal/ml/jobs/blocking_jobs_tasks Get blocking job tasks
-   * @apiName BlockingJobTasks
-   * @apiDescription Gets the ids of deleting, resetting or reverting anomaly detection jobs
-   */
   router.versioned
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/jobs/blocking_jobs_tasks`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetJobs'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetJobs'],
+        },
       },
+      summary: 'Get blocking job tasks',
+      description: 'Gets the ids of deleting, resetting or reverting anomaly detection jobs.',
     })
     .addVersion(
       {
@@ -601,23 +540,18 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
       })
     );
 
-  /**
-   * @apiGroup JobService
-   *
-   * @api {post} /internal/ml/jobs/jobs_exist Check whether jobs exists in current or any space
-   * @apiName JobsExist
-   * @apiDescription Checks if each of the jobs in the specified list of IDs exist.
-   *                 If allSpaces is true, the check will look across all spaces.
-   *
-   * @apiSchema (body) jobsExistSchema
-   */
   router.versioned
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/jobs/jobs_exist`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetJobs'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetJobs'],
+        },
       },
+      summary: 'Check if jobs exist',
+      description:
+        'Checks if each of the jobs in the specified list of IDs exist. If allSpaces is true, the check will look across all spaces.',
     })
     .addVersion(
       {
@@ -643,20 +577,17 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
       })
     );
 
-  /**
-   * @apiGroup JobService
-   *
-   * @api {get} /internal/ml/jobs/new_job_caps/:indexPattern Get new job capabilities
-   * @apiName NewJobCaps
-   * @apiDescription Retrieve the capabilities of fields for indices
-   */
   router.versioned
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/jobs/new_job_caps/{indexPattern}`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetJobs'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetJobs'],
+        },
       },
+      summary: 'Get new job capabilities',
+      description: 'Retrieve the capabilities of fields for indices',
     })
     .addVersion(
       {
@@ -688,22 +619,17 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
       )
     );
 
-  /**
-   * @apiGroup JobService
-   *
-   * @api {post} /internal/ml/jobs/new_job_line_chart Get job line chart data
-   * @apiName NewJobLineChart
-   * @apiDescription Returns line chart data for anomaly detection job
-   *
-   * @apiSchema (body) chartSchema
-   */
   router.versioned
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/jobs/new_job_line_chart`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetJobs'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canCreateJob'],
+        },
       },
+      summary: 'Get job line chart data',
+      description: 'Returns line chart data for anomaly detection job',
     })
     .addVersion(
       {
@@ -754,22 +680,17 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
       })
     );
 
-  /**
-   * @apiGroup JobService
-   *
-   * @api {post} /internal/ml/jobs/new_job_population_chart Get population job chart data
-   * @apiName NewJobPopulationChart
-   * @apiDescription Returns population job chart data
-   *
-   * @apiSchema (body) chartSchema
-   */
   router.versioned
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/jobs/new_job_population_chart`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetJobs'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canCreateJob'],
+        },
       },
+      summary: 'Get job population chart data',
+      description: 'Returns population chart data for anomaly detection job',
     })
     .addVersion(
       {
@@ -818,20 +739,17 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
       })
     );
 
-  /**
-   * @apiGroup JobService
-   *
-   * @api {get} /internal/ml/jobs/all_jobs_and_group_ids Get all job and group IDs
-   * @apiName GetAllJobAndGroupIds
-   * @apiDescription Returns a list of all job IDs and all group IDs
-   */
   router.versioned
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/jobs/all_jobs_and_group_ids`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetJobs'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetJobs'],
+        },
       },
+      summary: 'Get all job and group IDs',
+      description: 'Returns a list of all job IDs and all group IDs',
     })
     .addVersion(
       {
@@ -852,22 +770,17 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
       })
     );
 
-  /**
-   * @apiGroup JobService
-   *
-   * @api {post} /internal/ml/jobs/look_back_progress Get lookback progress
-   * @apiName GetLookBackProgress
-   * @apiDescription Returns current progress of anomaly detection job
-   *
-   * @apiSchema (body) lookBackProgressSchema
-   */
   router.versioned
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/jobs/look_back_progress`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canCreateJob'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canCreateJob'],
+        },
       },
+      summary: 'Get lookback progress',
+      description: 'Returns current progress of anomaly detection job',
     })
     .addVersion(
       {
@@ -893,22 +806,17 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
       })
     );
 
-  /**
-   * @apiGroup JobService
-   *
-   * @api {post} /internal/ml/jobs/categorization_field_validation Get categorization field examples
-   * @apiName ValidateCategoryValidation
-   * @apiDescription Validates a field for categorization
-   *
-   * @apiSchema (body) categorizationFieldValidationSchema
-   */
   router.versioned
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/jobs/categorization_field_validation`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canCreateJob'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canCreateJob'],
+        },
       },
+      summary: 'Get categorization field examples',
+      description: 'Returns examples of categorization field',
     })
     .addVersion(
       {
@@ -957,22 +865,17 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
       })
     );
 
-  /**
-   * @apiGroup JobService
-   *
-   * @api {post} /internal/ml/jobs/top_categories Get top categories
-   * @apiName TopCategories
-   * @apiDescription Returns list of top categories
-   *
-   * @apiSchema (body) topCategoriesSchema
-   */
   router.versioned
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/jobs/top_categories`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetJobs'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetJobs'],
+        },
       },
+      summary: 'Get top categories',
+      description: 'Returns list of top categories',
     })
     .addVersion(
       {
@@ -1011,9 +914,13 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/jobs/datafeed_preview`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canPreviewDatafeed'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canPreviewDatafeed'],
+        },
       },
+      summary: 'Get datafeed preview',
+      description: 'Returns a preview of the datafeed search',
     })
     .addVersion(
       {
@@ -1053,22 +960,18 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
       })
     );
 
-  /**
-   * @apiGroup JobService
-   *
-   * @api {post} /internal/ml/jobs/revert_model_snapshot Revert model snapshot
-   * @apiName RevertModelSnapshot
-   * @apiDescription Reverts a job to a specified snapshot. Also allows the job to replayed to a specified date and to auto create calendars to skip analysis of specified date ranges
-   *
-   * @apiSchema (body) revertModelSnapshotSchema
-   */
   router.versioned
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/jobs/revert_model_snapshot`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canCreateJob', 'access:ml:canStartStopDatafeed'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canCreateJob', 'ml:canStartStopDatafeed'],
+        },
       },
+      summary: 'Revert model snapshot',
+      description:
+        'Reverts a job to a specified snapshot. Also allows the job to replayed to a specified date and to auto create calendars to skip analysis of specified date ranges',
     })
     .addVersion(
       {
@@ -1102,22 +1005,17 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
       })
     );
 
-  /**
-   * @apiGroup JobService
-   *
-   * @api {post} /internal/ml/jobs/bulk_create Bulk create jobs and datafeeds
-   * @apiName BulkCreateJobs
-   * @apiDescription Bulk create jobs and datafeeds.
-   *
-   * @apiSchema (body) bulkCreateSchema
-   */
   router.versioned
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/jobs/bulk_create`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canPreviewDatafeed'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canPreviewDatafeed'],
+        },
       },
+      summary: 'Bulk create jobs and datafeeds',
+      description: 'Bulk create jobs and datafeeds.',
     })
     .addVersion(
       {

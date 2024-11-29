@@ -10,14 +10,19 @@ import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiCallOut, EuiLink } fro
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { TimeRange } from '@kbn/es-query';
 import { useLinkProps } from '@kbn/observability-shared-plugin/public';
-import { CollapsibleSection } from './section/collapsible_section';
-import { ServicesSectionTitle } from '../../components/section_titles';
-import { useServices } from '../../hooks/use_services';
-import { HOST_FIELD } from '../../../../../common/constants';
+import { decodeOrThrow } from '@kbn/io-ts-utils';
+import { ServicesAPIResponseRT } from '../../../../../common/http_api';
+import { isPending, useFetcher } from '../../../../hooks/use_fetcher';
+import { Section } from '../../components/section';
+import { ServicesSectionTitle } from './section_titles';
+import { HOST_NAME_FIELD } from '../../../../../common/constants';
 import { LinkToApmServices } from '../../links';
-import { APM_HOST_FILTER_FIELD } from '../../constants';
+import { APM_HOST_FILTER_FIELD, APM_HOST_TROUBLESHOOTING_LINK } from '../../constants';
 import { LinkToApmService } from '../../links/link_to_apm_service';
 import { useKibanaEnvironmentContext } from '../../../../hooks/use_kibana';
+import { useRequestObservable } from '../../hooks/use_request_observable';
+import { useTabSwitcherContext } from '../../hooks/use_tab_switcher';
+import { useMetadataStateContext } from '../../hooks/use_metadata_state';
 
 export const ServicesContent = ({
   hostName,
@@ -27,6 +32,10 @@ export const ServicesContent = ({
   dateRange: TimeRange;
 }) => {
   const { isServerlessEnv } = useKibanaEnvironmentContext();
+  const { request$ } = useRequestObservable();
+  const { isActiveTab } = useTabSwitcherContext();
+  const { metadata, loading: metadataLoading } = useMetadataStateContext();
+
   const linkProps = useLinkProps({
     app: 'home',
     hash: '/tutorial/apm',
@@ -37,23 +46,41 @@ export const ServicesContent = ({
   });
   const params = useMemo(
     () => ({
-      filters: { [HOST_FIELD]: hostName },
+      filters: { [HOST_NAME_FIELD]: hostName },
       from: dateRange.from,
       to: dateRange.to,
     }),
     [hostName, dateRange.from, dateRange.to]
   );
-  const { error, loading, response } = useServices(params);
-  const services = response?.services;
+
+  const query = useMemo(() => ({ ...params, filters: JSON.stringify(params.filters) }), [params]);
+
+  const { data, status, error } = useFetcher(
+    async (callApi) => {
+      const response = await callApi('/api/infra/services', {
+        method: 'GET',
+        query,
+      });
+
+      return decodeOrThrow(ServicesAPIResponseRT)(response);
+    },
+    [query],
+    {
+      requestObservable$: request$,
+      autoFetch: isActiveTab('overview'),
+    }
+  );
+
+  const services = data?.services;
   const hasServices = services?.length;
 
   return (
-    <CollapsibleSection
-      title={ServicesSectionTitle}
+    <Section
+      title={<ServicesSectionTitle />}
       collapsible
       data-test-subj="infraAssetDetailsServicesCollapsible"
       id="services"
-      extraAction={<LinkToApmServices assetName={hostName} apmField={APM_HOST_FILTER_FIELD} />}
+      extraAction={<LinkToApmServices assetId={hostName} apmField={APM_HOST_FILTER_FIELD} />}
     >
       {error ? (
         <EuiCallOut
@@ -67,7 +94,7 @@ export const ServicesContent = ({
             defaultMessage: 'An error occurred while fetching services.',
           })}
         </EuiCallOut>
-      ) : loading ? (
+      ) : isPending(status) || metadataLoading ? (
         <EuiLoadingSpinner size="m" />
       ) : hasServices ? (
         <EuiFlexGroup
@@ -86,7 +113,7 @@ export const ServicesContent = ({
             </EuiFlexItem>
           ))}
         </EuiFlexGroup>
-      ) : (
+      ) : metadata?.hasSystemIntegration ? (
         <p>
           <FormattedMessage
             id="xpack.infra.assetDetails.services.noServicesMsg"
@@ -94,7 +121,7 @@ export const ServicesContent = ({
             values={{
               apmTutorialLink: (
                 <EuiLink
-                  data-test-subj="assetDetailsTooltiAPMTutorialLink"
+                  data-test-subj="assetDetailsTooltipAPMTutorialLink"
                   href={isServerlessEnv ? serverlessLinkProps.href : linkProps.href}
                 >
                   <FormattedMessage
@@ -104,9 +131,36 @@ export const ServicesContent = ({
                 </EuiLink>
               ),
             }}
-          />
+          />{' '}
+          <EuiLink
+            data-test-subj="assetDetailsAPMTroubleshootingLink"
+            href={APM_HOST_TROUBLESHOOTING_LINK}
+            target="_blank"
+          >
+            <FormattedMessage
+              id="xpack.infra.assetDetails.table.services.noServices.troubleshootingLink"
+              defaultMessage="Troubleshooting"
+            />
+          </EuiLink>
+        </p>
+      ) : (
+        <p>
+          <FormattedMessage
+            id="xpack.infra.assetDetails.services.noServicesWithApmMessage"
+            defaultMessage="No services found on this host."
+          />{' '}
+          <EuiLink
+            data-test-subj="assetDetailsAPMHostTroubleshootingLink"
+            href={APM_HOST_TROUBLESHOOTING_LINK}
+            target="_blank"
+          >
+            <FormattedMessage
+              id="xpack.infra.assetDetails.table.services.noServices.troubleshootingLink"
+              defaultMessage="Troubleshooting"
+            />
+          </EuiLink>
         </p>
       )}
-    </CollapsibleSection>
+    </Section>
   );
 };

@@ -7,17 +7,13 @@
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { isEmpty } from 'lodash';
-import { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
-import { GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
+import { GetViewInAppRelativeUrlFnOpts, AlertsClientError } from '@kbn/alerting-plugin/server';
 import { observabilityPaths } from '@kbn/observability-plugin/common';
-import { createLifecycleRuleTypeFactory, IRuleDataClient } from '@kbn/rule-registry-plugin/server';
+import apm from 'elastic-apm-node';
+import { AlertOverviewStatus } from '../../../common/runtime_types/alert_rules/common';
+import { StatusRuleExecutorOptions } from './types';
+import { syntheticsRuleFieldMap } from '../../../common/rules/synthetics_rule_field_map';
 import { SyntheticsPluginsSetupDependencies, SyntheticsServerSetup } from '../../types';
-import { DOWN_LABEL, getMonitorAlertDocument, getMonitorSummary } from './message_utils';
-import {
-  SyntheticsCommonState,
-  SyntheticsMonitorStatusAlertState,
-} from '../../../common/runtime_types/alert_rules/common';
-import { OverviewStatus } from '../../../common/runtime_types';
 import { StatusRuleExecutor } from './status_rule_executor';
 import { StatusRulePramsSchema } from '../../../common/rules/status_rule';
 import {
@@ -27,30 +23,24 @@ import {
 import {
   setRecoveredAlertsContext,
   updateState,
-  getAlertDetailsUrl,
-  getViewInAppUrl,
-  getRelativeViewInAppUrl,
-  getFullViewInAppMessage,
-  UptimeRuleTypeAlertDefinition,
+  SyntheticsRuleTypeAlertDefinition,
 } from '../common';
-import { ALERT_DETAILS_URL, getActionVariables, VIEW_IN_APP_URL } from '../action_variables';
+import { getActionVariables } from '../action_variables';
 import { STATUS_RULE_NAME } from '../translations';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
-
-export type ActionGroupIds = ActionGroupIdsOf<typeof MONITOR_STATUS>;
 
 export const registerSyntheticsStatusCheckRule = (
   server: SyntheticsServerSetup,
   plugins: SyntheticsPluginsSetupDependencies,
-  syntheticsMonitorClient: SyntheticsMonitorClient,
-  ruleDataClient: IRuleDataClient
+  syntheticsMonitorClient: SyntheticsMonitorClient
 ) => {
-  const createLifecycleRuleType = createLifecycleRuleTypeFactory({
-    ruleDataClient,
-    logger: server.logger,
-  });
+  if (!plugins.alerting) {
+    throw new Error(
+      'Cannot register the synthetics monitor status rule type. The alerting plugin needs to be enabled.'
+    );
+  }
 
-  return createLifecycleRuleType({
+  plugins.alerting.registerType({
     id: SYNTHETICS_ALERT_RULE_TYPES.MONITOR_STATUS,
     category: DEFAULT_APP_CATEGORIES.observability.id,
     producer: 'uptime',
@@ -64,102 +54,52 @@ export const registerSyntheticsStatusCheckRule = (
     isExportable: true,
     minimumLicenseRequired: 'basic',
     doesSetRecoveryContext: true,
-    async executor({ state, params, services, spaceId, previousStartedAt }) {
-      const ruleState = state as SyntheticsCommonState;
-
+    executor: async (options: StatusRuleExecutorOptions) => {
+      apm.setTransactionName('Synthetics Status Rule Executor');
+      const { state: ruleState, params, services, spaceId } = options;
+      const { alertsClient, uiSettingsClient } = services;
+      if (!alertsClient) {
+        throw new AlertsClientError();
+      }
       const { basePath } = server;
-      const {
-        alertFactory,
-        getAlertUuid,
-        savedObjectsClient,
-        scopedClusterClient,
-        alertWithLifecycle,
-        uiSettingsClient,
-      } = services;
 
-      const dateFormat = await uiSettingsClient.get('dateFormat');
-      const timezone = await uiSettingsClient.get('dateFormat:tz');
+      const [dateFormat, timezone] = await Promise.all([
+        uiSettingsClient.get('dateFormat'),
+        uiSettingsClient.get('dateFormat:tz'),
+      ]);
       const tz = timezone === 'Browser' ? 'UTC' : timezone;
 
-      const statusRule = new StatusRuleExecutor(
-        previousStartedAt,
-        params,
-        savedObjectsClient,
-        scopedClusterClient.asCurrentUser,
-        server,
-        syntheticsMonitorClient
-      );
+      const groupBy = params?.condition?.groupBy ?? 'locationId';
+      const groupByLocation = groupBy === 'locationId';
+
+      const statusRule = new StatusRuleExecutor(server, syntheticsMonitorClient, options);
 
       const { downConfigs, staleDownConfigs, upConfigs } = await statusRule.getDownChecks(
-        ruleState.meta?.downConfigs as OverviewStatus['downConfigs']
+        ruleState.meta?.downConfigs as AlertOverviewStatus['downConfigs']
       );
 
-      Object.entries(downConfigs).forEach(([idWithLocation, { ping, configId }]) => {
-        const locationId = ping.observer.name ?? '';
-        const alertId = idWithLocation;
-        const monitorSummary = getMonitorSummary(
-          ping,
-          DOWN_LABEL,
-          locationId,
-          configId,
-          dateFormat,
-          tz
-        );
-
-        const alert = alertWithLifecycle({
-          id: alertId,
-          fields: getMonitorAlertDocument(monitorSummary),
-        });
-        const alertUuid = getAlertUuid(alertId);
-        const alertState = alert.getState() as SyntheticsMonitorStatusAlertState;
-        const errorStartedAt: string = alertState.errorStartedAt || ping['@timestamp'];
-
-        let relativeViewInAppUrl = '';
-        if (monitorSummary.stateId) {
-          relativeViewInAppUrl = getRelativeViewInAppUrl({
-            configId,
-            stateId: monitorSummary.stateId,
-            locationId,
-          });
-        }
-
-        const context = {
-          ...monitorSummary,
-          errorStartedAt,
-          linkMessage: monitorSummary.stateId
-            ? getFullViewInAppMessage(basePath, spaceId, relativeViewInAppUrl)
-            : '',
-          [VIEW_IN_APP_URL]: getViewInAppUrl(basePath, spaceId, relativeViewInAppUrl),
-        };
-
-        alert.replaceState({
-          ...updateState(ruleState, true),
-          ...context,
-          idWithLocation,
-        });
-
-        alert.scheduleActions(MONITOR_STATUS.id, {
-          ...context,
-          [ALERT_DETAILS_URL]: getAlertDetailsUrl(basePath, spaceId, alertUuid),
-        });
+      statusRule.handleDownMonitorThresholdAlert({
+        downConfigs,
       });
 
       setRecoveredAlertsContext({
-        alertFactory,
+        alertsClient,
         basePath,
-        getAlertUuid,
         spaceId,
-        staleDownConfigs,
-        upConfigs,
         dateFormat,
         tz,
+        params,
+        groupByLocation,
+        staleDownConfigs,
+        upConfigs,
       });
 
       return {
         state: updateState(ruleState, !isEmpty(downConfigs), { downConfigs }),
       };
     },
-    alerts: UptimeRuleTypeAlertDefinition,
+    alerts: SyntheticsRuleTypeAlertDefinition,
+    fieldsForAAD: Object.keys(syntheticsRuleFieldMap),
     getViewInAppRelativeUrl: ({ rule }: GetViewInAppRelativeUrlFnOpts<{}>) =>
       observabilityPaths.ruleDetails(rule.id),
   });

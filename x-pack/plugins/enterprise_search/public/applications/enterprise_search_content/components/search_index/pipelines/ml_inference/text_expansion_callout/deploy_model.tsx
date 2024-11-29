@@ -19,7 +19,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, FormattedHTMLMessage } from '@kbn/i18n-react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { docLinks } from '../../../../../../shared/doc_links';
 
@@ -71,7 +71,7 @@ export const DeployModel = ({
           <EuiFlexGroup direction="column">
             <EuiFlexItem>
               <EuiText size="s">
-                <FormattedHTMLMessage
+                <FormattedMessage
                   id="xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.body"
                   defaultMessage="ELSER (Elastic Learned Sparse EncodeR) is Elastic's NLP model for English semantic search, utilizing sparse vectors. It prioritizes intent and contextual meaning over literal term matching, optimized specifically for English documents and queries on the Elastic platform."
                   tagName="p"

@@ -28,7 +28,7 @@ export const FILE_FORMATS = {
   DELIMITED: 'delimited',
   NDJSON: 'ndjson',
   SEMI_STRUCTURED_TEXT: 'semi_structured_text',
-  // XML: 'xml',
+  TIKA: 'tika',
 };
 
 export const SUPPORTED_FIELD_TYPES = {
@@ -47,6 +47,9 @@ export const SUPPORTED_FIELD_TYPES = {
   NESTED: 'nested',
   STRING: 'string',
   TEXT: 'text',
+  SEMANTIC_TEXT: 'semantic_text',
+  DENSE_VECTOR: 'dense_vector',
+  SPARSE_VECTOR: 'sparse_vector',
   VERSION: 'version',
   UNKNOWN: 'unknown',
 } as const;
@@ -59,6 +62,7 @@ export const OMIT_FIELDS: string[] = [
   '_version',
   '_score',
   '_tier',
+  '_ignored',
 ];
 
 export const NON_AGGREGATABLE_FIELD_TYPES = new Set<string>([
@@ -72,3 +76,4 @@ export const featureTitle = i18n.translate('xpack.dataVisualizer.title', {
   defaultMessage: 'Upload a file',
 });
 export const featureId = `file_data_visualizer`;
+export const SUPPORTED_FIELD_TYPES_LIST: string[] = Object.values(SUPPORTED_FIELD_TYPES);

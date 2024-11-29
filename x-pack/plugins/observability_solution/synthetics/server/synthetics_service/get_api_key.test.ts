@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { getAPIKeyForSyntheticsService, syntheticsIndex } from './get_api_key';
+import {
+  getAPIKeyForSyntheticsService,
+  getServiceApiKeyPrivileges,
+  syntheticsIndex,
+} from './get_api_key';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { coreMock } from '@kbn/core/server/mocks';
@@ -15,7 +19,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 
 import * as authUtils from './authentication/check_has_privilege';
 import { SyntheticsServerSetup } from '../types';
-import { getUptimeESMockClient } from '../legacy_uptime/lib/requests/test_helpers';
+import { getUptimeESMockClient } from '../queries/test_helpers';
 
 describe('getAPIKeyTest', function () {
   const core = coreMock.createStart();
@@ -30,7 +34,7 @@ describe('getAPIKeyTest', function () {
     security,
     encryptedSavedObjects,
     savedObjectsClient: core.savedObjects.getScopedClient(request),
-    uptimeEsClient: getUptimeESMockClient().uptimeEsClient,
+    syntheticsEsClient: getUptimeESMockClient().syntheticsEsClient,
   } as unknown as SyntheticsServerSetup;
 
   security.authc.apiKeys.areAPIKeysEnabled = jest.fn().mockReturnValue(true);
@@ -83,6 +87,18 @@ describe('getAPIKeyTest', function () {
       'ba997842-b0cf-4429-aa9d-578d9bf0d391'
     );
   });
+
+  it.each([
+    [true, ['monitor', 'read_pipeline']],
+    [false, ['monitor', 'read_pipeline', 'read_ilm']],
+  ])(
+    'Includes/excludes `read_ilm` priv when serverless is mode is %s',
+    (isServerlessEs, expectedClusterPrivs) => {
+      const { cluster } = getServiceApiKeyPrivileges(isServerlessEs);
+
+      expect(cluster).toEqual(expectedClusterPrivs);
+    }
+  );
 
   it('invalidates api keys with missing read permissions', async () => {
     jest.spyOn(authUtils, 'checkHasPrivileges').mockResolvedValue({

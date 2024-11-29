@@ -14,12 +14,16 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
 import { type DataViewEditorService as DataViewEditorServiceSpec } from '@kbn/data-view-editor-plugin/public';
 import { INDEX_PATTERN_TYPE } from '@kbn/data-views-plugin/public';
+import type { FinderAttributes, SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 import { createPath } from '../../routing/router';
 import { ML_PAGES } from '../../../../common/constants/locator';
 import { DataDriftIndexPatternsEditor } from './data_drift_index_patterns_editor';
 
 import { MlPageHeader } from '../../components/page_header';
 import { useMlKibana, useNavigateToPath } from '../../contexts/kibana';
+
+type SavedObject = SavedObjectCommon<FinderAttributes & { isTextBasedQuery?: boolean }>;
+
 export const DataDriftIndexOrSearchRedirect: FC = () => {
   const navigateToPath = useNavigateToPath();
   const { contentManagement, uiSettings } = useMlKibana().services;
@@ -49,6 +53,7 @@ export const DataDriftIndexOrSearchRedirect: FC = () => {
         </MlPageHeader>
         <EuiPanel hasShadow={false} hasBorder>
           <SavedObjectFinder
+            id="mlDataDriftDataViewsPicker"
             key="searchSavedObjectFinder"
             onChoose={onObjectSelection}
             showFilter
@@ -65,6 +70,9 @@ export const DataDriftIndexOrSearchRedirect: FC = () => {
                     defaultMessage: 'Saved search',
                   }
                 ),
+                showSavedObject: (savedObject: SavedObject) =>
+                  // ES|QL Based saved searches are not supported in Data Drift, filter them out
+                  savedObject.attributes.isTextBasedQuery !== true,
               },
               {
                 type: 'index-pattern',

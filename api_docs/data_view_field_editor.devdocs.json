@@ -195,7 +195,7 @@
             "label": "render",
             "description": [],
             "signature": [
-              "() => JSX.Element"
+              "() => React.JSX.Element"
             ],
             "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/editors/default/default.tsx",
             "deprecated": false,
@@ -558,6 +558,14 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
+              " | ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewLazy",
+                "text": "DataViewLazy"
+              },
               "; }"
             ],
             "path": "src/plugins/data_view_field_editor/public/open_delete_modal.tsx",
@@ -649,6 +657,14 @@
                 "docId": "kibDataViewsPluginApi",
                 "section": "def-common.DataView",
                 "text": "DataView"
+              },
+              " | ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewLazy",
+                "text": "DataViewLazy"
               },
               "; }"
             ],
@@ -1019,7 +1035,9 @@
               "section": "def-public.OpenFieldEditorOptions",
               "text": "OpenFieldEditorOptions"
             },
-            ") => () => void"
+            ") => Promise<",
+            "CloseEditor",
+            ">"
           ],
           "path": "src/plugins/data_view_field_editor/public/types.ts",
           "deprecated": false,
@@ -1067,7 +1085,9 @@
               "section": "def-public.OpenFieldDeleteModalOptions",
               "text": "OpenFieldDeleteModalOptions"
             },
-            ") => () => void"
+            ") => Promise<",
+            "CloseEditor",
+            ">"
           ],
           "path": "src/plugins/data_view_field_editor/public/types.ts",
           "deprecated": false,
@@ -1173,14 +1193,14 @@
             {
               "parentPluginId": "dataViewFieldEditor",
               "id": "def-public.PluginStart.DeleteRuntimeFieldProvider.$1",
-              "type": "CompoundType",
+              "type": "Uncategorized",
               "tags": [],
               "label": "props",
               "description": [],
               "signature": [
-                "P & { children?: React.ReactNode; }"
+                "P"
               ],
-              "path": "node_modules/@types/react/index.d.ts",
+              "path": "node_modules/@types/react/ts5.0/index.d.ts",
               "deprecated": false,
               "trackAdoption": false
             },
@@ -1194,7 +1214,7 @@
               "signature": [
                 "any"
               ],
-              "path": "node_modules/@types/react/index.d.ts",
+              "path": "node_modules/@types/react/ts5.0/index.d.ts",
               "deprecated": false,
               "trackAdoption": false
             }

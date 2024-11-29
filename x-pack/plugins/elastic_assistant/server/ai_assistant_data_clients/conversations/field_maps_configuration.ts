@@ -147,7 +147,7 @@ export const conversationsFieldMap: FieldMap = {
     array: false,
     required: false,
   },
-  'api_config.connector_type_title': {
+  'api_config.action_type_id': {
     type: 'keyword',
     array: false,
     required: false,

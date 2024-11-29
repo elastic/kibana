@@ -33,11 +33,6 @@ export function CSharpFrameHeadingRenderer({
       </>
     );
   } else {
-    return (
-      <DefaultFrameHeadingRenderer
-        fileDetailComponent={FileDetail}
-        stackframe={stackframe}
-      />
-    );
+    return <DefaultFrameHeadingRenderer fileDetailComponent={FileDetail} stackframe={stackframe} />;
   }
 }

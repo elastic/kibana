@@ -9,11 +9,13 @@ import { ElasticsearchClientMock, elasticsearchServiceMock } from '@kbn/core/ser
 import moment from 'moment';
 import { SLO_DESTINATION_INDEX_PATTERN } from '../../common/constants';
 import { Duration, DurationUnit } from '../domain/models';
+import { BurnRatesClient } from './burn_rates_client';
 import { createSLO } from './fixtures/slo';
 import { sevenDaysRolling, weeklyCalendarAligned } from './fixtures/time_window';
+import { createBurnRatesClientMock } from './mocks';
 import { DefaultSummaryClient } from './summary_client';
 
-const commonEsResponse = {
+const createEsResponse = (good: number = 90, total: number = 100) => ({
   took: 100,
   timed_out: false,
   _shards: {
@@ -25,36 +27,35 @@ const commonEsResponse = {
   hits: {
     hits: [],
   },
-};
-
-const createEsResponse = (good: number = 90, total: number = 100) => ({
-  ...commonEsResponse,
-  responses: [
-    {
-      ...commonEsResponse,
-      aggregations: {
-        good: { value: good },
-        total: { value: total },
-      },
-    },
-  ],
+  aggregations: {
+    good: { value: good },
+    total: { value: total },
+  },
 });
 
 describe('SummaryClient', () => {
   let esClientMock: ElasticsearchClientMock;
+  let burnRatesClientMock: jest.Mocked<BurnRatesClient>;
 
   beforeEach(() => {
     esClientMock = elasticsearchServiceMock.createElasticsearchClient();
+    burnRatesClientMock = createBurnRatesClientMock();
+
+    burnRatesClientMock.calculate.mockResolvedValueOnce([
+      { name: '5m', burnRate: 0.5, sli: 0.9 },
+      { name: '1h', burnRate: 0.6, sli: 0.9 },
+      { name: '1d', burnRate: 0.7, sli: 0.9 },
+    ]);
   });
 
   describe('fetchSummary', () => {
     describe('with rolling and occurrences SLO', () => {
       it('returns the summary', async () => {
         const slo = createSLO({ timeWindow: sevenDaysRolling() });
-        esClientMock.msearch.mockResolvedValueOnce(createEsResponse());
-        const summaryClient = new DefaultSummaryClient(esClientMock);
+        esClientMock.search.mockResolvedValueOnce(createEsResponse());
+        const summaryClient = new DefaultSummaryClient(esClientMock, burnRatesClientMock);
 
-        const result = await summaryClient.computeSummary(slo);
+        const result = await summaryClient.computeSummary({ slo });
 
         expect(result).toMatchSnapshot();
         expect(esClientMock.search.mock.calls[0][0]).toEqual({
@@ -67,7 +68,7 @@ describe('SummaryClient', () => {
                 { term: { 'slo.revision': slo.revision } },
                 {
                   range: {
-                    '@timestamp': { gte: expect.anything(), lt: expect.anything() },
+                    '@timestamp': { gte: expect.anything(), lte: expect.anything() },
                   },
                 },
               ],
@@ -86,10 +87,10 @@ describe('SummaryClient', () => {
         const slo = createSLO({
           timeWindow: weeklyCalendarAligned(),
         });
-        esClientMock.msearch.mockResolvedValueOnce(createEsResponse());
-        const summaryClient = new DefaultSummaryClient(esClientMock);
+        esClientMock.search.mockResolvedValueOnce(createEsResponse());
+        const summaryClient = new DefaultSummaryClient(esClientMock, burnRatesClientMock);
 
-        await summaryClient.computeSummary(slo);
+        await summaryClient.computeSummary({ slo });
 
         expect(esClientMock.search.mock.calls[0][0]).toEqual({
           index: SLO_DESTINATION_INDEX_PATTERN,
@@ -103,7 +104,7 @@ describe('SummaryClient', () => {
                   range: {
                     '@timestamp': {
                       gte: expect.anything(),
-                      lt: expect.anything(),
+                      lte: expect.anything(),
                     },
                   },
                 },
@@ -129,10 +130,10 @@ describe('SummaryClient', () => {
           },
           timeWindow: sevenDaysRolling(),
         });
-        esClientMock.msearch.mockResolvedValueOnce(createEsResponse());
-        const summaryClient = new DefaultSummaryClient(esClientMock);
+        esClientMock.search.mockResolvedValueOnce(createEsResponse());
+        const summaryClient = new DefaultSummaryClient(esClientMock, burnRatesClientMock);
 
-        const result = await summaryClient.computeSummary(slo);
+        const result = await summaryClient.computeSummary({ slo });
 
         expect(result).toMatchSnapshot();
         expect(esClientMock.search.mock.calls[0][0]).toEqual({
@@ -145,23 +146,15 @@ describe('SummaryClient', () => {
                 { term: { 'slo.revision': slo.revision } },
                 {
                   range: {
-                    '@timestamp': { gte: expect.anything(), lt: expect.anything() },
+                    '@timestamp': { gte: expect.anything(), lte: expect.anything() },
                   },
                 },
               ],
             },
           },
           aggs: {
-            good: {
-              sum: {
-                field: 'slo.isGoodSlice',
-              },
-            },
-            total: {
-              value_count: {
-                field: 'slo.isGoodSlice',
-              },
-            },
+            good: { sum: { field: 'slo.isGoodSlice' } },
+            total: { value_count: { field: 'slo.isGoodSlice' } },
           },
         });
       });
@@ -178,10 +171,10 @@ describe('SummaryClient', () => {
           },
           timeWindow: weeklyCalendarAligned(),
         });
-        esClientMock.msearch.mockResolvedValueOnce(createEsResponse());
-        const summaryClient = new DefaultSummaryClient(esClientMock);
+        esClientMock.search.mockResolvedValueOnce(createEsResponse());
+        const summaryClient = new DefaultSummaryClient(esClientMock, burnRatesClientMock);
 
-        const result = await summaryClient.computeSummary(slo);
+        const result = await summaryClient.computeSummary({ slo });
 
         expect(result).toMatchSnapshot();
 
@@ -197,7 +190,7 @@ describe('SummaryClient', () => {
                   range: {
                     '@timestamp': {
                       gte: expect.anything(),
-                      lt: expect.anything(),
+                      lte: expect.anything(),
                     },
                   },
                 },
@@ -205,16 +198,8 @@ describe('SummaryClient', () => {
             },
           },
           aggs: {
-            good: {
-              sum: {
-                field: 'slo.isGoodSlice',
-              },
-            },
-            total: {
-              value_count: {
-                field: 'slo.isGoodSlice',
-              },
-            },
+            good: { sum: { field: 'slo.isGoodSlice' } },
+            total: { value_count: { field: 'slo.isGoodSlice' } },
           },
         });
       });

@@ -23,6 +23,7 @@ import { bulkCreateWithSuppression } from '../utils/bulk_create_with_suppression
 import type { GenericBulkCreateResponse } from '../utils/bulk_create_with_suppression';
 import { wrapSuppressedThresholdALerts } from './wrap_suppressed_threshold_alerts';
 import { transformBulkCreatedItemsToHits } from './utils';
+import type { ExperimentalFeatures } from '../../../../../common';
 
 interface BulkCreateSuppressedThresholdAlertsParams {
   buckets: ThresholdBucket[];
@@ -35,6 +36,7 @@ interface BulkCreateSuppressedThresholdAlertsParams {
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
   spaceId: string;
   runOpts: RunOpts<ThresholdRuleParams>;
+  experimentalFeatures: ExperimentalFeatures;
 }
 
 /**
@@ -53,6 +55,7 @@ export const bulkCreateSuppressedThresholdAlerts = async ({
   ruleExecutionLogger,
   spaceId,
   runOpts,
+  experimentalFeatures,
 }: BulkCreateSuppressedThresholdAlertsParams): Promise<{
   bulkCreateResult: GenericBulkCreateResponse<BaseFieldsLatest & SuppressionFieldsLatest>;
   unsuppressedAlerts: Array<SearchHit<unknown>>;
@@ -81,6 +84,7 @@ export const bulkCreateSuppressedThresholdAlerts = async ({
     to,
     suppressionWindow,
     threshold: ruleParams.threshold,
+    intendedTimestamp: runOpts.intendedTimestamp,
   });
 
   const bulkCreateResult = await bulkCreateWithSuppression({
@@ -90,6 +94,7 @@ export const bulkCreateSuppressedThresholdAlerts = async ({
     services,
     suppressionWindow,
     alertTimestampOverride: runOpts.alertTimestampOverride,
+    experimentalFeatures,
   });
 
   return {

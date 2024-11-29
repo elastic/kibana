@@ -29,6 +29,7 @@ export const commonFormatters: CommonFormatMap = {
   [ConfigKey.REVISION]: null,
   [ConfigKey.MONITOR_SOURCE_TYPE]: null,
   [ConfigKey.FORM_MONITOR_TYPE]: null,
+  [ConfigKey.LABELS]: null,
   [ConfigKey.JOURNEY_ID]: stringToJsonFormatter,
   [ConfigKey.PROJECT_ID]: stringToJsonFormatter,
   [ConfigKey.CUSTOM_HEARTBEAT_ID]: stringToJsonFormatter,
@@ -37,12 +38,14 @@ export const commonFormatters: CommonFormatMap = {
   [ConfigKey.MONITOR_QUERY_ID]: stringToJsonFormatter,
   [ConfigKey.PARAMS]: null,
   [ConfigKey.MAX_ATTEMPTS]: null,
+  retest_on_failure: null,
   [ConfigKey.SCHEDULE]: (fields) =>
     JSON.stringify(
       `@every ${fields[ConfigKey.SCHEDULE]?.number}${fields[ConfigKey.SCHEDULE]?.unit}`
     ),
   [ConfigKey.TAGS]: arrayToJsonFormatter,
   [ConfigKey.TIMEOUT]: secondsToCronFormatter,
+  // @ts-expect-error upgrade typescript v5.1.6
   [ConfigKey.MONITOR_SOURCE_TYPE]: (fields) =>
     fields[ConfigKey.MONITOR_SOURCE_TYPE] || SourceType.UI,
 };

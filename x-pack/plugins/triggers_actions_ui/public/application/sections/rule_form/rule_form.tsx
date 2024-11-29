@@ -43,7 +43,10 @@ import {
   EuiToolTip,
   EuiCallOut,
   EuiAccordion,
+  useEuiTheme,
+  COLOR_MODES_STANDARD,
 } from '@elastic/eui';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { capitalize } from 'lodash';
 import { KibanaFeature } from '@kbn/features-plugin/public';
 import {
@@ -54,24 +57,27 @@ import {
 } from '@kbn/alerting-plugin/common/parse_duration';
 import {
   RuleActionParam,
-  ALERTS_FEATURE_ID,
+  ALERTING_FEATURE_ID,
   RecoveredActionGroup,
   isActionGroupDisabledForActionTypeId,
   RuleActionAlertsFilterProperty,
+  RuleActionKey,
+  Flapping,
 } from '@kbn/alerting-plugin/common';
 import { AlertingConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { AlertConsumers } from '@kbn/rule-data-utils';
+import { IS_RULE_SPECIFIC_FLAPPING_ENABLED } from '@kbn/alerts-ui-shared/src/common/constants/rule_flapping';
 import { RuleReducerAction, InitialRule } from './rule_reducer';
 import {
   RuleTypeModel,
   Rule,
   IErrorObject,
-  RuleAction,
   RuleType,
   RuleTypeRegistryContract,
   ActionTypeRegistryContract,
   TriggersActionsUiConfig,
   RuleCreationValidConsumer,
+  RuleUiAction,
 } from '../../../types';
 import { getTimeOptions } from '../../../common/lib/get_time_options';
 import { ActionForm } from '../action_connector_form';
@@ -93,6 +99,7 @@ import { SectionLoading } from '../../components/section_loading';
 import { RuleFormConsumerSelection, VALID_CONSUMERS } from './rule_form_consumer_selection';
 import { getInitialInterval } from './get_initial_interval';
 import { useLoadRuleTypesQuery } from '../../hooks/use_load_rule_types_query';
+import { RuleFormAdvancedOptions } from './rule_form_advanced_options';
 
 const ENTER_KEY = 13;
 
@@ -198,6 +205,7 @@ export const RuleForm = ({
     dataViews,
   } = useKibana().services;
   const canShowActions = hasShowActionsCapability(capabilities);
+  const { colorMode } = useEuiTheme();
 
   const [ruleTypeModel, setRuleTypeModel] = useState<RuleTypeModel | null>(null);
   const flyoutBodyOverflowRef = useRef<HTMLDivElement | HTMLSpanElement | null>(null);
@@ -262,7 +270,7 @@ export const RuleForm = ({
           })
         )
         .filter((item) =>
-          rule.consumer === ALERTS_FEATURE_ID
+          rule.consumer === ALERTING_FEATURE_ID
             ? !item.ruleTypeModel.requiresAppContext
             : item.ruleType!.producer === rule.consumer
         );
@@ -360,7 +368,7 @@ export const RuleForm = ({
   );
 
   const setActions = useCallback(
-    (updatedActions: RuleAction[]) => setRuleProperty('actions', updatedActions),
+    (updatedActions: RuleUiAction[]) => setRuleProperty('actions', updatedActions),
     [setRuleProperty]
   );
 
@@ -372,9 +380,9 @@ export const RuleForm = ({
     dispatch({ command: { type: 'setScheduleProperty' }, payload: { key, value } });
   };
 
-  const setActionProperty = <Key extends keyof RuleAction>(
+  const setActionProperty = <Key extends RuleActionKey>(
     key: Key,
-    value: RuleAction[Key] | null,
+    value: RuleActionParam | null,
     index: number
   ) => {
     dispatch({ command: { type: 'setRuleActionProperty' }, payload: { key, value, index } });
@@ -403,6 +411,12 @@ export const RuleForm = ({
 
   const setAlertDelayProperty = (key: string, value: any) => {
     dispatch({ command: { type: 'setAlertDelayProperty' }, payload: { key, value } });
+  };
+
+  const onAlertDelayChange = (value: string) => {
+    const parsedValue = value === '' ? '' : parseInt(value, 10);
+    setAlertDelayProperty('active', parsedValue || 1);
+    setAlertDelay(parsedValue || undefined);
   };
 
   useEffect(() => {
@@ -438,7 +452,7 @@ export const RuleForm = ({
   const authorizedConsumers = useMemo(() => {
     // If the app context provides a consumer, we assume that consumer is
     // is what we set for all rules that is created in that context
-    if (rule.consumer !== ALERTS_FEATURE_ID) {
+    if (rule.consumer !== ALERTING_FEATURE_ID) {
       return [];
     }
 
@@ -612,27 +626,13 @@ export const RuleForm = ({
     </Fragment>
   ));
 
-  const labelForRuleChecked = [
-    i18n.translate('xpack.triggersActionsUI.sections.ruleForm.checkFieldLabel', {
-      defaultMessage: 'Check every',
-    }),
-    <EuiIconTip
-      position="right"
-      type="questionInCircle"
-      content={i18n.translate('xpack.triggersActionsUI.sections.ruleForm.checkWithTooltip', {
-        defaultMessage:
-          'Define how often to evaluate the condition. Checks are queued; they run as close to the defined value as capacity allows.',
-      })}
-    />,
-  ];
-
   const getHelpTextForInterval = () => {
     if (!config || !config.minimumScheduleInterval) {
       return '';
     }
 
     // No help text if there is an error
-    if (errors['schedule.interval'].length > 0) {
+    if (errors['schedule.interval'].length) {
       return '';
     }
 
@@ -764,24 +764,26 @@ export const RuleForm = ({
               </SectionLoading>
             }
           >
-            <RuleParamsExpressionComponent
-              id={rule.id}
-              ruleParams={rule.params}
-              ruleInterval={`${ruleInterval ?? 1}${ruleIntervalUnit}`}
-              ruleThrottle={''}
-              alertNotifyWhen={rule.notifyWhen ?? 'onActionGroupChange'}
-              errors={errors}
-              setRuleParams={setRuleParams}
-              setRuleProperty={setRuleProperty}
-              defaultActionGroupId={defaultActionGroupId}
-              actionGroups={selectedRuleType.actionGroups}
-              metadata={metadata}
-              charts={charts}
-              data={data}
-              dataViews={dataViews}
-              unifiedSearch={unifiedSearch}
-              onChangeMetaData={onChangeMetaData}
-            />
+            <EuiThemeProvider darkMode={colorMode === COLOR_MODES_STANDARD.dark}>
+              <RuleParamsExpressionComponent
+                id={rule.id}
+                ruleParams={rule.params}
+                ruleInterval={`${ruleInterval ?? 1}${ruleIntervalUnit}`}
+                ruleThrottle={''}
+                alertNotifyWhen={rule.notifyWhen ?? 'onActionGroupChange'}
+                errors={errors}
+                setRuleParams={setRuleParams}
+                setRuleProperty={setRuleProperty}
+                defaultActionGroupId={defaultActionGroupId}
+                actionGroups={selectedRuleType.actionGroups}
+                metadata={metadata}
+                charts={charts}
+                data={data}
+                dataViews={dataViews}
+                unifiedSearch={unifiedSearch}
+                onChangeMetaData={onChangeMetaData}
+              />
+            </EuiThemeProvider>
           </Suspense>
         </EuiErrorBoundary>
       ) : null}
@@ -790,19 +792,45 @@ export const RuleForm = ({
           <EuiFlexItem>
             <EuiFormRow
               fullWidth
+              label={
+                <EuiFlexGroup gutterSize="xs">
+                  <EuiFlexItem>
+                    {i18n.translate('xpack.triggersActionsUI.sections.ruleForm.ruleScheduleLabel', {
+                      defaultMessage: 'Rule schedule',
+                    })}
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiIconTip
+                      content={i18n.translate(
+                        'xpack.triggersActionsUI.sections.ruleForm.checkWithTooltip',
+                        {
+                          defaultMessage:
+                            'Define how often to evaluate the condition. Checks are queued; they run as close to the defined value as capacity allows.',
+                        }
+                      )}
+                      position="top"
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              }
               data-test-subj="intervalFormRow"
               display="rowCompressed"
               helpText={getHelpTextForInterval()}
-              isInvalid={errors['schedule.interval'].length > 0}
-              error={errors['schedule.interval']}
+              isInvalid={!!errors['schedule.interval'].length}
+              error={errors['schedule.interval'] as string[]}
             >
               <EuiFlexGroup gutterSize="s">
                 <EuiFlexItem grow={2}>
                   <EuiFieldNumber
-                    prepend={labelForRuleChecked}
+                    prepend={i18n.translate(
+                      'xpack.triggersActionsUI.sections.ruleForm.checkFieldLabel',
+                      {
+                        defaultMessage: 'Check every',
+                      }
+                    )}
                     fullWidth
                     min={1}
-                    isInvalid={errors['schedule.interval'].length > 0}
+                    isInvalid={!!errors['schedule.interval'].length}
                     value={ruleInterval || ''}
                     name="interval"
                     data-test-subj="intervalInput"
@@ -848,45 +876,14 @@ export const RuleForm = ({
             </EuiText>
           }
         >
-          <EuiSpacer size="s" />
-          <EuiFormRow fullWidth data-test-subj="alertDelayFormRow" display="rowCompressed">
-            <EuiFieldNumber
-              fullWidth
-              min={1}
-              value={alertDelay || ''}
-              name="alertDelay"
-              data-test-subj="alertDelayInput"
-              prepend={[
-                i18n.translate('xpack.triggersActionsUI.sections.ruleForm.alertDelayFieldLabel', {
-                  defaultMessage: 'Alert after',
-                }),
-                <EuiIconTip
-                  position="right"
-                  type="questionInCircle"
-                  content={
-                    <FormattedMessage
-                      id="xpack.triggersActionsUI.sections.ruleForm.alertDelayFieldHelp"
-                      defaultMessage="An alert occurs only when the specified number of consecutive runs meet the rule conditions."
-                    />
-                  }
-                />,
-              ]}
-              append={i18n.translate(
-                'xpack.triggersActionsUI.sections.ruleForm.alertDelayFieldAppendLabel',
-                {
-                  defaultMessage: 'consecutive matches',
-                }
-              )}
-              onChange={(e) => {
-                const value = e.target.value;
-                if (value === '' || INTEGER_REGEX.test(value)) {
-                  const parsedValue = value === '' ? '' : parseInt(value, 10);
-                  setAlertDelayProperty('active', parsedValue || 1);
-                  setAlertDelay(parsedValue || undefined);
-                }
-              }}
-            />
-          </EuiFormRow>
+          <EuiSpacer size="m" />
+          <RuleFormAdvancedOptions
+            alertDelay={alertDelay}
+            flappingSettings={rule.flapping}
+            onAlertDelayChange={onAlertDelayChange}
+            onFlappingChange={(flapping) => setRuleProperty('flapping', flapping as Flapping)}
+            enabledFlapping={IS_RULE_SPECIFIC_FLAPPING_ENABLED}
+          />
         </EuiAccordion>
       </EuiFlexItem>
       {shouldShowConsumerSelect && (
@@ -910,10 +907,10 @@ export const RuleForm = ({
       rule.ruleTypeId &&
       selectedRuleType ? (
         <>
-          {errors.actionConnectors.length >= 1 ? (
+          {!!errors.actionConnectors.length ? (
             <>
               <EuiSpacer />
-              <EuiCallOut color="danger" size="s" title={errors.actionConnectors} />
+              <EuiCallOut color="danger" size="s" title={errors.actionConnectors as string} />
               <EuiSpacer />
             </>
           ) : null}
@@ -982,13 +979,13 @@ export const RuleForm = ({
                 defaultMessage="Name"
               />
             }
-            isInvalid={errors.name.length > 0 && rule.name !== undefined}
-            error={errors.name}
+            isInvalid={!!errors.name.length && rule.name !== undefined}
+            error={errors.name as string}
           >
             <EuiFieldText
               fullWidth
               autoFocus={true}
-              isInvalid={errors.name.length > 0 && rule.name !== undefined}
+              isInvalid={!!errors.name.length && rule.name !== undefined}
               name="name"
               data-test-subj="ruleNameInput"
               value={rule.name || ''}
@@ -1118,10 +1115,10 @@ export const RuleForm = ({
               </EuiFlexGroup>
             </EuiFormRow>
             <EuiSpacer />
-            {errors.ruleTypeId.length >= 1 && rule.ruleTypeId !== undefined ? (
+            {!!errors.ruleTypeId.length && rule.ruleTypeId !== undefined ? (
               <>
                 <EuiSpacer />
-                <EuiCallOut color="danger" size="s" title={errors.ruleTypeId} />
+                <EuiCallOut color="danger" size="s" title={errors.ruleTypeId as string} />
                 <EuiSpacer />
               </>
             ) : null}

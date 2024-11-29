@@ -47,7 +47,7 @@ describe('check_capabilities', () => {
       );
       const { capabilities } = await getCapabilities();
       const count = Object.keys(capabilities).length;
-      expect(count).toBe(42);
+      expect(count).toBe(44);
     });
   });
 
@@ -86,6 +86,7 @@ describe('check_capabilities', () => {
       expect(capabilities.canCloseJob).toBe(false);
       expect(capabilities.canResetJob).toBe(false);
       expect(capabilities.canForecastJob).toBe(false);
+      expect(capabilities.canDeleteForecast).toBe(false);
       expect(capabilities.canStartStopDatafeed).toBe(false);
       expect(capabilities.canUpdateJob).toBe(false);
       expect(capabilities.canCreateDatafeed).toBe(false);
@@ -103,6 +104,7 @@ describe('check_capabilities', () => {
       expect(capabilities.canCreateMlAlerts).toBe(false);
       expect(capabilities.canViewMlNodes).toBe(false);
       expect(capabilities.canCreateTrainedModels).toBe(false);
+      expect(capabilities.canCreateInferenceEndpoint).toBe(false);
       expect(capabilities.canDeleteTrainedModels).toBe(false);
       expect(capabilities.canStartStopTrainedModels).toBe(false);
 
@@ -145,6 +147,7 @@ describe('check_capabilities', () => {
       expect(capabilities.canCloseJob).toBe(true);
       expect(capabilities.canResetJob).toBe(true);
       expect(capabilities.canForecastJob).toBe(true);
+      expect(capabilities.canDeleteForecast).toBe(true);
       expect(capabilities.canStartStopDatafeed).toBe(true);
       expect(capabilities.canUpdateJob).toBe(true);
       expect(capabilities.canCreateDatafeed).toBe(true);
@@ -162,6 +165,7 @@ describe('check_capabilities', () => {
       expect(capabilities.canCreateMlAlerts).toBe(true);
       expect(capabilities.canViewMlNodes).toBe(true);
       expect(capabilities.canCreateTrainedModels).toBe(true);
+      expect(capabilities.canCreateInferenceEndpoint).toBe(true);
       expect(capabilities.canDeleteTrainedModels).toBe(true);
       expect(capabilities.canStartStopTrainedModels).toBe(true);
 
@@ -204,6 +208,7 @@ describe('check_capabilities', () => {
       expect(capabilities.canCloseJob).toBe(false);
       expect(capabilities.canResetJob).toBe(false);
       expect(capabilities.canForecastJob).toBe(false);
+      expect(capabilities.canDeleteForecast).toBe(false);
       expect(capabilities.canStartStopDatafeed).toBe(false);
       expect(capabilities.canUpdateJob).toBe(false);
       expect(capabilities.canCreateDatafeed).toBe(false);
@@ -221,6 +226,7 @@ describe('check_capabilities', () => {
       expect(capabilities.canCreateMlAlerts).toBe(false);
       expect(capabilities.canViewMlNodes).toBe(false);
       expect(capabilities.canCreateTrainedModels).toBe(false);
+      expect(capabilities.canCreateInferenceEndpoint).toBe(false);
       expect(capabilities.canDeleteTrainedModels).toBe(false);
       expect(capabilities.canStartStopTrainedModels).toBe(false);
 
@@ -263,6 +269,7 @@ describe('check_capabilities', () => {
       expect(capabilities.canCloseJob).toBe(false);
       expect(capabilities.canResetJob).toBe(false);
       expect(capabilities.canForecastJob).toBe(false);
+      expect(capabilities.canDeleteForecast).toBe(false);
       expect(capabilities.canStartStopDatafeed).toBe(false);
       expect(capabilities.canUpdateJob).toBe(false);
       expect(capabilities.canCreateDatafeed).toBe(false);
@@ -280,6 +287,7 @@ describe('check_capabilities', () => {
       expect(capabilities.canCreateMlAlerts).toBe(false);
       expect(capabilities.canViewMlNodes).toBe(false);
       expect(capabilities.canCreateTrainedModels).toBe(false);
+      expect(capabilities.canCreateInferenceEndpoint).toBe(false);
       expect(capabilities.canDeleteTrainedModels).toBe(false);
       expect(capabilities.canStartStopTrainedModels).toBe(false);
 
@@ -322,6 +330,7 @@ describe('check_capabilities', () => {
       expect(capabilities.canCloseJob).toBe(false);
       expect(capabilities.canResetJob).toBe(false);
       expect(capabilities.canForecastJob).toBe(false);
+      expect(capabilities.canDeleteForecast).toBe(false);
       expect(capabilities.canStartStopDatafeed).toBe(false);
       expect(capabilities.canUpdateJob).toBe(false);
       expect(capabilities.canCreateDatafeed).toBe(false);
@@ -339,6 +348,7 @@ describe('check_capabilities', () => {
       expect(capabilities.canCreateMlAlerts).toBe(false);
       expect(capabilities.canViewMlNodes).toBe(false);
       expect(capabilities.canCreateTrainedModels).toBe(false);
+      expect(capabilities.canCreateInferenceEndpoint).toBe(false);
       expect(capabilities.canDeleteTrainedModels).toBe(false);
       expect(capabilities.canStartStopTrainedModels).toBe(false);
 
@@ -382,6 +392,7 @@ describe('check_capabilities', () => {
     expect(capabilities.canCloseJob).toBe(false);
     expect(capabilities.canResetJob).toBe(false);
     expect(capabilities.canForecastJob).toBe(false);
+    expect(capabilities.canDeleteForecast).toBe(false);
     expect(capabilities.canStartStopDatafeed).toBe(false);
     expect(capabilities.canUpdateJob).toBe(false);
     expect(capabilities.canCreateDatafeed).toBe(false);
@@ -399,6 +410,7 @@ describe('check_capabilities', () => {
     expect(capabilities.canCreateMlAlerts).toBe(false);
     expect(capabilities.canViewMlNodes).toBe(false);
     expect(capabilities.canCreateTrainedModels).toBe(false);
+    expect(capabilities.canCreateInferenceEndpoint).toBe(false);
     expect(capabilities.canDeleteTrainedModels).toBe(false);
     expect(capabilities.canStartStopTrainedModels).toBe(false);
 

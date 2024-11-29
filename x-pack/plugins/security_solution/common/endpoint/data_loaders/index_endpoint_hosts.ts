@@ -18,6 +18,7 @@ import { usageTracker } from './usage_tracker';
 import { EndpointDocGenerator } from '../generate_data';
 import type { HostMetadata, HostPolicyResponse } from '../types';
 import type {
+  BuildFleetAgentBulkCreateOperationsResponse,
   DeleteIndexedFleetAgentsResponse,
   IndexedFleetAgentResponse,
 } from './index_fleet_agent';
@@ -41,7 +42,12 @@ import {
   indexFleetEndpointPolicy,
 } from './index_fleet_endpoint_policy';
 import { metadataCurrentIndexPattern } from '../constants';
-import { EndpointDataLoadingError, mergeAndAppendArrays, wrapErrorAndRejectPromise } from './utils';
+import {
+  EndpointDataLoadingError,
+  fetchActiveSpaceId,
+  mergeAndAppendArrays,
+  wrapErrorAndRejectPromise,
+} from './utils';
 
 export interface IndexedHostsResponse
   extends IndexedFleetAgentResponse,
@@ -111,6 +117,7 @@ export const indexEndpointHostDocs = usageTracker.track(
     const timeBetweenDocs = 6 * 3600 * 1000; // 6 hours between metadata documents
     const timestamp = new Date().getTime();
     const kibanaVersion = await fetchKibanaVersion(kbnClient);
+    const activeSpaceId = await fetchActiveSpaceId(kbnClient);
     const response: IndexedHostsResponse = {
       hosts: [],
       agents: [],
@@ -136,7 +143,7 @@ export const indexEndpointHostDocs = usageTracker.track(
 
     for (let j = 0; j < numDocs; j++) {
       generator.updateHostData();
-      generator.updateHostPolicyData();
+      generator.updateHostPolicyData({ excludeInitialPolicy: true });
 
       hostMetadata = generator.generateHostMetadata(
         timestamp - timeBetweenDocs * (numDocs - j - 1),
@@ -167,16 +174,32 @@ export const indexEndpointHostDocs = usageTracker.track(
         if (!wasAgentEnrolled) {
           wasAgentEnrolled = true;
 
-          const { agents, fleetAgentsIndex, operations } = buildFleetAgentBulkCreateOperations({
-            endpoints: [hostMetadata],
-            agentPolicyId: realPolicies[appliedPolicyId].policy_id,
-            kibanaVersion,
+          const agentOperations: BuildFleetAgentBulkCreateOperationsResponse = {
+            agents: [],
+            fleetAgentsIndex: '',
+            operations: [],
+          };
+
+          realPolicies[appliedPolicyId].policy_ids.forEach((policyId) => {
+            const { agents, fleetAgentsIndex, operations } = buildFleetAgentBulkCreateOperations({
+              endpoints: [hostMetadata],
+              agentPolicyId: policyId,
+              spaceId: activeSpaceId,
+              kibanaVersion,
+            });
+
+            agentOperations.agents = [...agentOperations.agents, ...agents];
+            agentOperations.fleetAgentsIndex = fleetAgentsIndex;
+            agentOperations.operations = [...agentOperations.operations, ...operations];
           });
 
-          bulkOperations.push(...operations);
-          agentId = agents[0]?.agent?.id ?? agentId;
+          bulkOperations.push(...agentOperations.operations);
+          agentId = agentOperations.agents[0]?.agent?.id ?? agentId;
 
-          mergeAndAppendArrays(response, { agents, fleetAgentsIndex });
+          mergeAndAppendArrays(response, {
+            agents: agentOperations.agents,
+            fleetAgentsIndex: agentOperations.fleetAgentsIndex,
+          });
         }
 
         // Update the Host metadata record with the ID of the "real" policy along with the enrolled agent id

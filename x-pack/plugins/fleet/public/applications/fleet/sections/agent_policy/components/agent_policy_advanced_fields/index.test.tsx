@@ -18,6 +18,8 @@ import type { AgentPolicy, NewAgentPolicy } from '../../../../../../../common/ty
 
 import { useLicense } from '../../../../../../hooks/use_license';
 
+import { useFleetStatus } from '../../../../hooks';
+
 import type { LicenseService } from '../../../../../../../common/services';
 import { generateNewAgentPolicyWithDefaults } from '../../../../../../../common/services';
 
@@ -26,8 +28,13 @@ import type { ValidationResults } from '../agent_policy_validation';
 import { AgentPolicyAdvancedOptionsContent } from '.';
 
 jest.mock('../../../../../../hooks/use_license');
+jest.mock('../../../../hooks', () => ({
+  ...jest.requireActual('../../../../hooks'),
+  useFleetStatus: jest.fn(),
+}));
 
 const mockedUseLicence = useLicense as jest.MockedFunction<typeof useLicense>;
+const mockedUseFleetStatus = useFleetStatus as jest.MockedFunction<typeof useFleetStatus>;
 
 describe('Agent policy advanced options content', () => {
   let testRender: TestRenderer;
@@ -40,6 +47,10 @@ describe('Agent policy advanced options content', () => {
       hasAtLeast: () => true,
       isPlatinum: () => true,
     } as unknown as LicenseService);
+  const useSpaceAwareness = () =>
+    mockedUseFleetStatus.mockReturnValue({
+      isSpaceAwarenessEnabled: true,
+    } as any);
 
   const render = ({
     isProtected = false,
@@ -47,6 +58,7 @@ describe('Agent policy advanced options content', () => {
     policyId = 'agent-policy-1',
     newAgentPolicy = false,
     packagePolicy = [createPackagePolicyMock()],
+    spaceIds = ['default'],
   } = {}) => {
     if (newAgentPolicy) {
       mockAgentPolicy = generateNewAgentPolicyWithDefaults();
@@ -56,6 +68,7 @@ describe('Agent policy advanced options content', () => {
         package_policies: packagePolicy,
         id: policyId,
         is_managed: isManaged,
+        space_ids: spaceIds,
       };
     }
 
@@ -72,6 +85,7 @@ describe('Agent policy advanced options content', () => {
   };
 
   beforeEach(() => {
+    mockedUseFleetStatus.mockReturnValue({} as any);
     testRender = createFleetTestRendererMock();
   });
   afterEach(() => {
@@ -161,6 +175,50 @@ describe('Agent policy advanced options content', () => {
         usePlatinumLicense();
         render({ newAgentPolicy: true });
         expect(renderResult.getByTestId('tamperProtectionSwitch')).toBeDisabled();
+      });
+    });
+  });
+
+  describe('Custom Fields', () => {
+    it('should render the CustomFields component with correct props', () => {
+      usePlatinumLicense();
+      render();
+      expect(renderResult.queryByText('Custom fields')).toBeInTheDocument();
+      expect(renderResult.queryByText('This policy has no custom fields')).toBeInTheDocument();
+    });
+  });
+
+  describe('Space selector', () => {
+    beforeEach(() => {
+      usePlatinumLicense();
+    });
+
+    describe('when space awareness is disabled', () => {
+      it('should not be rendered', () => {
+        render();
+        expect(renderResult.queryByTestId('spaceSelectorInput')).not.toBeInTheDocument();
+      });
+    });
+
+    describe('when space awareness is enabled', () => {
+      beforeEach(() => {
+        useSpaceAwareness();
+      });
+
+      describe('when the user has access to all policy spaces', () => {
+        it('should render the space selection input with the Create space link', () => {
+          render();
+          expect(renderResult.queryByTestId('spaceSelectorInput')).toBeInTheDocument();
+          expect(renderResult.queryByTestId('spaceSelectorInputLink')).toBeInTheDocument();
+        });
+      });
+
+      describe('when the user does not have access to all policy spaces', () => {
+        it('should render the space selection input without the Create space link', () => {
+          render({ spaceIds: ['default', '?'] });
+          expect(renderResult.queryByTestId('spaceSelectorInput')).toBeInTheDocument();
+          expect(renderResult.queryByTestId('spaceSelectorInputLink')).not.toBeInTheDocument();
+        });
       });
     });
   });

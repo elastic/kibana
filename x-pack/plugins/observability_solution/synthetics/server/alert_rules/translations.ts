@@ -53,6 +53,15 @@ export const commonMonitorStateI18: Array<{
     ),
   },
   {
+    name: 'monitorTags',
+    description: i18n.translate(
+      'xpack.synthetics.alertRules.monitorStatus.actionVariables.state.monitorTags',
+      {
+        defaultMessage: 'Tags associated with the monitor.',
+      }
+    ),
+  },
+  {
     name: 'status',
     description: i18n.translate(
       'xpack.synthetics.alertRules.monitorStatus.actionVariables.state.status',
@@ -71,11 +80,29 @@ export const commonMonitorStateI18: Array<{
     ),
   },
   {
+    name: 'lastErrorStack',
+    description: i18n.translate(
+      'xpack.synthetics.alertRules.monitorStatus.actionVariables.state.lastErrorStack',
+      {
+        defaultMessage: 'Monitor last error stack trace.',
+      }
+    ),
+  },
+  {
     name: 'locationName',
     description: i18n.translate(
       'xpack.synthetics.alertRules.monitorStatus.actionVariables.state.locationName',
       {
         defaultMessage: 'Location name from which the check is performed.',
+      }
+    ),
+  },
+  {
+    name: 'locationNames',
+    description: i18n.translate(
+      'xpack.synthetics.alertRules.monitorStatus.actionVariables.state.locationNames',
+      {
+        defaultMessage: 'Location names from which the checks are performed.',
       }
     ),
   },
@@ -103,6 +130,24 @@ export const commonMonitorStateI18: Array<{
       'xpack.synthetics.alertRules.monitorStatus.actionVariables.state.checkedAt',
       {
         defaultMessage: 'Timestamp of the monitor run.',
+      }
+    ),
+  },
+  {
+    name: 'serviceName',
+    description: i18n.translate(
+      'xpack.synthetics.alertRules.monitorStatus.actionVariables.state.serviceName',
+      {
+        defaultMessage: 'Service name associated with the monitor.',
+      }
+    ),
+  },
+  {
+    name: 'labels',
+    description: i18n.translate(
+      'xpack.synthetics.alertRules.monitorStatus.actionVariables.state.labels',
+      {
+        defaultMessage: 'Labels associated with the monitor.',
       }
     ),
   },

@@ -15,54 +15,54 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { groupBy } from 'lodash';
 import { transparentize } from 'polished';
-import React, { useState } from 'react';
+import React, { useEffect, useRef } from 'react';
+import { WindowScroller, AutoSizer } from 'react-virtualized';
+import { areEqual, ListChildComponentProps, VariableSizeList as List } from 'react-window';
 import { asBigNumber } from '../../../../../../../common/utils/formatters';
-import { getCriticalPath } from '../../../../../../../common/critical_path/get_critical_path';
 import { useTheme } from '../../../../../../hooks/use_theme';
 import { Margins } from '../../../../../shared/charts/timeline';
 import {
+  IWaterfallNodeFlatten,
   IWaterfall,
   IWaterfallSpanOrTransaction,
 } from './waterfall_helpers/waterfall_helpers';
 import { WaterfallItem } from './waterfall_item';
+import { WaterfallContextProvider } from './context/waterfall_context';
+import { useWaterfallContext } from './context/use_waterfall';
 
 interface AccordionWaterfallProps {
   isOpen: boolean;
-  item: IWaterfallSpanOrTransaction;
-  level: number;
   duration: IWaterfall['duration'];
   waterfallItemId?: string;
   waterfall: IWaterfall;
   timelineMargins: Margins;
-  onClickWaterfallItem: (
-    item: IWaterfallSpanOrTransaction,
-    flyoutDetailTab: string
-  ) => void;
+  onClickWaterfallItem: (item: IWaterfallSpanOrTransaction, flyoutDetailTab: string) => void;
   showCriticalPath: boolean;
   maxLevelOpen: number;
 }
 
-const ACCORDION_HEIGHT = '48px';
+type WaterfallProps = Omit<
+  AccordionWaterfallProps,
+  'item' | 'maxLevelOpen' | 'showCriticalPath' | 'waterfall' | 'isOpen'
+>;
+
+interface WaterfallNodeProps extends WaterfallProps {
+  node: IWaterfallNodeFlatten;
+}
+
+const ACCORDION_HEIGHT = 48;
 
 const StyledAccordion = euiStyled(EuiAccordion).withConfig({
-  shouldForwardProp: (prop) =>
-    !['childrenCount', 'marginLeftLevel', 'hasError'].includes(prop),
+  shouldForwardProp: (prop) => !['marginLeftLevel', 'hasError'].includes(prop),
 })<
   EuiAccordionProps & {
-    childrenCount: number;
     marginLeftLevel: number;
     hasError: boolean;
   }
 >`
-  .waterfall_accordion {
-    border-top: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
-  }
 
-  .euiAccordion__childWrapper {
-    transition: none;
-  }
+  border-top: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
 
   ${(props) => {
     const borderLeft = props.hasError
@@ -70,7 +70,7 @@ const StyledAccordion = euiStyled(EuiAccordion).withConfig({
       : `1px solid ${props.theme.eui.euiColorLightShade};`;
     return `.button_${props.id} {
       width: 100%;
-      height: ${ACCORDION_HEIGHT};
+      height: ${ACCORDION_HEIGHT}px;
       margin-left: ${props.marginLeftLevel}px;
       border-left: ${borderLeft}
       &:hover {
@@ -85,119 +85,167 @@ const StyledAccordion = euiStyled(EuiAccordion).withConfig({
   }
 `;
 
-export function AccordionWaterfall(props: AccordionWaterfallProps) {
-  const {
-    item,
-    level,
-    duration,
-    waterfall,
-    waterfallItemId,
-    timelineMargins,
-    onClickWaterfallItem,
-    showCriticalPath,
-    maxLevelOpen,
-  } = props;
-  const theme = useTheme();
-
-  const [isOpen, setIsOpen] = useState(props.isOpen);
-
-  let children = waterfall.childrenByParentId[item.id] || [];
-
-  const criticalPath = showCriticalPath
-    ? getCriticalPath(waterfall)
-    : undefined;
-
-  const criticalPathSegmentsById = groupBy(
-    criticalPath?.segments,
-    (segment) => segment.item.id
+export function AccordionWaterfall({
+  maxLevelOpen,
+  showCriticalPath,
+  waterfall,
+  isOpen,
+  ...props
+}: AccordionWaterfallProps) {
+  return (
+    <WaterfallContextProvider
+      maxLevelOpen={maxLevelOpen}
+      showCriticalPath={showCriticalPath}
+      waterfall={waterfall}
+      isOpen={isOpen}
+    >
+      <Waterfall {...props} />
+    </WaterfallContextProvider>
   );
+}
 
-  let displayedColor = item.color;
+function Waterfall(props: WaterfallProps) {
+  const listRef = useRef<List>(null);
+  const rowSizeMapRef = useRef(new Map<number, number>());
+  const { traceList } = useWaterfallContext();
 
-  if (showCriticalPath) {
-    children = children.filter(
-      (child) => criticalPathSegmentsById[child.id]?.length
+  const onRowLoad = (index: number, size: number) => {
+    rowSizeMapRef.current.set(index, size);
+  };
+
+  const getRowSize = (index: number) => {
+    // adds 1px for the border top
+    return rowSizeMapRef.current.get(index) || ACCORDION_HEIGHT + 1;
+  };
+
+  const onScroll = ({ scrollTop }: { scrollTop: number }) => {
+    listRef.current?.scrollTo(scrollTop);
+  };
+
+  return (
+    <WindowScroller onScroll={onScroll}>
+      {({ registerChild }) => (
+        <AutoSizer disableHeight>
+          {({ width }) => (
+            // @ts-expect-error @types/react@18 Type 'HTMLDivElement' is not assignable to type 'ReactNode'
+            <div data-test-subj="waterfall" ref={registerChild}>
+              <List
+                ref={listRef}
+                style={{ height: '100%' }}
+                itemCount={traceList.length}
+                itemSize={getRowSize}
+                height={window.innerHeight}
+                width={width}
+                itemData={{ ...props, traceList, onLoad: onRowLoad }}
+              >
+                {VirtualRow}
+              </List>
+            </div>
+          )}
+        </AutoSizer>
+      )}
+    </WindowScroller>
+  );
+}
+
+const VirtualRow = React.memo(
+  ({
+    index,
+    style,
+    data,
+  }: ListChildComponentProps<
+    Omit<WaterfallNodeProps, 'node'> & {
+      traceList: IWaterfallNodeFlatten[];
+      onLoad: (index: number, size: number) => void;
+    }
+  >) => {
+    const { onLoad, traceList, ...props } = data;
+
+    const ref = React.useRef<HTMLDivElement | null>(null);
+    useEffect(() => {
+      onLoad(index, ref.current?.getBoundingClientRect().height ?? ACCORDION_HEIGHT);
+    }, [index, onLoad]);
+
+    return (
+      <div style={style} ref={ref}>
+        <WaterfallNode {...props} node={traceList[index]} />
+      </div>
     );
-    displayedColor = transparentize(0.5, item.color);
-  }
+  },
+  areEqual
+);
 
-  const errorCount = waterfall.getErrorCount(item.id);
+const WaterfallNode = React.memo((props: WaterfallNodeProps) => {
+  const theme = useTheme();
+  const { duration, waterfallItemId, onClickWaterfallItem, timelineMargins, node } = props;
+  const { criticalPathSegmentsById, getErrorCount, updateTreeNode, showCriticalPath } =
+    useWaterfallContext();
 
-  // To indent the items creating the parent/child tree
-  const marginLeftLevel = 8 * level;
+  const displayedColor = showCriticalPath ? transparentize(0.5, node.item.color) : node.item.color;
+  const marginLeftLevel = 8 * node.level;
+  const hasToggle = !!node.childrenToLoad;
+  const errorCount = getErrorCount(node.item.id);
 
-  function toggleAccordion() {
-    setIsOpen((isCurrentOpen) => !isCurrentOpen);
-  }
+  const segments = criticalPathSegmentsById[node.item.id]
+    ?.filter((segment) => segment.self)
+    .map((segment) => ({
+      id: segment.item.id,
+      color: theme.eui.euiColorAccent,
+      left: (segment.offset - node.item.offset - node.item.skew) / node.item.duration,
+      width: segment.duration / node.item.duration,
+    }));
 
-  const hasToggle = !!children.length;
+  const toggleAccordion = () => {
+    updateTreeNode({ ...node, expanded: !node.expanded });
+  };
+
+  const onWaterfallItemClick = (flyoutDetailTab: string) => {
+    onClickWaterfallItem(node.item, flyoutDetailTab);
+  };
 
   return (
     <StyledAccordion
       data-test-subj="waterfallItem"
-      className="waterfall_accordion"
       style={{ position: 'relative' }}
-      buttonClassName={`button_${item.id}`}
-      key={item.id}
-      id={item.id}
-      hasError={item.doc.event?.outcome === 'failure'}
+      buttonClassName={`button_${node.item.id}`}
+      id={node.item.id}
+      hasError={node.item.doc.event?.outcome === 'failure'}
       marginLeftLevel={marginLeftLevel}
-      childrenCount={children.length}
       buttonContentClassName="accordion__buttonContent"
       buttonContent={
-        <EuiFlexGroup gutterSize="none">
+        <EuiFlexGroup gutterSize="none" responsive={false}>
           <EuiFlexItem grow={false}>
             <ToggleAccordionButton
               show={hasToggle}
-              isOpen={isOpen}
-              childrenCount={children.length}
+              isOpen={node.expanded}
+              childrenCount={node.childrenToLoad}
               onClick={toggleAccordion}
             />
           </EuiFlexItem>
           <EuiFlexItem>
             <WaterfallItem
-              key={item.id}
+              key={node.item.id}
               timelineMargins={timelineMargins}
               color={displayedColor}
-              item={item}
+              item={node.item}
               hasToggle={hasToggle}
               totalDuration={duration}
-              isSelected={item.id === waterfallItemId}
+              isSelected={node.item.id === waterfallItemId}
               errorCount={errorCount}
               marginLeftLevel={marginLeftLevel}
-              onClick={(flyoutDetailTab: string) => {
-                onClickWaterfallItem(item, flyoutDetailTab);
-              }}
-              segments={criticalPathSegmentsById[item.id]
-                ?.filter((segment) => segment.self)
-                .map((segment) => ({
-                  color: theme.eui.euiColorAccent,
-                  left:
-                    (segment.offset - item.offset - item.skew) / item.duration,
-                  width: segment.duration / item.duration,
-                }))}
+              onClick={onWaterfallItemClick}
+              segments={segments}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
       }
       arrowDisplay="none"
-      initialIsOpen={true}
-      forceState={isOpen ? 'open' : 'closed'}
+      initialIsOpen
+      forceState={node.expanded ? 'open' : 'closed'}
       onToggle={toggleAccordion}
-    >
-      {isOpen &&
-        children.map((child) => (
-          <AccordionWaterfall
-            {...props}
-            key={child.id}
-            isOpen={maxLevelOpen > level}
-            level={level + 1}
-            item={child}
-          />
-        ))}
-    </StyledAccordion>
+    />
   );
-}
+});
 
 function ToggleAccordionButton({
   show,
@@ -221,7 +269,7 @@ function ToggleAccordionButton({
         display: 'flex',
       }}
     >
-      <EuiFlexGroup gutterSize="xs" alignItems="center" justifyContent="center">
+      <EuiFlexGroup gutterSize="xs" alignItems="center" justifyContent="center" responsive={false}>
         <EuiFlexItem grow={false}>
           {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events */}
           <div

@@ -14,8 +14,8 @@ import {
   createAndSyncRuleAndAlertsFactory,
   waitForRiskScoresToBePresent,
   riskEngineRouteHelpersFactory,
-  cleanRiskEngine,
   getRiskEngineStats,
+  areRiskScoreIndicesEmpty,
 } from '../../utils';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
@@ -25,104 +25,91 @@ export default ({ getService }: FtrProviderContext) => {
   const log = getService('log');
   const retry = getService('retry');
   const es = getService('es');
-
   const createAndSyncRuleAndAlerts = createAndSyncRuleAndAlertsFactory({ supertest, log });
   const riskEngineRoutes = riskEngineRouteHelpersFactory(supertest);
 
-  describe('@ess @serverless telemetry', async () => {
+  describe('@ess @serverless telemetry', () => {
     const { indexListOfDocuments } = dataGeneratorFactory({
       es,
       index: 'ecs_compliant',
       log,
     });
-    const kibanaServer = getService('kibanaServer');
 
     before(async () => {
+      await riskEngineRoutes.cleanUp();
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
     });
 
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
-    });
-
-    beforeEach(async () => {
-      await cleanRiskEngine({ kibanaServer, es, log });
       await deleteAllAlerts(supertest, log, es);
       await deleteAllRules(supertest, log);
     });
 
-    describe('Risk engine not enabled', () => {
-      it('should has empty riskEngineMetrics', async () => {
-        await retry.try(async () => {
-          const stats = await getRiskEngineStats(supertest, log);
-          const expected = {};
-          expect(stats).to.eql(expected);
-        });
+    beforeEach(async () => {
+      await deleteAllAlerts(supertest, log, es);
+      await deleteAllRules(supertest, log);
+    });
+
+    afterEach(async () => {
+      await riskEngineRoutes.cleanUp();
+    });
+
+    it('should return empty metrics when the risk engine is disabled', async () => {
+      await retry.try(async () => {
+        const stats = await getRiskEngineStats(supertest, log);
+        expect(stats).to.eql({});
       });
     });
 
-    describe('Risk engine enabled', () => {
-      let hostId: string;
-      let userId: string;
+    it('@skipInServerlessMKI should return metrics with expected values when risk engine is enabled', async () => {
+      expect(await areRiskScoreIndicesEmpty({ log, es })).to.be(true);
 
-      beforeEach(async () => {
-        hostId = uuidv4();
-        const hostEvent = buildDocument({ host: { name: 'host-1' } }, hostId);
-        await indexListOfDocuments(
-          Array(10)
-            .fill(hostEvent)
-            .map((event, index) => ({
-              ...event,
-              'host.name': `host-${index}`,
-            }))
-        );
+      const hostId = uuidv4();
+      const hostDocs = Array(10)
+        .fill(buildDocument({}, hostId))
+        .map((event, index) => ({
+          ...event,
+          'host.name': `host-${index}`,
+        }));
 
-        userId = uuidv4();
-        const userEvent = buildDocument({ user: { name: 'user-1' } }, userId);
-        await indexListOfDocuments(
-          Array(10)
-            .fill(userEvent)
-            .map((event, index) => ({
-              ...event,
-              'user.name': `user-${index}`,
-            }))
-        );
+      const userId = uuidv4();
+      const userDocs = Array(10)
+        .fill(buildDocument({}, userId))
+        .map((event, index) => ({
+          ...event,
+          'user.name': `user-${index}`,
+        }));
 
-        await createAndSyncRuleAndAlerts({
-          query: `id: ${userId} or id: ${hostId}`,
-          alerts: 20,
-          riskScore: 40,
-        });
+      await indexListOfDocuments([...hostDocs, ...userDocs]);
 
-        await riskEngineRoutes.init();
+      await createAndSyncRuleAndAlerts({
+        query: `id: ${userId} or id: ${hostId}`,
+        alerts: 20,
+        riskScore: 40,
       });
 
-      afterEach(async () => {
-        await cleanRiskEngine({ kibanaServer, es, log });
-        await deleteAllAlerts(supertest, log, es);
-        await deleteAllRules(supertest, log);
-      });
+      await riskEngineRoutes.init();
 
-      it('should return riskEngineMetrics with expected values', async () => {
-        await waitForRiskScoresToBePresent({ es, log, scoreCount: 20 });
-        await retry.try(async () => {
-          const {
-            all_risk_scores_index_size: allRiskScoreIndexSize,
-            unique_risk_scores_index_size: uniqueRiskScoreIndexSize,
-            ...otherStats
-          } = await getRiskEngineStats(supertest, log);
-          const expected = {
-            unique_host_risk_score_total: 0,
-            unique_user_risk_score_total: 0,
-            unique_user_risk_score_day: 0,
-            unique_host_risk_score_day: 0,
-            all_user_risk_scores_total: 10,
-            all_host_risk_scores_total: 10,
-            all_user_risk_scores_total_day: 10,
-            all_host_risk_scores_total_day: 10,
-          };
-          expect(otherStats).to.eql(expected);
-        });
+      await waitForRiskScoresToBePresent({ es, log, scoreCount: 20 });
+
+      await retry.try(async () => {
+        const {
+          all_risk_scores_index_size: allRiskScoreIndexSize,
+          unique_risk_scores_index_size: uniqueRiskScoreIndexSize,
+          ...otherStats
+        } = await getRiskEngineStats(supertest, log);
+        const expected = {
+          unique_host_risk_score_total: 10,
+          unique_user_risk_score_total: 10,
+          unique_user_risk_score_day: 10,
+          unique_host_risk_score_day: 10,
+          all_user_risk_scores_total: 10,
+          all_host_risk_scores_total: 10,
+          all_user_risk_scores_total_day: 10,
+          all_host_risk_scores_total_day: 10,
+        };
+        expect(otherStats).to.eql(expected);
       });
     });
   });

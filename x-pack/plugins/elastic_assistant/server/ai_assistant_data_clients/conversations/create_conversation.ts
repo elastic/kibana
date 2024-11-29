@@ -6,14 +6,13 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { AuthenticatedUser, ElasticsearchClient, Logger } from '@kbn/core/server';
 
 import {
   ConversationCategoryEnum,
   ConversationCreateProps,
   ConversationResponse,
 } from '@kbn/elastic-assistant-common';
-import { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 import { getConversation } from './get_conversation';
 import { CreateMessageSchema } from './types';
 
@@ -39,7 +38,7 @@ export const createConversation = async ({
   try {
     const response = await esClient.create({
       body,
-      id: uuidv4(),
+      id: conversation?.id || uuidv4(),
       index: conversationIndex,
       refresh: 'wait_for',
     });
@@ -85,8 +84,8 @@ export const transformToCreateScheme = (
     category: category ?? ConversationCategoryEnum.assistant,
     api_config: apiConfig
       ? {
+          action_type_id: apiConfig.actionTypeId,
           connector_id: apiConfig.connectorId,
-          connector_type_title: apiConfig.connectorTypeTitle,
           default_system_prompt_id: apiConfig.defaultSystemPromptId,
           model: apiConfig.model,
           provider: apiConfig.provider,
@@ -95,18 +94,27 @@ export const transformToCreateScheme = (
     exclude_from_last_conversation_storage: excludeFromLastConversationStorage,
     is_default: isDefault,
     messages: messages?.map((message) => ({
-      '@timestamp': new Date(message.timestamp).toISOString(),
+      '@timestamp': message.timestamp,
       content: message.content,
       is_error: message.isError,
       reader: message.reader,
       role: message.role,
-      trace_data: {
-        trace_id: message.traceData?.traceId,
-        transaction_id: message.traceData?.transactionId,
-      },
+      ...(message.traceData
+        ? {
+            trace_data: {
+              trace_id: message.traceData.traceId,
+              transaction_id: message.traceData.transactionId,
+            },
+          }
+        : {}),
     })),
     updated_at: createdAt,
-    replacements,
+    replacements: replacements
+      ? Object.keys(replacements).map((key) => ({
+          uuid: key,
+          value: replacements[key],
+        }))
+      : undefined,
     namespace: spaceId,
   };
 };

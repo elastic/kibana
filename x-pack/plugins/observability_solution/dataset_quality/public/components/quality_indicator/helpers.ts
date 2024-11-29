@@ -6,19 +6,8 @@
  */
 
 import { countBy } from 'lodash';
-import {
-  POOR_QUALITY_MINIMUM_PERCENTAGE,
-  DEGRADED_QUALITY_MINIMUM_PERCENTAGE,
-} from '../../../common/constants';
-import { QualityIndicators } from '../common';
-
-export const mapPercentageToQuality = (percentage: number): QualityIndicators => {
-  return percentage > POOR_QUALITY_MINIMUM_PERCENTAGE
-    ? 'poor'
-    : percentage > DEGRADED_QUALITY_MINIMUM_PERCENTAGE
-    ? 'degraded'
-    : 'good';
-};
+import { QualityIndicators } from '../../../common/types';
+import { mapPercentageToQuality } from '../../../common/utils';
 
 export const mapPercentagesToQualityCounts = (
   percentages: number[]

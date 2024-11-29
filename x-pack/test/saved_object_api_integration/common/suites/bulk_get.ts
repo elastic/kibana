@@ -125,7 +125,7 @@ export function bulkGetTestSuiteFactory(context: FtrProviderContext) {
           it(`should return ${test.responseStatusCode} ${test.title}`, async () => {
             await supertest
               .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_bulk_get`)
-              .auth(user?.username, user?.password)
+              .auth(user?.username!, user?.password!)
               .send(test.request)
               .expect(test.responseStatusCode)
               .then(test.responseBody);

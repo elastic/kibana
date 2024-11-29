@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { safeLoad } from 'js-yaml';
+import { load } from 'js-yaml';
 
 import {
   EuiFlyout,
@@ -28,7 +28,6 @@ import {
   EuiSpacer,
   EuiLink,
   EuiComboBox,
-  EuiBetaBadge,
   EuiText,
   EuiAccordion,
   EuiCode,
@@ -46,10 +45,13 @@ import { ExperimentalFeaturesService } from '../../../../../../services';
 
 import { outputType, RESERVED_CONFIG_YML_KEYS } from '../../../../../../../common/constants';
 
-import type { Output, FleetProxy } from '../../../../types';
-import { FLYOUT_MAX_WIDTH } from '../../constants';
+import { MAX_FLYOUT_WIDTH } from '../../../../constants';
 
-import { useBreadcrumbs, useStartServices } from '../../../../hooks';
+import type { Output, FleetProxy } from '../../../../types';
+
+import { useBreadcrumbs, useFleetStatus, useStartServices } from '../../../../hooks';
+
+import { ProxyWarning } from '../fleet_proxies_table/proxy_warning';
 
 import { OutputFormKafkaSection } from './output_form_kafka';
 
@@ -78,11 +80,25 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
   const form = useOutputForm(onClose, output, defaultOuput);
   const inputs = form.inputs;
   const { docLinks, cloud } = useStartServices();
-  const { outputSecretsStorage: isOutputSecretsStorageEnabled } = ExperimentalFeaturesService.get();
-  const [useSecretsStorage, setUseSecretsStorage] = React.useState(isOutputSecretsStorageEnabled);
+  const fleetStatus = useFleetStatus();
+
+  const [secretsToggleState, setSecretsToggleState] = useState<'disabled' | true | false>(
+    'disabled'
+  );
+
+  if (fleetStatus.isSecretsStorageEnabled !== undefined && secretsToggleState === 'disabled') {
+    setSecretsToggleState(fleetStatus.isSecretsStorageEnabled);
+  }
+
   const onToggleSecretStorage = (secretEnabled: boolean) => {
-    setUseSecretsStorage(secretEnabled);
+    if (secretsToggleState === 'disabled') {
+      return;
+    }
+
+    setSecretsToggleState(secretEnabled);
   };
+
+  const useSecretsStorage = secretsToggleState === true;
 
   const proxiesOptions = useMemo(
     () => proxies.map((proxy) => ({ value: proxy.id, label: proxy.name })),
@@ -215,7 +231,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
   };
 
   return (
-    <EuiFlyout maxWidth={FLYOUT_MAX_WIDTH} onClose={onClose}>
+    <EuiFlyout onClose={onClose} maxWidth={MAX_FLYOUT_WIDTH}>
       <EuiFlyoutHeader hasBorder={true}>
         <EuiTitle size="m">
           <h2 id="FleetEditOutputFlyoutTitle">
@@ -294,12 +310,6 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
                 data-test-subj="settingsOutputsFlyout.typeInput"
                 {...inputs.typeInput.props}
                 options={OUTPUT_TYPE_OPTIONS}
-                placeholder={i18n.translate(
-                  'xpack.fleet.settings.editOutputFlyout.typeInputPlaceholder',
-                  {
-                    defaultMessage: 'Specify type',
-                  }
-                )}
               />
               {renderTypeSpecificWarning()}
             </>
@@ -313,45 +323,37 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
               label={
                 <FormattedMessage
                   id="xpack.fleet.settings.editOutputFlyout.proxyIdLabel"
-                  defaultMessage="Proxy {badge}"
-                  values={{
-                    badge: (
-                      <EuiBetaBadge
-                        size="s"
-                        className="eui-alignTop"
-                        label={i18n.translate(
-                          'xpack.fleet.settings.editDownloadSourcesFlyout.proxyIdBetaBadge',
-                          {
-                            defaultMessage: 'Beta',
-                          }
-                        )}
-                      />
-                    ),
-                  }}
+                  defaultMessage="Proxy"
                 />
               }
             >
-              <EuiComboBox
-                fullWidth
-                data-test-subj="settingsOutputsFlyout.proxyIdInput"
-                {...inputs.proxyIdInput.props}
-                onChange={(options) => inputs.proxyIdInput.setValue(options?.[0]?.value ?? '')}
-                selectedOptions={
-                  inputs.proxyIdInput.value !== ''
-                    ? proxiesOptions.filter((option) => option.value === inputs.proxyIdInput.value)
-                    : []
-                }
-                options={proxiesOptions}
-                singleSelection={{ asPlainText: true }}
-                isDisabled={inputs.proxyIdInput.props.disabled}
-                isClearable={true}
-                placeholder={i18n.translate(
-                  'xpack.fleet.settings.editOutputFlyout.proxyIdPlaceholder',
-                  {
-                    defaultMessage: 'Select proxy',
+              <>
+                <EuiComboBox
+                  fullWidth
+                  data-test-subj="settingsOutputsFlyout.proxyIdInput"
+                  {...inputs.proxyIdInput.props}
+                  onChange={(options) => inputs.proxyIdInput.setValue(options?.[0]?.value ?? '')}
+                  selectedOptions={
+                    inputs.proxyIdInput.value !== ''
+                      ? proxiesOptions.filter(
+                          (option) => option.value === inputs.proxyIdInput.value
+                        )
+                      : []
                   }
-                )}
-              />
+                  options={proxiesOptions}
+                  singleSelection={{ asPlainText: true }}
+                  isDisabled={inputs.proxyIdInput.props.disabled}
+                  isClearable={true}
+                  placeholder={i18n.translate(
+                    'xpack.fleet.settings.editOutputFlyout.proxyIdPlaceholder',
+                    {
+                      defaultMessage: 'Select proxy',
+                    }
+                  )}
+                />
+                <EuiSpacer size="xs" />
+                <ProxyWarning />
+              </>
             </EuiFormRow>
           )}
           <EuiFormRow fullWidth {...inputs.defaultOutputInput.formRowProps}>
@@ -430,6 +432,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
                 }
               >
                 <EuiSelect
+                  fullWidth
                   data-test-subj="settingsOutputsFlyout.presetInput"
                   {...inputs.presetInput.props}
                   onChange={(e) => inputs.presetInput.setValue(e.target.value)}
@@ -437,7 +440,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
                     inputs.presetInput.props.disabled ||
                     outputYmlIncludesReservedPerformanceKey(
                       inputs.additionalYamlConfigInput.value,
-                      safeLoad
+                      load
                     )
                   }
                   options={[
@@ -454,7 +457,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
           {supportsPresets &&
             outputYmlIncludesReservedPerformanceKey(
               inputs.additionalYamlConfigInput.value,
-              safeLoad
+              load
             ) && (
               <>
                 <EuiSpacer size="s" />
@@ -505,7 +508,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
             <YamlCodeEditorWithPlaceholder
               value={inputs.additionalYamlConfigInput.value}
               onChange={(value) => {
-                if (outputYmlIncludesReservedPerformanceKey(value, safeLoad)) {
+                if (outputYmlIncludesReservedPerformanceKey(value, load)) {
                   inputs.presetInput.setValue('custom');
                 }
 

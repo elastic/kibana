@@ -1,15 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { estypes } from '@elastic/elasticsearch';
 import { schema } from '@kbn/config-schema';
 import { IRouter, RequestHandler, StartServicesAccessor } from '@kbn/core/server';
-import { FullValidationConfig } from '@kbn/core-http-server';
+import { VersionedRouteValidation } from '@kbn/core-http-server';
 import { INITIAL_REST_VERSION_INTERNAL as version } from '../../constants';
 import { IndexPatternsFetcher } from '../../fetcher';
 import type {
@@ -17,11 +18,7 @@ import type {
   DataViewsServerPluginStartDependencies,
 } from '../../types';
 import type { FieldDescriptorRestResponse } from '../route_types';
-import {
-  FIELDS_FOR_WILDCARD_PATH as path,
-  DATA_VIEWS_FIELDS_EXCLUDED_TIERS,
-} from '../../../common/constants';
-import { getIndexFilterDsl } from './utils';
+import { FIELDS_FOR_WILDCARD_PATH as path } from '../../../common/constants';
 
 /**
  * Accepts one of the following:
@@ -110,7 +107,7 @@ const FieldDescriptorSchema = schema.object({
   defaultFormatter: schema.maybe(schema.string()),
 });
 
-export const validate: FullValidationConfig<any, any, any> = {
+export const validate: VersionedRouteValidation<any, any, any> = {
   request: {
     query: querySchema,
     // not available to get request
@@ -118,10 +115,11 @@ export const validate: FullValidationConfig<any, any, any> = {
   },
   response: {
     200: {
-      body: schema.object({
-        fields: schema.arrayOf(FieldDescriptorSchema),
-        indices: schema.arrayOf(schema.string()),
-      }),
+      body: () =>
+        schema.object({
+          fields: schema.arrayOf(FieldDescriptorSchema),
+          indices: schema.arrayOf(schema.string()),
+        }),
     },
   },
 };
@@ -130,10 +128,11 @@ const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, I
   (isRollupsEnabled) => async (context, request, response) => {
     const core = await context.core;
     const { asCurrentUser } = core.elasticsearch.client;
-    const excludedTiers = await core.uiSettings.client.get<string>(
-      DATA_VIEWS_FIELDS_EXCLUDED_TIERS
-    );
-    const indexPatterns = new IndexPatternsFetcher(asCurrentUser, undefined, isRollupsEnabled());
+    const uiSettings = core.uiSettings.client;
+    const indexPatterns = new IndexPatternsFetcher(asCurrentUser, {
+      uiSettingsClient: uiSettings,
+      rollupsEnabled: isRollupsEnabled(),
+    });
 
     const {
       pattern,
@@ -172,7 +171,7 @@ const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, I
           includeUnmapped,
         },
         fieldTypes: parsedFieldTypes,
-        indexFilter: getIndexFilterDsl({ indexFilter, excludedTiers }),
+        indexFilter,
         allowHidden,
         includeEmptyFields,
         ...(parsedFields.length > 0 ? { fields: parsedFields } : {}),
@@ -209,7 +208,7 @@ const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, I
     }
   };
 
-export const registerFieldForWildcard = async (
+export const registerFieldForWildcard = (
   router: IRouter,
   getStartServices: StartServicesAccessor<
     DataViewsServerPluginStartDependencies,

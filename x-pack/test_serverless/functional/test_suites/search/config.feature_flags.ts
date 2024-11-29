@@ -18,11 +18,30 @@ export default createTestConfig({
   },
   suiteTags: { exclude: ['skipSvlSearch'] },
   // add feature flags
-  kbnServerArgs: ['--xpack.security.roleManagementEnabled=true'],
+  kbnServerArgs: [
+    `--xpack.cloud.id=ES3_FTR_TESTS:ZmFrZS1kb21haW4uY2xkLmVsc3RjLmNvJGZha2Vwcm9qZWN0aWQuZXMkZmFrZXByb2plY3RpZC5rYg==`,
+  ],
   // load tests in the index file
   testFiles: [require.resolve('./index.feature_flags.ts')],
 
   // include settings from project controller
   // https://github.com/elastic/project-controller/blob/main/internal/project/esproject/config/elasticsearch.yml
   esServerArgs: [],
+  apps: {
+    serverlessElasticsearch: {
+      pathname: '/app/elasticsearch/getting_started',
+    },
+    serverlessConnectors: {
+      pathname: '/app/connectors',
+    },
+    searchPlayground: {
+      pathname: '/app/search_playground',
+    },
+    elasticsearchStart: {
+      pathname: '/app/elasticsearch/start',
+    },
+    elasticsearchIndices: {
+      pathname: '/app/elasticsearch/indices',
+    },
+  },
 });

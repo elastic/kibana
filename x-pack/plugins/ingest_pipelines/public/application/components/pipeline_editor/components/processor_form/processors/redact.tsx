@@ -19,13 +19,13 @@ import {
   ValidationFunc,
 } from '../../../../../../shared_imports';
 
-import { XJsonEditor, InputList } from '../field_components';
+import { InputList, XJsonEditor } from '../field_components';
 
 import { FieldNameField } from './common_fields/field_name_field';
 import { IgnoreMissingField } from './common_fields/ignore_missing_field';
-import { FieldsConfig, to, from, EDITOR_PX_HEIGHT } from './shared';
+import { FieldsConfig, to, from, EDITOR_PX_HEIGHT, isXJsonField } from './shared';
 
-const { isJsonField, emptyField } = fieldValidators;
+const { emptyField } = fieldValidators;
 
 const i18nTexts = {
   addPatternLabel: i18n.translate(
@@ -68,8 +68,8 @@ const fieldsConfig: FieldsConfig = {
   /* Optional field configs */
   pattern_definitions: {
     type: FIELD_TYPES.TEXT,
-    deserializer: to.jsonString,
-    serializer: from.optionalJson,
+    deserializer: to.xJsonString,
+    serializer: from.optionalXJson,
     label: i18n.translate(
       'xpack.ingestPipelines.pipelineEditor.redactForm.patternDefinitionsLabel',
       {
@@ -85,7 +85,7 @@ const fieldsConfig: FieldsConfig = {
     ),
     validations: [
       {
-        validator: isJsonField(
+        validator: isXJsonField(
           i18n.translate(
             'xpack.ingestPipelines.pipelineEditor.redactForm.patternsDefinitionsInvalidJSONError',
             { defaultMessage: 'Invalid JSON' }
@@ -146,7 +146,11 @@ export const Redact: FunctionComponent = () => {
           return (
             <InputList
               label={fieldsConfig.patterns.label!}
-              helpText={fieldsConfig.patterns.helpText}
+              helpText={
+                typeof fieldsConfig.patterns.helpText === 'function'
+                  ? fieldsConfig.patterns.helpText()
+                  : fieldsConfig.patterns.helpText
+              }
               error={error}
               value={items}
               onAdd={addItem}

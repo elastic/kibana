@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { ResolvedTimelineWithOutcomeSavedObject } from '../../../../common/api/timeline';
-import { TimelineStatus, TimelineType } from '../../../../common/api/timeline';
+import type { ResolvedTimeline } from '../../../../common/api/timeline';
+import { TimelineStatusEnum, TimelineTypeEnum } from '../../../../common/api/timeline';
 
 export const mockResolvedSavedObject = {
   saved_object: {
@@ -74,7 +74,7 @@ export const mockResolvedTimeline = {
   eventType: 'all',
   filters: [],
   kqlMode: 'filter',
-  timelineType: TimelineType.default,
+  timelineType: TimelineTypeEnum.default,
   kqlQuery: { filterQuery: null },
   title: 'Test Timeline',
   sort: [
@@ -84,7 +84,7 @@ export const mockResolvedTimeline = {
       columnId: '@timestamp',
     },
   ],
-  status: TimelineStatus.active,
+  status: TimelineStatusEnum.active,
   created: 1632932987378,
   createdBy: 'tester',
   updated: 1632932988422,
@@ -117,7 +117,7 @@ export const mockPopulatedTimeline = {
   pinnedEventsSaveObject: [],
 };
 
-export const mockResolveTimelineResponse: ResolvedTimelineWithOutcomeSavedObject = {
+export const mockResolveTimelineResponse: ResolvedTimeline = {
   timeline: mockPopulatedTimeline,
   outcome: 'aliasMatch',
   alias_target_id: 'new-saved-object-id',

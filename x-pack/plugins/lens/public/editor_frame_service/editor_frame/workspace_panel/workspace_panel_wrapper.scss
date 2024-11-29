@@ -17,7 +17,6 @@
 
   .lnsWorkspacePanelWrapper__pageContentBody {
     @include euiBottomShadowMedium;
-    @include euiScrollBar;
     flex-grow: 1;
     display: flex;
     align-items: stretch;
@@ -25,7 +24,7 @@
     border-radius: $euiBorderRadius;
     background: $euiColorEmptyShade;
     height: 100%;
-
+    @include euiScrollBar;
     &>* {
       flex: 1 1 100%;
       display: flex;
@@ -46,7 +45,7 @@
 }
 
 .lnsWorkspacePanel__dragDrop {
-  &.domDragDrop-isDropTarget {
+  &.domDroppable--active {
     p {
       transition: filter $euiAnimSpeedFast ease-in-out;
       filter: blur(5px);
@@ -59,7 +58,7 @@
     }
   }
 
-  &.domDragDrop-isActiveDropTarget {
+  &.domDroppable--hover {
     .lnsDropIllustration__hand {
       animation: lnsWorkspacePanel__illustrationPulseContinuous 1.5s ease-in-out 0s infinite normal forwards;
     }

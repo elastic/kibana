@@ -23,6 +23,7 @@ import type {
 import { ProductFeatureKey } from '@kbn/security-solution-features/keys';
 import { httpServiceMock } from '@kbn/core-http-server-mocks';
 import type {
+  AuthzEnabled,
   KibanaRequest,
   LifecycleResponseFactory,
   OnPostAuthHandler,
@@ -40,8 +41,10 @@ const productFeature = {
 };
 const mockGetFeature = jest.fn().mockReturnValue(productFeature);
 jest.mock('@kbn/security-solution-features/product_features', () => ({
+  getAttackDiscoveryFeature: () => mockGetFeature(),
   getAssistantFeature: () => mockGetFeature(),
   getCasesFeature: () => mockGetFeature(),
+  getCasesV2Feature: () => mockGetFeature(),
   getSecurityFeature: () => mockGetFeature(),
 }));
 
@@ -54,8 +57,8 @@ describe('ProductFeaturesService', () => {
     const experimentalFeatures = {} as ExperimentalFeatures;
     new ProductFeaturesService(loggerMock.create(), experimentalFeatures);
 
-    expect(mockGetFeature).toHaveBeenCalledTimes(3);
-    expect(MockedProductFeatures).toHaveBeenCalledTimes(3);
+    expect(mockGetFeature).toHaveBeenCalledTimes(5);
+    expect(MockedProductFeatures).toHaveBeenCalledTimes(5);
   });
 
   it('should init all ProductFeatures when initialized', () => {
@@ -86,8 +89,10 @@ describe('ProductFeaturesService', () => {
     const mockSecurityConfig = new Map() as ProductFeaturesConfig<SecuritySubFeatureId>;
     const mockCasesConfig = new Map() as ProductFeaturesConfig<CasesSubFeatureId>;
     const mockAssistantConfig = new Map() as ProductFeaturesConfig<AssistantSubFeatureId>;
+    const mockAttackDiscoveryConfig = new Map() as ProductFeaturesConfig;
 
     const configurator: ProductFeaturesConfigurator = {
+      attackDiscovery: jest.fn(() => mockAttackDiscoveryConfig),
       security: jest.fn(() => mockSecurityConfig),
       cases: jest.fn(() => mockCasesConfig),
       securityAssistant: jest.fn(() => mockAssistantConfig),
@@ -97,6 +102,7 @@ describe('ProductFeaturesService', () => {
     expect(configurator.security).toHaveBeenCalled();
     expect(configurator.cases).toHaveBeenCalled();
     expect(configurator.securityAssistant).toHaveBeenCalled();
+    expect(configurator.attackDiscovery).toHaveBeenCalled();
 
     expect(MockedProductFeatures.mock.instances[0].setConfig).toHaveBeenCalledWith(
       mockSecurityConfig
@@ -104,6 +110,9 @@ describe('ProductFeaturesService', () => {
     expect(MockedProductFeatures.mock.instances[1].setConfig).toHaveBeenCalledWith(mockCasesConfig);
     expect(MockedProductFeatures.mock.instances[2].setConfig).toHaveBeenCalledWith(
       mockAssistantConfig
+    );
+    expect(MockedProductFeatures.mock.instances[3].setConfig).toHaveBeenCalledWith(
+      mockAttackDiscoveryConfig
     );
   });
 
@@ -127,8 +136,12 @@ describe('ProductFeaturesService', () => {
     const mockAssistantConfig = new Map([
       [ProductFeatureKey.assistant, {}],
     ]) as ProductFeaturesConfig<AssistantSubFeatureId>;
+    const mockAttackDiscoveryConfig = new Map([
+      [ProductFeatureKey.attackDiscovery, {}],
+    ]) as ProductFeaturesConfig;
 
     const configurator: ProductFeaturesConfigurator = {
+      attackDiscovery: jest.fn(() => mockAttackDiscoveryConfig),
       security: jest.fn(() => mockSecurityConfig),
       cases: jest.fn(() => mockCasesConfig),
       securityAssistant: jest.fn(() => mockAssistantConfig),
@@ -139,6 +152,7 @@ describe('ProductFeaturesService', () => {
     expect(productFeaturesService.isEnabled(ProductFeatureKey.endpointExceptions)).toEqual(true);
     expect(productFeaturesService.isEnabled(ProductFeatureKey.casesConnectors)).toEqual(true);
     expect(productFeaturesService.isEnabled(ProductFeatureKey.assistant)).toEqual(true);
+    expect(productFeaturesService.isEnabled(ProductFeatureKey.attackDiscovery)).toEqual(true);
     expect(productFeaturesService.isEnabled(ProductFeatureKey.externalRuleActions)).toEqual(false);
   });
 
@@ -169,13 +183,8 @@ describe('ProductFeaturesService', () => {
       lastRegisteredFn = fn;
     });
 
-    const getReq = (tags: string[] = []) =>
-      ({
-        route: { options: { tags } },
-        url: { pathname: '', search: '' },
-      } as unknown as KibanaRequest);
     const res = { notFound: jest.fn() } as unknown as LifecycleResponseFactory;
-    const toolkit = { next: jest.fn() };
+    const toolkit = httpServiceMock.createOnPostAuthToolkit();
 
     beforeEach(() => {
       jest.clearAllMocks();
@@ -192,93 +201,281 @@ describe('ProductFeaturesService', () => {
       expect(mockHttpSetup.registerOnPostAuth).toHaveBeenCalledTimes(1);
     });
 
-    it('should authorize when no tag matches', () => {
-      const experimentalFeatures = {} as ExperimentalFeatures;
-      const productFeaturesService = new ProductFeaturesService(
-        loggerMock.create(),
-        experimentalFeatures
-      );
-      productFeaturesService.registerApiAccessControl(mockHttpSetup);
+    describe('when using productFeature tag', () => {
+      const getReq = (tags: string[] = []) =>
+        ({
+          route: { options: { tags } },
+          url: { pathname: '', search: '' },
+        } as unknown as KibanaRequest);
 
-      lastRegisteredFn(getReq(['access:something', 'access:securitySolution']), res, toolkit);
+      it('should check when productFeature tag when it matches and return not found when not enabled', async () => {
+        const experimentalFeatures = {} as ExperimentalFeatures;
+        const productFeaturesService = new ProductFeaturesService(
+          loggerMock.create(),
+          experimentalFeatures
+        );
+        productFeaturesService.registerApiAccessControl(mockHttpSetup);
 
-      expect(MockedProductFeatures.mock.instances[0].isActionRegistered).not.toHaveBeenCalled();
-      expect(res.notFound).not.toHaveBeenCalled();
-      expect(toolkit.next).toHaveBeenCalledTimes(1);
+        productFeaturesService.isEnabled = jest.fn().mockReturnValueOnce(false);
+
+        await lastRegisteredFn(getReq(['securitySolutionProductFeature:foo']), res, toolkit);
+
+        expect(productFeaturesService.isEnabled).toHaveBeenCalledWith('foo');
+        expect(res.notFound).toHaveBeenCalledTimes(1);
+        expect(toolkit.next).not.toHaveBeenCalled();
+      });
+
+      it('should check when productFeature tag when it matches and continue when enabled', async () => {
+        const experimentalFeatures = {} as ExperimentalFeatures;
+        const productFeaturesService = new ProductFeaturesService(
+          loggerMock.create(),
+          experimentalFeatures
+        );
+        productFeaturesService.registerApiAccessControl(mockHttpSetup);
+
+        productFeaturesService.isEnabled = jest.fn().mockReturnValueOnce(true);
+
+        await lastRegisteredFn(getReq(['securitySolutionProductFeature:foo']), res, toolkit);
+
+        expect(productFeaturesService.isEnabled).toHaveBeenCalledWith('foo');
+        expect(res.notFound).not.toHaveBeenCalled();
+        expect(toolkit.next).toHaveBeenCalledTimes(1);
+      });
     });
 
-    it('should check when tag matches and return not found when not action registered', () => {
-      const experimentalFeatures = {} as ExperimentalFeatures;
-      const productFeaturesService = new ProductFeaturesService(
-        loggerMock.create(),
-        experimentalFeatures
-      );
-      productFeaturesService.registerApiAccessControl(mockHttpSetup);
+    // Documentation: https://docs.elastic.dev/kibana-dev-docs/key-concepts/security-api-authorization
+    describe('when using authorization', () => {
+      let productFeaturesService: ProductFeaturesService;
+      let mockIsActionRegistered: jest.Mock;
 
-      (MockedProductFeatures.mock.instances[0].isActionRegistered as jest.Mock).mockReturnValueOnce(
-        false
-      );
-      lastRegisteredFn(getReq(['access:securitySolution-foo']), res, toolkit);
+      beforeEach(() => {
+        const experimentalFeatures = {} as ExperimentalFeatures;
+        productFeaturesService = new ProductFeaturesService(
+          loggerMock.create(),
+          experimentalFeatures
+        );
+        productFeaturesService.registerApiAccessControl(mockHttpSetup);
+        mockIsActionRegistered = MockedProductFeatures.mock.instances[0]
+          .isActionRegistered as jest.Mock;
+      });
 
-      expect(MockedProductFeatures.mock.instances[0].isActionRegistered).toHaveBeenCalledWith(
-        'api:securitySolution-foo'
-      );
-      expect(res.notFound).toHaveBeenCalledTimes(1);
-      expect(toolkit.next).not.toHaveBeenCalled();
-    });
+      describe('when using access tag', () => {
+        const getReq = (tags: string[] = []) =>
+          ({
+            route: { options: { tags } },
+            url: { pathname: '', search: '' },
+          } as unknown as KibanaRequest);
 
-    it('should check when tag matches and continue when action registered', () => {
-      const experimentalFeatures = {} as ExperimentalFeatures;
-      const productFeaturesService = new ProductFeaturesService(
-        loggerMock.create(),
-        experimentalFeatures
-      );
-      productFeaturesService.registerApiAccessControl(mockHttpSetup);
+        it('should authorize when no tag matches', async () => {
+          await lastRegisteredFn(
+            getReq(['access:something', 'access:securitySolution']),
+            res,
+            toolkit
+          );
 
-      (MockedProductFeatures.mock.instances[0].isActionRegistered as jest.Mock).mockReturnValueOnce(
-        true
-      );
-      lastRegisteredFn(getReq(['access:securitySolution-foo']), res, toolkit);
+          expect(mockIsActionRegistered).not.toHaveBeenCalled();
+          expect(res.notFound).not.toHaveBeenCalled();
+          expect(toolkit.next).toHaveBeenCalledTimes(1);
+        });
 
-      expect(MockedProductFeatures.mock.instances[0].isActionRegistered).toHaveBeenCalledWith(
-        'api:securitySolution-foo'
-      );
-      expect(res.notFound).not.toHaveBeenCalled();
-      expect(toolkit.next).toHaveBeenCalledTimes(1);
-    });
+        it('should check when tag matches and return not found when not action registered', async () => {
+          mockIsActionRegistered.mockReturnValueOnce(false);
+          await lastRegisteredFn(getReq(['access:securitySolution-foo']), res, toolkit);
 
-    it('should check when productFeature tag when it matches and return not found when not enabled', () => {
-      const experimentalFeatures = {} as ExperimentalFeatures;
-      const productFeaturesService = new ProductFeaturesService(
-        loggerMock.create(),
-        experimentalFeatures
-      );
-      productFeaturesService.registerApiAccessControl(mockHttpSetup);
+          expect(mockIsActionRegistered).toHaveBeenCalledWith('api:securitySolution-foo');
+          expect(res.notFound).toHaveBeenCalledTimes(1);
+          expect(toolkit.next).not.toHaveBeenCalled();
+        });
 
-      productFeaturesService.isEnabled = jest.fn().mockReturnValueOnce(false);
+        it('should check when tag matches and continue when action registered', async () => {
+          mockIsActionRegistered.mockReturnValueOnce(true);
+          await lastRegisteredFn(getReq(['access:securitySolution-foo']), res, toolkit);
 
-      lastRegisteredFn(getReq(['securitySolutionProductFeature:foo']), res, toolkit);
+          expect(mockIsActionRegistered).toHaveBeenCalledWith('api:securitySolution-foo');
+          expect(res.notFound).not.toHaveBeenCalled();
+          expect(toolkit.next).toHaveBeenCalledTimes(1);
+        });
+      });
 
-      expect(productFeaturesService.isEnabled).toHaveBeenCalledWith('foo');
-      expect(res.notFound).toHaveBeenCalledTimes(1);
-      expect(toolkit.next).not.toHaveBeenCalled();
-    });
+      describe('when using security authz', () => {
+        beforeEach(() => {
+          mockIsActionRegistered.mockImplementation((action: string) => action.includes('enabled'));
+        });
 
-    it('should check when productFeature tag when it matches and continue when enabled', () => {
-      const experimentalFeatures = {} as ExperimentalFeatures;
-      const productFeaturesService = new ProductFeaturesService(
-        loggerMock.create(),
-        experimentalFeatures
-      );
-      productFeaturesService.registerApiAccessControl(mockHttpSetup);
+        const getReq = (requiredPrivileges?: AuthzEnabled['requiredPrivileges']) =>
+          ({
+            route: { options: { security: { authz: { requiredPrivileges } } } },
+            url: { pathname: '', search: '' },
+          } as unknown as KibanaRequest);
 
-      productFeaturesService.isEnabled = jest.fn().mockReturnValueOnce(true);
+        it('should authorize when no privilege matches', async () => {
+          await lastRegisteredFn(getReq(['something', 'securitySolution']), res, toolkit);
 
-      lastRegisteredFn(getReq(['securitySolutionProductFeature:foo']), res, toolkit);
+          expect(mockIsActionRegistered).not.toHaveBeenCalled();
+          expect(res.notFound).not.toHaveBeenCalled();
+          expect(toolkit.next).toHaveBeenCalledTimes(1);
+        });
 
-      expect(productFeaturesService.isEnabled).toHaveBeenCalledWith('foo');
-      expect(res.notFound).not.toHaveBeenCalled();
-      expect(toolkit.next).toHaveBeenCalledTimes(1);
+        it('should check when privilege matches and return not found when not action registered', async () => {
+          await lastRegisteredFn(getReq(['securitySolution-disabled']), res, toolkit);
+
+          expect(mockIsActionRegistered).toHaveBeenCalledWith('api:securitySolution-disabled');
+          expect(res.notFound).toHaveBeenCalledTimes(1);
+          expect(toolkit.next).not.toHaveBeenCalled();
+        });
+
+        it('should check when privilege matches and continue when action registered', async () => {
+          mockIsActionRegistered.mockReturnValueOnce(true);
+          await lastRegisteredFn(getReq(['securitySolution-enabled']), res, toolkit);
+
+          expect(mockIsActionRegistered).toHaveBeenCalledWith('api:securitySolution-enabled');
+          expect(res.notFound).not.toHaveBeenCalled();
+          expect(toolkit.next).toHaveBeenCalledTimes(1);
+        });
+
+        it('should restrict access when one action is not registered', async () => {
+          mockIsActionRegistered.mockReturnValueOnce(true);
+          await lastRegisteredFn(
+            getReq([
+              'securitySolution-enabled',
+              'securitySolution-disabled',
+              'securitySolution-enabled2',
+            ]),
+            res,
+            toolkit
+          );
+
+          expect(mockIsActionRegistered).toHaveBeenCalledTimes(2);
+          expect(mockIsActionRegistered).toHaveBeenCalledWith('api:securitySolution-enabled');
+          expect(mockIsActionRegistered).toHaveBeenCalledWith('api:securitySolution-disabled');
+
+          expect(res.notFound).toHaveBeenCalledTimes(1);
+          expect(toolkit.next).not.toHaveBeenCalled();
+        });
+
+        describe('when using nested requiredPrivileges', () => {
+          describe('when using allRequired', () => {
+            it('should allow access when all actions are registered', async () => {
+              const req = getReq([
+                {
+                  allRequired: [
+                    'securitySolution-enabled',
+                    'securitySolution-enabled2',
+                    'securitySolution-enabled3',
+                  ],
+                },
+              ]);
+              await lastRegisteredFn(req, res, toolkit);
+
+              expect(mockIsActionRegistered).toHaveBeenCalledTimes(3);
+              expect(mockIsActionRegistered).toHaveBeenCalledWith('api:securitySolution-enabled');
+              expect(mockIsActionRegistered).toHaveBeenCalledWith('api:securitySolution-enabled2');
+              expect(mockIsActionRegistered).toHaveBeenCalledWith('api:securitySolution-enabled3');
+
+              expect(res.notFound).not.toHaveBeenCalled();
+              expect(toolkit.next).toHaveBeenCalledTimes(1);
+            });
+
+            it('should restrict access if one action is not registered', async () => {
+              const req = getReq([
+                {
+                  allRequired: [
+                    'securitySolution-enabled',
+                    'securitySolution-disabled',
+                    'securitySolution-notCalled',
+                  ],
+                },
+              ]);
+              await lastRegisteredFn(req, res, toolkit);
+
+              expect(mockIsActionRegistered).toHaveBeenCalledTimes(2);
+              expect(mockIsActionRegistered).toHaveBeenCalledWith('api:securitySolution-enabled');
+              expect(mockIsActionRegistered).toHaveBeenCalledWith('api:securitySolution-disabled');
+
+              expect(res.notFound).toHaveBeenCalledTimes(1);
+              expect(toolkit.next).not.toHaveBeenCalled();
+            });
+
+            it('should allow only based on security privileges and ignore non-security', async () => {
+              const req = getReq([
+                { allRequired: ['notSecurityPrivilege', 'securitySolution-enabled'] },
+              ]);
+              await lastRegisteredFn(req, res, toolkit);
+
+              expect(mockIsActionRegistered).toHaveBeenCalledTimes(1);
+              expect(mockIsActionRegistered).toHaveBeenCalledWith('api:securitySolution-enabled');
+
+              expect(res.notFound).not.toHaveBeenCalled();
+              expect(toolkit.next).toHaveBeenCalledTimes(1);
+            });
+
+            it('should restrict only based on security privileges and ignore non-security', async () => {
+              const req = getReq([
+                { allRequired: ['notSecurityPrivilege', 'securitySolution-disabled'] },
+              ]);
+              await lastRegisteredFn(req, res, toolkit);
+
+              expect(mockIsActionRegistered).toHaveBeenCalledTimes(1);
+              expect(mockIsActionRegistered).toHaveBeenCalledWith('api:securitySolution-disabled');
+
+              expect(res.notFound).toHaveBeenCalledTimes(1);
+              expect(toolkit.next).not.toHaveBeenCalled();
+            });
+          });
+
+          describe('when using anyRequired', () => {
+            it('should allow access when one action is registered', async () => {
+              const req = getReq([
+                {
+                  anyRequired: [
+                    'securitySolution-disabled',
+                    'securitySolution-enabled',
+                    'securitySolution-notCalled',
+                  ],
+                },
+              ]);
+              await lastRegisteredFn(req, res, toolkit);
+
+              expect(mockIsActionRegistered).toHaveBeenCalledTimes(2);
+              expect(mockIsActionRegistered).toHaveBeenCalledWith('api:securitySolution-disabled');
+              expect(mockIsActionRegistered).toHaveBeenCalledWith('api:securitySolution-enabled');
+
+              expect(res.notFound).not.toHaveBeenCalled();
+              expect(toolkit.next).toHaveBeenCalledTimes(1);
+            });
+
+            it('should restrict access when no action is registered', async () => {
+              const req = getReq([
+                {
+                  anyRequired: ['securitySolution-disabled', 'securitySolution-disabled2'],
+                },
+              ]);
+              await lastRegisteredFn(req, res, toolkit);
+
+              expect(mockIsActionRegistered).toHaveBeenCalledTimes(2);
+              expect(mockIsActionRegistered).toHaveBeenCalledWith('api:securitySolution-disabled');
+              expect(mockIsActionRegistered).toHaveBeenCalledWith('api:securitySolution-disabled2');
+
+              expect(res.notFound).toHaveBeenCalledTimes(1);
+              expect(toolkit.next).not.toHaveBeenCalled();
+            });
+
+            it('should restrict only based on security privileges and allow when non-security privilege is present', async () => {
+              const req = getReq([
+                {
+                  anyRequired: ['notSecurityPrivilege', 'securitySolution-disabled'],
+                },
+              ]);
+              await lastRegisteredFn(req, res, toolkit);
+
+              expect(mockIsActionRegistered).not.toHaveBeenCalled();
+
+              expect(res.notFound).not.toHaveBeenCalled();
+              expect(toolkit.next).toHaveBeenCalledTimes(1);
+            });
+          });
+        });
+      });
     });
   });
 });

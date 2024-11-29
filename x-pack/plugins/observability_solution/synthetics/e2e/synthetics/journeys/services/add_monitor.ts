@@ -6,17 +6,14 @@
  */
 
 import axios from 'axios';
-import { SYNTHETICS_API_URLS } from '../../../../common/constants';
-import {
-  privateLocationsSavedObjectId,
-  privateLocationsSavedObjectName,
-} from '../../../../common/saved_objects/private_locations';
+import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
+import { legacyPrivateLocationsSavedObjectName } from '@kbn/synthetics-plugin/common/saved_objects/private_locations';
 
 export const enableMonitorManagedViaApi = async (kibanaUrl: string) => {
   try {
     await axios.put(kibanaUrl + SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT, undefined, {
       auth: { username: 'elastic', password: 'changeme' },
-      headers: { 'kbn-xsrf': 'true' },
+      headers: { 'kbn-xsrf': 'true', 'x-elastic-internal-origin': 'synthetics-e2e' },
     });
   } catch (e) {
     // eslint-disable-next-line no-console
@@ -38,22 +35,7 @@ export const addTestMonitor = async (
   try {
     await axios.post(kibanaUrl + SYNTHETICS_API_URLS.SYNTHETICS_MONITORS, testData, {
       auth: { username: 'elastic', password: 'changeme' },
-      headers: { 'kbn-xsrf': 'true' },
-    });
-  } catch (e) {
-    // eslint-disable-next-line no-console
-    console.log(e);
-  }
-};
-
-export const getPrivateLocations = async (params: Record<string, any>) => {
-  const getService = params.getService;
-  const server = getService('kibanaServer');
-
-  try {
-    return await server.savedObjects.get({
-      id: privateLocationsSavedObjectId,
-      type: privateLocationsSavedObjectName,
+      headers: { 'kbn-xsrf': 'true', 'x-elastic-internal-origin': 'synthetics-e2e' },
     });
   } catch (e) {
     // eslint-disable-next-line no-console
@@ -79,7 +61,11 @@ export const cleanPrivateLocations = async (params: Record<string, any>) => {
 
   try {
     await server.savedObjects.clean({
-      types: [privateLocationsSavedObjectName, 'ingest-agent-policies', 'ingest-package-policies'],
+      types: [
+        legacyPrivateLocationsSavedObjectName,
+        'ingest-agent-policies',
+        'ingest-package-policies',
+      ],
     });
   } catch (e) {
     // eslint-disable-next-line no-console

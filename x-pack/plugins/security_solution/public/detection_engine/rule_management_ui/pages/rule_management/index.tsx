@@ -9,7 +9,6 @@ import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/
 import { MaintenanceWindowCallout } from '@kbn/alerts-ui-shared';
 import React, { useCallback } from 'react';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { APP_UI_ID } from '../../../../../common/constants';
 import { SecurityPageName } from '../../../../app/types';
 import { ImportDataModal } from '../../../../common/components/import_data_modal';
@@ -36,7 +35,6 @@ import { AllRules } from '../../components/rules_table';
 import { RulesTableContextProvider } from '../../components/rules_table/rules_table/rules_table_context';
 import { useInvalidateFetchCoverageOverviewQuery } from '../../../rule_management/api/hooks/use_fetch_coverage_overview_query';
 import { HeaderPage } from '../../../../common/components/header_page';
-import { RuleFeatureTour } from '../../components/rules_table/feature_tour/rules_feature_tour';
 
 const RulesPageComponent: React.FC = () => {
   const [isImportModalVisible, showImportModal, hideImportModal] = useBoolState();
@@ -55,9 +53,6 @@ const RulesPageComponent: React.FC = () => {
     invalidateFetchRuleManagementFilters,
     invalidateFetchCoverageOverviewQuery,
   ]);
-  const isPerFieldPrebuiltRulesDiffingEnabled = useIsExperimentalFeatureEnabled(
-    'perFieldPrebuiltRulesDiffingEnabled'
-  );
 
   const [
     {
@@ -177,7 +172,6 @@ const RulesPageComponent: React.FC = () => {
             kibanaServices={kibanaServices}
             categories={[DEFAULT_APP_CATEGORIES.security.id]}
           />
-          {isPerFieldPrebuiltRulesDiffingEnabled && <RuleFeatureTour />}
           <AllRules data-test-subj="all-rules" />
         </SecuritySolutionPageWrapper>
       </RulesTableContextProvider>

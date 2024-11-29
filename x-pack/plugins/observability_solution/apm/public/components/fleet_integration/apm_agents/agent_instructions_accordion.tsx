@@ -34,17 +34,11 @@ import { AgentConfigInstructions } from '../../../tutorial/config_agent/agent_co
 import { renderMustache } from './render_mustache';
 import { TechnicalPreviewBadge } from '../../shared/technical_preview_badge';
 
-function AccordionButtonContent({
-  agentName,
-  title,
-}: {
-  agentName: AgentName;
-  title: string;
-}) {
+function AccordionButtonContent({ agentName, title }: { agentName: AgentName; title: string }) {
   return (
     <EuiFlexGroup justifyContent="flexStart" alignItems="center">
       <EuiFlexItem grow={false}>
-        <AgentIcon size="xl" agentName={agentName} />
+        <AgentIcon size="xl" agentName={agentName} role="presentation" />
       </EuiFlexItem>
       <EuiFlexItem grow={1}>
         <EuiFlexGroup direction="column" gutterSize="none">
@@ -56,14 +50,10 @@ function AccordionButtonContent({
           <EuiFlexItem>
             <EuiText size="s">
               <p>
-                {i18n.translate(
-                  'xpack.apm.fleet_integration.settings.apmAgent.description',
-                  {
-                    defaultMessage:
-                      'Configure instrumentation for {title} applications.',
-                    values: { title },
-                  }
-                )}
+                {i18n.translate('xpack.apm.fleet_integration.settings.apmAgent.description', {
+                  defaultMessage: 'Configure instrumentation for {title} applications.',
+                  values: { title },
+                })}
               </p>
             </EuiText>
           </EuiFlexItem>
@@ -116,10 +106,7 @@ export function AgentInstructionsAccordion({
   const secretToken = vars?.secret_token.value;
   const steps = createAgentInstructions(apmServerUrl, secretToken);
   const stepsElements = steps.map(
-    (
-      { title: stepTitle, textPre, textPost, customComponentName, commands },
-      index
-    ) => {
+    ({ title: stepTitle, textPre, textPost, customComponentName, commands }, index) => {
       const commandBlock = commands
         ? renderMustache({
             text: commands,
@@ -135,9 +122,7 @@ export function AgentInstructionsAccordion({
           <EuiSpacer size="s" />
           <EuiText color="subdued" size="s">
             {textPre && (
-              <InstructionsContent
-                markdown={renderMustache({ text: textPre, docLinks })}
-              />
+              <InstructionsContent markdown={renderMustache({ text: textPre, docLinks })} />
             )}
             {commandBlock && (
               <>
@@ -164,9 +149,7 @@ export function AgentInstructionsAccordion({
             {textPost && (
               <>
                 <EuiSpacer />
-                <InstructionsContent
-                  markdown={renderMustache({ text: textPost, docLinks })}
-                />
+                <InstructionsContent markdown={renderMustache({ text: textPost, docLinks })} />
               </>
             )}
           </EuiText>
@@ -186,9 +169,7 @@ export function AgentInstructionsAccordion({
   return (
     <StyledEuiAccordion
       id={agentName}
-      buttonContent={
-        <AccordionButtonContent agentName={agentName} title={title} />
-      }
+      buttonContent={<AccordionButtonContent agentName={agentName} title={title} />}
     >
       {AgentRuntimeAttachment ? (
         <>
@@ -206,11 +187,7 @@ export function AgentInstructionsAccordion({
               {
                 id: 'auto-attachment',
                 name: (
-                  <EuiFlexGroup
-                    justifyContent="flexStart"
-                    alignItems="baseline"
-                    gutterSize="s"
-                  >
+                  <EuiFlexGroup justifyContent="flexStart" alignItems="baseline" gutterSize="s">
                     <EuiFlexItem grow={false}>
                       {i18n.translate(
                         'xpack.apm.fleetIntegration.apmAgent.runtimeAttachment.autoAttachment',

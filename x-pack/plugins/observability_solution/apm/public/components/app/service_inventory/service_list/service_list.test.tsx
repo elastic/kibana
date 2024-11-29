@@ -8,7 +8,7 @@
 import { composeStories } from '@storybook/testing-react';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import { getServiceColumns } from '.';
+import { getServiceColumns } from './apm_services_table';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { Breakpoints } from '../../../../hooks/use_breakpoints';
 import { apmRouter } from '../../../routing/apm_route_config';
@@ -83,9 +83,7 @@ describe('ServiceList', () => {
           showAlertsColumn: true,
           link: apmRouter.link,
           serviceOverflowCount: 0,
-        }).map((c) =>
-          c.render ? c.render!(service[c.field!], service) : service[c.field!]
-        );
+        }).map((c) => (c.render ? c.render!(service[c.field!], service) : service[c.field!]));
         expect(renderedColumns.length).toEqual(8);
         expect(renderedColumns[3]).toMatchInlineSnapshot(`
           <EnvironmentBadge
@@ -124,9 +122,7 @@ describe('ServiceList', () => {
           showAlertsColumn: true,
           link: apmRouter.link,
           serviceOverflowCount: 0,
-        }).map((c) =>
-          c.render ? c.render!(service[c.field!], service) : service[c.field!]
-        );
+        }).map((c) => (c.render ? c.render!(service[c.field!], service) : service[c.field!]));
         expect(renderedColumns.length).toEqual(6);
         expect(renderedColumns[3]).toMatchInlineSnapshot(`
           <ListMetric
@@ -154,9 +150,7 @@ describe('ServiceList', () => {
             showAlertsColumn: true,
             link: apmRouter.link,
             serviceOverflowCount: 0,
-          }).map((c) =>
-            c.render ? c.render!(service[c.field!], service) : service[c.field!]
-          );
+          }).map((c) => (c.render ? c.render!(service[c.field!], service) : service[c.field!]));
           expect(renderedColumns.length).toEqual(7);
           expect(renderedColumns[3]).toMatchInlineSnapshot(`
             <EnvironmentBadge
@@ -194,9 +188,7 @@ describe('ServiceList', () => {
             showAlertsColumn: true,
             link: apmRouter.link,
             serviceOverflowCount: 0,
-          }).map((c) =>
-            c.render ? c.render!(service[c.field!], service) : service[c.field!]
-          );
+          }).map((c) => (c.render ? c.render!(service[c.field!], service) : service[c.field!]));
           expect(renderedColumns.length).toEqual(8);
           expect(renderedColumns[3]).toMatchInlineSnapshot(`
                       <EnvironmentBadge

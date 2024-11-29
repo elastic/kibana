@@ -319,7 +319,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
     if (!this._descriptor.splitField) {
       throw new Error(
         i18n.translate('xpack.maps.source.esGeoLine.missingConfigurationError', {
-          defaultMessage: `Unable to create tracks. Provide a value for required configuration '{inputLabel}'`,
+          defaultMessage: `Unable to create tracks. Provide a value for required configuration ''{inputLabel}''`,
           values: { inputLabel: ENTITY_INPUT_LABEL },
         })
       );
@@ -328,7 +328,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
     if (!this._descriptor.sortField) {
       throw new Error(
         i18n.translate('xpack.maps.source.esGeoLine.missingConfigurationError', {
-          defaultMessage: `Unable to create tracks. Provide a value for required configuration '{inputLabel}'`,
+          defaultMessage: `Unable to create tracks. Provide a value for required configuration ''{inputLabel}''`,
           values: { inputLabel: SORT_INPUT_LABEL },
         })
       );

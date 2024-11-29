@@ -9,9 +9,9 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { serverMock } from '../../__mocks__/server';
 import { requestContextMock } from '../../__mocks__/request_context';
 import { getPromptsBulkActionRequest, requestMock } from '../../__mocks__/request';
+import { authenticatedUser } from '../../__mocks__/user';
 import { ELASTIC_AI_ASSISTANT_PROMPTS_URL_BULK_ACTION } from '@kbn/elastic-assistant-common';
 import { getEmptyFindResult, getFindPromptsResultWithSingleHit } from '../../__mocks__/response';
-import { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 import { bulkPromptsRoute } from './bulk_actions_route';
 import {
   getCreatePromptSchemaMock,
@@ -25,14 +25,7 @@ describe('Perform bulk action route', () => {
   let { clients, context } = requestContextMock.createTools();
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   const mockPrompt = getPromptMock(getUpdatePromptSchemaMock());
-  const mockUser1 = {
-    profile_uid: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
-    username: 'my_username',
-    authentication_realm: {
-      type: 'my_realm_type',
-      name: 'my_realm_name',
-    },
-  } as AuthenticatedUser;
+  const mockUser1 = authenticatedUser;
 
   beforeEach(async () => {
     server = serverMock.create();
@@ -70,14 +63,14 @@ describe('Perform bulk action route', () => {
       expect(response.status).toEqual(200);
       expect(response.body).toEqual({
         success: true,
-        prompts_count: 2,
+        prompts_count: 3,
         attributes: {
           results: someBulkActionResults(),
           summary: {
             failed: 0,
             skipped: 0,
-            succeeded: 2,
-            total: 2,
+            succeeded: 3,
+            total: 3,
           },
         },
       });
@@ -90,7 +83,7 @@ describe('Perform bulk action route', () => {
         (await clients.elasticAssistant.getAIAssistantPromptsDataClient.getWriter())
           .bulk as jest.Mock
       ).mockResolvedValue({
-        docs_created: [mockPrompt, mockPrompt],
+        docs_created: [mockPrompt],
         docs_updated: [],
         docs_deleted: [],
         errors: [
@@ -107,7 +100,7 @@ describe('Perform bulk action route', () => {
             document: { id: 'failed-prompt-id-3', name: 'Detect Root/Admin Users' },
           },
         ],
-        total: 5,
+        total: 4,
       });
       clients.elasticAssistant.getAIAssistantPromptsDataClient.findDocuments.mockResolvedValueOnce(
         Promise.resolve(getEmptyFindResult())
@@ -126,9 +119,9 @@ describe('Perform bulk action route', () => {
         attributes: {
           summary: {
             failed: 3,
-            succeeded: 2,
+            succeeded: 1,
             skipped: 0,
-            total: 5,
+            total: 4,
           },
           errors: [
             {

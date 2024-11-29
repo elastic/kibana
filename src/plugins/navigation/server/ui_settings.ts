@@ -1,110 +1,70 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { UiSettingsParams } from '@kbn/core/types';
 import { i18n } from '@kbn/i18n';
+import { isRelativeUrl } from '@kbn/std';
 
-import {
-  ENABLE_SOLUTION_NAV_UI_SETTING_ID,
-  DEFAULT_SOLUTION_NAV_UI_SETTING_ID,
-  OPT_IN_STATUS_SOLUTION_NAV_UI_SETTING_ID,
-} from '../common/constants';
-import { NavigationConfig } from './config';
-
-const optInStatusOptionLabels = {
-  visible: i18n.translate('navigation.advancedSettings.optInVisibleStatus', {
-    defaultMessage: 'Visible',
-  }),
-  hidden: i18n.translate('navigation.advancedSettings.optInHiddenStatus', {
-    defaultMessage: 'Hidden',
-  }),
-  ask: i18n.translate('navigation.advancedSettings.optInAskStatus', {
-    defaultMessage: 'Ask',
-  }),
-};
-
-const solutionsOptionLabels = {
-  ask: i18n.translate('navigation.advancedSettings.askUserWhichSolution', {
-    defaultMessage: 'Ask user to choose a solution',
-  }),
-  es: i18n.translate('navigation.advancedSettings.searchSolution', {
-    defaultMessage: 'Search',
-  }),
-  oblt: i18n.translate('navigation.advancedSettings.observabilitySolution', {
-    defaultMessage: 'Observability',
-  }),
-  security: i18n.translate('navigation.advancedSettings.securitySolution', {
-    defaultMessage: 'Security',
-  }),
-};
-
-const categoryLabel = i18n.translate('navigation.uiSettings.categoryLabel', {
-  defaultMessage: 'Technical preview',
-});
+import { DEFAULT_ROUTE_UI_SETTING_ID, DEFAULT_ROUTES } from '../common/constants';
+import { NavigationServerStartDependencies } from './types';
 
 /**
  * uiSettings definitions for Navigation
  */
-export const getUiSettings = (config: NavigationConfig): Record<string, UiSettingsParams> => {
+export const getUiSettings = (
+  core: CoreSetup<NavigationServerStartDependencies>,
+  logger: Logger
+): Record<string, UiSettingsParams> => {
   return {
-    [ENABLE_SOLUTION_NAV_UI_SETTING_ID]: {
-      category: [categoryLabel],
-      name: i18n.translate('navigation.uiSettings.enableSolutionNav.name', {
-        defaultMessage: 'Enable solution navigation',
+    [DEFAULT_ROUTE_UI_SETTING_ID]: {
+      name: i18n.translate('navigation.ui_settings.params.defaultRoute.defaultRouteTitle', {
+        defaultMessage: 'Default route',
       }),
-      description: i18n.translate('navigation.uiSettings.enableSolutionNav.description', {
-        defaultMessage: 'Let users opt in to the new solution navigation experience.',
-      }),
-      schema: schema.boolean(),
-      value: config.solutionNavigation.enabled,
-      order: 1,
-    },
-    [OPT_IN_STATUS_SOLUTION_NAV_UI_SETTING_ID]: {
-      category: [categoryLabel],
-      description: i18n.translate('navigation.uiSettings.optInStatusSolutionNav.description', {
-        defaultMessage: `Define how user will opt-in to the new navigation.
-      <ul>
-        <li><strong>{visible}:</strong> The new navigation is visible immediately to all user. They will be able to opt-out from their user profile.</li>
-        <li><strong>{hidden}:</strong> The new navigation is hidden by default. Users can opt-in from their user profile. No banners are shown.</li>
-        <li><strong>{ask}:</strong> Show a banner to the users inviting them to try the new navigation experience.</li>
-      </ul>`,
-        values: {
-          visible: optInStatusOptionLabels.visible,
-          hidden: optInStatusOptionLabels.hidden,
-          ask: optInStatusOptionLabels.ask,
+      getValue: async ({ request }: { request?: KibanaRequest } = {}) => {
+        const [_, { spaces }] = await core.getStartServices();
+
+        if (!spaces || !request) {
+          return DEFAULT_ROUTES.classic;
+        }
+
+        try {
+          if (!request.auth.isAuthenticated) return DEFAULT_ROUTES.classic;
+
+          const activeSpace = await spaces.spacesService.getActiveSpace(request);
+
+          const solution = activeSpace?.solution ?? 'classic';
+          return DEFAULT_ROUTES[solution] ?? DEFAULT_ROUTES.classic;
+        } catch (e) {
+          logger.error(`Failed to retrieve active space: ${e.message}`);
+          return DEFAULT_ROUTES.classic;
+        }
+      },
+      schema: schema.string({
+        validate(value) {
+          if (!value.startsWith('/') || !isRelativeUrl(value)) {
+            return i18n.translate(
+              'navigation.uiSettings.defaultRoute.defaultRouteIsRelativeValidationMessage',
+              {
+                defaultMessage: 'Must be a relative URL.',
+              }
+            );
+          }
         },
       }),
-      name: i18n.translate('navigation.uiSettings.optInStatusSolutionNav.name', {
-        defaultMessage: 'Opt-in behaviour',
-      }),
-      type: 'select',
-      schema: schema.string(),
-      value: config.solutionNavigation.optInStatus,
-      options: ['visible', 'hidden', 'ask'],
-      optionLabels: optInStatusOptionLabels,
-      order: 2,
-    },
-    [DEFAULT_SOLUTION_NAV_UI_SETTING_ID]: {
-      category: [categoryLabel],
-      description: i18n.translate('navigation.uiSettings.defaultSolutionNav.description', {
+      description: i18n.translate('navigation.uiSettings.defaultRoute.defaultRouteText', {
         defaultMessage:
-          'The default solution to display to the users once they opt-in to the new navigation.',
+          'This setting specifies the default route when opening Kibana. ' +
+          'You can use this setting to modify the landing page when opening Kibana. ' +
+          'The route must be a relative URL.',
       }),
-      name: i18n.translate('navigation.uiSettings.defaultSolutionNav.name', {
-        defaultMessage: 'Default solution',
-      }),
-      type: 'select',
-      schema: schema.string(),
-      value: config.solutionNavigation.defaultSolution,
-      options: ['ask', 'es', 'oblt', 'security'],
-      optionLabels: solutionsOptionLabels,
-      order: 2,
     },
   };
 };

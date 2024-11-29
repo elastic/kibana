@@ -23,21 +23,13 @@ export function SpanDatabase({ spanDb }: Props) {
     <Fragment>
       <EuiTitle size="xs">
         <h3>
-          {i18n.translate(
-            'xpack.apm.transactionDetails.spanFlyout.databaseStatementTitle',
-            {
-              defaultMessage: 'Database statement',
-            }
-          )}
+          {i18n.translate('xpack.apm.transactionDetails.spanFlyout.databaseStatementTitle', {
+            defaultMessage: 'Database statement',
+          })}
         </h3>
       </EuiTitle>
       <EuiSpacer size="s" />
-      <EuiCodeBlock
-        language="sql"
-        fontSize="m"
-        paddingSize="m"
-        overflowHeight={150}
-      >
+      <EuiCodeBlock language="sql" fontSize="m" paddingSize="m" overflowHeight={150}>
         {spanDb.statement}
       </EuiCodeBlock>
       <EuiSpacer size="m" />

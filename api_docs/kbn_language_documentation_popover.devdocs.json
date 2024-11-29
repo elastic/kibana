@@ -21,15 +21,79 @@
     "functions": [
       {
         "parentPluginId": "@kbn/language-documentation-popover",
+        "id": "def-common.LanguageDocumentationFlyout",
+        "type": "Function",
+        "tags": [],
+        "label": "LanguageDocumentationFlyout",
+        "description": [],
+        "signature": [
+          "React.NamedExoticComponent<DocumentationFlyoutProps> & { readonly type: ({ searchInDescription, linkToDocumentation, isHelpMenuOpen, onHelpMenuVisibilityChange, }: DocumentationFlyoutProps) => JSX.Element; }"
+        ],
+        "path": "packages/kbn-language-documentation-popover/src/components/as_flyout/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/language-documentation-popover",
+            "id": "def-common.LanguageDocumentationFlyout.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/language-documentation-popover",
+        "id": "def-common.LanguageDocumentationInline",
+        "type": "Function",
+        "tags": [],
+        "label": "LanguageDocumentationInline",
+        "description": [],
+        "signature": [
+          "React.NamedExoticComponent<DocumentationInlineProps> & { readonly type: ({ searchInDescription }: DocumentationInlineProps) => JSX.Element; }"
+        ],
+        "path": "packages/kbn-language-documentation-popover/src/components/as_inline/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/language-documentation-popover",
+            "id": "def-common.LanguageDocumentationInline.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/language-documentation-popover",
         "id": "def-common.LanguageDocumentationPopover",
         "type": "Function",
         "tags": [],
         "label": "LanguageDocumentationPopover",
         "description": [],
         "signature": [
-          "React.NamedExoticComponent<DocumentationPopoverProps> & { readonly type: ({ language, sections, buttonProps, searchInDescription, linkToDocumentation, }: DocumentationPopoverProps) => JSX.Element; }"
+          "React.NamedExoticComponent<DocumentationPopoverProps> & { readonly type: ({ language, sections, buttonProps, searchInDescription, linkToDocumentation, isHelpMenuOpen, onHelpMenuVisibilityChange, }: DocumentationPopoverProps) => JSX.Element; }"
         ],
-        "path": "packages/kbn-language-documentation-popover/src/components/documentation_popover.tsx",
+        "path": "packages/kbn-language-documentation-popover/src/components/as_popover/index.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -61,7 +125,7 @@
         "signature": [
           "React.NamedExoticComponent<DocumentationProps> & { readonly type: ({ language, sections, searchInDescription, linkToDocumentation, }: DocumentationProps) => JSX.Element; }"
         ],
-        "path": "packages/kbn-language-documentation-popover/src/components/documentation_content.tsx",
+        "path": "packages/kbn-language-documentation-popover/src/components/as_popover/popover_content.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -92,7 +156,7 @@
         "tags": [],
         "label": "LanguageDocumentationSections",
         "description": [],
-        "path": "packages/kbn-language-documentation-popover/src/components/documentation_content.tsx",
+        "path": "packages/kbn-language-documentation-popover/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -106,7 +170,7 @@
             "signature": [
               "{ label: string; description?: string | undefined; items: { label: string; description?: JSX.Element | undefined; }[]; }[]"
             ],
-            "path": "packages/kbn-language-documentation-popover/src/components/documentation_content.tsx",
+            "path": "packages/kbn-language-documentation-popover/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -120,7 +184,7 @@
             "signature": [
               "JSX.Element"
             ],
-            "path": "packages/kbn-language-documentation-popover/src/components/documentation_content.tsx",
+            "path": "packages/kbn-language-documentation-popover/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }

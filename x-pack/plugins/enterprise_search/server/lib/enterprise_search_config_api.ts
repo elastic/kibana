@@ -56,7 +56,6 @@ export const callEnterpriseSearchConfigAPI = async ({
         hasIncrementalSyncEnabled: config.hasIncrementalSyncEnabled,
         hasNativeConnectors: config.hasNativeConnectors,
         hasWebCrawler: config.hasWebCrawler,
-        showAIPlayground: config.showAIPlayground,
       },
       kibanaVersion: kibanaPackageJson.version,
     };
@@ -112,7 +111,6 @@ export const callEnterpriseSearchConfigAPI = async ({
         hasIncrementalSyncEnabled: config.hasIncrementalSyncEnabled,
         hasNativeConnectors: config.hasNativeConnectors,
         hasWebCrawler: config.hasWebCrawler,
-        showAIPlayground: config.showAIPlayground,
       },
       publicUrl: stripTrailingSlash(data?.settings?.external_url),
       readOnlyMode: !!data?.settings?.read_only_mode,
@@ -141,6 +139,7 @@ export const callEnterpriseSearchConfigAPI = async ({
       },
       appSearch: {
         accountId: data?.current_user?.app_search?.account?.id,
+        kibanaUIsEnabled: data?.current_user?.app_search?.account?.kibana_uis_enabled || false,
         onboardingComplete: !!data?.current_user?.app_search?.account?.onboarding_complete,
         role: {
           id: data?.current_user?.app_search?.role?.id,

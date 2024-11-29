@@ -22,7 +22,9 @@ import type {
 } from '../../../common/types';
 import * as APIKeyService from '../../services/api_keys';
 import { agentPolicyService } from '../../services/agent_policy';
-import { defaultFleetErrorHandler, AgentPolicyNotFoundError } from '../../errors';
+import { AgentPolicyNotFoundError } from '../../errors';
+import { getCurrentNamespace } from '../../services/spaces/get_current_namespace';
+import { isSpaceAwarenessEnabled } from '../../services/spaces/helpers';
 
 export const getEnrollmentApiKeysHandler: RequestHandler<
   undefined,
@@ -30,25 +32,24 @@ export const getEnrollmentApiKeysHandler: RequestHandler<
 > = async (context, request, response) => {
   // Use kibana_system and depend on authz checks on HTTP layer to prevent abuse
   const esClient = (await context.core).elasticsearch.client.asInternalUser;
+  const soClient = (await context.core).savedObjects.client;
 
-  try {
-    const { items, total, page, perPage } = await APIKeyService.listEnrollmentApiKeys(esClient, {
-      page: request.query.page,
-      perPage: request.query.perPage,
-      kuery: request.query.kuery,
-    });
-    const body: GetEnrollmentAPIKeysResponse = {
-      list: items, // deprecated
-      items,
-      total,
-      page,
-      perPage,
-    };
+  const useSpaceAwareness = await isSpaceAwarenessEnabled();
+  const { items, total, page, perPage } = await APIKeyService.listEnrollmentApiKeys(esClient, {
+    page: request.query.page,
+    perPage: request.query.perPage,
+    kuery: request.query.kuery,
+    spaceId: useSpaceAwareness ? getCurrentNamespace(soClient) : undefined,
+  });
+  const body: GetEnrollmentAPIKeysResponse = {
+    list: items, // deprecated
+    items,
+    total,
+    page,
+    perPage,
+  };
 
-    return response.ok({ body });
-  } catch (error) {
-    return defaultFleetErrorHandler({ error, response });
-  }
+  return response.ok({ body });
 };
 export const postEnrollmentApiKeyHandler: RequestHandler<
   undefined,
@@ -58,36 +59,40 @@ export const postEnrollmentApiKeyHandler: RequestHandler<
   const { elasticsearch, savedObjects } = await context.core;
   const soClient = savedObjects.client;
   const esClient = elasticsearch.client.asInternalUser;
-  try {
-    // validate policy id
-    await agentPolicyService.get(soClient, request.body.policy_id).catch((err) => {
-      if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
-        throw new AgentPolicyNotFoundError(`Agent policy "${request.body.policy_id}" not found`);
-      }
+  // validate policy exists in the current space
+  await agentPolicyService.get(soClient, request.body.policy_id).catch((err) => {
+    if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
+      throw new AgentPolicyNotFoundError(`Agent policy "${request.body.policy_id}" not found`);
+    }
 
-      throw err;
-    });
+    throw err;
+  });
 
-    const apiKey = await APIKeyService.generateEnrollmentAPIKey(soClient, esClient, {
-      name: request.body.name,
-      expiration: request.body.expiration,
-      agentPolicyId: request.body.policy_id,
-    });
+  const apiKey = await APIKeyService.generateEnrollmentAPIKey(soClient, esClient, {
+    name: request.body.name,
+    expiration: request.body.expiration,
+    agentPolicyId: request.body.policy_id,
+  });
 
-    const body: PostEnrollmentAPIKeyResponse = { item: apiKey, action: 'created' };
+  const body: PostEnrollmentAPIKeyResponse = { item: apiKey, action: 'created' };
 
-    return response.ok({ body });
-  } catch (error) {
-    return defaultFleetErrorHandler({ error, response });
-  }
+  return response.ok({ body });
 };
 
 export const deleteEnrollmentApiKeyHandler: RequestHandler<
   TypeOf<typeof DeleteEnrollmentAPIKeyRequestSchema.params>
 > = async (context, request, response) => {
-  const esClient = (await context.core).elasticsearch.client.asInternalUser;
   try {
-    await APIKeyService.deleteEnrollmentApiKey(esClient, request.params.keyId);
+    const useSpaceAwareness = await isSpaceAwarenessEnabled();
+    const coreContext = await context.core;
+    const esClient = coreContext.elasticsearch.client.asInternalUser;
+    const currentNamespace = getCurrentNamespace(coreContext.savedObjects.client);
+    await APIKeyService.deleteEnrollmentApiKey(
+      esClient,
+      request.params.keyId,
+      false,
+      useSpaceAwareness ? currentNamespace : undefined
+    );
 
     const body: DeleteEnrollmentAPIKeyResponse = { action: 'deleted' };
 
@@ -98,7 +103,7 @@ export const deleteEnrollmentApiKeyHandler: RequestHandler<
         body: { message: `EnrollmentAPIKey ${request.params.keyId} not found` },
       });
     }
-    return defaultFleetErrorHandler({ error, response });
+    throw error;
   }
 };
 
@@ -106,9 +111,18 @@ export const getOneEnrollmentApiKeyHandler: RequestHandler<
   TypeOf<typeof GetOneEnrollmentAPIKeyRequestSchema.params>
 > = async (context, request, response) => {
   // Use kibana_system and depend on authz checks on HTTP layer to prevent abuse
-  const esClient = (await context.core).elasticsearch.client.asInternalUser;
+
   try {
-    const apiKey = await APIKeyService.getEnrollmentAPIKey(esClient, request.params.keyId);
+    const coreContext = await context.core;
+    const esClient = coreContext.elasticsearch.client.asInternalUser;
+    const currentNamespace = getCurrentNamespace(coreContext.savedObjects.client);
+    const useSpaceAwareness = await isSpaceAwarenessEnabled();
+
+    const apiKey = await APIKeyService.getEnrollmentAPIKey(
+      esClient,
+      request.params.keyId,
+      useSpaceAwareness ? currentNamespace : undefined
+    );
     const body: GetOneEnrollmentAPIKeyResponse = { item: apiKey };
 
     return response.ok({ body });
@@ -119,6 +133,6 @@ export const getOneEnrollmentApiKeyHandler: RequestHandler<
       });
     }
 
-    return defaultFleetErrorHandler({ error, response });
+    throw error;
   }
 };

@@ -9,6 +9,7 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { bulkActionConversationsRoute } from './bulk_actions_route';
 import { serverMock } from '../../__mocks__/server';
 import { requestContextMock } from '../../__mocks__/request_context';
+import { authenticatedUser } from '../../__mocks__/user';
 import { getConversationsBulkActionRequest, requestMock } from '../../__mocks__/request';
 import { ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BULK_ACTION } from '@kbn/elastic-assistant-common';
 import {
@@ -21,21 +22,13 @@ import {
   getPerformBulkActionSchemaMock,
   getUpdateConversationSchemaMock,
 } from '../../__mocks__/conversations_schema.mock';
-import { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 
 describe('Perform bulk action route', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   const mockConversation = getConversationMock(getUpdateConversationSchemaMock());
-  const mockUser1 = {
-    profile_uid: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
-    username: 'my_username',
-    authentication_realm: {
-      type: 'my_realm_type',
-      name: 'my_realm_name',
-    },
-  } as AuthenticatedUser;
+  const mockUser1 = authenticatedUser;
 
   beforeEach(async () => {
     server = serverMock.create();
@@ -74,14 +67,14 @@ describe('Perform bulk action route', () => {
       expect(response.status).toEqual(200);
       expect(response.body).toEqual({
         success: true,
-        conversations_count: 2,
+        conversations_count: 3,
         attributes: {
           results: someBulkActionResults(),
           summary: {
             failed: 0,
             skipped: 0,
-            succeeded: 2,
-            total: 2,
+            succeeded: 3,
+            total: 3,
           },
         },
       });
@@ -94,7 +87,7 @@ describe('Perform bulk action route', () => {
         (await clients.elasticAssistant.getAIAssistantConversationsDataClient.getWriter())
           .bulk as jest.Mock
       ).mockResolvedValue({
-        docs_created: [mockConversation, mockConversation],
+        docs_created: ['49403909-ca9b-49ba-9d7a-7e5320e68d04'],
         docs_updated: [],
         docs_deleted: [],
         errors: [
@@ -130,9 +123,9 @@ describe('Perform bulk action route', () => {
         attributes: {
           summary: {
             failed: 3,
-            succeeded: 2,
+            succeeded: 1,
             skipped: 0,
-            total: 5,
+            total: 4,
           },
           errors: [
             {

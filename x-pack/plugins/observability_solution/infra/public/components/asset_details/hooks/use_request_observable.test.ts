@@ -5,20 +5,26 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { act, waitFor, renderHook } from '@testing-library/react';
 import { useRequestObservable } from './use_request_observable';
 import { type RequestState, useLoadingStateContext } from './use_loading_state';
 import { useDatePickerContext, type UseDateRangeProviderProps } from './use_date_picker';
+import { useSearchSessionContext } from '../../../hooks/use_search_session';
 import { BehaviorSubject } from 'rxjs';
 
 jest.mock('./use_loading_state');
 jest.mock('./use_date_picker');
+jest.mock('../../../hooks/use_search_session');
 
 const useLoadingStateContextMock = useLoadingStateContext as jest.MockedFunction<
   typeof useLoadingStateContext
 >;
 const useDatePickerContextMock = useDatePickerContext as jest.MockedFunction<
   typeof useDatePickerContext
+>;
+
+const useSearchSessionMock = useSearchSessionContext as jest.MockedFunction<
+  typeof useSearchSessionContext
 >;
 
 describe('useRequestObservable', () => {
@@ -32,10 +38,15 @@ describe('useRequestObservable', () => {
   // needed to spy on `next` function
   requestStateMock$.next = jest.fn();
 
-  const mockUseLoadingStateContextMock = () => {
-    useLoadingStateContextMock.mockReturnValue({
+  const mockUseSearchSessionMock = () => {
+    useSearchSessionMock.mockReturnValue({
       updateSearchSessionId: jest.fn(() => {}),
       searchSessionId: '',
+    });
+  };
+
+  const mockUseLoadingStateContextMock = () => {
+    useLoadingStateContextMock.mockReturnValue({
       requestState$: requestStateMock$,
       isAutoRefreshRequestPending$: isAutoRefreshRequestPendingMock$,
     });
@@ -49,6 +60,7 @@ describe('useRequestObservable', () => {
 
   beforeEach(() => {
     mockDatePickerContext();
+    mockUseSearchSessionMock();
     mockUseLoadingStateContextMock();
   });
 
@@ -57,7 +69,7 @@ describe('useRequestObservable', () => {
   });
 
   it('should process a valid request function', async () => {
-    const { result, waitFor, unmount } = renderHook(() => useRequestObservable());
+    const { result, unmount } = renderHook(() => useRequestObservable());
 
     act(() => {
       result.current.request$.next(() => Promise.resolve());
@@ -73,7 +85,7 @@ describe('useRequestObservable', () => {
   });
 
   it('should be able to make new requests if isAutoRefreshRequestPending is false', async () => {
-    const { result, waitFor, unmount } = renderHook(() => useRequestObservable());
+    const { result, unmount } = renderHook(() => useRequestObservable());
 
     act(() => {
       isAutoRefreshRequestPendingMock$.next(false);
@@ -90,7 +102,7 @@ describe('useRequestObservable', () => {
   });
 
   it('should block new requests when isAutoRefreshRequestPending is true', async () => {
-    const { result, waitFor, unmount } = renderHook(() => useRequestObservable());
+    const { result, unmount } = renderHook(() => useRequestObservable());
 
     act(() => {
       isAutoRefreshRequestPendingMock$.next(false);
@@ -111,7 +123,7 @@ describe('useRequestObservable', () => {
   });
 
   it('should not block new requests when auto-refresh is paused', async () => {
-    const { result, waitFor, unmount } = renderHook(() => useRequestObservable());
+    const { result, unmount } = renderHook(() => useRequestObservable());
 
     act(() => {
       autoRefreshConfig$.next({ isPaused: true, interval: 5000 });
@@ -132,7 +144,7 @@ describe('useRequestObservable', () => {
   });
 
   it('should complete the request when an error is thrown', async () => {
-    const { result, waitFor, unmount } = renderHook(() => useRequestObservable());
+    const { result, unmount } = renderHook(() => useRequestObservable());
 
     act(() => {
       autoRefreshConfig$.next({ isPaused: true, interval: 5000 });

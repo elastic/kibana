@@ -7,12 +7,11 @@
 
 export interface PostHealthCheckRequest {
   body: {
-    host: string;
+    id: string;
   };
 }
 
 export interface PostHealthCheckResponse {
-  name: string;
-  host: string;
+  host_id: string;
   status: string;
 }

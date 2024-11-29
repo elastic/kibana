@@ -26,6 +26,7 @@ import {
   type AlertStatus,
 } from '@kbn/rule-data-utils';
 import { pick } from 'lodash';
+import type { PropsWithChildren } from 'react';
 import React, { type FC, useCallback, useMemo, useRef } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
@@ -44,9 +45,9 @@ import {
 import { useMlKibana } from '../../contexts/kibana';
 import { useAnomalyExplorerContext } from '../anomaly_explorer_context';
 import type { AppStateSelectedCells, SwimlaneData } from '../explorer_utils';
-import { Y_AXIS_LABEL_WIDTH } from '../swimlane_annotation_container';
 import { CELL_HEIGHT } from '../swimlane_container';
 import { statusNameMap } from './const';
+import { Y_AXIS_LABEL_WIDTH } from '../constants';
 
 export interface SwimLaneWrapperProps {
   selection?: AppStateSelectedCells | null;
@@ -58,7 +59,7 @@ export interface SwimLaneWrapperProps {
  * Wrapper component for the swim lane
  * that handles the popover for the selected cells.
  */
-export const SwimLaneWrapper: FC<SwimLaneWrapperProps> = ({
+export const SwimLaneWrapper: FC<PropsWithChildren<SwimLaneWrapperProps>> = ({
   children,
   selection,
   swimlaneContainerWidth,

@@ -39,12 +39,8 @@ export default {
   ],
 };
 
-export const CreatingInApmServiceOverview: Story<Args> = ({
-  ruleParams,
-  metadata,
-}) => {
-  const [params, setParams] =
-    useState<TransactionDurationRuleParams>(ruleParams);
+export const CreatingInApmServiceOverview: Story<Args> = ({ ruleParams, metadata }) => {
+  const [params, setParams] = useState<TransactionDurationRuleParams>(ruleParams);
 
   function setRuleParams(property: string, value: any) {
     setParams({ ...params, [property]: value });
@@ -77,12 +73,8 @@ CreatingInApmServiceOverview.args = {
   },
 };
 
-export const CreatingInStackManagement: Story<Args> = ({
-  ruleParams,
-  metadata,
-}) => {
-  const [params, setParams] =
-    useState<TransactionDurationRuleParams>(ruleParams);
+export const CreatingInStackManagement: Story<Args> = ({ ruleParams, metadata }) => {
+  const [params, setParams] = useState<TransactionDurationRuleParams>(ruleParams);
 
   function setRuleParams(property: string, value: any) {
     setParams({ ...params, [property]: value });

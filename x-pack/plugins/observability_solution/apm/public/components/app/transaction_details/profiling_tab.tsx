@@ -22,14 +22,7 @@ import { ProfilingTopNFunctions } from '../../shared/profiling/top_functions';
 
 function ProfilingTab() {
   const {
-    query: {
-      rangeFrom,
-      rangeTo,
-      environment,
-      kuery,
-      transactionName,
-      transactionType,
-    },
+    query: { rangeFrom, rangeTo, environment, kuery, transactionName, transactionType },
     path: { serviceName },
   } = useApmParams('/services/{serviceName}/transactions/view');
   const { isProfilingAvailable, isLoading } = useProfilingPlugin();
@@ -38,10 +31,9 @@ function ProfilingTab() {
     return [
       {
         id: 'flamegraph',
-        name: i18n.translate(
-          'xpack.apm.transactions.profiling.tabs.flamegraph',
-          { defaultMessage: 'Flamegraph' }
-        ),
+        name: i18n.translate('xpack.apm.transactions.profiling.tabs.flamegraph', {
+          defaultMessage: 'Flamegraph',
+        }),
         content: (
           <>
             <EuiSpacer />
@@ -59,10 +51,9 @@ function ProfilingTab() {
       },
       {
         id: 'topNFunctions',
-        name: i18n.translate(
-          'xpack.apm.transactions.profiling.tabs.topNFunctions',
-          { defaultMessage: 'Top 10 Functions' }
-        ),
+        name: i18n.translate('xpack.apm.transactions.profiling.tabs.topNFunctions', {
+          defaultMessage: 'Top 10 Functions',
+        }),
         content: (
           <>
             <EuiSpacer />
@@ -79,15 +70,7 @@ function ProfilingTab() {
         ),
       },
     ];
-  }, [
-    environment,
-    kuery,
-    rangeFrom,
-    rangeTo,
-    serviceName,
-    transactionName,
-    transactionType,
-  ]);
+  }, [environment, kuery, rangeFrom, rangeTo, serviceName, transactionName, transactionType]);
 
   if (isLoading) {
     return (
@@ -103,13 +86,7 @@ function ProfilingTab() {
     return <ProfilingEmptyState />;
   }
 
-  return (
-    <EuiTabbedContent
-      tabs={tabs}
-      initialSelectedTab={tabs[0]}
-      autoFocus="selected"
-    />
-  );
+  return <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} autoFocus="selected" />;
 }
 
 export const profilingTab = {

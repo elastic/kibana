@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -28,17 +29,25 @@ import {
   CoreSecurityRouteHandlerContext,
   type InternalSecurityServiceStart,
 } from '@kbn/core-security-server-internal';
+import {
+  CoreUserProfileRouteHandlerContext,
+  type InternalUserProfileServiceStart,
+} from '@kbn/core-user-profile-server-internal';
+import { CoreFeatureFlagsRouteHandlerContext } from '@kbn/core-feature-flags-server-internal';
+import type { FeatureFlagsStart } from '@kbn/core-feature-flags-server';
 
 /**
  * Subset of `InternalCoreStart` used by {@link CoreRouteHandlerContext}
  * @internal
  */
 export interface CoreRouteHandlerContextParams {
+  featureFlags: FeatureFlagsStart;
   elasticsearch: InternalElasticsearchServiceStart;
   savedObjects: InternalSavedObjectsServiceStart;
   uiSettings: InternalUiSettingsServiceStart;
   deprecations: InternalDeprecationsServiceStart;
   security: InternalSecurityServiceStart;
+  userProfile: InternalUserProfileServiceStart;
 }
 
 /**
@@ -47,16 +56,25 @@ export interface CoreRouteHandlerContextParams {
  * @internal
  */
 export class CoreRouteHandlerContext implements CoreRequestHandlerContext {
+  #featureFlags?: CoreFeatureFlagsRouteHandlerContext;
   #elasticsearch?: CoreElasticsearchRouteHandlerContext;
   #savedObjects?: CoreSavedObjectsRouteHandlerContext;
   #uiSettings?: CoreUiSettingsRouteHandlerContext;
   #deprecations?: CoreDeprecationsRouteHandlerContext;
   #security?: CoreSecurityRouteHandlerContext;
+  #userProfile?: CoreUserProfileRouteHandlerContext;
 
   constructor(
     private readonly coreStart: CoreRouteHandlerContextParams,
     private readonly request: KibanaRequest
   ) {}
+
+  public get featureFlags() {
+    if (!this.#featureFlags) {
+      this.#featureFlags = new CoreFeatureFlagsRouteHandlerContext(this.coreStart.featureFlags);
+    }
+    return this.#featureFlags;
+  }
 
   public get elasticsearch() {
     if (!this.#elasticsearch) {
@@ -104,5 +122,15 @@ export class CoreRouteHandlerContext implements CoreRequestHandlerContext {
       this.#security = new CoreSecurityRouteHandlerContext(this.coreStart.security, this.request);
     }
     return this.#security;
+  }
+
+  public get userProfile() {
+    if (!this.#userProfile) {
+      this.#userProfile = new CoreUserProfileRouteHandlerContext(
+        this.coreStart.userProfile,
+        this.request
+      );
+    }
+    return this.#userProfile;
   }
 }

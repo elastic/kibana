@@ -13,7 +13,7 @@ import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import type { RulesClient, PartialRule } from '@kbn/alerting-plugin/server';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { withSecuritySpan } from '../../../../../utils/with_security_span';
-import { internalRuleToAPIResponse } from '../../normalization/rule_converters';
+import { internalRuleToAPIResponse } from '../detection_rules_client/converters/internal_rule_to_api_response';
 import type { RuleParams } from '../../../rule_schema';
 import { hasValidRuleType } from '../../../rule_schema';
 import { findRules } from '../search/find_rules';
@@ -29,15 +29,21 @@ export const getExportByObjectIds = async (
   ruleIds: string[],
   actionsExporter: ISavedObjectsExporter,
   request: KibanaRequest,
-  actionsClient: ActionsClient
+  actionsClient: ActionsClient,
+  prebuiltRulesCustomizationEnabled?: boolean
 ): Promise<{
   rulesNdjson: string;
   exportDetails: string;
   exceptionLists: string | null;
   actionConnectors: string;
+  prebuiltRulesCustomizationEnabled?: boolean;
 }> =>
   withSecuritySpan('getExportByObjectIds', async () => {
-    const rulesAndErrors = await fetchRulesByIds(rulesClient, ruleIds);
+    const rulesAndErrors = await fetchRulesByIds(
+      rulesClient,
+      ruleIds,
+      prebuiltRulesCustomizationEnabled
+    );
     const { rules, missingRuleIds } = rulesAndErrors;
 
     // Retrieve exceptions
@@ -76,7 +82,8 @@ interface FetchRulesResult {
 
 const fetchRulesByIds = async (
   rulesClient: RulesClient,
-  ruleIds: string[]
+  ruleIds: string[],
+  prebuiltRulesCustomizationEnabled?: boolean
 ): Promise<FetchRulesResult> => {
   // It's important to avoid too many clauses in the request otherwise ES will fail to process the request
   // with `too_many_clauses` error (see https://github.com/elastic/kibana/issues/170015). The clauses limit
@@ -110,7 +117,7 @@ const fetchRulesByIds = async (
 
         return matchingRule != null &&
           hasValidRuleType(matchingRule) &&
-          matchingRule.params.immutable !== true
+          (prebuiltRulesCustomizationEnabled || matchingRule.params.immutable !== true)
           ? {
               rule: transformRuleToExportableFormat(internalRuleToAPIResponse(matchingRule)),
             }

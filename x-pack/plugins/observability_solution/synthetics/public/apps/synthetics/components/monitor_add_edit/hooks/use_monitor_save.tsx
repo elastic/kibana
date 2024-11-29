@@ -6,11 +6,12 @@
  */
 
 import { FETCH_STATUS, useFetcher } from '@kbn/observability-shared-plugin/public';
-import { toMountPoint, useKibana } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { useParams, useRouteMatch } from 'react-router-dom';
 import React, { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { i18n } from '@kbn/i18n';
+import { useGetUrlParams } from '../../../hooks';
 import { MONITOR_EDIT_ROUTE } from '../../../../../../common/constants';
 import { SyntheticsMonitor } from '../../../../../../common/runtime_types';
 import { createMonitorAPI, updateMonitorAPI } from '../../../state/monitor_management/api';
@@ -19,11 +20,10 @@ import { cleanMonitorListState, IHttpSerializedFetchError } from '../../../state
 import { useSyntheticsRefreshContext } from '../../../contexts';
 
 export const useMonitorSave = ({ monitorData }: { monitorData?: SyntheticsMonitor }) => {
-  const core = useKibana();
-  const theme$ = core.services.theme?.theme$;
   const dispatch = useDispatch();
   const { refreshApp } = useSyntheticsRefreshContext();
   const { monitorId } = useParams<{ monitorId: string }>();
+  const { spaceId } = useGetUrlParams();
 
   const editRouteMatch = useRouteMatch({ path: MONITOR_EDIT_ROUTE });
   const isEdit = editRouteMatch?.isExact;
@@ -33,6 +33,7 @@ export const useMonitorSave = ({ monitorData }: { monitorData?: SyntheticsMonito
       if (isEdit) {
         return updateMonitorAPI({
           id: monitorId,
+          spaceId,
           monitor: monitorData,
         });
       } else {
@@ -41,11 +42,16 @@ export const useMonitorSave = ({ monitorData }: { monitorData?: SyntheticsMonito
         });
       }
     }
+    // FIXME: Dario thinks there is a better way to do this but
+    // he's getting tired and maybe the Synthetics folks can fix it
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [monitorData]);
 
   useEffect(() => {
+    const { coreStart, toasts } = kibanaService;
+
     if (status === FETCH_STATUS.FAILURE && error) {
-      kibanaService.toasts.addError(
+      toasts.addError(
         {
           ...error,
           message: (error as unknown as IHttpSerializedFetchError).body.message ?? error.message,
@@ -55,18 +61,18 @@ export const useMonitorSave = ({ monitorData }: { monitorData?: SyntheticsMonito
     } else if (status === FETCH_STATUS.SUCCESS && !loading) {
       refreshApp();
       dispatch(cleanMonitorListState());
-      kibanaService.toasts.addSuccess({
+      toasts.addSuccess({
         title: monitorId ? MONITOR_UPDATED_SUCCESS_LABEL : MONITOR_SUCCESS_LABEL,
         text: toMountPoint(
           <p data-test-subj="synthetcsMonitorSaveSubtext">
             {monitorId ? MONITOR_UPDATED_SUCCESS_LABEL_SUBTEXT : MONITOR_SUCCESS_LABEL_SUBTEXT}
           </p>,
-          { theme$ }
+          coreStart
         ),
         toastLifeTimeMs: 3000,
       });
     }
-  }, [data, status, monitorId, loading, refreshApp, dispatch, theme$, error]);
+  }, [data, status, monitorId, loading, refreshApp, dispatch, error]);
 
   return { status, loading, isEdit };
 };

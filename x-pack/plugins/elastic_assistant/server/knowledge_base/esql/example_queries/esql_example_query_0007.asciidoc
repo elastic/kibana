@@ -1,10 +1,13 @@
-[[esql-example-queries]]
-
-The following is an example ES|QL query:
-
-```
-FROM packetbeat-*
-| STATS doc_count = COUNT(destination.domain) BY destination.domain
-| SORT doc_count DESC
-| LIMIT 10
-```
+//7. Windows logon activity by source IP
+// Helpful when answering questions about the CASE command (as well as conditional outputs/if statements)
+//MITRE Tactics: "Credential Access"
+from logs-*
+| where host.os.family == "windows" and
+event.category == "authentication" and event.action in ("logon-failed", "logged-in") and winlog.logon.type == "Network" and
+source.ip is not null and
+/* noisy failure status codes often associated to authentication misconfiguration */
+not (event.action == "logon-failed" and winlog.event_data.Status in ("0xC000015B", "0XC000005E", "0XC0000133", "0XC0000192"))
+| eval failed = case(event.action == "logon-failed", source.ip, null), success = case(event.action == "logged-in", source.ip, null)
+| stats count_failed = count(failed), count_success = count(success), count_user = count_distinct(winlog.event_data.TargetUserName) by source.ip
+/* below threshold should be adjusted to your env logon patterns */
+| where count_failed >= 100 and count_success <= 10 and count_user >= 20

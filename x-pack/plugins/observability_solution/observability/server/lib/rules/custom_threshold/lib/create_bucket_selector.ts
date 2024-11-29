@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { convertToBuiltInComparators } from '../../../../../common';
 import { CustomMetricExpressionParams } from '../../../../../common/custom_threshold_rule/types';
 import { createConditionScript } from './create_condition_script';
 import { createLastPeriod } from './wrap_in_period';
@@ -24,7 +25,10 @@ export const createBucketSelector = (
       buckets_path: {
         value: bucketPath,
       },
-      script: createConditionScript(condition.threshold, condition.comparator),
+      script: createConditionScript(
+        condition.threshold,
+        convertToBuiltInComparators(condition.comparator)
+      ),
     },
   };
 

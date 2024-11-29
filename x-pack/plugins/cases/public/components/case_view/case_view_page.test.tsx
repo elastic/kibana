@@ -9,7 +9,6 @@ import React from 'react';
 import { waitFor, screen } from '@testing-library/react';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
-import '../../common/mock/match_media';
 import { useUrlParams } from '../../common/navigation/hooks';
 import { CaseViewPage } from './case_view_page';
 import { caseData, caseViewProps } from './mocks';

@@ -9,8 +9,8 @@ import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
 import {
+  API_VERSIONS,
   ELASTIC_AI_ASSISTANT_ANONYMIZATION_FIELDS_URL_FIND,
-  ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
 } from '@kbn/elastic-assistant-common';
 
 import {
@@ -20,8 +20,9 @@ import {
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { ElasticAssistantPluginRouter } from '../../types';
 import { buildResponse } from '../utils';
-import { SearchEsAnonymizationFieldsSchema } from '../../ai_assistant_data_clients/anonymization_fields/types';
-import { transformESToAnonymizationFields } from '../../ai_assistant_data_clients/anonymization_fields/helpers';
+import { EsAnonymizationFieldsSchema } from '../../ai_assistant_data_clients/anonymization_fields/types';
+import { transformESSearchToAnonymizationFields } from '../../ai_assistant_data_clients/anonymization_fields/helpers';
+import { performChecks } from '../helpers';
 
 export const findAnonymizationFieldsRoute = (
   router: ElasticAssistantPluginRouter,
@@ -37,7 +38,7 @@ export const findAnonymizationFieldsRoute = (
     })
     .addVersion(
       {
-        version: ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
+        version: API_VERSIONS.public.v1,
         validate: {
           request: {
             query: buildRouteValidationWithZod(FindAnonymizationFieldsRequestQuery),
@@ -53,11 +54,21 @@ export const findAnonymizationFieldsRoute = (
 
         try {
           const { query } = request;
-          const ctx = await context.resolve(['core', 'elasticAssistant']);
+          const ctx = await context.resolve(['core', 'elasticAssistant', 'licensing']);
+          // Perform license and authenticated user checks
+          const checkResponse = performChecks({
+            context: ctx,
+            request,
+            response,
+          });
+          if (!checkResponse.isSuccess) {
+            return checkResponse.response;
+          }
+
           const dataClient =
             await ctx.elasticAssistant.getAIAssistantAnonymizationFieldsDataClient();
 
-          const result = await dataClient?.findDocuments<SearchEsAnonymizationFieldsSchema>({
+          const result = await dataClient?.findDocuments<EsAnonymizationFieldsSchema>({
             perPage: query.per_page,
             page: query.page,
             sortField: query.sort_field,
@@ -72,7 +83,7 @@ export const findAnonymizationFieldsRoute = (
                 perPage: result.perPage,
                 page: result.page,
                 total: result.total,
-                data: transformESToAnonymizationFields(result.data),
+                data: transformESSearchToAnonymizationFields(result.data),
               },
             });
           }

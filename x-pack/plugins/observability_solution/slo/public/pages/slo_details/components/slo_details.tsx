@@ -5,70 +5,25 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, htmlIdGenerator } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { EuiFlexGroup } from '@elastic/eui';
+import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import moment from 'moment';
 import React, { useEffect, useState } from 'react';
-import { BurnRateOption, BurnRates } from '../../../components/slo/burn_rate/burn_rates';
-
-import { useFetchHistoricalSummary } from '../../../hooks/use_fetch_historical_summary';
-import { useFetchRulesForSlo } from '../../../hooks/use_fetch_rules_for_slo';
-import { formatHistoricalData } from '../../../utils/slo/chart_data_formatter';
-import { ErrorBudgetChartPanel } from './error_budget_chart_panel';
+import { BurnRatePanel } from './burn_rate_panel/burn_rate_panel';
 import { EventsChartPanel } from './events_chart_panel';
+import { HistoricalDataCharts } from './historical_data_charts';
+import { SLODetailsHistory } from './history/slo_details_history';
 import { Overview } from './overview/overview';
-import { SliChartPanel } from './sli_chart_panel';
 import { SloDetailsAlerts } from './slo_detail_alerts';
+import { SloHealthCallout } from './slo_health_callout';
+import { SloRemoteCallout } from './slo_remote_callout';
 
 export const TAB_ID_URL_PARAM = 'tabId';
 export const OVERVIEW_TAB_ID = 'overview';
+export const HISTORY_TAB_ID = 'history';
 export const ALERTS_TAB_ID = 'alerts';
-const DAY_IN_MILLISECONDS = 24 * 60 * 60 * 1000;
 
-const DEFAULT_BURN_RATE_OPTIONS: BurnRateOption[] = [
-  {
-    id: htmlIdGenerator()(),
-    label: i18n.translate('xpack.slo.burnRates.fromRange.label', {
-      defaultMessage: '{duration}h',
-      values: { duration: 1 },
-    }),
-    windowName: 'CRITICAL',
-    threshold: 14.4,
-    duration: 1,
-  },
-  {
-    id: htmlIdGenerator()(),
-    label: i18n.translate('xpack.slo.burnRates.fromRange.label', {
-      defaultMessage: '{duration}h',
-      values: { duration: 6 },
-    }),
-    windowName: 'HIGH',
-    threshold: 6,
-    duration: 6,
-  },
-  {
-    id: htmlIdGenerator()(),
-    label: i18n.translate('xpack.slo.burnRates.fromRange.label', {
-      defaultMessage: '{duration}h',
-      values: { duration: 24 },
-    }),
-    windowName: 'MEDIUM',
-    threshold: 3,
-    duration: 24,
-  },
-  {
-    id: htmlIdGenerator()(),
-    label: i18n.translate('xpack.slo.burnRates.fromRange.label', {
-      defaultMessage: '{duration}h',
-      values: { duration: 72 },
-    }),
-    windowName: 'LOW',
-    threshold: 1,
-    duration: 72,
-  },
-];
-
-export type SloTabId = typeof OVERVIEW_TAB_ID | typeof ALERTS_TAB_ID;
+export type SloTabId = typeof OVERVIEW_TAB_ID | typeof ALERTS_TAB_ID | typeof HISTORY_TAB_ID;
 
 export interface Props {
   slo: SLOWithSummaryResponse;
@@ -76,82 +31,53 @@ export interface Props {
   selectedTabId: SloTabId;
 }
 export function SloDetails({ slo, isAutoRefreshing, selectedTabId }: Props) {
-  const { data: rules } = useFetchRulesForSlo({ sloIds: [slo.id] });
-  const burnRateOptions =
-    rules?.[slo.id]?.[0]?.params?.windows?.map((window) => ({
-      id: htmlIdGenerator()(),
-      label: i18n.translate('xpack.slo.burnRates.fromRange.label', {
-        defaultMessage: '{duration}h',
-        values: { duration: window.longWindow.value },
-      }),
-      windowName: window.actionGroup,
-      threshold: window.burnRateThreshold,
-      duration: window.longWindow.value,
-    })) ?? DEFAULT_BURN_RATE_OPTIONS;
-
-  const { data: historicalSummaries = [], isLoading: historicalSummaryLoading } =
-    useFetchHistoricalSummary({
-      list: [{ sloId: slo.id, instanceId: slo.instanceId ?? ALL_VALUE }],
-      shouldRefetch: isAutoRefreshing,
-    });
-
-  const sloHistoricalSummary = historicalSummaries.find(
-    (historicalSummary) =>
-      historicalSummary.sloId === slo.id &&
-      historicalSummary.instanceId === (slo.instanceId ?? ALL_VALUE)
-  );
-
-  const [range, setRange] = useState({
-    start: new Date().getTime() - DAY_IN_MILLISECONDS,
-    end: new Date().getTime(),
+  const [range, setRange] = useState<{ from: Date; to: Date }>({
+    from: moment().subtract(1, 'day').toDate(),
+    to: new Date(),
   });
 
   useEffect(() => {
     let intervalId: any;
     if (isAutoRefreshing) {
       intervalId = setInterval(() => {
-        setRange({ start: new Date().getTime() - DAY_IN_MILLISECONDS, end: new Date().getTime() });
+        setRange({ from: moment().subtract(1, 'day').toDate(), to: new Date() });
       }, 60 * 1000);
     }
 
     return () => clearInterval(intervalId);
   }, [isAutoRefreshing]);
 
-  const errorBudgetBurnDownData = formatHistoricalData(
-    sloHistoricalSummary?.data,
-    'error_budget_remaining'
-  );
-  const historicalSliData = formatHistoricalData(sloHistoricalSummary?.data, 'sli_value');
+  if (selectedTabId === HISTORY_TAB_ID) {
+    return (
+      <SLODetailsHistory
+        slo={slo}
+        isAutoRefreshing={isAutoRefreshing}
+        selectedTabId={selectedTabId}
+      />
+    );
+  }
 
-  return selectedTabId === OVERVIEW_TAB_ID ? (
+  if (selectedTabId === ALERTS_TAB_ID) {
+    return <SloDetailsAlerts slo={slo} />;
+  }
+
+  return (
     <EuiFlexGroup direction="column" gutterSize="xl">
-      <EuiFlexItem>
-        <Overview slo={slo} />
-      </EuiFlexItem>
+      <SloRemoteCallout slo={slo} />
+      <SloHealthCallout slo={slo} />
+      <Overview slo={slo} />
+
       <EuiFlexGroup direction="column" gutterSize="l">
-        <EuiFlexItem>
-          <BurnRates
-            slo={slo}
-            isAutoRefreshing={isAutoRefreshing}
-            burnRateOptions={burnRateOptions}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <SliChartPanel data={historicalSliData} isLoading={historicalSummaryLoading} slo={slo} />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <ErrorBudgetChartPanel
-            data={errorBudgetBurnDownData}
-            isLoading={historicalSummaryLoading}
-            slo={slo}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EventsChartPanel slo={slo} range={range} />
-        </EuiFlexItem>
+        <BurnRatePanel slo={slo} isAutoRefreshing={isAutoRefreshing} />
+
+        <HistoricalDataCharts
+          slo={slo}
+          selectedTabId={selectedTabId}
+          isAutoRefreshing={isAutoRefreshing}
+        />
+
+        <EventsChartPanel slo={slo} range={range} selectedTabId={selectedTabId} />
       </EuiFlexGroup>
     </EuiFlexGroup>
-  ) : (
-    <SloDetailsAlerts slo={slo} />
   );
 }

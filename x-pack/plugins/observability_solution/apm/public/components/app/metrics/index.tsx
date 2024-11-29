@@ -18,11 +18,22 @@ import { JvmMetricsOverview } from './jvm_metrics_overview';
 import { JsonMetricsDashboard } from './static_dashboard';
 import { hasDashboardFile } from './static_dashboard/helper';
 import { useAdHocApmDataView } from '../../../hooks/use_adhoc_apm_data_view';
+import { isLogsOnlySignal } from '../../../utils/get_signal_type';
+import { ServiceTabEmptyState } from '../service_tab_empty_state';
 
 export function Metrics() {
   const { agentName, runtimeName, serverlessType } = useApmServiceContext();
   const isAWSLambda = isAWSLambdaAgentName(serverlessType);
   const { dataView } = useAdHocApmDataView();
+  const { serviceEntitySummary } = useApmServiceContext();
+
+  const hasLogsOnlySignal =
+    serviceEntitySummary?.dataStreamTypes && isLogsOnlySignal(serviceEntitySummary.dataStreamTypes);
+
+  if (hasLogsOnlySignal) {
+    return <ServiceTabEmptyState id="metrics" />;
+  }
+
   if (isAWSLambda) {
     return <ServerlessMetrics />;
   }
@@ -44,10 +55,7 @@ export function Metrics() {
     );
   }
 
-  if (
-    !isAWSLambda &&
-    (isJavaAgentName(agentName) || isJRubyAgentName(agentName, runtimeName))
-  ) {
+  if (!isAWSLambda && (isJavaAgentName(agentName) || isJRubyAgentName(agentName, runtimeName))) {
     return <JvmMetricsOverview />;
   }
 

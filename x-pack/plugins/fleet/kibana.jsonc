@@ -1,11 +1,15 @@
 {
   "type": "plugin",
   "id": "@kbn/fleet-plugin",
-  "owner": "@elastic/fleet",
+  "owner": [
+    "@elastic/fleet"
+  ],
+  "group": "platform",
+  "visibility": "shared",
   "plugin": {
     "id": "fleet",
-    "server": true,
     "browser": true,
+    "server": true,
     "configPath": [
       "xpack",
       "fleet"
@@ -23,7 +27,10 @@
       "taskManager",
       "files",
       "uiActions",
-      "dashboard"
+      "dashboard",
+      "fieldsMetadata",
+      "logsDataAccess",
+      "spaces"
     ],
     "optionalPlugins": [
       "features",
@@ -34,8 +41,8 @@
       "telemetry",
       "discover",
       "ingestPipelines",
-      "spaces",
       "guidedOnboarding",
+      "integrationAssistant"
     ],
     "requiredBundles": [
       "kibanaReact",

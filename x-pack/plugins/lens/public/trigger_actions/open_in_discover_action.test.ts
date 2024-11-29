@@ -8,29 +8,12 @@
 import { DataViewsService } from '@kbn/data-views-plugin/public';
 import { type EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
-import { BehaviorSubject } from 'rxjs';
-import { DOC_TYPE } from '../../common/constants';
 import { createOpenInDiscoverAction } from './open_in_discover_action';
 import type { DiscoverAppLocator } from './open_in_discover_helpers';
+import { getLensApiMock } from '../react_embeddable/mocks';
 
 describe('open in discover action', () => {
-  const compatibleEmbeddableApi = {
-    type: DOC_TYPE,
-    panelTitle: 'some title',
-    hidePanelTitle: false,
-    filters$: new BehaviorSubject([]),
-    query$: new BehaviorSubject({ query: 'test', language: 'kuery' }),
-    timeRange$: new BehaviorSubject({ from: 'now-15m', to: 'now' }),
-    getSavedVis: jest.fn(() => undefined),
-    canViewUnderlyingData: () => Promise.resolve(true),
-    getViewUnderlyingDataArgs: jest.fn(() => ({
-      dataViewSpec: { id: 'index-pattern-id' },
-      timeRange: { from: 'now-7d', to: 'now' },
-      filters: [],
-      query: undefined,
-      columns: [],
-    })),
-  };
+  const compatibleEmbeddableApi = getLensApiMock();
 
   describe('compatibility check', () => {
     it('is incompatible with non-lens embeddables', async () => {
@@ -48,6 +31,10 @@ describe('open in discover action', () => {
     });
     it('is incompatible if user cant access Discover app', async () => {
       // setup
+      const lensApi = {
+        ...compatibleEmbeddableApi,
+        canViewUnderlyingData$: { getValue: jest.fn(() => true) },
+      };
 
       let hasDiscoverAccess = true;
       // make sure it would work if we had access to Discover
@@ -57,7 +44,7 @@ describe('open in discover action', () => {
           {} as DataViewsService,
           hasDiscoverAccess
         ).isCompatible({
-          embeddable: compatibleEmbeddableApi,
+          embeddable: lensApi,
         } as ActionExecutionContext<EmbeddableApiContext>)
       ).toBeTruthy();
 
@@ -69,7 +56,7 @@ describe('open in discover action', () => {
           {} as DataViewsService,
           hasDiscoverAccess
         ).isCompatible({
-          embeddable: compatibleEmbeddableApi,
+          embeddable: lensApi,
         } as ActionExecutionContext<EmbeddableApiContext>)
       ).toBeFalsy();
     });
@@ -77,8 +64,7 @@ describe('open in discover action', () => {
       // setup
       const embeddable = {
         ...compatibleEmbeddableApi,
-        canViewUnderlyingData: jest.fn(() => Promise.resolve(false)),
-        getViewUnderlyingDataArgs: jest.fn(() => undefined),
+        canViewUnderlyingData$: { getValue: jest.fn(() => false) },
       };
 
       // test false
@@ -92,10 +78,11 @@ describe('open in discover action', () => {
         } as ActionExecutionContext<EmbeddableApiContext>)
       ).toBeFalsy();
 
-      expect(embeddable.canViewUnderlyingData).toHaveBeenCalledTimes(1);
+      expect(embeddable.canViewUnderlyingData$.getValue).toHaveBeenCalledTimes(1);
 
       // test true
-      embeddable.canViewUnderlyingData = jest.fn(() => Promise.resolve(true));
+      embeddable.canViewUnderlyingData$.getValue = jest.fn(() => true);
+
       expect(
         await createOpenInDiscoverAction(
           {} as DiscoverAppLocator,
@@ -106,7 +93,7 @@ describe('open in discover action', () => {
         } as ActionExecutionContext<EmbeddableApiContext>)
       ).toBeTruthy();
 
-      expect(embeddable.canViewUnderlyingData).toHaveBeenCalledTimes(1);
+      expect(embeddable.canViewUnderlyingData$.getValue).toHaveBeenCalledTimes(1);
     });
   });
 

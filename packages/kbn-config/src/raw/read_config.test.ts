@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { relative, resolve } from 'path';
@@ -125,6 +126,56 @@ test('supports unsplittable key syntax on nested list', () => {
             "bar",
           ],
           "id": "id1",
+        },
+      ],
+    }
+  `);
+});
+
+test('supports unsplittable key syntax on nested list with splittable subkeys', () => {
+  const config = getConfigFromFiles([fixtureFile('/unsplittable_3.yml')]);
+
+  expect(config).toMatchInlineSnapshot(`
+    Object {
+      "foo.bar": "foobar",
+      "list": Array [
+        Object {
+          "a.b": Array [
+            "foo",
+            "bar",
+          ],
+          "id": "id1",
+          "test": Object {
+            "this": Object {
+              "out": Array [
+                "foo",
+                "bar",
+              ],
+            },
+          },
+        },
+      ],
+    }
+  `);
+});
+
+test('supports var:default syntax', () => {
+  process.env.KBN_ENV_VAR1 = 'val1';
+
+  const config = getConfigFromFiles([fixtureFile('/en_var_with_defaults.yml')]);
+
+  delete process.env.KBN_ENV_VAR1;
+
+  expect(config).toMatchInlineSnapshot(`
+    Object {
+      "foo": "pre-val1-mid-default2-post",
+      "nested_list": Array [
+        Object {
+          "id": "a",
+          "values": Array [
+            "val1",
+            "default2",
+          ],
         },
       ],
     }

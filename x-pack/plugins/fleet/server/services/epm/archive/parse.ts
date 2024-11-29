@@ -40,7 +40,7 @@ import {
 import { PackageInvalidArchiveError } from '../../../errors';
 import { pkgToPkgKey } from '../registry';
 
-import { unpackBufferEntries } from '.';
+import { traverseArchiveEntries } from '.';
 
 const readFileAsync = promisify(readFile);
 export const MANIFEST_NAME = 'manifest.yml';
@@ -110,9 +110,7 @@ type OptionalPackageProp = OptionalPropertyOf<ArchivePackage>;
 const requiredArchivePackageProps: readonly RequiredPackageProp[] = [
   'name',
   'version',
-  'description',
   'title',
-  'format_version',
   'owner',
 ] as const;
 
@@ -128,7 +126,10 @@ const optionalArchivePackageProps: readonly OptionalPackageProp[] = [
   'icons',
   'policy_templates',
   'release',
+  'agent',
   'elasticsearch',
+  'description',
+  'format_version',
 ] as const;
 
 const registryInputProps = Object.values(RegistryInputKeys);
@@ -159,9 +160,8 @@ export async function generatePackageInfoFromArchiveBuffer(
   contentType: string
 ): Promise<{ paths: string[]; packageInfo: ArchivePackage }> {
   const assetsMap: AssetsBufferMap = {};
-  const entries = await unpackBufferEntries(archiveBuffer, contentType);
   const paths: string[] = [];
-  entries.forEach(({ path: bufferPath, buffer }) => {
+  await traverseArchiveEntries(archiveBuffer, contentType, async ({ path: bufferPath, buffer }) => {
     paths.push(bufferPath);
     if (buffer && filterAssetPathForParseAndVerifyArchive(bufferPath)) {
       assetsMap[bufferPath] = buffer;
@@ -230,7 +230,7 @@ export function parseAndVerifyArchive(
   let manifest: ArchivePackage;
   try {
     logger.debug(`Verifying archive - loading yaml`);
-    manifest = yaml.safeLoad(manifestBuffer.toString());
+    manifest = yaml.load(manifestBuffer.toString());
   } catch (error) {
     throw new PackageInvalidArchiveError(
       `Could not parse top-level package manifest at top-level directory ${toplevelDir}: ${error}.`
@@ -310,7 +310,7 @@ export function parseAndVerifyArchive(
   if (paths.includes(tagsFile) || tagsBuffer) {
     let tags: PackageSpecTags[];
     try {
-      tags = yaml.safeLoad(tagsBuffer.toString());
+      tags = yaml.load(tagsBuffer.toString());
       logger.debug(`Parsing archive - parsing kibana/tags.yml file`);
       if (tags.length) {
         parsed.asset_tags = tags;
@@ -368,7 +368,7 @@ export function parseAndVerifyDataStreams(opts: {
 
     let manifest;
     try {
-      manifest = yaml.safeLoad(manifestBuffer.toString());
+      manifest = yaml.load(manifestBuffer.toString());
     } catch (error) {
       throw new PackageInvalidArchiveError(
         `Could not parse package manifest for data stream '${dataStreamPath}': ${error}.`
@@ -381,7 +381,7 @@ export function parseAndVerifyDataStreams(opts: {
     let dataStreamRoutingRules: RegistryDataStreamRoutingRules[] | undefined;
     if (routingRulesBuffer) {
       try {
-        dataStreamRoutingRules = yaml.safeLoad(routingRulesBuffer.toString());
+        dataStreamRoutingRules = yaml.load(routingRulesBuffer.toString());
       } catch (error) {
         throw new PackageInvalidArchiveError(
           `Could not parse routing rules for data stream '${dataStreamPath}': ${error}.`
@@ -394,7 +394,7 @@ export function parseAndVerifyDataStreams(opts: {
     let dataStreamLifecyle: RegistryDataStreamLifecycle | undefined;
     if (lifecyleBuffer) {
       try {
-        dataStreamLifecyle = yaml.safeLoad(lifecyleBuffer.toString());
+        dataStreamLifecyle = yaml.load(lifecyleBuffer.toString());
       } catch (error) {
         throw new PackageInvalidArchiveError(
           `Could not parse lifecycle for data stream '${dataStreamPath}': ${error}.`
@@ -403,11 +403,17 @@ export function parseAndVerifyDataStreams(opts: {
     }
 
     const {
+      // @ts-expect-error upgrade typescript v5.1.6
       title: dataStreamTitle,
+      // @ts-expect-error upgrade typescript v5.1.6
       release = DEFAULT_RELEASE_VALUE,
+      // @ts-expect-error upgrade typescript v5.1.6
       type,
+      // @ts-expect-error upgrade typescript v5.1.6
       dataset,
+      // @ts-expect-error upgrade typescript v5.1.6
       streams: manifestStreams,
+      // @ts-expect-error upgrade typescript v5.1.6
       elasticsearch,
       ...restOfProps
     } = expandDottedObject(manifest);
@@ -642,41 +648,57 @@ export function parseDataStreamElasticsearchEntry(
     parsedElasticsearchEntry['ingest_pipeline.name'] = ingestPipeline;
   }
 
+  // @ts-expect-error upgrade typescript v5.1.6
   if (expandedElasticsearch?.privileges) {
+    // @ts-expect-error upgrade typescript v5.1.6
     parsedElasticsearchEntry.privileges = expandedElasticsearch.privileges;
   }
 
+  // @ts-expect-error upgrade typescript v5.1.6
   if (expandedElasticsearch?.source_mode) {
+    // @ts-expect-error upgrade typescript v5.1.6
     parsedElasticsearchEntry.source_mode = expandedElasticsearch.source_mode;
   }
 
+  // @ts-expect-error upgrade typescript v5.1.6
   if (expandedElasticsearch?.index_template?.mappings) {
     parsedElasticsearchEntry['index_template.mappings'] = expandDottedEntries(
+      // @ts-expect-error upgrade typescript v5.1.6
       expandedElasticsearch.index_template.mappings
     );
   }
 
+  // @ts-expect-error upgrade typescript v5.1.6
   if (expandedElasticsearch?.index_template?.settings) {
     parsedElasticsearchEntry['index_template.settings'] = expandDottedEntries(
+      // @ts-expect-error upgrade typescript v5.1.6
       expandedElasticsearch.index_template.settings
     );
   }
 
+  // @ts-expect-error upgrade typescript v5.1.6
   if (expandedElasticsearch?.index_template?.data_stream) {
     parsedElasticsearchEntry['index_template.data_stream'] = expandDottedEntries(
+      // @ts-expect-error upgrade typescript v5.1.6
       expandedElasticsearch.index_template.data_stream
     );
   }
 
+  // @ts-expect-error upgrade typescript v5.1.6
   if (expandedElasticsearch?.index_mode) {
+    // @ts-expect-error upgrade typescript v5.1.6
     parsedElasticsearchEntry.index_mode = expandedElasticsearch.index_mode;
   }
 
+  // @ts-expect-error upgrade typescript v5.1.6
   if (expandedElasticsearch?.dynamic_dataset) {
+    // @ts-expect-error upgrade typescript v5.1.6
     parsedElasticsearchEntry.dynamic_dataset = expandedElasticsearch.dynamic_dataset;
   }
 
+  // @ts-expect-error upgrade typescript v5.1.6
   if (expandedElasticsearch?.dynamic_namespace) {
+    // @ts-expect-error upgrade typescript v5.1.6
     parsedElasticsearchEntry.dynamic_namespace = expandedElasticsearch.dynamic_namespace;
   }
 
@@ -687,18 +709,24 @@ export function parseTopLevelElasticsearchEntry(elasticsearch?: Record<string, a
   const parsedElasticsearchEntry: Record<string, any> = {};
   const expandedElasticsearch = expandDottedObject(elasticsearch);
 
+  // @ts-expect-error upgrade typescript v5.1.6
   if (expandedElasticsearch?.privileges) {
+    // @ts-expect-error upgrade typescript v5.1.6
     parsedElasticsearchEntry.privileges = expandedElasticsearch.privileges;
   }
 
+  // @ts-expect-error upgrade typescript v5.1.6
   if (expandedElasticsearch?.index_template?.mappings) {
     parsedElasticsearchEntry['index_template.mappings'] = expandDottedEntries(
+      // @ts-expect-error upgrade typescript v5.1.6
       expandedElasticsearch.index_template.mappings
     );
   }
 
+  // @ts-expect-error upgrade typescript v5.1.6
   if (expandedElasticsearch?.index_template?.settings) {
     parsedElasticsearchEntry['index_template.settings'] = expandDottedEntries(
+      // @ts-expect-error upgrade typescript v5.1.6
       expandedElasticsearch.index_template.settings
     );
   }

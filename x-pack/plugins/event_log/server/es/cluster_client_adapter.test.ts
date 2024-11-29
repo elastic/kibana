@@ -23,7 +23,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import { fromKueryExpression } from '@kbn/es-query';
 import { getEsNames } from './names';
 
-type MockedLogger = ReturnType<typeof loggingSystemMock['createLogger']>;
+type MockedLogger = ReturnType<(typeof loggingSystemMock)['createLogger']>;
 
 let logger: MockedLogger;
 let clusterClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
@@ -212,6 +212,117 @@ describe('createIndexTemplate', () => {
     clusterClient.indices.putIndexTemplate.mockRejectedValueOnce(new Error('Fail'));
     clusterClient.indices.existsTemplate.mockResponseOnce(true);
     await clusterClientAdapter.createIndexTemplate('foo', { args: true });
+  });
+});
+
+describe('updateIndexTemplate', () => {
+  test('should call cluster with given template', async () => {
+    clusterClient.indices.simulateTemplate.mockImplementationOnce(async () => ({
+      template: {
+        aliases: {
+          alias_name_1: {
+            is_hidden: true,
+          },
+          alias_name_2: {
+            is_hidden: true,
+          },
+        },
+        settings: {
+          hidden: true,
+          number_of_shards: 1,
+          auto_expand_replicas: '0-1',
+        },
+        mappings: { dynamic: false, properties: { '@timestamp': { type: 'date' } } },
+      },
+    }));
+
+    await clusterClientAdapter.updateIndexTemplate('foo', { args: true });
+
+    expect(clusterClient.indices.simulateTemplate).toHaveBeenCalledWith({
+      name: 'foo',
+      body: { args: true },
+    });
+    expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledWith({
+      name: 'foo',
+      body: { args: true },
+    });
+  });
+
+  test(`should throw error if simulate mappings response is empty`, async () => {
+    clusterClient.indices.simulateTemplate.mockImplementationOnce(async () => ({
+      template: {
+        aliases: {
+          alias_name_1: {
+            is_hidden: true,
+          },
+          alias_name_2: {
+            is_hidden: true,
+          },
+        },
+        settings: {
+          hidden: true,
+          number_of_shards: 1,
+          auto_expand_replicas: '0-1',
+        },
+        mappings: {},
+      },
+    }));
+
+    await expect(() =>
+      clusterClientAdapter.updateIndexTemplate('foo', { name: 'template', args: true })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"No mappings would be generated for template, possibly due to failed/misconfigured bootstrapping"`
+    );
+
+    expect(logger.error).toHaveBeenCalledWith(
+      `Error updating index template foo: No mappings would be generated for template, possibly due to failed/misconfigured bootstrapping`
+    );
+  });
+
+  test(`should throw error if simulateTemplate throws error`, async () => {
+    clusterClient.indices.simulateTemplate.mockImplementationOnce(() => {
+      throw new Error('failed to simulate');
+    });
+
+    await expect(() =>
+      clusterClientAdapter.updateIndexTemplate('foo', { name: 'template', args: true })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`"failed to simulate"`);
+
+    expect(logger.error).toHaveBeenCalledWith(
+      `Error updating index template foo: failed to simulate`
+    );
+  });
+
+  test(`should throw error if putIndexTemplate throws error`, async () => {
+    clusterClient.indices.simulateTemplate.mockImplementationOnce(async () => ({
+      template: {
+        aliases: {
+          alias_name_1: {
+            is_hidden: true,
+          },
+          alias_name_2: {
+            is_hidden: true,
+          },
+        },
+        settings: {
+          hidden: true,
+          number_of_shards: 1,
+          auto_expand_replicas: '0-1',
+        },
+        mappings: { dynamic: false, properties: { '@timestamp': { type: 'date' } } },
+      },
+    }));
+    clusterClient.indices.putIndexTemplate.mockImplementationOnce(() => {
+      throw new Error('failed to update index template');
+    });
+
+    await expect(() =>
+      clusterClientAdapter.updateIndexTemplate('foo', { name: 'template', args: true })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`"failed to update index template"`);
+
+    expect(logger.error).toHaveBeenCalledWith(
+      `Error updating index template foo: failed to update index template`
+    );
   });
 });
 
@@ -497,7 +608,7 @@ describe('doesDataStreamExist', () => {
   });
 });
 
-describe('createIndex', () => {
+describe('createDataStream', () => {
   test('should call cluster with proper arguments', async () => {
     await clusterClientAdapter.createDataStream('foo');
     expect(clusterClient.indices.createDataStream).toHaveBeenCalledWith({
@@ -523,6 +634,95 @@ describe('createIndex', () => {
     };
     clusterClient.indices.create.mockRejectedValue(err);
     await clusterClientAdapter.createDataStream('foo');
+  });
+});
+
+describe('updateConcreteIndices', () => {
+  test('should call cluster with proper arguments', async () => {
+    clusterClient.indices.simulateIndexTemplate.mockImplementationOnce(async () => ({
+      template: {
+        aliases: { alias_name_1: { is_hidden: true } },
+        settings: {
+          hidden: true,
+          number_of_shards: 1,
+          auto_expand_replicas: '0-1',
+        },
+        mappings: { dynamic: false, properties: { '@timestamp': { type: 'date' } } },
+      },
+    }));
+
+    await clusterClientAdapter.updateConcreteIndices('foo');
+    expect(clusterClient.indices.simulateIndexTemplate).toHaveBeenCalledWith({
+      name: 'foo',
+    });
+    expect(clusterClient.indices.putMapping).toHaveBeenCalledWith({
+      index: 'foo',
+      body: { dynamic: false, properties: { '@timestamp': { type: 'date' } } },
+    });
+  });
+
+  test('should not update mapping if simulate response does not contain mappings', async () => {
+    // @ts-ignore
+    clusterClient.indices.simulateIndexTemplate.mockImplementationOnce(async () => ({
+      template: {
+        aliases: { alias_name_1: { is_hidden: true } },
+        settings: {
+          hidden: true,
+          number_of_shards: 1,
+          auto_expand_replicas: '0-1',
+        },
+      },
+    }));
+
+    await clusterClientAdapter.updateConcreteIndices('foo');
+    expect(clusterClient.indices.simulateIndexTemplate).toHaveBeenCalledWith({
+      name: 'foo',
+    });
+    expect(clusterClient.indices.putMapping).not.toHaveBeenCalled();
+  });
+
+  test('should throw error if simulateIndexTemplate throws error', async () => {
+    clusterClient.indices.simulateIndexTemplate.mockImplementationOnce(() => {
+      throw new Error('failed to simulate');
+    });
+
+    await expect(() =>
+      clusterClientAdapter.updateConcreteIndices('foo')
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`"failed to simulate"`);
+
+    expect(clusterClient.indices.putMapping).not.toHaveBeenCalled();
+    expect(logger.error).toHaveBeenCalledWith(
+      `Error updating index mappings for foo: failed to simulate`
+    );
+  });
+
+  test('should throw error if putMapping throws error', async () => {
+    clusterClient.indices.simulateIndexTemplate.mockImplementationOnce(async () => ({
+      template: {
+        aliases: { alias_name_1: { is_hidden: true } },
+        settings: {
+          hidden: true,
+          number_of_shards: 1,
+          auto_expand_replicas: '0-1',
+        },
+        mappings: { dynamic: false, properties: { '@timestamp': { type: 'date' } } },
+      },
+    }));
+    clusterClient.indices.putMapping.mockImplementationOnce(() => {
+      throw new Error('failed to put mappings');
+    });
+
+    await expect(() =>
+      clusterClientAdapter.updateConcreteIndices('foo')
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`"failed to put mappings"`);
+
+    expect(clusterClient.indices.putMapping).toHaveBeenCalledWith({
+      index: 'foo',
+      body: { dynamic: false, properties: { '@timestamp': { type: 'date' } } },
+    });
+    expect(logger.error).toHaveBeenCalledWith(
+      `Error updating index mappings for foo: failed to put mappings`
+    );
   });
 });
 

@@ -6,24 +6,29 @@
  */
 
 import { queue } from 'async';
+import { chunk } from 'lodash';
 
 import { SIGNIFICANT_ITEM_TYPE, type SignificantItem } from '@kbn/ml-agg-utils';
 import { i18n } from '@kbn/i18n';
 
 import {
-  addSignificantItemsAction,
-  updateLoadingStateAction,
-} from '../../../../common/api/log_rate_analysis/actions';
-
-import { isRequestAbortedError } from '../../../lib/is_request_aborted_error';
-
-import { fetchTopCategories } from '../queries/fetch_top_categories';
-import { fetchTopTerms } from '../queries/fetch_top_terms';
+  addSignificantItems,
+  updateLoadingState,
+} from '@kbn/aiops-log-rate-analysis/api/stream_reducer';
 
 import type {
   AiopsLogRateAnalysisSchema,
   AiopsLogRateAnalysisApiVersion as ApiVersion,
-} from '../../../../common/api/log_rate_analysis/schema';
+} from '@kbn/aiops-log-rate-analysis/api/schema';
+import { isRequestAbortedError } from '@kbn/aiops-common/is_request_aborted_error';
+import { fetchTopCategories } from '@kbn/aiops-log-rate-analysis/queries/fetch_top_categories';
+import { fetchTopTerms } from '@kbn/aiops-log-rate-analysis/queries/fetch_top_terms';
+import type { QueueFieldCandidate } from '@kbn/aiops-log-rate-analysis/queue_field_candidates';
+import {
+  isKeywordFieldCandidates,
+  isTextFieldCandidates,
+  QUEUE_CHUNKING_SIZE,
+} from '@kbn/aiops-log-rate-analysis/queue_field_candidates';
 
 import {
   LOADED_FIELD_CANDIDATES,
@@ -35,7 +40,7 @@ import type { ResponseStreamFetchOptions } from '../response_stream_factory';
 export const topItemsHandlerFactory =
   <T extends ApiVersion>({
     abortSignal,
-    client,
+    esClient,
     logDebugMessage,
     logger,
     requestBody,
@@ -44,145 +49,165 @@ export const topItemsHandlerFactory =
     version,
   }: ResponseStreamFetchOptions<T>) =>
   async ({
-    fieldCandidates,
+    keywordFieldCandidates,
     textFieldCandidates,
   }: {
-    fieldCandidates: string[];
+    keywordFieldCandidates: string[];
     textFieldCandidates: string[];
   }) => {
-    let fieldCandidatesCount = fieldCandidates.length;
-
     // This will store the combined count of detected log patterns and keywords
     let fieldValuePairsCount = 0;
 
-    const topCategories: SignificantItem[] = [];
+    if (version === '3') {
+      const overridesRemainingTextFieldCandidates = (requestBody as AiopsLogRateAnalysisSchema<'3'>)
+        .overrides?.remainingTextFieldCandidates;
 
-    if (version === '1') {
-      topCategories.push(
-        ...((requestBody as AiopsLogRateAnalysisSchema<'1'>).overrides?.significantTerms?.filter(
-          (d) => d.type === SIGNIFICANT_ITEM_TYPE.LOG_PATTERN
-        ) ?? [])
-      );
-    }
-
-    if (version === '2') {
-      topCategories.push(
-        ...((requestBody as AiopsLogRateAnalysisSchema<'2'>).overrides?.significantItems?.filter(
-          (d) => d.type === SIGNIFICANT_ITEM_TYPE.LOG_PATTERN
-        ) ?? [])
-      );
-    }
-
-    // Get categories of text fields
-    if (textFieldCandidates.length > 0) {
-      topCategories.push(
-        ...(await fetchTopCategories(
-          client,
-          requestBody,
-          textFieldCandidates,
-          logger,
-          stateHandler.sampleProbability(),
-          responseStream.pushError,
-          abortSignal
-        ))
-      );
-
-      if (topCategories.length > 0) {
-        responseStream.push(addSignificantItemsAction(topCategories, version));
+      if (Array.isArray(overridesRemainingTextFieldCandidates)) {
+        textFieldCandidates.push(...overridesRemainingTextFieldCandidates);
       }
     }
+
+    const topCategories: SignificantItem[] = [];
+
+    topCategories.push(
+      ...(requestBody.overrides?.significantItems?.filter(
+        (d) => d.type === SIGNIFICANT_ITEM_TYPE.LOG_PATTERN
+      ) ?? [])
+    );
 
     const topTerms: SignificantItem[] = [];
 
-    if (version === '1') {
-      topTerms.push(
-        ...((requestBody as AiopsLogRateAnalysisSchema<'1'>).overrides?.significantTerms?.filter(
-          (d) => d.type === SIGNIFICANT_ITEM_TYPE.KEYWORD
-        ) ?? [])
-      );
-    }
+    topTerms.push(
+      ...((requestBody as AiopsLogRateAnalysisSchema<'3'>).overrides?.significantItems?.filter(
+        (d) => d.type === SIGNIFICANT_ITEM_TYPE.KEYWORD
+      ) ?? [])
+    );
 
-    if (version === '2') {
-      topTerms.push(
-        ...((requestBody as AiopsLogRateAnalysisSchema<'2'>).overrides?.significantItems?.filter(
-          (d) => d.type === SIGNIFICANT_ITEM_TYPE.KEYWORD
-        ) ?? [])
-      );
-    }
-
-    const fieldsToSample = new Set<string>();
-
-    let remainingFieldCandidates: string[];
+    let remainingKeywordFieldCandidates: string[];
     let loadingStepSizeTopTerms = PROGRESS_STEP_P_VALUES;
 
-    if (requestBody.overrides?.remainingFieldCandidates) {
-      fieldCandidates.push(...requestBody.overrides?.remainingFieldCandidates);
-      remainingFieldCandidates = requestBody.overrides?.remainingFieldCandidates;
-      fieldCandidatesCount = fieldCandidates.length;
-      loadingStepSizeTopTerms =
-        LOADED_FIELD_CANDIDATES +
-        PROGRESS_STEP_P_VALUES -
-        (requestBody.overrides?.loaded ?? PROGRESS_STEP_P_VALUES);
-    } else {
-      remainingFieldCandidates = fieldCandidates;
+    if (version === '2') {
+      const overridesRemainingFieldCandidates = (requestBody as AiopsLogRateAnalysisSchema<'2'>)
+        .overrides?.remainingFieldCandidates;
+
+      if (Array.isArray(overridesRemainingFieldCandidates)) {
+        keywordFieldCandidates.push(...overridesRemainingFieldCandidates);
+        remainingKeywordFieldCandidates = overridesRemainingFieldCandidates;
+        loadingStepSizeTopTerms =
+          LOADED_FIELD_CANDIDATES +
+          PROGRESS_STEP_P_VALUES -
+          (requestBody.overrides?.loaded ?? PROGRESS_STEP_P_VALUES);
+      } else {
+        remainingKeywordFieldCandidates = keywordFieldCandidates;
+      }
+    } else if (version === '3') {
+      const overridesRemainingKeywordFieldCandidates = (
+        requestBody as AiopsLogRateAnalysisSchema<'3'>
+      ).overrides?.remainingKeywordFieldCandidates;
+
+      if (Array.isArray(overridesRemainingKeywordFieldCandidates)) {
+        keywordFieldCandidates.push(...overridesRemainingKeywordFieldCandidates);
+        remainingKeywordFieldCandidates = overridesRemainingKeywordFieldCandidates;
+        loadingStepSizeTopTerms =
+          LOADED_FIELD_CANDIDATES +
+          PROGRESS_STEP_P_VALUES -
+          (requestBody.overrides?.loaded ?? PROGRESS_STEP_P_VALUES);
+      } else {
+        remainingKeywordFieldCandidates = keywordFieldCandidates;
+      }
     }
 
-    logDebugMessage('Fetch p-values.');
+    logDebugMessage('Fetch top items.');
 
-    const topTermsQueue = queue(async function (fieldCandidate: string) {
-      stateHandler.loaded((1 / fieldCandidatesCount) * loadingStepSizeTopTerms, false);
+    const topTermsQueueChunks = [
+      ...chunk(keywordFieldCandidates, QUEUE_CHUNKING_SIZE).map((d) => ({
+        keywordFieldCandidates: d,
+      })),
+      ...chunk(textFieldCandidates, QUEUE_CHUNKING_SIZE).map((d) => ({ textFieldCandidates: d })),
+    ];
+    const loadingStepSize = (1 / topTermsQueueChunks.length) * loadingStepSizeTopTerms;
 
-      let fetchedTopTerms: Awaited<ReturnType<typeof fetchTopTerms>>;
+    const topTermsQueue = queue(async function (payload: QueueFieldCandidate) {
+      if (isKeywordFieldCandidates(payload)) {
+        const { keywordFieldCandidates: fieldNames } = payload;
+        let fetchedTopTerms: Awaited<ReturnType<typeof fetchTopTerms>>;
 
-      try {
-        fetchedTopTerms = await fetchTopTerms(
-          client,
-          requestBody,
-          [fieldCandidate],
-          logger,
-          stateHandler.sampleProbability(),
-          responseStream.pushError,
-          abortSignal
-        );
-      } catch (e) {
-        if (!isRequestAbortedError(e)) {
-          logger.error(`Failed to fetch p-values for '${fieldCandidate}', got: \n${e.toString()}`);
-          responseStream.pushError(`Failed to fetch p-values for '${fieldCandidate}'.`);
+        try {
+          fetchedTopTerms = await fetchTopTerms({
+            esClient,
+            logger,
+            emitError: responseStream.pushError,
+            abortSignal,
+            arguments: {
+              ...requestBody,
+              fieldNames,
+              sampleProbability: stateHandler.sampleProbability(),
+            },
+          });
+        } catch (e) {
+          if (!isRequestAbortedError(e)) {
+            logger.error(
+              `Failed to fetch top items for ${fieldNames.join()}, got: \n${e.toString()}`
+            );
+            responseStream.pushError(`Failed to fetch top items for ${fieldNames.join()}.`);
+          }
+          return;
         }
-        return;
-      }
 
-      remainingFieldCandidates = remainingFieldCandidates.filter((d) => d !== fieldCandidate);
+        remainingKeywordFieldCandidates = remainingKeywordFieldCandidates.filter(
+          (d) => !fieldNames.includes(d)
+        );
 
-      if (fetchedTopTerms.length > 0) {
-        fetchedTopTerms.forEach((d) => {
-          fieldsToSample.add(d.fieldName);
+        if (fetchedTopTerms.length > 0) {
+          topTerms.push(...fetchedTopTerms);
+          responseStream.push(addSignificantItems(fetchedTopTerms));
+        }
+
+        stateHandler.loaded(loadingStepSize, false);
+
+        responseStream.push(
+          updateLoadingState({
+            ccsWarning: false,
+            loaded: stateHandler.loaded(),
+            loadingState: i18n.translate(
+              'xpack.aiops.logRateAnalysis.loadingState.identifiedFieldValuePairs',
+              {
+                defaultMessage:
+                  'Identified {fieldValuePairsCount, plural, one {# significant field/value pair} other {# significant field/value pairs}}.',
+                values: {
+                  fieldValuePairsCount,
+                },
+              }
+            ),
+            remainingKeywordFieldCandidates,
+          })
+        );
+      } else if (isTextFieldCandidates(payload)) {
+        const { textFieldCandidates: fieldNames } = payload;
+
+        const topCategoriesForField = await fetchTopCategories({
+          esClient,
+          logger,
+          emitError: responseStream.pushError,
+          abortSignal,
+          arguments: {
+            ...requestBody,
+            fieldNames,
+            sampleProbability: stateHandler.sampleProbability(),
+          },
         });
-        topTerms.push(...fetchedTopTerms);
 
-        responseStream.push(addSignificantItemsAction(fetchedTopTerms, version));
+        if (topCategoriesForField.length > 0) {
+          topCategories.push(...topCategoriesForField);
+          responseStream.push(addSignificantItems(topCategoriesForField));
+          fieldValuePairsCount += topCategoriesForField.length;
+        }
+
+        stateHandler.loaded(loadingStepSize, false);
       }
-
-      responseStream.push(
-        updateLoadingStateAction({
-          ccsWarning: false,
-          loaded: stateHandler.loaded(),
-          loadingState: i18n.translate(
-            'xpack.aiops.logRateAnalysis.loadingState.identifiedFieldValuePairs',
-            {
-              defaultMessage:
-                'Identified {fieldValuePairsCount, plural, one {# significant field/value pair} other {# significant field/value pairs}}.',
-              values: {
-                fieldValuePairsCount,
-              },
-            }
-          ),
-          remainingFieldCandidates,
-        })
-      );
     }, MAX_CONCURRENT_QUERIES);
 
-    topTermsQueue.push(fieldCandidates, (err) => {
+    topTermsQueue.push(topTermsQueueChunks, (err) => {
       if (err) {
         logger.error(`Failed to fetch p-values.', got: \n${err.toString()}`);
         responseStream.pushError(`Failed to fetch p-values.`);

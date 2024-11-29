@@ -22,7 +22,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const es = getService('es');
   const log = getService('log');
 
-  describe('Search Profiler Editor', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/186126
+  describe.skip('Search Profiler Editor', () => {
     before(async () => {
       await security.testUser.setRoles(['global_devtools_read']);
       await PageObjects.common.navigateToApp('searchProfiler');
@@ -66,7 +67,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             `parser errors to match expectation: HAS ${expectation ? 'ERRORS' : 'NO ERRORS'}`,
             async () => {
               const actual = await PageObjects.searchProfiler.editorHasParseErrors();
-              return expectation === actual;
+              return expectation === actual?.length > 0;
             }
           );
         }

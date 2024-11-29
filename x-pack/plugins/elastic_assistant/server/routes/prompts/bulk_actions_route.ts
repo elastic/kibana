@@ -10,18 +10,18 @@ import type { IKibanaResponse, KibanaResponseFactory, Logger } from '@kbn/core/s
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
+  API_VERSIONS,
   ELASTIC_AI_ASSISTANT_PROMPTS_URL_BULK_ACTION,
-  ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
 } from '@kbn/elastic-assistant-common';
 
 import {
   PromptResponse,
-  BulkActionSkipResult,
-  BulkCrudActionResponse,
-  BulkCrudActionResults,
+  PromptsBulkActionSkipResult,
+  PromptsBulkCrudActionResponse,
+  PromptsBulkCrudActionResults,
   BulkCrudActionSummary,
-  PerformBulkActionRequestBody,
-  PerformBulkActionResponse,
+  PerformPromptsBulkActionRequestBody,
+  PerformPromptsBulkActionResponse,
 } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { PROMPTS_TABLE_MAX_PAGE_SIZE } from '../../../common/constants';
@@ -32,11 +32,10 @@ import {
   transformToCreateScheme,
   transformToUpdateScheme,
   transformESToPrompts,
+  transformESSearchToPrompts,
 } from '../../ai_assistant_data_clients/prompts/helpers';
-import {
-  SearchEsPromptsSchema,
-  UpdatePromptSchema,
-} from '../../ai_assistant_data_clients/prompts/types';
+import { EsPromptsSchema, UpdatePromptSchema } from '../../ai_assistant_data_clients/prompts/types';
+import { performChecks } from '../helpers';
 
 export interface BulkOperationError {
   message: string;
@@ -45,8 +44,6 @@ export interface BulkOperationError {
     id: string;
   };
 }
-
-export type BulkActionError = BulkOperationError | unknown;
 
 const buildBulkResponse = (
   response: KibanaResponseFactory,
@@ -61,9 +58,9 @@ const buildBulkResponse = (
     updated?: PromptResponse[];
     created?: PromptResponse[];
     deleted?: string[];
-    skipped?: BulkActionSkipResult[];
+    skipped?: PromptsBulkActionSkipResult[];
   }
-): IKibanaResponse<BulkCrudActionResponse> => {
+): IKibanaResponse<PromptsBulkCrudActionResponse> => {
   const numSucceeded = updated.length + created.length + deleted.length;
   const numSkipped = skipped.length;
   const numFailed = errors.length;
@@ -75,7 +72,7 @@ const buildBulkResponse = (
     total: numSucceeded + numFailed + numSkipped,
   };
 
-  const results: BulkCrudActionResults = {
+  const results: PromptsBulkCrudActionResults = {
     updated,
     created,
     deleted,
@@ -83,7 +80,7 @@ const buildBulkResponse = (
   };
 
   if (numFailed > 0) {
-    return response.custom<BulkCrudActionResponse>({
+    return response.custom<PromptsBulkCrudActionResponse>({
       headers: { 'content-type': 'application/json' },
       body: {
         message: summary.succeeded > 0 ? 'Bulk edit partially failed' : 'Bulk edit failed',
@@ -101,7 +98,7 @@ const buildBulkResponse = (
     });
   }
 
-  const responseBody: BulkCrudActionResponse = {
+  const responseBody: PromptsBulkCrudActionResponse = {
     success: true,
     prompts_count: summary.total,
     attributes: { results, summary },
@@ -124,14 +121,18 @@ export const bulkPromptsRoute = (router: ElasticAssistantPluginRouter, logger: L
     })
     .addVersion(
       {
-        version: ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
+        version: API_VERSIONS.public.v1,
         validate: {
           request: {
-            body: buildRouteValidationWithZod(PerformBulkActionRequestBody),
+            body: buildRouteValidationWithZod(PerformPromptsBulkActionRequestBody),
           },
         },
       },
-      async (context, request, response): Promise<IKibanaResponse<PerformBulkActionResponse>> => {
+      async (
+        context,
+        request,
+        response
+      ): Promise<IKibanaResponse<PerformPromptsBulkActionResponse>> => {
         const { body } = request;
         const assistantResponse = buildResponse(response);
 
@@ -152,19 +153,22 @@ export const bulkPromptsRoute = (router: ElasticAssistantPluginRouter, logger: L
         // when route is finished by timeout, aborted$ is not getting fired
         request.events.completed$.subscribe(() => abortController.abort());
         try {
-          const ctx = await context.resolve(['core', 'elasticAssistant']);
-
-          const authenticatedUser = ctx.elasticAssistant.getCurrentUser();
-          if (authenticatedUser == null) {
-            return assistantResponse.error({
-              body: `Authenticated user not found`,
-              statusCode: 401,
-            });
+          const ctx = await context.resolve(['core', 'elasticAssistant', 'licensing']);
+          // Perform license and authenticated user checks
+          const checkResponse = performChecks({
+            context: ctx,
+            request,
+            response,
+          });
+          if (!checkResponse.isSuccess) {
+            return checkResponse.response;
           }
+          const authenticatedUser = checkResponse.currentUser;
+
           const dataClient = await ctx.elasticAssistant.getAIAssistantPromptsDataClient();
 
           if (body.create && body.create.length > 0) {
-            const result = await dataClient?.findDocuments<SearchEsPromptsSchema>({
+            const result = await dataClient?.findDocuments<EsPromptsSchema>({
               perPage: 100,
               page: 1,
               filter: `users:{ id: "${authenticatedUser?.profile_uid}" } AND (${body.create
@@ -200,25 +204,20 @@ export const bulkPromptsRoute = (router: ElasticAssistantPluginRouter, logger: L
             ),
             getUpdateScript: (document: UpdatePromptSchema) =>
               getUpdateScript({ prompt: document, isPatch: true }),
-            authenticatedUser,
+            authenticatedUser: authenticatedUser ?? undefined,
           });
-
-          const created = await dataClient?.findDocuments<SearchEsPromptsSchema>({
-            page: 1,
-            perPage: 1000,
-            filter: docsCreated.map((c) => `id:${c}`).join(' OR '),
-            fields: ['id'],
-          });
-          const updated = await dataClient?.findDocuments<SearchEsPromptsSchema>({
-            page: 1,
-            perPage: 1000,
-            filter: docsUpdated.map((c) => `id:${c}`).join(' OR '),
-            fields: ['id'],
-          });
+          const created =
+            docsCreated.length > 0
+              ? await dataClient?.findDocuments<EsPromptsSchema>({
+                  page: 1,
+                  perPage: 100,
+                  filter: docsCreated.map((c) => `_id:${c}`).join(' OR '),
+                })
+              : undefined;
 
           return buildBulkResponse(response, {
-            updated: updated?.data ? transformESToPrompts(updated.data) : [],
-            created: created?.data ? transformESToPrompts(created.data) : [],
+            updated: docsUpdated ? transformESToPrompts(docsUpdated as EsPromptsSchema[]) : [],
+            created: created ? transformESSearchToPrompts(created.data) : [],
             deleted: docsDeleted ?? [],
             errors,
           });

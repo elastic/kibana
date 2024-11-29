@@ -7,7 +7,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { omit, orderBy } from 'lodash';
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useHistory } from 'react-router-dom';
 import { ChartPointerEventContextProvider } from '../../../context/chart_pointer_event/chart_pointer_event_context';
 import { useApmParams } from '../../../hooks/use_apm_params';
@@ -20,6 +20,7 @@ import { ResettingHeightRetainer } from '../../shared/height_retainer/resetting_
 import { push, replace } from '../../shared/links/url_helpers';
 import { useWaterfallFetcher } from '../transaction_details/use_waterfall_fetcher';
 import { WaterfallWithSummary } from '../transaction_details/waterfall_with_summary';
+import { TransactionTab } from '../transaction_details/waterfall_with_summary/transaction_tabs';
 import { DependencyOperationDistributionChart } from './dependency_operation_distribution_chart';
 import { DetailViewHeader } from './detail_view_header';
 import { maybeRedirectToAvailableSpanSample } from './maybe_redirect_to_available_span_sample';
@@ -49,7 +50,12 @@ export function DependencyOperationDetailView() {
     },
   } = useApmParams('/dependencies/operation');
 
-  useDependencyDetailOperationsBreadcrumb();
+  useDependencyDetailOperationsBreadcrumb({
+    title: spanName,
+    href: router.link('/dependencies/operation', {
+      query,
+    }),
+  });
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
@@ -72,27 +78,16 @@ export function DependencyOperationDetailView() {
         },
       });
     },
-    [
-      dependencyName,
-      spanName,
-      start,
-      end,
-      environment,
-      kuery,
-      sampleRangeFrom,
-      sampleRangeTo,
-    ]
+    [dependencyName, spanName, start, end, environment, kuery, sampleRangeFrom, sampleRangeTo]
   );
 
   const samples = useMemo(() => {
     return (
-      orderBy(spanFetch.data?.spans ?? [], sortField, sortDirection).map(
-        (span) => ({
-          spanId: span.spanId,
-          traceId: span.traceId,
-          transactionId: span.transactionId,
-        })
-      ) || []
+      orderBy(spanFetch.data?.spans ?? [], sortField, sortDirection).map((span) => ({
+        spanId: span.spanId,
+        traceId: span.traceId,
+        transactionId: span.transactionId,
+      })) || []
     );
   }, [spanFetch.data?.spans, sortField, sortDirection]);
 
@@ -126,17 +121,44 @@ export function DependencyOperationDetailView() {
   const isWaterfallLoading =
     spanFetch.status === FETCH_STATUS.NOT_INITIATED ||
     (spanFetch.status === FETCH_STATUS.LOADING && samples.length === 0) ||
-    waterfallFetch.status === FETCH_STATUS.LOADING ||
-    !waterfallFetch.waterfall.entryWaterfallTransaction;
+    (waterfallFetch.status === FETCH_STATUS.LOADING &&
+      !waterfallFetch.waterfall.entryWaterfallTransaction);
 
+  const onSampleClick = useCallback(
+    (sample: any) => {
+      push(history, { query: { spanId: sample.spanId } });
+    },
+    [history]
+  );
+
+  const onTabClick = useCallback(
+    (nextDetailTab: TransactionTab) => {
+      push(history, {
+        query: {
+          detailTab: nextDetailTab,
+        },
+      });
+    },
+    [history]
+  );
+
+  const onShowCriticalPathChange = useCallback(
+    (nextShowCriticalPath: boolean) => {
+      push(history, {
+        query: {
+          showCriticalPath: nextShowCriticalPath ? 'true' : 'false',
+        },
+      });
+    },
+    [history]
+  );
   return (
     <EuiFlexGroup direction="column">
       <EuiFlexItem>
         <DetailViewHeader
-          backLabel={i18n.translate(
-            'xpack.apm.dependecyOperationDetailView.header.backLinkLabel',
-            { defaultMessage: 'All operations' }
-          )}
+          backLabel={i18n.translate('xpack.apm.dependecyOperationDetailView.header.backLinkLabel', {
+            defaultMessage: 'All operations',
+          })}
           backHref={router.link('/dependencies/operations', {
             query: queryWithoutSpanName,
           })}
@@ -159,34 +181,18 @@ export function DependencyOperationDetailView() {
           <ResettingHeightRetainer reset={!isWaterfallLoading}>
             <WaterfallWithSummary
               environment={environment}
-              waterfallFetchResult={waterfallFetch}
+              waterfallFetchResult={waterfallFetch.waterfall}
+              waterfallFetchStatus={waterfallFetch.status}
               traceSamples={samples}
               traceSamplesFetchStatus={spanFetch.status}
-              onSampleClick={(sample) => {
-                push(history, { query: { spanId: sample.spanId } });
-              }}
-              onTabClick={(tab) => {
-                push(history, {
-                  query: {
-                    detailTab: tab,
-                  },
-                });
-              }}
-              serviceName={
-                waterfallFetch.waterfall.entryWaterfallTransaction?.doc.service
-                  .name
-              }
+              onSampleClick={onSampleClick}
+              onTabClick={onTabClick}
+              serviceName={waterfallFetch.waterfall.entryWaterfallTransaction?.doc.service.name}
               waterfallItemId={waterfallItemId}
               detailTab={detailTab}
               selectedSample={selectedSample || null}
               showCriticalPath={showCriticalPath}
-              onShowCriticalPathChange={(nextShowCriticalPath) => {
-                push(history, {
-                  query: {
-                    showCriticalPath: nextShowCriticalPath ? 'true' : 'false',
-                  },
-                });
-              }}
+              onShowCriticalPathChange={onShowCriticalPathChange}
             />
           </ResettingHeightRetainer>
         </EuiPanel>

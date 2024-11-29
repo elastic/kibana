@@ -22,10 +22,11 @@ import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 export interface Props {
   slo: SLOWithSummaryResponse | undefined;
   direction?: 'column' | 'row';
+  gutterSize?: 'none' | 's';
   truncate?: boolean;
 }
 
-export function SLOGroupings({ slo, direction = 'row', truncate = true }: Props) {
+export function SLOGroupings({ slo, direction = 'row', gutterSize = 's', truncate = true }: Props) {
   const groups = Object.entries(slo?.groupings || []);
   const shouldTruncate = truncate && groups.length > 3;
   const firstThree = shouldTruncate ? groups.slice(0, 3) : groups;
@@ -59,7 +60,7 @@ export function SLOGroupings({ slo, direction = 'row', truncate = true }: Props)
                     direction={direction}
                   >
                     <EuiFlexItem>
-                      <Entries entries={firstThree} direction={direction} />{' '}
+                      <Entries entries={firstThree} direction={direction} gutterSize={gutterSize} />
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
                       {rest.length && (
@@ -80,12 +81,16 @@ export function SLOGroupings({ slo, direction = 'row', truncate = true }: Props)
                 </>
               }
             >
-              <Entries entries={rest} direction={direction} />
+              <Entries entries={rest} direction={direction} gutterSize={gutterSize} />
             </EuiAccordion>
           </EuiFlexItem>
         </EuiFlexGroup>
       ) : (
-        <Entries entries={truncate ? firstThree : groups} direction={direction} />
+        <Entries
+          entries={truncate ? firstThree : groups}
+          gutterSize={gutterSize}
+          direction={direction}
+        />
       )}
     </>
   );
@@ -94,14 +99,16 @@ export function SLOGroupings({ slo, direction = 'row', truncate = true }: Props)
 function Entries({
   entries,
   direction,
+  gutterSize = 's',
 }: {
   entries: Array<[string, unknown]>;
   direction: 'row' | 'column';
+  gutterSize?: 'none' | 's';
 }) {
   const { euiTheme } = useEuiTheme();
 
   return (
-    <EuiFlexGroup gutterSize="s" direction={direction}>
+    <EuiFlexGroup gutterSize={gutterSize} direction={direction}>
       {entries.map(([key, value]) => (
         <EuiFlexItem grow={false} key={key}>
           <EuiText size="s">

@@ -20,21 +20,29 @@ export function defineGetCurrentUserProfileRoute({
   router.get(
     {
       path: '/internal/security/user_profile',
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route delegates authorization to the internal authorization service; a currently authenticated user is required',
+        },
+      },
       validate: {
         query: schema.object({ dataPath: schema.maybe(schema.string()) }),
       },
     },
     createLicensedRouteHandler(async (context, request, response) => {
-      const authenticationService = await getAuthenticationService();
+      const authenticationService = getAuthenticationService();
       const currentUser = authenticationService.getCurrentUser(request);
       if (!currentUser) {
         return response.notFound();
       }
 
+      const { userProfile } = await context.core;
+
       let profile: UserProfileWithSecurity | null;
       try {
-        profile = await getUserProfileService().getCurrent({
-          request,
+        profile = await userProfile.getCurrent({
           dataPath: request.query.dataPath,
         });
       } catch (error) {

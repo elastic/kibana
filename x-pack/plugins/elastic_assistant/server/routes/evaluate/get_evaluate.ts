@@ -10,21 +10,22 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 
 import {
   API_VERSIONS,
+  ELASTIC_AI_ASSISTANT_EVALUATE_URL,
   INTERNAL_API_ACCESS,
   GetEvaluateResponse,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { buildResponse } from '../../lib/build_response';
 import { ElasticAssistantRequestHandlerContext } from '../../types';
-import { EVALUATE } from '../../../common/constants';
-import { DEFAULT_PLUGIN_NAME, getPluginNameFromRequest } from '../helpers';
-import { AGENT_EXECUTOR_MAP } from '../../lib/langchain/executors';
+import { performChecks } from '../helpers';
+import { ASSISTANT_GRAPH_MAP } from '../../lib/langchain/graphs';
+import { fetchLangSmithDatasets } from './utils';
 
 export const getEvaluateRoute = (router: IRouter<ElasticAssistantRequestHandlerContext>) => {
   router.versioned
     .get({
       access: INTERNAL_API_ACCESS,
-      path: EVALUATE,
+      path: ELASTIC_AI_ASSISTANT_EVALUATE_URL,
       options: {
         tags: ['access:elasticAssistant'],
       },
@@ -35,28 +36,33 @@ export const getEvaluateRoute = (router: IRouter<ElasticAssistantRequestHandlerC
         validate: {
           response: {
             200: {
-              body: buildRouteValidationWithZod(GetEvaluateResponse),
+              body: { custom: buildRouteValidationWithZod(GetEvaluateResponse) },
             },
           },
         },
       },
       async (context, request, response): Promise<IKibanaResponse<GetEvaluateResponse>> => {
-        const assistantContext = await context.elasticAssistant;
-        const logger = assistantContext.logger;
+        const ctx = await context.resolve(['core', 'elasticAssistant', 'licensing']);
+        const assistantContext = ctx.elasticAssistant;
+        const logger = assistantContext.logger.get('evaluate');
 
-        // Validate evaluation feature is enabled
-        const pluginName = getPluginNameFromRequest({
+        // Perform license, authenticated user and evaluation FF checks
+        const checkResponse = performChecks({
+          capability: 'assistantModelEvaluation',
+          context: ctx,
           request,
-          defaultPluginName: DEFAULT_PLUGIN_NAME,
-          logger,
+          response,
         });
-        const registeredFeatures = assistantContext.getRegisteredFeatures(pluginName);
-        if (!registeredFeatures.assistantModelEvaluation) {
-          return response.notFound();
+
+        if (!checkResponse.isSuccess) {
+          return checkResponse.response;
         }
 
+        // Fetch datasets from LangSmith // TODO: plumb apiKey so this will work in cloud w/o env vars
+        const datasets = await fetchLangSmithDatasets({ logger });
+
         try {
-          return response.ok({ body: { agentExecutors: Object.keys(AGENT_EXECUTOR_MAP) } });
+          return response.ok({ body: { graphs: Object.keys(ASSISTANT_GRAPH_MAP), datasets } });
         } catch (err) {
           logger.error(err);
           const error = transformError(err);

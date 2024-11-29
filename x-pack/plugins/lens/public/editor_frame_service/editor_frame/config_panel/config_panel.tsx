@@ -23,7 +23,7 @@ import {
 import { AddLayerFunction, DragDropOperation, Visualization } from '../../../types';
 import { LayerPanel } from './layer_panel';
 import { generateId } from '../../../id_generator';
-import { ConfigPanelWrapperProps } from './types';
+import { ConfigPanelWrapperProps, LayerPanelProps } from './types';
 import { useFocusUpdate } from './use_focus_update';
 import {
   setLayerDefaultDimension,
@@ -238,18 +238,16 @@ export function LayerPanels(
     [dispatchLens, props.framePublicAPI.dataViews.indexPatterns, props.indexPatternService]
   );
 
-  const addLayer: AddLayerFunction = (layerType, extraArg, ignoreInitialValues) => {
+  const addLayer: AddLayerFunction = (layerType, extraArg, ignoreInitialValues, seriesType) => {
     const layerId = generateId();
-
-    dispatchLens(addLayerAction({ layerId, layerType, extraArg, ignoreInitialValues }));
+    dispatchLens(addLayerAction({ layerId, layerType, extraArg, ignoreInitialValues, seriesType }));
 
     setNextFocusedLayerId(layerId);
   };
 
-  const registerLibraryAnnotationGroupFunction = useCallback(
-    (groupInfo) => dispatchLens(registerLibraryAnnotationGroup(groupInfo)),
-    [dispatchLens]
-  );
+  const registerLibraryAnnotationGroupFunction = useCallback<
+    LayerPanelProps['registerLibraryAnnotationGroup']
+  >((groupInfo) => dispatchLens(registerLibraryAnnotationGroup(groupInfo)), [dispatchLens]);
 
   const hideAddLayerButton = query && isOfAggregateQueryType(query);
 
@@ -280,7 +278,7 @@ export function LayerPanels(
               updateDatasource={updateDatasource}
               updateDatasourceAsync={updateDatasourceAsync}
               displayLayerSettings={!props.hideLayerHeader}
-              shouldDisplayChartSwitch={props.shouldDisplayChartSwitch}
+              onlyAllowSwitchToSubtypes={props.onlyAllowSwitchToSubtypes}
               onChangeIndexPattern={(args) => {
                 onChangeIndexPattern(args);
                 const layersToRemove =
@@ -335,6 +333,7 @@ export function LayerPanels(
       })}
       {!hideAddLayerButton &&
         activeVisualization?.getAddLayerButtonComponent?.({
+          state: visualization.state,
           supportedLayers: activeVisualization.getSupportedLayers(
             visualization.state,
             props.framePublicAPI

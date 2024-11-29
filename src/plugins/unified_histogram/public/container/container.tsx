@@ -1,19 +1,24 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
+import React, { forwardRef, useEffect, useImperativeHandle, useMemo, useState } from 'react';
 import { Subject } from 'rxjs';
 import { pick } from 'lodash';
 import useMount from 'react-use/lib/useMount';
 import { LensSuggestionsApi } from '@kbn/lens-plugin/public';
-import type { Datatable } from '@kbn/expressions-plugin/common';
 import { UnifiedHistogramLayout, UnifiedHistogramLayoutProps } from '../layout';
-import type { UnifiedHistogramInputMessage, UnifiedHistogramRequestContext } from '../types';
+import {
+  UnifiedHistogramExternalVisContextStatus,
+  UnifiedHistogramInputMessage,
+  UnifiedHistogramRequestContext,
+  UnifiedHistogramVisContext,
+} from '../types';
 import {
   createStateService,
   UnifiedHistogramStateOptions,
@@ -21,7 +26,9 @@ import {
 } from './services/state_service';
 import { useStateProps } from './hooks/use_state_props';
 import { useStateSelector } from './utils/use_state_selector';
-import { topPanelHeightSelector, currentSuggestionSelector } from './utils/state_selectors';
+import { topPanelHeightSelector } from './utils/state_selectors';
+import { exportVisContext } from '../utils/external_vis_context';
+import { getBreakdownField } from './utils/local_storage_utils';
 
 type LayoutProps = Pick<
   UnifiedHistogramLayoutProps,
@@ -44,7 +51,12 @@ export type UnifiedHistogramContainerProps = {
   searchSessionId?: UnifiedHistogramRequestContext['searchSessionId'];
   requestAdapter?: UnifiedHistogramRequestContext['adapter'];
   isChartLoading?: boolean;
-  table?: Datatable;
+  breakdownField?: string;
+  onBreakdownFieldChange?: (breakdownField: string | undefined) => void;
+  onVisContextChanged?: (
+    nextVisContext: UnifiedHistogramVisContext | undefined,
+    externalVisContextStatus: UnifiedHistogramExternalVisContextStatus
+  ) => void;
 } & Pick<
   UnifiedHistogramLayoutProps,
   | 'services'
@@ -55,11 +67,13 @@ export type UnifiedHistogramContainerProps = {
   | 'timeRange'
   | 'relativeTimeRange'
   | 'columns'
+  | 'table'
   | 'container'
   | 'renderCustomChartToggleActions'
   | 'children'
   | 'onBrushEnd'
   | 'onFilter'
+  | 'externalVisContext'
   | 'withDefaultActions'
   | 'disabledActions'
   | 'abortController'
@@ -75,19 +89,15 @@ export type UnifiedHistogramApi = {
   refetch: () => void;
 } & Pick<
   UnifiedHistogramStateService,
-  | 'state$'
-  | 'setChartHidden'
-  | 'setTopPanelHeight'
-  | 'setBreakdownField'
-  | 'setTimeInterval'
-  | 'setTotalHits'
+  'state$' | 'setChartHidden' | 'setTopPanelHeight' | 'setTimeInterval' | 'setTotalHits'
 >;
 
 export const UnifiedHistogramContainer = forwardRef<
   UnifiedHistogramApi,
   UnifiedHistogramContainerProps
->((containerProps, ref) => {
+>(({ onBreakdownFieldChange, onVisContextChanged, ...containerProps }, ref) => {
   const [layoutProps, setLayoutProps] = useState<LayoutProps>();
+  const [localStorageKeyPrefix, setLocalStorageKeyPrefix] = useState<string>();
   const [stateService, setStateService] = useState<UnifiedHistogramStateService>();
   const [lensSuggestionsApi, setLensSuggestionsApi] = useState<LensSuggestionsApi>();
   const [input$] = useState(() => new Subject<UnifiedHistogramInputMessage>());
@@ -103,6 +113,7 @@ export const UnifiedHistogramContainer = forwardRef<
     const apiHelper = await services.lens.stateHelperApi();
 
     setLayoutProps(pick(options, 'disableAutoFetching', 'disableTriggers', 'disabledActions'));
+    setLocalStorageKeyPrefix(options?.localStorageKeyPrefix);
     setStateService(createStateService({ services, ...options }));
     setLensSuggestionsApi(() => apiHelper.suggestions);
   });
@@ -122,22 +133,48 @@ export const UnifiedHistogramContainer = forwardRef<
         'state$',
         'setChartHidden',
         'setTopPanelHeight',
-        'setBreakdownField',
         'setTimeInterval',
         'setTotalHits'
       ),
     });
   }, [input$, stateService]);
-  const { dataView, query, searchSessionId, requestAdapter, isChartLoading } = containerProps;
-  const currentSuggestion = useStateSelector(stateService?.state$, currentSuggestionSelector);
+
+  const { services, dataView, query, columns, searchSessionId, requestAdapter, isChartLoading } =
+    containerProps;
   const topPanelHeight = useStateSelector(stateService?.state$, topPanelHeightSelector);
+  const initialBreakdownField = useMemo(
+    () =>
+      localStorageKeyPrefix
+        ? getBreakdownField(services.storage, localStorageKeyPrefix)
+        : undefined,
+    [localStorageKeyPrefix, services.storage]
+  );
   const stateProps = useStateProps({
+    services,
+    localStorageKeyPrefix,
     stateService,
     dataView,
     query,
     searchSessionId,
     requestAdapter,
+    columns,
+    breakdownField: initialBreakdownField,
+    ...pick(containerProps, 'breakdownField'),
+    onBreakdownFieldChange,
   });
+
+  const handleVisContextChange: UnifiedHistogramLayoutProps['onVisContextChanged'] | undefined =
+    useMemo(() => {
+      if (!onVisContextChanged) {
+        return undefined;
+      }
+
+      return (visContext, externalVisContextStatus) => {
+        const minifiedVisContext = exportVisContext(visContext);
+
+        onVisContextChanged(minifiedVisContext, externalVisContextStatus);
+      };
+    }, [onVisContextChanged]);
 
   // Don't render anything until the container is initialized
   if (!layoutProps || !lensSuggestionsApi || !api) {
@@ -149,7 +186,7 @@ export const UnifiedHistogramContainer = forwardRef<
       {...containerProps}
       {...layoutProps}
       {...stateProps}
-      currentSuggestion={currentSuggestion}
+      onVisContextChanged={handleVisContextChange}
       isChartLoading={Boolean(isChartLoading)}
       topPanelHeight={topPanelHeight}
       input$={input$}

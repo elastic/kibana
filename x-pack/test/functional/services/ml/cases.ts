@@ -6,8 +6,7 @@
  */
 
 import type { SwimlaneType } from '@kbn/ml-plugin/public/application/explorer/explorer_constants';
-import type { AnomalySwimlaneEmbeddableInput } from '@kbn/ml-plugin/public';
-import type { AnomalyChartsEmbeddableInput } from '@kbn/ml-plugin/public/embeddables';
+import type { AnomalySwimLaneEmbeddableState } from '@kbn/ml-plugin/public';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import type { MlAnomalySwimLane } from './swim_lane';
 import type { MlAnomalyCharts } from './anomaly_charts';
@@ -52,7 +51,7 @@ export function MachineLearningCasesProvider(
 
     async assertCaseWithAnomalySwimLaneAttachment(
       params: CaseParams,
-      attachment: AnomalySwimlaneEmbeddableInput,
+      attachment: AnomalySwimLaneEmbeddableState,
       expectedSwimLaneState: {
         yAxisLabelCount: number;
       }
@@ -71,7 +70,7 @@ export function MachineLearningCasesProvider(
 
     async assertCaseWithAnomalyChartsAttachment(
       params: CaseParams,
-      attachment: AnomalyChartsEmbeddableInput,
+      attachment: { id?: string; jobIds: string[]; maxSeriesToPlot: number },
       expectedChartsCount: number
     ) {
       await this.assertBasicCaseProps(params);
@@ -81,6 +80,19 @@ export function MachineLearningCasesProvider(
         attachment.id !== undefined ? `mlExplorerEmbeddable_${attachment.id}` : undefined,
         expectedChartsCount
       );
+    },
+
+    async assertCaseWithLogPatternAnalysisAttachment(params: CaseParams) {
+      await this.assertBasicCaseProps(params);
+      await testSubjects.existOrFail('comment-persistableState-aiopsPatternAnalysisEmbeddable');
+      await testSubjects.existOrFail('aiopsEmbeddablePatternAnalysis');
+      await testSubjects.existOrFail('aiopsLogPatternsTable');
+    },
+
+    async assertCaseWithChangePointDetectionChartsAttachment(params: CaseParams) {
+      await this.assertBasicCaseProps(params);
+      await testSubjects.existOrFail('comment-persistableState-aiopsChangePointChart');
+      await testSubjects.existOrFail('aiopsEmbeddableChangePointChart');
     },
   };
 }

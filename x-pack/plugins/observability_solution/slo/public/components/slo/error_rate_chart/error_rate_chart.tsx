@@ -6,20 +6,22 @@
  */
 
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-import { SLOResponse } from '@kbn/slo-schema';
+import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import moment from 'moment';
 import React from 'react';
-import { useKibana } from '../../../utils/kibana_react';
+import { TimeBounds } from '../../../pages/slo_details/types';
+import { useKibana } from '../../../hooks/use_kibana';
 import { getDelayInSecondsFromSLO } from '../../../utils/slo/get_delay_in_seconds_from_slo';
 import { AlertAnnotation, TimeRange, useLensDefinition } from './use_lens_definition';
 
 interface Props {
-  slo: SLOResponse;
+  slo: SLOWithSummaryResponse;
   dataTimeRange: TimeRange;
-  threshold: number;
+  threshold?: number;
   alertTimeRange?: TimeRange;
-  showErrorRateAsLine?: boolean;
   annotations?: AlertAnnotation[];
+  onBrushed?: (timeBounds: TimeBounds) => void;
+  variant?: 'success' | 'danger';
 }
 
 export function ErrorRateChart({
@@ -27,19 +29,21 @@ export function ErrorRateChart({
   dataTimeRange,
   threshold,
   alertTimeRange,
-  showErrorRateAsLine,
   annotations,
+  onBrushed,
+  variant = 'success',
 }: Props) {
   const {
     lens: { EmbeddableComponent },
   } = useKibana().services;
-  const lensDef = useLensDefinition(
+  const lensDef = useLensDefinition({
     slo,
     threshold,
     alertTimeRange,
+    dataTimeRange,
     annotations,
-    showErrorRateAsLine
-  );
+    variant,
+  });
   const delayInSeconds = getDelayInSecondsFromSLO(slo);
 
   const from = moment(dataTimeRange.from).subtract(delayInSeconds, 'seconds').toISOString();
@@ -55,6 +59,12 @@ export function ErrorRateChart({
       }}
       attributes={lensDef}
       viewMode={ViewMode.VIEW}
+      onBrushEnd={({ range }) => {
+        onBrushed?.({
+          from: moment(range[0]).toDate(),
+          to: moment(range[1]).toDate(),
+        });
+      }}
       noPadding
     />
   );

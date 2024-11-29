@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-
+import type { EuiTableDataType } from '@elastic/eui';
 import { defaultToEmptyTag } from '../../../../common/components/empty_value';
 
 import * as i18n from '../translations';
@@ -21,7 +21,7 @@ export const getExtendedColumns = (showExtendedColumns: boolean) => {
 
   return [
     {
-      dataType: 'string',
+      dataType: 'string' as EuiTableDataType,
       field: 'updatedBy',
       name: i18n.MODIFIED_BY,
       render: (updatedBy: OpenTimelineResult['updatedBy']) => (

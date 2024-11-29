@@ -8,8 +8,13 @@
 import React, { useMemo, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import type { Columns, Criteria, ItemsPerRow } from '../../../explore/components/paginated_table';
+import { EuiFilterGroup, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import type {
+  Columns,
+  Criteria,
+  ItemsPerRow,
+  SiemTables,
+} from '../../../explore/components/paginated_table';
 import { PaginatedTable } from '../../../explore/components/paginated_table';
 
 import { getUserRiskScoreColumns } from './columns';
@@ -21,7 +26,7 @@ import type { UserRiskScoreItem } from '../../../../common/search_strategy/secur
 import type { SeverityCount } from '../severity/types';
 import { SeverityBadges } from '../severity/severity_badges';
 import { SeverityBar } from '../severity/severity_bar';
-import { SeverityFilterGroup } from '../severity/severity_filter_group';
+import { SeverityFilter } from '../severity/severity_filter';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import type { State } from '../../../common/store';
 import type {
@@ -82,7 +87,7 @@ const UserRiskScoreTableComponent: React.FC<UserRiskScoreTableProps> = ({
   const { activePage, limit, sort } = useDeepEqualSelector((state: State) =>
     getUserRiskScoreSelector(state)
   );
-  const updateLimitPagination = useCallback(
+  const updateLimitPagination = useCallback<SiemTables['updateLimitPagination']>(
     (newLimit) => {
       dispatch(
         usersActions.updateTableLimit({
@@ -95,7 +100,7 @@ const UserRiskScoreTableComponent: React.FC<UserRiskScoreTableProps> = ({
     [type, dispatch]
   );
 
-  const updateActivePage = useCallback(
+  const updateActivePage = useCallback<SiemTables['updateActivePage']>(
     (newPage) => {
       dispatch(
         usersActions.updateTableActivePage({
@@ -181,12 +186,13 @@ const UserRiskScoreTableComponent: React.FC<UserRiskScoreTableProps> = ({
             <RiskInformationButtonEmpty riskEntity={RiskScoreEntity.user} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <SeverityFilterGroup
-              selectedSeverities={severitySelectionRedux}
-              severityCount={severityCount}
-              onSelect={onSelect}
-              riskEntity={RiskScoreEntity.user}
-            />
+            <EuiFilterGroup>
+              <SeverityFilter
+                selectedItems={severitySelectionRedux}
+                onSelect={onSelect}
+                riskEntity={RiskScoreEntity.user}
+              />
+            </EuiFilterGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
       }

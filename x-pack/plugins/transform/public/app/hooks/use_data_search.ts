@@ -10,7 +10,7 @@ import { lastValueFrom } from 'rxjs';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import type { IKibanaSearchRequest } from '@kbn/data-plugin/common';
+import type { IKibanaSearchRequest } from '@kbn/search-types';
 
 import { TRANSFORM_REACT_QUERY_KEYS } from '../../../common/constants';
 

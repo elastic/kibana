@@ -7,7 +7,7 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import type React from 'react';
-import type { EuiSwitchEvent } from '@elastic/eui';
+import type { EuiComboBoxOptionOption, EuiSwitchEvent } from '@elastic/eui';
 
 export interface FormInput {
   validate: () => boolean;
@@ -128,6 +128,7 @@ export function useSecretInput(
       error: errors,
       isInvalid,
       initialValue,
+      disabled,
       clear: () => {
         setValue('');
       },
@@ -389,5 +390,73 @@ export function useSelectInput(
       setValue('');
     },
     setValue,
+  };
+}
+
+export function useComboBoxWithCustomInput(
+  id: string,
+  defaultValue: Array<EuiComboBoxOptionOption<string>> = [],
+  validate?: (value: Array<EuiComboBoxOptionOption<string>>) => string[] | undefined,
+  disabled = false
+) {
+  const [selectedOptions, setSelected] = useState(defaultValue);
+  const [errors, setErrors] = useState<string[] | undefined>();
+
+  const onChange = useCallback(
+    (selected: Array<EuiComboBoxOptionOption<string>>) => {
+      setSelected(selected);
+      if (errors && validate) {
+        setErrors(validate(selected));
+      }
+    },
+    [validate, errors]
+  );
+
+  const onCreateOption = (searchValue: string) => {
+    const normalizedSearchValue = searchValue.trim();
+    const newOption = {
+      label: normalizedSearchValue,
+      value: normalizedSearchValue,
+    };
+    setSelected([newOption]);
+    if (validate) {
+      setErrors(validate([newOption]));
+    }
+  };
+
+  const validateCallback = useCallback(() => {
+    if (validate) {
+      const newErrors = validate(selectedOptions);
+      setErrors(newErrors);
+
+      return newErrors === undefined;
+    }
+
+    return true;
+  }, [validate, selectedOptions]);
+
+  const value = selectedOptions.length > 0 ? selectedOptions[0]?.value : '';
+  const isInvalid = errors !== undefined;
+
+  return {
+    props: {
+      id,
+      onChange,
+      onCreateOption,
+      errors,
+      isInvalid,
+      disabled,
+      selectedOptions,
+    },
+    formRowProps: {
+      error: errors,
+      isInvalid,
+    },
+    value,
+    clear: () => {
+      setSelected(defaultValue);
+    },
+    setSelected,
+    validate: validateCallback,
   };
 }

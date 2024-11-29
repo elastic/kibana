@@ -5,10 +5,8 @@
   },
   "include": [
     "public/**/*",
-    "config.ts",
     "public/**/*.json",
     "server/**/*",
-    "config.ts",
   ],
   "kbn_references": [
     "@kbn/core",
@@ -37,8 +35,8 @@
     "@kbn/react-field",
     "@kbn/ui-theme",
     "@kbn/saved-objects-management-plugin",
-    "@kbn/text-based-languages",
-    "@kbn/text-based-editor",
+    "@kbn/esql",
+    "@kbn/esql-editor",
     "@kbn/core-doc-links-browser",
     "@kbn/core-lifecycle-browser",
     "@kbn/ml-string-hash",
@@ -46,7 +44,11 @@
     "@kbn/calculate-width-from-char-count",
     "@kbn/react-kibana-context-render",
     "@kbn/data-view-utils",
-    "@kbn/esql-utils"
+    "@kbn/esql-utils",
+    "@kbn/esql-validation-autocomplete",
+    "@kbn/react-kibana-mount",
+    "@kbn/field-utils",
+    "@kbn/language-documentation"
   ],
   "exclude": [
     "target/**/*",

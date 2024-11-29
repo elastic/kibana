@@ -13,6 +13,7 @@ import { mockHandlerArguments } from '../_mock_handler_arguments';
 import { rulesClientMock } from '../../rules_client.mock';
 import { RuleTypeDisabledError } from '../../lib/errors/rule_type_disabled';
 import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
+import { docLinksServiceMock } from '@kbn/core/server/mocks';
 
 const rulesClient = rulesClientMock.create();
 jest.mock('../../lib/license_api_access', () => ({
@@ -28,15 +29,18 @@ beforeEach(() => {
 });
 
 describe('muteAllAlertRoute', () => {
+  const docLinks = docLinksServiceMock.createSetupContract();
+
   it('mute an alert', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    muteAllAlertRoute(router, licenseState);
+    muteAllAlertRoute(router, licenseState, docLinks);
 
     const [config, handler] = router.post.mock.calls[0];
 
     expect(config.path).toMatchInlineSnapshot(`"/api/alerts/alert/{id}/_mute_all"`);
+    expect(config.options?.access).toBe('public');
 
     rulesClient.muteAll.mockResolvedValueOnce();
 
@@ -64,11 +68,23 @@ describe('muteAllAlertRoute', () => {
     expect(res.noContent).toHaveBeenCalled();
   });
 
+  it('should have internal access for serverless', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    muteAllAlertRoute(router, licenseState, docLinks, undefined, true);
+
+    const [config] = router.post.mock.calls[0];
+
+    expect(config.path).toMatchInlineSnapshot(`"/api/alerts/alert/{id}/_mute_all"`);
+    expect(config.options?.access).toBe('internal');
+  });
+
   it('ensures the alert type gets validated for the license', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    muteAllAlertRoute(router, licenseState);
+    muteAllAlertRoute(router, licenseState, docLinks);
 
     const [, handler] = router.post.mock.calls[0];
 
@@ -90,12 +106,38 @@ describe('muteAllAlertRoute', () => {
     const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
     const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
 
-    muteAllAlertRoute(router, licenseState, mockUsageCounter);
+    muteAllAlertRoute(router, licenseState, docLinks, mockUsageCounter);
     const [, handler] = router.post.mock.calls[0];
     const [context, req, res] = mockHandlerArguments({ rulesClient }, { params: {}, body: {} }, [
       'ok',
     ]);
     await handler(context, req, res);
     expect(trackLegacyRouteUsage).toHaveBeenCalledWith('muteAll', mockUsageCounter);
+  });
+
+  it('should be deprecated', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    muteAllAlertRoute(router, licenseState, docLinks, undefined, true);
+
+    const [config] = router.post.mock.calls[0];
+
+    expect(config.options?.deprecated).toMatchInlineSnapshot(
+      {
+        documentationUrl: expect.stringMatching(/#breaking-201550$/),
+      },
+      `
+      Object {
+        "documentationUrl": StringMatching /#breaking-201550\\$/,
+        "reason": Object {
+          "newApiMethod": "POST",
+          "newApiPath": "/api/alerting/rule/{id}/_mute_all",
+          "type": "migrate",
+        },
+        "severity": "warning",
+      }
+    `
+    );
   });
 });

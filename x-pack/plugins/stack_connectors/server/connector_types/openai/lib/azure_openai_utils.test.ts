@@ -101,9 +101,50 @@ describe('Azure Open AI Utils', () => {
       };
       [chatUrl, completionUrl, completionExtensionsUrl].forEach((url: string) => {
         const sanitizedBodyString = getRequestWithStreamOption(url, JSON.stringify(body), true);
-        expect(sanitizedBodyString).toEqual(
-          `{\"messages\":[{\"role\":\"user\",\"content\":\"This is a test\"}],\"stream\":true}`
-        );
+        expect(JSON.parse(sanitizedBodyString)).toEqual({
+          messages: [{ content: 'This is a test', role: 'user' }],
+          stream: true,
+          stream_options: {
+            include_usage: true,
+          },
+        });
+      });
+    });
+    it('sets stream_options when stream is true', () => {
+      const body = {
+        messages: [
+          {
+            role: 'user',
+            content: 'This is a test',
+          },
+        ],
+      };
+      [chatUrl, completionUrl, completionExtensionsUrl].forEach((url: string) => {
+        const sanitizedBodyString = getRequestWithStreamOption(url, JSON.stringify(body), true);
+        expect(JSON.parse(sanitizedBodyString)).toEqual({
+          messages: [{ content: 'This is a test', role: 'user' }],
+          stream: true,
+          stream_options: {
+            include_usage: true,
+          },
+        });
+      });
+    });
+    it('does not sets stream_options when stream is false', () => {
+      const body = {
+        messages: [
+          {
+            role: 'user',
+            content: 'This is a test',
+          },
+        ],
+      };
+      [chatUrl, completionUrl, completionExtensionsUrl].forEach((url: string) => {
+        const sanitizedBodyString = getRequestWithStreamOption(url, JSON.stringify(body), false);
+        expect(JSON.parse(sanitizedBodyString)).toEqual({
+          messages: [{ content: 'This is a test', role: 'user' }],
+          stream: false,
+        });
       });
     });
     it('overrides stream parameter if defined in body', () => {
@@ -146,18 +187,14 @@ describe('Azure Open AI Utils', () => {
       const regex = transformApiUrlToRegex(AZURE_OPENAI_CHAT_URL);
       const match = chatUrl.match(regex);
       expect(match).not.toBeNull();
-      expect(match![0]).toEqual(
-        'https://My-test-resource-123.openai.azure.com/openai/deployments/NEW-DEPLOYMENT-321/chat/completions'
-      );
+      expect(match![0]).toEqual('/openai/deployments/NEW-DEPLOYMENT-321/chat/completions');
     });
 
     it('should match valid completion url', () => {
       const regex = transformApiUrlToRegex(AZURE_OPENAI_COMPLETIONS_URL);
       const match = completionUrl.match(regex);
       expect(match).not.toBeNull();
-      expect(match![0]).toEqual(
-        'https://My-test-resource-123.openai.azure.com/openai/deployments/NEW-DEPLOYMENT-321/completions'
-      );
+      expect(match![0]).toEqual('/openai/deployments/NEW-DEPLOYMENT-321/completions');
     });
 
     it('should match valid completion extensions url', () => {
@@ -165,19 +202,14 @@ describe('Azure Open AI Utils', () => {
       const match = completionExtensionsUrl.match(regex);
       expect(match).not.toBeNull();
       expect(match![0]).toEqual(
-        'https://My-test-resource-123.openai.azure.com/openai/deployments/NEW-DEPLOYMENT-321/extensions/chat/completions'
+        '/openai/deployments/NEW-DEPLOYMENT-321/extensions/chat/completions'
       );
     });
 
     it('should not match invalid chat url', () => {
       const regex = transformApiUrlToRegex(AZURE_OPENAI_CHAT_URL);
       [
-        'https://openai.azure.com/openai/deployments/NEW-DEPLOYMENT-321/chat/completions?api-version=2023-05-15',
-        'https://My-test-resource-123.openaiazure.com/openai/deployments/NEW-DEPLOYMENT-321/chat/completions?api-version=2023-05-15',
-        'https://My-test-resource-123.openaiaazure.com/openai/deployments/NEW-DEPLOYMENT-321/chat/completions?api-version=2023-05-15',
-        'https://My-test-resource-123openai.azure.com/openai/deployments/NEW-DEPLOYMENT-321/chat/completions?api-version=2023-05-15',
-        'https://My-test-resource-123.openai.azure.com//openai/deployments/NEW-DEPLOYMENT-321/chat/completions?api-version=2023-05-15',
-        'https:///My-test-resource-123.openai.azure.com/openai/deployments/NEW-DEPLOYMENT-321/chat/completions?api-version=2023-05-15',
+        'https://openai.azure.com/openai/deployments/NEW-DEPLOYMENT-321/chat/not-completions?api-version=2023-05-15',
       ].forEach((url) => {
         const match = url.match(regex);
         expect(match).toBeNull();
@@ -187,12 +219,7 @@ describe('Azure Open AI Utils', () => {
     it('should not match invalid completion url', () => {
       const regex = transformApiUrlToRegex(AZURE_OPENAI_COMPLETIONS_URL);
       [
-        'https://fooai.com/completions?api-version=2023-05-15',
-        'https://My-test-resource-123.openaiazure.com/openai/deployments/NEW-DEPLOYMENT-321/completions?api-version=2023-05-15',
-        'https://My-test-resource-123.openaiaazure.com/openai/deployments/NEW-DEPLOYMENT-321/completions?api-version=2023-05-15',
-        'https://My-test-resource-123openai.azure.com/openai/deployments/NEW-DEPLOYMENT-321/completions?api-version=2023-05-15',
-        'https://My-test-resource-123.openai.azure.com//openai/deployments/NEW-DEPLOYMENT-321/completions?api-version=2023-05-15',
-        'https:///My-test-resource-123.openai.azure.com/openai/deployments/NEW-DEPLOYMENT-321/completions?api-version=2023-05-15',
+        'https://My-test-resource-123.openaiazure.com/openai/deployments/NEW-DEPLOYMENT-321/not-completions?api-version=2023-05-15',
       ].forEach((url) => {
         const match = url.match(regex);
         expect(match).toBeNull();
@@ -202,12 +229,7 @@ describe('Azure Open AI Utils', () => {
     it('should not match invalid completion extensions url', () => {
       const regex = transformApiUrlToRegex(AZURE_OPENAI_COMPLETIONS_EXTENSIONS_URL);
       [
-        'https://My-test-resource-123.openai.azure.com/openai/deployments/extensions/chat/completions?api-version=2023-05-15',
-        'https://My-test-resource-123.openaiazure.com/openai/deployments/NEW-DEPLOYMENT-321/extensions/chat/completions?api-version=2023-05-15',
-        'https://My-test-resource-123.openaiaazure.com/openai/deployments/NEW-DEPLOYMENT-321/extensions/chat/completions?api-version=2023-05-15',
-        'https://My-test-resource-123openai.azure.com/openai/deployments/NEW-DEPLOYMENT-321/extensions/chat/completions?api-version=2023-05-15',
-        'https:///My-test-resource-123.openai.azure.com/openai/deployments/NEW-DEPLOYMENT-321/extensions/chat/completions?api-version=2023-05-15',
-        'https://My-test-resource-123.openai.azure.com/openai//deployments/NEW-DEPLOYMENT-321/extensions/chat/completions?api-version=2023-05-15',
+        'https://My-test-resource-123.openai.azure.com/openai/deployments/extensions/chat/not-completions?api-version=2023-05-15',
       ].forEach((url) => {
         const match = url.match(regex);
         expect(match).toBeNull();

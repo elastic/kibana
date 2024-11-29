@@ -32,6 +32,7 @@ import type {
   KafkaPartitionType,
   KafkaSaslMechanism,
   KafkaTopicWhenType,
+  SimpleSOAssetType,
 } from '../../common/types';
 
 export type AgentPolicyStatus = typeof agentPolicyStatuses;
@@ -63,6 +64,8 @@ export interface AgentPolicySOAttributes {
   package_policies?: PackagePolicy[];
   agents?: number;
   overrides?: any | null;
+  global_data_tags?: Array<{ name: string; value: string | number }>;
+  version?: string;
 }
 
 export interface AgentSOAttributes {
@@ -116,7 +119,10 @@ export interface PackagePolicySOAttributes {
   created_at: string;
   created_by: string;
   inputs: PackagePolicyInput[];
-  policy_id: string;
+  policy_id?: string | null;
+  policy_ids: string[];
+  // Nullable to allow user to reset to default outputs
+  output_id?: string | null;
   updated_at: string;
   updated_by: string;
   description?: string;
@@ -130,6 +136,8 @@ export interface PackagePolicySOAttributes {
     };
   };
   agents?: number;
+  overrides?: any | null;
+  bump_agent_policy_revision?: boolean;
 }
 
 interface OutputSoBaseAttributes {
@@ -227,11 +235,22 @@ export type OutputSOAttributes =
   | OutputSoKafkaAttributes;
 
 export interface SettingsSOAttributes {
-  prerelease_integrations_enabled: boolean;
+  prerelease_integrations_enabled?: boolean;
   has_seen_add_data_notice?: boolean;
   fleet_server_hosts?: string[];
   secret_storage_requirements_met?: boolean;
   output_secret_storage_requirements_met?: boolean;
+  use_space_awareness_migration_status?: 'pending' | 'success' | 'error';
+  use_space_awareness_migration_started_at?: string | null;
+  delete_unenrolled_agents?: {
+    enabled: boolean;
+    is_preconfigured: boolean;
+  };
+}
+
+export interface SpaceSettingsSOAttributes {
+  allowed_namespace_prefixes?: string[] | null;
+  managed_by?: 'kibana_config' | null;
 }
 
 export interface DownloadSourceSOAttributes {
@@ -241,7 +260,4 @@ export interface DownloadSourceSOAttributes {
   source_id?: string;
   proxy_id?: string | null;
 }
-export interface SimpleSOAssetAttributes {
-  title?: string;
-  description?: string;
-}
+export type SimpleSOAssetAttributes = SimpleSOAssetType['attributes'];

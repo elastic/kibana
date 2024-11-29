@@ -7,7 +7,7 @@
 
 import { from, takeUntil } from 'rxjs';
 
-import { IBasePath } from '@kbn/core-http-server';
+import type { IStaticAssets } from '@kbn/core-http-browser';
 import {
   GlobalSearchProviderResult,
   GlobalSearchResultProvider,
@@ -18,7 +18,11 @@ import { ENTERPRISE_SEARCH_CONTENT_PLUGIN } from '../../common/constants';
 
 import { getIndexData } from '../lib/indices/utils/get_index_data';
 
-export function getIndicesSearchResultProvider(basePath: IBasePath): GlobalSearchResultProvider {
+import { calculateScore } from './calculate_search_score';
+
+export function getIndicesSearchResultProvider(
+  staticAssets: IStaticAssets
+): GlobalSearchResultProvider {
   return {
     find: ({ term, types, tags }, { aborted$, client, maxResults }) => {
       if (!client || !term || tags || (types && !types.includes('indices'))) {
@@ -29,23 +33,13 @@ export function getIndicesSearchResultProvider(basePath: IBasePath): GlobalSearc
 
         const searchResults: GlobalSearchProviderResult[] = indexNames
           .map((indexName) => {
-            let score = 0;
-            const searchTerm = (term || '').toLowerCase();
-            const searchName = indexName.toLowerCase();
-            if (!searchTerm) {
-              score = 80;
-            } else if (searchName === searchTerm) {
-              score = 100;
-            } else if (searchName.startsWith(searchTerm)) {
-              score = 90;
-            } else if (searchName.includes(searchTerm)) {
-              score = 75;
-            }
+            const score = calculateScore(term, indexName);
 
             return {
+              icon: staticAssets.getPluginAssetHref('images/index.svg'),
               id: indexName,
+              score,
               title: indexName,
-              icon: basePath.prepend('/plugins/enterpriseSearch/assets/source_icons/index.svg'),
               type: i18n.translate('xpack.enterpriseSearch.searchIndexProvider.type.name', {
                 defaultMessage: 'Index',
               }),
@@ -53,7 +47,6 @@ export function getIndicesSearchResultProvider(basePath: IBasePath): GlobalSearc
                 path: `${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}/search_indices/${indexName}`,
                 prependBasePath: true,
               },
-              score,
             };
           })
           .filter(({ score }) => score > 0)

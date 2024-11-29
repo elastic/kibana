@@ -24,11 +24,19 @@ it('matches snapshot', () => {
       },
       "event.action": Object {
         "array": false,
+        "ignore_above": 1024,
         "required": false,
         "type": "keyword",
       },
       "event.kind": Object {
         "array": false,
+        "ignore_above": 1024,
+        "required": false,
+        "type": "keyword",
+      },
+      "event.original": Object {
+        "array": false,
+        "ignore_above": 1024,
         "required": false,
         "type": "keyword",
       },
@@ -72,6 +80,11 @@ it('matches snapshot', () => {
         "required": true,
         "type": "keyword",
       },
+      "kibana.alert.intended_timestamp": Object {
+        "array": false,
+        "required": false,
+        "type": "date",
+      },
       "kibana.alert.last_detected": Object {
         "array": false,
         "required": false,
@@ -79,6 +92,11 @@ it('matches snapshot', () => {
       },
       "kibana.alert.maintenance_window_ids": Object {
         "array": true,
+        "required": false,
+        "type": "keyword",
+      },
+      "kibana.alert.previous_action_group": Object {
+        "array": false,
         "required": false,
         "type": "keyword",
       },
@@ -130,6 +148,16 @@ it('matches snapshot', () => {
         "type": "keyword",
       },
       "kibana.alert.rule.enabled": Object {
+        "array": false,
+        "required": false,
+        "type": "keyword",
+      },
+      "kibana.alert.rule.execution.timestamp": Object {
+        "array": false,
+        "required": false,
+        "type": "date",
+      },
+      "kibana.alert.rule.execution.type": Object {
         "array": false,
         "required": false,
         "type": "keyword",
@@ -239,6 +267,11 @@ it('matches snapshot', () => {
         "array": false,
         "required": false,
         "type": "keyword",
+      },
+      "kibana.alert.severity_improving": Object {
+        "array": false,
+        "required": false,
+        "type": "boolean",
       },
       "kibana.alert.start": Object {
         "array": false,

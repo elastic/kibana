@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { getButtonGroupInputValue } from '@kbn/test-eui-helpers';
+import { getSelectedButtonInGroup } from '@kbn/test-eui-helpers';
 import { DataTableToolbar } from './toolbar';
 import { DatatableVisualizationState } from '../visualization';
 import { FramePublicAPI, VisualizationToolbarProps } from '../../../types';
@@ -38,22 +38,20 @@ describe('datatable toolbar', () => {
     defaultProps = {
       setState: jest.fn(),
       frame: {} as FramePublicAPI,
-      state: {
-        rowHeight: 'single',
-        headerRowHeight: 'single',
-      } as DatatableVisualizationState,
+      state: {} as DatatableVisualizationState,
     };
   });
 
-  const renderToolbar = (overrides = {}) => {
+  const renderAndOpenToolbar = async (overrides = {}) => {
     const ROW_HEIGHT_SETTINGS_TEST_ID = 'lnsRowHeightSettings';
     const HEADER_HEIGHT_SETTINGS_TEST_ID = 'lnsHeaderHeightSettings';
 
     const rtlRender = render(<DataTableToolbar {...defaultProps} {...overrides} />);
 
-    const togglePopover = () => {
-      userEvent.click(screen.getByRole('button', { name: /visual options/i }));
+    const togglePopover = async () => {
+      await userEvent.click(screen.getByRole('button', { name: /visual options/i }));
     };
+    await togglePopover();
 
     const selectOptionFromButtonGroup = (testId: string) => (optionName: string | RegExp) => {
       const buttonGroup = screen.getByTestId(testId);
@@ -72,10 +70,10 @@ describe('datatable toolbar', () => {
     return {
       ...rtlRender,
       togglePopover,
-      getRowHeightValue: getButtonGroupInputValue(ROW_HEIGHT_SETTINGS_TEST_ID),
+      getRowHeightValue: getSelectedButtonInGroup(ROW_HEIGHT_SETTINGS_TEST_ID),
       getRowHeightCustomValue: () => getNumberInput(ROW_HEIGHT_SETTINGS_TEST_ID),
       selectRowHeightOption: selectOptionFromButtonGroup(ROW_HEIGHT_SETTINGS_TEST_ID),
-      getHeaderHeightValue: getButtonGroupInputValue(HEADER_HEIGHT_SETTINGS_TEST_ID),
+      getHeaderHeightValue: getSelectedButtonInGroup(HEADER_HEIGHT_SETTINGS_TEST_ID),
       getHeaderHeightCustomValue: () => getNumberInput(HEADER_HEIGHT_SETTINGS_TEST_ID),
       selectHeaderHeightOption: selectOptionFromButtonGroup(HEADER_HEIGHT_SETTINGS_TEST_ID),
       getPaginationSwitch,
@@ -84,46 +82,46 @@ describe('datatable toolbar', () => {
   };
 
   it('should reflect default state in the UI', async () => {
-    const { togglePopover, getRowHeightValue, getHeaderHeightValue, getPaginationSwitch } =
-      renderToolbar();
-    togglePopover();
+    const {
+      getHeaderHeightCustomValue,
+      getRowHeightValue,
+      getHeaderHeightValue,
+      getPaginationSwitch,
+    } = await renderAndOpenToolbar();
 
     expect(getRowHeightValue()).toHaveTextContent(/single/i);
-    expect(getHeaderHeightValue()).toHaveTextContent(/single/i);
+    expect(getHeaderHeightValue()).toHaveTextContent(/custom/i);
+    expect(getHeaderHeightCustomValue()).toHaveValue(3);
     expect(getPaginationSwitch()).not.toBeChecked();
   });
 
   it('should reflect passed state in the UI', async () => {
     const {
-      togglePopover,
       getRowHeightValue,
       getHeaderHeightValue,
       getPaginationSwitch,
       getHeaderHeightCustomValue,
       getRowHeightCustomValue,
-    } = renderToolbar({
+    } = await renderAndOpenToolbar({
       state: {
         ...defaultProps.state,
         rowHeight: 'custom',
         rowHeightLines: 2,
         headerRowHeight: 'custom',
-        headerRowHeightLines: 3,
+        headerRowHeightLines: 4,
         paging: { size: 10, enabled: true },
       },
     });
 
-    togglePopover();
-
     expect(getRowHeightValue()).toHaveTextContent(/custom/i);
     expect(getRowHeightCustomValue()).toHaveValue(2);
     expect(getHeaderHeightValue()).toHaveTextContent(/custom/i);
-    expect(getHeaderHeightCustomValue()).toHaveValue(3);
+    expect(getHeaderHeightCustomValue()).toHaveValue(4);
     expect(getPaginationSwitch()).toBeChecked();
   });
 
   it('should change row height to "Auto" mode when selected', async () => {
-    const { togglePopover, selectRowHeightOption } = renderToolbar();
-    togglePopover();
+    const { selectRowHeightOption } = await renderAndOpenToolbar();
 
     selectRowHeightOption(/auto fit/i);
     expect(defaultProps.setState).toHaveBeenCalledTimes(1);
@@ -133,8 +131,7 @@ describe('datatable toolbar', () => {
   });
 
   it('should toggle pagination on click', async () => {
-    const { togglePopover, clickPaginationSwitch } = renderToolbar();
-    togglePopover();
+    const { clickPaginationSwitch } = await renderAndOpenToolbar();
 
     clickPaginationSwitch();
     expect(defaultProps.setState).toHaveBeenCalledTimes(1);
@@ -144,59 +141,52 @@ describe('datatable toolbar', () => {
   });
 
   it('should change row height to "Custom" mode when selected', async () => {
-    const { togglePopover, selectRowHeightOption } = renderToolbar();
-    togglePopover();
+    const { selectRowHeightOption } = await renderAndOpenToolbar();
 
     selectRowHeightOption(/custom/i);
     expect(defaultProps.setState).toHaveBeenCalledTimes(1);
     expect(defaultProps.setState).toHaveBeenCalledWith({
       rowHeight: 'custom',
-      headerRowHeight: 'single',
       rowHeightLines: 2,
     });
   });
 
   it('should change header height to "Custom" mode', async () => {
-    const { togglePopover, selectHeaderHeightOption } = renderToolbar();
-    togglePopover();
+    const { selectHeaderHeightOption } = await renderAndOpenToolbar({
+      headerRowHeight: 'single',
+    });
 
     selectHeaderHeightOption(/custom/i);
     expect(defaultProps.setState).toHaveBeenCalledTimes(1);
     expect(defaultProps.setState).toHaveBeenCalledWith({
-      rowHeight: 'single',
       headerRowHeight: 'custom',
-      headerRowHeightLines: 2,
+      headerRowHeightLines: 3,
     });
   });
 
   it('should toggle on table pagination', async () => {
-    const { togglePopover, clickPaginationSwitch } = renderToolbar();
-    togglePopover();
+    const { clickPaginationSwitch } = await renderAndOpenToolbar();
 
     clickPaginationSwitch();
     expect(defaultProps.setState).toHaveBeenCalledTimes(1);
     expect(defaultProps.setState).toHaveBeenCalledWith(
       expect.objectContaining({
         paging: defaultPagingState,
-        rowHeight: 'single',
-        headerRowHeight: 'single',
       })
     );
   });
   it('should toggle off table pagination', async () => {
-    const { togglePopover, clickPaginationSwitch } = renderToolbar({
+    const { clickPaginationSwitch } = await renderAndOpenToolbar({
       state: {
         ...defaultProps.state,
         paging: defaultPagingState,
       },
     });
-    togglePopover();
+
     clickPaginationSwitch();
 
     expect(defaultProps.setState).toHaveBeenCalledTimes(1);
     expect(defaultProps.setState).toHaveBeenCalledWith({
-      rowHeight: 'single',
-      headerRowHeight: 'single',
       paging: { ...defaultPagingState, enabled: false },
     });
   });

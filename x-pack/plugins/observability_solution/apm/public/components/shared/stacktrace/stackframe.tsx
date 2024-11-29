@@ -23,9 +23,7 @@ const ContextContainer = euiStyled.div<{ isLibraryFrame: boolean }>`
   border: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
   border-radius: ${({ theme }) => theme.eui.euiBorderRadiusSmall};
   background: ${({ isLibraryFrame, theme }) =>
-    isLibraryFrame
-      ? theme.eui.euiColorEmptyShade
-      : theme.eui.euiColorLightestShade};
+    isLibraryFrame ? theme.eui.euiColorEmptyShade : theme.eui.euiColorLightestShade};
 `;
 
 // Indent the non-context frames the same amount as the accordion control
@@ -86,8 +84,6 @@ export function Stackframe({
   );
 }
 
-function hasLineContext(
-  stackframe: StackframeType
-): stackframe is StackframeWithLineContext {
-  return stackframe.line?.hasOwnProperty('context') || false;
+function hasLineContext(stackframe: StackframeType): stackframe is StackframeWithLineContext {
+  return Object.hasOwn(stackframe.line ?? {}, 'context') || false;
 }

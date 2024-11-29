@@ -9,14 +9,14 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiHeaderLink, EuiHeaderLinks } from '@elastic/eui';
 import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
-import { useKibana } from '../../utils/kibana_react';
+import { useKibana } from '../../hooks/use_kibana';
 import { usePluginContext } from '../../hooks/use_plugin_context';
+import { SLOS_BASE_PATH, SLO_SETTINGS_PATH } from '../../../common/locators/paths';
 
 export function HeaderMenu(): React.ReactElement | null {
   const { http, theme } = useKibana().services;
 
-  const { appMountParameters } = usePluginContext();
-
+  const { appMountParameters, isServerless } = usePluginContext();
   return (
     <HeaderMenuPortal
       setHeaderActionMenu={appMountParameters?.setHeaderActionMenu!}
@@ -27,11 +27,31 @@ export function HeaderMenu(): React.ReactElement | null {
           <EuiHeaderLinks>
             <EuiHeaderLink
               color="primary"
-              href={http.basePath.prepend('/app/integrations/browse')}
+              href={http.basePath.prepend('/app/observabilityOnboarding')}
               iconType="indexOpen"
             >
               {i18n.translate('xpack.slo.headerMenu.addData', {
-                defaultMessage: 'Add integrations',
+                defaultMessage: 'Add data',
+              })}
+            </EuiHeaderLink>
+            {!isServerless && (
+              <EuiHeaderLink
+                color="primary"
+                href={http.basePath.prepend(`${SLOS_BASE_PATH}${SLO_SETTINGS_PATH}`)}
+                iconType="gear"
+              >
+                {i18n.translate('xpack.slo.headerMenu.settings', {
+                  defaultMessage: 'Settings',
+                })}
+              </EuiHeaderLink>
+            )}
+            <EuiHeaderLink
+              color="primary"
+              href={http.basePath.prepend('/app/observability/annotations')}
+              iconType="brush"
+            >
+              {i18n.translate('xpack.slo.home.annotations', {
+                defaultMessage: 'Annotations',
               })}
             </EuiHeaderLink>
           </EuiHeaderLinks>

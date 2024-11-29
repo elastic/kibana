@@ -6,15 +6,17 @@
  */
 
 import semver from 'semver';
-import { isEmpty, isEqual, keyBy } from 'lodash';
+import { chunk, isEmpty, isEqual, keyBy } from 'lodash';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { type Logger, type SavedObjectsClientContract } from '@kbn/core/server';
-import { ENDPOINT_LIST_ID, ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
+import { ENDPOINT_ARTIFACT_LISTS, ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import type { Artifact, PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { ProductFeatureKey } from '@kbn/security-solution-features/keys';
+import { asyncForEach } from '@kbn/std';
+import { UnifiedManifestClient } from '../unified_manifest_client';
 import { stringify } from '../../../utils/stringify';
 import { QueueProcessor } from '../../../utils/queue_processor';
 import type { ProductFeaturesService } from '../../../../lib/product_features_service/product_features_service';
@@ -35,9 +37,15 @@ import {
   Manifest,
 } from '../../../lib/artifacts';
 
+import type {
+  InternalUnifiedManifestBaseSchema,
+  InternalUnifiedManifestSchema,
+  InternalUnifiedManifestUpdateSchema,
+} from '../../../schemas/artifacts';
 import {
   internalArtifactCompleteSchema,
   type InternalArtifactCompleteSchema,
+  type InternalManifestSchema,
   type WrappedTranslatedExceptionList,
 } from '../../../schemas/artifacts';
 import type { EndpointArtifactClientInterface } from '../artifact_client';
@@ -149,9 +157,14 @@ export class ManifestManager {
   }): Promise<WrappedTranslatedExceptionList> {
     if (!this.cachedExceptionsListsByOs.has(`${listId}-${os}`)) {
       let itemsByListId: ExceptionListItemSchema[] = [];
+      // endpointHostIsolationExceptions includes full CRUD support for Host Isolation Exceptions
+      // endpointArtifactManagement includes full CRUD support for all other exception lists + RD support for Host Isolation Exceptions
+      // If there are host isolation exceptions in place but there is a downgrade scenario, those shouldn't be taken into account when generating artifacts.
       if (
         (listId === ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id &&
-          this.productFeaturesService.isEnabled(ProductFeatureKey.endpointResponseActions)) ||
+          this.productFeaturesService.isEnabled(
+            ProductFeatureKey.endpointHostIsolationExceptions
+          )) ||
         (listId !== ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id &&
           this.productFeaturesService.isEnabled(ProductFeatureKey.endpointArtifactManagement))
       ) {
@@ -181,7 +194,7 @@ export class ManifestManager {
     const exceptions: ExceptionListItemSchema[] =
       listId === ENDPOINT_LIST_ID ? allExceptionsByListId : allExceptionsByListId.filter(filter);
 
-    return convertExceptionsToEndpointFormat(exceptions, schemaVersion);
+    return convertExceptionsToEndpointFormat(exceptions, schemaVersion, this.experimentalFeatures);
   }
 
   /**
@@ -513,7 +526,25 @@ export class ManifestManager {
    */
   public async getLastComputedManifest(): Promise<Manifest | null> {
     try {
-      const manifestSo = await this.getManifestClient().getManifest();
+      let manifestSo;
+      if (this.experimentalFeatures.unifiedManifestEnabled) {
+        const unifiedManifestsSo = await this.getAllUnifiedManifestsSO();
+        // On first run, there will be no existing Unified Manifests SO, so we need to copy the semanticVersion from the legacy manifest
+        // This is to ensure that the first Unified Manifest created has the same semanticVersion as the legacy manifest and is not too far
+        // behind for package policy to pick it up.
+        if (unifiedManifestsSo.length === 0) {
+          const legacyManifestSo = await this.getManifestClient().getManifest();
+          const legacySemanticVersion = legacyManifestSo?.attributes?.semanticVersion;
+          manifestSo = this.transformUnifiedManifestSOtoLegacyManifestSO(
+            unifiedManifestsSo,
+            legacySemanticVersion
+          );
+        } else {
+          manifestSo = this.transformUnifiedManifestSOtoLegacyManifestSO(unifiedManifestsSo);
+        }
+      } else {
+        manifestSo = await this.getManifestClient().getManifest();
+      }
 
       if (manifestSo.version === undefined) {
         throw new InvalidInternalManifestError(
@@ -660,7 +691,7 @@ export class ManifestManager {
       },
     });
 
-    for await (const policies of this.fetchAllPolicies()) {
+    for await (const policies of await this.fetchAllPolicies()) {
       for (const packagePolicy of policies) {
         const { id, name } = packagePolicy;
 
@@ -721,24 +752,28 @@ export class ManifestManager {
    * @returns {Promise<Error | null>} An error, if encountered, or null.
    */
   public async commit(manifest: Manifest) {
-    const manifestClient = this.getManifestClient();
-
-    // Commit the new manifest
     const manifestSo = manifest.toSavedObject();
-    const version = manifest.getSavedObjectVersion();
 
-    if (version == null) {
-      await manifestClient.createManifest(manifestSo);
+    if (this.experimentalFeatures.unifiedManifestEnabled) {
+      await this.commitUnified(manifestSo);
     } else {
-      await manifestClient.updateManifest(manifestSo, {
-        version,
-      });
-    }
+      const manifestClient = this.getManifestClient();
 
-    this.logger.debug(`Committed manifest ${manifest.getSemanticVersion()}`);
+      const version = manifest.getSavedObjectVersion();
+
+      if (version == null) {
+        await manifestClient.createManifest(manifestSo);
+      } else {
+        await manifestClient.updateManifest(manifestSo, {
+          version,
+        });
+      }
+
+      this.logger.debug(`Committed manifest ${manifest.getSemanticVersion()}`);
+    }
   }
 
-  private fetchAllPolicies(): AsyncIterable<PackagePolicy[]> {
+  private fetchAllPolicies(): Promise<AsyncIterable<PackagePolicy[]>> {
     return this.packagePolicyService.fetchAllItems(this.savedObjectsClient, {
       kuery: 'ingest-package-policies.package.name:endpoint',
     });
@@ -746,7 +781,7 @@ export class ManifestManager {
 
   private async listEndpointPolicyIds(): Promise<string[]> {
     const allPolicyIds: string[] = [];
-    const idFetcher = this.packagePolicyService.fetchAllItemIds(this.savedObjectsClient, {
+    const idFetcher = await this.packagePolicyService.fetchAllItemIds(this.savedObjectsClient, {
       kuery: 'ingest-package-policies.package.name:endpoint',
     });
 
@@ -833,6 +868,231 @@ export class ManifestManager {
           badArtifactIds
         )}`
       );
+    }
+  }
+
+  /**
+   * Unified Manifest methods
+   */
+
+  private setNewSemanticVersion(semanticVersion: string): string | null {
+    const newSemanticVersion = semver.inc(semanticVersion, 'patch');
+    if (!semver.valid(newSemanticVersion)) {
+      throw new Error(`Invalid semver: ${newSemanticVersion}`);
+    }
+    return newSemanticVersion;
+  }
+
+  protected getUnifiedManifestClient(): UnifiedManifestClient {
+    return new UnifiedManifestClient(this.savedObjectsClient);
+  }
+
+  public async getAllUnifiedManifestsSO(): Promise<InternalUnifiedManifestSchema[]> {
+    return this.getUnifiedManifestClient().getAllUnifiedManifests();
+  }
+
+  public transformUnifiedManifestSOtoLegacyManifestSO(
+    unifiedManifestsSo: InternalUnifiedManifestSchema[],
+    semanticVersion?: string
+  ): {
+    version: string;
+    attributes: {
+      artifacts: Array<
+        { artifactId: string; policyId: undefined } | { artifactId: string; policyId: string }
+      >;
+      semanticVersion: string;
+      schemaVersion: ManifestSchemaVersion;
+    };
+  } {
+    const globalUnifiedManifest = unifiedManifestsSo.find((a) => a.policyId === '.global');
+    return {
+      version: 'WzQ3NzAsMV0=', // version is hardcoded since it was used only to determine whether to create a new manifest or update an existing one
+      attributes: {
+        artifacts: [
+          ...(globalUnifiedManifest?.artifactIds.map((artifactId) => ({
+            artifactId,
+            policyId: undefined,
+          })) ?? []),
+          ...unifiedManifestsSo.reduce(
+            (acc: Array<{ artifactId: string; policyId: string }>, unifiedManifest) => {
+              if (unifiedManifest.policyId === '.global') {
+                return acc;
+              }
+              acc.push(
+                ...unifiedManifest.artifactIds.map((artifactId) => ({
+                  policyId: unifiedManifest.policyId,
+                  artifactId,
+                }))
+              );
+
+              return acc;
+            },
+            []
+          ),
+        ],
+        semanticVersion: (semanticVersion || globalUnifiedManifest?.semanticVersion) ?? '1.0.0',
+        schemaVersion: this.schemaVersion,
+      },
+    };
+  }
+
+  public transformLegacyManifestSOtoUnifiedManifestSO(
+    manifestSo: InternalManifestSchema,
+    unifiedManifestsSo: InternalUnifiedManifestSchema[]
+  ): Array<InternalUnifiedManifestBaseSchema & { id?: string }> {
+    const manifestObject = manifestSo.artifacts.reduce(
+      (
+        acc: Record<string, InternalUnifiedManifestBaseSchema & { id?: string }>,
+        { artifactId, policyId = '.global' }
+      ) => {
+        const existingPolicy = acc[policyId];
+        if (existingPolicy) {
+          existingPolicy.artifactIds.push(artifactId);
+        } else {
+          const existingUnifiedManifestSo = unifiedManifestsSo.find(
+            (item) => item.policyId === policyId
+          );
+
+          // On first run, there will be no existing Unified Manifests SO, so we need to copy the semanticVersion from the legacy manifest
+          // This is to ensure that the first Unified Manifest created has the same semanticVersion as the legacy manifest and is not too far
+          // behind for package policy to pick it up.
+          const semanticVersion =
+            (policyId === '.global' && !unifiedManifestsSo.length
+              ? manifestSo?.semanticVersion
+              : existingUnifiedManifestSo?.semanticVersion) ?? '1.0.0';
+
+          acc[policyId] = {
+            policyId,
+            artifactIds: [artifactId],
+            semanticVersion,
+            id: existingUnifiedManifestSo?.id,
+          };
+        }
+        return acc;
+      },
+      {}
+    );
+    return Object.values(manifestObject);
+  }
+
+  public prepareUnifiedManifestsSOUpdates(
+    unifiedManifestsSo: Array<Omit<InternalUnifiedManifestUpdateSchema, 'id'> & { id?: string }>,
+    existingUnifiedManifestsSo: InternalUnifiedManifestSchema[]
+  ) {
+    const existingManifestsObj: Record<string, InternalUnifiedManifestSchema> = {};
+    existingUnifiedManifestsSo.forEach((manifest) => {
+      existingManifestsObj[manifest.id] = manifest;
+    });
+
+    const { unifiedManifestsToUpdate, unifiedManifestsToCreate } = unifiedManifestsSo.reduce(
+      (
+        acc: {
+          unifiedManifestsToUpdate: InternalUnifiedManifestUpdateSchema[];
+          unifiedManifestsToCreate: InternalUnifiedManifestBaseSchema[];
+        },
+        unifiedManifest
+      ) => {
+        if (unifiedManifest.id !== undefined) {
+          // Manifest with id exists in SO, check if it needs to be updated
+          const existingUnifiedManifest = existingManifestsObj[unifiedManifest.id];
+          // Update SO if the artifactIds changed.
+          if (!isEqual(existingUnifiedManifest.artifactIds, unifiedManifest.artifactIds)) {
+            acc.unifiedManifestsToUpdate.push({
+              ...unifiedManifest,
+              semanticVersion: this.setNewSemanticVersion(unifiedManifest.semanticVersion),
+              version: existingUnifiedManifest.version,
+            } as InternalUnifiedManifestUpdateSchema);
+          }
+        } else {
+          // Manifest with id does not exist in SO, create new SO
+          acc.unifiedManifestsToCreate.push(unifiedManifest);
+        }
+
+        return acc;
+      },
+      { unifiedManifestsToUpdate: [], unifiedManifestsToCreate: [] }
+    );
+
+    const unifiedManifestsToDelete = existingUnifiedManifestsSo.reduce(
+      (acc: string[], { policyId, id }) => {
+        const existingPolicy = unifiedManifestsSo.find((item) => item.policyId === policyId);
+        if (!existingPolicy) {
+          acc.push(id);
+        }
+        return acc;
+      },
+      []
+    );
+
+    return { unifiedManifestsToUpdate, unifiedManifestsToCreate, unifiedManifestsToDelete };
+  }
+
+  public async bumpGlobalUnifiedManifestVersion(): Promise<void> {
+    const globalUnifiedManifestSO =
+      await this.getUnifiedManifestClient().getUnifiedManifestByPolicyId('.global');
+    if (!globalUnifiedManifestSO?.saved_objects?.length) {
+      this.logger.warn('No Global Unified Manifest found to bump version');
+      return;
+    }
+    const globalUnifiedManifest = globalUnifiedManifestSO.saved_objects[0];
+
+    const newSemanticVersion =
+      this.setNewSemanticVersion(globalUnifiedManifest.attributes.semanticVersion) || '1.0.0';
+    await this.getUnifiedManifestClient().updateUnifiedManifest({
+      ...globalUnifiedManifest.attributes,
+      id: globalUnifiedManifest.id,
+      semanticVersion: newSemanticVersion,
+    });
+  }
+
+  public async commitUnified(manifestSo: InternalManifestSchema): Promise<void> {
+    const existingUnifiedManifestsSo = await this.getAllUnifiedManifestsSO();
+
+    const unifiedManifestSO = this.transformLegacyManifestSOtoUnifiedManifestSO(
+      manifestSo,
+      existingUnifiedManifestsSo
+    );
+
+    const { unifiedManifestsToUpdate, unifiedManifestsToCreate, unifiedManifestsToDelete } =
+      this.prepareUnifiedManifestsSOUpdates(unifiedManifestSO, existingUnifiedManifestsSo);
+
+    if (unifiedManifestsToCreate.length) {
+      await asyncForEach(chunk(unifiedManifestsToCreate, 100), async (unifiedManifestsBatch) => {
+        await this.getUnifiedManifestClient().createUnifiedManifests(unifiedManifestsBatch);
+      });
+      this.logger.debug(`Created ${unifiedManifestsToCreate.length} unified manifests`);
+    }
+
+    if (unifiedManifestsToUpdate.length) {
+      await asyncForEach(chunk(unifiedManifestsToUpdate, 100), async (unifiedManifestsBatch) => {
+        await this.getUnifiedManifestClient().updateUnifiedManifests(unifiedManifestsBatch);
+      });
+
+      this.logger.debug(`Updated ${unifiedManifestsToUpdate.length} unified manifests`);
+    }
+
+    if (unifiedManifestsToDelete.length) {
+      await asyncForEach(chunk(unifiedManifestsToDelete, 100), async (unifiedManifestsBatch) => {
+        await this.getUnifiedManifestClient().deleteUnifiedManifestByIds(unifiedManifestsBatch);
+      });
+
+      this.logger.debug(`Deleted ${unifiedManifestsToDelete.length} unified manifests`);
+    }
+
+    if (
+      unifiedManifestsToCreate.length ||
+      unifiedManifestsToUpdate.length ||
+      unifiedManifestsToDelete.length
+    ) {
+      // If global manifest is not in the list of manifests to create or update, we need to bump its version
+      // We use it to set schemaVersion of the legacy manifest we are going to create so that its being picked up when populating agent policy
+      const hasGlobalManifest = [...unifiedManifestsToCreate, ...unifiedManifestsToUpdate].some(
+        (manifest) => manifest.policyId === '.global'
+      );
+
+      if (!hasGlobalManifest || unifiedManifestsToDelete.length) {
+        await this.bumpGlobalUnifiedManifestVersion();
+      }
     }
   }
 }

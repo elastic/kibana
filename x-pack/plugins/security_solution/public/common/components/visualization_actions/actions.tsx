@@ -10,7 +10,7 @@ import { buildContextMenuForActions } from '@kbn/ui-actions-plugin/public';
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
-import { useAsync } from 'react-use';
+import useAsync from 'react-use/lib/useAsync';
 import { InputsModelId } from '../../store/inputs/constants';
 import { ModalInspectQuery } from '../inspect/modal';
 
@@ -21,7 +21,7 @@ import type { VisualizationActionsProps } from './types';
 import { MORE_ACTIONS } from './translations';
 import { VISUALIZATION_ACTIONS_BUTTON_CLASS } from './utils';
 import { DEFAULT_ACTIONS, useActions, VISUALIZATION_CONTEXT_MENU_TRIGGER } from './use_actions';
-import { SourcererScopeName } from '../../store/sourcerer/model';
+import { SourcererScopeName } from '../../../sourcerer/store/model';
 
 const Wrapper = styled.div`
   &.viz-actions {

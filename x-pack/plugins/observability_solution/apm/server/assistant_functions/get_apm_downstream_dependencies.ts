@@ -7,52 +7,56 @@
 
 import { i18n } from '@kbn/i18n';
 import type { FunctionRegistrationParameters } from '.';
+import { RandomSampler } from '../lib/helpers/get_random_sampler';
 import { getAssistantDownstreamDependencies } from '../routes/assistant_functions/get_apm_downstream_dependencies';
+
+interface DownstreamDependenciesFunctionRegistrationParams extends FunctionRegistrationParameters {
+  randomSampler: RandomSampler;
+}
 
 export function registerGetApmDownstreamDependenciesFunction({
   apmEventClient,
   registerFunction,
-}: FunctionRegistrationParameters) {
+  randomSampler,
+}: DownstreamDependenciesFunctionRegistrationParams) {
   registerFunction(
     {
       name: 'get_apm_downstream_dependencies',
-      contexts: ['apm'],
-      description: `Get the downstream dependencies (services or uninstrumented backends) for a 
-      service. This allows you to map the dowstream dependency name to a service, by 
-      returning both span.destination.service.resource and service.name. Use this to 
+      description: `Get the downstream dependencies (services or uninstrumented backends) for a
+      service. This allows you to map the downstream dependency name to a service, by
+      returning both span.destination.service.resource and service.name. Use this to
       drilldown further if needed.`,
       descriptionForUser: i18n.translate(
         'xpack.apm.observabilityAiAssistant.functions.registerGetApmDownstreamDependencies.descriptionForUser',
         {
-          defaultMessage: `Get the downstream dependencies (services or uninstrumented backends) for a 
-      service. This allows you to map the dowstream dependency name to a service, by 
-      returning both span.destination.service.resource and service.name. Use this to 
+          defaultMessage: `Get the downstream dependencies (services or uninstrumented backends) for a
+      service. This allows you to map the dowstream dependency name to a service, by
+      returning both span.destination.service.resource and service.name. Use this to
       drilldown further if needed.`,
         }
       ),
       parameters: {
         type: 'object',
         properties: {
-          'service.name': {
+          serviceName: {
             type: 'string',
             description: 'The name of the service',
           },
-          'service.environment': {
+          serviceEnvironment: {
             type: 'string',
-            description: 'The environment that the service is running in',
+            description:
+              'The environment that the service is running in. Leave empty to query for all environments.',
           },
           start: {
             type: 'string',
-            description:
-              'The start of the time range, in Elasticsearch date math, like `now`.',
+            description: 'The start of the time range, in Elasticsearch date math, like `now`.',
           },
           end: {
             type: 'string',
-            description:
-              'The end of the time range, in Elasticsearch date math, like `now-24h`.',
+            description: 'The end of the time range, in Elasticsearch date math, like `now-24h`.',
           },
         },
-        required: ['service.name', 'start', 'end'],
+        required: ['serviceName', 'start', 'end'],
       } as const,
     },
     async ({ arguments: args }, signal) => {
@@ -60,6 +64,7 @@ export function registerGetApmDownstreamDependenciesFunction({
         content: await getAssistantDownstreamDependencies({
           arguments: args,
           apmEventClient,
+          randomSampler,
         }),
       };
     }

@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { waitFor, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import userEvent, { type UserEvent } from '@testing-library/user-event';
 
 import type { EditTagsProps } from './edit_tags';
 import { EditTags } from './edit_tags';
@@ -26,13 +26,27 @@ const defaultProps: EditTagsProps = {
 };
 
 describe('EditTags ', () => {
+  let user: UserEvent;
   let appMockRender: AppMockRenderer;
 
   const sampleTags = ['coke', 'pepsi'];
   const fetchTags = jest.fn();
 
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
   beforeEach(() => {
     jest.resetAllMocks();
+
+    // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
+    user = userEvent.setup({
+      advanceTimers: jest.advanceTimersByTime,
+    });
 
     (useGetTags as jest.Mock).mockImplementation(() => ({
       data: sampleTags,
@@ -42,29 +56,23 @@ describe('EditTags ', () => {
     appMockRender = createAppMockRenderer();
   });
 
-  it('renders no tags, and then edit', async () => {
+  it('renders no tags message', async () => {
     appMockRender.render(<EditTags {...defaultProps} />);
 
     expect(await screen.findByTestId('no-tags')).toBeInTheDocument();
-
-    userEvent.click(await screen.findByTestId('tag-list-edit-button'));
-
-    await waitFor(() => {
-      expect(screen.queryByTestId('no-tags')).not.toBeInTheDocument();
-    });
-
-    expect(await screen.findByTestId('edit-tags')).toBeInTheDocument();
+    expect(await screen.findByTestId('tag-list-edit-button')).toBeInTheDocument();
   });
 
   it('edit tag from options on submit', async () => {
     appMockRender.render(<EditTags {...defaultProps} />);
 
-    userEvent.click(await screen.findByTestId('tag-list-edit-button'));
+    await user.click(await screen.findByTestId('tag-list-edit-button'));
 
-    userEvent.paste(await screen.findByRole('combobox'), `${sampleTags[0]}`);
-    userEvent.keyboard('{enter}');
+    await user.click(await screen.findByRole('combobox'));
+    await user.paste(`${sampleTags[0]}`);
+    await user.keyboard('{enter}');
 
-    userEvent.click(await screen.findByTestId('edit-tags-submit'));
+    await user.click(await screen.findByTestId('edit-tags-submit'));
 
     await waitFor(() => expect(onSubmit).toBeCalledWith([sampleTags[0]]));
   });
@@ -72,14 +80,15 @@ describe('EditTags ', () => {
   it('add new tags on submit', async () => {
     appMockRender.render(<EditTags {...defaultProps} />);
 
-    userEvent.click(await screen.findByTestId('tag-list-edit-button'));
+    await user.click(await screen.findByTestId('tag-list-edit-button'));
 
     expect(await screen.findByTestId('edit-tags')).toBeInTheDocument();
 
-    userEvent.paste(await screen.findByRole('combobox'), 'dude');
-    userEvent.keyboard('{enter}');
+    await user.click(await screen.findByRole('combobox'));
+    await user.paste('dude');
+    await user.keyboard('{enter}');
 
-    userEvent.click(await screen.findByTestId('edit-tags-submit'));
+    await user.click(await screen.findByTestId('edit-tags-submit'));
 
     await waitFor(() => expect(onSubmit).toBeCalledWith(['dude']));
   });
@@ -87,14 +96,15 @@ describe('EditTags ', () => {
   it('trims the tags on submit', async () => {
     appMockRender.render(<EditTags {...defaultProps} />);
 
-    userEvent.click(await screen.findByTestId('tag-list-edit-button'));
+    await user.click(await screen.findByTestId('tag-list-edit-button'));
 
     expect(await screen.findByTestId('edit-tags')).toBeInTheDocument();
 
-    userEvent.paste(await screen.findByRole('combobox'), 'dude      ');
-    userEvent.keyboard('{enter}');
+    await user.click(await screen.findByRole('combobox'));
+    await user.paste('dude      ');
+    await user.keyboard('{enter}');
 
-    userEvent.click(await screen.findByTestId('edit-tags-submit'));
+    await user.click(await screen.findByTestId('edit-tags-submit'));
 
     await waitFor(() => expect(onSubmit).toBeCalledWith(['dude']));
   });
@@ -102,14 +112,15 @@ describe('EditTags ', () => {
   it('cancels on cancel', async () => {
     appMockRender.render(<EditTags {...defaultProps} />);
 
-    userEvent.click(await screen.findByTestId('tag-list-edit-button'));
+    await user.click(await screen.findByTestId('tag-list-edit-button'));
 
-    userEvent.paste(await screen.findByRole('combobox'), 'new');
-    userEvent.keyboard('{enter}');
+    await user.click(await screen.findByRole('combobox'));
+    await user.paste('new');
+    await user.keyboard('{enter}');
 
     expect(await screen.findByTestId('comboBoxInput')).toHaveTextContent('new');
 
-    userEvent.click(await screen.findByTestId('edit-tags-cancel'));
+    await user.click(await screen.findByTestId('edit-tags-cancel'));
 
     await waitFor(() => {
       expect(onSubmit).not.toBeCalled();
@@ -121,12 +132,13 @@ describe('EditTags ', () => {
   it('shows error when tag is empty', async () => {
     appMockRender.render(<EditTags {...defaultProps} />);
 
-    userEvent.click(await screen.findByTestId('tag-list-edit-button'));
+    await user.click(await screen.findByTestId('tag-list-edit-button'));
 
     expect(await screen.findByTestId('edit-tags')).toBeInTheDocument();
 
-    userEvent.paste(await screen.findByRole('combobox'), ' ');
-    userEvent.keyboard('{enter}');
+    await user.click(await screen.findByRole('combobox'));
+    await user.paste(' ');
+    await user.keyboard('{enter}');
 
     expect(await screen.findByText('A tag must contain at least one non-space character.'));
   });
@@ -136,12 +148,13 @@ describe('EditTags ', () => {
 
     appMockRender.render(<EditTags {...defaultProps} />);
 
-    userEvent.click(await screen.findByTestId('tag-list-edit-button'));
+    await user.click(await screen.findByTestId('tag-list-edit-button'));
 
     expect(await screen.findByTestId('edit-tags')).toBeInTheDocument();
 
-    userEvent.paste(await screen.findByRole('combobox'), `${longTag}`);
-    userEvent.keyboard('{enter}');
+    await user.click(await screen.findByRole('combobox'));
+    await user.paste(`${longTag}`);
+    await user.keyboard('{enter}');
 
     expect(
       await screen.findByText(

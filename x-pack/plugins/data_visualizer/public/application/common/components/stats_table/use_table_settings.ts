@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import type { Direction, EuiBasicTableProps, Pagination, PropertySort } from '@elastic/eui';
+import type {
+  Direction,
+  EuiBasicTableProps,
+  Pagination,
+  PropertySort,
+  CriteriaWithPagination,
+} from '@elastic/eui';
 import { useCallback, useMemo } from 'react';
 
 import type { DataVisualizerTableState } from '../../../../../common/types';
@@ -21,12 +27,13 @@ interface UseTableSettingsReturnValue<T extends object> {
 export function useTableSettings<TypeOfItem extends object>(
   items: TypeOfItem[],
   pageState: DataVisualizerTableState,
-  updatePageState: (update: DataVisualizerTableState) => void
+  updatePageState: (update: DataVisualizerTableState) => void,
+  isEsql: boolean = false
 ): UseTableSettingsReturnValue<TypeOfItem> {
   const { pageIndex, pageSize, sortField, sortDirection } = pageState;
 
   const onTableChange: EuiBasicTableProps<TypeOfItem>['onChange'] = useCallback(
-    ({ page, sort }) => {
+    ({ page, sort }: CriteriaWithPagination<TypeOfItem>) => {
       const result = {
         ...pageState,
         pageIndex: page?.index ?? pageState.pageIndex,
@@ -44,9 +51,9 @@ export function useTableSettings<TypeOfItem extends object>(
       pageIndex,
       pageSize,
       totalItemCount: items.length,
-      pageSizeOptions: PAGE_SIZE_OPTIONS,
+      pageSizeOptions: isEsql ? [10, 25] : PAGE_SIZE_OPTIONS,
     }),
-    [items, pageIndex, pageSize]
+    [items, pageIndex, pageSize, isEsql]
   );
 
   const sorting = useMemo(

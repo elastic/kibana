@@ -15,7 +15,10 @@ import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../../../common/constants';
+import {
+  ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE,
+  EXAMPLE_CONNECTOR_SERVICE_TYPES,
+} from '../../../../../common/constants';
 
 import { docLinks } from '../../../shared/doc_links';
 import { generateEncodedPath } from '../../../shared/encode_path_params';
@@ -35,14 +38,41 @@ import { ConnectorViewLogic } from './connector_view_logic';
 
 export const ConnectorDetailOverview: React.FC = () => {
   const { indexData } = useValues(IndexViewLogic);
-  const { connector } = useValues(ConnectorViewLogic);
-  const error = null;
+  const { connector, error } = useValues(ConnectorViewLogic);
   const { isCloud } = useValues(KibanaLogic);
   const { showModal } = useActions(ConvertConnectorLogic);
   const { isModalVisible } = useValues(ConvertConnectorLogic);
 
   return (
     <>
+      {
+        // TODO remove this callout when example status is removed
+        connector &&
+          connector.service_type &&
+          EXAMPLE_CONNECTOR_SERVICE_TYPES.includes(connector.service_type) && (
+            <>
+              <EuiCallOut
+                iconType="iInCircle"
+                color="warning"
+                title={i18n.translate(
+                  'xpack.enterpriseSearch.content.connectors.overview.connectorUnsupportedCallOut.title',
+                  {
+                    defaultMessage: 'Example connector',
+                  }
+                )}
+              >
+                <EuiSpacer size="s" />
+                <EuiText size="s">
+                  <FormattedMessage
+                    id="xpack.enterpriseSearch.content.connectors.overview.connectorUnsupportedCallOut.description"
+                    defaultMessage="This is an example connector that serves as a building block for customizations. The design and code is being provided as-is with no warranties. This is not subject to the SLA of supported features."
+                  />
+                </EuiText>
+              </EuiCallOut>
+              <EuiSpacer />
+            </>
+          )
+      }
       {error && (
         <>
           <EuiCallOut
@@ -137,7 +167,8 @@ export const ConnectorDetailOverview: React.FC = () => {
             title={i18n.translate(
               'xpack.enterpriseSearch.content.connectors.overview.nativeCloudCallout.title',
               {
-                defaultMessage: 'Native connectors are no longer supported outside Elastic Cloud',
+                defaultMessage:
+                  'Elastic managed connectors (formerly native connectors) are no longer supported outside Elastic Cloud',
               }
             )}
           >
@@ -146,13 +177,18 @@ export const ConnectorDetailOverview: React.FC = () => {
               <p>
                 <FormattedMessage
                   id="xpack.enterpriseSearch.content.connectors.overview.nativeCloudCallout.content"
-                  defaultMessage="Convert it to a {link}, to be self-managed on your own infrastructure. Native connectors are available only in your Elastic Cloud deployment."
+                  defaultMessage="Convert it to a {link}, to be self-hosted on your own infrastructure. Elastic managed connectors are available only in your Elastic Cloud deployment."
                   values={{
                     link: (
-                      <EuiLink href={docLinks.buildConnector} target="_blank">
+                      <EuiLink
+                        data-test-subj="entSearchContent-connectorDetailOverview-nativeCloudCallout-connectorClientLink"
+                        data-telemetry-id="entSearchContent-connectorDetailOverview-nativeCloudCallout-connectorClientLink"
+                        href={docLinks.buildConnector}
+                        target="_blank"
+                      >
                         {i18n.translate(
                           'xpack.enterpriseSearch.content.connectors.overview.nativeCloudCallout.connectorClient',
-                          { defaultMessage: 'connector client' }
+                          { defaultMessage: 'self-managed connector' }
                         )}
                       </EuiLink>
                     ),
@@ -161,7 +197,12 @@ export const ConnectorDetailOverview: React.FC = () => {
               </p>
             </EuiText>
             <EuiSpacer size="s" />
-            <EuiButton color="warning" fill onClick={() => showModal()}>
+            <EuiButton
+              data-test-subj="entSearchContent-connectorDetailOverview-nativeCloudCallout-convertToSelfManagedClientButton"
+              color="warning"
+              fill
+              onClick={() => showModal()}
+            >
               {i18n.translate(
                 'xpack.enterpriseSearch.content.indices.connectors.overview.convertConnector.buttonLabel',
                 { defaultMessage: 'Convert connector' }
@@ -177,7 +218,7 @@ export const ConnectorDetailOverview: React.FC = () => {
       {connector && connector.service_type !== ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE && (
         <>
           <EuiSpacer />
-          <SyncJobs />
+          <SyncJobs connector={connector} />
         </>
       )}
     </>

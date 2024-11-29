@@ -15,13 +15,9 @@ import { ENVIRONMENT_ALL } from '../../common/environment_filter_values';
 import type { TimePickerTimeDefaults } from '../components/shared/date_picker/typings';
 import type { APMLocatorPayload } from './helpers';
 
-const helpersModule = import('./helpers');
-
 export const APM_APP_LOCATOR_ID = 'APM_LOCATOR';
 
-export class APMServiceDetailLocator
-  implements LocatorDefinition<APMLocatorPayload>
-{
+export class APMServiceDetailLocator implements LocatorDefinition<APMLocatorPayload> {
   id = APM_APP_LOCATOR_ID;
   uiSettings: IUiSettingsClient;
 
@@ -30,14 +26,12 @@ export class APMServiceDetailLocator
   }
 
   async getLocation(payload: APMLocatorPayload) {
-    const { getPathForServiceDetail } = await helpersModule;
+    const { getPathForServiceDetail } = await import('./helpers');
 
     const defaultTimeRange = this.uiSettings.get<TimePickerTimeDefaults>(
       UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS
     );
-    const isComparisonEnabledByDefault = this.uiSettings.get<boolean>(
-      enableComparisonByDefault
-    );
+    const isComparisonEnabledByDefault = this.uiSettings.get<boolean>(enableComparisonByDefault);
     const defaultEnvironment = this.uiSettings.get<string>(
       defaultApmServiceEnvironment,
       ENVIRONMENT_ALL.value

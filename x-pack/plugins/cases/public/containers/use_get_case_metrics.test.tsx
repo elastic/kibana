@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
-import { renderHook } from '@testing-library/react-hooks';
+import { waitFor, renderHook } from '@testing-library/react';
 import type { SingleCaseMetricsFeature } from '../../common/ui';
 import { useGetCaseMetrics } from './use_get_case_metrics';
 import { basicCase } from './mock';
@@ -18,7 +19,9 @@ import { CaseMetricsFeature } from '../../common/types/api';
 jest.mock('./api');
 jest.mock('../common/lib/kibana');
 
-const wrapper: React.FC<string> = ({ children }) => <TestProviders>{children}</TestProviders>;
+const wrapper: FC<PropsWithChildren<unknown>> = ({ children }) => (
+  <TestProviders>{children}</TestProviders>
+);
 
 describe('useGetCaseMetrics', () => {
   const abortCtrl = new AbortController();
@@ -31,12 +34,13 @@ describe('useGetCaseMetrics', () => {
   it('calls getSingleCaseMetrics with correct arguments', async () => {
     const spyOnGetCaseMetrics = jest.spyOn(api, 'getSingleCaseMetrics');
 
-    const { waitForNextUpdate } = renderHook(() => useGetCaseMetrics(basicCase.id, features), {
+    renderHook(() => useGetCaseMetrics(basicCase.id, features), {
       wrapper,
     });
 
-    await waitForNextUpdate();
-    expect(spyOnGetCaseMetrics).toBeCalledWith(basicCase.id, features, abortCtrl.signal);
+    await waitFor(() =>
+      expect(spyOnGetCaseMetrics).toBeCalledWith(basicCase.id, features, abortCtrl.signal)
+    );
   });
 
   it('shows an error toast when getSingleCaseMetrics throws', async () => {
@@ -48,13 +52,13 @@ describe('useGetCaseMetrics', () => {
       throw new Error('Something went wrong');
     });
 
-    const { waitForNextUpdate } = renderHook(() => useGetCaseMetrics(basicCase.id, features), {
+    renderHook(() => useGetCaseMetrics(basicCase.id, features), {
       wrapper,
     });
 
-    await waitForNextUpdate();
-
-    expect(spyOnGetCaseMetrics).toBeCalledWith(basicCase.id, features, abortCtrl.signal);
-    expect(addError).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(spyOnGetCaseMetrics).toBeCalledWith(basicCase.id, features, abortCtrl.signal);
+      expect(addError).toHaveBeenCalled();
+    });
   });
 });

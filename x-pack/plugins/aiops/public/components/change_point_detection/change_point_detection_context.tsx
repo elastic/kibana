@@ -5,26 +5,24 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { type DataViewField } from '@kbn/data-views-plugin/public';
 import { startWith } from 'rxjs';
-import type { Filter, Query } from '@kbn/es-query';
+import { buildEsQuery, type Filter, type Query } from '@kbn/es-query';
 import { usePageUrlState } from '@kbn/ml-url-state';
 import { useTimefilter } from '@kbn/ml-date-picker';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { type QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
+import type { TimeBuckets, TimeBucketsInterval } from '@kbn/ml-time-buckets';
+import { useTimeBuckets } from '@kbn/ml-time-buckets';
+import { createDefaultQuery } from '@kbn/aiops-common/create_default_query';
+import { getEsQueryConfig } from '@kbn/data-service';
 import { useFilterQueryUpdates } from '../../hooks/use_filters_query';
 import { type ChangePointType, DEFAULT_AGG_FUNCTION } from './constants';
-import {
-  createMergedEsQuery,
-  getEsQueryFromSavedSearch,
-} from '../../application/utils/search_utils';
+import { getEsQueryFromSavedSearch } from '../../application/utils/search_utils';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
-import type { TimeBucketsInterval } from '../../../common/time_buckets';
-import { type TimeBuckets } from '../../../common/time_buckets';
 import { useDataSource } from '../../hooks/use_data_source';
-import { useTimeBuckets } from '../../hooks/use_time_buckets';
 
 export interface ChangePointDetectionPageUrlState {
   pageKey: 'changePoint';
@@ -100,7 +98,9 @@ export const useChangePointDetectionControlsContext = () => {
   return useContext(ChangePointDetectionControlsContext);
 };
 
-export const ChangePointDetectionControlsContextProvider: FC = ({ children }) => {
+export const ChangePointDetectionControlsContextProvider: FC<PropsWithChildren<unknown>> = ({
+  children,
+}) => {
   const { dataView } = useDataSource();
 
   const metricFieldOptions = useMemo<DataViewField[]>(() => {
@@ -128,12 +128,14 @@ export const ChangePointDetectionControlsContextProvider: FC = ({ children }) =>
   );
 };
 
-export const ChangePointDetectionContextProvider: FC = ({ children }) => {
+export const ChangePointDetectionContextProvider: FC<PropsWithChildren<unknown>> = ({
+  children,
+}) => {
   const { dataView, savedSearch } = useDataSource();
   const {
     uiSettings,
     data: {
-      query: { filterManager },
+      query: { filterManager, queryString },
     },
   } = useAiopsAppContext();
 
@@ -147,7 +149,7 @@ export const ChangePointDetectionContextProvider: FC = ({ children }) => {
   }, [dataView, savedSearch, uiSettings, filterManager]);
 
   const timefilter = useTimefilter();
-  const timeBuckets = useTimeBuckets();
+  const timeBuckets = useTimeBuckets(uiSettings);
 
   const { searchBounds } = useFilterQueryUpdates();
 
@@ -242,32 +244,31 @@ export const ChangePointDetectionContextProvider: FC = ({ children }) => {
       if (requestParamsFromUrl.filters) {
         filterManager.setFilters(requestParamsFromUrl.filters);
       }
+      if (requestParamsFromUrl.query) {
+        queryString.setQuery(requestParamsFromUrl.query);
+      }
       if (globalFilters) {
         filterManager?.addFilters(globalFilters);
       }
+      return () => {
+        filterManager?.removeAll();
+        queryString.clearQuery();
+      };
     },
-    [requestParamsFromUrl.filters, filterManager]
+    [requestParamsFromUrl.filters, requestParamsFromUrl.query, filterManager, queryString]
   );
 
   const combinedQuery = useMemo(() => {
-    const mergedQuery = createMergedEsQuery(resultQuery, resultFilters, dataView, uiSettings);
-    if (!Array.isArray(mergedQuery.bool?.filter)) {
-      if (!mergedQuery.bool) {
-        mergedQuery.bool = {};
-      }
-      mergedQuery.bool.filter = [];
-    }
-
-    mergedQuery.bool!.filter.push({
-      range: {
-        [dataView.timeFieldName!]: {
-          from: searchBounds.min?.valueOf(),
-          to: searchBounds.max?.valueOf(),
-        },
-      },
-    });
-
-    return mergedQuery;
+    const mergedQuery = buildEsQuery(
+      dataView,
+      resultQuery,
+      resultFilters,
+      uiSettings ? getEsQueryConfig(uiSettings) : undefined
+    );
+    const to = searchBounds.max?.valueOf();
+    const from = searchBounds.min?.valueOf();
+    const timeRange = to !== undefined && from !== undefined ? { from, to } : undefined;
+    return createDefaultQuery(mergedQuery, dataView.timeFieldName!, timeRange);
   }, [resultFilters, resultQuery, uiSettings, dataView, searchBounds]);
 
   if (!bucketInterval) return null;

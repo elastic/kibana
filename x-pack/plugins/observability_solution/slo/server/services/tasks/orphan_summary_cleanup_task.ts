@@ -13,10 +13,10 @@ import {
 } from '@kbn/task-manager-plugin/server';
 import { AggregationsCompositeAggregateKey } from '@elastic/elasticsearch/lib/api/types';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
-import { StoredSLO } from '../../domain/models';
+import { StoredSLODefinition } from '../../domain/models';
 import { SO_SLO_TYPE } from '../../saved_objects';
-import { SloConfig } from '../..';
 import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../common/constants';
+import { SLOConfig } from '../../types';
 
 export const TASK_TYPE = 'SLO:ORPHAN_SUMMARIES-CLEANUP-TASK';
 
@@ -49,9 +49,9 @@ export class SloOrphanSummaryCleanupTask {
   private taskManager?: TaskManagerStartContract;
   private soClient?: SavedObjectsClientContract;
   private esClient?: ElasticsearchClient;
-  private config: SloConfig;
+  private config: SLOConfig;
 
-  constructor(taskManager: TaskManagerSetupContract, logger: Logger, config: SloConfig) {
+  constructor(taskManager: TaskManagerSetupContract, logger: Logger, config: SLOConfig) {
     this.logger = logger;
     this.config = config;
 
@@ -201,7 +201,7 @@ export class SloOrphanSummaryCleanupTask {
   };
 
   findSloDefinitions = async (ids: string[]) => {
-    const sloDefinitions = await this.soClient?.find<Pick<StoredSLO, 'id' | 'revision'>>({
+    const sloDefinitions = await this.soClient?.find<Pick<StoredSLODefinition, 'id' | 'revision'>>({
       type: SO_SLO_TYPE,
       page: 1,
       perPage: ids.length,
@@ -232,7 +232,7 @@ export class SloOrphanSummaryCleanupTask {
     }
 
     if (this.config.sloOrphanSummaryCleanUpTaskEnabled) {
-      this.taskManager.ensureScheduled({
+      await this.taskManager.ensureScheduled({
         id: this.taskId,
         taskType: TASK_TYPE,
         schedule: {
@@ -243,7 +243,7 @@ export class SloOrphanSummaryCleanupTask {
         params: {},
       });
     } else {
-      this.taskManager.removeIfExists(this.taskId);
+      await this.taskManager.removeIfExists(this.taskId);
     }
   }
 }

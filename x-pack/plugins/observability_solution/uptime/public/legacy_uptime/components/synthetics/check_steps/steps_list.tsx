@@ -236,8 +236,6 @@ export const StepsList = ({
         loading={loading}
         columns={columns}
         error={error?.message}
-        isExpandable={true}
-        hasActions={true}
         items={steps}
         itemIdToExpandedRowMap={expandedRows}
         noItemsMessage={
@@ -249,7 +247,7 @@ export const StepsList = ({
                 defaultMessage: 'No history found',
               })
         }
-        tableLayout={'auto'}
+        tableLayout="auto"
         rowProps={getRowProps}
       />
     </>

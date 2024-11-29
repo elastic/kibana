@@ -8,7 +8,7 @@
 import type SuperTest from 'supertest';
 import type {
   RuleCreateProps,
-  PreviewRulesSchema,
+  RulePreviewRequestBody,
   RulePreviewLogs,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
 
@@ -26,23 +26,26 @@ export const previewRule = async ({
   rule,
   invocationCount = 1,
   timeframeEnd = new Date(),
+  enableLoggedRequests,
 }: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: SuperTest.Agent;
   rule: RuleCreateProps;
   invocationCount?: number;
   timeframeEnd?: Date;
+  enableLoggedRequests?: boolean;
 }): Promise<{
   previewId: string;
   logs: RulePreviewLogs[];
   isAborted: boolean;
 }> => {
-  const previewRequest: PreviewRulesSchema = {
+  const previewRequest: RulePreviewRequestBody = {
     ...rule,
     invocationCount,
     timeframeEnd: timeframeEnd.toISOString(),
   };
   const response = await supertest
     .post(DETECTION_ENGINE_RULES_PREVIEW)
+    .query(enableLoggedRequests ? { enable_logged_requests: true } : {})
     .set('kbn-xsrf', 'true')
     .set('elastic-api-version', '2023-10-31')
     .send(previewRequest)

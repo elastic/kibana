@@ -5,43 +5,24 @@
  * 2.0.
  */
 
-import { GroupOption } from '@kbn/securitysolution-grouping';
+import { GroupOption } from '@kbn/grouping';
 import { FindingsBaseURLQuery } from '../../common/types';
 import { CloudSecurityDefaultColumn } from '../../components/cloud_security_data_table';
 import { GROUPING_LABELS } from './translations';
-
-export const VULNERABILITY_FIELDS = {
-  VULNERABILITY_ID: 'vulnerability.id',
-  SCORE_BASE: 'vulnerability.score.base',
-  RESOURCE_NAME: 'resource.name',
-  RESOURCE_ID: 'resource.id',
-  SEVERITY: 'vulnerability.severity',
-  PACKAGE_NAME: 'package.name',
-  PACKAGE_VERSION: 'package.version',
-  PACKAGE_FIXED_VERSION: 'package.fixed_version',
-  CLOUD_ACCOUNT_NAME: 'cloud.account.name',
-  CLOUD_PROVIDER: 'cloud.provider',
-  DESCRIPTION: 'vulnerability.description',
-} as const;
-
-export const GROUPING_OPTIONS = {
-  RESOURCE_NAME: VULNERABILITY_FIELDS.RESOURCE_NAME,
-  CLOUD_ACCOUNT_NAME: VULNERABILITY_FIELDS.CLOUD_ACCOUNT_NAME,
-  CVE: VULNERABILITY_FIELDS.VULNERABILITY_ID,
-};
+import { VULNERABILITY_GROUPING_OPTIONS, VULNERABILITY_FIELDS } from '../../common/constants';
 
 export const defaultGroupingOptions: GroupOption[] = [
   {
     label: GROUPING_LABELS.RESOURCE_NAME,
-    key: GROUPING_OPTIONS.RESOURCE_NAME,
+    key: VULNERABILITY_GROUPING_OPTIONS.RESOURCE_NAME,
   },
   {
     label: GROUPING_LABELS.CLOUD_ACCOUNT_NAME,
-    key: GROUPING_OPTIONS.CLOUD_ACCOUNT_NAME,
+    key: VULNERABILITY_GROUPING_OPTIONS.CLOUD_ACCOUNT_NAME,
   },
   {
     label: 'CVE',
-    key: GROUPING_OPTIONS.CVE,
+    key: VULNERABILITY_GROUPING_OPTIONS.CVE,
   },
 ];
 
@@ -68,4 +49,5 @@ export const defaultColumns: CloudSecurityDefaultColumn[] = [
   { id: VULNERABILITY_FIELDS.PACKAGE_NAME },
   { id: VULNERABILITY_FIELDS.PACKAGE_VERSION },
   { id: VULNERABILITY_FIELDS.PACKAGE_FIXED_VERSION },
+  { id: VULNERABILITY_FIELDS.VENDOR },
 ];

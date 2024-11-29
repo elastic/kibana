@@ -16,6 +16,7 @@ import {
   Tooltip,
   LIGHT_THEME,
   DARK_THEME,
+  LegendValue,
 } from '@elastic/charts';
 import { EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -27,10 +28,7 @@ import { usePreviousPeriodLabel } from '../../../../hooks/use_previous_period_te
 import { useTheme } from '../../../../hooks/use_theme';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { ChartContainer } from '../../../shared/charts/chart_container';
-import {
-  ChartType,
-  getTimeSeriesColor,
-} from '../../../shared/charts/helper/get_timeseries_color';
+import { ChartType, getTimeSeriesColor } from '../../../shared/charts/helper/get_timeseries_color';
 import { getTimeZone } from '../../../shared/charts/helper/timezone';
 
 type ErrorDistributionAPIResponse =
@@ -97,7 +95,7 @@ export function ErrorDistribution({ distribution, title, fetchStatus }: Props) {
           <Settings
             xDomain={{ min, max }}
             showLegend
-            showLegendExtra
+            legendValues={[LegendValue.CurrentAndLastValue]}
             legendPosition={Position.Bottom}
             theme={theme.darkMode ? DARK_THEME : LIGHT_THEME}
             locale={i18n.getLocale()}
@@ -108,12 +106,7 @@ export function ErrorDistribution({ distribution, title, fetchStatus }: Props) {
             showOverlappingTicks
             tickFormat={xFormatter}
           />
-          <Axis
-            id="y-axis"
-            position={Position.Left}
-            ticks={2}
-            gridLine={{ visible: true }}
-          />
+          <Axis id="y-axis" position={Position.Left} ticks={2} gridLine={{ visible: true }} />
 
           {timeseries.map((serie) => {
             return (

@@ -18,13 +18,5 @@ export const convertToQueryType = (query: Query | AggregateQuery): Query => {
       language: 'esql',
     };
   }
-
-  if ('sql' in query) {
-    return {
-      query: query.sql,
-      language: 'sql',
-    };
-  }
-
   return query;
 };

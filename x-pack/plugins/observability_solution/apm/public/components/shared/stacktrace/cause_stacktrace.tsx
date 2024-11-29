@@ -37,12 +37,9 @@ function CausedBy({ message }: { message: string }) {
   return (
     <CausedByContainer>
       <CausedByHeading>
-        {i18n.translate(
-          'xpack.apm.stacktraceTab.causedByFramesToogleButtonLabel',
-          {
-            defaultMessage: 'Caused By',
-          }
-        )}
+        {i18n.translate('xpack.apm.stacktraceTab.causedByFramesToogleButtonLabel', {
+          defaultMessage: 'Caused By',
+        })}
       </CausedByHeading>
       <EuiTitle size="xxs">
         <span>{message}</span>

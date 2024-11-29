@@ -9,21 +9,25 @@ import type { FC } from 'react';
 import React from 'react';
 import { parse } from 'query-string';
 import { i18n } from '@kbn/i18n';
+import { dynamic } from '@kbn/shared-ux-utility';
 import { DataSourceContextProvider } from '../../../contexts/ml';
 import { ML_PAGES } from '../../../../locator';
 import type { NavigateToPath } from '../../../contexts/kibana';
+import { useMlApi } from '../../../contexts/kibana';
 import { useMlKibana } from '../../../contexts/kibana';
 import type { MlRoute, PageProps } from '../../router';
 import { createPath, PageLoader } from '../../router';
 import { useRouteResolver } from '../../use_resolver';
 import { basicResolvers } from '../../resolvers';
-import { Page } from '../../../data_frame_analytics/pages/analytics_creation';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 import {
   DATA_FRAME_ANALYTICS,
   loadNewJobCapabilities,
 } from '../../../services/new_job_capabilities/load_new_job_capabilities';
 
+const Page = dynamic(async () => ({
+  default: (await import('../../../data_frame_analytics/pages/analytics_creation')).Page,
+}));
 export const analyticsJobsCreationRouteFactory = (
   navigateToPath: NavigateToPath,
   basePath: string
@@ -54,6 +58,7 @@ const PageWrapper: FC<PageProps> = ({ location }) => {
       savedSearch: savedSearchService,
     },
   } = useMlKibana();
+  const mlApi = useMlApi();
 
   const { context } = useRouteResolver(
     'full',
@@ -64,6 +69,7 @@ const PageWrapper: FC<PageProps> = ({ location }) => {
         loadNewJobCapabilities(
           index,
           savedSearchId,
+          mlApi,
           dataViewsService,
           savedSearchService,
           DATA_FRAME_ANALYTICS

@@ -126,6 +126,12 @@ const registerHttpRequestMockHelpers = (
     error?: ResponseError
   ) => mockResponse('GET', `${API_BASE_PATH}/mapping/${indexName}`, response, error);
 
+  const setUpdateIndexMappingsResponse = (
+    indexName: string,
+    response?: HttpResponse,
+    error?: ResponseError
+  ) => mockResponse('PUT', `${API_BASE_PATH}/mapping/${indexName}`, response, error);
+
   const setLoadIndexStatsResponse = (
     indexName: string,
     response?: HttpResponse,
@@ -140,6 +146,12 @@ const registerHttpRequestMockHelpers = (
 
   const setSimulateTemplateResponse = (response?: HttpResponse, error?: ResponseError) =>
     mockResponse('POST', `${API_BASE_PATH}/index_templates/simulate`, response, error);
+
+  const setSimulateTemplateByNameResponse = (
+    name: string,
+    response?: HttpResponse,
+    error?: ResponseError
+  ) => mockResponse('POST', `${API_BASE_PATH}/index_templates/simulate/${name}`, response, error);
 
   const setLoadComponentTemplatesResponse = (response?: HttpResponse, error?: ResponseError) =>
     mockResponse('GET', `${API_BASE_PATH}/component_templates`, response, error);
@@ -157,6 +169,13 @@ const registerHttpRequestMockHelpers = (
     mockResponse(
       'POST',
       `${INTERNAL_API_BASE_PATH}/enrich_policies/get_matching_indices`,
+      response,
+      error
+    );
+  const setGetMatchingDataStreams = (response?: HttpResponse, error?: ResponseError) =>
+    mockResponse(
+      'POST',
+      `${INTERNAL_API_BASE_PATH}/enrich_policies/get_matching_data_streams`,
       response,
       error
     );
@@ -203,6 +222,9 @@ const registerHttpRequestMockHelpers = (
   const setCreateIndexResponse = (response?: HttpResponse, error?: ResponseError) =>
     mockResponse('PUT', `${INTERNAL_API_BASE_PATH}/indices/create`, response, error);
 
+  const setInferenceModels = (response?: HttpResponse, error?: ResponseError) =>
+    mockResponse('GET', `${API_BASE_PATH}/inference/all`, response, error);
+
   return {
     setLoadTemplatesResponse,
     setLoadIndicesResponse,
@@ -216,9 +238,11 @@ const registerHttpRequestMockHelpers = (
     setCreateTemplateResponse,
     setLoadIndexSettingsResponse,
     setLoadIndexMappingResponse,
+    setUpdateIndexMappingsResponse,
     setLoadIndexStatsResponse,
     setUpdateIndexSettingsResponse,
     setSimulateTemplateResponse,
+    setSimulateTemplateByNameResponse,
     setLoadComponentTemplatesResponse,
     setLoadNodesPluginsResponse,
     setLoadTelemetryResponse,
@@ -231,6 +255,8 @@ const registerHttpRequestMockHelpers = (
     setGetFieldsFromIndices,
     setGetPrivilegesResponse,
     setCreateEnrichPolicy,
+    setInferenceModels,
+    setGetMatchingDataStreams,
   };
 };
 

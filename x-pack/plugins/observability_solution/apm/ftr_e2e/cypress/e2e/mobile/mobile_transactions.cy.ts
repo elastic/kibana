@@ -42,25 +42,19 @@ describe('Mobile transactions page', () => {
     describe('when click on tab shows correct table', () => {
       it('shows version tab', () => {
         cy.visitKibana(mobileTransactionsPageHref);
-        cy.getByTestSubj('apmAppVersionTab')
-          .click()
-          .should('have.attr', 'aria-selected', 'true');
+        cy.getByTestSubj('apmAppVersionTab').click().should('have.attr', 'aria-selected', 'true');
         cy.url().should('include', 'mobileSelectedTab=app_version_tab');
       });
 
       it('shows OS version tab', () => {
         cy.visitKibana(mobileTransactionsPageHref);
-        cy.getByTestSubj('apmOsVersionTab')
-          .click()
-          .should('have.attr', 'aria-selected', 'true');
+        cy.getByTestSubj('apmOsVersionTab').click().should('have.attr', 'aria-selected', 'true');
         cy.url().should('include', 'mobileSelectedTab=os_version_tab');
       });
 
       it('shows devices tab', () => {
         cy.visitKibana(mobileTransactionsPageHref);
-        cy.getByTestSubj('apmDevicesTab')
-          .click()
-          .should('have.attr', 'aria-selected', 'true');
+        cy.getByTestSubj('apmDevicesTab').click().should('have.attr', 'aria-selected', 'true');
         cy.url().should('include', 'mobileSelectedTab=devices_tab');
       });
     });

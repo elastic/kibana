@@ -5,8 +5,4 @@
  * 2.0.
  */
 
-export const getReduxDevtools = () => (window as any).__REDUX_DEVTOOLS_EXTENSION__;
-
-export const hasReduxDevtools = () => getReduxDevtools() != null;
-
 export const isDevMode = () => process.env.NODE_ENV !== 'production';

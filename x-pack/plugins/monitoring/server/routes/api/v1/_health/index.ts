@@ -8,7 +8,7 @@
 import type { LegacyRequest, MonitoringCore } from '../../../../types';
 import type { MonitoringConfig } from '../../../../config';
 import { createValidationFunction } from '../../../../lib/create_route_validation_function';
-import { getIndexPatterns, getDsIndexPattern } from '../../../../lib/cluster/get_index_patterns';
+import { getIndexPatterns, getDsIndexPattern } from '../../../../../common/get_index_patterns';
 import { getHealthRequestQueryRT } from '../../../../../common/http_api/_health';
 import type { TimeRange } from '../../../../../common/http_api/shared';
 
@@ -29,6 +29,9 @@ export function registerV1HealthRoute(server: MonitoringCore) {
     path: '/api/monitoring/v1/_health',
     validate: {
       query: validateQuery,
+    },
+    options: {
+      access: 'internal',
     },
     async handler(req: LegacyRequest) {
       const logger = req.getLogger();

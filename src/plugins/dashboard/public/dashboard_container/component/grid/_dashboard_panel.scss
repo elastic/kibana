@@ -1,22 +1,12 @@
-/**
-  * EDITING MODE
-  * Use .dshLayout--editing to target editing state because
-  * .embPanel--editing doesn't get updating without a hard refresh
-  */
-
 // LAYOUT MODES
 // Adjust borders/etc... for non-spaced out and expanded panels
 .dshLayout-withoutMargins {
-  .embPanel {
-    box-shadow: none;
-    border-radius: 0;
-  }
+  margin-top: $euiSizeS;
 
-  .embPanel__content {
-    border-radius: 0;
-  }
-
-  .dshDashboardGrid__item--highlighted {
+  .embPanel__content,
+  .embPanel,
+  .embPanel__hoverActionsAnchor,
+  .lnsExpressionRenderer {
     border-radius: 0;
   }
 }
@@ -26,13 +16,23 @@
 .dshDashboardGrid__item--expanded,
 .dshDashboardGrid__item--blurred,
 .dshDashboardGrid__item--focused {
-  .embPanel {
-    border-color: transparent;
-  }
-
   .embPanel--dragHandle:hover {
     background-color: unset;
     cursor: default;
+  }
+
+  .embPanel__hoverActions {
+    .embPanel--dragHandle {
+      visibility: hidden;
+    }
+  }
+}
+
+// Hide hover actions when dashboard has an overlay
+.dshDashboardGrid__item--blurred,
+.dshDashboardGrid__item--focused {
+  .embPanel__hoverActions {
+    visibility: hidden;
   }
 }
 
@@ -40,19 +40,22 @@
   0% {
     outline: solid $euiSizeXS transparentize($euiColorSuccess, 1);
   }
+
   25% {
     outline: solid $euiSizeXS transparentize($euiColorSuccess, .5);
   }
+
   100% {
     outline: solid $euiSizeXS transparentize($euiColorSuccess, 1);
   }
 }
 
 .dshDashboardGrid__item--highlighted {
-  border-radius: $euiSizeXS;
-  animation-name: highlightOutline;
-  animation-duration: 4s;
-  animation-timing-function: ease-out;
-  // keeps outline from getting cut off by other panels without margins
-  z-index: 999 !important;
+  .embPanel {
+    border-radius: $euiSizeXS;
+    animation-name: highlightOutline;
+    animation-duration: 4s;
+    animation-timing-function: ease-out;
+    z-index: $euiZLevel2;
+  }
 }

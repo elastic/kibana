@@ -86,7 +86,6 @@ export const Table = ({ loading, rows, onSearchChange, search, showActionsColumn
         align: 'center' as HorizontalAlignment,
         width: '5%',
         sortable: false,
-        showOnHover: true,
         render: (_name: string, item: Field) => {
           return (
             <AddMetadataPinToRow
@@ -127,7 +126,7 @@ export const Table = ({ loading, rows, onSearchChange, search, showActionsColumn
   );
 
   const searchBarOnChange = useCallback(
-    ({ queryText, error }) => {
+    ({ queryText, error }: any) => {
       if (error) {
         setSearchError(error);
       } else {
@@ -158,7 +157,6 @@ export const Table = ({ loading, rows, onSearchChange, search, showActionsColumn
               field: 'value',
               name: 'Actions',
               sortable: false,
-              showOnHover: true,
               align: 'center' as HorizontalAlignment,
               render: (_name: string, item: Field) => {
                 return <AddMetadataFilterButton item={item} />;
@@ -173,10 +171,9 @@ export const Table = ({ loading, rows, onSearchChange, search, showActionsColumn
     <EuiInMemoryTable
       data-test-subj="infraAssetDetailsMetadataTable"
       tableLayout="fixed"
-      responsive={false}
+      responsiveBreakpoint={false}
       columns={columns}
       items={fieldsWithPins}
-      rowProps={{ className: 'euiTableRow-hasActions' }}
       search={searchBar}
       loading={loading}
       error={searchError ? `${searchError.message}` : ''}

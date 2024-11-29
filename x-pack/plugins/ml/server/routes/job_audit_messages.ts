@@ -19,23 +19,17 @@ import {
  * Routes for job audit message routes
  */
 export function jobAuditMessagesRoutes({ router, routeGuard }: RouteInitialization) {
-  /**
-   * @apiGroup JobAuditMessages
-   *
-   * @api {get} /internal/ml/job_audit_messages/messages/:jobId Get audit messages
-   * @apiName GetJobAuditMessages
-   * @apiDescription Returns audit messages for specified job ID
-   *
-   * @apiSchema (params) jobAuditMessagesJobIdSchema
-   * @apiSchema (query) jobAuditMessagesQuerySchema
-   */
   router.versioned
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/job_audit_messages/messages/{jobId}`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetJobs'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetJobs'],
+        },
       },
+      summary: 'Gets audit messages',
+      description: 'Retrieves the audit messages for the specified job ID.',
     })
     .addVersion(
       {
@@ -70,22 +64,17 @@ export function jobAuditMessagesRoutes({ router, routeGuard }: RouteInitializati
       )
     );
 
-  /**
-   * @apiGroup JobAuditMessages
-   *
-   * @api {get} /internal/ml/job_audit_messages/messages Get all audit messages
-   * @apiName GetAllJobAuditMessages
-   * @apiDescription Returns all audit messages
-   *
-   * @apiSchema (query) jobAuditMessagesQuerySchema
-   */
   router.versioned
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/job_audit_messages/messages`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetJobs'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetJobs'],
+        },
       },
+      summary: 'Gets all audit messages',
+      description: 'Retrieves all audit messages.',
     })
     .addVersion(
       {
@@ -113,22 +102,17 @@ export function jobAuditMessagesRoutes({ router, routeGuard }: RouteInitializati
       )
     );
 
-  /**
-   * @apiGroup JobAuditMessages
-   *
-   * @api {put} /internal/ml/job_audit_messages/clear_messages Clear messages
-   * @apiName ClearJobAuditMessages
-   * @apiDescription Clear the job audit messages.
-   *
-   * @apiSchema (body) clearJobAuditMessagesSchema
-   */
   router.versioned
     .put({
       path: `${ML_INTERNAL_BASE_PATH}/job_audit_messages/clear_messages`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canCreateJob'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canCreateJob'],
+        },
       },
+      summary: 'Clear messages',
+      description: 'Clear the job audit messages.',
     })
     .addVersion(
       {

@@ -32,8 +32,7 @@ export function EmptyDashboards({ actions }: Props) {
         title={
           <h2>
             {i18n.translate('xpack.apm.serviceDashboards.emptyTitle', {
-              defaultMessage:
-                'The best way to understand your data is to visualize it.',
+              defaultMessage: 'The best way to understand your data is to visualize it.',
             })}
           </h2>
         }
@@ -48,27 +47,20 @@ export function EmptyDashboards({ actions }: Props) {
                 })}
               </li>
               <li>
-                {i18n.translate(
-                  'xpack.apm.serviceDashboards.emptyBody.second',
-                  {
-                    defaultMessage: 'tell a story about your data',
-                  }
-                )}
+                {i18n.translate('xpack.apm.serviceDashboards.emptyBody.second', {
+                  defaultMessage: 'tell a story about your data',
+                })}
               </li>
               <li>
                 {i18n.translate('xpack.apm.serviceDashboards.emptyBody', {
-                  defaultMessage:
-                    'focus on only the data that’s important to you',
+                  defaultMessage: 'focus on only the data that’s important to you',
                 })}
               </li>
             </ul>
             <p>
-              {i18n.translate(
-                'xpack.apm.serviceDashboards.emptyBody.getStarted',
-                {
-                  defaultMessage: 'To get started, add your dashaboard',
-                }
-              )}
+              {i18n.translate('xpack.apm.serviceDashboards.emptyBody.getStarted', {
+                defaultMessage: 'To get started, add your dashboard',
+              })}
             </p>
           </>
         }

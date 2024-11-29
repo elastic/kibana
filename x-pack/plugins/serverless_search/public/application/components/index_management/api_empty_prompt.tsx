@@ -26,6 +26,7 @@ import {
   CodeBox,
   getConsoleRequest,
   getLanguageDefinitionCodeSnippet,
+  IngestPipelinePanel,
   LanguageDefinition,
   LanguageDefinitionSnippetArguments,
 } from '@kbn/search-api-panels';
@@ -37,13 +38,14 @@ import { useKibanaServices } from '../../hooks/use_kibana';
 import { javaDefinition } from '../languages/java';
 import { languageDefinitions } from '../languages/languages';
 import { LanguageGrid } from '../languages/language_grid';
-import {
-  API_KEY_PLACEHOLDER,
-  CLOUD_ID_PLACEHOLDER,
-  ELASTICSEARCH_URL_PLACEHOLDER,
-} from '../../constants';
+
+import { useIngestPipelines } from '../../hooks/api/use_ingest_pipelines';
+import { DEFAULT_INGESTION_PIPELINE } from '../../../../common';
+
+import { API_KEY_PLACEHOLDER, CLOUD_ID_PLACEHOLDER } from '../../constants';
 
 import { ApiKeyPanel } from '../api_key/api_key';
+import { useElasticsearchUrl } from '../../hooks/use_elastisearch_url';
 
 export interface APIIndexEmptyPromptProps {
   indexName: string;
@@ -55,19 +57,24 @@ export const APIIndexEmptyPrompt = ({ indexName, onBackClick }: APIIndexEmptyPro
   const assetBasePath = useAssetBasePath();
   const [selectedLanguage, setSelectedLanguage] =
     React.useState<LanguageDefinition>(javaDefinition);
+
+  const [selectedPipeline, setSelectedPipeline] = React.useState<string>('');
   const [clientApiKey, setClientApiKey] = useState<string>(API_KEY_PLACEHOLDER);
-  const { elasticsearchURL, cloudId } = useMemo(() => {
+  const { elasticsearchUrl } = useElasticsearchUrl();
+  const { cloudId } = useMemo(() => {
     return {
-      elasticsearchURL: cloud?.elasticsearchUrl ?? ELASTICSEARCH_URL_PLACEHOLDER,
       cloudId: cloud?.cloudId ?? CLOUD_ID_PLACEHOLDER,
     };
   }, [cloud]);
   const codeSnippetArguments: LanguageDefinitionSnippetArguments = {
-    url: elasticsearchURL,
+    url: elasticsearchUrl,
     apiKey: clientApiKey,
     cloudId,
     indexName,
+    ingestPipeline: selectedPipeline,
   };
+
+  const { data: pipelineData } = useIngestPipelines();
 
   const apiIngestSteps: EuiContainedStepProps[] = [
     {
@@ -83,6 +90,14 @@ export const APIIndexEmptyPrompt = ({ indexName, onBackClick }: APIIndexEmptyPro
               setSelectedLanguage={setSelectedLanguage}
               languages={languageDefinitions}
               selectedLanguage={selectedLanguage.id}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <IngestPipelinePanel
+              selectedPipeline={selectedPipeline}
+              setSelectedPipeline={setSelectedPipeline}
+              ingestPipelinesData={pipelineData?.pipelines}
+              defaultIngestPipeline={DEFAULT_INGESTION_PIPELINE}
             />
           </EuiFlexItem>
           <EuiFlexItem>

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { firstValueFrom, of, Subject } from 'rxjs';
+import { firstValueFrom, of, Subject, BehaviorSubject } from 'rxjs';
 import { merge } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 import { httpServiceMock, docLinksServiceMock } from '@kbn/core/server/mocks';
@@ -14,14 +14,24 @@ import { mockHandlerArguments } from './_mock_handler_arguments';
 import { sleep } from '../test_utils';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
-import { MonitoringStats, RawMonitoringStats, summarizeMonitoringStats } from '../monitoring';
-import { ServiceStatusLevels, Logger } from '@kbn/core/server';
+import { MonitoringStats, RawMonitoringStats } from '../monitoring';
+import { ServiceStatusLevels } from '@kbn/core/server';
 import { configSchema, TaskManagerConfig } from '../config';
 import { FillPoolResult } from '../lib/fill_pool';
+
+jest.mock('../monitoring', () => {
+  const monitoring = jest.requireActual('../monitoring');
+  return {
+    ...monitoring,
+    summarizeMonitoringStats: jest.fn(),
+  };
+});
 
 jest.mock('../lib/log_health_metrics', () => ({
   logHealthMetrics: jest.fn(),
 }));
+
+const { summarizeMonitoringStats } = jest.requireMock('../monitoring');
 
 const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
 const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
@@ -38,12 +48,29 @@ const createMockClusterClient = (response: any) => {
   return { mockClusterClient, mockScopedClusterClient };
 };
 
+const timestamp = new Date().toISOString();
+
 describe('healthRoute', () => {
   const logger = loggingSystemMock.create().get();
   const docLinks = docLinksServiceMock.create().setup();
-
   beforeEach(() => {
     jest.resetAllMocks();
+
+    summarizeMonitoringStats.mockReturnValue({
+      last_update: timestamp,
+      stats: {
+        workload: {
+          timestamp,
+          value: {},
+          status: 'OK',
+        },
+        capacity_estimation: {
+          status: 'OK',
+          timestamp,
+          value: {},
+        },
+      },
+    });
   });
 
   it('registers the route', async () => {
@@ -60,6 +87,7 @@ describe('healthRoute', () => {
       usageCounter: mockUsageCounter,
       shouldRunTasks: true,
       docLinks,
+      numOfKibanaInstances$: new BehaviorSubject(1),
     });
 
     const [config] = router.get.mock.calls[0];
@@ -84,6 +112,7 @@ describe('healthRoute', () => {
       usageCounter: mockUsageCounter,
       shouldRunTasks: true,
       docLinks,
+      numOfKibanaInstances$: new BehaviorSubject(1),
     });
 
     const [, handler] = router.get.mock.calls[0];
@@ -126,6 +155,7 @@ describe('healthRoute', () => {
       usageCounter: mockUsageCounter,
       shouldRunTasks: true,
       docLinks,
+      numOfKibanaInstances$: new BehaviorSubject(1),
     });
 
     const [, handler] = router.get.mock.calls[0];
@@ -173,6 +203,7 @@ describe('healthRoute', () => {
       getClusterClient: () => Promise.resolve(mockClusterClient),
       shouldRunTasks: true,
       docLinks,
+      numOfKibanaInstances$: new BehaviorSubject(1),
     });
 
     const [, handler] = router.get.mock.calls[0];
@@ -215,6 +246,7 @@ describe('healthRoute', () => {
       usageCounter: mockUsageCounter,
       shouldRunTasks: true,
       docLinks,
+      numOfKibanaInstances$: new BehaviorSubject(1),
     });
 
     stats$.next(mockStat);
@@ -245,6 +277,24 @@ describe('healthRoute', () => {
   it(`logs at a warn level if the status is warning`, async () => {
     const router = httpServiceMock.createRouter();
     const { logHealthMetrics } = jest.requireMock('../lib/log_health_metrics');
+    const reason =
+      'setting HealthStatus.Warning because assumedAverageRecurringRequiredThroughputPerMinutePerKibana (78.28472222222223) < capacityPerMinutePerKibana (200)';
+    summarizeMonitoringStats.mockReturnValue({
+      last_update: timestamp,
+      stats: {
+        workload: {
+          timestamp,
+          value: {},
+          status: 'OK',
+        },
+        capacity_estimation: {
+          status: 'warn',
+          reason,
+          timestamp,
+          value: {},
+        },
+      },
+    });
 
     const warnRuntimeStat = mockHealthStats();
     const warnConfigurationStat = mockHealthStats();
@@ -274,6 +324,7 @@ describe('healthRoute', () => {
       usageCounter: mockUsageCounter,
       shouldRunTasks: true,
       docLinks,
+      numOfKibanaInstances$: new BehaviorSubject(1),
     });
 
     const serviceStatus = firstValueFrom(serviceStatus$);
@@ -288,8 +339,7 @@ describe('healthRoute', () => {
 
     expect(await serviceStatus).toMatchObject({
       level: ServiceStatusLevels.degraded,
-      summary:
-        'Task Manager is unhealthy - Reason: setting HealthStatus.Warning because assumedAverageRecurringRequiredThroughputPerMinutePerKibana (78.28472222222223) < capacityPerMinutePerKibana (200)',
+      summary: `Task Manager is unhealthy - Reason: ${reason}`,
     });
 
     expect(logHealthMetrics).toBeCalledTimes(4);
@@ -330,6 +380,24 @@ describe('healthRoute', () => {
   it(`logs at an error level if the status is error`, async () => {
     const router = httpServiceMock.createRouter();
     const { logHealthMetrics } = jest.requireMock('../lib/log_health_metrics');
+    const reason =
+      'setting HealthStatus.Warning because assumedAverageRecurringRequiredThroughputPerMinutePerKibana (78.28472222222223) < capacityPerMinutePerKibana (200)';
+    summarizeMonitoringStats.mockReturnValue({
+      last_update: timestamp,
+      stats: {
+        workload: {
+          timestamp,
+          value: {},
+          status: 'OK',
+        },
+        capacity_estimation: {
+          status: 'error',
+          reason,
+          timestamp,
+          value: {},
+        },
+      },
+    });
 
     const errorRuntimeStat = mockHealthStats();
     const errorConfigurationStat = mockHealthStats();
@@ -359,6 +427,7 @@ describe('healthRoute', () => {
       usageCounter: mockUsageCounter,
       shouldRunTasks: true,
       docLinks,
+      numOfKibanaInstances$: new BehaviorSubject(1),
     });
 
     const serviceStatus = firstValueFrom(serviceStatus$);
@@ -373,8 +442,7 @@ describe('healthRoute', () => {
 
     expect(await serviceStatus).toMatchObject({
       level: ServiceStatusLevels.degraded,
-      summary:
-        'Task Manager is unhealthy - Reason: setting HealthStatus.Warning because assumedAverageRecurringRequiredThroughputPerMinutePerKibana (78.28472222222223) < capacityPerMinutePerKibana (200)',
+      summary: `Task Manager is unhealthy - Reason: ${reason}`,
     });
 
     expect(logHealthMetrics).toBeCalledTimes(4);
@@ -414,6 +482,22 @@ describe('healthRoute', () => {
 
   it('returns a error status if the overall stats have not been updated within the required hot freshness', async () => {
     const router = httpServiceMock.createRouter();
+    const coldTimestamp = new Date(Date.now() - 3001).toISOString();
+    summarizeMonitoringStats.mockReturnValue({
+      last_update: coldTimestamp,
+      stats: {
+        workload: {
+          timestamp: coldTimestamp,
+          value: {},
+          status: 'OK',
+        },
+        capacity_estimation: {
+          status: 'OK',
+          timestamp: coldTimestamp,
+          value: {},
+        },
+      },
+    });
 
     const stats$ = new Subject<MonitoringStats>();
 
@@ -432,6 +516,7 @@ describe('healthRoute', () => {
       usageCounter: mockUsageCounter,
       shouldRunTasks: true,
       docLinks,
+      numOfKibanaInstances$: new BehaviorSubject(1),
     });
 
     const serviceStatus = firstValueFrom(serviceStatus$);
@@ -444,7 +529,7 @@ describe('healthRoute', () => {
 
     stats$.next(
       mockHealthStats({
-        last_update: new Date(Date.now() - 3001).toISOString(),
+        last_update: coldTimestamp,
       })
     );
 
@@ -487,17 +572,26 @@ describe('healthRoute', () => {
       summary:
         'Task Manager is unhealthy - Reason: setting HealthStatus.Error because of expired hot timestamps',
     });
-    const warnCalls = (logger as jest.Mocked<Logger>).debug.mock.calls as string[][];
-    const warnMessage =
-      /^setting HealthStatus.Warning because assumedAverageRecurringRequiredThroughputPerMinutePerKibana/;
-    const found = warnCalls
-      .map((arr) => arr[0])
-      .find((message) => message.match(warnMessage) != null);
-    expect(found).toMatch(warnMessage);
   });
 
   it('returns a error status if the workload stats have not been updated within the required cold freshness', async () => {
+    const coldTimestamp = new Date(Date.now() - 120000).toISOString();
     const router = httpServiceMock.createRouter();
+    summarizeMonitoringStats.mockReturnValue({
+      last_update: timestamp,
+      stats: {
+        workload: {
+          timestamp: coldTimestamp,
+          value: {},
+          status: 'OK',
+        },
+        capacity_estimation: {
+          status: 'OK',
+          timestamp,
+          value: {},
+        },
+      },
+    });
 
     const stats$ = new Subject<MonitoringStats>();
 
@@ -516,18 +610,18 @@ describe('healthRoute', () => {
       usageCounter: mockUsageCounter,
       shouldRunTasks: true,
       docLinks,
+      numOfKibanaInstances$: new BehaviorSubject(1),
     });
 
     const serviceStatus = firstValueFrom(serviceStatus$);
 
     await sleep(0);
 
-    const lastUpdateOfWorkload = new Date(Date.now() - 120000).toISOString();
     stats$.next(
       mockHealthStats({
         stats: {
           workload: {
-            timestamp: lastUpdateOfWorkload,
+            timestamp: coldTimestamp,
           },
         },
       })
@@ -598,6 +692,7 @@ describe('healthRoute', () => {
       usageCounter: mockUsageCounter,
       shouldRunTasks: true,
       docLinks,
+      numOfKibanaInstances$: new BehaviorSubject(1),
     });
     const serviceStatus = firstValueFrom(serviceStatus$);
     await sleep(0);
@@ -663,7 +758,23 @@ describe('healthRoute', () => {
   });
 
   it('returns a OK status for empty if shouldRunTasks is false', async () => {
+    const lastUpdate = new Date().toISOString();
     const router = httpServiceMock.createRouter();
+    summarizeMonitoringStats.mockReturnValue({
+      last_update: lastUpdate,
+      stats: {
+        workload: {
+          timestamp: lastUpdate,
+          value: {},
+          status: 'OK',
+        },
+        capacity_estimation: {
+          status: 'OK',
+          timestamp: lastUpdate,
+          value: {},
+        },
+      },
+    });
 
     const stats$ = new Subject<MonitoringStats>();
     const { serviceStatus$ } = healthRoute({
@@ -681,11 +792,11 @@ describe('healthRoute', () => {
       usageCounter: mockUsageCounter,
       shouldRunTasks: false,
       docLinks,
+      numOfKibanaInstances$: new BehaviorSubject(1),
     });
     const serviceStatus = firstValueFrom(serviceStatus$);
     await sleep(0);
 
-    const lastUpdate = new Date().toISOString();
     stats$.next({
       last_update: lastUpdate,
       stats: {},
@@ -709,6 +820,55 @@ describe('healthRoute', () => {
       },
     });
   });
+
+  it('calls summarizeMonitoringStats with the latest number of Kibana nodes', async () => {
+    const router = httpServiceMock.createRouter();
+    const stats$ = new Subject<MonitoringStats>();
+    const numOfKibanaInstances$ = new BehaviorSubject(1);
+
+    const id = uuidv4();
+    const config = getTaskManagerConfig({
+      monitored_stats_required_freshness: 1000,
+      monitored_stats_health_verbose_log: {
+        enabled: true,
+        level: 'debug',
+        warn_delayed_task_start_in_seconds: 100,
+      },
+      monitored_aggregated_stats_refresh_rate: 60000,
+    });
+    healthRoute({
+      router,
+      monitoringStats$: stats$,
+      logger,
+      taskManagerId: id,
+      config,
+      kibanaVersion: '8.0',
+      kibanaIndexName: '.kibana',
+      getClusterClient: () => Promise.resolve(elasticsearchServiceMock.createClusterClient()),
+      usageCounter: mockUsageCounter,
+      shouldRunTasks: true,
+      docLinks,
+      numOfKibanaInstances$,
+    });
+
+    stats$.next(mockHealthStats());
+    expect(summarizeMonitoringStats).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.anything(),
+      expect.anything(),
+      1
+    );
+
+    await sleep(1000);
+    numOfKibanaInstances$.next(2);
+    stats$.next(mockHealthStats());
+    expect(summarizeMonitoringStats).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.anything(),
+      expect.anything(),
+      2
+    );
+  });
 });
 
 function ignoreCapacityEstimation(stats: RawMonitoringStats) {
@@ -723,7 +883,8 @@ function mockHealthStats(overrides = {}) {
       configuration: {
         timestamp: new Date().toISOString(),
         value: {
-          max_workers: 10,
+          capacity: { config: 10, as_cost: 20, as_workers: 10 },
+          claim_strategy: 'update_by_query',
           poll_interval: 3000,
           request_capacity: 1000,
           monitored_aggregated_stats_refresh_rate: 5000,
@@ -741,16 +902,19 @@ function mockHealthStats(overrides = {}) {
         timestamp: new Date().toISOString(),
         value: {
           count: 4,
+          cost: 8,
           task_types: {
-            actions_telemetry: { count: 2, status: { idle: 2 } },
-            alerting_telemetry: { count: 1, status: { idle: 1 } },
-            session_cleanup: { count: 1, status: { idle: 1 } },
+            actions_telemetry: { count: 2, cost: 4, status: { idle: 2 } },
+            alerting_telemetry: { count: 1, cost: 2, status: { idle: 1 } },
+            session_cleanup: { count: 1, cost: 2, status: { idle: 1 } },
           },
           schedule: [],
           overdue: 0,
+          overdue_cost: 2,
           overdue_non_recurring: 0,
           estimatedScheduleDensity: [],
           non_recurring: 20,
+          non_recurring_cost: 40,
           owner_ids: [0, 0, 0, 1, 2, 0, 0, 2, 2, 2, 1, 2, 1, 1],
           estimated_schedule_density: [],
           capacity_requirements: {
@@ -778,6 +942,7 @@ function mockHealthStats(overrides = {}) {
             claim_conflicts: [0, 100, 75],
             claim_mismatches: [0, 100, 75],
             claim_duration: [0, 100, 75],
+            claim_stale_tasks: [0, 100, 75],
             result_frequency_percent_as_number: [
               FillPoolResult.NoTasksClaimed,
               FillPoolResult.NoTasksClaimed,

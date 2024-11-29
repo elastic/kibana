@@ -6,64 +6,64 @@
  */
 
 import { EuiTextArea } from '@elastic/eui';
-import React, { useCallback, useEffect, forwardRef } from 'react';
+import React, { useCallback, forwardRef } from 'react';
+import { css } from '@emotion/react';
 
-// eslint-disable-next-line @kbn/eslint/module_migration
-import styled from 'styled-components';
 import * as i18n from './translations';
 
 export interface Props extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
-  handlePromptChange: (value: string) => void;
+  setUserPrompt: (value: string) => void;
   isDisabled?: boolean;
   onPromptSubmit: (value: string) => void;
   value: string;
 }
 
-const StyledTextArea = styled(EuiTextArea)`
-  min-height: 125px;
-  padding-right: 42px;
-`;
-
 export const PromptTextArea = forwardRef<HTMLTextAreaElement, Props>(
-  ({ isDisabled = false, value, onPromptSubmit, handlePromptChange, ...props }, ref) => {
+  ({ isDisabled = false, value, onPromptSubmit, setUserPrompt }, ref) => {
     const onChangeCallback = useCallback(
       (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-        handlePromptChange(event.target.value);
+        setUserPrompt(event.target.value);
       },
-      [handlePromptChange]
+      [setUserPrompt]
     );
 
     const onKeyDown = useCallback(
-      (event) => {
-        if (event.key === 'Enter' && !event.shiftKey && value.trim().length > 0) {
+      (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+        // keyCode 13 is needed in case of IME input
+        if (event.keyCode === 13 && !event.shiftKey) {
           event.preventDefault();
-          onPromptSubmit(event.target.value?.trim());
-          handlePromptChange('');
-        } else if (event.key === 'Enter' && !event.shiftKey && value.trim().length === 0) {
-          event.preventDefault();
-          event.stopPropagation();
+
+          if (value.trim().length) {
+            onPromptSubmit(event.currentTarget.value?.trim());
+            setUserPrompt('');
+          } else {
+            event.stopPropagation();
+          }
         }
       },
-      [value, onPromptSubmit, handlePromptChange]
+      [value, onPromptSubmit, setUserPrompt]
     );
 
-    useEffect(() => {
-      handlePromptChange(value);
-    }, [handlePromptChange, value]);
-
     return (
-      <StyledTextArea
+      <EuiTextArea
+        css={css`
+          padding-right: 64px !important;
+          min-height: 64px;
+          max-height: 350px;
+        `}
         className="eui-scrollBar"
         inputRef={ref}
         id={'prompt-textarea'}
         data-test-subj={'prompt-textarea'}
         fullWidth
         autoFocus
+        resize="none"
         disabled={isDisabled}
         placeholder={i18n.PROMPT_PLACEHOLDER}
         value={value}
         onChange={onChangeCallback}
         onKeyDown={onKeyDown}
+        rows={1}
       />
     );
   }

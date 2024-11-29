@@ -31,12 +31,12 @@ import {
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import { monitorAttributes } from '../../../common/types/saved_objects';
 import { AlertConfigKey } from '../../../common/constants/monitor_management';
-import { UptimeEsClient } from '../../lib';
+import { SyntheticsEsClient } from '../../lib';
 
 export class TLSRuleExecutor {
   previousStartedAt: Date | null;
   params: TLSParams;
-  esClient: UptimeEsClient;
+  esClient: SyntheticsEsClient;
   soClient: SavedObjectsClientContract;
   server: SyntheticsServerSetup;
   syntheticsMonitorClient: SyntheticsMonitorClient;
@@ -53,7 +53,7 @@ export class TLSRuleExecutor {
     this.previousStartedAt = previousStartedAt;
     this.params = p;
     this.soClient = soClient;
-    this.esClient = new UptimeEsClient(this.soClient, scopedClient, {
+    this.esClient = new SyntheticsEsClient(this.soClient, scopedClient, {
       heartbeatIndices: SYNTHETICS_INDEX_PATTERN,
     });
     this.server = server;
@@ -71,16 +71,16 @@ export class TLSRuleExecutor {
       allIds,
       enabledMonitorQueryIds,
       monitorLocationIds,
-      monitorLocationMap,
+      monitorLocationsMap,
       projectMonitorsCount,
       monitorQueryIdToConfigIdMap,
-    } = processMonitors(this.monitors, this.server, this.soClient, this.syntheticsMonitorClient);
+    } = processMonitors(this.monitors);
 
     return {
       enabledMonitorQueryIds,
       monitorLocationIds,
       allIds,
-      monitorLocationMap,
+      monitorLocationsMap,
       projectMonitorsCount,
       monitorQueryIdToConfigIdMap,
     };
@@ -89,7 +89,7 @@ export class TLSRuleExecutor {
   async getExpiredCertificates() {
     const { enabledMonitorQueryIds } = await this.getMonitors();
 
-    const dynamicSettings = await savedObjectsAdapter.getUptimeDynamicSettings(this.soClient);
+    const dynamicSettings = await savedObjectsAdapter.getSyntheticsDynamicSettings(this.soClient);
 
     const expiryThreshold =
       this.params.certExpirationThreshold ??
@@ -124,7 +124,7 @@ export class TLSRuleExecutor {
     }
 
     const { certs, total }: CertResult = await getSyntheticsCerts({
-      uptimeEsClient: this.esClient,
+      syntheticsEsClient: this.esClient,
       pageIndex: 0,
       size: 1000,
       notValidAfter: `now+${expiryThreshold}d`,

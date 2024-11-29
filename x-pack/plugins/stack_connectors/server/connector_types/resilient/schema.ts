@@ -43,39 +43,66 @@ export const ExecutorSubActionPushParamsSchema = schema.object({
   ),
 });
 
-export const ExecutorSubActionGetIncidentParamsSchema = schema.object({
-  externalId: schema.string(),
-});
+export const PushToServiceIncidentSchema = {
+  name: schema.string(),
+  description: schema.nullable(schema.string()),
+  incidentTypes: schema.nullable(schema.arrayOf(schema.number())),
+  severityCode: schema.nullable(schema.number()),
+};
 
 // Reserved for future implementation
 export const ExecutorSubActionCommonFieldsParamsSchema = schema.object({});
-export const ExecutorSubActionHandshakeParamsSchema = schema.object({});
 export const ExecutorSubActionGetIncidentTypesParamsSchema = schema.object({});
 export const ExecutorSubActionGetSeverityParamsSchema = schema.object({});
 
-export const ExecutorParamsSchema = schema.oneOf([
-  schema.object({
-    subAction: schema.literal('getFields'),
-    subActionParams: ExecutorSubActionCommonFieldsParamsSchema,
-  }),
-  schema.object({
-    subAction: schema.literal('getIncident'),
-    subActionParams: ExecutorSubActionGetIncidentParamsSchema,
-  }),
-  schema.object({
-    subAction: schema.literal('handshake'),
-    subActionParams: ExecutorSubActionHandshakeParamsSchema,
-  }),
-  schema.object({
-    subAction: schema.literal('pushToService'),
-    subActionParams: ExecutorSubActionPushParamsSchema,
-  }),
-  schema.object({
-    subAction: schema.literal('incidentTypes'),
-    subActionParams: ExecutorSubActionGetIncidentTypesParamsSchema,
-  }),
-  schema.object({
-    subAction: schema.literal('severity'),
-    subActionParams: ExecutorSubActionGetSeverityParamsSchema,
-  }),
-]);
+const ArrayOfValuesSchema = schema.arrayOf(
+  schema.object(
+    {
+      value: schema.number(),
+      label: schema.string(),
+    },
+    { unknowns: 'allow' }
+  )
+);
+
+export const GetIncidentTypesResponseSchema = schema.object(
+  {
+    values: ArrayOfValuesSchema,
+  },
+  { unknowns: 'allow' }
+);
+
+export const GetSeverityResponseSchema = schema.object(
+  {
+    values: ArrayOfValuesSchema,
+  },
+  { unknowns: 'allow' }
+);
+
+export const ExternalServiceFieldsSchema = schema.object(
+  {
+    input_type: schema.string(),
+    name: schema.string(),
+    read_only: schema.boolean(),
+    required: schema.nullable(schema.string()),
+    text: schema.string(),
+  },
+  { unknowns: 'allow' }
+);
+
+export const GetCommonFieldsResponseSchema = schema.arrayOf(ExternalServiceFieldsSchema);
+
+export const ExternalServiceIncidentResponseSchema = schema.object({
+  id: schema.string(),
+  title: schema.string(),
+  url: schema.string(),
+  pushedDate: schema.string(),
+});
+
+export const GetIncidentResponseSchema = schema.object(
+  {
+    id: schema.number(),
+    inc_last_modified_date: schema.number(),
+  },
+  { unknowns: 'allow' }
+);

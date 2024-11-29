@@ -5,23 +5,25 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
 import {
+  ElasticsearchClientMock,
   elasticsearchServiceMock,
   httpServiceMock,
   loggingSystemMock,
+  ScopedClusterClientMock,
 } from '@kbn/core/server/mocks';
 import { MockedLogger } from '@kbn/logging-mocks';
 import { UpdateSLOParams } from '@kbn/slo-schema';
 import { cloneDeep, omit, pick } from 'lodash';
 
+import { SecurityHasPrivilegesResponse } from '@elastic/elasticsearch/lib/api/types';
 import {
   getSLOSummaryTransformId,
   getSLOTransformId,
   SLO_DESTINATION_INDEX_PATTERN,
   SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
 } from '../../common/constants';
-import { SLO } from '../domain/models';
+import { SLODefinition } from '../domain/models';
 import { fiveMinute, oneMinute } from './fixtures/duration';
 import {
   createAPMTransactionErrorRateIndicator,
@@ -41,23 +43,26 @@ import { UpdateSLO } from './update_slo';
 describe('UpdateSLO', () => {
   let mockRepository: jest.Mocked<SLORepository>;
   let mockTransformManager: jest.Mocked<TransformManager>;
-  let mockEsClient: jest.Mocked<ElasticsearchClient>;
-  let loggerMock: jest.Mocked<MockedLogger>;
+  let mockEsClient: ElasticsearchClientMock;
+  let mockScopedClusterClient: ScopedClusterClientMock;
+  let mockLogger: jest.Mocked<MockedLogger>;
   let mockSummaryTransformManager: jest.Mocked<TransformManager>;
   let updateSLO: UpdateSLO;
 
   beforeEach(() => {
     mockRepository = createSLORepositoryMock();
     mockTransformManager = createTransformManagerMock();
-    loggerMock = loggingSystemMock.createLogger();
+    mockLogger = loggingSystemMock.createLogger();
     mockSummaryTransformManager = createSummaryTransformManagerMock();
     mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
+    mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
     updateSLO = new UpdateSLO(
       mockRepository,
       mockTransformManager,
       mockSummaryTransformManager,
       mockEsClient,
-      loggerMock,
+      mockScopedClusterClient,
+      mockLogger,
       'some-space',
       httpServiceMock.createStartContract().basePath
     );
@@ -65,6 +70,8 @@ describe('UpdateSLO', () => {
 
   describe('when the update payload does not change the original SLO', () => {
     function expectNoCallsToAnyMocks() {
+      expect(mockEsClient.security.hasPrivileges).not.toBeCalled();
+
       expect(mockTransformManager.stop).not.toBeCalled();
       expect(mockTransformManager.uninstall).not.toBeCalled();
       expect(mockTransformManager.install).not.toBeCalled();
@@ -76,7 +83,7 @@ describe('UpdateSLO', () => {
       expect(mockSummaryTransformManager.start).not.toBeCalled();
 
       expect(mockEsClient.deleteByQuery).not.toBeCalled();
-      expect(mockEsClient.ingest.putPipeline).not.toBeCalled();
+      expect(mockScopedClusterClient.asSecondaryAuthUser.ingest.putPipeline).not.toBeCalled();
     }
 
     it('returns early with a fully identical SLO payload', async () => {
@@ -188,15 +195,25 @@ describe('UpdateSLO', () => {
   });
 
   describe('handles breaking changes', () => {
+    beforeEach(() => {
+      mockEsClient.security.hasPrivileges.mockResolvedValue({
+        has_all_requested: true,
+      } as SecurityHasPrivilegesResponse);
+    });
+
     it('consideres a settings change as a breaking change', async () => {
       const slo = createSLO();
       mockRepository.findById.mockResolvedValueOnce(slo);
 
-      const newSettings = { ...slo.settings, timestamp_field: 'newField' };
+      const newSettings = {
+        ...slo.settings,
+        frequency: fiveMinute(),
+        preventInitialBackfill: true,
+      };
       await updateSLO.execute(slo.id, { settings: newSettings });
 
       expectDeletionOfOriginalSLOResources(slo);
-      expect(mockRepository.save).toHaveBeenCalledWith(
+      expect(mockRepository.update).toHaveBeenCalledWith(
         expect.objectContaining({
           ...slo,
           settings: newSettings,
@@ -294,28 +311,80 @@ describe('UpdateSLO', () => {
   });
 
   describe('when error happens during the update', () => {
-    it('restores the previous SLO definition in the repository', async () => {
-      const slo = createSLO({
+    beforeEach(() => {
+      mockEsClient.security.hasPrivileges.mockResolvedValue({
+        has_all_requested: true,
+      } as SecurityHasPrivilegesResponse);
+    });
+
+    it('throws a SecurityException error when the user does not have the required privileges on the source index', async () => {
+      mockEsClient.security.hasPrivileges.mockResolvedValue({
+        has_all_requested: false,
+      } as SecurityHasPrivilegesResponse);
+
+      const originalSlo = createSLO({
+        id: 'original-id',
+        indicator: createAPMTransactionErrorRateIndicator(),
+      });
+      mockRepository.findById.mockResolvedValueOnce(originalSlo);
+
+      const newIndicator = createAPMTransactionErrorRateIndicator({ index: 'new-index-*' });
+
+      await expect(
+        updateSLO.execute(originalSlo.id, { indicator: newIndicator })
+      ).rejects.toThrowError(
+        "Missing ['read', 'view_index_metadata'] privileges on the source index [new-index-*]"
+      );
+    });
+
+    it('restores the previous SLO definition when updated summary transform install fails', async () => {
+      const originalSlo = createSLO({
         id: 'original-id',
         indicator: createAPMTransactionErrorRateIndicator({ environment: 'development' }),
       });
-      mockRepository.findById.mockResolvedValueOnce(slo);
+      mockRepository.findById.mockResolvedValueOnce(originalSlo);
       mockTransformManager.install.mockRejectedValueOnce(new Error('Transform install error'));
 
       const newIndicator = createAPMTransactionErrorRateIndicator({ environment: 'production' });
 
-      await expect(updateSLO.execute(slo.id, { indicator: newIndicator })).rejects.toThrowError(
-        'Transform install error'
+      await expect(
+        updateSLO.execute(originalSlo.id, { indicator: newIndicator })
+      ).rejects.toThrowError('Transform install error');
+
+      expect(mockRepository.update).toHaveBeenCalledWith(originalSlo);
+      expect(
+        mockScopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline
+      ).toHaveBeenCalledTimes(1); // for the sli only
+
+      expect(mockSummaryTransformManager.stop).not.toHaveBeenCalled();
+      expect(mockSummaryTransformManager.uninstall).not.toHaveBeenCalled();
+      expect(mockTransformManager.stop).not.toHaveBeenCalled();
+      expect(mockTransformManager.uninstall).not.toHaveBeenCalled();
+    });
+
+    it('restores the previous SLO definition and rollback succeeded operations until the summary transform start operation fails', async () => {
+      const originalSlo = createSLO({
+        id: 'original-id',
+        indicator: createAPMTransactionErrorRateIndicator({ environment: 'development' }),
+      });
+      mockRepository.findById.mockResolvedValueOnce(originalSlo);
+      mockSummaryTransformManager.start.mockRejectedValueOnce(
+        new Error('summary transform start error')
       );
 
-      expect(mockRepository.save).toHaveBeenCalledWith(slo);
+      const newIndicator = createAPMTransactionErrorRateIndicator({ environment: 'production' });
 
-      // these calls are related to the updated slo
-      expect(mockSummaryTransformManager.stop).toMatchSnapshot();
-      expect(mockSummaryTransformManager.uninstall).toMatchSnapshot();
-      expect(mockTransformManager.stop).toMatchSnapshot();
-      expect(mockTransformManager.uninstall).toMatchSnapshot();
-      expect(mockEsClient.ingest.deletePipeline).toMatchSnapshot();
+      await expect(
+        updateSLO.execute(originalSlo.id, { indicator: newIndicator })
+      ).rejects.toThrowError('summary transform start error');
+
+      expect(mockRepository.update).toHaveBeenCalledWith(originalSlo);
+      expect(mockSummaryTransformManager.uninstall).toHaveBeenCalled();
+      expect(mockScopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline).toHaveBeenCalled();
+      expect(mockTransformManager.stop).toHaveBeenCalled();
+      expect(mockTransformManager.uninstall).toHaveBeenCalled();
+
+      expect(mockSummaryTransformManager.stop).not.toHaveBeenCalled();
     });
   });
 
@@ -323,7 +392,7 @@ describe('UpdateSLO', () => {
     expect(mockTransformManager.install).toHaveBeenCalled();
     expect(mockTransformManager.start).toHaveBeenCalled();
 
-    expect(mockEsClient.ingest.putPipeline).toHaveBeenCalled();
+    expect(mockScopedClusterClient.asSecondaryAuthUser.ingest.putPipeline).toHaveBeenCalled();
 
     expect(mockSummaryTransformManager.install).toHaveBeenCalled();
     expect(mockSummaryTransformManager.start).toHaveBeenCalled();
@@ -331,7 +400,7 @@ describe('UpdateSLO', () => {
     expect(mockEsClient.index).toHaveBeenCalled();
   }
 
-  function expectDeletionOfOriginalSLOResources(originalSlo: SLO) {
+  function expectDeletionOfOriginalSLOResources(originalSlo: SLODefinition) {
     const transformId = getSLOTransformId(originalSlo.id, originalSlo.revision);
     expect(mockTransformManager.stop).toHaveBeenCalledWith(transformId);
     expect(mockTransformManager.uninstall).toHaveBeenCalledWith(transformId);
@@ -340,7 +409,7 @@ describe('UpdateSLO', () => {
     expect(mockSummaryTransformManager.stop).toHaveBeenCalledWith(summaryTransformId);
     expect(mockSummaryTransformManager.uninstall).toHaveBeenCalledWith(summaryTransformId);
 
-    expect(mockEsClient.ingest.deletePipeline).toHaveBeenCalled();
+    expect(mockScopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline).toHaveBeenCalled();
 
     expect(mockEsClient.deleteByQuery).toHaveBeenCalledTimes(2);
     expect(mockEsClient.deleteByQuery).toHaveBeenNthCalledWith(

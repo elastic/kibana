@@ -19,28 +19,20 @@ describe('[Logs onboarding] Custom logs - configure step', () => {
       });
 
       it('navigates to observability logs onboarding page', () => {
-        cy.getByTestSubj('observabilityOnboardingBackButtonBackButton').click();
+        cy.getByTestSubj('observabilityOnboardingFlowBackToSelectionButton').click();
 
         cy.url().should('include', '/app/observabilityOnboarding');
       });
     });
 
     it('Users shouldnt be able to continue if logFilePaths is empty', () => {
-      cy.getByTestSubj('obltOnboardingLogFilePath-0')
-        .find('input')
-        .should('not.have.text');
-      cy.getByTestSubj('obltOnboardingCustomLogsContinue').should(
-        'be.disabled'
-      );
+      cy.getByTestSubj('obltOnboardingLogFilePath-0').find('input').should('not.have.text');
+      cy.getByTestSubj('obltOnboardingCustomLogsContinue').should('be.disabled');
     });
 
     it('Users should be able to continue if logFilePaths is not empty', () => {
-      cy.getByTestSubj('obltOnboardingLogFilePath-0')
-        .find('input')
-        .type('myLogs.log');
-      cy.getByTestSubj('obltOnboardingCustomLogsContinue').should(
-        'not.be.disabled'
-      );
+      cy.getByTestSubj('obltOnboardingLogFilePath-0').find('input').type('myLogs.log');
+      cy.getByTestSubj('obltOnboardingCustomLogsContinue').should('not.be.disabled');
     });
 
     it('Users can add multiple logFilePaths', () => {
@@ -51,44 +43,24 @@ describe('[Logs onboarding] Custom logs - configure step', () => {
 
     it('Users can delete logFilePaths', () => {
       cy.getByTestSubj('obltOnboardingCustomLogsAddFilePath').click();
-      cy.get('*[data-test-subj^="obltOnboardingLogFilePath-"]').should(
-        'have.length',
-        2
-      );
+      cy.get('*[data-test-subj^="obltOnboardingLogFilePath-"]').should('have.length', 2);
 
       cy.getByTestSubj('obltOnboardingLogFilePathDelete-1').click();
-      cy.get('*[data-test-subj^="obltOnboardingLogFilePath-"]').should(
-        'have.length',
-        1
-      );
+      cy.get('*[data-test-subj^="obltOnboardingLogFilePath-"]').should('have.length', 1);
     });
 
     describe('when users fill logFilePaths', () => {
       it('datasetname and integration name are auto generated if it is the first path', () => {
-        cy.getByTestSubj('obltOnboardingLogFilePath-0')
-          .find('input')
-          .type('myLogs.log');
-        cy.getByTestSubj('obltOnboardingCustomLogsIntegrationsName').should(
-          'have.value',
-          'mylogs'
-        );
-        cy.getByTestSubj('obltOnboardingCustomLogsDatasetName').should(
-          'have.value',
-          'mylogs'
-        );
+        cy.getByTestSubj('obltOnboardingLogFilePath-0').find('input').type('myLogs.log');
+        cy.getByTestSubj('obltOnboardingCustomLogsIntegrationsName').should('have.value', 'mylogs');
+        cy.getByTestSubj('obltOnboardingCustomLogsDatasetName').should('have.value', 'mylogs');
       });
 
       it('datasetname and integration name are not generated if it is not the first path', () => {
         cy.getByTestSubj('obltOnboardingCustomLogsAddFilePath').click();
-        cy.getByTestSubj('obltOnboardingLogFilePath-1')
-          .find('input')
-          .type('myLogs.log');
-        cy.getByTestSubj('obltOnboardingCustomLogsIntegrationsName').should(
-          'be.empty'
-        );
-        cy.getByTestSubj('obltOnboardingCustomLogsDatasetName').should(
-          'be.empty'
-        );
+        cy.getByTestSubj('obltOnboardingLogFilePath-1').find('input').type('myLogs.log');
+        cy.getByTestSubj('obltOnboardingCustomLogsIntegrationsName').should('be.empty');
+        cy.getByTestSubj('obltOnboardingCustomLogsDatasetName').should('be.empty');
       });
     });
   });
@@ -98,15 +70,11 @@ describe('[Logs onboarding] Custom logs - configure step', () => {
       cy.loginAsViewerUser();
       cy.visitKibana('/app/observabilityOnboarding/customLogs');
 
-      cy.getByTestSubj('obltOnboardingLogFilePath-0')
-        .find('input')
-        .type('myLogs.log');
+      cy.getByTestSubj('obltOnboardingLogFilePath-0').find('input').type('myLogs.log');
     });
 
     it('should be optional allowing user to continue if it is empty', () => {
-      cy.getByTestSubj('obltOnboardingCustomLogsServiceName').should(
-        'not.have.text'
-      );
+      cy.getByTestSubj('obltOnboardingCustomLogsServiceName').should('not.have.text');
       cy.getByTestSubj('obltOnboardingCustomLogsContinue').should('be.enabled');
     });
   });
@@ -116,31 +84,21 @@ describe('[Logs onboarding] Custom logs - configure step', () => {
       cy.loginAsViewerUser();
       cy.visitKibana('/app/observabilityOnboarding/customLogs');
 
-      cy.getByTestSubj('obltOnboardingLogFilePath-0')
-        .find('input')
-        .type('myLogs.log');
+      cy.getByTestSubj('obltOnboardingLogFilePath-0').find('input').type('myLogs.log');
     });
 
     it('Users should expand the content when clicking it', () => {
       cy.getByTestSubj('obltOnboardingCustomLogsAdvancedSettings').click();
 
-      cy.getByTestSubj('obltOnboardingCustomLogsNamespace').should(
-        'be.visible'
-      );
-      cy.getByTestSubj('obltOnboardingCustomLogsCustomConfig').should(
-        'be.visible'
-      );
+      cy.getByTestSubj('obltOnboardingCustomLogsNamespace').should('be.visible');
+      cy.getByTestSubj('obltOnboardingCustomLogsCustomConfig').should('be.visible');
     });
 
     it('Users should hide the content when clicking it', () => {
       cy.getByTestSubj('obltOnboardingCustomLogsAdvancedSettings').click();
 
-      cy.getByTestSubj('obltOnboardingCustomLogsNamespace').should(
-        'not.be.visible'
-      );
-      cy.getByTestSubj('obltOnboardingCustomLogsCustomConfig').should(
-        'not.be.visible'
-      );
+      cy.getByTestSubj('obltOnboardingCustomLogsNamespace').should('not.be.visible');
+      cy.getByTestSubj('obltOnboardingCustomLogsCustomConfig').should('not.be.visible');
     });
 
     describe('Namespace', () => {
@@ -153,18 +111,13 @@ describe('[Logs onboarding] Custom logs - configure step', () => {
       });
 
       it('Users should see a default namespace', () => {
-        cy.getByTestSubj('obltOnboardingCustomLogsNamespace').should(
-          'have.value',
-          'default'
-        );
+        cy.getByTestSubj('obltOnboardingCustomLogsNamespace').should('have.value', 'default');
       });
 
       it('Users should not be able to continue if they do not specify a namespace', () => {
         cy.getByTestSubj('obltOnboardingCustomLogsNamespace').clear();
 
-        cy.getByTestSubj('obltOnboardingCustomLogsContinue').should(
-          'be.disabled'
-        );
+        cy.getByTestSubj('obltOnboardingCustomLogsContinue').should('be.disabled');
       });
     });
 
@@ -178,12 +131,8 @@ describe('[Logs onboarding] Custom logs - configure step', () => {
       });
 
       it('should be optional allowing user to continue if it is empty', () => {
-        cy.getByTestSubj('obltOnboardingCustomLogsCustomConfig').should(
-          'not.have.text'
-        );
-        cy.getByTestSubj('obltOnboardingCustomLogsContinue').should(
-          'be.enabled'
-        );
+        cy.getByTestSubj('obltOnboardingCustomLogsCustomConfig').should('not.have.text');
+        cy.getByTestSubj('obltOnboardingCustomLogsContinue').should('be.enabled');
       });
     });
   });
@@ -193,23 +142,17 @@ describe('[Logs onboarding] Custom logs - configure step', () => {
       cy.loginAsViewerUser();
       cy.visitKibana('/app/observabilityOnboarding/customLogs');
 
-      cy.getByTestSubj('obltOnboardingLogFilePath-0')
-        .find('input')
-        .type('myLogs.log');
+      cy.getByTestSubj('obltOnboardingLogFilePath-0').find('input').type('myLogs.log');
     });
 
     it('Users should not be able to continue if they do not specify an integrationName', () => {
       cy.getByTestSubj('obltOnboardingCustomLogsIntegrationsName').clear();
 
-      cy.getByTestSubj('obltOnboardingCustomLogsContinue').should(
-        'be.disabled'
-      );
+      cy.getByTestSubj('obltOnboardingCustomLogsContinue').should('be.disabled');
     });
 
     it('value will contain _ instead of special chars', () => {
-      cy.getByTestSubj('obltOnboardingCustomLogsIntegrationsName')
-        .clear()
-        .type('hello$world');
+      cy.getByTestSubj('obltOnboardingCustomLogsIntegrationsName').clear().type('hello$world');
 
       cy.getByTestSubj('obltOnboardingCustomLogsIntegrationsName').should(
         'have.value',
@@ -218,9 +161,7 @@ describe('[Logs onboarding] Custom logs - configure step', () => {
     });
 
     it('value will be invalid if it is not lowercase', () => {
-      cy.getByTestSubj('obltOnboardingCustomLogsIntegrationsName')
-        .clear()
-        .type('H3llowOrld');
+      cy.getByTestSubj('obltOnboardingCustomLogsIntegrationsName').clear().type('H3llowOrld');
 
       cy.contains('An integration name should be lowercase.');
     });
@@ -231,34 +172,23 @@ describe('[Logs onboarding] Custom logs - configure step', () => {
       cy.loginAsViewerUser();
       cy.visitKibana('/app/observabilityOnboarding/customLogs');
 
-      cy.getByTestSubj('obltOnboardingLogFilePath-0')
-        .find('input')
-        .type('myLogs.log');
+      cy.getByTestSubj('obltOnboardingLogFilePath-0').find('input').type('myLogs.log');
     });
 
     it('Users should not be able to continue if they do not specify a datasetName', () => {
       cy.getByTestSubj('obltOnboardingCustomLogsDatasetName').clear();
 
-      cy.getByTestSubj('obltOnboardingCustomLogsContinue').should(
-        'be.disabled'
-      );
+      cy.getByTestSubj('obltOnboardingCustomLogsContinue').should('be.disabled');
     });
 
     it('value will contain _ instead of special chars', () => {
-      cy.getByTestSubj('obltOnboardingCustomLogsDatasetName')
-        .clear()
-        .type('hello$world');
+      cy.getByTestSubj('obltOnboardingCustomLogsDatasetName').clear().type('hello$world');
 
-      cy.getByTestSubj('obltOnboardingCustomLogsDatasetName').should(
-        'have.value',
-        'hello_world'
-      );
+      cy.getByTestSubj('obltOnboardingCustomLogsDatasetName').should('have.value', 'hello_world');
     });
 
     it('value will be invalid if it is not lowercase', () => {
-      cy.getByTestSubj('obltOnboardingCustomLogsDatasetName')
-        .clear()
-        .type('H3llowOrld');
+      cy.getByTestSubj('obltOnboardingCustomLogsDatasetName').clear().type('H3llowOrld');
 
       cy.contains('A dataset name should be lowercase.');
     });
@@ -284,9 +214,7 @@ describe('[Logs onboarding] Custom logs - configure step', () => {
       });
 
       it('installation fails', () => {
-        cy.getByTestSubj('obltOnboardingCustomIntegrationErrorCallout').should(
-          'exist'
-        );
+        cy.getByTestSubj('obltOnboardingCustomIntegrationErrorCallout').should('exist');
       });
     });
 
@@ -307,10 +235,7 @@ describe('[Logs onboarding] Custom logs - configure step', () => {
       });
 
       it('installation succeed and user is redirected install elastic agent step', () => {
-        cy.url().should(
-          'include',
-          '/app/observabilityOnboarding/customLogs/installElasticAgent'
-        );
+        cy.url().should('include', '/app/observabilityOnboarding/customLogs/installElasticAgent');
       });
     });
 
@@ -348,9 +273,7 @@ describe('[Logs onboarding] Custom logs - configure step', () => {
       });
 
       it('user should see the error displayed', () => {
-        cy.getByTestSubj('obltOnboardingCustomIntegrationErrorCallout').should(
-          'exist'
-        );
+        cy.getByTestSubj('obltOnboardingCustomIntegrationErrorCallout').should('exist');
       });
     });
   });

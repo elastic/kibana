@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import React, { useEffect, useMemo, useState } from 'react';
+
+import React, { useEffect, useMemo, useState, FC, PropsWithChildren } from 'react';
 import {
   EuiCallOut,
   EuiFlexGroup,
@@ -31,13 +33,17 @@ interface SchedulePanelProps {
   description: string;
   title: string;
 }
-export const SchedulePanel: React.FC<SchedulePanelProps> = ({ title, description, children }) => {
+export const SchedulePanel: FC<PropsWithChildren<SchedulePanelProps>> = ({
+  title,
+  description,
+  children,
+}) => {
   return (
     <>
       <EuiSplitPanel.Outer>
         <EuiSplitPanel.Inner color="subdued">
-          <EuiTitle>
-            <h2>{title}</h2>
+          <EuiTitle size="s">
+            <h4>{title}</h4>
           </EuiTitle>
         </EuiSplitPanel.Inner>
         <EuiSplitPanel.Inner>
@@ -60,6 +66,7 @@ interface ConnectorContentSchedulingProps {
   hasPlatinumLicense: boolean;
   hasChanges: boolean;
   hasIngestionError: boolean;
+  isDisabled?: boolean;
   setHasChanges: (changes: boolean) => void;
   shouldShowAccessControlSync: boolean;
   shouldShowIncrementalSync: boolean;
@@ -75,6 +82,7 @@ export const ConnectorSchedulingComponent: React.FC<ConnectorContentSchedulingPr
   hasChanges,
   hasIngestionError,
   hasPlatinumLicense,
+  isDisabled,
   setHasChanges,
   shouldShowAccessControlSync,
   shouldShowIncrementalSync,
@@ -109,7 +117,6 @@ export const ConnectorSchedulingComponent: React.FC<ConnectorContentSchedulingPr
   }
   return (
     <>
-      <EuiSpacer size="l" />
       {hasIngestionError ? <ConnectorError /> : <></>}
       {children}
       <EuiFlexGroup>
@@ -135,6 +142,7 @@ export const ConnectorSchedulingComponent: React.FC<ConnectorContentSchedulingPr
                   updateConnectorStatus={updateConnectorStatus}
                   updateScheduling={updateScheduling}
                   dataTelemetryIdPrefix={dataTelemetryIdPrefix}
+                  isDisabled={isDisabled}
                 />
               </EuiFlexItem>
               {shouldShowIncrementalSync && (
@@ -148,6 +156,7 @@ export const ConnectorSchedulingComponent: React.FC<ConnectorContentSchedulingPr
                     updateConnectorStatus={updateConnectorStatus}
                     updateScheduling={updateScheduling}
                     dataTelemetryIdPrefix={dataTelemetryIdPrefix}
+                    isDisabled={isDisabled}
                   />
                 </EuiFlexItem>
               )}
@@ -181,6 +190,7 @@ export const ConnectorSchedulingComponent: React.FC<ConnectorContentSchedulingPr
                     updateConnectorStatus={updateConnectorStatus}
                     updateScheduling={updateScheduling}
                     dataTelemetryIdPrefix={dataTelemetryIdPrefix}
+                    isDisabled={isDisabled}
                   />
                 </SchedulePanel>
               </EuiFlexItem>

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import cytoscape from 'cytoscape';
 import dagre from 'cytoscape-dagre';
 import { EuiTheme } from '@kbn/kibana-react-plugin/common';
@@ -45,9 +45,7 @@ describe('useCytoscapeEventHandlers', () => {
             } as unknown as cytoscape.CollectionReturnValue),
         } as unknown as cytoscape.CollectionReturnValue);
 
-        renderHook(() =>
-          useCytoscapeEventHandlers({ serviceName: 'test', cy, theme })
-        );
+        renderHook(() => useCytoscapeEventHandlers({ serviceName: 'test', cy, theme }));
         cy.trigger('custom:data');
 
         expect(cy.getElementById('test').hasClass('primary')).toEqual(true);
@@ -334,9 +332,7 @@ describe('useCytoscapeEventHandlers', () => {
       const cy = cytoscape({ elements: [{ data: { id: 'test' } }] });
       (useUiTracker as jest.Mock).mockReturnValueOnce(() => {});
       jest.spyOn(Storage.prototype, 'getItem').mockReturnValueOnce('true');
-      const debug = jest
-        .spyOn(window.console, 'debug')
-        .mockReturnValueOnce(undefined);
+      const debug = jest.spyOn(window.console, 'debug').mockReturnValueOnce(undefined);
 
       renderHook(() => useCytoscapeEventHandlers({ cy, theme }));
       cy.getElementById('test').trigger('select');

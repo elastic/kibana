@@ -123,38 +123,39 @@ export async function getAggregatedCriticalPath({
                 double duration;
                 
                 def operationMetadata = [
-                  "service.name": doc['service.name'].value,
-                  "processor.event": doc['processor.event'].value,
-                  "agent.name": doc['agent.name'].value
+                  "service.name": $('service.name', ''),
+                  "processor.event": $('processor.event', ''),
+                  "agent.name": $('agent.name', '')
                 ];
 
-                def isSpan = !doc['span.id'].empty && !doc['span.name'].empty;
-                
-                if (isSpan) {
-                  id = doc['span.id'].value;
-                  operationMetadata.put('span.name', doc['span.name'].value);
-                  if (!doc['span.type'].empty) {
-                    operationMetadata.put('span.type', doc['span.type'].value);
+                def spanName = $('span.name', null);
+                id = $('span.id', null);
+                if (id != null && spanName != null) {
+                  operationMetadata.put('span.name', spanName);
+                  def spanType = $('span.type', '');
+                  if (spanType != '') {
+                    operationMetadata.put('span.type', spanType);
                   }
-                  if (!doc['span.subtype'].empty) {
-                    operationMetadata.put('span.subtype', doc['span.subtype'].value);
+                  def spanSubtype = $('span.subtype', '');
+                  if (spanSubtype != '') {
+                    operationMetadata.put('span.subtype', spanSubtype);
                   }
-                  duration = doc['span.duration.us'].value;
+                  duration = $('span.duration.us', 0);
                 } else {
-                  id = doc['transaction.id'].value;
-                  operationMetadata.put('transaction.name', doc['transaction.name'].value);
-                  operationMetadata.put('transaction.type', doc['transaction.type'].value);
-                  duration = doc['transaction.duration.us'].value;
+                  id = $('transaction.id', '');
+                  operationMetadata.put('transaction.name', $('transaction.name', ''));
+                  operationMetadata.put('transaction.type', $('transaction.type', ''));
+                  duration = $('transaction.duration.us', 0);
                 }
                  
                 String operationId = toHash(operationMetadata);
                 
                 def map = [
-                  "traceId": doc['trace.id'].value,
+                  "traceId": $('trace.id', ''),
                   "id": id,
-                  "parentId": doc['parent.id'].empty ? null : doc['parent.id'].value,
+                  "parentId": $('parent.id', null),
                   "operationId": operationId,
-                  "timestamp": doc['timestamp.us'].value,
+                  "timestamp": $('timestamp.us', 0),
                   "duration": duration
                 ];
                 
@@ -407,9 +408,7 @@ export async function getAggregatedCriticalPath({
     },
   });
 
-  logger.debug(
-    `Retrieved critical path in ${Date.now() - now}ms, took: ${response.took}ms`
-  );
+  logger.debug(`Retrieved critical path in ${Date.now() - now}ms, took: ${response.took}ms`);
 
   if (!response.aggregations) {
     return {
@@ -417,8 +416,7 @@ export async function getAggregatedCriticalPath({
     };
   }
 
-  const criticalPath = response.aggregations?.critical_path
-    .value as CriticalPathResponse;
+  const criticalPath = response.aggregations?.critical_path.value as CriticalPathResponse;
 
   return {
     criticalPath,

@@ -7,39 +7,20 @@
 
 import type { Datatable, DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
-import type { DatatableArgs } from './datatable';
-import type { ColumnConfig, ColumnConfigArg } from './datatable_column';
-
-const TRANSPOSE_SEPARATOR = '---';
-
-const TRANSPOSE_VISUAL_SEPARATOR = '›';
-
-function getTransposeId(value: string, columnId: string) {
-  return `${value}${TRANSPOSE_SEPARATOR}${columnId}`;
-}
-
-export function getOriginalId(id: string) {
-  if (id.includes(TRANSPOSE_SEPARATOR)) {
-    const idParts = id.split(TRANSPOSE_SEPARATOR);
-    return idParts[idParts.length - 1];
-  }
-  return id;
-}
+import { TRANSPOSE_VISUAL_SEPARATOR, getTransposeId } from '@kbn/transpose-utils';
+import { DatatableArgs } from './datatable';
+import type { DatatableColumnConfig, DatatableColumnArgs } from './datatable_column';
 
 /**
  * Transposes the columns of the given table as defined in the arguments.
  * This function modifies the passed in args and firstTable objects.
  * This process consists out of three parts:
+ *
  * * Calculating the new column arguments
  * * Calculating the new datatable columns
  * * Calculating the new rows
  *
- * If the table is tranposed by multiple columns, this process is repeated on top of the previous transformation.
- *
- * @internal
- * @param args Arguments for the table visualization
- * @param firstTable datatable object containing the actual data
- * @param formatters Formatters for all columns to transpose columns by actual display values
+ * If the table is transposed by multiple columns, this process is repeated on top of the previous transformation.
  */
 export function transposeTable(
   args: DatatableArgs,
@@ -48,8 +29,7 @@ export function transposeTable(
 ) {
   args.columns
     .filter((columnArgs) => columnArgs.isTransposed)
-    // start with the inner nested transposed column and work up to preserve column grouping
-    .reverse()
+    .reverse() // start with the inner nested transposed column and work up to preserve column grouping
     .forEach(({ columnId: transposedColumnId }) => {
       const datatableColumnIndex = firstTable.columns.findIndex((c) => c.id === transposedColumnId);
       const datatableColumn = firstTable.columns[datatableColumnIndex];
@@ -82,16 +62,21 @@ export function transposeTable(
         transposedColumnId,
         metricsColumnArgs
       );
+
+      const colOrderMap = new Map(args.columns.map((c, i) => [c.columnId, i]));
+      firstTable.columns.sort((a, b) => {
+        return (colOrderMap.get(a.id) ?? 0) - (colOrderMap.get(b.id) ?? 0);
+      });
     });
 }
 
 function transposeRows(
   firstTable: Datatable,
-  bucketsColumnArgs: ColumnConfigArg[],
+  bucketsColumnArgs: DatatableColumnArgs[],
   formatters: Record<string, FieldFormat>,
   transposedColumnFormatter: FieldFormat,
   transposedColumnId: string,
-  metricsColumnArgs: ColumnConfigArg[]
+  metricsColumnArgs: DatatableColumnArgs[]
 ) {
   const rowsByBucketColumns: Record<string, DatatableRow[]> = groupRowsByBucketColumns(
     firstTable,
@@ -113,8 +98,8 @@ function transposeRows(
  */
 function updateColumnArgs(
   args: DatatableArgs,
-  bucketsColumnArgs: ColumnConfig['columns'],
-  transposedColumnGroups: Array<ColumnConfig['columns']>
+  bucketsColumnArgs: DatatableColumnConfig['columns'],
+  transposedColumnGroups: Array<DatatableColumnConfig['columns']>
 ) {
   args.columns = [...bucketsColumnArgs];
   // add first column from each group, then add second column for each group, ...
@@ -127,9 +112,6 @@ function updateColumnArgs(
 
 /**
  * Finds all unique values in a column in order of first occurence
- * @param table Table to search through
- * @param formatter formatter for the column
- * @param columnId column
  */
 function getUniqueValues(table: Datatable, formatter: FieldFormat, columnId: string) {
   const values = new Map<string, unknown>();
@@ -145,14 +127,11 @@ function getUniqueValues(table: Datatable, formatter: FieldFormat, columnId: str
 /**
  * Calculate transposed column objects of the datatable object and puts them into the datatable.
  * Returns args for additional columns grouped by metric
- * @param metricColumns
- * @param firstTable
- * @param uniqueValues
  */
 function transposeColumns(
   args: DatatableArgs,
-  bucketsColumnArgs: ColumnConfig['columns'],
-  metricColumns: ColumnConfig['columns'],
+  bucketsColumnArgs: DatatableColumnConfig['columns'],
+  metricColumns: DatatableColumnConfig['columns'],
   firstTable: Datatable,
   uniqueValues: string[],
   uniqueRawValues: unknown[],
@@ -196,10 +175,10 @@ function transposeColumns(
  */
 function mergeRowGroups(
   rowsByBucketColumns: Record<string, DatatableRow[]>,
-  bucketColumns: ColumnConfigArg[],
+  bucketColumns: DatatableColumnArgs[],
   formatter: FieldFormat,
   transposedColumnId: string,
-  metricColumns: ColumnConfigArg[]
+  metricColumns: DatatableColumnArgs[]
 ) {
   return Object.values(rowsByBucketColumns).map((rows) => {
     const mergedRow: DatatableRow = {};
@@ -222,7 +201,7 @@ function mergeRowGroups(
  */
 function groupRowsByBucketColumns(
   firstTable: Datatable,
-  bucketColumns: ColumnConfigArg[],
+  bucketColumns: DatatableColumnArgs[],
   formatters: Record<string, FieldFormat>
 ) {
   const rowsByBucketColumns: Record<string, DatatableRow[]> = {};

@@ -5,9 +5,12 @@
  * 2.0.
  */
 
+import { EuiSelectableOption } from '@elastic/eui';
+import { InferenceToModelIdMap } from '../components/document_fields/fields';
 import { FormHook, OnFormUpdateArg, RuntimeField } from '../shared_imports';
 import {
   Field,
+  NormalizedField,
   NormalizedFields,
   NormalizedRuntimeField,
   NormalizedRuntimeFields,
@@ -29,9 +32,11 @@ export interface MappingsConfiguration {
     enabled?: boolean;
     includes?: string[];
     excludes?: string[];
+    mode?: string;
   };
   _meta?: string;
   _size?: { enabled: boolean };
+  subobjects?: boolean;
 }
 
 export interface MappingsTemplates {
@@ -92,15 +97,27 @@ export interface State {
     format(): MappingsFields;
     isValid: boolean;
   };
+  filter: {
+    filteredFields: NormalizedField[];
+    selectedOptions: EuiSelectableOption[];
+    selectedDataTypes: string[];
+  };
   search: {
     term: string;
     result: SearchResult[];
   };
   templates: TemplatesFormState;
+  inferenceToModelIdMap?: InferenceToModelIdMap;
+  mappingViewFields: NormalizedFields; // state of the incoming index mappings, separate from the editor state above
 }
 
 export type Action =
   | { type: 'editor.replaceMappings'; value: { [key: string]: any } }
+  | { type: 'editor.replaceViewMappings'; value: { fields: NormalizedFields } }
+  | {
+      type: 'inferenceToModelIdMap.update';
+      value: { inferenceToModelIdMap?: InferenceToModelIdMap };
+    }
   | { type: 'configuration.update'; value: Partial<ConfigurationFormState> }
   | { type: 'configuration.save'; value: MappingsConfiguration }
   | { type: 'templates.update'; value: Partial<State['templates']> }
@@ -122,6 +139,7 @@ export type Action =
   | { type: 'runtimeField.edit'; value: NormalizedRuntimeField }
   | { type: 'fieldsJsonEditor.update'; value: { json: { [key: string]: any }; isValid: boolean } }
   | { type: 'search:update'; value: string }
-  | { type: 'validity:update'; value: boolean };
+  | { type: 'validity:update'; value: boolean }
+  | { type: 'filter:update'; value: { selectedOptions: EuiSelectableOption[] } };
 
 export type Dispatch = (action: Action) => void;

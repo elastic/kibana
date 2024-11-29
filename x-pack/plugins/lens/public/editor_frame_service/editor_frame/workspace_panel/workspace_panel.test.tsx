@@ -668,6 +668,7 @@ describe('workspace_panel', () => {
     it('should show configuration error messages if present', async () => {
       const messages: UserMessage[] = [
         {
+          uniqueId: 'unique_id_1',
           severity: 'error',
           fixableInEditor: true,
           displayLocations: [{ id: 'visualization' }],
@@ -675,6 +676,7 @@ describe('workspace_panel', () => {
           longMessage: "i'm an error",
         },
         {
+          uniqueId: 'unique_id_2',
           severity: 'error',
           fixableInEditor: true,
           displayLocations: [{ id: 'visualization' }],
@@ -699,7 +701,7 @@ describe('workspace_panel', () => {
 
       // EuiFlexItem duplicates internally the attribute, so we need to filter only the most inner one here
       expect(instance.find('[data-test-subj="workspace-error-message"]').last().text()).toEqual(
-        `i'm an error`
+        `hey there i'm an error`
       );
       expect(instance.find(expressionRendererMock)).toHaveLength(0);
       expect(getUserMessages).toHaveBeenCalledWith(['visualization', 'visualizationInEditor'], {
@@ -936,14 +938,12 @@ describe('workspace_panel', () => {
           datasourceState: {},
         }),
       });
-      expect(screen.getByTestId('lnsWorkspace').classList).toContain('domDragDrop-isDropTarget');
+      expect(screen.getByTestId('lnsWorkspace').classList).toContain('domDroppable--active');
     });
 
     it('should refuse to drop if there are no suggestions', () => {
       renderWithDndAndRedux();
-      expect(screen.getByTestId('lnsWorkspace').classList).not.toContain(
-        'domDragDrop-isDropTarget'
-      );
+      expect(screen.getByTestId('lnsWorkspace').classList).not.toContain('domDroppable--active');
     });
   });
 });

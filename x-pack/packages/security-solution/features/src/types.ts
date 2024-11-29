@@ -13,6 +13,7 @@ import type {
 import type { RecursivePartial } from '@kbn/utility-types';
 import type {
   ProductFeatureAssistantKey,
+  ProductFeatureAttackDiscoveryKey,
   ProductFeatureCasesKey,
   ProductFeatureKeyType,
   ProductFeatureSecurityKey,
@@ -49,6 +50,11 @@ export type ProductFeaturesCasesConfig = Map<
 export type ProductFeaturesAssistantConfig = Map<
   ProductFeatureAssistantKey,
   ProductFeatureKibanaConfig<AssistantSubFeatureId>
+>;
+
+export type ProductFeaturesAttackDiscoveryConfig = Map<
+  ProductFeatureAttackDiscoveryKey,
+  ProductFeatureKibanaConfig
 >;
 
 export type AppSubFeaturesMap<T extends string = string> = Map<T, SubFeatureConfig>;

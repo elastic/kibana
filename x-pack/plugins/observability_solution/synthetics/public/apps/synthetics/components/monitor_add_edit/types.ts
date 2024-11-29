@@ -46,6 +46,7 @@ export interface FormLocation {
 export type FormConfig = MonitorFields & {
   isTLSEnabled: boolean;
   ['schedule.number']: string;
+  ['schedule.unit']: string;
   ['source.inline']: string;
   [AlertConfigKey.STATUS_ENABLED]: boolean;
   [AlertConfigKey.TLS_ENABLED]: boolean;
@@ -164,4 +165,5 @@ export interface FieldMap {
   [ConfigKey.MODE]: FieldMeta<ConfigKey.MODE>;
   [ConfigKey.IPV4]: FieldMeta<ConfigKey.IPV4>;
   [ConfigKey.MAX_ATTEMPTS]: FieldMeta<ConfigKey.MAX_ATTEMPTS>;
+  [ConfigKey.LABELS]: FieldMeta<ConfigKey.LABELS>;
 }

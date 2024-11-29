@@ -34,9 +34,7 @@ export function getFormattedSelection(selection: [number, number]): string {
   const from = getDurationFormatter(selection[0])(selection[0]);
   const to = getDurationFormatter(selection[1])(selection[1]);
 
-  return `${from.unit === to.unit ? from.value : from.formatted} - ${
-    to.formatted
-  }`;
+  return `${from.unit === to.unit ? from.value : from.formatted} - ${to.formatted}`;
 }
 
 // Enforce min height so it's consistent across all tabs on the same level
@@ -82,9 +80,7 @@ export function DurationDistributionChartWithScrubber({
 
   const trackApmEvent = useUiTracker({ app: 'apm' });
 
-  const onTrackedChartSelection: BrushEndListener = (
-    brushEvent: BrushEvent
-  ) => {
+  const onTrackedChartSelection: BrushEndListener = (brushEvent: BrushEvent) => {
     onChartSelection(brushEvent as XYBrushEvent);
     // metric name is transaction_x for bwc
     trackApmEvent({ metric: 'transaction_distribution_chart_selection' });
@@ -98,20 +94,13 @@ export function DurationDistributionChartWithScrubber({
 
   return (
     <>
-      <EuiFlexGroup
-        style={{ minHeight: MIN_TAB_TITLE_HEIGHT }}
-        alignItems="center"
-        gutterSize="s"
-      >
+      <EuiFlexGroup style={{ minHeight: MIN_TAB_TITLE_HEIGHT }} alignItems="center" gutterSize="s">
         <EuiFlexItem grow={false}>
           <EuiTitle size="xs">
             <h5 data-test-subj="apmDurationDistributionChartWithScrubberTitle">
-              {i18n.translate(
-                'xpack.apm.durationDistributionChartWithScrubber.panelTitle',
-                {
-                  defaultMessage: 'Latency distribution',
-                }
-              )}
+              {i18n.translate('xpack.apm.durationDistributionChartWithScrubber.panelTitle', {
+                defaultMessage: 'Latency distribution',
+              })}
             </h5>
           </EuiTitle>
         </EuiFlexItem>
@@ -121,18 +110,11 @@ export function DurationDistributionChartWithScrubber({
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          <TotalDocCountLabel
-            eventType={eventType}
-            totalDocCount={totalDocCount}
-          />
+          <TotalDocCountLabel eventType={eventType} totalDocCount={totalDocCount} />
         </EuiFlexItem>
 
         <EuiFlexItem>
-          <EuiFlexGroup
-            justifyContent="flexEnd"
-            alignItems="center"
-            gutterSize="xs"
-          >
+          <EuiFlexGroup justifyContent="flexEnd" alignItems="center" gutterSize="xs">
             {selection ? (
               <EuiFlexItem grow={false}>
                 <EuiBadge
@@ -144,25 +126,18 @@ export function DurationDistributionChartWithScrubber({
                   iconOnClickAriaLabel={clearSelectionAriaLabel}
                   data-test-sub="apmDurationDistributionChartWithScrubberTitleClearSelectionBadge"
                 >
-                  {i18n.translate(
-                    'xpack.apm.durationDistributionChartWithScrubber.selectionText',
-                    {
-                      defaultMessage: `Selection: {formattedSelection}`,
-                      values: {
-                        formattedSelection: getFormattedSelection(selection),
-                      },
-                    }
-                  )}
+                  {i18n.translate('xpack.apm.durationDistributionChartWithScrubber.selectionText', {
+                    defaultMessage: `Selection: {formattedSelection}`,
+                    values: {
+                      formattedSelection: getFormattedSelection(selection),
+                    },
+                  })}
                 </EuiBadge>
               </EuiFlexItem>
             ) : (
               <>
                 <EuiFlexItem grow={false}>
-                  <EuiIcon
-                    type="iInCircle"
-                    title={emptySelectionText}
-                    size="s"
-                  />
+                  <EuiIcon type="iInCircle" title={emptySelectionText} size="s" />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiText size="xs">{emptySelectionText}</EuiText>

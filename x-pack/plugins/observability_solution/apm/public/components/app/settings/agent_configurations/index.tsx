@@ -6,14 +6,7 @@
  */
 
 import { EuiToolTip } from '@elastic/eui';
-import {
-  EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiTitle,
-  EuiText,
-} from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import React from 'react';
@@ -30,8 +23,7 @@ export function AgentConfigurations() {
     data = INITIAL_DATA,
     status,
   } = useFetcher(
-    (callApmApi) =>
-      callApmApi('GET /api/apm/settings/agent-configuration 2023-10-31'),
+    (callApmApi) => callApmApi('GET /api/apm/settings/agent-configuration 2023-10-31'),
     [],
     { preservePreviousData: false, showToastOnError: false }
   );
@@ -44,10 +36,9 @@ export function AgentConfigurations() {
         <EuiFlexItem grow={false}>
           <EuiTitle size="s">
             <h2>
-              {i18n.translate(
-                'xpack.apm.agentConfig.configurationsPanelTitle',
-                { defaultMessage: 'Configurations' }
-              )}
+              {i18n.translate('xpack.apm.agentConfig.configurationsPanelTitle', {
+                defaultMessage: 'Configurations',
+              })}
             </h2>
           </EuiTitle>
         </EuiFlexItem>
@@ -78,7 +69,7 @@ function CreateConfigurationButton() {
 
   const { core } = useApmPluginContext();
 
-  const canSave = core.application.capabilities.apm.save;
+  const canSave = core.application.capabilities.apm['settings:save'];
   return (
     <EuiFlexItem>
       <EuiFlexGroup alignItems="center" justifyContent="flexEnd">

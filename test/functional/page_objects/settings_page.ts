@@ -1,14 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
 import { FtrService } from '../ftr_provider_context';
-
 export class SettingsPageObject extends FtrService {
   private readonly log = this.ctx.getService('log');
   private readonly retry = this.ctx.getService('retry');
@@ -131,7 +131,7 @@ export class SettingsPageObject extends FtrService {
   }
 
   async toggleAdvancedSettingCheckbox(propertyName: string, value?: boolean) {
-    let curValue: string | undefined;
+    let curValue: string | null;
     if (value !== undefined) {
       curValue = await this.getAdvancedSettingAriaCheckbox(propertyName);
 
@@ -386,6 +386,11 @@ export class SettingsPageObject extends FtrService {
     const input = await this.testSubjects.find('indexPatternFieldFilter');
     await input.clearValueWithKeyboard();
     await input.type(name);
+    const value = await this.testSubjects.getAttribute('indexPatternFieldFilter', 'value');
+    expect(value).to.eql(
+      name,
+      `Expected new value to be the input: [${name}}], but got: [${value}]`
+    );
   }
 
   async openControlsByName(name: string) {
@@ -621,18 +626,7 @@ export class SettingsPageObject extends FtrService {
 
   async clickAddNewIndexPatternButton() {
     await this.common.scrollKibanaBodyTop();
-
-    // if showing no data view prompt
-    const noDataView = await this.testSubjects.exists('createDataViewButton');
-    if (noDataView) {
-      await this.testSubjects.click('createDataViewButton');
-      return;
-    }
-
-    const tableView = await this.testSubjects.exists('createIndexPatternButton');
-    if (tableView) {
-      await this.testSubjects.click('createIndexPatternButton');
-    }
+    await this.testSubjects.click('createDataViewButton');
   }
 
   async selectRollupIndexPatternType() {
@@ -669,7 +663,7 @@ export class SettingsPageObject extends FtrService {
       // case where we don't want the * appended so we'll remove it if it was added
       await field.type(indexPatternName, { charByChar: true });
       const tempName = await field.getAttribute('value');
-      if (tempName.length > indexPatternName.length) {
+      if (tempName?.length ?? 0 > indexPatternName.length) {
         await field.type(this.browser.keys.DELETE, { charByChar: true });
       }
     }
@@ -787,7 +781,7 @@ export class SettingsPageObject extends FtrService {
   ) {
     await this.clickAddField();
     await this.setFieldName(name);
-    await this.setFieldTypeComposite();
+    await this.setFieldType('Composite');
     await this.setCompositeScript(script);
     if (subfieldCount > 0) {
       await this.testSubjects.find(`typeField_${subfieldCount - 1}`);
@@ -874,14 +868,13 @@ export class SettingsPageObject extends FtrService {
   }
 
   async setFieldType(type: string) {
+    const typeFieldDataTestSubj = 'typeField';
     this.log.debug('set type = ' + type);
-    await this.comboBox.set('typeField', type);
-  }
-
-  async setFieldTypeComposite() {
-    this.log.debug('set type = Composite');
-    await this.testSubjects.setValue('typeField', 'Composite');
-    await this.browser.pressKeys(this.browser.keys.RETURN);
+    await this.retry.try(async () => {
+      await this.comboBox.set(typeFieldDataTestSubj, type);
+      const comboBox = await this.testSubjects.find(typeFieldDataTestSubj);
+      expect(await this.comboBox.isOptionSelected(comboBox, type)).to.be(true);
+    });
   }
 
   async setFieldScript(script: string) {
@@ -1058,5 +1051,30 @@ export class SettingsPageObject extends FtrService {
       `select[data-test-subj="managementChangeIndexSelection-${oldIndexPatternId}"] >
       [data-test-subj="indexPatternOption-${newIndexPatternTitle}"]`
     );
+  }
+
+  async changeAndValidateFieldFormat({
+    name,
+    fieldType,
+    expectedPreviewText,
+  }: {
+    name: string;
+    fieldType: string;
+    expectedPreviewText: string;
+  }) {
+    await this.filterField(name);
+    await this.setFieldTypeFilter(fieldType);
+    await this.testSubjects.click('editFieldFormat');
+
+    expect(await this.testSubjects.getVisibleText('flyoutTitle')).to.eql(`Edit field '${name}'`);
+
+    await this.retry.tryForTime(5000, async () => {
+      const previewText = await this.testSubjects.getVisibleText('fieldPreviewItem > value');
+      expect(previewText).to.eql(
+        expectedPreviewText,
+        `Expected previewText to eql [${expectedPreviewText}], but got: [${previewText}]`
+      );
+    });
+    await this.closeIndexPatternFieldEditor();
   }
 }

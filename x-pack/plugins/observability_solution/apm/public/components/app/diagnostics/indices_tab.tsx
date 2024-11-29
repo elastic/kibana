@@ -106,8 +106,8 @@ export function DiagnosticsIndices() {
   return (
     <>
       <EuiText>
-        This section shows the concrete indices backing the data streams, and
-        highlights mapping issues and missing ingest pipelines.
+        This section shows the concrete indices backing the data streams, and highlights mapping
+        issues and missing ingest pipelines.
       </EuiText>
 
       <EuiSpacer />

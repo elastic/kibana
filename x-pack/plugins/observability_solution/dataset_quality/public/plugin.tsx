@@ -6,9 +6,13 @@
  */
 
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import { TelemetryService } from './services/telemetry';
 import { createDatasetQuality } from './components/dataset_quality';
-import { createDatasetQualityControllerLazyFactory } from './controller/lazy_create_controller';
+import { createDatasetQualityDetails } from './components/dataset_quality_details';
+import { createDatasetQualityControllerLazyFactory } from './controller/dataset_quality/lazy_create_controller';
+import { createDatasetQualityDetailsControllerLazyFactory } from './controller/dataset_quality_details/lazy_create_controller';
 import { DataStreamsStatsService } from './services/data_streams_stats';
+import { DataStreamDetailsService } from './services/data_stream_details';
 import {
   DatasetQualityPluginSetup,
   DatasetQualityPluginStart,
@@ -19,28 +23,56 @@ import {
 export class DatasetQualityPlugin
   implements Plugin<DatasetQualityPluginSetup, DatasetQualityPluginStart>
 {
+  private telemetry = new TelemetryService();
+
   constructor(context: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, plugins: DatasetQualitySetupDeps) {
+    this.telemetry.setup({ analytics: core.analytics });
+
     return {};
   }
 
   public start(core: CoreStart, plugins: DatasetQualityStartDeps): DatasetQualityPluginStart {
-    const dataStreamStatsClient = new DataStreamsStatsService().start({
+    const telemetryClient = this.telemetry.start();
+
+    const dataStreamStatsService = new DataStreamsStatsService().start({
       http: core.http,
-    }).client;
+    });
+
+    const dataStreamDetailsService = new DataStreamDetailsService().start({
+      http: core.http,
+    });
 
     const DatasetQuality = createDatasetQuality({
       core,
       plugins,
-      dataStreamStatsClient,
+      telemetryClient,
     });
 
     const createDatasetQualityController = createDatasetQualityControllerLazyFactory({
       core,
-      dataStreamStatsClient,
+      dataStreamStatsService,
     });
 
-    return { DatasetQuality, createDatasetQualityController };
+    const DatasetQualityDetails = createDatasetQualityDetails({
+      core,
+      plugins,
+      telemetryClient,
+    });
+
+    const createDatasetQualityDetailsController = createDatasetQualityDetailsControllerLazyFactory({
+      core,
+      plugins,
+      dataStreamStatsService,
+      dataStreamDetailsService,
+    });
+
+    return {
+      DatasetQuality,
+      createDatasetQualityController,
+      DatasetQualityDetails,
+      createDatasetQualityDetailsController,
+    };
   }
 }

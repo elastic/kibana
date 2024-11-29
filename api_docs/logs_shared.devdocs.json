@@ -11,7 +11,7 @@
         "label": "getLogViewReferenceFromUrl",
         "description": [],
         "signature": [
-          "({ logViewKey, sourceIdKey, toastsService, urlStateStorage, }: LogViewUrlStateDependencies) => { logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; } | null"
+          "({ logViewKey, sourceIdKey, toastsService, urlStateStorage, }: LogViewUrlStateDependencies) => { logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; } | null"
         ],
         "path": "x-pack/plugins/observability_solution/logs_shared/public/observability_logs/log_view_state/src/url_state_storage_service.ts",
         "deprecated": false,
@@ -295,7 +295,7 @@
             "signature": [
               "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -329,7 +329,7 @@
             "signature": [
               "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -344,7 +344,7 @@
         "label": "LogColumnHeadersWrapper",
         "description": [],
         "signature": [
-          "React.ForwardRefExoticComponent<(Pick<Omit<Omit<any, \"role\"> & Partial<Pick<any, \"role\">>, \"theme\"> & { theme?: ",
+          "React.ForwardRefExoticComponent<(Omit<Omit<Omit<any, \"role\"> & Partial<Pick<any, \"role\">>, \"theme\"> & { theme?: ",
           {
             "pluginId": "@kbn/react-kibana-context-styled",
             "scope": "common",
@@ -352,7 +352,7 @@
             "section": "def-common.EuiTheme",
             "text": "EuiTheme"
           },
-          " | undefined; } & { as?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; forwardedAs?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; }, string | number | symbol> | Pick<Omit<Omit<any, \"role\"> & Partial<Pick<any, \"role\">>, \"theme\"> & { theme?: ",
+          " | undefined; } & { as?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; forwardedAs?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; }, \"ref\"> | Omit<Omit<Omit<any, \"role\"> & Partial<Pick<any, \"role\">>, \"theme\"> & { theme?: ",
           {
             "pluginId": "@kbn/react-kibana-context-styled",
             "scope": "common",
@@ -360,7 +360,7 @@
             "section": "def-common.EuiTheme",
             "text": "EuiTheme"
           },
-          " | undefined; } & { children?: React.ReactNode; } & { as?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; forwardedAs?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; }, string | number | symbol>) & React.RefAttributes<{}>>"
+          " | undefined; } & { children?: React.ReactNode; } & { as?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; forwardedAs?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; }, \"ref\">) & React.RefAttributes<{}>>"
         ],
         "path": "x-pack/plugins/observability_solution/logs_shared/public/index.ts",
         "deprecated": false,
@@ -377,7 +377,7 @@
             "signature": [
               "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -392,7 +392,7 @@
         "label": "LogEntryColumn",
         "description": [],
         "signature": [
-          "React.ForwardRefExoticComponent<(Pick<Omit<Omit<any, \"role\"> & Partial<Pick<any, \"role\">>, \"theme\"> & { theme?: ",
+          "React.ForwardRefExoticComponent<(Omit<Omit<Omit<any, \"role\"> & Partial<Pick<any, \"role\">>, \"theme\"> & { theme?: ",
           {
             "pluginId": "@kbn/react-kibana-context-styled",
             "scope": "common",
@@ -400,7 +400,7 @@
             "section": "def-common.EuiTheme",
             "text": "EuiTheme"
           },
-          " | undefined; } & { as?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; forwardedAs?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; }, string | number | symbol> | Pick<Omit<Omit<any, \"role\"> & Partial<Pick<any, \"role\">>, \"theme\"> & { theme?: ",
+          " | undefined; } & { as?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; forwardedAs?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; }, \"ref\"> | Omit<Omit<Omit<any, \"role\"> & Partial<Pick<any, \"role\">>, \"theme\"> & { theme?: ",
           {
             "pluginId": "@kbn/react-kibana-context-styled",
             "scope": "common",
@@ -408,7 +408,7 @@
             "section": "def-common.EuiTheme",
             "text": "EuiTheme"
           },
-          " | undefined; } & { children?: React.ReactNode; } & { as?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; forwardedAs?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; }, string | number | symbol>) & React.RefAttributes<{}>>"
+          " | undefined; } & { children?: React.ReactNode; } & { as?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; forwardedAs?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; }, \"ref\">) & React.RefAttributes<{}>>"
         ],
         "path": "x-pack/plugins/observability_solution/logs_shared/public/index.ts",
         "deprecated": false,
@@ -425,7 +425,7 @@
             "signature": [
               "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -442,7 +442,7 @@
         "signature": [
           "React.ForwardRefExoticComponent<",
           "LogEntryContextMenuProps",
-          " & { children?: React.ReactNode; } & React.RefAttributes<{}>>"
+          " & React.RefAttributes<{}>>"
         ],
         "path": "x-pack/plugins/observability_solution/logs_shared/public/index.ts",
         "deprecated": false,
@@ -459,7 +459,7 @@
             "signature": [
               "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -476,7 +476,7 @@
         "signature": [
           "React.ForwardRefExoticComponent<",
           "LogEntryFieldColumnProps",
-          " & { children?: React.ReactNode; } & React.RefAttributes<{}>>"
+          " & React.RefAttributes<{}>>"
         ],
         "path": "x-pack/plugins/observability_solution/logs_shared/public/index.ts",
         "deprecated": false,
@@ -493,7 +493,7 @@
             "signature": [
               "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -508,31 +508,30 @@
         "label": "LogEntryFlyout",
         "description": [],
         "signature": [
-          "({ logEntryId, onCloseFlyout, onSetFieldFilter, logViewReference, }: ",
+          "React.ForwardRefExoticComponent<",
           "LogEntryFlyoutProps",
-          ") => JSX.Element"
+          " & React.RefAttributes<{}>>"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/public/components/logging/log_entry_flyout/log_entry_flyout.tsx",
+        "path": "x-pack/plugins/observability_solution/logs_shared/public/index.ts",
         "deprecated": false,
         "trackAdoption": false,
+        "returnComment": [],
         "children": [
           {
             "parentPluginId": "logsShared",
             "id": "def-public.LogEntryFlyout.$1",
-            "type": "Object",
+            "type": "Uncategorized",
             "tags": [],
-            "label": "{\n  logEntryId,\n  onCloseFlyout,\n  onSetFieldFilter,\n  logViewReference,\n}",
+            "label": "props",
             "description": [],
             "signature": [
-              "LogEntryFlyoutProps"
+              "P"
             ],
-            "path": "x-pack/plugins/observability_solution/logs_shared/public/components/logging/log_entry_flyout/log_entry_flyout.tsx",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
+            "trackAdoption": false
           }
         ],
-        "returnComment": [],
         "initialIsOpen": false
       },
       {
@@ -562,7 +561,7 @@
             "signature": [
               "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -577,7 +576,7 @@
         "label": "LogEntryRowWrapper",
         "description": [],
         "signature": [
-          "React.ForwardRefExoticComponent<(Pick<Omit<Omit<any, \"role\"> & Partial<Pick<any, \"role\">>, \"theme\"> & { theme?: ",
+          "React.ForwardRefExoticComponent<(Omit<Omit<Omit<any, \"role\"> & Partial<Pick<any, \"role\">>, \"theme\"> & { theme?: ",
           {
             "pluginId": "@kbn/react-kibana-context-styled",
             "scope": "common",
@@ -585,7 +584,7 @@
             "section": "def-common.EuiTheme",
             "text": "EuiTheme"
           },
-          " | undefined; } & { as?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; forwardedAs?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; }, string | number | symbol> | Pick<Omit<Omit<any, \"role\"> & Partial<Pick<any, \"role\">>, \"theme\"> & { theme?: ",
+          " | undefined; } & { as?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; forwardedAs?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; }, \"ref\"> | Omit<Omit<Omit<any, \"role\"> & Partial<Pick<any, \"role\">>, \"theme\"> & { theme?: ",
           {
             "pluginId": "@kbn/react-kibana-context-styled",
             "scope": "common",
@@ -593,7 +592,7 @@
             "section": "def-common.EuiTheme",
             "text": "EuiTheme"
           },
-          " | undefined; } & { children?: React.ReactNode; } & { as?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; forwardedAs?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; }, string | number | symbol>) & React.RefAttributes<{}>>"
+          " | undefined; } & { children?: React.ReactNode; } & { as?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; forwardedAs?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; }, \"ref\">) & React.RefAttributes<{}>>"
         ],
         "path": "x-pack/plugins/observability_solution/logs_shared/public/index.ts",
         "deprecated": false,
@@ -610,7 +609,7 @@
             "signature": [
               "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -644,7 +643,7 @@
             "signature": [
               "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -669,14 +668,14 @@
           {
             "parentPluginId": "logsShared",
             "id": "def-public.LogHighlightsStateProvider.$1",
-            "type": "CompoundType",
+            "type": "Uncategorized",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "P & { children?: React.ReactNode; }"
+              "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -690,7 +689,7 @@
             "signature": [
               "any"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -719,14 +718,14 @@
           {
             "parentPluginId": "logsShared",
             "id": "def-public.LogPositionStateProvider.$1",
-            "type": "CompoundType",
+            "type": "Uncategorized",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "P & { children?: React.ReactNode; }"
+              "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -740,7 +739,7 @@
             "signature": [
               "any"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -780,7 +779,7 @@
             "signature": [
               "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -805,14 +804,14 @@
           {
             "parentPluginId": "logsShared",
             "id": "def-public.LogStreamProvider.$1",
-            "type": "CompoundType",
+            "type": "Uncategorized",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "P & { children?: React.ReactNode; }"
+              "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -826,7 +825,7 @@
             "signature": [
               "any"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -841,7 +840,7 @@
         "label": "LogViewProvider",
         "description": [],
         "signature": [
-          "React.FunctionComponent<React.PropsWithChildren<{ initialLogViewReference?: { logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; } | undefined; logViews: ",
+          "React.FunctionComponent<React.PropsWithChildren<{ initialLogViewReference?: { logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; } | undefined; logViews: ",
           "ILogViewsClient",
           "; useDevTools?: boolean | undefined; initializeFromUrl?: ",
           "InvokeCreator",
@@ -1029,14 +1028,14 @@
           {
             "parentPluginId": "logsShared",
             "id": "def-public.LogViewProvider.$1",
-            "type": "CompoundType",
+            "type": "Uncategorized",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "P & { children?: React.ReactNode; }"
+              "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1050,7 +1049,51 @@
             "signature": [
               "any"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "logsShared",
+        "id": "def-public.OpenInLogsExplorerButton",
+        "type": "Function",
+        "tags": [],
+        "label": "OpenInLogsExplorerButton",
+        "description": [],
+        "signature": [
+          "React.ForwardRefExoticComponent<Pick<(",
+          "DisambiguateSet",
+          "<EuiButtonEmptyPropsForAnchor, ",
+          "EuiButtonEmptyPropsForButton",
+          "> & ",
+          "CommonEuiButtonEmptyProps",
+          " & { onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; } & React.ButtonHTMLAttributes<HTMLButtonElement>) | (",
+          "DisambiguateSet",
+          "<",
+          "EuiButtonEmptyPropsForButton",
+          ", EuiButtonEmptyPropsForAnchor> & ",
+          "CommonEuiButtonEmptyProps",
+          " & { href?: string | undefined; onClick?: React.MouseEventHandler<HTMLAnchorElement> | undefined; } & React.AnchorHTMLAttributes<HTMLAnchorElement>), \"size\" | \"flush\" | \"href\"> & { testSubject: string; } & React.RefAttributes<{}>>"
+        ],
+        "path": "x-pack/plugins/observability_solution/logs_shared/public/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "logsShared",
+            "id": "def-public.OpenInLogsExplorerButton.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1065,7 +1108,7 @@
         "label": "ScrollableLogTextStreamView",
         "description": [],
         "signature": [
-          "React.ForwardRefExoticComponent<Pick<",
+          "React.ForwardRefExoticComponent<Omit<",
           "ScrollableLogTextStreamViewProps",
           " & React.RefAttributes<",
           {
@@ -1075,9 +1118,7 @@
             "section": "def-public.ScrollableLogTextStreamView",
             "text": "ScrollableLogTextStreamView"
           },
-          ">, \"key\" | \"css\" | keyof ",
-          "ScrollableLogTextStreamViewProps",
-          "> & React.RefAttributes<{}>>"
+          ">, \"ref\"> & React.RefAttributes<{}>>"
         ],
         "path": "x-pack/plugins/observability_solution/logs_shared/public/index.ts",
         "deprecated": false,
@@ -1094,7 +1135,7 @@
             "signature": [
               "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1214,7 +1255,7 @@
             "section": "def-public.LogEntryColumnWidths",
             "text": "LogEntryColumnWidths"
           },
-          "; CharacterDimensionsProbe: () => JSX.Element; }"
+          "; CharacterDimensionsProbe: () => React.JSX.Element; }"
         ],
         "path": "x-pack/plugins/observability_solution/logs_shared/public/components/logging/log_text_stream/log_entry_column.tsx",
         "deprecated": false,
@@ -1276,39 +1317,6 @@
                 "trackAdoption": false
               }
             ]
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "logsShared",
-        "id": "def-public.useLogEntryFlyout",
-        "type": "Function",
-        "tags": [],
-        "label": "useLogEntryFlyout",
-        "description": [],
-        "signature": [
-          "(logViewReference: { logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }) => { openLogEntryFlyout: (logEntryId: any) => void; closeLogEntryFlyout: () => void; }"
-        ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/public/components/logging/log_entry_flyout/log_entry_flyout.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "logsShared",
-            "id": "def-public.useLogEntryFlyout.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "logViewReference",
-            "description": [],
-            "signature": [
-              "{ logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }"
-            ],
-            "path": "x-pack/plugins/observability_solution/logs_shared/public/components/logging/log_entry_flyout/log_entry_flyout.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
           }
         ],
         "returnComment": [],
@@ -1476,91 +1484,13 @@
       },
       {
         "parentPluginId": "logsShared",
-        "id": "def-public.useLogSummary",
-        "type": "Function",
-        "tags": [],
-        "label": "useLogSummary",
-        "description": [],
-        "signature": [
-          "(logViewReference: { logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }, startTimestamp: number | null, endTimestamp: number | null, filterQuery: string | null) => { buckets: { start: number; end: number; entriesCount: number; }[]; start: number | null; end: number | null; }"
-        ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/public/containers/logs/log_summary/log_summary.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "logsShared",
-            "id": "def-public.useLogSummary.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "logViewReference",
-            "description": [],
-            "signature": [
-              "{ logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }"
-            ],
-            "path": "x-pack/plugins/observability_solution/logs_shared/public/containers/logs/log_summary/log_summary.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "logsShared",
-            "id": "def-public.useLogSummary.$2",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "startTimestamp",
-            "description": [],
-            "signature": [
-              "number | null"
-            ],
-            "path": "x-pack/plugins/observability_solution/logs_shared/public/containers/logs/log_summary/log_summary.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
-          },
-          {
-            "parentPluginId": "logsShared",
-            "id": "def-public.useLogSummary.$3",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "endTimestamp",
-            "description": [],
-            "signature": [
-              "number | null"
-            ],
-            "path": "x-pack/plugins/observability_solution/logs_shared/public/containers/logs/log_summary/log_summary.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
-          },
-          {
-            "parentPluginId": "logsShared",
-            "id": "def-public.useLogSummary.$4",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "filterQuery",
-            "description": [],
-            "signature": [
-              "string | null"
-            ],
-            "path": "x-pack/plugins/observability_solution/logs_shared/public/containers/logs/log_summary/log_summary.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "logsShared",
         "id": "def-public.useLogView",
         "type": "Function",
         "tags": [],
         "label": "useLogView",
         "description": [],
         "signature": [
-          "({ initialLogViewReference, logViews, useDevTools, initializeFromUrl, updateContextInUrl, listenForUrlChanges, }: { initialLogViewReference?: { logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; } | undefined; logViews: ",
+          "({ initialLogViewReference, logViews, useDevTools, initializeFromUrl, updateContextInUrl, listenForUrlChanges, }: { initialLogViewReference?: { logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; } | undefined; logViews: ",
           "ILogViewsClient",
           "; useDevTools?: boolean | undefined; initializeFromUrl?: ",
           "InvokeCreator",
@@ -1874,7 +1804,7 @@
             "section": "def-public.LogViewNotificationEvent",
             "text": "LogViewNotificationEvent"
           },
-          ">; hasFailedLoading: boolean; hasFailedLoadingLogView: boolean; hasFailedLoadingLogViewStatus: boolean; hasFailedResolvingLogView: boolean; latestLoadLogViewFailures: Error[]; isUninitialized: boolean; isLoading: boolean; isLoadingLogView: boolean; isLoadingLogViewStatus: boolean; isResolvingLogView: boolean; logViewReference: { logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }; logView: ({ id: string; origin: \"internal\" | \"inline\" | \"stored\" | \"infra-source-stored\" | \"infra-source-internal\" | \"infra-source-fallback\"; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; } & { updatedAt?: number | undefined; version?: string | undefined; }) | undefined; resolvedLogView: ",
+          ">; hasFailedLoading: boolean; hasFailedLoadingLogView: boolean; hasFailedLoadingLogViewStatus: boolean; hasFailedResolvingLogView: boolean; latestLoadLogViewFailures: Error[]; isUninitialized: boolean; isLoading: boolean; isLoadingLogView: boolean; isLoadingLogViewStatus: boolean; isResolvingLogView: boolean; logViewReference: { logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }; logView: ({ id: string; origin: \"internal\" | \"inline\" | \"stored\" | \"infra-source-stored\" | \"infra-source-internal\" | \"infra-source-fallback\"; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; } & { updatedAt?: number | undefined; version?: string | undefined; }) | undefined; resolvedLogView: ",
           {
             "pluginId": "logsShared",
             "scope": "common",
@@ -1882,7 +1812,7 @@
             "section": "def-common.ResolvedLogView",
             "text": "ResolvedLogView"
           },
-          " | undefined; logViewStatus: { index: \"missing\" | \"unknown\" | \"empty\" | \"available\"; } | undefined; derivedDataView: ",
+          " | undefined; logViewStatus: { index: \"unknown\" | \"missing\" | \"empty\" | \"available\"; } | undefined; derivedDataView: ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -2030,7 +1960,7 @@
           "BaseActionObject",
           ", ",
           "ServiceMap",
-          ">>; update: (logViewAttributes: Partial<{ name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }>) => Promise<void>; changeLogViewReference: (logViewReference: { logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }) => void; revertToDefaultLogView: () => void; }"
+          ">>; update: (logViewAttributes: Partial<{ name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }>) => Promise<void>; changeLogViewReference: (logViewReference: { logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }) => void; revertToDefaultLogView: () => void; }"
         ],
         "path": "x-pack/plugins/observability_solution/logs_shared/public/hooks/use_log_view.ts",
         "deprecated": false,
@@ -2055,7 +1985,7 @@
                 "label": "initialLogViewReference",
                 "description": [],
                 "signature": [
-                  "{ logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; } | undefined"
+                  "{ logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; } | undefined"
                 ],
                 "path": "x-pack/plugins/observability_solution/logs_shared/public/hooks/use_log_view.ts",
                 "deprecated": false,
@@ -2455,7 +2385,7 @@
             "section": "def-public.LogViewNotificationEvent",
             "text": "LogViewNotificationEvent"
           },
-          ">; hasFailedLoading: boolean; hasFailedLoadingLogView: boolean; hasFailedLoadingLogViewStatus: boolean; hasFailedResolvingLogView: boolean; latestLoadLogViewFailures: Error[]; isUninitialized: boolean; isLoading: boolean; isLoadingLogView: boolean; isLoadingLogViewStatus: boolean; isResolvingLogView: boolean; logViewReference: { logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }; logView: ({ id: string; origin: \"internal\" | \"inline\" | \"stored\" | \"infra-source-stored\" | \"infra-source-internal\" | \"infra-source-fallback\"; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; } & { updatedAt?: number | undefined; version?: string | undefined; }) | undefined; resolvedLogView: ",
+          ">; hasFailedLoading: boolean; hasFailedLoadingLogView: boolean; hasFailedLoadingLogViewStatus: boolean; hasFailedResolvingLogView: boolean; latestLoadLogViewFailures: Error[]; isUninitialized: boolean; isLoading: boolean; isLoadingLogView: boolean; isLoadingLogViewStatus: boolean; isResolvingLogView: boolean; logViewReference: { logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }; logView: ({ id: string; origin: \"internal\" | \"inline\" | \"stored\" | \"infra-source-stored\" | \"infra-source-internal\" | \"infra-source-fallback\"; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; } & { updatedAt?: number | undefined; version?: string | undefined; }) | undefined; resolvedLogView: ",
           {
             "pluginId": "logsShared",
             "scope": "common",
@@ -2463,7 +2393,7 @@
             "section": "def-common.ResolvedLogView",
             "text": "ResolvedLogView"
           },
-          " | undefined; logViewStatus: { index: \"missing\" | \"unknown\" | \"empty\" | \"available\"; } | undefined; derivedDataView: ",
+          " | undefined; logViewStatus: { index: \"unknown\" | \"missing\" | \"empty\" | \"available\"; } | undefined; derivedDataView: ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -2611,7 +2541,7 @@
           "BaseActionObject",
           ", ",
           "ServiceMap",
-          ">>; update: (logViewAttributes: Partial<{ name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }>) => Promise<void>; changeLogViewReference: (logViewReference: { logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }) => void; revertToDefaultLogView: () => void; }"
+          ">>; update: (logViewAttributes: Partial<{ name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }>) => Promise<void>; changeLogViewReference: (logViewReference: { logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }) => void; revertToDefaultLogView: () => void; }"
         ],
         "path": "x-pack/plugins/observability_solution/logs_shared/public/hooks/use_log_view.ts",
         "deprecated": false,
@@ -2628,7 +2558,7 @@
         "label": "WithSummary",
         "description": [],
         "signature": [
-          "({ serializedParsedQuery, children }: ",
+          "React.ForwardRefExoticComponent<",
           {
             "pluginId": "logsShared",
             "scope": "public",
@@ -2636,36 +2566,28 @@
             "section": "def-public.WithSummaryProps",
             "text": "WithSummaryProps"
           },
-          ") => ",
-          "RendererResult"
+          " & React.RefAttributes<{}>>"
         ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/public/containers/logs/log_summary/with_summary.ts",
+        "path": "x-pack/plugins/observability_solution/logs_shared/public/index.ts",
         "deprecated": false,
         "trackAdoption": false,
+        "returnComment": [],
         "children": [
           {
             "parentPluginId": "logsShared",
             "id": "def-public.WithSummary.$1",
-            "type": "Object",
+            "type": "Uncategorized",
             "tags": [],
-            "label": "{ serializedParsedQuery, children }",
+            "label": "props",
             "description": [],
             "signature": [
-              {
-                "pluginId": "logsShared",
-                "scope": "public",
-                "docId": "kibLogsSharedPluginApi",
-                "section": "def-public.WithSummaryProps",
-                "text": "WithSummaryProps"
-              }
+              "P"
             ],
-            "path": "x-pack/plugins/observability_solution/logs_shared/public/containers/logs/log_summary/with_summary.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
+            "trackAdoption": false
           }
         ],
-        "returnComment": [],
         "initialIsOpen": false
       }
     ],
@@ -2967,6 +2889,29 @@
         "children": [
           {
             "parentPluginId": "logsShared",
+            "id": "def-public.LogsSharedClientStartDeps.charts",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "charts",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "charts",
+                "scope": "public",
+                "docId": "kibChartsPluginApi",
+                "section": "def-public.ChartsPluginSetup",
+                "text": "ChartsPluginSetup"
+              },
+              " & { activeCursor: ",
+              "ActiveCursor",
+              "; }"
+            ],
+            "path": "x-pack/plugins/observability_solution/logs_shared/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "logsShared",
             "id": "def-public.LogsSharedClientStartDeps.data",
             "type": "Object",
             "tags": [],
@@ -3007,6 +2952,42 @@
           },
           {
             "parentPluginId": "logsShared",
+            "id": "def-public.LogsSharedClientStartDeps.discoverShared",
+            "type": "Object",
+            "tags": [],
+            "label": "discoverShared",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "discoverShared",
+                "scope": "public",
+                "docId": "kibDiscoverSharedPluginApi",
+                "section": "def-public.DiscoverSharedPublicStart",
+                "text": "DiscoverSharedPublicStart"
+              }
+            ],
+            "path": "x-pack/plugins/observability_solution/logs_shared/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "logsShared",
+            "id": "def-public.LogsSharedClientStartDeps.logsDataAccess",
+            "type": "Object",
+            "tags": [],
+            "label": "logsDataAccess",
+            "description": [],
+            "signature": [
+              "{ services: { logSourcesService: ",
+              "LogSourcesService",
+              "; }; }"
+            ],
+            "path": "x-pack/plugins/observability_solution/logs_shared/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "logsShared",
             "id": "def-public.LogsSharedClientStartDeps.observabilityAIAssistant",
             "type": "Object",
             "tags": [],
@@ -3019,7 +3000,48 @@
                 "docId": "kibObservabilityAIAssistantPluginApi",
                 "section": "def-public.ObservabilityAIAssistantPublicStart",
                 "text": "ObservabilityAIAssistantPublicStart"
-              }
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/observability_solution/logs_shared/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "logsShared",
+            "id": "def-public.LogsSharedClientStartDeps.share",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "share",
+            "description": [],
+            "signature": [
+              "{ toggleShareContextMenu: (options: ",
+              {
+                "pluginId": "share",
+                "scope": "public",
+                "docId": "kibSharePluginApi",
+                "section": "def-public.ShowShareMenuOptions",
+                "text": "ShowShareMenuOptions"
+              },
+              ") => void; } & { url: ",
+              {
+                "pluginId": "share",
+                "scope": "public",
+                "docId": "kibSharePluginApi",
+                "section": "def-public.BrowserUrlService",
+                "text": "BrowserUrlService"
+              },
+              "; navigate(options: ",
+              "RedirectOptions",
+              "<",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
+              },
+              ">): void; }"
             ],
             "path": "x-pack/plugins/observability_solution/logs_shared/public/types.ts",
             "deprecated": false,
@@ -3041,7 +3063,7 @@
                 "section": "def-common.Trigger",
                 "text": "Trigger"
               },
-              ") => void; readonly getTrigger: (triggerId: string) => ",
+              ") => void; readonly hasTrigger: (triggerId: string) => boolean; readonly getTrigger: (triggerId: string) => ",
               "TriggerContract",
               "<object>; readonly registerAction: <Context extends object>(definition: ",
               {
@@ -3106,6 +3128,36 @@
                 "docId": "kibUiActionsPluginApi",
                 "section": "def-public.UiActionsService",
                 "text": "UiActionsService"
+              },
+              "; }"
+            ],
+            "path": "x-pack/plugins/observability_solution/logs_shared/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "logsShared",
+            "id": "def-public.LogsSharedClientStartDeps.fieldFormats",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "fieldFormats",
+            "description": [],
+            "signature": [
+              "Omit<",
+              {
+                "pluginId": "fieldFormats",
+                "scope": "common",
+                "docId": "kibFieldFormatsPluginApi",
+                "section": "def-common.FieldFormatsRegistry",
+                "text": "FieldFormatsRegistry"
+              },
+              ", \"init\" | \"register\"> & { deserialize: ",
+              {
+                "pluginId": "fieldFormats",
+                "scope": "common",
+                "docId": "kibFieldFormatsPluginApi",
+                "section": "def-common.FormatFactory",
+                "text": "FormatFactory"
               },
               "; }"
             ],
@@ -3218,6 +3270,137 @@
       },
       {
         "parentPluginId": "logsShared",
+        "id": "def-public.UpdatedDateRange",
+        "type": "Interface",
+        "tags": [],
+        "label": "UpdatedDateRange",
+        "description": [],
+        "path": "x-pack/plugins/observability_solution/logs_shared/public/components/logging/log_text_stream/scrollable_log_text_stream_view.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "logsShared",
+            "id": "def-public.UpdatedDateRange.startDateExpression",
+            "type": "string",
+            "tags": [],
+            "label": "startDateExpression",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/observability_solution/logs_shared/public/components/logging/log_text_stream/scrollable_log_text_stream_view.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "logsShared",
+            "id": "def-public.UpdatedDateRange.endDateExpression",
+            "type": "string",
+            "tags": [],
+            "label": "endDateExpression",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/observability_solution/logs_shared/public/components/logging/log_text_stream/scrollable_log_text_stream_view.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "logsShared",
+        "id": "def-public.VisibleInterval",
+        "type": "Interface",
+        "tags": [],
+        "label": "VisibleInterval",
+        "description": [],
+        "path": "x-pack/plugins/observability_solution/logs_shared/public/components/logging/log_text_stream/scrollable_log_text_stream_view.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "logsShared",
+            "id": "def-public.VisibleInterval.pagesBeforeStart",
+            "type": "number",
+            "tags": [],
+            "label": "pagesBeforeStart",
+            "description": [],
+            "path": "x-pack/plugins/observability_solution/logs_shared/public/components/logging/log_text_stream/scrollable_log_text_stream_view.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "logsShared",
+            "id": "def-public.VisibleInterval.pagesAfterEnd",
+            "type": "number",
+            "tags": [],
+            "label": "pagesAfterEnd",
+            "description": [],
+            "path": "x-pack/plugins/observability_solution/logs_shared/public/components/logging/log_text_stream/scrollable_log_text_stream_view.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "logsShared",
+            "id": "def-public.VisibleInterval.startKey",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "startKey",
+            "description": [],
+            "signature": [
+              "({ time: string; tiebreaker: number; } & { gid?: string | undefined; fromAutoReload?: boolean | undefined; }) | null"
+            ],
+            "path": "x-pack/plugins/observability_solution/logs_shared/public/components/logging/log_text_stream/scrollable_log_text_stream_view.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "logsShared",
+            "id": "def-public.VisibleInterval.middleKey",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "middleKey",
+            "description": [],
+            "signature": [
+              "({ time: string; tiebreaker: number; } & { gid?: string | undefined; fromAutoReload?: boolean | undefined; }) | null"
+            ],
+            "path": "x-pack/plugins/observability_solution/logs_shared/public/components/logging/log_text_stream/scrollable_log_text_stream_view.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "logsShared",
+            "id": "def-public.VisibleInterval.endKey",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "endKey",
+            "description": [],
+            "signature": [
+              "({ time: string; tiebreaker: number; } & { gid?: string | undefined; fromAutoReload?: boolean | undefined; }) | null"
+            ],
+            "path": "x-pack/plugins/observability_solution/logs_shared/public/components/logging/log_text_stream/scrollable_log_text_stream_view.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "logsShared",
+            "id": "def-public.VisibleInterval.fromScroll",
+            "type": "boolean",
+            "tags": [],
+            "label": "fromScroll",
+            "description": [],
+            "path": "x-pack/plugins/observability_solution/logs_shared/public/components/logging/log_text_stream/scrollable_log_text_stream_view.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "logsShared",
         "id": "def-public.WithSummaryProps",
         "type": "Interface",
         "tags": [],
@@ -3297,6 +3480,31 @@
           }
         ],
         "path": "x-pack/plugins/observability_solution/logs_shared/public/components/logging/log_text_stream/log_entry_column.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "logsShared",
+        "id": "def-public.LogsOverviewProps",
+        "type": "Type",
+        "tags": [],
+        "label": "LogsOverviewProps",
+        "description": [],
+        "signature": [
+          "{ timeRange: { start: string; end: string; }; documentFilters?: ",
+          "QueryDslQueryContainer",
+          "[] | undefined; logsSource?: ",
+          {
+            "pluginId": "@kbn/observability-logs-overview",
+            "scope": "public",
+            "docId": "kibKbnObservabilityLogsOverviewPluginApi",
+            "section": "def-public.LogsSourceConfiguration",
+            "text": "LogsSourceConfiguration"
+          },
+          " | undefined; }"
+        ],
+        "path": "x-pack/plugins/observability_solution/logs_shared/public/components/logs_overview/logs_overview.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3404,7 +3612,7 @@
         "label": "LogViewNotificationEvent",
         "description": [],
         "signature": [
-          "{ type: \"LOADING_LOG_VIEW_STARTED\"; logViewReference: { logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }; } | { type: \"LOADING_LOG_VIEW_SUCCEEDED\"; resolvedLogView: ",
+          "{ type: \"LOADING_LOG_VIEW_STARTED\"; logViewReference: { logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }; } | { type: \"LOADING_LOG_VIEW_SUCCEEDED\"; resolvedLogView: ",
           {
             "pluginId": "logsShared",
             "scope": "common",
@@ -3412,7 +3620,7 @@
             "section": "def-common.ResolvedLogView",
             "text": "ResolvedLogView"
           },
-          "; status: { index: \"missing\" | \"unknown\" | \"empty\" | \"available\"; }; } | { type: \"LOADING_LOG_VIEW_FAILED\"; error: Error; }"
+          "; status: { index: \"unknown\" | \"missing\" | \"empty\" | \"available\"; }; } | { type: \"LOADING_LOG_VIEW_FAILED\"; error: Error; }"
         ],
         "path": "x-pack/plugins/observability_solution/logs_shared/public/observability_logs/log_view_state/src/notifications.ts",
         "deprecated": false,
@@ -3497,7 +3705,7 @@
           "label": "LogAIAssistant",
           "description": [],
           "signature": [
-            "(props: Omit<",
+            "((props: Omit<",
             {
               "pluginId": "logsShared",
               "scope": "public",
@@ -3505,7 +3713,7 @@
               "section": "def-public.LogAIAssistantProps",
               "text": "LogAIAssistantProps"
             },
-            ", \"observabilityAIAssistant\">) => JSX.Element"
+            ", \"observabilityAIAssistant\">) => JSX.Element) | undefined"
           ],
           "path": "x-pack/plugins/observability_solution/logs_shared/public/types.ts",
           "deprecated": false,
@@ -3536,6 +3744,22 @@
             }
           ],
           "returnComment": []
+        },
+        {
+          "parentPluginId": "logsShared",
+          "id": "def-public.LogsSharedClientStartExports.LogsOverview",
+          "type": "CompoundType",
+          "tags": [],
+          "label": "LogsOverview",
+          "description": [],
+          "signature": [
+            "SelfContainedLogsOverviewComponent",
+            " & ",
+            "SelfContainedLogsOverviewHelpers"
+          ],
+          "path": "x-pack/plugins/observability_solution/logs_shared/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
         }
       ],
       "lifecycle": "start",
@@ -3632,12 +3856,12 @@
               "(requestContext: ",
               {
                 "pluginId": "@kbn/core-http-request-handler-context-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                "section": "def-common.RequestHandlerContext",
+                "section": "def-server.RequestHandlerContext",
                 "text": "RequestHandlerContext"
               },
-              ", logView: { logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }, params: ",
+              ", logView: { logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }, params: ",
               "LogEntriesAroundParams",
               ", columnOverrides?: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[] | undefined) => Promise<{ entries: { id: string; index: string; cursor: { time: string; tiebreaker: number; }; columns: ({ columnId: string; time: string; } | { columnId: string; field: string; value: ",
               {
@@ -3671,9 +3895,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-request-handler-context-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                    "section": "def-common.RequestHandlerContext",
+                    "section": "def-server.RequestHandlerContext",
                     "text": "RequestHandlerContext"
                   }
                 ],
@@ -3690,7 +3914,7 @@
                 "label": "logView",
                 "description": [],
                 "signature": [
-                  "{ logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }"
+                  "{ logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }"
                 ],
                 "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
                 "deprecated": false,
@@ -3741,12 +3965,12 @@
               "(requestContext: ",
               {
                 "pluginId": "@kbn/core-http-request-handler-context-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                "section": "def-common.RequestHandlerContext",
+                "section": "def-server.RequestHandlerContext",
                 "text": "RequestHandlerContext"
               },
-              ", logView: { logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }, params: ",
+              ", logView: { logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }, params: ",
               "LogEntriesParams",
               ", columnOverrides?: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[] | undefined) => Promise<{ entries: { id: string; index: string; cursor: { time: string; tiebreaker: number; }; columns: ({ columnId: string; time: string; } | { columnId: string; field: string; value: ",
               {
@@ -3780,9 +4004,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-request-handler-context-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                    "section": "def-common.RequestHandlerContext",
+                    "section": "def-server.RequestHandlerContext",
                     "text": "RequestHandlerContext"
                   }
                 ],
@@ -3799,7 +4023,7 @@
                 "label": "logView",
                 "description": [],
                 "signature": [
-                  "{ logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }"
+                  "{ logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }"
                 ],
                 "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
                 "deprecated": false,
@@ -3850,12 +4074,12 @@
               "(requestContext: ",
               {
                 "pluginId": "@kbn/core-http-request-handler-context-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                "section": "def-common.RequestHandlerContext",
+                "section": "def-server.RequestHandlerContext",
                 "text": "RequestHandlerContext"
               },
-              ", logView: { logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }, start: number, end: number, bucketSize: number, filterQuery?: ",
+              ", logView: { logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }, start: number, end: number, bucketSize: number, filterQuery?: ",
               {
                 "pluginId": "@kbn/utility-types",
                 "scope": "common",
@@ -3879,9 +4103,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-request-handler-context-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                    "section": "def-common.RequestHandlerContext",
+                    "section": "def-server.RequestHandlerContext",
                     "text": "RequestHandlerContext"
                   }
                 ],
@@ -3898,7 +4122,7 @@
                 "label": "logView",
                 "description": [],
                 "signature": [
-                  "{ logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }"
+                  "{ logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }"
                 ],
                 "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
                 "deprecated": false,
@@ -3986,12 +4210,12 @@
               "(requestContext: ",
               {
                 "pluginId": "@kbn/core-http-request-handler-context-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                "section": "def-common.RequestHandlerContext",
+                "section": "def-server.RequestHandlerContext",
                 "text": "RequestHandlerContext"
               },
-              ", logView: { logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }, startTimestamp: number, endTimestamp: number, bucketSize: number, highlightQueries: string[], filterQuery?: ",
+              ", logView: { logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }, startTimestamp: number, endTimestamp: number, bucketSize: number, highlightQueries: string[], filterQuery?: ",
               {
                 "pluginId": "@kbn/utility-types",
                 "scope": "common",
@@ -4015,9 +4239,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-request-handler-context-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                    "section": "def-common.RequestHandlerContext",
+                    "section": "def-server.RequestHandlerContext",
                     "text": "RequestHandlerContext"
                   }
                 ],
@@ -4034,7 +4258,7 @@
                 "label": "logView",
                 "description": [],
                 "signature": [
-                  "{ logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }"
+                  "{ logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }"
                 ],
                 "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
                 "deprecated": false,
@@ -4137,9 +4361,9 @@
               "(requestContext: ",
               {
                 "pluginId": "@kbn/core-http-request-handler-context-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                "section": "def-common.RequestHandlerContext",
+                "section": "def-server.RequestHandlerContext",
                 "text": "RequestHandlerContext"
               },
               ", timestampField: string, indexName: string, startTime: number, endTime: number, runtimeMappings: ",
@@ -4160,9 +4384,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-request-handler-context-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                    "section": "def-common.RequestHandlerContext",
+                    "section": "def-server.RequestHandlerContext",
                     "text": "RequestHandlerContext"
                   }
                 ],
@@ -4277,12 +4501,12 @@
               "(requestContext: ",
               {
                 "pluginId": "@kbn/core-http-request-handler-context-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                "section": "def-common.RequestHandlerContext",
+                "section": "def-server.RequestHandlerContext",
                 "text": "RequestHandlerContext"
               },
-              ", logView: { logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }, params: ",
+              ", logView: { logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }, params: ",
               "LogEntriesAroundParams",
               ", columnOverrides?: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[] | undefined) => Promise<{ entries: { id: string; index: string; cursor: { time: string; tiebreaker: number; }; columns: ({ columnId: string; time: string; } | { columnId: string; field: string; value: ",
               {
@@ -4316,9 +4540,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-request-handler-context-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                    "section": "def-common.RequestHandlerContext",
+                    "section": "def-server.RequestHandlerContext",
                     "text": "RequestHandlerContext"
                   }
                 ],
@@ -4335,7 +4559,7 @@
                 "label": "logView",
                 "description": [],
                 "signature": [
-                  "{ logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }"
+                  "{ logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }"
                 ],
                 "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
                 "deprecated": false,
@@ -4386,12 +4610,12 @@
               "(requestContext: ",
               {
                 "pluginId": "@kbn/core-http-request-handler-context-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                "section": "def-common.RequestHandlerContext",
+                "section": "def-server.RequestHandlerContext",
                 "text": "RequestHandlerContext"
               },
-              ", logView: { logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }, params: ",
+              ", logView: { logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }, params: ",
               "LogEntriesParams",
               ", columnOverrides?: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[] | undefined) => Promise<{ entries: { id: string; index: string; cursor: { time: string; tiebreaker: number; }; columns: ({ columnId: string; time: string; } | { columnId: string; field: string; value: ",
               {
@@ -4425,9 +4649,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-request-handler-context-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                    "section": "def-common.RequestHandlerContext",
+                    "section": "def-server.RequestHandlerContext",
                     "text": "RequestHandlerContext"
                   }
                 ],
@@ -4444,7 +4668,7 @@
                 "label": "logView",
                 "description": [],
                 "signature": [
-                  "{ logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }"
+                  "{ logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }"
                 ],
                 "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
                 "deprecated": false,
@@ -4495,12 +4719,12 @@
               "(requestContext: ",
               {
                 "pluginId": "@kbn/core-http-request-handler-context-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                "section": "def-common.RequestHandlerContext",
+                "section": "def-server.RequestHandlerContext",
                 "text": "RequestHandlerContext"
               },
-              ", logView: { logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }, start: number, end: number, bucketSize: number, filterQuery?: ",
+              ", logView: { logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }, start: number, end: number, bucketSize: number, filterQuery?: ",
               {
                 "pluginId": "@kbn/utility-types",
                 "scope": "common",
@@ -4524,9 +4748,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-request-handler-context-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                    "section": "def-common.RequestHandlerContext",
+                    "section": "def-server.RequestHandlerContext",
                     "text": "RequestHandlerContext"
                   }
                 ],
@@ -4543,7 +4767,7 @@
                 "label": "logView",
                 "description": [],
                 "signature": [
-                  "{ logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }"
+                  "{ logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }"
                 ],
                 "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
                 "deprecated": false,
@@ -4631,12 +4855,12 @@
               "(requestContext: ",
               {
                 "pluginId": "@kbn/core-http-request-handler-context-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                "section": "def-common.RequestHandlerContext",
+                "section": "def-server.RequestHandlerContext",
                 "text": "RequestHandlerContext"
               },
-              ", logView: { logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }, startTimestamp: number, endTimestamp: number, bucketSize: number, highlightQueries: string[], filterQuery?: ",
+              ", logView: { logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }, startTimestamp: number, endTimestamp: number, bucketSize: number, highlightQueries: string[], filterQuery?: ",
               {
                 "pluginId": "@kbn/utility-types",
                 "scope": "common",
@@ -4660,9 +4884,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-request-handler-context-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                    "section": "def-common.RequestHandlerContext",
+                    "section": "def-server.RequestHandlerContext",
                     "text": "RequestHandlerContext"
                   }
                 ],
@@ -4679,7 +4903,7 @@
                 "label": "logView",
                 "description": [],
                 "signature": [
-                  "{ logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }"
+                  "{ logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }"
                 ],
                 "path": "x-pack/plugins/observability_solution/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
                 "deprecated": false,
@@ -4782,9 +5006,9 @@
               "(requestContext: ",
               {
                 "pluginId": "@kbn/core-http-request-handler-context-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                "section": "def-common.RequestHandlerContext",
+                "section": "def-server.RequestHandlerContext",
                 "text": "RequestHandlerContext"
               },
               ", timestampField: string, indexName: string, startTime: number, endTime: number, runtimeMappings: ",
@@ -4805,9 +5029,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-request-handler-context-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-                    "section": "def-common.RequestHandlerContext",
+                    "section": "def-server.RequestHandlerContext",
                     "text": "RequestHandlerContext"
                   }
                 ],
@@ -5535,7 +5759,7 @@
             "label": "logView",
             "description": [],
             "signature": [
-              "{ logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; } | undefined"
+              "{ logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; } | undefined"
             ],
             "path": "x-pack/plugins/observability_solution/logs_shared/common/locators/types.ts",
             "deprecated": false,
@@ -5828,36 +6052,6 @@
       },
       {
         "parentPluginId": "logsShared",
-        "id": "def-common.INFRA_LOGS_LOCATOR_ID",
-        "type": "string",
-        "tags": [],
-        "label": "INFRA_LOGS_LOCATOR_ID",
-        "description": [],
-        "signature": [
-          "\"INFRA_LOGS_LOCATOR\""
-        ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/common/locators/infra.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "logsShared",
-        "id": "def-common.INFRA_NODE_LOGS_LOCATOR_ID",
-        "type": "string",
-        "tags": [],
-        "label": "INFRA_NODE_LOGS_LOCATOR_ID",
-        "description": [],
-        "signature": [
-          "\"INFRA_NODE_LOGS_LOCATOR\""
-        ],
-        "path": "x-pack/plugins/observability_solution/logs_shared/common/locators/infra.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "logsShared",
         "id": "def-common.LOG_ENTRIES_HIGHLIGHTS_PATH",
         "type": "string",
         "tags": [],
@@ -6001,7 +6195,7 @@
         "label": "LogEntryAfterCursor",
         "description": [],
         "signature": [
-          "{ after: { time: string; tiebreaker: number; } | \"first\"; }"
+          "{ after: \"first\" | { time: string; tiebreaker: number; }; }"
         ],
         "path": "x-pack/plugins/observability_solution/logs_shared/common/log_entry/log_entry_cursor.ts",
         "deprecated": false,
@@ -6152,7 +6346,7 @@
         "label": "LogIndexReference",
         "description": [],
         "signature": [
-          "{ type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; }"
+          "{ type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }"
         ],
         "path": "x-pack/plugins/observability_solution/logs_shared/common/log_views/types.ts",
         "deprecated": false,
@@ -6260,6 +6454,21 @@
       },
       {
         "parentPluginId": "logsShared",
+        "id": "def-common.LogSourcesKibanaAdvancedSettingReference",
+        "type": "Type",
+        "tags": [],
+        "label": "LogSourcesKibanaAdvancedSettingReference",
+        "description": [],
+        "signature": [
+          "{ type: \"kibana_advanced_setting\"; }"
+        ],
+        "path": "x-pack/plugins/observability_solution/logs_shared/common/log_views/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "logsShared",
         "id": "def-common.LogTimestampColumn",
         "type": "Type",
         "tags": [],
@@ -6281,7 +6490,7 @@
         "label": "LogView",
         "description": [],
         "signature": [
-          "{ id: string; origin: \"internal\" | \"inline\" | \"stored\" | \"infra-source-stored\" | \"infra-source-internal\" | \"infra-source-fallback\"; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; } & { updatedAt?: number | undefined; version?: string | undefined; }"
+          "{ id: string; origin: \"internal\" | \"inline\" | \"stored\" | \"infra-source-stored\" | \"infra-source-internal\" | \"infra-source-fallback\"; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; } & { updatedAt?: number | undefined; version?: string | undefined; }"
         ],
         "path": "x-pack/plugins/observability_solution/logs_shared/common/log_views/types.ts",
         "deprecated": false,
@@ -6296,7 +6505,7 @@
         "label": "LogViewAttributes",
         "description": [],
         "signature": [
-          "{ name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }"
+          "{ name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }"
         ],
         "path": "x-pack/plugins/observability_solution/logs_shared/common/log_views/types.ts",
         "deprecated": false,
@@ -6326,7 +6535,7 @@
         "label": "LogViewReference",
         "description": [],
         "signature": [
-          "{ logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }"
+          "{ logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }"
         ],
         "path": "x-pack/plugins/observability_solution/logs_shared/common/log_views/types.ts",
         "deprecated": false,
@@ -6341,7 +6550,7 @@
         "label": "LogViewStatus",
         "description": [],
         "signature": [
-          "{ index: \"missing\" | \"unknown\" | \"empty\" | \"available\"; }"
+          "{ index: \"unknown\" | \"missing\" | \"empty\" | \"available\"; }"
         ],
         "path": "x-pack/plugins/observability_solution/logs_shared/common/log_views/types.ts",
         "deprecated": false,
@@ -6763,7 +6972,11 @@
           "LiteralC",
           "<\"index_name\">; indexName: ",
           "StringC",
-          "; }>]>; logColumns: ",
+          "; }>, ",
+          "TypeC",
+          "<{ type: ",
+          "LiteralC",
+          "<\"kibana_advanced_setting\">; }>]>; logColumns: ",
           "ArrayC",
           "<",
           "UnionC",
@@ -6907,7 +7120,11 @@
           "LiteralC",
           "<\"index_name\">; indexName: ",
           "StringC",
-          "; }>]>; logColumns: ",
+          "; }>, ",
+          "TypeC",
+          "<{ type: ",
+          "LiteralC",
+          "<\"kibana_advanced_setting\">; }>]>; logColumns: ",
           "ArrayC",
           "<",
           "UnionC",
@@ -7063,7 +7280,11 @@
           "LiteralC",
           "<\"index_name\">; indexName: ",
           "StringC",
-          "; }>]>; logColumns: ",
+          "; }>, ",
+          "TypeC",
+          "<{ type: ",
+          "LiteralC",
+          "<\"kibana_advanced_setting\">; }>]>; logColumns: ",
           "ArrayC",
           "<",
           "UnionC",
@@ -7219,7 +7440,11 @@
           "LiteralC",
           "<\"index_name\">; indexName: ",
           "StringC",
-          "; }>]>; logColumns: ",
+          "; }>, ",
+          "TypeC",
+          "<{ type: ",
+          "LiteralC",
+          "<\"kibana_advanced_setting\">; }>]>; logColumns: ",
           "ArrayC",
           "<",
           "UnionC",
@@ -7629,7 +7854,11 @@
           "LiteralC",
           "<\"index_name\">; indexName: ",
           "StringC",
-          "; }>]>; logColumns: ",
+          "; }>, ",
+          "TypeC",
+          "<{ type: ",
+          "LiteralC",
+          "<\"kibana_advanced_setting\">; }>]>; logColumns: ",
           "ArrayC",
           "<",
           "UnionC",
@@ -8224,6 +8453,24 @@
       },
       {
         "parentPluginId": "logsShared",
+        "id": "def-common.logSourcesKibanaAdvancedSettingRT",
+        "type": "Object",
+        "tags": [],
+        "label": "logSourcesKibanaAdvancedSettingRT",
+        "description": [],
+        "signature": [
+          "TypeC",
+          "<{ type: ",
+          "LiteralC",
+          "<\"kibana_advanced_setting\">; }>"
+        ],
+        "path": "x-pack/plugins/observability_solution/logs_shared/common/log_views/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "logsShared",
         "id": "def-common.logTimestampColumnRT",
         "type": "Object",
         "tags": [],
@@ -8341,7 +8588,11 @@
           "LiteralC",
           "<\"index_name\">; indexName: ",
           "StringC",
-          "; }>]>; logColumns: ",
+          "; }>, ",
+          "TypeC",
+          "<{ type: ",
+          "LiteralC",
+          "<\"kibana_advanced_setting\">; }>]>; logColumns: ",
           "ArrayC",
           "<",
           "UnionC",

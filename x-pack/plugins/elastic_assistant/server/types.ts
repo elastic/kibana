@@ -10,6 +10,7 @@ import type {
   PluginStartContract as ActionsPluginStart,
 } from '@kbn/actions-plugin/server';
 import type {
+  AuthenticatedUser,
   CoreRequestHandlerContext,
   CoreSetup,
   AnalyticsServiceSetup,
@@ -17,23 +18,41 @@ import type {
   IRouter,
   KibanaRequest,
   Logger,
-  SavedObjectsClientContract,
+  SecurityServiceStart,
 } from '@kbn/core/server';
 import { type MlPluginSetup } from '@kbn/ml-plugin/server';
+import { DynamicStructuredTool, Tool } from '@langchain/core/tools';
 import { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
-import { AuthenticatedUser, SecurityPluginStart } from '@kbn/security-plugin/server';
-import { Tool } from 'langchain/dist/tools/base';
-import { RetrievalQAChain } from 'langchain/chains';
 import { ElasticsearchClient } from '@kbn/core/server';
 import {
+  AttackDiscoveryPostRequestBody,
+  DefendInsightsPostRequestBody,
   AssistantFeatures,
   ExecuteConnectorRequestBody,
-  Replacement,
+  Replacements,
 } from '@kbn/elastic-assistant-common';
+import { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
+import {
+  LicensingApiRequestHandlerContext,
+  LicensingPluginStart,
+} from '@kbn/licensing-plugin/server';
+import {
+  ActionsClientChatBedrockConverse,
+  ActionsClientChatOpenAI,
+  ActionsClientChatVertexAI,
+  ActionsClientGeminiChatModel,
+  ActionsClientLlm,
+} from '@kbn/langchain/server';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+
+import type { GetAIAssistantKnowledgeBaseDataClientParams } from './ai_assistant_data_clients/knowledge_base';
+import { AttackDiscoveryDataClient } from './lib/attack_discovery/persistence';
 import { AIAssistantConversationsDataClient } from './ai_assistant_data_clients/conversations';
 import type { GetRegisteredFeatures, GetRegisteredTools } from './services/app_context';
 import { AIAssistantDataClient } from './ai_assistant_data_clients';
+import { AIAssistantKnowledgeBaseDataClient } from './ai_assistant_data_clients/knowledge_base';
+import type { DefendInsightsDataClient } from './ai_assistant_data_clients/defend_insights';
 
 export const PLUGIN_ID = 'elasticAssistant' as const;
 
@@ -48,6 +67,10 @@ export interface ElasticAssistantPluginStart {
    * Actions plugin start contract.
    */
   actions: ActionsPluginStart;
+  /**
+   * Inference plugin start contract.
+   */
+  inference: InferenceServerStart;
   /**
    * Register features to be used by the elastic assistant.
    *
@@ -88,8 +111,10 @@ export interface ElasticAssistantPluginSetupDependencies {
 }
 export interface ElasticAssistantPluginStartDependencies {
   actions: ActionsPluginStart;
+  inference: InferenceServerStart;
   spaces?: SpacesPluginStart;
-  security: SecurityPluginStart;
+  security: SecurityServiceStart;
+  licensing: LicensingPluginStart;
 }
 
 export interface ElasticAssistantApiRequestHandlerContext {
@@ -102,8 +127,14 @@ export interface ElasticAssistantApiRequestHandlerContext {
   getSpaceId: () => string;
   getCurrentUser: () => AuthenticatedUser | null;
   getAIAssistantConversationsDataClient: () => Promise<AIAssistantConversationsDataClient | null>;
+  getAIAssistantKnowledgeBaseDataClient: (
+    params?: GetAIAssistantKnowledgeBaseDataClientParams
+  ) => Promise<AIAssistantKnowledgeBaseDataClient | null>;
+  getAttackDiscoveryDataClient: () => Promise<AttackDiscoveryDataClient | null>;
+  getDefendInsightsDataClient: () => Promise<DefendInsightsDataClient | null>;
   getAIAssistantPromptsDataClient: () => Promise<AIAssistantDataClient | null>;
   getAIAssistantAnonymizationFieldsDataClient: () => Promise<AIAssistantDataClient | null>;
+  inference: InferenceServerStart;
   telemetry: AnalyticsServiceSetup;
 }
 /**
@@ -111,6 +142,7 @@ export interface ElasticAssistantApiRequestHandlerContext {
  */
 export type ElasticAssistantRequestHandlerContext = CustomRequestHandlerContext<{
   elasticAssistant: ElasticAssistantApiRequestHandlerContext;
+  licensing: LicensingApiRequestHandlerContext;
 }>;
 
 export type ElasticAssistantPluginRouter = IRouter<ElasticAssistantRequestHandlerContext>;
@@ -120,45 +152,43 @@ export type ElasticAssistantPluginCoreSetupDependencies = CoreSetup<
   ElasticAssistantPluginStart
 >;
 
-export type GetElser = (
-  request: KibanaRequest,
-  savedObjectsClient: SavedObjectsClientContract
-) => Promise<string> | never;
-
-export interface InitAssistantResult {
-  assistantResourcesInstalled: boolean;
-  assistantNamespaceResourcesInstalled: boolean;
-  assistantSettingsCreated: boolean;
-  errors: string[];
-}
+export type GetElser = () => Promise<string> | never;
 
 export interface AssistantResourceNames {
   componentTemplate: {
     conversations: string;
+    knowledgeBase: string;
     prompts: string;
     anonymizationFields: string;
-    kb: string;
+    attackDiscovery: string;
+    defendInsights: string;
   };
   indexTemplate: {
     conversations: string;
+    knowledgeBase: string;
     prompts: string;
     anonymizationFields: string;
-    kb: string;
+    attackDiscovery: string;
+    defendInsights: string;
   };
   aliases: {
     conversations: string;
+    knowledgeBase: string;
     prompts: string;
     anonymizationFields: string;
-    kb: string;
+    attackDiscovery: string;
+    defendInsights: string;
   };
   indexPatterns: {
     conversations: string;
+    knowledgeBase: string;
     prompts: string;
     anonymizationFields: string;
-    kb: string;
+    attackDiscovery: string;
+    defendInsights: string;
   };
   pipelines: {
-    kb: string;
+    knowledgeBase: string;
   };
 }
 
@@ -171,18 +201,6 @@ export interface IIndexPatternString {
   secondaryAlias?: string;
 }
 
-export interface PublicAIAssistantDataClient {
-  getConversationsLimitValue: () => number;
-}
-
-export interface IAIAssistantDataClient {
-  client(): PublicAIAssistantDataClient | null;
-}
-
-export interface AIAssistantPrompts {
-  id: string;
-}
-
 /**
  * Interfaces for registering tools to be used by the elastic assistant
  */
@@ -193,19 +211,34 @@ export interface AssistantTool {
   description: string;
   sourceRegister: string;
   isSupported: (params: AssistantToolParams) => boolean;
-  getTool: (params: AssistantToolParams) => Tool | null;
+  getTool: (params: AssistantToolParams) => Tool | DynamicStructuredTool | null;
 }
+
+export type AssistantToolLlm =
+  | ActionsClientChatBedrockConverse
+  | ActionsClientChatOpenAI
+  | ActionsClientGeminiChatModel
+  | ActionsClientChatVertexAI;
 
 export interface AssistantToolParams {
   alertsIndexPattern?: string;
-  allow?: string[];
-  allowReplacement?: string[];
+  anonymizationFields?: AnonymizationFieldResponse[];
+  inference?: InferenceServerStart;
   isEnabledKnowledgeBase: boolean;
-  chain: RetrievalQAChain;
+  connectorId?: string;
   esClient: ElasticsearchClient;
-  modelExists: boolean;
-  onNewReplacements?: (newReplacements: Replacement[]) => void;
-  replacements?: Replacement[];
-  request: KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
+  kbDataClient?: AIAssistantKnowledgeBaseDataClient;
+  langChainTimeout?: number;
+  llm?: ActionsClientLlm | AssistantToolLlm;
+  isOssModel?: boolean;
+  logger: Logger;
+  onNewReplacements?: (newReplacements: Replacements) => void;
+  replacements?: Replacements;
+  request: KibanaRequest<
+    unknown,
+    unknown,
+    ExecuteConnectorRequestBody | AttackDiscoveryPostRequestBody | DefendInsightsPostRequestBody
+  >;
   size?: number;
+  telemetry?: AnalyticsServiceSetup;
 }

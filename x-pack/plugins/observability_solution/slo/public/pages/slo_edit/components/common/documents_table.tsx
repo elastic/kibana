@@ -16,12 +16,12 @@ import { EuiResizableContainer, EuiProgress, EuiCallOut, EuiSpacer } from '@elas
 import { buildFilter, FILTERS, TimeRange } from '@kbn/es-query';
 import { FieldPath, useFormContext } from 'react-hook-form';
 import { Serializable } from '@kbn/utility-types';
-import { useFieldSidebar } from './use_field_sidebar';
-import { useTableDocs } from './use_table_docs';
-import { SearchBarProps } from './query_builder';
-import { QuerySearchBar } from './query_search_bar';
+import { useKibana } from '../../../../hooks/use_kibana';
 import { CreateSLOForm } from '../../types';
-import { useKibana } from '../../../../utils/kibana_react';
+import { QuerySearchBar } from './query_search_bar';
+import { SearchBarProps } from './query_builder';
+import { useTableDocs } from './use_table_docs';
+import { useFieldSidebar } from './use_field_sidebar';
 
 export function DocumentsTable({
   dataView,
@@ -97,7 +97,10 @@ export function DocumentsTable({
               >
                 {loading && <EuiProgress size="xs" color="accent" />}
                 <UnifiedDataTable
-                  rows={buildDataTableRecordList((data?.hits?.hits ?? []) as any, dataView)}
+                  rows={buildDataTableRecordList({
+                    records: (data?.hits?.hits ?? []) as any,
+                    dataView,
+                  })}
                   showColumnTokens
                   dataView={dataView}
                   onFilter={(fieldK, val, mode) => {
@@ -128,7 +131,15 @@ export function DocumentsTable({
                       }
                     }
                   }}
-                  services={services}
+                  services={{
+                    theme: services.theme,
+                    fieldFormats: services.fieldFormats,
+                    uiSettings: services.uiSettings,
+                    dataViewFieldEditor: services.dataViewFieldEditor,
+                    toastNotifications: services.notifications.toasts,
+                    storage: services.storage,
+                    data: services.data,
+                  }}
                   ariaLabelledBy={i18n.translate('xpack.slo.edit.documentsTableAriaLabel', {
                     defaultMessage: 'Documents table',
                   })}

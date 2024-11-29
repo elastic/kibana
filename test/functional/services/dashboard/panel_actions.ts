@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
@@ -11,226 +12,216 @@ import { FtrService } from '../../ftr_provider_context';
 
 const REMOVE_PANEL_DATA_TEST_SUBJ = 'embeddablePanelAction-deletePanel';
 const EDIT_PANEL_DATA_TEST_SUBJ = 'embeddablePanelAction-editPanel';
-const INLINE_EDIT_PANEL_DATA_TEST_SUBJ = 'embeddablePanelAction-ACTION_CONFIGURE_IN_LENS';
 const EDIT_IN_LENS_EDITOR_DATA_TEST_SUBJ = 'navigateToLensEditorLink';
-const REPLACE_PANEL_DATA_TEST_SUBJ = 'embeddablePanelAction-replacePanel';
 const CLONE_PANEL_DATA_TEST_SUBJ = 'embeddablePanelAction-clonePanel';
 const TOGGLE_EXPAND_PANEL_DATA_TEST_SUBJ = 'embeddablePanelAction-togglePanel';
 const CUSTOMIZE_PANEL_DATA_TEST_SUBJ = 'embeddablePanelAction-ACTION_CUSTOMIZE_PANEL';
 const OPEN_CONTEXT_MENU_ICON_DATA_TEST_SUBJ = 'embeddablePanelToggleMenuIcon';
 const OPEN_INSPECTOR_TEST_SUBJ = 'embeddablePanelAction-openInspector';
 const COPY_PANEL_TO_DATA_TEST_SUBJ = 'embeddablePanelAction-copyToDashboard';
+const LEGACY_SAVE_TO_LIBRARY_TEST_SUBJ = 'embeddablePanelAction-legacySaveToLibrary';
 const SAVE_TO_LIBRARY_TEST_SUBJ = 'embeddablePanelAction-saveToLibrary';
+const LEGACY_UNLINK_FROM_LIBRARY_TEST_SUBJ = 'embeddablePanelAction-legacyUnlinkFromLibrary';
 const UNLINK_FROM_LIBRARY_TEST_SUBJ = 'embeddablePanelAction-unlinkFromLibrary';
 const CONVERT_TO_LENS_TEST_SUBJ = 'embeddablePanelAction-ACTION_EDIT_IN_LENS';
 
-const DASHBOARD_TOP_OFFSET = 96 + 105; // 96 for Kibana navigation bar + 105 for dashboard top nav bar (in edit mode)
+const DASHBOARD_MARGIN_SIZE = 8;
 
 export class DashboardPanelActionsService extends FtrService {
   private readonly log = this.ctx.getService('log');
   private readonly retry = this.ctx.getService('retry');
-  private readonly browser = this.ctx.getService('browser');
+  private readonly find = this.ctx.getService('find');
   private readonly inspector = this.ctx.getService('inspector');
   private readonly testSubjects = this.ctx.getService('testSubjects');
+  private readonly browser = this.ctx.getService('browser');
 
   private readonly header = this.ctx.getPageObject('header');
   private readonly common = this.ctx.getPageObject('common');
   private readonly dashboard = this.ctx.getPageObject('dashboard');
 
-  async findContextMenu(parent?: WebElementWrapper) {
-    return parent
-      ? await this.testSubjects.findDescendant(OPEN_CONTEXT_MENU_ICON_DATA_TEST_SUBJ, parent)
+  async getContainerTopOffset() {
+    const containerSelector = (await this.find.existsByCssSelector('.dashboardContainer'))
+      ? '.dashboardContainer'
+      : '.canvasContainer';
+    return (
+      (await (await this.find.byCssSelector(containerSelector)).getPosition()).y +
+      DASHBOARD_MARGIN_SIZE
+    );
+  }
+
+  async findContextMenu(wrapper?: WebElementWrapper) {
+    this.log.debug('findContextMenu');
+    return wrapper
+      ? await wrapper.findByTestSubject(OPEN_CONTEXT_MENU_ICON_DATA_TEST_SUBJ)
       : await this.testSubjects.find(OPEN_CONTEXT_MENU_ICON_DATA_TEST_SUBJ);
   }
 
-  async isContextMenuIconVisible() {
-    this.log.debug('isContextMenuIconVisible');
-    return await this.testSubjects.exists(OPEN_CONTEXT_MENU_ICON_DATA_TEST_SUBJ);
+  async scrollPanelIntoView(wrapper?: WebElementWrapper) {
+    this.log.debug(`scrollPanelIntoView`);
+    wrapper = wrapper || (await this.getPanelWrapper());
+    const yOffset = (await wrapper.getPosition()).y;
+    await this.browser.execute(`
+        const scrollY = window.scrollY;
+        window.scrollBy(0, scrollY - ${yOffset});
+      `);
+
+    const containerTop = await this.getContainerTopOffset();
+
+    await wrapper.moveMouseTo({
+      topOffset: containerTop,
+    });
   }
 
-  async toggleContextMenu(parent?: WebElementWrapper) {
-    this.log.debug(`toggleContextMenu(${parent})`);
-    if (parent) {
-      await parent.scrollIntoViewIfNecessary(DASHBOARD_TOP_OFFSET);
-      await this.browser.getActions().move({ x: 0, y: 0, origin: parent._webElement }).perform();
-    } else {
-      await this.testSubjects.moveMouseTo('dashboardPanelTitle');
-    }
-    const toggleMenuItem = await this.findContextMenu(parent);
-    await toggleMenuItem.click(DASHBOARD_TOP_OFFSET);
+  async toggleContextMenu(wrapper?: WebElementWrapper) {
+    this.log.debug(`toggleContextMenu`);
+    await this.scrollPanelIntoView(wrapper);
+    const toggleMenuItem = await this.findContextMenu(wrapper);
+    await toggleMenuItem.click(await this.getContainerTopOffset());
+  }
+
+  async toggleContextMenuByTitle(title = '') {
+    this.log.debug(`toggleContextMenu(${title})`);
+    const wrapper = await this.getPanelWrapper(title);
+    await this.toggleContextMenu(wrapper);
   }
 
   async expectContextMenuToBeOpen() {
     this.log.debug('expectContextMenuToBeOpen');
-    await this.testSubjects.existOrFail('embeddablePanelContextMenuOpen');
+    await this.testSubjects.existOrFail('embeddablePanelContextMenuOpen', { allowHidden: true });
   }
 
-  async openContextMenu(parent?: WebElementWrapper) {
-    this.log.debug(`openContextMenu(${parent}`);
-    await this.toggleContextMenu(parent);
+  async openContextMenu(wrapper?: WebElementWrapper) {
+    this.log.debug(`openContextMenu(${wrapper}`);
+    const open = await this.testSubjects.exists('embeddablePanelContextMenuOpen');
+    if (!open) await this.toggleContextMenu(wrapper);
     await this.expectContextMenuToBeOpen();
   }
 
-  async hasContextMenuMoreItem() {
-    return await this.testSubjects.exists('embeddablePanelMore-mainMenu');
+  async openContextMenuByTitle(title = '') {
+    this.log.debug(`openContextMenuByTitle(${title})`);
+    const wrapper = await this.getPanelWrapper(title);
+    await this.openContextMenu(wrapper);
   }
 
-  async clickContextMenuMoreItem() {
-    this.log.debug('clickContextMenuMoreItem');
-    await this.expectContextMenuToBeOpen();
-    const hasMoreSubPanel = await this.hasContextMenuMoreItem();
-    if (hasMoreSubPanel) {
-      await this.testSubjects.click('embeddablePanelMore-mainMenu');
+  async clickPanelAction(testSubject: string, wrapper?: WebElementWrapper) {
+    this.log.debug(`clickPanelAction(${testSubject})`);
+    wrapper = wrapper || (await this.getPanelWrapper());
+    await this.scrollPanelIntoView(wrapper);
+    const exists = await this.testSubjects.descendantExists(testSubject, wrapper);
+    let action;
+    if (!exists) {
+      await this.openContextMenu(wrapper);
+      action = await this.testSubjects.find(testSubject);
+    } else {
+      action = await this.testSubjects.findDescendant(testSubject, wrapper);
     }
+
+    await action.click(await this.getContainerTopOffset());
   }
 
-  async openContextMenuMorePanel(parent?: WebElementWrapper) {
-    await this.openContextMenu(parent);
-    await this.clickContextMenuMoreItem();
+  async clickPanelActionByTitle(testSubject: string, title = '') {
+    this.log.debug(`clickPanelActionByTitle(${testSubject},${title})`);
+    const wrapper = await this.getPanelWrapper(title);
+    await this.clickPanelAction(testSubject, wrapper);
   }
 
-  private async navigateToEditorFromFlyout() {
-    await this.testSubjects.clickWhenNotDisabledWithoutRetry(INLINE_EDIT_PANEL_DATA_TEST_SUBJ);
+  async navigateToEditorFromFlyout(wrapper?: WebElementWrapper) {
+    this.log.debug('navigateToEditorFromFlyout');
+    // make sure the context menu is open before proceeding
+    await this.openContextMenu();
+    await this.clickPanelAction(EDIT_PANEL_DATA_TEST_SUBJ);
     await this.header.waitUntilLoadingHasFinished();
-    await this.testSubjects.click(EDIT_IN_LENS_EDITOR_DATA_TEST_SUBJ);
+    await this.testSubjects.clickWhenNotDisabledWithoutRetry(EDIT_IN_LENS_EDITOR_DATA_TEST_SUBJ);
     const isConfirmModalVisible = await this.testSubjects.exists('confirmModalConfirmButton');
     if (isConfirmModalVisible) {
-      await this.testSubjects.click('confirmModalConfirmButton', 20000);
+      await this.testSubjects.clickWhenNotDisabledWithoutRetry('confirmModalConfirmButton', {
+        timeout: 20000,
+      });
     }
   }
 
-  async clickInlineEdit() {
+  async clickInlineEdit(wrapper?: WebElementWrapper) {
     this.log.debug('clickInlineEditAction');
-    await this.expectContextMenuToBeOpen();
-    const isInlineEditingActionVisible = await this.testSubjects.exists(
-      INLINE_EDIT_PANEL_DATA_TEST_SUBJ
-    );
-    if (!isInlineEditingActionVisible) await this.clickContextMenuMoreItem();
-    await this.testSubjects.clickWhenNotDisabledWithoutRetry(INLINE_EDIT_PANEL_DATA_TEST_SUBJ);
+    await this.clickPanelAction(EDIT_PANEL_DATA_TEST_SUBJ, wrapper);
     await this.header.waitUntilLoadingHasFinished();
     await this.common.waitForTopNavToBeVisible();
   }
 
-  /** The dashboard/canvas panels can be either edited on their editor or inline.
+  /**
+   * The dashboard/canvas panels can be either edited on their editor or inline.
    * The inline editing panels allow the navigation to the editor after the flyout opens
    */
-  async clickEdit() {
-    this.log.debug('clickEdit');
-    await this.expectContextMenuToBeOpen();
-    const isActionVisible = await this.testSubjects.exists(EDIT_PANEL_DATA_TEST_SUBJ);
-    const isInlineEditingActionVisible = await this.testSubjects.exists(
-      INLINE_EDIT_PANEL_DATA_TEST_SUBJ
-    );
-    if (!isActionVisible && !isInlineEditingActionVisible) await this.clickContextMenuMoreItem();
-    // navigate to the editor
-    if (await this.testSubjects.exists(EDIT_PANEL_DATA_TEST_SUBJ)) {
-      await this.testSubjects.clickWhenNotDisabledWithoutRetry(EDIT_PANEL_DATA_TEST_SUBJ);
+  async clickEdit(wrapper?: WebElementWrapper) {
+    this.log.debug(`clickEdit`);
+    wrapper = wrapper || (await this.getPanelWrapper());
+    await this.scrollPanelIntoView(wrapper);
+    if (await this.testSubjects.descendantExists(EDIT_PANEL_DATA_TEST_SUBJ, wrapper)) {
+      // navigate to the editor
+      await this.clickPanelAction(EDIT_PANEL_DATA_TEST_SUBJ, wrapper);
+    } else {
       // open the flyout and then navigate to the editor
-    } else {
-      await this.navigateToEditorFromFlyout();
+      await this.navigateToEditorFromFlyout(wrapper);
     }
     await this.header.waitUntilLoadingHasFinished();
     await this.common.waitForTopNavToBeVisible();
   }
 
-  /** The dashboard/canvas panels can be either edited on their editor or inline.
+  /**
+   * The dashboard/canvas panels can be either edited on their editor or inline.
    * The inline editing panels allow the navigation to the editor after the flyout opens
    */
-  async editPanelByTitle(title?: string) {
+  async editPanelByTitle(title = '') {
     this.log.debug(`editPanelByTitle(${title})`);
-    if (title) {
-      const panelOptions = await this.getPanelHeading(title);
-      await this.openContextMenu(panelOptions);
-    } else {
-      await this.openContextMenu();
-    }
-    if (await this.testSubjects.exists(EDIT_PANEL_DATA_TEST_SUBJ)) {
-      await this.testSubjects.clickWhenNotDisabledWithoutRetry(EDIT_PANEL_DATA_TEST_SUBJ);
-    } else {
-      await this.navigateToEditorFromFlyout();
-    }
+    const wrapper = await this.getPanelWrapper(title);
+    await this.clickEdit(wrapper);
   }
 
   async clickExpandPanelToggle() {
     this.log.debug(`clickExpandPanelToggle`);
-    await this.expectContextMenuToBeOpen();
-    const isActionVisible = await this.testSubjects.exists(TOGGLE_EXPAND_PANEL_DATA_TEST_SUBJ);
-    if (!isActionVisible) await this.clickContextMenuMoreItem();
-    await this.testSubjects.click(TOGGLE_EXPAND_PANEL_DATA_TEST_SUBJ);
+    await this.openContextMenu();
+    await this.clickPanelAction(TOGGLE_EXPAND_PANEL_DATA_TEST_SUBJ);
   }
 
-  async removePanel(parent?: WebElementWrapper) {
+  async removePanel(wrapper?: WebElementWrapper) {
     this.log.debug('removePanel');
-    await this.openContextMenu(parent);
-    const isActionVisible = await this.testSubjects.exists(REMOVE_PANEL_DATA_TEST_SUBJ);
-    if (!isActionVisible) await this.clickContextMenuMoreItem();
-    const isPanelActionVisible = await this.testSubjects.exists(REMOVE_PANEL_DATA_TEST_SUBJ);
-    if (!isPanelActionVisible) await this.clickContextMenuMoreItem();
-    await this.testSubjects.click(REMOVE_PANEL_DATA_TEST_SUBJ);
+    await this.clickPanelAction(REMOVE_PANEL_DATA_TEST_SUBJ, wrapper);
   }
 
-  async removePanelByTitle(title: string) {
-    const header = await this.getPanelHeading(title);
-    this.log.debug('found header? ', Boolean(header));
-    await this.removePanel(header);
+  async removePanelByTitle(title = '') {
+    this.log.debug(`removePanel(${title})`);
+    const wrapper = await this.getPanelWrapper(title);
+    await this.removePanel(wrapper);
   }
 
-  async customizePanel(parent?: WebElementWrapper) {
-    this.log.debug('customizePanel');
-    await this.openContextMenu(parent);
-    const isActionVisible = await this.testSubjects.exists(CUSTOMIZE_PANEL_DATA_TEST_SUBJ);
-    if (!isActionVisible) await this.clickContextMenuMoreItem();
-    const isPanelActionVisible = await this.testSubjects.exists(CUSTOMIZE_PANEL_DATA_TEST_SUBJ);
-    if (!isPanelActionVisible) await this.clickContextMenuMoreItem();
-    await this.testSubjects.click(CUSTOMIZE_PANEL_DATA_TEST_SUBJ);
+  async customizePanel(title = '') {
+    this.log.debug(`customizePanel(${title})`);
+    await this.clickPanelActionByTitle(CUSTOMIZE_PANEL_DATA_TEST_SUBJ, title);
   }
 
-  async replacePanelByTitle(title?: string) {
-    this.log.debug(`replacePanel(${title})`);
-    if (title) {
-      const panelOptions = await this.getPanelHeading(title);
-      await this.openContextMenu(panelOptions);
-    } else {
-      await this.openContextMenu();
-    }
-    const actionExists = await this.testSubjects.exists(REPLACE_PANEL_DATA_TEST_SUBJ);
-    if (!actionExists) {
-      await this.clickContextMenuMoreItem();
-    }
-    await this.testSubjects.click(REPLACE_PANEL_DATA_TEST_SUBJ);
-  }
-
-  async clonePanelByTitle(title?: string) {
+  async clonePanel(title = '') {
     this.log.debug(`clonePanel(${title})`);
-    if (title) {
-      const panelOptions = await this.getPanelHeading(title);
-      await this.openContextMenu(panelOptions);
-    } else {
-      await this.openContextMenu();
-    }
-    await this.testSubjects.click(CLONE_PANEL_DATA_TEST_SUBJ);
+    await this.clickPanelActionByTitle(CLONE_PANEL_DATA_TEST_SUBJ, title);
     await this.dashboard.waitForRenderComplete();
   }
 
-  async openCopyToModalByTitle(title?: string) {
+  async openCopyToModalByTitle(title = '') {
     this.log.debug(`copyPanelTo(${title})`);
-    if (title) {
-      const panelOptions = await this.getPanelHeading(title);
-      await this.openContextMenu(panelOptions);
-    } else {
-      await this.openContextMenu();
-    }
-    const isActionVisible = await this.testSubjects.exists(COPY_PANEL_TO_DATA_TEST_SUBJ);
-    if (!isActionVisible) await this.clickContextMenuMoreItem();
-    await this.testSubjects.click(COPY_PANEL_TO_DATA_TEST_SUBJ);
+    await this.clickPanelActionByTitle(COPY_PANEL_TO_DATA_TEST_SUBJ, title);
   }
 
-  async openInspectorByTitle(title: string) {
-    const header = await this.getPanelHeading(title);
-    await this.openInspector(header);
+  async openInspector(wrapper?: WebElementWrapper) {
+    this.log.debug(`openInspector`);
+    await this.clickPanelAction(OPEN_INSPECTOR_TEST_SUBJ, wrapper);
   }
 
-  async getSearchSessionIdByTitle(title: string) {
+  async openInspectorByTitle(title = '') {
+    this.log.debug(`openInspector(${title})`);
+    const wrapper = await this.getPanelWrapper(title);
+    await this.openInspector(wrapper);
+  }
+
+  async getSearchSessionIdByTitle(title = '') {
+    this.log.debug(`getSearchSessionId(${title})`);
     await this.openInspectorByTitle(title);
     await this.inspector.openInspectorRequestsView();
     const searchSessionId = await (
@@ -240,7 +231,8 @@ export class DashboardPanelActionsService extends FtrService {
     return searchSessionId;
   }
 
-  async getSearchResponseByTitle(title: string) {
+  async getSearchResponseByTitle(title = '') {
+    this.log.debug(`setSearchResponse(${title})`);
     await this.openInspectorByTitle(title);
     await this.inspector.openInspectorRequestsView();
     const response = await this.inspector.getResponse();
@@ -248,124 +240,133 @@ export class DashboardPanelActionsService extends FtrService {
     return response;
   }
 
-  async openInspector(parent?: WebElementWrapper) {
-    await this.openContextMenu(parent);
-    const exists = await this.testSubjects.exists(OPEN_INSPECTOR_TEST_SUBJ);
-    if (!exists) {
-      await this.clickContextMenuMoreItem();
-    }
-    await this.testSubjects.click(OPEN_INSPECTOR_TEST_SUBJ);
+  async legacyUnlinkFromLibrary(title = '') {
+    this.log.debug(`legacyUnlinkFromLibrary(${title}`);
+    await this.clickPanelActionByTitle(LEGACY_UNLINK_FROM_LIBRARY_TEST_SUBJ, title);
+    await this.testSubjects.existOrFail('unlinkPanelSuccess');
+    await this.expectNotLinkedToLibrary(title, true);
   }
 
-  async unlinkFromLibary(parent?: WebElementWrapper) {
-    this.log.debug('unlinkFromLibrary');
-    await this.openContextMenu(parent);
-    const exists = await this.testSubjects.exists(UNLINK_FROM_LIBRARY_TEST_SUBJ);
-    if (!exists) {
-      await this.clickContextMenuMoreItem();
-    }
-    await this.testSubjects.click(UNLINK_FROM_LIBRARY_TEST_SUBJ);
-    await this.testSubjects.waitForDeleted(
-      'embeddablePanelNotification-ACTION_LIBRARY_NOTIFICATION'
-    );
+  async unlinkFromLibrary(title = '') {
+    this.log.debug(`unlinkFromLibrary(${title})`);
+    await this.clickPanelActionByTitle(UNLINK_FROM_LIBRARY_TEST_SUBJ, title);
+    await this.testSubjects.existOrFail('unlinkPanelSuccess');
+    await this.expectNotLinkedToLibrary(title);
   }
 
-  async saveToLibrary(newTitle: string, parent?: WebElementWrapper) {
-    this.log.debug('saveToLibrary');
-    await this.openContextMenu(parent);
-    const exists = await this.testSubjects.exists(SAVE_TO_LIBRARY_TEST_SUBJ);
-    if (!exists) {
-      await this.clickContextMenuMoreItem();
-    }
-    await this.testSubjects.click(SAVE_TO_LIBRARY_TEST_SUBJ);
+  async legacySaveToLibrary(newTitle = '', oldTitle = '') {
+    this.log.debug(`legacySaveToLibrary(${newTitle},${oldTitle})`);
+    await this.clickPanelActionByTitle(LEGACY_SAVE_TO_LIBRARY_TEST_SUBJ, oldTitle);
     await this.testSubjects.setValue('savedObjectTitle', newTitle, {
       clearWithKeyboard: true,
     });
-    await this.testSubjects.click('confirmSaveSavedObjectButton');
-    await this.retry.try(async () => {
-      await this.testSubjects.existOrFail(
-        'embeddablePanelNotification-ACTION_LIBRARY_NOTIFICATION'
-      );
+    await this.testSubjects.clickWhenNotDisabledWithoutRetry('confirmSaveSavedObjectButton');
+    await this.testSubjects.existOrFail('addPanelToLibrarySuccess');
+    await this.expectLinkedToLibrary(newTitle, true);
+  }
+
+  async saveToLibrary(newTitle = '', oldTitle = '') {
+    this.log.debug(`saveToLibraryByTitle(${newTitle},${oldTitle})`);
+    await this.clickPanelActionByTitle(SAVE_TO_LIBRARY_TEST_SUBJ, oldTitle);
+    await this.testSubjects.setValue('savedObjectTitle', newTitle, {
+      clearWithKeyboard: true,
     });
+    await this.testSubjects.clickWhenNotDisabledWithoutRetry('confirmSaveSavedObjectButton');
+    await this.testSubjects.existOrFail('addPanelToLibrarySuccess');
+    await this.expectLinkedToLibrary(newTitle);
   }
 
-  async expectExistsPanelAction(testSubject: string, title?: string) {
-    this.log.debug('expectExistsPanelAction', testSubject);
+  async panelActionExists(testSubject: string, wrapper?: WebElementWrapper) {
+    this.log.debug(`panelActionExists(${testSubject})`);
+    return wrapper
+      ? await this.testSubjects.descendantExists(testSubject, wrapper)
+      : await this.testSubjects.exists(testSubject, { allowHidden: true });
+  }
 
-    const panelWrapper = title ? await this.getPanelHeading(title) : undefined;
-    await this.openContextMenu(panelWrapper);
+  async panelActionExistsByTitle(testSubject: string, title = '') {
+    this.log.debug(`panelActionExists(${testSubject}) on "${title}"`);
+    const wrapper = await this.getPanelWrapper(title);
+    return await this.panelActionExists(testSubject, wrapper);
+  }
 
-    if (!(await this.testSubjects.exists(testSubject))) {
-      if (await this.hasContextMenuMoreItem()) {
-        await this.clickContextMenuMoreItem();
-      }
-      await this.testSubjects.existOrFail(testSubject);
+  async expectExistsPanelAction(testSubject: string, title = '') {
+    this.log.debug('expectExistsPanelAction', testSubject, title);
+
+    const wrapper = await this.getPanelWrapper(title);
+
+    const exists = await this.panelActionExists(testSubject, wrapper);
+
+    if (!exists) {
+      await this.openContextMenu(wrapper);
+      await this.testSubjects.existOrFail(testSubject, { allowHidden: true });
+      await this.toggleContextMenu(wrapper);
     }
-    await this.toggleContextMenu(panelWrapper);
   }
 
-  async expectExistsRemovePanelAction() {
+  async expectExistsRemovePanelAction(title = '') {
     this.log.debug('expectExistsRemovePanelAction');
-    await this.expectExistsPanelAction(REMOVE_PANEL_DATA_TEST_SUBJ);
+    await this.expectExistsPanelAction(REMOVE_PANEL_DATA_TEST_SUBJ, title);
   }
 
-  async expectExistsEditPanelAction(title?: string, allowsInlineEditing?: boolean) {
+  async expectExistsEditPanelAction(title = '') {
     this.log.debug('expectExistsEditPanelAction');
-    let testSubj = EDIT_PANEL_DATA_TEST_SUBJ;
-    if (allowsInlineEditing) {
-      testSubj = INLINE_EDIT_PANEL_DATA_TEST_SUBJ;
-    }
+    const testSubj = EDIT_PANEL_DATA_TEST_SUBJ;
     await this.expectExistsPanelAction(testSubj, title);
   }
 
-  async expectExistsReplacePanelAction() {
-    this.log.debug('expectExistsReplacePanelAction');
-    await this.expectExistsPanelAction(REPLACE_PANEL_DATA_TEST_SUBJ);
-  }
-
-  async expectExistsClonePanelAction() {
+  async expectExistsClonePanelAction(title = '') {
     this.log.debug('expectExistsClonePanelAction');
-    await this.expectExistsPanelAction(CLONE_PANEL_DATA_TEST_SUBJ);
+    await this.expectExistsPanelAction(CLONE_PANEL_DATA_TEST_SUBJ, title);
   }
 
-  async expectExistsToggleExpandAction() {
+  async expectExistsToggleExpandAction(title = '') {
     this.log.debug('expectExistsToggleExpandAction');
-    await this.expectExistsPanelAction(TOGGLE_EXPAND_PANEL_DATA_TEST_SUBJ);
+    await this.expectExistsPanelAction(TOGGLE_EXPAND_PANEL_DATA_TEST_SUBJ, title);
   }
 
-  async expectMissingPanelAction(testSubject: string) {
-    this.log.debug('expectMissingPanelAction', testSubject);
-    await this.openContextMenu();
-    await this.testSubjects.missingOrFail(testSubject);
-    if (await this.hasContextMenuMoreItem()) {
-      await this.clickContextMenuMoreItem();
+  async expectMissingPanelAction(testSubject: string, title = '') {
+    this.log.debug('expectMissingPanelAction', testSubject, title);
+    const wrapper = await this.getPanelWrapper(title);
+
+    const exists = await this.panelActionExists(testSubject, wrapper);
+
+    if (!exists) {
+      await this.openContextMenu(wrapper);
       await this.testSubjects.missingOrFail(testSubject);
+      await this.toggleContextMenu(wrapper);
     }
-    await this.toggleContextMenu();
   }
 
-  async expectMissingEditPanelAction() {
+  async expectMissingEditPanelAction(title = '') {
     this.log.debug('expectMissingEditPanelAction');
-    await this.expectMissingPanelAction(EDIT_PANEL_DATA_TEST_SUBJ);
+    await this.expectMissingPanelAction(EDIT_PANEL_DATA_TEST_SUBJ, title);
   }
 
-  async expectMissingReplacePanelAction() {
-    this.log.debug('expectMissingReplacePanelAction');
-    await this.expectMissingPanelAction(REPLACE_PANEL_DATA_TEST_SUBJ);
-  }
-
-  async expectMissingDuplicatePanelAction() {
+  async expectMissingDuplicatePanelAction(title = '') {
     this.log.debug('expectMissingDuplicatePanelAction');
-    await this.expectMissingPanelAction(CLONE_PANEL_DATA_TEST_SUBJ);
+    await this.expectMissingPanelAction(CLONE_PANEL_DATA_TEST_SUBJ, title);
   }
 
-  async expectMissingRemovePanelAction() {
+  async expectMissingRemovePanelAction(title = '') {
     this.log.debug('expectMissingRemovePanelAction');
-    await this.expectMissingPanelAction(REMOVE_PANEL_DATA_TEST_SUBJ);
+    await this.expectMissingPanelAction(REMOVE_PANEL_DATA_TEST_SUBJ, title);
   }
 
-  async getPanelHeading(title: string) {
+  async getPanelHeading(title = '') {
+    this.log.debug(`getPanelHeading(${title})`);
+    if (!title) return await this.find.byClassName('embPanel__wrapper');
     return await this.testSubjects.find(`embeddablePanelHeading-${title.replace(/\s/g, '')}`);
+  }
+
+  async getPanelWrapper(title = '') {
+    this.log.debug(`getPanelWrapper(${title})`);
+    if (!title) return await this.find.byClassName('embPanel__hoverActionsAnchor');
+    return await this.testSubjects.find(`embeddablePanelHoverActions-${title.replace(/\s/g, '')}`);
+  }
+
+  async getPanelWrapperById(embeddableId: string) {
+    this.log.debug(`getPanelWrapperById(${embeddableId})`);
+    return await this.find.byCssSelector(`[data-test-embeddable-id="${embeddableId}"]`);
   }
 
   async getActionWebElementByText(text: string): Promise<WebElementWrapper> {
@@ -382,25 +383,57 @@ export class DashboardPanelActionsService extends FtrService {
     throw new Error(`No action matching text "${text}"`);
   }
 
-  async canConvertToLens(parent?: WebElementWrapper) {
+  async canConvertToLens(wrapper?: WebElementWrapper) {
     this.log.debug('canConvertToLens');
-    await this.openContextMenu(parent);
-    const isActionVisible = await this.testSubjects.exists(CONVERT_TO_LENS_TEST_SUBJ);
-    if (!isActionVisible) await this.clickContextMenuMoreItem();
-    const isPanelActionVisible = await this.testSubjects.exists(CONVERT_TO_LENS_TEST_SUBJ);
-    if (!isPanelActionVisible) await this.clickContextMenuMoreItem();
+    await this.openContextMenu(wrapper);
     return await this.testSubjects.exists(CONVERT_TO_LENS_TEST_SUBJ, { timeout: 500 });
   }
 
-  async convertToLens(parent?: WebElementWrapper) {
+  async canConvertToLensByTitle(title = '') {
+    this.log.debug(`canConvertToLens(${title})`);
+    const wrapper = await this.getPanelWrapper(title);
+    return await this.canConvertToLens(wrapper);
+  }
+
+  async convertToLens(wrapper?: WebElementWrapper) {
     this.log.debug('convertToLens');
 
     await this.retry.try(async () => {
-      if (!(await this.canConvertToLens(parent))) {
+      if (!(await this.canConvertToLens(wrapper))) {
         throw new Error('Convert to Lens option not found');
       }
 
-      await this.testSubjects.click(CONVERT_TO_LENS_TEST_SUBJ);
+      await this.testSubjects.clickWhenNotDisabledWithoutRetry(CONVERT_TO_LENS_TEST_SUBJ);
     });
+  }
+
+  async convertToLensByTitle(title = '') {
+    this.log.debug(`convertToLens(${title})`);
+    const wrapper = await this.getPanelWrapper(title);
+    return await this.convertToLens(wrapper);
+  }
+
+  async expectLinkedToLibrary(title = '', legacy?: boolean) {
+    this.log.debug(`expectLinkedToLibrary(${title})`);
+    const isViewMode = await this.dashboard.getIsInViewMode();
+    if (isViewMode) await this.dashboard.switchToEditMode();
+    if (legacy) {
+      await this.expectExistsPanelAction(LEGACY_UNLINK_FROM_LIBRARY_TEST_SUBJ, title);
+    } else {
+      await this.expectExistsPanelAction(UNLINK_FROM_LIBRARY_TEST_SUBJ, title);
+    }
+    if (isViewMode) await this.dashboard.clickCancelOutOfEditMode();
+  }
+
+  async expectNotLinkedToLibrary(title = '', legacy?: boolean) {
+    this.log.debug(`expectNotLinkedToLibrary(${title})`);
+    const isViewMode = await this.dashboard.getIsInViewMode();
+    if (isViewMode) await this.dashboard.switchToEditMode();
+    if (legacy) {
+      await this.expectExistsPanelAction(LEGACY_SAVE_TO_LIBRARY_TEST_SUBJ, title);
+    } else {
+      await this.expectExistsPanelAction(SAVE_TO_LIBRARY_TEST_SUBJ, title);
+    }
+    if (isViewMode) await this.dashboard.clickCancelOutOfEditMode();
   }
 }

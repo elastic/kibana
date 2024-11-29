@@ -22,8 +22,11 @@ export type Section = 'connectors' | 'rules' | 'alerts' | 'logs';
 
 export const routeToHome = `/`;
 export const routeToConnectors = `/connectors`;
+export const routeToConnectorEdit = `/connectors/:connectorId`;
 export const routeToRules = `/rules`;
 export const routeToLogs = `/logs`;
+export const routeToCreateRule = '/rules/create';
+export const routeToEditRule = '/rules/edit';
 export const legacyRouteToAlerts = `/alerts`;
 export const legacyRouteToRuleDetails = `/alert/:alertId`;
 
@@ -37,8 +40,7 @@ export const recoveredActionGroupMessage = i18n.translate(
 export const summaryMessage = i18n.translate(
   'xpack.triggersActionsUI.sections.actionForm.SummaryMessage',
   {
-    defaultMessage:
-      'The system has detected \\{\\{alerts.new.count\\}\\} new, \\{\\{alerts.ongoing.count\\}\\} ongoing, and \\{\\{alerts.recovered.count\\}\\} recovered alerts.',
+    defaultMessage: `The system has detected '{{alerts.new.count}}' new, '{{alerts.ongoing.count}}' ongoing, and '{{alerts.recovered.count}}' recovered alerts.`,
   }
 );
 

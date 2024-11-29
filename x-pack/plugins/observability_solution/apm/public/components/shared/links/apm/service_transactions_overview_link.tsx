@@ -51,10 +51,6 @@ export function ServiceOrTransactionsOverviewLink({
     transactionType,
   });
   return (
-    <EuiLink
-      data-test-subj="apmServiceOrTransactionsOverviewLinkLink"
-      href={href}
-      {...rest}
-    />
+    <EuiLink data-test-subj="apmServiceOrTransactionsOverviewLinkLink" href={href} {...rest} />
   );
 }

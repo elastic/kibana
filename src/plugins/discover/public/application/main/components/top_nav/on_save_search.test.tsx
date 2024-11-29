@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import * as savedObjectsPlugin from '@kbn/saved-objects-plugin/public';
@@ -13,7 +14,7 @@ import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
 import { onSaveSearch } from './on_save_search';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
-import { getDiscoverStateContainer } from '../../services/discover_state';
+import { getDiscoverStateContainer } from '../../state_management/discover_state';
 import { ReactElement } from 'react';
 import { discoverServiceMock } from '../../../../__mocks__/services';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';

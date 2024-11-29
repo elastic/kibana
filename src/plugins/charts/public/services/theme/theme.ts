@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { useEffect, useRef, useState } from 'react';
@@ -52,6 +53,30 @@ export class ThemeService {
     return {};
   };
 
+  /**
+   * A react hook to return shared sparkline chart overrides
+   *
+   * Replacement for `EUI_SPARKLINE_THEME_PARTIAL`
+   */
+  public useSparklineOverrides = (): PartialTheme => {
+    return {
+      lineSeriesStyle: {
+        point: {
+          visible: 'never',
+          strokeWidth: 1,
+          radius: 1,
+        },
+      },
+      areaSeriesStyle: {
+        point: {
+          visible: 'never',
+          strokeWidth: 1,
+          radius: 1,
+        },
+      },
+    };
+  };
+
   /** A React hook for consuming the charts theme */
   public useChartsBaseTheme = (): Theme => {
     const [value, update] = useState(this._chartsBaseTheme$.getValue());
@@ -70,7 +95,11 @@ export class ThemeService {
     return value;
   };
 
-  /** initialize service with uiSettings */
+  /**
+   * Initialize theme service with dark mode
+   *
+   * Meant to be called by charts plugin setup method
+   */
   public init(theme: CoreSetup['theme']) {
     this.theme$ = theme.theme$;
     this.theme$.subscribe(({ darkMode }) => {

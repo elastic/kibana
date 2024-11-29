@@ -10,7 +10,7 @@ import { DataViewBase } from '@kbn/es-query';
 
 export const convertKueryToElasticSearchQuery = (
   kueryExpression: string,
-  indexPattern: DataViewBase,
+  indexPattern?: DataViewBase,
   swallowErrors: boolean = true
 ) => {
   try {

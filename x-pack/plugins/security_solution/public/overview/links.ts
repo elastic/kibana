@@ -10,18 +10,11 @@ import {
   DATA_QUALITY_PATH,
   DETECTION_RESPONSE_PATH,
   ENTITY_ANALYTICS_PATH,
-  LANDING_PATH,
   OVERVIEW_PATH,
   SecurityPageName,
   SERVER_APP_ID,
 } from '../../common/constants';
-import {
-  DATA_QUALITY,
-  DETECTION_RESPONSE,
-  GETTING_STARTED,
-  OVERVIEW,
-  ENTITY_ANALYTICS,
-} from '../app/translations';
+import { DATA_QUALITY, DETECTION_RESPONSE, OVERVIEW, ENTITY_ANALYTICS } from '../app/translations';
 import type { LinkItem } from '../common/links/types';
 import overviewPageImg from '../common/images/overview_page.png';
 import dataQualityDashboardPageImg from '../common/images/data_quality_dashboard_page.png';
@@ -43,21 +36,6 @@ export const overviewLinks: LinkItem = {
       defaultMessage: 'Overview',
     }),
   ],
-};
-
-export const gettingStartedLinks: LinkItem = {
-  id: SecurityPageName.landing,
-  title: GETTING_STARTED,
-  path: LANDING_PATH,
-  capabilities: [`${SERVER_APP_ID}.show`],
-  globalSearchKeywords: [
-    i18n.translate('xpack.securitySolution.appLinks.getStarted', {
-      defaultMessage: 'Getting started',
-    }),
-  ],
-  sideNavIcon: 'launch',
-  skipUrlState: true,
-  hideTimeline: true,
 };
 
 export const detectionResponseLinks: LinkItem = {

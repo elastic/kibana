@@ -72,14 +72,14 @@ export function MachineLearningDataVisualizerProvider({ getService }: FtrProvide
       await testSubjects.existOrFail('dataVisualizerPageFileUpload');
     },
 
-    async setESQLQuery(
-      query: string,
-      refreshOrUpdateBtnSelector:
-        | 'superDatePickerApplyTimeButton'
-        | 'mlDatePickerRefreshPageButton loaded' = 'mlDatePickerRefreshPageButton loaded'
-    ) {
+    async setESQLQuery(query: string) {
       await retry.tryForTime(5000, async () => {
-        await testSubjects.existOrFail(refreshOrUpdateBtnSelector);
+        const superDatePickerApplyTimeButton = await testSubjects.exists(
+          'superDatePickerApplyTimeButton'
+        );
+        const refreshOrUpdateBtnSelector = superDatePickerApplyTimeButton
+          ? 'superDatePickerApplyTimeButton'
+          : 'mlDatePickerRefreshPageButton loaded';
         const visibleText = await testSubjects.getVisibleText(refreshOrUpdateBtnSelector);
 
         expect(visibleText).to.eql('Refresh');
@@ -95,18 +95,18 @@ export function MachineLearningDataVisualizerProvider({ getService }: FtrProvide
       });
     },
 
-    async assertLimitSize(size: 5000 | 10000 | 100000 | 1000000 | 'none') {
+    async assertLimitSize(size: 5000 | 10000 | 100000) {
       await testSubjects.existOrFail(`dvESQLLimitSize-${size}`, { timeout: 1000 });
     },
 
-    async setLimitSize(size: 5000 | 10000 | 100000 | 1000000 | 'none') {
+    async setLimitSize(size: 5000 | 10000) {
       await retry.tryForTime(5000, async () => {
         // escape popover
         await browser.pressKeys(browser.keys.ESCAPE);
 
         // Once clicked, show list of options
         await testSubjects.clickWhenNotDisabled('dvESQLLimitSizeSelect');
-        for (const option of [5000, 10000, 100000, 1000000, 'none']) {
+        for (const option of [5000, 10000]) {
           await testSubjects.existOrFail(`dvESQLLimitSize-${option}`, { timeout: 1000 });
         }
 

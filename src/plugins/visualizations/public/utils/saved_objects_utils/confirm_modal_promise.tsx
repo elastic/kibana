@@ -1,29 +1,30 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import type { OverlayStart } from '@kbn/core/public';
 import { EuiConfirmModal } from '@elastic/eui';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import { StartServices } from '../../types';
 
 export function confirmModalPromise(
   message = '',
   title = '',
   confirmBtnText = '',
-  overlays: OverlayStart
+  startServices: StartServices
 ): Promise<boolean> {
   return new Promise((resolve, reject) => {
     const cancelButtonText = i18n.translate('visualizations.confirmModal.cancelButtonLabel', {
       defaultMessage: 'Cancel',
     });
 
-    const modal = overlays.openModal(
+    const modal = startServices.overlays.openModal(
       toMountPoint(
         <EuiConfirmModal
           onCancel={() => {
@@ -39,7 +40,8 @@ export function confirmModalPromise(
           title={title}
         >
           {message}
-        </EuiConfirmModal>
+        </EuiConfirmModal>,
+        startServices
       )
     );
   });

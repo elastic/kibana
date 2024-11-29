@@ -6,22 +6,21 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
+import { RuleParamsV1 } from '@kbn/response-ops-rule-params';
 import {
-  ruleParamsSchemaV1,
   ruleResponseSchemaV1,
   ruleSnoozeScheduleSchemaV1,
   ruleLastRunSchemaV1,
   monitoringSchemaV1,
 } from '..';
 
-export type RuleParams = TypeOf<typeof ruleParamsSchemaV1>;
 export type RuleSnoozeSchedule = TypeOf<typeof ruleSnoozeScheduleSchemaV1>;
 export type RuleLastRun = TypeOf<typeof ruleLastRunSchemaV1>;
 export type Monitoring = TypeOf<typeof monitoringSchemaV1>;
 
 type RuleResponseSchemaType = TypeOf<typeof ruleResponseSchemaV1>;
 
-export interface RuleResponse<Params extends RuleParams = never> {
+export interface RuleResponse<Params extends RuleParamsV1 = never> {
   id: RuleResponseSchemaType['id'];
   enabled: RuleResponseSchemaType['enabled'];
   name: RuleResponseSchemaType['name'];
@@ -43,7 +42,7 @@ export interface RuleResponse<Params extends RuleParams = never> {
   mute_all: RuleResponseSchemaType['mute_all'];
   notify_when?: RuleResponseSchemaType['notify_when'];
   muted_alert_ids: RuleResponseSchemaType['muted_alert_ids'];
-  execution_status: RuleResponseSchemaType['execution_status'];
+  execution_status?: RuleResponseSchemaType['execution_status'];
   monitoring?: RuleResponseSchemaType['monitoring'];
   snooze_schedule?: RuleResponseSchemaType['snooze_schedule'];
   active_snoozes?: RuleResponseSchemaType['active_snoozes'];
@@ -54,4 +53,5 @@ export interface RuleResponse<Params extends RuleParams = never> {
   running?: RuleResponseSchemaType['running'];
   view_in_app_relative_url?: RuleResponseSchemaType['view_in_app_relative_url'];
   alert_delay?: RuleResponseSchemaType['alert_delay'];
+  flapping?: RuleResponseSchemaType['flapping'];
 }

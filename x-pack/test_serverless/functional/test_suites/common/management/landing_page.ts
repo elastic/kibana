@@ -18,6 +18,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     this.tags('smoke');
     before(async () => {
       await pageObjects.svlCommonPage.loginAsAdmin();
+    });
+
+    beforeEach(async () => {
       await pageObjects.common.navigateToApp('management');
     });
 
@@ -37,12 +40,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('Roles management card', () => {
-      it('should not be displayed by default', async () => {
-        await pageObjects.common.navigateToApp('management');
-
-        await pageObjects.svlManagementPage.assertRoleManagementCardDoesNotExist();
-      });
+    it('navigates to API keys management by clicking the card', async () => {
+      await testSubjects.click('app-card-api_keys');
+      expect(async () => {
+        await pageObjects.common.waitUntilUrlIncludes('/app/management/security/api_keys');
+      }).not.to.throwError();
     });
   });
 };

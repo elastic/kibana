@@ -6,10 +6,11 @@
  */
 
 import { alertComment } from '../../../containers/mock';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
+import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import { CasesContext } from '../../cases_context';
-import { CasesContextStoreActionsList } from '../../cases_context/cases_context_reducer';
+import { CasesContextStoreActionsList } from '../../cases_context/state/cases_context_reducer';
 import { useCasesAddToNewCaseFlyout } from './use_cases_add_to_new_case_flyout';
 import { allCasesPermissions } from '../../../common/mock';
 import { ExternalReferenceAttachmentTypeRegistry } from '../../../client/attachment_framework/external_reference_registry';
@@ -22,7 +23,7 @@ const persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTyp
 
 describe('use cases add to new case flyout hook', () => {
   const dispatch = jest.fn();
-  let wrapper: React.FC;
+  let wrapper: FC<PropsWithChildren<unknown>>;
   beforeEach(() => {
     dispatch.mockReset();
     wrapper = ({ children }) => {
@@ -46,12 +47,11 @@ describe('use cases add to new case flyout hook', () => {
   });
 
   it('should throw if called outside of a cases context', () => {
-    const { result } = renderHook(() => {
-      useCasesAddToNewCaseFlyout();
-    });
-    expect(result.error?.message).toContain(
-      'useCasesContext must be used within a CasesProvider and have a defined value'
-    );
+    expect(() =>
+      renderHook(() => {
+        useCasesAddToNewCaseFlyout();
+      })
+    ).toThrow(/useCasesContext must be used within a CasesProvider and have a defined value/);
   });
 
   it('should dispatch the open action when invoked without attachments', () => {

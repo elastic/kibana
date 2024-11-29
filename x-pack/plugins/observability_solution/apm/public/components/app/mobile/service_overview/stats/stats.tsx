@@ -6,21 +6,12 @@
  */
 import { MetricDatum, MetricTrendShape } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiLoadingSpinner,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLoadingSpinner } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { useTheme } from '@kbn/observability-shared-plugin/public';
 import { NOT_AVAILABLE_LABEL } from '../../../../../../common/i18n';
 import { useAnyOfApmParams } from '../../../../../hooks/use_apm_params';
-import {
-  FETCH_STATUS,
-  isPending,
-  useFetcher,
-} from '../../../../../hooks/use_fetcher';
+import { FETCH_STATUS, isPending, useFetcher } from '../../../../../hooks/use_fetcher';
 import { MetricItem } from './metric_item';
 import { usePreviousPeriodLabel } from '../../../../../hooks/use_previous_period_text';
 
@@ -28,15 +19,7 @@ const valueFormatter = (value: number, suffix = '') => {
   return `${value} ${suffix}`;
 };
 
-export function MobileStats({
-  start,
-  end,
-  kuery,
-}: {
-  start: string;
-  end: string;
-  kuery: string;
-}) {
+export function MobileStats({ start, end, kuery }: { start: string; end: string; kuery: string }) {
   const euiTheme = useTheme();
 
   const {
@@ -48,32 +31,29 @@ export function MobileStats({
 
   const { data, status } = useFetcher(
     (callApmApi) => {
-      return callApmApi(
-        'GET /internal/apm/mobile-services/{serviceName}/stats',
-        {
-          params: {
-            path: { serviceName },
-            query: {
-              start,
-              end,
-              environment,
-              kuery,
-              transactionType,
-              offset,
-            },
+      return callApmApi('GET /internal/apm/mobile-services/{serviceName}/stats', {
+        params: {
+          path: { serviceName },
+          query: {
+            start,
+            end,
+            environment,
+            kuery,
+            transactionType,
+            offset,
           },
-        }
-      );
+        },
+      });
     },
     [start, end, environment, kuery, serviceName, transactionType, offset]
   );
 
   const getComparisonValueFormatter = useCallback(
-    (value) => {
+    (value: any) => {
       return (
         <span>
           {value && comparisonEnabled
-            ? `${previousPeriodLabel}: ${value}`
+            ? `${previousPeriodLabel}: ${Number.isInteger(value) ? value : value.toFixed(2)}`
             : null}
         </span>
       );
@@ -83,15 +63,7 @@ export function MobileStats({
 
   const getIcon = useCallback(
     (type: string) =>
-      ({
-        width = 20,
-        height = 20,
-        color,
-      }: {
-        width: number;
-        height: number;
-        color: string;
-      }) => {
+      ({ width = 20, height = 20, color }: { width: number; height: number; color: string }) => {
         return status === FETCH_STATUS.LOADING ? (
           <EuiLoadingSpinner size="m" />
         ) : (
@@ -127,13 +99,9 @@ export function MobileStats({
       icon: getIcon('visGauge'),
       value: data?.currentPeriod?.launchTimes?.value ?? NaN,
       valueFormatter: (value: number) =>
-        Number.isNaN(value)
-          ? NOT_AVAILABLE_LABEL
-          : valueFormatter(Number(value.toFixed(1)), 'ms'),
+        Number.isNaN(value) ? NOT_AVAILABLE_LABEL : valueFormatter(Number(value.toFixed(1)), 'ms'),
       trend: data?.currentPeriod?.launchTimes?.timeseries ?? [],
-      extra: getComparisonValueFormatter(
-        data?.previousPeriod.launchTimes?.value?.toFixed(1)
-      ),
+      extra: getComparisonValueFormatter(data?.previousPeriod.launchTimes?.value),
       trendShape: MetricTrendShape.Area,
     },
     {

@@ -8,8 +8,8 @@
 import { JsonObject } from '@kbn/utility-types';
 import { useCallback } from 'react';
 import { Observable } from 'rxjs';
-import { exhaustMap } from 'rxjs/operators';
-import { IKibanaSearchRequest } from '@kbn/data-plugin/public';
+import { exhaustMap } from 'rxjs';
+import type { IKibanaSearchRequest } from '@kbn/search-types';
 import { LogEntryBeforeCursor } from '../../../../common/log_entry';
 import { LogViewColumnConfiguration, LogViewReference } from '../../../../common/log_views';
 import { decodeOrThrow } from '../../../../common/runtime_types';

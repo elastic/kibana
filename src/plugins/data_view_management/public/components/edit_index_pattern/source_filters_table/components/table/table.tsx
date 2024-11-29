@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { Component } from 'react';
@@ -20,6 +21,11 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DataView } from '@kbn/data-views-plugin/public';
+import {
+  withEuiTablePersist,
+  type EuiTablePersistInjectedProps,
+} from '@kbn/shared-ux-table-persist';
+
 import { SourceFiltersTableFilter } from '../../types';
 
 const filterHeader = i18n.translate(
@@ -68,6 +74,8 @@ const cancelAria = i18n.translate(
   }
 );
 
+const PAGE_SIZE_OPTIONS = [5, 10, 25, 50];
+
 export interface TableProps {
   indexPattern: DataView;
   items: SourceFiltersTableFilter[];
@@ -82,8 +90,11 @@ export interface TableState {
   editingFilterValue: string;
 }
 
-export class Table extends Component<TableProps, TableState> {
-  constructor(props: TableProps) {
+class TableClass extends Component<
+  TableProps & EuiTablePersistInjectedProps<SourceFiltersTableFilter>,
+  TableState
+> {
+  constructor(props: TableProps & EuiTablePersistInjectedProps<SourceFiltersTableFilter>) {
     super(props);
     this.state = {
       editingFilterId: '',
@@ -226,11 +237,15 @@ export class Table extends Component<TableProps, TableState> {
   }
 
   render() {
-    const { items, isSaving } = this.props;
+    const {
+      items,
+      isSaving,
+      euiTablePersist: { pageSize, sorting, onTableChange },
+    } = this.props;
     const columns = this.getColumns();
     const pagination = {
-      initialPageSize: 10,
-      pageSizeOptions: [5, 10, 25, 50],
+      pageSize,
+      pageSizeOptions: PAGE_SIZE_OPTIONS,
     };
 
     return (
@@ -239,8 +254,17 @@ export class Table extends Component<TableProps, TableState> {
         items={items}
         columns={columns}
         pagination={pagination}
-        sorting={true}
+        sorting={sorting}
+        onTableChange={onTableChange}
       />
     );
   }
 }
+
+export const TableWithoutPersist = TableClass; // For testing purposes
+
+export const Table = withEuiTablePersist(TableClass, {
+  tableId: 'dataViewsSourceFilters',
+  pageSizeOptions: PAGE_SIZE_OPTIONS,
+  initialPageSize: 10,
+});

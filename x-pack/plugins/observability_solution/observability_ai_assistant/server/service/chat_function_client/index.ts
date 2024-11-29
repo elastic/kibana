@@ -9,16 +9,22 @@
 import Ajv, { type ErrorObject, type ValidateFunction } from 'ajv';
 import dedent from 'dedent';
 import { compact, keyBy } from 'lodash';
-import {
-  FunctionVisibility,
-  type ContextDefinition,
-  type ContextRegistry,
-  type FunctionResponse,
-  type RegisterContextDefinition,
-} from '../../../common/functions/types';
-import type { Message, ObservabilityAIAssistantScreenContextRequest } from '../../../common/types';
+import { FunctionVisibility, type FunctionResponse } from '../../../common/functions/types';
+import type {
+  AdHocInstruction,
+  Message,
+  ObservabilityAIAssistantScreenContextRequest,
+} from '../../../common/types';
 import { filterFunctionDefinitions } from '../../../common/utils/filter_function_definitions';
-import type { ChatFn, FunctionHandler, FunctionHandlerRegistry, RegisterFunction } from '../types';
+import type {
+  FunctionCallChatFunction,
+  FunctionHandler,
+  FunctionHandlerRegistry,
+  InstructionOrCallback,
+  RegisterAdHocInstruction,
+  RegisterFunction,
+  RegisterInstruction,
+} from '../types';
 
 export class FunctionArgsValidationError extends Error {
   constructor(public readonly errors: ErrorObject[]) {
@@ -30,8 +36,12 @@ const ajv = new Ajv({
   strict: false,
 });
 
+export const GET_DATA_ON_SCREEN_FUNCTION_NAME = 'get_data_on_screen';
+
 export class ChatFunctionClient {
-  private readonly contextRegistry: ContextRegistry = new Map();
+  private readonly instructions: InstructionOrCallback[] = [];
+  private readonly adhocInstructions: AdHocInstruction[] = [];
+
   private readonly functionRegistry: FunctionHandlerRegistry = new Map();
   private readonly validators: Map<string, ValidateFunction> = new Map();
 
@@ -45,16 +55,11 @@ export class ChatFunctionClient {
     if (allData.length) {
       this.registerFunction(
         {
-          name: 'get_data_on_screen',
-          contexts: ['core'],
-          description: dedent(`Get data that is on the screen:
-            ${allData.map((data) => `${data.name}: ${data.description}`).join('\n')}
-          `),
+          name: GET_DATA_ON_SCREEN_FUNCTION_NAME,
+          description: `Retrieve the structured data of content currently visible on the user's screen. Use this tool to understand what the user is viewing at this moment to provide more accurate and context-aware responses to their questions.`,
           visibility: FunctionVisibility.AssistantOnly,
           parameters: {
             type: 'object',
-            additionalProperties: false,
-            additionalItems: false,
             properties: {
               data: {
                 type: 'array',
@@ -64,8 +69,6 @@ export class ChatFunctionClient {
                   type: 'string',
                   enum: allData.map((data) => data.name),
                 },
-                additionalItems: false,
-                additionalProperties: false,
               },
             },
             required: ['data' as const],
@@ -77,6 +80,13 @@ export class ChatFunctionClient {
           };
         }
       );
+
+      this.registerAdhocInstruction({
+        text: `The ${GET_DATA_ON_SCREEN_FUNCTION_NAME} function will retrieve specific content from the user's screen by specifying a data key. Use this tool to provide context-aware responses. Available data: ${dedent(
+          allData.map((data) => `${data.name}: ${data.description}`).join('\n')
+        )}`,
+        instruction_type: 'application_instruction',
+      });
     }
 
     this.actions.forEach((action) => {
@@ -90,11 +100,15 @@ export class ChatFunctionClient {
     if (definition.parameters) {
       this.validators.set(definition.name, ajv.compile(definition.parameters));
     }
-    this.functionRegistry.set(definition.name, { definition, respond });
+    this.functionRegistry.set(definition.name, { handler: { definition, respond } });
   };
 
-  registerContext: RegisterContextDefinition = (context) => {
-    this.contextRegistry.set(context.name, context);
+  registerInstruction: RegisterInstruction = (instruction) => {
+    this.instructions.push(instruction);
+  };
+
+  registerAdhocInstruction: RegisterAdHocInstruction = (instruction: AdHocInstruction) => {
+    this.adhocInstructions.push(instruction);
   };
 
   validate(name: string, parameters: unknown) {
@@ -109,8 +123,12 @@ export class ChatFunctionClient {
     }
   }
 
-  getContexts(): ContextDefinition[] {
-    return Array.from(this.contextRegistry.values());
+  getInstructions(): InstructionOrCallback[] {
+    return this.instructions;
+  }
+
+  getAdhocInstructions(): AdHocInstruction[] {
+    return this.adhocInstructions;
   }
 
   hasAction(name: string) {
@@ -118,18 +136,15 @@ export class ChatFunctionClient {
   }
 
   getFunctions({
-    contexts,
     filter,
   }: {
-    contexts?: string[];
     filter?: string;
   } = {}): FunctionHandler[] {
-    const allFunctions = Array.from(this.functionRegistry.values());
+    const allFunctions = Array.from(this.functionRegistry.values()).map(({ handler }) => handler);
 
     const functionsByName = keyBy(allFunctions, (definition) => definition.definition.name);
 
     const matchingDefinitions = filterFunctionDefinitions({
-      contexts,
       filter,
       definitions: allFunctions.map((fn) => fn.definition),
     });
@@ -137,7 +152,7 @@ export class ChatFunctionClient {
     return matchingDefinitions.map((definition) => functionsByName[definition.name]);
   }
 
-  getActions() {
+  getActions(): Required<ObservabilityAIAssistantScreenContextRequest>['actions'] {
     return this.actions;
   }
 
@@ -152,13 +167,15 @@ export class ChatFunctionClient {
     messages,
     signal,
     connectorId,
+    useSimulatedFunctionCalling,
   }: {
-    chat: ChatFn;
+    chat: FunctionCallChatFunction;
     name: string;
     args: string | undefined;
     messages: Message[];
     signal: AbortSignal;
     connectorId: string;
+    useSimulatedFunctionCalling: boolean;
   }): Promise<FunctionResponse> {
     const fn = this.functionRegistry.get(name);
 
@@ -170,13 +187,14 @@ export class ChatFunctionClient {
 
     this.validate(name, parsedArguments);
 
-    return await fn.respond(
+    return await fn.handler.respond(
       {
         arguments: parsedArguments,
         messages,
-        connectorId,
         screenContexts: this.screenContexts,
         chat,
+        connectorId,
+        useSimulatedFunctionCalling,
       },
       signal
     );

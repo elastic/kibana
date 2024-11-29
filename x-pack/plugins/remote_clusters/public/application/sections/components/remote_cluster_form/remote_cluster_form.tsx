@@ -50,7 +50,7 @@ import {
 const defaultClusterValues: ClusterPayload = {
   name: '',
   seeds: [],
-  skipUnavailable: false,
+  skipUnavailable: true,
   nodeConnections: 3,
   proxyAddress: '',
   proxySocketConnections: 18,
@@ -87,6 +87,8 @@ export class RemoteClusterForm extends Component<Props, State> {
 
   static contextType = AppContext;
   private readonly generateId: (idSuffix?: string) => string;
+
+  declare context: Context;
 
   constructor(props: Props, context: Context) {
     super(props, context);
@@ -287,7 +289,6 @@ export class RemoteClusterForm extends Component<Props, State> {
         <EuiFormRow
           data-test-subj="remoteClusterFormSkipUnavailableFormRow"
           className="remoteClusterSkipIfUnavailableSwitch"
-          hasEmptyLabelSpace
           fullWidth
           helpText={
             skipUnavailable !== defaultClusterValues.skipUnavailable ? (
@@ -422,7 +423,7 @@ export class RemoteClusterForm extends Component<Props, State> {
 
       return (
         <Fragment>
-          <EuiCallOut title={message} iconType="cross" color="warning">
+          <EuiCallOut title={message} color="danger" iconType="error">
             {errorBody}
           </EuiCallOut>
 

@@ -44,6 +44,13 @@ export const InfraMetadataHostRT = rt.partial({
   containerized: rt.boolean,
 });
 
+export const InfraMetadataContainerRT = rt.partial({
+  name: rt.string,
+  id: rt.string,
+  runtime: rt.string,
+  image: rt.partial({ name: rt.string }),
+});
+
 export const InfraMetadataInstanceRT = rt.partial({
   id: rt.string,
   name: rt.string,
@@ -71,6 +78,7 @@ export const InfraMetadataCloudRT = rt.partial({
   project: InfraMetadataProjectRT,
   machine: InfraMetadataMachineRT,
   region: rt.string,
+  imageId: rt.string,
 });
 
 export const InfraMetadataAgentRT = rt.partial({
@@ -82,6 +90,7 @@ export const InfraMetadataAgentRT = rt.partial({
 export const InfraMetadataInfoRT = rt.partial({
   cloud: InfraMetadataCloudRT,
   host: InfraMetadataHostRT,
+  container: InfraMetadataContainerRT,
   agent: InfraMetadataAgentRT,
   '@timestamp': rt.string,
 });
@@ -89,6 +98,7 @@ export const InfraMetadataInfoRT = rt.partial({
 export const InfraMetadataInfoResponseRT = rt.partial({
   cloud: InfraMetadataCloudRT,
   host: InfraMetadataHostRT,
+  container: InfraMetadataContainerRT,
   agent: InfraMetadataAgentRT,
   timestamp: rt.string,
 });
@@ -101,6 +111,7 @@ const InfraMetadataRequiredRT = rt.type({
 
 const InfraMetadataOptionalRT = rt.partial({
   info: InfraMetadataInfoResponseRT,
+  hasSystemIntegration: rt.boolean,
 });
 
 export const InfraMetadataRT = rt.intersection([InfraMetadataRequiredRT, InfraMetadataOptionalRT]);
@@ -122,5 +133,7 @@ export type InfraMetadataProject = rt.TypeOf<typeof InfraMetadataProjectRT>;
 export type InfraMetadataMachine = rt.TypeOf<typeof InfraMetadataMachineRT>;
 
 export type InfraMetadataHost = rt.TypeOf<typeof InfraMetadataHostRT>;
+
+export type InfraMetadataContainer = rt.TypeOf<typeof InfraMetadataContainerRT>;
 
 export type InfraMetadataOS = rt.TypeOf<typeof InfraMetadataOSRT>;

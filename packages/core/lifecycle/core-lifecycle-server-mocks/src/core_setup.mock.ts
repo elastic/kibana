@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
@@ -27,7 +28,9 @@ import { coreUsageDataServiceMock } from '@kbn/core-usage-data-server-mocks';
 import { customBrandingServiceMock } from '@kbn/core-custom-branding-server-mocks';
 import { userSettingsServiceMock } from '@kbn/core-user-settings-server-mocks';
 import { securityServiceMock } from '@kbn/core-security-server-mocks';
+import { userProfileServiceMock } from '@kbn/core-user-profile-server-mocks';
 import { createCoreStartMock } from './core_start.mock';
+import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-server-mocks';
 
 type CoreSetupMockType = MockedKeys<CoreSetup> & {
   elasticsearch: ReturnType<typeof elasticsearchServiceMock.createSetup>;
@@ -59,6 +62,7 @@ export function createCoreSetupMock({
     userSettings: userSettingsServiceMock.createSetupContract(),
     docLinks: docLinksServiceMock.createSetupContract(),
     elasticsearch: elasticsearchServiceMock.createSetup(),
+    featureFlags: coreFeatureFlagsMock.createSetup(),
     http: httpMock,
     i18n: i18nServiceMock.createSetupContract(),
     savedObjects: savedObjectsServiceMock.createInternalSetupContract(),
@@ -69,8 +73,11 @@ export function createCoreSetupMock({
     deprecations: deprecationsServiceMock.createSetupContract(),
     executionContext: executionContextServiceMock.createInternalSetupContract(),
     security: securityServiceMock.createSetup(),
+    userProfile: userProfileServiceMock.createSetup(),
     coreUsageData: {
       registerUsageCounter: coreUsageDataServiceMock.createSetupContract().registerUsageCounter,
+      registerDeprecatedUsageFetch:
+        coreUsageDataServiceMock.createSetupContract().registerDeprecatedUsageFetch,
     },
     plugins: {
       onSetup: jest.fn(),

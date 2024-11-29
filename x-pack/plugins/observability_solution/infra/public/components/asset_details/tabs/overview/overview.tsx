@@ -5,27 +5,32 @@
  * 2.0.
  */
 
-import React, { useRef } from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import React from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
+import { css } from '@emotion/react';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import {
   MetadataSummaryList,
   MetadataSummaryListCompact,
 } from './metadata_summary/metadata_summary_list';
-import { AlertsSummaryContent } from './alerts';
+import { AlertsSummaryContent } from './alerts/alerts';
 import { KPIGrid } from './kpis/kpi_grid';
-import { MetricsSection, MetricsSectionCompact } from './metrics/metrics_section';
 import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
 import { useMetadataStateContext } from '../../hooks/use_metadata_state';
 import { useDataViewsContext } from '../../hooks/use_data_views';
 import { useDatePickerContext } from '../../hooks/use_date_picker';
-import { SectionSeparator } from './section_separator';
 import { MetadataErrorCallout } from '../../components/metadata_error_callout';
-import { useIntersectingState } from '../../hooks/use_intersecting_state';
 import { CpuProfilingPrompt } from './kpis/cpu_profiling_prompt';
 import { ServicesContent } from './services';
+import { MetricsContent } from './metrics/metrics';
+import { AddMetricsCallout } from '../../add_metrics_callout';
+import { AddMetricsCalloutKey } from '../../add_metrics_callout/constants';
+import { useEntitySummary } from '../../hooks/use_entity_summary';
+import { isMetricsSignal } from '../../utils/get_data_stream_types';
+import { INTEGRATIONS } from '../../constants';
+import { useIntegrationCheck } from '../../hooks/use_integration_check';
 
 export const Overview = () => {
-  const ref = useRef<HTMLDivElement>(null);
   const { dateRange } = useDatePickerContext();
   const { asset, renderMode } = useAssetDetailsRenderPropsContext();
   const {
@@ -33,58 +38,108 @@ export const Overview = () => {
     loading: metadataLoading,
     error: fetchMetadataError,
   } = useMetadataStateContext();
-  const { logs, metrics } = useDataViewsContext();
-
+  const { metrics } = useDataViewsContext();
   const isFullPageView = renderMode.mode === 'page';
-
-  const state = useIntersectingState(ref, { dateRange });
-
-  const metricsSection = isFullPageView ? (
-    <MetricsSection
-      dateRange={state.dateRange}
-      logsDataView={logs.dataView}
-      metricsDataView={metrics.dataView}
-      assetName={asset.name}
-    />
-  ) : (
-    <MetricsSectionCompact
-      dateRange={state.dateRange}
-      logsDataView={logs.dataView}
-      metricsDataView={metrics.dataView}
-      assetName={asset.name}
-    />
+  const { dataStreams, status: dataStreamsStatus } = useEntitySummary({
+    entityType: asset.type,
+    entityId: asset.id,
+  });
+  const addMetricsCalloutId: AddMetricsCalloutKey =
+    asset.type === 'host' ? 'hostOverview' : 'containerOverview';
+  const [dismissedAddMetricsCallout, setDismissedAddMetricsCallout] = useLocalStorage(
+    `infra.dismissedAddMetricsCallout.${addMetricsCalloutId}`,
+    false
   );
+  const isDockerContainer = useIntegrationCheck({ dependsOn: INTEGRATIONS.docker });
+  const isKubernetesContainer = useIntegrationCheck({
+    dependsOn: INTEGRATIONS.kubernetesContainer,
+  });
+
   const metadataSummarySection = isFullPageView ? (
-    <MetadataSummaryList metadata={metadata} loading={metadataLoading} />
+    <MetadataSummaryList metadata={metadata} loading={metadataLoading} assetType={asset.type} />
   ) : (
-    <MetadataSummaryListCompact metadata={metadata} loading={metadataLoading} />
+    <MetadataSummaryListCompact
+      metadata={metadata}
+      loading={metadataLoading}
+      assetType={asset.type}
+    />
   );
+
+  const shouldShowCallout = () => {
+    if (
+      dataStreamsStatus !== 'success' ||
+      renderMode.mode !== 'page' ||
+      dismissedAddMetricsCallout
+    ) {
+      return false;
+    }
+
+    const { type } = asset;
+    const baseCondition = !isMetricsSignal(dataStreams);
+
+    const isRelevantContainer =
+      type === 'container' && (isDockerContainer || isKubernetesContainer);
+
+    return baseCondition && (type === 'host' || isRelevantContainer);
+  };
+
+  const showAddMetricsCallout = shouldShowCallout();
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="m" ref={ref}>
-      <EuiFlexItem grow={false}>
-        <KPIGrid assetName={asset.name} dateRange={state.dateRange} dataView={metrics.dataView} />
-        <CpuProfilingPrompt />
-      </EuiFlexItem>
+    <EuiFlexGroup direction="column" gutterSize="m">
+      {showAddMetricsCallout ? (
+        <EuiFlexItem grow={false}>
+          <AddMetricsCallout
+            id={addMetricsCalloutId}
+            onDismiss={() => {
+              setDismissedAddMetricsCallout(true);
+            }}
+          />
+        </EuiFlexItem>
+      ) : (
+        <EuiFlexItem grow={false}>
+          <KPIGrid
+            assetId={asset.id}
+            assetType={asset.type}
+            dateRange={dateRange}
+            dataView={metrics.dataView}
+          />
+          {asset.type === 'host' ? <CpuProfilingPrompt /> : null}
+        </EuiFlexItem>
+      )}
       <EuiFlexItem grow={false}>
         {fetchMetadataError && !metadataLoading ? <MetadataErrorCallout /> : metadataSummarySection}
         <SectionSeparator />
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <AlertsSummaryContent
-          assetName={asset.name}
-          assetType={asset.type}
-          dateRange={state.dateRange}
-        />
-        <SectionSeparator />
-      </EuiFlexItem>
-      {asset.type === 'host' ? (
+      {asset.type === 'host' || asset.type === 'container' ? (
         <EuiFlexItem grow={false}>
-          <ServicesContent hostName={asset.name} dateRange={state.dateRange} />
+          <AlertsSummaryContent assetId={asset.id} assetType={asset.type} dateRange={dateRange} />
           <SectionSeparator />
         </EuiFlexItem>
       ) : null}
-      <EuiFlexItem grow={false}>{metricsSection}</EuiFlexItem>
+      {asset.type === 'host' ? (
+        <EuiFlexItem grow={false}>
+          <ServicesContent hostName={asset.id} dateRange={dateRange} />
+          <SectionSeparator />
+        </EuiFlexItem>
+      ) : null}
+      <EuiFlexItem grow={false}>
+        <MetricsContent
+          assetId={asset.id}
+          assetType={asset.type}
+          dateRange={dateRange}
+          dataView={metrics.dataView}
+        />
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };
+
+const SectionSeparator = () => (
+  <EuiHorizontalRule
+    margin="m"
+    css={css`
+      margin-bottom: 0;
+    `}
+  />
+);

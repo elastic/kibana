@@ -12,24 +12,21 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
 import {
   LOG_RATE_ANALYSIS_TYPE,
   type LogRateAnalysisType,
-} from '@kbn/aiops-utils/log_rate_analysis_type';
+} from '@kbn/aiops-log-rate-analysis/log_rate_analysis_type';
+import { getLogRateAnalysisParametersFromAlert } from '@kbn/aiops-log-rate-analysis/get_log_rate_analysis_parameters_from_alert';
 import { LogRateAnalysisContent, type LogRateAnalysisResultsData } from '@kbn/aiops-plugin/public';
-import { Rule } from '@kbn/alerting-plugin/common';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Message } from '@kbn/observability-ai-assistant-plugin/public';
-import { ALERT_END } from '@kbn/rule-data-utils';
-import { CustomThresholdRuleTypeParams } from '../../types';
-import { TopAlert } from '../../../..';
+import { ALERT_END, ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
+import { CustomThresholdAlert } from '../types';
 import { Color, colorTransformer } from '../../../../../common/custom_threshold_rule/color_palette';
 import { getLogRateAnalysisEQQuery } from './helpers/log_rate_analysis_query';
-import { getInitialAnalysisStart } from './helpers/get_initial_analysis_start';
 
 export interface AlertDetailsLogRateAnalysisProps {
-  alert: TopAlert<Record<string, any>>;
+  alert: CustomThresholdAlert;
   dataView: any;
-  rule: Rule<CustomThresholdRuleTypeParams>;
   services: any;
 }
 
@@ -40,12 +37,7 @@ interface SignificantFieldValue {
   pValue: number | null;
 }
 
-export function LogRateAnalysis({
-  alert,
-  dataView,
-  rule,
-  services,
-}: AlertDetailsLogRateAnalysisProps) {
+export function LogRateAnalysis({ alert, dataView, services }: AlertDetailsLogRateAnalysisProps) {
   const {
     observabilityAIAssistant: {
       ObservabilityAIAssistantContextualInsight,
@@ -57,36 +49,33 @@ export function LogRateAnalysis({
     | { logRateAnalysisType: LogRateAnalysisType; significantFieldValues: SignificantFieldValue[] }
     | undefined
   >();
+  const ruleParams = alert.fields[ALERT_RULE_PARAMETERS];
 
   useEffect(() => {
-    const esSearchRequest = getLogRateAnalysisEQQuery(alert, rule.params);
+    const esSearchRequest = getLogRateAnalysisEQQuery(alert);
 
     if (esSearchRequest) {
       setEsSearchQuery(esSearchRequest);
     }
-  }, [alert, rule.params]);
+  }, [alert]);
 
-  // Identify `intervalFactor` to adjust time ranges based on alert settings.
-  // The default time ranges for `initialAnalysisStart` are suitable for a `1m` lookback.
-  // If an alert would have a `5m` lookback, this would result in a factor of `5`.
-  const lookbackDuration =
-    alert.fields['kibana.alert.rule.parameters'] &&
-    alert.fields['kibana.alert.rule.parameters'].timeSize &&
-    alert.fields['kibana.alert.rule.parameters'].timeUnit
-      ? moment.duration(
-          alert.fields['kibana.alert.rule.parameters'].timeSize as number,
-          alert.fields['kibana.alert.rule.parameters'].timeUnit as any
-        )
-      : moment.duration(1, 'm');
-  const intervalFactor = Math.max(1, lookbackDuration.asSeconds() / 60);
+  const { timeRange, windowParameters } = useMemo(() => {
+    const alertStartedAt = moment(alert.start).toISOString();
+    const alertEndedAt = alert.fields[ALERT_END]
+      ? moment(alert.fields[ALERT_END]).toISOString()
+      : undefined;
+    const timeSize = ruleParams.criteria[0]?.timeSize as number | undefined;
+    const timeUnit = ruleParams.criteria[0]?.timeUnit as
+      | moment.unitOfTime.DurationConstructor
+      | undefined;
 
-  const alertStart = moment(alert.start);
-  const alertEnd = alert.fields[ALERT_END] ? moment(alert.fields[ALERT_END]) : undefined;
-
-  const timeRange = {
-    min: alertStart.clone().subtract(15 * intervalFactor, 'minutes'),
-    max: alertEnd ? alertEnd.clone().add(1 * intervalFactor, 'minutes') : moment(new Date()),
-  };
+    return getLogRateAnalysisParametersFromAlert({
+      alertStartedAt,
+      alertEndedAt,
+      timeSize,
+      timeUnit,
+    });
+  }, [alert.fields, alert.start, ruleParams.criteria]);
 
   const logRateAnalysisTitle = i18n.translate(
     'xpack.observability.customThreshold.alertDetails.logRateAnalysisTitle',
@@ -189,35 +178,33 @@ export function LogRateAnalysis({
         </EuiFlexItem>
         <EuiFlexItem>
           <LogRateAnalysisContent
-            embeddingOrigin="observability_log_threshold_alert_details"
             dataView={dataView}
             timeRange={timeRange}
             esSearchQuery={esSearchQuery}
-            initialAnalysisStart={getInitialAnalysisStart({
-              alertStart,
-              intervalFactor,
-              alertEnd,
-            })}
+            initialAnalysisStart={windowParameters}
             barColorOverride={colorTransformer(Color.color0)}
             barHighlightColorOverride={colorTransformer(Color.color1)}
             onAnalysisCompleted={onAnalysisCompleted}
-            appDependencies={pick(services, [
-              'analytics',
-              'application',
-              'data',
-              'executionContext',
-              'charts',
-              'fieldFormats',
-              'http',
-              'notifications',
-              'share',
-              'storage',
-              'uiSettings',
-              'unifiedSearch',
-              'theme',
-              'lens',
-              'i18n',
-            ])}
+            appContextValue={{
+              embeddingOrigin: 'observability_custom_threshold_alert_details',
+              ...pick(services, [
+                'analytics',
+                'application',
+                'data',
+                'executionContext',
+                'charts',
+                'fieldFormats',
+                'http',
+                'notifications',
+                'share',
+                'storage',
+                'uiSettings',
+                'unifiedSearch',
+                'theme',
+                'lens',
+                'i18n',
+              ]),
+            }}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

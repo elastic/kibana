@@ -8,23 +8,25 @@
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 
+import { MessageSigningError } from '../../common/errors';
 import { createAppContextStartContractMock, xpackMocks } from '../mocks';
 
 import { ensurePreconfiguredPackagesAndPolicies } from '.';
 
 import { appContextService } from './app_context';
 import { getInstallations } from './epm/packages';
-import { upgradeManagedPackagePolicies } from './managed_package_policies';
+import { setupUpgradeManagedPackagePolicies } from './setup/managed_package_policies';
 import { setupFleet } from './setup';
 
 jest.mock('./preconfiguration');
 jest.mock('./preconfiguration/outputs');
 jest.mock('./preconfiguration/fleet_proxies');
+jest.mock('./preconfiguration/space_settings');
 jest.mock('./settings');
 jest.mock('./output');
 jest.mock('./download_source');
 jest.mock('./epm/packages');
-jest.mock('./managed_package_policies');
+jest.mock('./setup/managed_package_policies');
 jest.mock('./setup/upgrade_package_install_version');
 jest.mock('./epm/elasticsearch/template/install', () => {
   return {
@@ -63,11 +65,13 @@ describe('setupFleet', () => {
       nonFatalErrors: [],
     });
 
-    (upgradeManagedPackagePolicies as jest.Mock).mockResolvedValue([]);
+    (setupUpgradeManagedPackagePolicies as jest.Mock).mockResolvedValue([]);
 
     soClient.get.mockResolvedValue({ attributes: {} } as any);
     soClient.find.mockResolvedValue({ saved_objects: [] } as any);
     soClient.bulkGet.mockResolvedValue({ saved_objects: [] } as any);
+    soClient.create.mockResolvedValue({ attributes: {} } as any);
+    soClient.delete.mockResolvedValue({});
   });
 
   afterEach(async () => {
@@ -77,7 +81,7 @@ describe('setupFleet', () => {
 
   describe('should reject with any error thrown underneath', () => {
     it('SO client throws plain Error', async () => {
-      mockedMethodThrowsError(upgradeManagedPackagePolicies as jest.Mock);
+      mockedMethodThrowsError(setupUpgradeManagedPackagePolicies as jest.Mock);
 
       const setupPromise = setupFleet(soClient, esClient);
       await expect(setupPromise).rejects.toThrow('SO method mocked to throw');
@@ -85,7 +89,7 @@ describe('setupFleet', () => {
     });
 
     it('SO client throws other error', async () => {
-      mockedMethodThrowsCustom(upgradeManagedPackagePolicies as jest.Mock);
+      mockedMethodThrowsCustom(setupUpgradeManagedPackagePolicies as jest.Mock);
 
       const setupPromise = setupFleet(soClient, esClient);
       await expect(setupPromise).rejects.toThrow('method mocked to throw');
@@ -94,13 +98,6 @@ describe('setupFleet', () => {
   });
 
   it('should not return non fatal errors when upgrade result has no errors', async () => {
-    (upgradeManagedPackagePolicies as jest.Mock).mockResolvedValue([
-      {
-        errors: [],
-        packagePolicyId: '1',
-      },
-    ]);
-
     const result = await setupFleet(soClient, esClient);
 
     expect(result).toEqual({
@@ -109,13 +106,11 @@ describe('setupFleet', () => {
     });
   });
 
-  it('should return non fatal errors when upgrade result has errors', async () => {
-    (upgradeManagedPackagePolicies as jest.Mock).mockResolvedValue([
-      {
-        errors: [{ key: 'key', message: 'message' }],
-        packagePolicyId: '1',
-      },
-    ]);
+  it('should return non fatal errors when generateKeyPair result has errors', async () => {
+    const messageSigninError = new MessageSigningError('test');
+    jest
+      .mocked(appContextService.getMessageSigningService()!.generateKeyPair)
+      .mockRejectedValue(messageSigninError);
 
     const result = await setupFleet(soClient, esClient);
 
@@ -123,15 +118,64 @@ describe('setupFleet', () => {
       isInitialized: true,
       nonFatalErrors: [
         {
-          errors: [
-            {
-              key: 'key',
-              message: 'message',
-            },
-          ],
-          packagePolicyId: '1',
+          error: messageSigninError,
         },
       ],
     });
+  });
+
+  it('should create and delete lock if not exists', async () => {
+    soClient.get.mockRejectedValue({ isBoom: true, output: { statusCode: 404 } } as any);
+
+    const result = await setupFleet(soClient, esClient, { useLock: true });
+
+    expect(result).toEqual({
+      isInitialized: true,
+      nonFatalErrors: [],
+    });
+    expect(soClient.create).toHaveBeenCalledWith('fleet-setup-lock', expect.anything(), {
+      id: 'fleet-setup-lock',
+    });
+    expect(soClient.delete).toHaveBeenCalledWith('fleet-setup-lock', 'fleet-setup-lock', {
+      refresh: true,
+    });
+  });
+
+  it('should return not initialized if lock exists', async () => {
+    const result = await setupFleet(soClient, esClient, { useLock: true });
+
+    expect(result).toEqual({
+      isInitialized: false,
+      nonFatalErrors: [],
+    });
+    expect(soClient.create).not.toHaveBeenCalled();
+    expect(soClient.delete).not.toHaveBeenCalled();
+  });
+
+  it('should return not initialized if lock could not be created', async () => {
+    soClient.get.mockRejectedValue({ isBoom: true, output: { statusCode: 404 } } as any);
+    soClient.create.mockRejectedValue({ isBoom: true, output: { statusCode: 409 } } as any);
+    const result = await setupFleet(soClient, esClient, { useLock: true });
+
+    expect(result).toEqual({
+      isInitialized: false,
+      nonFatalErrors: [],
+    });
+    expect(soClient.delete).not.toHaveBeenCalled();
+  });
+
+  it('should delete previous lock if created more than 1 hour ago', async () => {
+    soClient.get.mockResolvedValue({
+      attributes: { started_at: new Date(Date.now() - 60 * 60 * 1000 - 1000).toISOString() },
+    } as any);
+
+    const result = await setupFleet(soClient, esClient, { useLock: true });
+
+    expect(result).toEqual({
+      isInitialized: true,
+      nonFatalErrors: [],
+    });
+    expect(soClient.create).toHaveBeenCalled();
+    expect(soClient.delete).toHaveBeenCalledTimes(2);
   });
 });

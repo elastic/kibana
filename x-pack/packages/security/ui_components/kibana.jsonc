@@ -1,0 +1,9 @@
+{
+  "type": "shared-browser",
+  "id": "@kbn/security-ui-components",
+  "owner": [
+    "@elastic/kibana-security"
+  ],
+  "group": "platform",
+  "visibility": "private"
+}

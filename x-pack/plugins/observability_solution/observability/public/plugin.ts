@@ -8,8 +8,8 @@
 import { CasesDeepLinkId, CasesPublicStart, getCasesDeepLinks } from '@kbn/cases-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
-import type { IUiSettingsClient } from '@kbn/core/public';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import type { IUiSettingsClient } from '@kbn/core/public';
 import {
   App,
   AppDeepLink,
@@ -23,7 +23,7 @@ import {
   ToastsStart,
 } from '@kbn/core/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
+import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { LOGS_EXPLORER_LOCATOR_ID, LogsExplorerLocatorParams } from '@kbn/deeplinks-observability';
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
@@ -32,43 +32,45 @@ import type { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-pl
 import type { HomePublicPluginSetup, HomePublicPluginStart } from '@kbn/home-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
+import type { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
 import type {
   NavigationEntry,
   ObservabilitySharedPluginSetup,
   ObservabilitySharedPluginStart,
 } from '@kbn/observability-shared-plugin/public';
-import type { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
 
-import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
-import {
+import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import type {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { BehaviorSubject, from } from 'rxjs';
-import { map, mergeMap } from 'rxjs/operators';
+import { BehaviorSubject, from, map, mergeMap } from 'rxjs';
 
-import { AiopsPluginStart } from '@kbn/aiops-plugin/public/types';
+import type { AiopsPluginStart } from '@kbn/aiops-plugin/public/types';
+import type { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
-import { ExploratoryViewPublicStart } from '@kbn/exploratory-view-plugin/public';
-import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
-import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
-import {
+import type { ExploratoryViewPublicStart } from '@kbn/exploratory-view-plugin/public';
+import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
+import type { InvestigatePublicStart } from '@kbn/investigate-plugin/public';
+import type { LicenseManagementUIPluginSetup } from '@kbn/license-management-plugin/public';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
+import type {
   ObservabilityAIAssistantPublicSetup,
   ObservabilityAIAssistantPublicStart,
 } from '@kbn/observability-ai-assistant-plugin/public';
-import { SecurityPluginStart } from '@kbn/security-plugin/public';
-import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import {
+import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
+import type { SecurityPluginStart } from '@kbn/security-plugin/public';
+import type { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type {
   ActionTypeRegistryContract,
   RuleTypeRegistryContract,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
-import type { UiActionsStart, UiActionsSetup } from '@kbn/ui-actions-plugin/public';
-
-import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
-import { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
+import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import type { StreamsPluginStart, StreamsPluginSetup } from '@kbn/streams-plugin/public';
 import { observabilityAppId, observabilityFeatureId } from '../common';
 import {
   ALERTS_PATH,
@@ -79,20 +81,17 @@ import {
 } from '../common/locators/paths';
 import { registerDataHandler } from './context/has_data_context/data_handler';
 import { createUseRulesLink } from './hooks/create_use_rules_link';
-import { RulesLocatorDefinition } from './locators/rules';
 import { RuleDetailsLocatorDefinition } from './locators/rule_details';
+import { RulesLocatorDefinition } from './locators/rules';
 import {
-  createObservabilityRuleTypeRegistry,
   ObservabilityRuleTypeRegistry,
+  createObservabilityRuleTypeRegistry,
 } from './rules/create_observability_rule_type_registry';
 import { registerObservabilityRuleTypes } from './rules/register_observability_rule_types';
 
 export interface ConfigSchema {
   unsafe: {
     alertDetails: {
-      metrics: {
-        enabled: boolean;
-      };
       logs?: {
         enabled: boolean;
       };
@@ -106,6 +105,9 @@ export interface ConfigSchema {
     thresholdRule?: {
       enabled: boolean;
     };
+    ruleFormV2?: {
+      enabled: boolean;
+    };
   };
 }
 export type ObservabilityPublicSetup = ReturnType<Plugin['setup']>;
@@ -113,7 +115,7 @@ export interface ObservabilityPublicPluginsSetup {
   data: DataPublicPluginSetup;
   fieldFormats: FieldFormatsSetup;
   observabilityShared: ObservabilitySharedPluginSetup;
-  observabilityAIAssistant: ObservabilityAIAssistantPublicSetup;
+  observabilityAIAssistant?: ObservabilityAIAssistantPublicSetup;
   share: SharePluginSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   home?: HomePublicPluginSetup;
@@ -123,6 +125,7 @@ export interface ObservabilityPublicPluginsSetup {
   licensing: LicensingPluginSetup;
   serverless?: ServerlessPluginSetup;
   presentationUtil?: PresentationUtilPluginStart;
+  streams?: StreamsPluginSetup;
 }
 export interface ObservabilityPublicPluginsStart {
   actionTypeRegistry: ActionTypeRegistryContract;
@@ -139,8 +142,10 @@ export interface ObservabilityPublicPluginsStart {
   guidedOnboarding?: GuidedOnboardingPluginStart;
   lens: LensPublicStart;
   licensing: LicensingPluginStart;
+  licenseManagement?: LicenseManagementUIPluginSetup;
+  navigation: NavigationPublicPluginStart;
   observabilityShared: ObservabilitySharedPluginStart;
-  observabilityAIAssistant: ObservabilityAIAssistantPublicStart;
+  observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
   ruleTypeRegistry: RuleTypeRegistryContract;
   security: SecurityPluginStart;
   share: SharePluginStart;
@@ -158,6 +163,8 @@ export interface ObservabilityPublicPluginsStart {
   theme: CoreStart['theme'];
   dataViewFieldEditor: DataViewFieldEditorStart;
   toastNotifications: ToastsStart;
+  investigate?: InvestigatePublicStart;
+  streams?: StreamsPluginStart;
 }
 export type ObservabilityPublicStart = ReturnType<Plugin['start']>;
 
@@ -354,7 +361,7 @@ export class Plugin
                 : [];
 
               const isAiAssistantEnabled =
-                pluginsStart.observabilityAIAssistant.service.isEnabled();
+                pluginsStart.observabilityAIAssistant?.service.isEnabled();
 
               const aiAssistantLink =
                 isAiAssistantEnabled &&
@@ -378,7 +385,7 @@ export class Plugin
                         defaultMessage: 'SLOs',
                       }),
                       app: 'slo',
-                      path: '/',
+                      path: '',
                     },
                   ]
                 : [];
@@ -440,14 +447,18 @@ export class Plugin
   }
 
   public start(coreStart: CoreStart, pluginsStart: ObservabilityPublicPluginsStart) {
-    const { application } = coreStart;
+    const { application, http, notifications } = coreStart;
+    const { dataViews, triggersActionsUi } = pluginsStart;
     const config = this.initContext.config.get();
-    const { alertsTableConfigurationRegistry } = pluginsStart.triggersActionsUi;
+    const { alertsTableConfigurationRegistry } = triggersActionsUi;
     this.lazyRegisterAlertsTableConfiguration().then(({ registerAlertsTableConfiguration }) => {
       return registerAlertsTableConfiguration(
         alertsTableConfigurationRegistry,
         this.observabilityRuleTypeRegistry,
-        config
+        config,
+        dataViews,
+        http,
+        notifications
       );
     });
 
@@ -455,6 +466,10 @@ export class Plugin
       capabilities: application.capabilities,
       deepLinks: this.deepLinks,
       updater$: this.appUpdater$,
+    });
+
+    import('./navigation_tree').then(({ createDefinition }) => {
+      return pluginsStart.navigation.addSolutionNavigation(createDefinition(pluginsStart));
     });
 
     return {

@@ -13,8 +13,8 @@ import * as rt from 'io-ts';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { constant, identity } from 'fp-ts/lib/function';
+import { useUrlState } from '@kbn/observability-shared-plugin/public';
 import { replaceStateKeyInQueryString } from '../../../../../common/url_state_storage_service';
-import { useUrlState } from '../../../../utils/use_url_state';
 
 const parseRange = (range: MetricsTimeInput) => {
   const parsedFrom = dateMath.parse(range.from.toString());

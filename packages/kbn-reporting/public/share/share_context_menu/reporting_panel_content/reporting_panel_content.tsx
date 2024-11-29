@@ -1,16 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { Component, ReactElement } from 'react';
+import * as Rx from 'rxjs';
 
 import { CSV_REPORT_TYPE, CSV_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-csv-common';
-import { PDF_REPORT_TYPE, PDF_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-pdf-common';
-import { PNG_REPORT_TYPE, PNG_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-png-common';
+import { PDF_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-pdf-common';
+import { PNG_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-png-common';
 
 import {
   EuiAccordion,
@@ -22,13 +24,14 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import { IUiSettingsClient, ThemeServiceSetup, ToastsSetup } from '@kbn/core/public';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n-react';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { BaseParams } from '@kbn/reporting-common/types';
 
-import { ReportingAPIClient } from '../../../reporting_api_client';
+import type { StartServices } from '../..';
+import type { ReportingAPIClient } from '../../../reporting_api_client';
 import { ErrorUnsavedWorkPanel, ErrorUrlTooLongPanel } from './components';
 import { getMaxUrlLength } from './constants';
 
@@ -38,8 +41,6 @@ import { getMaxUrlLength } from './constants';
  */
 export interface ReportingPanelProps {
   apiClient: ReportingAPIClient;
-  toasts: ToastsSetup;
-  uiSettings: IUiSettingsClient;
   reportType: string;
 
   requiresSavedState: boolean; // Whether the report to be generated requires saved state that is not captured in the URL submitted to the report generator.
@@ -51,7 +52,8 @@ export interface ReportingPanelProps {
   options?: ReactElement | null;
   isDirty?: boolean;
   onClose?: () => void;
-  theme: ThemeServiceSetup;
+
+  startServices$: Rx.Observable<StartServices>;
 }
 
 export type Props = ReportingPanelProps & { intl: InjectedIntl };
@@ -247,15 +249,16 @@ class ReportingPanelContentUi extends Component<Props, State> {
 
   private prettyPrintReportingType = () => {
     switch (this.props.reportType) {
-      case PDF_REPORT_TYPE:
+      case 'pdf':
       case PDF_REPORT_TYPE_V2:
         return 'PDF';
+      case 'csv':
       case CSV_REPORT_TYPE:
       case CSV_REPORT_TYPE_V2:
         return 'CSV';
       case 'png':
       case PNG_REPORT_TYPE_V2:
-        return PNG_REPORT_TYPE;
+        return 'PNG';
       default:
         return this.props.reportType;
     }
@@ -277,66 +280,66 @@ class ReportingPanelContentUi extends Component<Props, State> {
     this.setState({ absoluteUrl });
   };
 
-  private createReportingJob = () => {
-    const { intl } = this.props;
-    const decoratedJobParams = this.props.apiClient.getDecoratedJobParams(
-      this.props.getJobParams()
-    );
+  private createReportingJob = async () => {
+    const { startServices$, apiClient, intl } = this.props;
+    const [coreStart] = await Rx.firstValueFrom(startServices$);
+    const decoratedJobParams = apiClient.getDecoratedJobParams(this.props.getJobParams());
+    const { toasts } = coreStart.notifications;
 
     this.setState({ isCreatingReportJob: true });
 
-    return this.props.apiClient
-      .createReportingJob(this.props.reportType, decoratedJobParams)
-      .then(() => {
-        this.props.toasts.addSuccess({
-          title: intl.formatMessage(
-            {
-              id: 'reporting.share.panelContent.successfullyQueuedReportNotificationTitle',
-              defaultMessage: 'Queued report for {objectType}',
-            },
-            { objectType: this.state.objectType }
-          ),
-          text: toMountPoint(
-            <FormattedMessage
-              id="reporting.share.panelContent.successfullyQueuedReportNotificationDescription"
-              defaultMessage="Track its progress in {path}."
-              values={{
-                path: (
-                  <a href={this.props.apiClient.getManagementLink()}>
-                    <FormattedMessage
-                      id="reporting.share.publicNotifier.reportLink.reportingSectionUrlLinkLabel"
-                      defaultMessage="Stack Management &gt; Reporting"
-                    />
-                  </a>
-                ),
-              }}
-            />,
-            { theme$: this.props.theme.theme$ }
-          ),
-          'data-test-subj': 'queueReportSuccess',
-        });
-        if (this.props.onClose) {
-          this.props.onClose();
-        }
-        if (this.mounted) {
-          this.setState({ isCreatingReportJob: false });
-        }
-      })
-      .catch((error) => {
-        this.props.toasts.addError(error, {
-          title: intl.formatMessage({
-            id: 'reporting.share.panelContent.notification.reportingErrorTitle',
-            defaultMessage: 'Unable to create report',
-          }),
-          toastMessage: (
-            // eslint-disable-next-line react/no-danger
-            <span dangerouslySetInnerHTML={{ __html: error.body.message }} />
-          ) as unknown as string,
-        });
-        if (this.mounted) {
-          this.setState({ isCreatingReportJob: false });
-        }
+    try {
+      await this.props.apiClient.createReportingJob(this.props.reportType, decoratedJobParams);
+      toasts.addSuccess({
+        title: intl.formatMessage(
+          {
+            id: 'reporting.share.panelContent.successfullyQueuedReportNotificationTitle',
+            defaultMessage: 'Queued report for {objectType}',
+          },
+          { objectType: this.state.objectType }
+        ),
+        text: toMountPoint(
+          <FormattedMessage
+            id="reporting.share.panelContent.successfullyQueuedReportNotificationDescription"
+            defaultMessage="Track its progress in {path}."
+            values={{
+              path: (
+                <a href={this.props.apiClient.getManagementLink()}>
+                  <FormattedMessage
+                    id="reporting.share.publicNotifier.reportLink.reportingSectionUrlLinkLabel"
+                    defaultMessage="Stack Management &gt; Reporting"
+                  />
+                </a>
+              ),
+            }}
+          />,
+          coreStart
+        ),
+        'data-test-subj': 'queueReportSuccess',
       });
+      if (this.props.onClose) {
+        this.props.onClose();
+      }
+      if (this.mounted) {
+        this.setState({ isCreatingReportJob: false });
+      }
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error(error);
+      toasts.addError(error, {
+        title: intl.formatMessage({
+          id: 'reporting.share.panelContent.notification.reportingErrorTitle',
+          defaultMessage: 'Unable to create report',
+        }),
+        toastMessage: intl.formatMessage({
+          id: 'reporting.share.panelContent.notification.reportingErrorToastMessage',
+          defaultMessage: `We couldn't create a report at this time.`,
+        }),
+      });
+      if (this.mounted) {
+        this.setState({ isCreatingReportJob: false });
+      }
+    }
   };
 }
 

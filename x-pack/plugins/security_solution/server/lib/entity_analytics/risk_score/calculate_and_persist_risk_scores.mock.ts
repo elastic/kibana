@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { CalculateAndPersistScoresResponse } from '../types';
+import type { RiskScoresCalculationResponse } from '../../../../common/api/entity_analytics';
 
 const buildResponseMock = (
-  overrides: Partial<CalculateAndPersistScoresResponse> = {}
-): CalculateAndPersistScoresResponse => ({
+  overrides: Partial<RiskScoresCalculationResponse> = {}
+): RiskScoresCalculationResponse => ({
   after_keys: {
     host: { 'host.name': 'hostname' },
   },

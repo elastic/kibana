@@ -12,19 +12,11 @@ import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 // `isRunning` refers to the search strategy as whole which might still be in the process
 // of fetching more data such as correlation results. That's why we have to determine
 // the `status` of the data for the latency chart separately.
-export function getOverallHistogram(
-  data: LatencyCorrelationsResponse,
-  isRunning: boolean
-) {
+export function getOverallHistogram(data: LatencyCorrelationsResponse, isRunning: boolean) {
   const overallHistogram =
-    data.overallHistogram === undefined && !isRunning
-      ? []
-      : data.overallHistogram;
-  const hasData =
-    Array.isArray(overallHistogram) && overallHistogram.length > 0;
-  const status = Array.isArray(overallHistogram)
-    ? FETCH_STATUS.SUCCESS
-    : FETCH_STATUS.LOADING;
+    data.overallHistogram === undefined && !isRunning ? [] : data.overallHistogram;
+  const hasData = Array.isArray(overallHistogram) && overallHistogram.length > 0;
+  const status = Array.isArray(overallHistogram) ? FETCH_STATUS.SUCCESS : FETCH_STATUS.LOADING;
 
   return { overallHistogram, hasData, status };
 }

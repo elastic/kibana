@@ -5,27 +5,46 @@
  * 2.0.
  */
 
-import type { StartServicesAccessor } from '@kbn/core/public';
 import type { ManagementApp, ManagementSetup } from '@kbn/management-plugin/public';
 
-import { spacesManagementApp } from './spaces_management_app';
-import type { ConfigType } from '../config';
-import type { PluginsStart } from '../plugin';
-import type { SpacesManager } from '../spaces_manager';
+import {
+  spacesManagementApp,
+  type CreateParams as SpacesManagementAppCreateParams,
+} from './spaces_management_app';
 
-interface SetupDeps {
+interface SetupDeps extends SpacesManagementAppCreateParams {
   management: ManagementSetup;
-  getStartServices: StartServicesAccessor<PluginsStart>;
-  spacesManager: SpacesManager;
-  config: ConfigType;
 }
 
 export class ManagementService {
   private registeredSpacesManagementApp?: ManagementApp;
 
-  public setup({ getStartServices, management, spacesManager, config }: SetupDeps) {
+  public setup({
+    getStartServices,
+    management,
+    spacesManager,
+    config,
+    logger,
+    getIsRoleManagementEnabled,
+    getRolesAPIClient,
+    eventTracker,
+    getPrivilegesAPIClient,
+    isServerless,
+    getSecurityLicense,
+  }: SetupDeps) {
     this.registeredSpacesManagementApp = management.sections.section.kibana.registerApp(
-      spacesManagementApp.create({ getStartServices, spacesManager, config })
+      spacesManagementApp.create({
+        getStartServices,
+        spacesManager,
+        config,
+        logger,
+        getIsRoleManagementEnabled,
+        getRolesAPIClient,
+        eventTracker,
+        getPrivilegesAPIClient,
+        isServerless,
+        getSecurityLicense,
+      })
     );
   }
 

@@ -8,54 +8,31 @@
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import { RoleCredentials } from '../../../../shared/services';
 
 const CACHE_TEMPLATES = true;
 
 export default function ({ getService }: FtrProviderContext) {
   const log = getService('log');
-  const indexManagementService = getService('indexManagement');
+  const svlCommonApi = getService('svlCommonApi');
+  const svlUserManager = getService('svlUserManager');
+  let roleAuthc: RoleCredentials;
+  const svlComponentTemplatesApi = getService('svlComponentTemplatesApi');
+  const svlComponentTemplateHelpers = getService('svlComponentTemplateHelpers');
 
-  describe('component templates', () => {
-    // Api methods
-    let getAllComponentTemplates: typeof indexManagementService['componentTemplates']['api']['getAllComponentTemplates'];
-    let getOneComponentTemplate: typeof indexManagementService['componentTemplates']['api']['getOneComponentTemplate'];
-    let updateComponentTemplate: typeof indexManagementService['componentTemplates']['api']['updateComponentTemplate'];
-    let deleteComponentTemplate: typeof indexManagementService['componentTemplates']['api']['deleteComponentTemplate'];
-    let getComponentTemplateDatastreams: typeof indexManagementService['componentTemplates']['api']['getComponentTemplateDatastreams'];
-    // Helpers
-    let addDatastream: typeof indexManagementService['componentTemplates']['helpers']['addDatastream'];
-    let addIndexTemplate: typeof indexManagementService['componentTemplates']['helpers']['addIndexTemplate'];
-    let addComponentTemplate: typeof indexManagementService['componentTemplates']['helpers']['addComponentTemplate'];
-    let cleanupDatastreams: typeof indexManagementService['componentTemplates']['helpers']['cleanupDatastreams'];
-    let cleanUpIndexTemplates: typeof indexManagementService['componentTemplates']['helpers']['cleanUpIndexTemplates'];
-    let cleanUpComponentTemplates: typeof indexManagementService['componentTemplates']['helpers']['cleanUpComponentTemplates'];
-
+  // Failing: See https://github.com/elastic/kibana/issues/182792
+  // Failing: See https://github.com/elastic/kibana/issues/182797
+  // Failing: See https://github.com/elastic/kibana/issues/182791
+  describe.skip('component templates', () => {
     before(async () => {
-      ({
-        componentTemplates: {
-          api: {
-            getAllComponentTemplates,
-            getOneComponentTemplate,
-            updateComponentTemplate,
-            deleteComponentTemplate,
-            getComponentTemplateDatastreams,
-          },
-          helpers: {
-            addDatastream,
-            addIndexTemplate,
-            addComponentTemplate,
-            cleanupDatastreams,
-            cleanUpIndexTemplates,
-            cleanUpComponentTemplates,
-          },
-        },
-      } = indexManagementService);
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
     });
 
     after(async () => {
-      await cleanUpIndexTemplates();
-      await cleanUpComponentTemplates();
-      await cleanupDatastreams();
+      await svlComponentTemplateHelpers.cleanUpIndexTemplates();
+      await svlComponentTemplateHelpers.cleanUpComponentTemplates();
+      await svlComponentTemplateHelpers.cleanupDatastreams();
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
     describe('Get', () => {
@@ -68,9 +45,6 @@ export default function ({ getService }: FtrProviderContext) {
             },
           },
           mappings: {
-            _source: {
-              enabled: false,
-            },
             properties: {
               host_name: {
                 type: 'keyword',
@@ -87,7 +61,10 @@ export default function ({ getService }: FtrProviderContext) {
       // Create component template to verify GET requests
       before(async () => {
         try {
-          await addComponentTemplate({ body: COMPONENT, name: COMPONENT_NAME }, CACHE_TEMPLATES);
+          await svlComponentTemplateHelpers.addComponentTemplate(
+            { body: COMPONENT, name: COMPONENT_NAME },
+            CACHE_TEMPLATES
+          );
         } catch (err) {
           log.debug('[Setup error] Error creating component template');
           throw err;
@@ -96,7 +73,10 @@ export default function ({ getService }: FtrProviderContext) {
 
       describe('all component templates', () => {
         it('should return an array of component templates', async () => {
-          const { body: componentTemplates } = await getAllComponentTemplates().expect(200);
+          const { body: componentTemplates, status } =
+            await svlComponentTemplatesApi.getAllComponentTemplates(roleAuthc);
+
+          svlCommonApi.assertResponseStatusCode(200, status, { componentTemplates });
 
           const testComponentTemplate = componentTemplates.find(
             ({ name }: { name: string }) => name === COMPONENT_NAME
@@ -116,7 +96,12 @@ export default function ({ getService }: FtrProviderContext) {
 
       describe('one component template', () => {
         it('should return a single component template', async () => {
-          const { body } = await getOneComponentTemplate(COMPONENT_NAME).expect(200);
+          const { body, status } = await svlComponentTemplatesApi.getOneComponentTemplate(
+            COMPONENT_NAME,
+            roleAuthc
+          );
+
+          svlCommonApi.assertResponseStatusCode(200, status, body);
 
           expect(body).to.eql({
             name: COMPONENT_NAME,
@@ -130,7 +115,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('Update', () => {
+    describe('Update #1', () => {
       const COMPONENT_NAME = 'test_update_component_template';
       const COMPONENT = {
         template: {
@@ -140,9 +125,6 @@ export default function ({ getService }: FtrProviderContext) {
             },
           },
           mappings: {
-            _source: {
-              enabled: false,
-            },
             properties: {
               host_name: {
                 type: 'keyword',
@@ -159,7 +141,10 @@ export default function ({ getService }: FtrProviderContext) {
       before(async () => {
         // Create component template that can be used to test PUT request
         try {
-          await addComponentTemplate({ body: COMPONENT, name: COMPONENT_NAME }, CACHE_TEMPLATES);
+          await svlComponentTemplateHelpers.addComponentTemplate(
+            { body: COMPONENT, name: COMPONENT_NAME },
+            CACHE_TEMPLATES
+          );
         } catch (err) {
           log.debug('[Setup error] Error creating component template');
           throw err;
@@ -167,14 +152,20 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should allow an existing component template to be updated', async () => {
-        const { body } = await updateComponentTemplate(COMPONENT_NAME, {
-          ...COMPONENT,
-          version: 1,
-          _kbnMeta: {
-            usedBy: [],
-            isManaged: false,
+        const { body, status } = await svlComponentTemplatesApi.updateComponentTemplate(
+          COMPONENT_NAME,
+          {
+            ...COMPONENT,
+            version: 1,
+            _kbnMeta: {
+              usedBy: [],
+              isManaged: false,
+            },
           },
-        }).expect(200);
+          roleAuthc
+        );
+
+        svlCommonApi.assertResponseStatusCode(200, status, body);
 
         expect(body).to.eql({
           acknowledged: true,
@@ -182,14 +173,20 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should not allow a non-existing component template to be updated', async () => {
-        const { body } = await updateComponentTemplate('component_does_not_exist', {
-          ...COMPONENT,
-          version: 1,
-          _kbnMeta: {
-            usedBy: [],
-            isManaged: false,
+        const { body, status } = await svlComponentTemplatesApi.updateComponentTemplate(
+          'component_does_not_exist',
+          {
+            ...COMPONENT,
+            version: 1,
+            _kbnMeta: {
+              usedBy: [],
+              isManaged: false,
+            },
           },
-        }).expect(404);
+          roleAuthc
+        );
+
+        svlCommonApi.assertResponseStatusCode(400, status, body);
 
         expect(body).to.eql({
           statusCode: 404,
@@ -211,7 +208,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('Update', () => {
+    describe('Update #2', () => {
       const COMPONENT_NAME = 'test_update_component_template';
       const COMPONENT = {
         template: {
@@ -221,9 +218,6 @@ export default function ({ getService }: FtrProviderContext) {
             },
           },
           mappings: {
-            _source: {
-              enabled: false,
-            },
             properties: {
               host_name: {
                 type: 'keyword',
@@ -240,7 +234,10 @@ export default function ({ getService }: FtrProviderContext) {
       before(async () => {
         // Create component template that can be used to test PUT request
         try {
-          await addComponentTemplate({ body: COMPONENT, name: COMPONENT_NAME }, CACHE_TEMPLATES);
+          await svlComponentTemplateHelpers.addComponentTemplate(
+            { body: COMPONENT, name: COMPONENT_NAME },
+            CACHE_TEMPLATES
+          );
         } catch (err) {
           log.debug('[Setup error] Error creating component template');
           throw err;
@@ -248,14 +245,20 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should allow an existing component template to be updated', async () => {
-        const { body } = await updateComponentTemplate(COMPONENT_NAME, {
-          ...COMPONENT,
-          version: 1,
-          _kbnMeta: {
-            usedBy: [],
-            isManaged: false,
+        const { body, status } = await svlComponentTemplatesApi.updateComponentTemplate(
+          COMPONENT_NAME,
+          {
+            ...COMPONENT,
+            version: 1,
+            _kbnMeta: {
+              usedBy: [],
+              isManaged: false,
+            },
           },
-        }).expect(200);
+          roleAuthc
+        );
+
+        svlCommonApi.assertResponseStatusCode(200, status, body);
 
         expect(body).to.eql({
           acknowledged: true,
@@ -263,14 +266,19 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should not allow a non-existing component template to be updated', async () => {
-        const { body } = await updateComponentTemplate('component_does_not_exist', {
-          ...COMPONENT,
-          version: 1,
-          _kbnMeta: {
-            usedBy: [],
-            isManaged: false,
+        const { body, status } = await svlComponentTemplatesApi.updateComponentTemplate(
+          'component_does_not_exist',
+          {
+            ...COMPONENT,
+            version: 1,
+            _kbnMeta: {
+              usedBy: [],
+              isManaged: false,
+            },
           },
-        }).expect(404);
+          roleAuthc
+        );
+        svlCommonApi.assertResponseStatusCode(404, status, body);
 
         expect(body).to.eql({
           statusCode: 404,
@@ -312,7 +320,8 @@ export default function ({ getService }: FtrProviderContext) {
         // Create several component templates that can be used to test deletion
         await Promise.all(
           [componentTemplateA, componentTemplateB, componentTemplateC, componentTemplateD].map(
-            (template) => addComponentTemplate(template, !CACHE_TEMPLATES)
+            (template) =>
+              svlComponentTemplateHelpers.addComponentTemplate(template, !CACHE_TEMPLATES)
           )
         ).catch((err) => {
           log.debug(`[Setup error] Error creating component templates: ${err.message}`);
@@ -322,7 +331,11 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should delete a component template', async () => {
         const { name } = componentTemplateA;
-        const { body } = await deleteComponentTemplate(name).expect(200);
+        const { status, body } = await svlComponentTemplatesApi.deleteComponentTemplate(
+          name,
+          roleAuthc
+        );
+        svlCommonApi.assertResponseStatusCode(200, status, body);
 
         expect(body).to.eql({
           itemsDeleted: [name],
@@ -335,10 +348,13 @@ export default function ({ getService }: FtrProviderContext) {
         const { name: componentTemplate2Name } = componentTemplateC;
 
         const {
+          status,
           body: { itemsDeleted, errors },
-        } = await deleteComponentTemplate(
-          `${componentTemplate1Name},${componentTemplate2Name}`
-        ).expect(200);
+        } = await svlComponentTemplatesApi.deleteComponentTemplate(
+          `${componentTemplate1Name},${componentTemplate2Name}`,
+          roleAuthc
+        );
+        svlCommonApi.assertResponseStatusCode(200, status, { itemsDeleted, errors });
 
         expect(errors).to.eql([]);
 
@@ -352,9 +368,12 @@ export default function ({ getService }: FtrProviderContext) {
         const COMPONENT_DOES_NOT_EXIST = 'component_does_not_exist';
         const { name: componentTemplateName } = componentTemplateD;
 
-        const { body } = await deleteComponentTemplate(
-          `${componentTemplateName},${COMPONENT_DOES_NOT_EXIST}`
-        ).expect(200);
+        const { body, status } = await svlComponentTemplatesApi.deleteComponentTemplate(
+          `${componentTemplateName},${COMPONENT_DOES_NOT_EXIST}`,
+          roleAuthc
+        );
+        svlCommonApi.assertResponseStatusCode(200, status, body);
+
         expect(body.itemsDeleted).to.eql([componentTemplateName]);
         expect(body.errors[0].name).to.eql(COMPONENT_DOES_NOT_EXIST);
 
@@ -381,9 +400,6 @@ export default function ({ getService }: FtrProviderContext) {
             },
           },
           mappings: {
-            _source: {
-              enabled: false,
-            },
             properties: {
               host_name: {
                 type: 'keyword',
@@ -407,8 +423,14 @@ export default function ({ getService }: FtrProviderContext) {
       // Create component template to verify GET requests
       before(async () => {
         try {
-          await addComponentTemplate({ body: COMPONENT, name: COMPONENT_NAME }, CACHE_TEMPLATES);
-          await addIndexTemplate({ body: TEMPLATE, name: TEMPLATE_NAME }, CACHE_TEMPLATES);
+          await svlComponentTemplateHelpers.addComponentTemplate(
+            { body: COMPONENT, name: COMPONENT_NAME },
+            CACHE_TEMPLATES
+          );
+          await svlComponentTemplateHelpers.addIndexTemplate(
+            { body: TEMPLATE, name: TEMPLATE_NAME },
+            CACHE_TEMPLATES
+          );
         } catch (err) {
           log.debug('[Setup error] Error creating component template');
           throw err;
@@ -417,7 +439,11 @@ export default function ({ getService }: FtrProviderContext) {
 
       describe('without datastreams', () => {
         it('should return no datastreams', async () => {
-          const { body } = await getComponentTemplateDatastreams(COMPONENT_NAME).expect(200);
+          const { body, status } = await svlComponentTemplatesApi.getComponentTemplateDatastreams(
+            COMPONENT_NAME,
+            roleAuthc
+          );
+          svlCommonApi.assertResponseStatusCode(200, status, body);
 
           expect(body).to.eql({ data_streams: [] });
         });
@@ -425,10 +451,14 @@ export default function ({ getService }: FtrProviderContext) {
 
       describe('with datastreams', () => {
         before(async () => {
-          await addDatastream(DATASTREAM_NAME, CACHE_TEMPLATES);
+          await svlComponentTemplateHelpers.addDatastream(DATASTREAM_NAME, CACHE_TEMPLATES);
         });
         it('should return datastreams', async () => {
-          const { body } = await getComponentTemplateDatastreams(COMPONENT_NAME).expect(200);
+          const { body, status } = await svlComponentTemplatesApi.getComponentTemplateDatastreams(
+            COMPONENT_NAME,
+            roleAuthc
+          );
+          svlCommonApi.assertResponseStatusCode(200, status, body);
 
           expect(body).to.eql({ data_streams: ['logs-test-component-template-default'] });
         });

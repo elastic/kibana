@@ -22,7 +22,7 @@
         "label": "ProfilingConfig",
         "description": [],
         "signature": [
-          "{ readonly elasticsearch?: Readonly<{} & { username: string; hosts: string; password: string; }> | undefined; }"
+          "{ readonly elasticsearch?: Readonly<{} & { username: string; password: string; hosts: string; }> | undefined; }"
         ],
         "path": "x-pack/plugins/observability_solution/profiling_data_access/server/index.ts",
         "deprecated": false,
@@ -56,6 +56,16 @@
           " | ",
           "SetupStateType",
           ">; fetchFunctions: ({ core, esClient, startIndex, endIndex, indices, stacktraceIdsField, query, totalSeconds, }: ",
+          "FetchFunctionsParams",
+          ") => Promise<",
+          {
+            "pluginId": "@kbn/profiling-utils",
+            "scope": "common",
+            "docId": "kibKbnProfilingUtilsPluginApi",
+            "section": "def-common.TopNFunctions",
+            "text": "TopNFunctions"
+          },
+          ">; fetchESFunctions: ({ core, esClient, indices, stacktraceIdsField, query, aggregationField, limit, totalSeconds, }: ",
           "FetchFunctionsParams",
           ") => Promise<",
           {
@@ -113,9 +123,9 @@
           "; soClient: ",
           {
             "pluginId": "@kbn/core-saved-objects-api-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-            "section": "def-common.SavedObjectsClientContract",
+            "section": "def-server.SavedObjectsClientContract",
             "text": "SavedObjectsClientContract"
           },
           "; }) => Promise<",
@@ -173,9 +183,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-api-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                    "section": "def-common.SavedObjectsClientContract",
+                    "section": "def-server.SavedObjectsClientContract",
                     "text": "SavedObjectsClientContract"
                   }
                 ],
@@ -208,9 +218,9 @@
           "; soClient: ",
           {
             "pluginId": "@kbn/core-saved-objects-api-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-            "section": "def-common.SavedObjectsClientContract",
+            "section": "def-server.SavedObjectsClientContract",
             "text": "SavedObjectsClientContract"
           },
           "; }) => Promise<",
@@ -268,9 +278,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-api-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                    "section": "def-common.SavedObjectsClientContract",
+                    "section": "def-server.SavedObjectsClientContract",
                     "text": "SavedObjectsClientContract"
                   }
                 ],
@@ -303,9 +313,9 @@
           "; soClient: ",
           {
             "pluginId": "@kbn/core-saved-objects-api-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-            "section": "def-common.SavedObjectsClientContract",
+            "section": "def-server.SavedObjectsClientContract",
             "text": "SavedObjectsClientContract"
           },
           "; }) => Promise<",
@@ -363,9 +373,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-api-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                    "section": "def-common.SavedObjectsClientContract",
+                    "section": "def-server.SavedObjectsClientContract",
                     "text": "SavedObjectsClientContract"
                   }
                 ],

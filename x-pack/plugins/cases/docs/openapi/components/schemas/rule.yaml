@@ -5,15 +5,13 @@ description: >
   This functionality is in technical preview and may be changed or removed in a future release.
   Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
 type: object
-x-technical-preview: true
+x-state: Technical preview
 properties:
   id:
     description: The rule identifier.
     type: string
-    examples:
-      - 94d80550-aaf4-11ec-985f-97e55adae8b9
+    example: 94d80550-aaf4-11ec-985f-97e55adae8b9
   name:
     description: The rule name.
     type: string
-    examples:
-      - security_rule
+    example: security_rule

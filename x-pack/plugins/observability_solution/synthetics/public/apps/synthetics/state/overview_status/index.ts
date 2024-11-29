@@ -7,14 +7,21 @@
 
 import { createReducer } from '@reduxjs/toolkit';
 
-import { OverviewStatusState } from '../../../../../common/runtime_types';
+import { OverviewStatusMetaData, OverviewStatusState } from '../../../../../common/runtime_types';
 import { IHttpSerializedFetchError } from '..';
-import { clearOverviewStatusErrorAction, fetchOverviewStatusAction } from './actions';
+import {
+  clearOverviewStatusErrorAction,
+  clearOverviewStatusState,
+  fetchOverviewStatusAction,
+  quietFetchOverviewStatusAction,
+} from './actions';
 
 export interface OverviewStatusStateReducer {
   loading: boolean;
   loaded: boolean;
   status: OverviewStatusState | null;
+  allConfigs?: OverviewStatusMetaData[];
+  disabledConfigs?: OverviewStatusMetaData[];
   error: IHttpSerializedFetchError | null;
 }
 
@@ -29,16 +36,32 @@ export const overviewStatusReducer = createReducer(initialState, (builder) => {
   builder
     .addCase(fetchOverviewStatusAction.get, (state) => {
       state.status = null;
+      state.loading = true;
+    })
+    .addCase(quietFetchOverviewStatusAction.get, (state) => {
+      state.loading = true;
     })
     .addCase(fetchOverviewStatusAction.success, (state, action) => {
-      state.status = {
-        ...action.payload,
-        allConfigs: { ...action.payload.upConfigs, ...action.payload.downConfigs },
-      };
+      state.status = action.payload;
+      state.allConfigs = Object.values({
+        ...action.payload.upConfigs,
+        ...action.payload.downConfigs,
+        ...action.payload.pendingConfigs,
+        ...action.payload.disabledConfigs,
+      });
+      state.disabledConfigs = state.allConfigs.filter((monitor) => !monitor.isEnabled);
       state.loaded = true;
+      state.loading = false;
     })
     .addCase(fetchOverviewStatusAction.fail, (state, action) => {
       state.error = action.payload;
+      state.loading = false;
+    })
+    .addCase(clearOverviewStatusState, (state, action) => {
+      state.status = null;
+      state.loading = false;
+      state.loaded = false;
+      state.error = null;
     })
     .addCase(clearOverviewStatusErrorAction, (state) => {
       state.error = null;

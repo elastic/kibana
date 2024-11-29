@@ -8,12 +8,12 @@
 import moment from 'moment';
 import { apiService } from '../../../../utils/api_service';
 import {
-  EncryptedSyntheticsSavedMonitor,
   EncryptedSyntheticsMonitorCodec,
   PingsResponse,
   PingsResponseType,
+  SyntheticsMonitorWithId,
 } from '../../../../../common/runtime_types';
-import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
+import { INITIAL_REST_VERSION, SYNTHETICS_API_URLS } from '../../../../../common/constants';
 
 export const fetchMonitorLastRun = async ({
   monitorId,
@@ -65,11 +65,18 @@ export const fetchMonitorRecentPings = async ({
 
 export const fetchSyntheticsMonitor = async ({
   monitorId,
+  spaceId,
 }: {
   monitorId: string;
-}): Promise<EncryptedSyntheticsSavedMonitor> =>
-  apiService.get<EncryptedSyntheticsSavedMonitor>(
+  spaceId?: string;
+}): Promise<SyntheticsMonitorWithId> => {
+  return apiService.get<SyntheticsMonitorWithId>(
     SYNTHETICS_API_URLS.GET_SYNTHETICS_MONITOR.replace('{monitorId}', monitorId),
-    undefined,
+    {
+      internal: true,
+      spaceId,
+      version: INITIAL_REST_VERSION,
+    },
     EncryptedSyntheticsMonitorCodec
   );
+};

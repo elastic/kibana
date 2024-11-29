@@ -1,11 +1,15 @@
 {
   "type": "plugin",
   "id": "@kbn/index-management-plugin",
-  "owner": "@elastic/kibana-management",
+  "owner": [
+    "@elastic/kibana-management"
+  ],
+  "group": "platform",
+  "visibility": "shared",
   "plugin": {
     "id": "indexManagement",
-    "server": true,
     "browser": true,
+    "server": true,
     "configPath": [
       "xpack",
       "index_management"
@@ -21,7 +25,9 @@
       "usageCollection",
       "fleet",
       "cloud",
-      "console"
+      "ml",
+      "console",
+      "licensing"
     ],
     "requiredBundles": [
       "kibanaReact",

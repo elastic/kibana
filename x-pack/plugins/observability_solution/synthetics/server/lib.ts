@@ -6,6 +6,10 @@
  */
 
 import {
+  MsearchMultisearchBody,
+  MsearchMultisearchHeader,
+} from '@elastic/elasticsearch/lib/api/types';
+import {
   ElasticsearchClient,
   SavedObjectsClientContract,
   KibanaRequest,
@@ -13,14 +17,13 @@ import {
 } from '@kbn/core/server';
 import chalk from 'chalk';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { ESSearchResponse } from '@kbn/es-types';
+import type { ESSearchResponse, InferSearchResponseOf } from '@kbn/es-types';
 import { RequestStatus } from '@kbn/inspector-plugin/common';
 import { InspectResponse } from '@kbn/observability-plugin/typings/common';
 import { enableInspectEsQueries } from '@kbn/observability-plugin/common';
 import { getInspectResponse } from '@kbn/observability-shared-plugin/common';
-import { SYNTHETICS_API_URLS } from '../common/constants';
+import { SYNTHETICS_API_URLS, SYNTHETICS_INDEX_PATTERN } from '../common/constants';
 import { SyntheticsServerSetup } from './types';
-import { savedObjectsAdapter } from './saved_objects/saved_objects';
 
 export interface CountResponse {
   result: {
@@ -37,11 +40,10 @@ export interface CountResponse {
   indices: string;
 }
 
-export class UptimeEsClient {
+export class SyntheticsEsClient {
   isDev: boolean;
   request?: KibanaRequest;
   baseESClient: ElasticsearchClient;
-  heartbeatIndices: string;
   isInspectorEnabled?: Promise<boolean | undefined>;
   inspectableEsQueries: InspectResponse = [];
   uiSettings?: CoreRequestHandlerContext['uiSettings'];
@@ -57,36 +59,25 @@ export class UptimeEsClient {
       heartbeatIndices?: string;
     }
   ) {
-    const { isDev = false, uiSettings, request, heartbeatIndices = '' } = options ?? {};
+    const { isDev = false, uiSettings, request } = options ?? {};
     this.uiSettings = uiSettings;
     this.baseESClient = esClient;
     this.savedObjectsClient = savedObjectsClient;
     this.request = request;
-    this.heartbeatIndices = heartbeatIndices;
     this.isDev = isDev;
     this.inspectableEsQueries = [];
-    this.getInspectEnabled();
-  }
-
-  async initSettings() {
-    const self = this;
-    const heartbeatIndices = await this.getIndices();
-    self.heartbeatIndices = heartbeatIndices || '';
+    this.getInspectEnabled().catch(() => {});
   }
 
   async search<DocumentSource extends unknown, TParams extends estypes.SearchRequest>(
     params: TParams,
-    operationName?: string,
-    index?: string
+    operationName?: string
   ): Promise<{ body: ESSearchResponse<DocumentSource, TParams> }> {
     let res: any;
     let esError: any;
 
-    await this.initSettings();
-
-    const esParams = { index: index ?? this.heartbeatIndices, ...params };
+    const esParams = { index: SYNTHETICS_INDEX_PATTERN, ...params };
     const startTime = process.hrtime();
-
     const startTimeNow = Date.now();
 
     let esRequestStatus: RequestStatus = RequestStatus.PENDING;
@@ -98,7 +89,8 @@ export class UptimeEsClient {
       esError = e;
       esRequestStatus = RequestStatus.ERROR;
     }
-    if (this.request) {
+    const isInspectorEnabled = await this.getInspectEnabled();
+    if ((isInspectorEnabled || this.isDev) && this.request) {
       this.inspectableEsQueries.push(
         getInspectResponse({
           esError,
@@ -111,7 +103,7 @@ export class UptimeEsClient {
         })
       );
     }
-    const isInspectorEnabled = await this.getInspectEnabled();
+
     if (isInspectorEnabled && this.request) {
       debugESCall({
         startTime,
@@ -128,13 +120,65 @@ export class UptimeEsClient {
 
     return res;
   }
+
+  async msearch<
+    TSearchRequest extends estypes.SearchRequest = estypes.SearchRequest,
+    TDocument = unknown
+  >(
+    requests: MsearchMultisearchBody[],
+    operationName?: string
+  ): Promise<{ responses: Array<InferSearchResponseOf<TDocument, TSearchRequest>> }> {
+    const searches: Array<MsearchMultisearchHeader | MsearchMultisearchBody> = [];
+    for (const request of requests) {
+      searches.push({ index: SYNTHETICS_INDEX_PATTERN, ignore_unavailable: true });
+      searches.push(request);
+    }
+
+    const startTimeNow = Date.now();
+
+    let res: any;
+    let esError: any;
+
+    try {
+      res = await this.baseESClient.msearch(
+        {
+          searches,
+        },
+        { meta: true }
+      );
+    } catch (e) {
+      esError = e;
+    }
+
+    const isInspectorEnabled = await this.getInspectEnabled();
+    if (isInspectorEnabled && this.request) {
+      requests.forEach((request, index) => {
+        this.inspectableEsQueries.push(
+          getInspectResponse({
+            esError,
+            esRequestParams: { index: SYNTHETICS_INDEX_PATTERN, ...request },
+            esRequestStatus: RequestStatus.OK,
+            esResponse: res.body.responses[index],
+            kibanaRequest: this.request!,
+            operationName: operationName ?? '',
+            startTime: startTimeNow,
+          })
+        );
+      });
+    }
+
+    return {
+      responses: res.body?.responses as unknown as Array<
+        InferSearchResponseOf<TDocument, TSearchRequest>
+      >,
+    };
+  }
+
   async count<TParams>(params: TParams): Promise<CountResponse> {
     let res: any;
     let esError: any;
 
-    await this.initSettings();
-
-    const esParams = { index: this.heartbeatIndices, ...params };
+    const esParams = { index: SYNTHETICS_INDEX_PATTERN, ...params };
     const startTime = process.hrtime();
 
     try {
@@ -159,7 +203,7 @@ export class UptimeEsClient {
       throw esError;
     }
 
-    return { result: res, indices: this.heartbeatIndices };
+    return { result: res, indices: SYNTHETICS_INDEX_PATTERN };
   }
   getSavedObjectsClient() {
     return this.savedObjectsClient;
@@ -176,23 +220,14 @@ export class UptimeEsClient {
     return {};
   }
   async getInspectEnabled() {
-    if (this.isInspectorEnabled !== undefined) {
-      return this.isInspectorEnabled;
-    }
-
     if (!this.uiSettings) {
       return false;
     }
 
-    this.isInspectorEnabled = this.uiSettings.client.get<boolean>(enableInspectEsQueries);
-  }
-
-  async getIndices() {
-    if (this.heartbeatIndices) {
-      return this.heartbeatIndices;
+    if (this.isInspectorEnabled === undefined) {
+      this.isInspectorEnabled = this.uiSettings.client.get<boolean>(enableInspectEsQueries);
     }
-    const settings = await savedObjectsAdapter.getUptimeDynamicSettings(this.savedObjectsClient);
-    return settings?.heartbeatIndices || '';
+    return this.isInspectorEnabled;
   }
 }
 

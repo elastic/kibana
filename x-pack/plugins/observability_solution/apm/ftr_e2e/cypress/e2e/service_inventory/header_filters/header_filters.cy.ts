@@ -16,8 +16,7 @@ const serviceOverviewHref = url.format({
   query: { rangeFrom: start, rangeTo: end },
 });
 
-const specialServiceName =
-  'service 1 / ? # [ ] @ ! $ &  ( ) * + , ; = < > % {} | ^ ` <>';
+const specialServiceName = 'service 1 / ? # [ ] @ ! $ &  ( ) * + , ; = < > % {} | ^ ` <>';
 
 describe('Service inventory - header filters', () => {
   before(() => {
@@ -28,7 +27,6 @@ describe('Service inventory - header filters', () => {
         specialServiceName,
       })
     );
-    cy.dismissServiceGroupsTour();
   });
 
   after(() => {

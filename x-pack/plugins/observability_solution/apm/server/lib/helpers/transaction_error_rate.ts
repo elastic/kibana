@@ -16,10 +16,7 @@ import type {
   AggregationResultOfMap,
 } from '@kbn/es-types';
 import { ApmDocumentType } from '../../../common/document_type';
-import {
-  EVENT_OUTCOME,
-  EVENT_SUCCESS_COUNT,
-} from '../../../common/es_fields/apm';
+import { EVENT_OUTCOME, EVENT_SUCCESS_COUNT } from '../../../common/es_fields/apm';
 import { EventOutcome } from '../../../common/event_outcome';
 
 export const getOutcomeAggregation = (
@@ -28,9 +25,7 @@ export const getOutcomeAggregation = (
   successful_or_failed:
     | { value_count: AggregationsValueCountAggregation }
     | { filter: QueryDslQueryContainer };
-  successful:
-    | { sum: AggregationsSumAggregation }
-    | { filter: QueryDslQueryContainer };
+  successful: { sum: AggregationsSumAggregation } | { filter: QueryDslQueryContainer };
 } => {
   if (documentType === ApmDocumentType.ServiceTransactionMetric) {
     return {
@@ -92,8 +87,7 @@ export function calculateFailedTransactionRate(
       ? outcomeResponse.successful_or_failed.value
       : outcomeResponse.successful_or_failed.doc_count;
 
-  const failedTransactions =
-    successfulOrFailedTransactions - successfulTransactions;
+  const failedTransactions = successfulOrFailedTransactions - successfulTransactions;
 
   return failedTransactions / successfulOrFailedTransactions;
 }

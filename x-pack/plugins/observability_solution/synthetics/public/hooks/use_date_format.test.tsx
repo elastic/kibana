@@ -31,7 +31,7 @@ describe('useDateFormat', () => {
   });
   it('returns a formatter function that makes a date into the expected output', () => {
     const response = renderHook(() => useDateFormat());
-    expect(response.result.current('2023-02-01 13:00:00')).toEqual('Feb 1, 2023 @ 1:00 PM');
+    expect(response.result.current('2023-02-01 13:00:00')).toEqual('Feb 1, 2023 @ 1:00:00 PM');
   });
   it('adjusts formatter based on locale', () => {
     Object.defineProperty(global.navigator, 'language', {
@@ -39,7 +39,7 @@ describe('useDateFormat', () => {
       writable: true,
     });
     const response = renderHook(() => useDateFormat());
-    expect(response.result.current('2023-02-01 13:00:00')).toEqual('1 Feb 2023 @ 13:00');
+    expect(response.result.current('2023-02-01 13:00:00')).toEqual('1 Feb 2023 @ 13:00:00');
   });
   it('prefers Kibana locale if set', () => {
     jest.spyOn(i18n, 'getLocale').mockReturnValue('fr-FR');
@@ -49,6 +49,6 @@ describe('useDateFormat', () => {
       writable: true,
     });
     const response = renderHook(() => useDateFormat());
-    expect(response.result.current('2023-02-01 13:00:00')).toEqual('1 févr. 2023 @ 13:00');
+    expect(response.result.current('2023-02-01 13:00:00')).toEqual('1 févr. 2023 @ 13:00:00');
   });
 });

@@ -1,32 +1,45 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
 import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
 import { i18n } from '@kbn/i18n';
+import type {
+  IKibanaSearchRequest,
+  IKibanaSearchResponse,
+  ISearchGeneric,
+} from '@kbn/search-types';
 import type { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
-
+import { getStartEndParams } from '@kbn/esql-utils';
 import { zipObject } from 'lodash';
-import { Observable, defer, throwError } from 'rxjs';
-import { catchError, map, switchMap, tap } from 'rxjs/operators';
-import { buildEsQuery } from '@kbn/es-query';
-import type { ESQLSearchReponse, ESQLSearchParams } from '@kbn/es-types';
+import { catchError, defer, map, Observable, switchMap, tap, throwError } from 'rxjs';
+import { buildEsQuery, type Filter } from '@kbn/es-query';
+import type { ESQLSearchParams, ESQLSearchResponse } from '@kbn/es-types';
 import { getEsQueryConfig } from '../../es_query';
 import { getTime } from '../../query';
 import {
   ESQL_ASYNC_SEARCH_STRATEGY,
-  IKibanaSearchRequest,
-  ISearchGeneric,
-  KibanaContext,
+  ESQL_TABLE_TYPE,
+  isRunningResponse,
+  type KibanaContext,
 } from '..';
-import { IKibanaSearchResponse } from '../types';
 import { UiSettingsCommon } from '../..';
+
+declare global {
+  interface Window {
+    /**
+     * Debug setting to make requests complete slower than normal. Only available on snapshots where `error_query` is enabled in ES.
+     */
+    ELASTIC_ESQL_DELAY_SECONDS?: number;
+  }
+}
 
 type Input = KibanaContext | null;
 type Output = Observable<Datatable>;
@@ -39,6 +52,12 @@ interface Arguments {
   // timezone?: string;
   timeField?: string;
   locale?: string;
+
+  /**
+   * Requests' meta for showing in Inspector
+   */
+  titleForInspector?: string;
+  descriptionForInspector?: string;
 }
 
 export type EsqlExpressionFunctionDefinition = ExpressionFunctionDefinition<
@@ -72,6 +91,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
     name: 'esql',
     type: 'datatable',
     inputTypes: ['kibana_context', 'null'],
+    allowCache: true,
     help: i18n.translate('data.search.esql.help', {
       defaultMessage: 'Queries Elasticsearch using ES|QL.',
     }),
@@ -106,10 +126,24 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
           defaultMessage: 'The locale to use.',
         }),
       },
+      titleForInspector: {
+        aliases: ['titleForInspector'],
+        types: ['string'],
+        help: i18n.translate('data.search.esql.titleForInspector.help', {
+          defaultMessage: 'The title to show in Inspector.',
+        }),
+      },
+      descriptionForInspector: {
+        aliases: ['descriptionForInspector'],
+        types: ['string'],
+        help: i18n.translate('data.search.esql.descriptionForInspector.help', {
+          defaultMessage: 'The description to show in Inspector.',
+        }),
+      },
     },
     fn(
       input,
-      { query, /* timezone, */ timeField, locale },
+      { query, /* timezone, */ timeField, locale, titleForInspector, descriptionForInspector },
       { abortSignal, inspectorAdapters, getKibanaRequest }
     ) {
       return defer(() =>
@@ -130,23 +164,50 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
             query,
             // time_zone: timezone,
             locale,
+            include_ccs_metadata: true,
           };
           if (input) {
             const esQueryConfigs = getEsQueryConfig(
               uiSettings as Parameters<typeof getEsQueryConfig>[0]
             );
+
+            const namedParams = getStartEndParams(query, input.timeRange);
+
+            if (namedParams.length) {
+              params.params = namedParams;
+            }
+
             const timeFilter =
               input.timeRange &&
               getTime(undefined, input.timeRange, {
                 fieldName: timeField,
               });
 
-            params.filter = buildEsQuery(
-              undefined,
-              input.query || [],
-              [...(input.filters ?? []), ...(timeFilter ? [timeFilter] : [])],
-              esQueryConfigs
-            );
+            // Used for debugging & inside automated tests to simulate a slow query
+            const delayFilter: Filter | undefined = window.ELASTIC_ESQL_DELAY_SECONDS
+              ? {
+                  meta: {},
+                  query: {
+                    error_query: {
+                      indices: [
+                        {
+                          name: '*',
+                          error_type: 'warning',
+                          stall_time_seconds: window.ELASTIC_ESQL_DELAY_SECONDS,
+                        },
+                      ],
+                    },
+                  },
+                }
+              : undefined;
+
+            const filters = [
+              ...(input.filters ?? []),
+              ...(timeFilter ? [timeFilter] : []),
+              ...(delayFilter ? [delayFilter] : []),
+            ];
+
+            params.filter = buildEsQuery(undefined, input.query || [], filters, esQueryConfigs);
           }
 
           let startTime = Date.now();
@@ -156,14 +217,17 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
             }
 
             const request = inspectorAdapters.requests.start(
-              i18n.translate('data.search.dataRequest.title', {
-                defaultMessage: 'Data',
-              }),
-              {
-                description: i18n.translate('data.search.es_search.dataRequest.description', {
-                  defaultMessage:
-                    'This request queries Elasticsearch to fetch the data for the visualization.',
+              titleForInspector ??
+                i18n.translate('data.search.dataRequest.title', {
+                  defaultMessage: 'Data',
                 }),
+              {
+                description:
+                  descriptionForInspector ??
+                  i18n.translate('data.search.es_search.dataRequest.description', {
+                    defaultMessage:
+                      'This request queries Elasticsearch to fetch the data for the visualization.',
+                  }),
               },
               startTime
             );
@@ -174,7 +238,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
 
           return search<
             IKibanaSearchRequest<ESQLSearchParams>,
-            IKibanaSearchResponse<ESQLSearchReponse>
+            IKibanaSearchResponse<ESQLSearchResponse>
           >(
             { params: { ...params, dropNullColumns: true } },
             { abortSignal, strategy: ESQL_ASYNC_SEARCH_STRATEGY }
@@ -194,7 +258,9 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
               return throwError(() => error);
             }),
             tap({
-              next({ rawResponse, requestParams }) {
+              next(response) {
+                if (isRunningResponse(response)) return;
+                const { rawResponse, requestParams } = response;
                 logInspectorRequest()
                   .stats({
                     hits: {
@@ -206,9 +272,25 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
                         defaultMessage: 'The number of documents returned by the query.',
                       }),
                     },
+                    ...(rawResponse?.took && {
+                      queryTime: {
+                        label: i18n.translate('data.search.es_search.queryTimeLabel', {
+                          defaultMessage: 'Query time',
+                        }),
+                        value: i18n.translate('data.search.es_search.queryTimeValue', {
+                          defaultMessage: '{queryTime}ms',
+                          values: { queryTime: rawResponse.took },
+                        }),
+                        description: i18n.translate('data.search.es_search.queryTimeDescription', {
+                          defaultMessage:
+                            'The time it took to process the query. ' +
+                            'Does not include the time to send the request or parse it in the browser.',
+                        }),
+                      },
+                    }),
                   })
                   .json(params)
-                  .ok({ json: rawResponse, requestParams });
+                  .ok({ json: { rawResponse }, requestParams });
               },
               error(error) {
                 logInspectorRequest()
@@ -233,7 +315,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
             (body.all_columns ?? body.columns)?.map(({ name, type }) => ({
               id: name,
               name,
-              meta: { type: esFieldTypeToKibanaFieldType(type) },
+              meta: { type: esFieldTypeToKibanaFieldType(type), esType: type },
               isNull: hasEmptyColumns ? !lookup.has(name) : false,
             })) ?? [];
 
@@ -248,7 +330,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
           return {
             type: 'datatable',
             meta: {
-              type: 'es_ql',
+              type: ESQL_TABLE_TYPE,
             },
             columns: allColumns,
             rows,

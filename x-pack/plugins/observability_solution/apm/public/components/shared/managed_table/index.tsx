@@ -8,22 +8,14 @@
 import { i18n } from '@kbn/i18n';
 import { EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
 import { isEmpty, merge, orderBy } from 'lodash';
-import React, {
-  ReactNode,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react';
+import React, { ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { apmEnableTableSearchBar } from '@kbn/observability-plugin/common';
 import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { fromQuery, toQuery } from '../links/url_helpers';
 import {
   getItemsFilteredBySearchQuery,
   TableSearchBar,
 } from '../table_search_bar/table_search_bar';
-import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 
 type SortDirection = 'asc' | 'desc';
 
@@ -46,28 +38,21 @@ export interface ITableColumn<T extends object> {
 }
 
 export interface TableSearchBar<T> {
-  isEnabled?: boolean;
+  isEnabled: boolean;
   fieldsToSearch: Array<keyof T>;
   maxCountExceeded: boolean;
   placeholder: string;
   onChangeSearchQuery: (searchQuery: string) => void;
+  techPreview?: boolean;
 }
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50];
 
-function defaultSortFn<T>(
-  items: T[],
-  sortField: keyof T,
-  sortDirection: SortDirection
-) {
+function defaultSortFn<T>(items: T[], sortField: keyof T, sortDirection: SortDirection) {
   return orderBy(items, sortField, sortDirection) as T[];
 }
 
-export type SortFunction<T> = (
-  items: T[],
-  sortField: keyof T,
-  sortDirection: SortDirection
-) => T[];
+export type SortFunction<T> = (items: T[], sortField: keyof T, sortDirection: SortDirection) => T[];
 
 export const shouldfetchServer = ({
   maxCountExceeded,
@@ -82,6 +67,7 @@ export const shouldfetchServer = ({
 function UnoptimizedManagedTable<T extends object>(props: {
   items: T[];
   columns: Array<ITableColumn<T>>;
+  rowHeader?: string | false;
   noItemsMessage?: React.ReactNode;
   isLoading?: boolean;
   error?: boolean;
@@ -108,15 +94,11 @@ function UnoptimizedManagedTable<T extends object>(props: {
 }) {
   const [searchQuery, setSearchQuery] = useState('');
   const history = useHistory();
-  const { core } = useApmPluginContext();
-  const isTableSearchBarEnabled = core.uiSettings.get<boolean>(
-    apmEnableTableSearchBar,
-    true
-  );
 
   const {
     items,
     columns,
+    rowHeader,
     noItemsMessage,
     isLoading = false,
     error = false,
@@ -174,12 +156,17 @@ function UnoptimizedManagedTable<T extends object>(props: {
   // update table options state when url params change
   useEffect(() => setTableOptions(getStateFromUrl()), [getStateFromUrl]);
 
+  // Clean up searchQuery when fast filter is toggled off
+  useEffect(() => {
+    if (!tableSearchBar.isEnabled) {
+      setSearchQuery('');
+    }
+  }, [tableSearchBar.isEnabled]);
+
   // update table options state when `onTableChange` is invoked and persist to url
   const onTableChange = useCallback(
     (newTableOptions: Partial<TableOptions<T>>) => {
-      setTableOptions((oldTableOptions) =>
-        merge({}, oldTableOptions, newTableOptions)
-      );
+      setTableOptions((oldTableOptions) => merge({}, oldTableOptions, newTableOptions));
 
       if (saveTableOptionsToUrl) {
         history.push({
@@ -209,11 +196,7 @@ function UnoptimizedManagedTable<T extends object>(props: {
 
   const renderedItems = useMemo(() => {
     const sortedItems = sortItems
-      ? sortFn(
-          filteredItems,
-          tableOptions.sort.field as keyof T,
-          tableOptions.sort.direction
-        )
+      ? sortFn(filteredItems, tableOptions.sort.field as keyof T, tableOptions.sort.direction)
       : filteredItems;
 
     return sortedItems.slice(
@@ -276,16 +259,14 @@ function UnoptimizedManagedTable<T extends object>(props: {
     [searchQuery, tableSearchBar]
   );
 
-  const isSearchBarEnabled =
-    isTableSearchBarEnabled && (tableSearchBar.isEnabled ?? true);
-
   return (
     <>
-      {isSearchBarEnabled ? (
+      {tableSearchBar.isEnabled ? (
         <TableSearchBar
           placeholder={tableSearchBar.placeholder}
           searchQuery={searchQuery}
           onChangeSearchQuery={onChangeSearchQuery}
+          techPreview={tableSearchBar.techPreview}
         />
       ) : null}
 
@@ -308,6 +289,7 @@ function UnoptimizedManagedTable<T extends object>(props: {
         }
         items={renderedItems}
         columns={columns as unknown as Array<EuiBasicTableColumn<T>>} // EuiBasicTableColumn is stricter than ITableColumn
+        rowHeader={rowHeader === false ? undefined : rowHeader ?? columns[0]?.field}
         sorting={sorting}
         onChange={onTableChange}
         {...(paginationProps ? { pagination: paginationProps } : {})}
@@ -316,8 +298,6 @@ function UnoptimizedManagedTable<T extends object>(props: {
   );
 }
 
-const ManagedTable = React.memo(
-  UnoptimizedManagedTable
-) as typeof UnoptimizedManagedTable;
+const ManagedTable = React.memo(UnoptimizedManagedTable) as typeof UnoptimizedManagedTable;
 
 export { ManagedTable, UnoptimizedManagedTable };

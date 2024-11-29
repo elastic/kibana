@@ -6,7 +6,7 @@
  */
 
 import { filter, map } from 'lodash';
-import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import type { IRouter } from '@kbn/core/server';
 import type { ReadPacksRequestParamsSchema } from '../../../common/api';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
@@ -25,7 +25,11 @@ export const readPackRoute = (router: IRouter) => {
     .get({
       access: 'public',
       path: '/api/osquery/packs/{id}',
-      options: { tags: [`access:${PLUGIN_ID}-readPacks`] },
+      security: {
+        authz: {
+          requiredPrivileges: [`${PLUGIN_ID}-readPacks`],
+        },
+      },
     })
     .addVersion(
       {
@@ -46,7 +50,10 @@ export const readPackRoute = (router: IRouter) => {
         const { attributes, references, id, ...rest } =
           await savedObjectsClient.get<PackSavedObject>(packSavedObjectType, request.params.id);
 
-        const policyIds = map(filter(references, ['type', AGENT_POLICY_SAVED_OBJECT_TYPE]), 'id');
+        const policyIds = map(
+          filter(references, ['type', LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE]),
+          'id'
+        );
         const osqueryPackAssetReference = !!filter(references, ['type', 'osquery-pack-asset']);
 
         const data: ReadPackResponseData = {

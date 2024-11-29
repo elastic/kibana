@@ -30,9 +30,7 @@ export const DEFAULT_ANOMALIES: ServiceAnomaliesResponse = {
   serviceAnomalies: [],
 };
 
-export type ServiceAnomaliesResponse = Awaited<
-  ReturnType<typeof getServiceAnomalies>
->;
+export type ServiceAnomaliesResponse = Awaited<ReturnType<typeof getServiceAnomalies>>;
 export async function getServiceAnomalies({
   mlClient,
   environment,
@@ -60,11 +58,7 @@ export async function getServiceAnomalies({
               ...apmMlAnomalyQuery({
                 detectorTypes: [AnomalyDetectorType.txLatency],
               }),
-              ...rangeQuery(
-                Math.min(end - 30 * 60 * 1000, start),
-                end,
-                'timestamp'
-              ),
+              ...rangeQuery(Math.min(end - 30 * 60 * 1000, start), end, 'timestamp'),
               {
                 terms: {
                   // Only retrieving anomalies for default transaction types
@@ -82,9 +76,7 @@ export async function getServiceAnomalies({
               sources: [
                 { serviceName: { terms: { field: ML_SERVICE_NAME_FIELD } } },
                 { jobId: { terms: { field: 'job_id' } } },
-              ] as Array<
-                Record<string, estypes.AggregationsCompositeAggregationSource>
-              >,
+              ] as Array<Record<string, estypes.AggregationsCompositeAggregationSource>>,
             },
             aggs: {
               metrics: {
@@ -153,10 +145,7 @@ export async function getServiceAnomalies({
   });
 }
 
-export async function getMLJobs(
-  anomalyDetectors: MlAnomalyDetectors,
-  environment?: string
-) {
+export async function getMLJobs(anomalyDetectors: MlAnomalyDetectors, environment?: string) {
   const jobs = await getMlJobsWithAPMGroup(anomalyDetectors);
 
   // to filter out legacy jobs we are filtering by the existence of `apm_ml_version` in `custom_settings`
@@ -172,10 +161,7 @@ export async function getMLJobs(
   return mlJobs;
 }
 
-export async function getMLJobIds(
-  anomalyDetectors: MlAnomalyDetectors,
-  environment?: string
-) {
+export async function getMLJobIds(anomalyDetectors: MlAnomalyDetectors, environment?: string) {
   const mlJobs = await getMLJobs(anomalyDetectors, environment);
   return mlJobs.map((job) => job.jobId);
 }

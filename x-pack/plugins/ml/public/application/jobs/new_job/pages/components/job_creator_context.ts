@@ -7,7 +7,7 @@
 
 import { createContext } from 'react';
 import type { Field, Aggregation } from '@kbn/ml-anomaly-utils';
-import type { TimeBuckets } from '../../../../util/time_buckets';
+import type { TimeBuckets } from '@kbn/ml-time-buckets';
 import type { JobCreatorType, SingleMetricJobCreator } from '../../common/job_creator';
 import type { ChartLoader } from '../../common/chart_loader';
 import type { MapLoader } from '../../common/map_loader';

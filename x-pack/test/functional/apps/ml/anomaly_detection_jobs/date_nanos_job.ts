@@ -134,21 +134,21 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testExecution.logTestStep('job creation inputs the query delay');
           await ml.jobWizardAdvanced.assertQueryDelayInputExists();
           await ml.jobWizardAdvanced.assertQueryDelayValue(defaultValues.queryDelay);
-          if (testData.datafeedConfig.hasOwnProperty('queryDelay')) {
+          if (Object.hasOwn(testData.datafeedConfig, 'queryDelay')) {
             await ml.jobWizardAdvanced.setQueryDelay(testData.datafeedConfig.queryDelay!);
           }
 
           await ml.testExecution.logTestStep('job creation inputs the frequency');
           await ml.jobWizardAdvanced.assertFrequencyInputExists();
           await ml.jobWizardAdvanced.assertFrequencyValue(defaultValues.frequency);
-          if (testData.datafeedConfig.hasOwnProperty('frequency')) {
+          if (Object.hasOwn(testData.datafeedConfig, 'frequency')) {
             await ml.jobWizardAdvanced.setFrequency(testData.datafeedConfig.frequency!);
           }
 
           await ml.testExecution.logTestStep('job creation inputs the scroll size');
           await ml.jobWizardAdvanced.assertScrollSizeInputExists();
           await ml.jobWizardAdvanced.assertScrollSizeValue(defaultValues.scrollSize);
-          if (testData.datafeedConfig.hasOwnProperty('scrollSize')) {
+          if (Object.hasOwn(testData.datafeedConfig, 'scrollSize')) {
             await ml.jobWizardAdvanced.setScrollSize(testData.datafeedConfig.scrollSize!);
           }
 
@@ -161,7 +161,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           await ml.testExecution.logTestStep('job creation selects the summary count field');
           await ml.jobWizardAdvanced.assertSummaryCountFieldInputExists();
-          if (testData.pickFieldsConfig.hasOwnProperty('summaryCountField')) {
+          if (Object.hasOwn(testData.pickFieldsConfig, 'summaryCountField')) {
             await ml.jobWizardAdvanced.selectSummaryCountField(
               testData.pickFieldsConfig.summaryCountField!
             );
@@ -188,22 +188,22 @@ export default function ({ getService }: FtrProviderContext) {
             await ml.jobWizardAdvanced.assertDetectorDescriptionValue('');
 
             await ml.jobWizardAdvanced.selectDetectorFunction(detector.function);
-            if (detector.hasOwnProperty('field')) {
+            if (Object.hasOwn(detector, 'field')) {
               await ml.jobWizardAdvanced.selectDetectorField(detector.field!);
             }
-            if (detector.hasOwnProperty('byField')) {
+            if (Object.hasOwn(detector, 'byField')) {
               await ml.jobWizardAdvanced.selectDetectorByField(detector.byField!);
             }
-            if (detector.hasOwnProperty('overField')) {
+            if (Object.hasOwn(detector, 'overField')) {
               await ml.jobWizardAdvanced.selectDetectorOverField(detector.overField!);
             }
-            if (detector.hasOwnProperty('partitionField')) {
+            if (Object.hasOwn(detector, 'partitionField')) {
               await ml.jobWizardAdvanced.selectDetectorPartitionField(detector.partitionField!);
             }
-            if (detector.hasOwnProperty('excludeFrequent')) {
+            if (Object.hasOwn(detector, 'excludeFrequent')) {
               await ml.jobWizardAdvanced.selectDetectorExcludeFrequent(detector.excludeFrequent!);
             }
-            if (detector.hasOwnProperty('description')) {
+            if (Object.hasOwn(detector, 'description')) {
               await ml.jobWizardAdvanced.setDetectorDescription(detector.description!);
             }
 
@@ -215,7 +215,7 @@ export default function ({ getService }: FtrProviderContext) {
             await ml.jobWizardAdvanced.assertDetectorEntryExists(
               index,
               detector.identifier,
-              detector.hasOwnProperty('description') ? detector.description! : undefined
+              Object.hasOwn(detector, 'description') ? detector.description! : undefined
             );
           }
 
@@ -298,7 +298,7 @@ export default function ({ getService }: FtrProviderContext) {
             ...testData.expected.row,
           });
 
-          await ml.jobTable.assertJobRowDetailsCounts(
+          await ml.jobExpandedDetails.assertJobRowDetailsCounts(
             testData.jobId,
             {
               job_id: testData.jobId,

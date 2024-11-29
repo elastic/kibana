@@ -5,27 +5,28 @@
  * 2.0.
  */
 
-import React from 'react';
-import { useLogViewContext } from '@kbn/logs-shared-plugin/public';
+import React, { FC, PropsWithChildren } from 'react';
+import { useLogSourcesContext } from '@kbn/logs-data-access-plugin/public';
 import { logEntryCategoriesJobType } from '../../../../common/log_analysis';
-import { InlineLogViewSplashPage } from '../../../components/logging/inline_log_view_splash_page';
 import { LogAnalysisSetupFlyoutStateProvider } from '../../../components/logging/log_analysis_setup/setup_flyout';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
 import { LogEntryCategoriesModuleProvider } from '../../../containers/logs/log_analysis/modules/log_entry_categories';
 import { useActiveKibanaSpace } from '../../../hooks/use_kibana_space';
-import { ConnectedLogViewErrorPage } from '../shared/page_log_view_error';
+import { LogSourceErrorPage } from '../shared/page_log_view_error';
 import { useLogMlJobIdFormatsShimContext } from '../shared/use_log_ml_job_id_formats_shim';
 
-export const LogEntryCategoriesPageProviders: React.FunctionComponent = ({ children }) => {
+const TIMESTAMP_FIELD = '@timestamp';
+const DEFAULT_MODULE_SOURCE_CONFIGURATION_ID = 'default'; // NOTE: Left in for legacy reasons, this used to refer to a log view ID (legacy).
+
+export const LogEntryCategoriesPageProviders: FC<PropsWithChildren<unknown>> = ({ children }) => {
   const {
-    hasFailedLoading,
-    isLoading,
+    logSources,
+    isLoadingLogSources,
     isUninitialized,
-    resolvedLogView,
-    logViewReference,
-    isPersistedLogView,
-    revertToDefaultLogView,
-  } = useLogViewContext();
+    hasFailedLoadingLogSources,
+    logSourcesError,
+    combinedIndices,
+  } = useLogSourcesContext();
   const { space } = useActiveKibanaSpace();
   const { idFormats, isLoadingLogAnalysisIdFormats, hasFailedLoadingLogAnalysisIdFormats } =
     useLogMlJobIdFormatsShimContext();
@@ -35,24 +36,24 @@ export const LogEntryCategoriesPageProviders: React.FunctionComponent = ({ child
   // React concurrent mode and Suspense in order to handle that more gracefully.
   if (space == null) {
     return null;
-  } else if (!isPersistedLogView) {
-    return <InlineLogViewSplashPage revertToDefaultLogView={revertToDefaultLogView} />;
-  } else if (hasFailedLoading || hasFailedLoadingLogAnalysisIdFormats) {
-    return <ConnectedLogViewErrorPage />;
-  } else if (isLoading || isUninitialized || isLoadingLogAnalysisIdFormats || !idFormats) {
+  } else if (hasFailedLoadingLogSources || hasFailedLoadingLogAnalysisIdFormats) {
+    return <LogSourceErrorPage errors={logSourcesError !== undefined ? [logSourcesError] : []} />;
+  } else if (
+    isLoadingLogSources ||
+    isUninitialized ||
+    isLoadingLogAnalysisIdFormats ||
+    !idFormats
+  ) {
     return <SourceLoadingPage />;
-  } else if (resolvedLogView != null) {
-    if (logViewReference.type === 'log-view-inline') {
-      throw new Error('Logs ML features only support persisted Log View references');
-    }
+  } else if (logSources.length > 0) {
     return (
       <LogEntryCategoriesModuleProvider
-        indexPattern={resolvedLogView.indices}
-        logViewId={logViewReference.logViewId}
+        indexPattern={combinedIndices}
         spaceId={space.id}
+        sourceId={DEFAULT_MODULE_SOURCE_CONFIGURATION_ID}
         idFormat={idFormats[logEntryCategoriesJobType]}
-        timestampField={resolvedLogView.timestampField}
-        runtimeMappings={resolvedLogView.runtimeMappings}
+        timestampField={TIMESTAMP_FIELD}
+        runtimeMappings={{}}
       >
         <LogAnalysisSetupFlyoutStateProvider>{children}</LogAnalysisSetupFlyoutStateProvider>
       </LogEntryCategoriesModuleProvider>

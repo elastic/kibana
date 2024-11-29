@@ -5,60 +5,45 @@
  * 2.0.
  */
 
-import {
-  CoreSetup,
-  CoreStart,
-  Logger,
-  Plugin,
-  PluginInitializerContext,
-} from '@kbn/core/server';
-import { isEmpty, mapValues } from 'lodash';
-import { Dataset } from '@kbn/rule-registry-plugin/server';
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
+import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { alertsLocatorID } from '@kbn/observability-plugin/common';
+import { Dataset } from '@kbn/rule-registry-plugin/server';
+import { isEmpty, mapValues } from 'lodash';
 import { APMConfig, APM_SERVER_FEATURE_ID } from '.';
+import { apmTutorialCustomIntegration } from '../common/tutorial/tutorials';
+import { registerAssistantFunctions } from './assistant_functions';
+import { registerDeprecations } from './deprecations';
 import { APM_FEATURE, registerFeaturesUsage } from './feature';
-import {
-  registerApmRuleTypes,
-  apmRuleTypeAlertFieldMap,
-  APM_RULE_TYPE_ALERT_CONTEXT,
-} from './routes/alerts/register_apm_rule_types';
-import { registerFleetPolicyCallbacks } from './routes/fleet/register_fleet_policy_callbacks';
 import { createApmTelemetry } from './lib/apm_telemetry';
-import { getInternalSavedObjectsClient } from './lib/helpers/get_internal_saved_objects_client';
-import { createApmAgentConfigurationIndex } from './routes/settings/agent_configuration/create_agent_config_index';
-import { createApmCustomLinkIndex } from './routes/settings/custom_link/create_custom_link_index';
 import {
-  apmTelemetry,
-  apmServerSettings,
-  apmServiceGroups,
-  apmCustomDashboards,
-} from './saved_objects';
-import {
-  APMPluginSetup,
-  APMPluginSetupDependencies,
-  APMPluginStartDependencies,
-} from './types';
+  APM_RULE_TYPE_ALERT_CONTEXT,
+  apmRuleTypeAlertFieldMap,
+  registerApmRuleTypes,
+} from './routes/alerts/register_apm_rule_types';
+import { getGlobalApmServerRouteRepository } from './routes/apm_routes/get_global_apm_server_route_repository';
 import {
   APMRouteHandlerResources,
   registerRoutes,
 } from './routes/apm_routes/register_apm_server_routes';
-import { getGlobalApmServerRouteRepository } from './routes/apm_routes/get_global_apm_server_route_repository';
-import { tutorialProvider } from './tutorial';
-import { scheduleSourceMapMigration } from './routes/source_maps/schedule_source_map_migration';
-import { createApmSourceMapIndexTemplate } from './routes/source_maps/create_apm_source_map_index_template';
+import { getAlertDetailsContextHandler } from './routes/assistant_functions/get_observability_alert_details_context';
 import { addApiKeysToEveryPackagePolicyIfMissing } from './routes/fleet/api_keys/add_api_keys_to_policies_if_missing';
-import { apmTutorialCustomIntegration } from '../common/tutorial/tutorials';
-import { registerAssistantFunctions } from './assistant_functions';
+import { registerFleetPolicyCallbacks } from './routes/fleet/register_fleet_policy_callbacks';
+import { createApmAgentConfigurationIndex } from './routes/settings/agent_configuration/create_agent_config_index';
+import { createApmCustomLinkIndex } from './routes/settings/custom_link/create_custom_link_index';
+import { createApmSourceMapIndexTemplate } from './routes/source_maps/create_apm_source_map_index_template';
+import { scheduleSourceMapMigration } from './routes/source_maps/schedule_source_map_migration';
+import {
+  apmCustomDashboards,
+  apmServerSettings,
+  apmServiceGroups,
+  apmTelemetry,
+} from './saved_objects';
+import { tutorialProvider } from './tutorial';
+import { APMPluginSetup, APMPluginSetupDependencies, APMPluginStartDependencies } from './types';
 
 export class APMPlugin
-  implements
-    Plugin<
-      APMPluginSetup,
-      void,
-      APMPluginSetupDependencies,
-      APMPluginStartDependencies
-    >
+  implements Plugin<APMPluginSetup, void, APMPluginSetupDependencies, APMPluginStartDependencies>
 {
   private currentConfig?: APMConfig;
   private logger?: Logger;
@@ -67,11 +52,8 @@ export class APMPlugin
     this.initContext = initContext;
   }
 
-  public setup(
-    core: CoreSetup<APMPluginStartDependencies>,
-    plugins: APMPluginSetupDependencies
-  ) {
-    this.logger = this.initContext.logger.get();
+  public setup(core: CoreSetup<APMPluginStartDependencies>, plugins: APMPluginSetupDependencies) {
+    const logger = (this.logger = this.initContext.logger.get());
     const config$ = this.initContext.config.create<APMConfig>();
 
     core.savedObjects.registerType(apmTelemetry);
@@ -95,15 +77,14 @@ export class APMPlugin
         logger: this.logger,
         kibanaVersion: this.initContext.env.packageInfo.version,
         isProd: this.initContext.env.mode.prod,
-      });
+      }).catch(() => {});
     }
 
     plugins.features.registerKibanaFeature(APM_FEATURE);
 
     registerFeaturesUsage({ licensingPlugin: plugins.licensing });
 
-    const getCoreStart = () =>
-      core.getStartServices().then(([coreStart]) => coreStart);
+    const getCoreStart = () => core.getStartServices().then(([coreStart]) => coreStart);
 
     const getPluginStart = () =>
       core.getStartServices().then(([coreStart, pluginStart]) => pluginStart);
@@ -128,45 +109,35 @@ export class APMPlugin
         start: () =>
           core.getStartServices().then((services) => {
             const [, pluginsStartContracts] = services;
-            return pluginsStartContracts[
-              key as keyof APMPluginStartDependencies
-            ];
+            return pluginsStartContracts[key as keyof APMPluginStartDependencies];
           }),
       };
     }) as APMRouteHandlerResources['plugins'];
-
-    const apmIndicesPromise = (async () => {
-      const coreStart = await getCoreStart();
-      const soClient = await getInternalSavedObjectsClient(coreStart);
-      const { getApmIndices } = plugins.apmDataAccess;
-      return getApmIndices(soClient);
-    })();
 
     // This if else block will go away in favour of removing Home Tutorial Integration
     // Ideally we will directly register a custom integration and pass the configs
     // for cloud, onPrem and Serverless so that the actual component can take
     // care of rendering
     if (currentConfig.serverlessOnboarding && plugins.customIntegrations) {
-      plugins.customIntegrations?.registerCustomIntegration(
-        apmTutorialCustomIntegration
-      );
+      plugins.customIntegrations?.registerCustomIntegration(apmTutorialCustomIntegration);
     } else {
-      apmIndicesPromise.then((apmIndices) => {
-        plugins.home?.tutorials.registerTutorial(
-          tutorialProvider({
-            apmConfig: currentConfig,
-            apmIndices,
-            cloud: plugins.cloud,
-            isFleetPluginEnabled: !isEmpty(resourcePlugins.fleet),
-          })
-        );
-      });
+      plugins.apmDataAccess
+        .getApmIndices()
+        .then((apmIndices) => {
+          plugins.home?.tutorials.registerTutorial(
+            tutorialProvider({
+              apmConfig: currentConfig,
+              apmIndices,
+              cloud: plugins.cloud,
+              isFleetPluginEnabled: !isEmpty(resourcePlugins.fleet),
+            })
+          );
+        })
+        .catch(() => {});
     }
 
     const telemetryUsageCounter =
-      resourcePlugins.usageCollection?.setup.createUsageCounter(
-        APM_SERVER_FEATURE_ID
-      );
+      resourcePlugins.usageCollection?.setup.createUsageCounter(APM_SERVER_FEATURE_ID);
 
     const kibanaVersion = this.initContext.env.packageInfo.version;
 
@@ -233,7 +204,7 @@ export class APMPlugin
       this.logger?.error(e);
     });
 
-    plugins.observabilityAIAssistant.service.register(
+    plugins.observabilityAIAssistant?.service.register(
       registerAssistantFunctions({
         config: this.currentConfig!,
         coreSetup: core,
@@ -244,6 +215,18 @@ export class APMPlugin
         ruleDataClient,
       })
     );
+
+    plugins.observability.alertDetailsContextualInsightsService.registerHandler(
+      getAlertDetailsContextHandler(resourcePlugins, logger)
+    );
+
+    registerDeprecations({
+      core,
+      apmDeps: {
+        logger: this.logger,
+        security: plugins.security,
+      },
+    });
 
     return { config$ };
   }

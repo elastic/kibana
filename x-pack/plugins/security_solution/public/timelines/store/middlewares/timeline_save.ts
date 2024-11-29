@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { get, has, set, omit, isObject, toString as fpToString } from 'lodash/fp';
+import { get, has, omit, isObject, toString as fpToString } from 'lodash/fp';
+import { set } from '@kbn/safer-lodash-set/fp';
 import type { Action, Middleware } from 'redux';
 import type { CoreStart } from '@kbn/core/public';
 import type { Filter, MatchAllFilter } from '@kbn/es-query';
@@ -33,9 +34,12 @@ import { inputsSelectors } from '../../../common/store/inputs';
 import { selectTimelineById } from '../selectors';
 import * as i18n from '../../pages/translations';
 import type { inputsModel } from '../../../common/store/inputs';
-import { TimelineStatus, TimelineType } from '../../../../common/api/timeline';
-import type { TimelineErrorResponse, TimelineResponse } from '../../../../common/api/timeline';
-import type { TimelineInput } from '../../../../common/search_strategy';
+import { TimelineStatusEnum, TimelineTypeEnum } from '../../../../common/api/timeline';
+import type {
+  TimelineErrorResponse,
+  PersistTimelineResponse,
+  SavedTimeline,
+} from '../../../../common/api/timeline';
 import type { TimelineModel } from '../model';
 import type { ColumnHeaderOptions } from '../../../../common/types/timeline';
 import { refreshTimelines } from './helpers';
@@ -59,7 +63,7 @@ export const saveTimelineMiddleware: (kibana: CoreStart) => Middleware<{}, State
       store.dispatch(startTimelineSaving({ id: localTimelineId }));
 
       try {
-        const result = await (action.payload.saveAsNew && timeline.id
+        const response = await (action.payload.saveAsNew && timeline.id
           ? copyTimeline({
               timelineId,
               timeline: {
@@ -80,9 +84,12 @@ export const saveTimelineMiddleware: (kibana: CoreStart) => Middleware<{}, State
               savedSearch: timeline.savedSearch,
             }));
 
-        if (isTimelineErrorResponse(result)) {
-          const error = getErrorFromResponse(result);
+        if (isTimelineErrorResponse(response)) {
+          const error = getErrorFromResponse(response);
           switch (error?.errorCode) {
+            case 403:
+              store.dispatch(showCallOutUnauthorizedMsg());
+              break;
             // conflict
             case 409:
               kibana.notifications.toasts.addDanger({
@@ -99,17 +106,11 @@ export const saveTimelineMiddleware: (kibana: CoreStart) => Middleware<{}, State
           return;
         }
 
-        const response = result?.data?.persistTimeline;
         if (response == null) {
           kibana.notifications.toasts.addDanger({
             title: i18n.UPDATE_TIMELINE_ERROR_TITLE,
             text: i18n.UPDATE_TIMELINE_ERROR_TEXT,
           });
-          return;
-        }
-
-        if (response && response.code === 403) {
-          store.dispatch(showCallOutUnauthorizedMsg());
           return;
         }
 
@@ -120,15 +121,15 @@ export const saveTimelineMiddleware: (kibana: CoreStart) => Middleware<{}, State
             id: localTimelineId,
             timeline: {
               ...timeline,
-              id: response.timeline.savedObjectId,
-              updated: response.timeline.updated ?? undefined,
-              savedObjectId: response.timeline.savedObjectId,
-              version: response.timeline.version,
-              status: response.timeline.status ?? TimelineStatus.active,
-              timelineType: response.timeline.timelineType ?? TimelineType.default,
-              templateTimelineId: response.timeline.templateTimelineId ?? null,
-              templateTimelineVersion: response.timeline.templateTimelineVersion ?? null,
-              savedSearchId: response.timeline.savedSearchId ?? null,
+              id: response.savedObjectId,
+              updated: response.updated ?? undefined,
+              savedObjectId: response.savedObjectId,
+              version: response.version,
+              status: response.status ?? TimelineStatusEnum.active,
+              timelineType: response.timelineType ?? TimelineTypeEnum.default,
+              templateTimelineId: response.templateTimelineId ?? null,
+              templateTimelineVersion: response.templateTimelineVersion ?? null,
+              savedSearchId: response.savedSearchId ?? null,
               isSaving: false,
             },
           })
@@ -155,7 +156,7 @@ export const saveTimelineMiddleware: (kibana: CoreStart) => Middleware<{}, State
     return ret;
   };
 
-const timelineInput: TimelineInput = {
+const timelineInput: SavedTimeline = {
   columns: null,
   dataProviders: null,
   dataViewId: null,
@@ -168,7 +169,7 @@ const timelineInput: TimelineInput = {
   kqlQuery: null,
   indexNames: null,
   title: null,
-  timelineType: TimelineType.default,
+  timelineType: TimelineTypeEnum.default,
   templateTimelineVersion: null,
   templateTimelineId: null,
   dateRange: null,
@@ -181,8 +182,8 @@ const timelineInput: TimelineInput = {
 export const convertTimelineAsInput = (
   timeline: TimelineModel,
   timelineTimeRange: inputsModel.TimeRange
-): TimelineInput =>
-  Object.keys(timelineInput).reduce<TimelineInput>((acc, key) => {
+): SavedTimeline =>
+  Object.keys(timelineInput).reduce<SavedTimeline>((acc, key) => {
     if (has(key, timeline)) {
       if (key === 'kqlQuery') {
         return set(`${key}.filterQuery`, get(`${key}.filterQuery`, timeline), acc);
@@ -270,7 +271,7 @@ const convertToString = (obj: unknown) => {
   }
 };
 
-type PossibleResponse = TimelineResponse | TimelineErrorResponse;
+type PossibleResponse = PersistTimelineResponse | TimelineErrorResponse;
 
 function isTimelineErrorResponse(response: PossibleResponse): response is TimelineErrorResponse {
   return response && ('status_code' in response || 'statusCode' in response);

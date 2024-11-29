@@ -8,20 +8,20 @@ slug: /kibana-dev-docs/api/observabilityAIAssistant
 title: "observabilityAIAssistant"
 image: https://source.unsplash.com/400x175/?github
 description: API docs for the observabilityAIAssistant plugin
-date: 2024-03-20
+date: 2024-11-28
 tags: ['contributor', 'dev', 'apidocs', 'kibana', 'observabilityAIAssistant']
 ---
 import observabilityAIAssistantObj from './observability_a_i_assistant.devdocs.json';
 
 
 
-Contact [@elastic/obs-knowledge-team](https://github.com/orgs/elastic/teams/obs-knowledge-team) for questions regarding this plugin.
+Contact [@elastic/obs-ai-assistant](https://github.com/orgs/elastic/teams/obs-ai-assistant) for questions regarding this plugin.
 
 **Code health stats**
 
 | Public API count  | Any count | Items lacking comments | Missing exports |
 |-------------------|-----------|------------------------|-----------------|
-| 227 | 1 | 225 | 25 |
+| 296 | 1 | 294 | 27 |
 
 ## Client
 
@@ -31,8 +31,14 @@ Contact [@elastic/obs-knowledge-team](https://github.com/orgs/elastic/teams/obs-
 ### Start
 <DocDefinitionList data={[observabilityAIAssistantObj.client.start]}/>
 
+### Objects
+<DocDefinitionList data={observabilityAIAssistantObj.client.objects}/>
+
 ### Functions
 <DocDefinitionList data={observabilityAIAssistantObj.client.functions}/>
+
+### Classes
+<DocDefinitionList data={observabilityAIAssistantObj.client.classes}/>
 
 ### Interfaces
 <DocDefinitionList data={observabilityAIAssistantObj.client.interfaces}/>
@@ -50,6 +56,9 @@ Contact [@elastic/obs-knowledge-team](https://github.com/orgs/elastic/teams/obs-
 
 ### Start
 <DocDefinitionList data={[observabilityAIAssistantObj.server.start]}/>
+
+### Functions
+<DocDefinitionList data={observabilityAIAssistantObj.server.functions}/>
 
 ### Consts, variables and types
 <DocDefinitionList data={observabilityAIAssistantObj.server.misc}/>

@@ -8,6 +8,8 @@ import React, { useState, useMemo, useCallback } from 'react';
 import { differenceBy, isEqual } from 'lodash';
 import { EuiSpacer, EuiPortal } from '@elastic/eui';
 
+import { isStuckInUpdating } from '../../../../../../common/services/agent_status';
+
 import type { Agent } from '../../../types';
 
 import {
@@ -33,12 +35,15 @@ import { AgentRequestDiagnosticsModal } from '../components/agent_request_diagno
 
 import type { SelectionMode } from './components/types';
 
-import { AgentTableHeader } from './components/table_header';
-import { SearchAndFilterBar } from './components/search_and_filter_bar';
-import { TagsAddRemove } from './components/tags_add_remove';
-import { AgentActivityFlyout, AgentSoftLimitCallout } from './components';
-import { TableRowActions } from './components/table_row_actions';
-import { AgentListTable } from './components/agent_list_table';
+import {
+  AgentListTable,
+  AgentSoftLimitCallout,
+  AgentTableHeader,
+  SearchAndFilterBar,
+  TableRowActions,
+  TagsAddRemove,
+} from './components';
+import { AgentActivityFlyout } from './components/agent_activity_flyout';
 import { useAgentSoftLimit, useMissingEncryptionKeyCallout, useFetchAgentsData } from './hooks';
 
 export const AgentListPage: React.FunctionComponent<{}> = () => {
@@ -72,6 +77,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   const [agentToRequestDiagnostics, setAgentToRequestDiagnostics] = useState<Agent | undefined>(
     undefined
   );
+
   const [showAgentActivityTour, setShowAgentActivityTour] = useState({ isOpen: false });
 
   const {
@@ -97,7 +103,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     setSelectedStatus,
     selectedTags,
     setSelectedTags,
-    agentPolicies,
+    allAgentPolicies,
     agentPoliciesRequest,
     agentPoliciesIndexedById,
     pagination,
@@ -108,6 +114,8 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     setDraftKuery,
     fetchData,
     currentRequestRef,
+    latestAgentActionErrors,
+    setLatestAgentActionErrors,
   } = useFetchAgentsData();
 
   const onSubmitSearch = useCallback(
@@ -161,10 +169,6 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     setSortField(sort!.field);
     setSortOrder(sort!.direction);
   };
-
-  const showInactive = useMemo(() => {
-    return selectedStatus.some((status) => status === 'inactive' || status === 'unenrolled');
-  }, [selectedStatus]);
 
   const renderActions = (agent: Agent) => {
     const agentPolicy =
@@ -264,7 +268,8 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
 
   const onClickAgentActivity = useCallback(() => {
     setAgentActivityFlyoutOpen(true);
-  }, [setAgentActivityFlyoutOpen]);
+    setLatestAgentActionErrors([]);
+  }, [setAgentActivityFlyoutOpen, setLatestAgentActionErrors]);
 
   const refreshAgents = ({ refreshTags = false }: { refreshTags?: boolean } = {}) => {
     fetchData({ refreshTags });
@@ -283,13 +288,14 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
             refreshAgentActivity={isLoading}
             setSearch={setSearch}
             setSelectedStatus={setSelectedStatus}
+            agentPolicies={allAgentPolicies}
           />
         </EuiPortal>
       ) : null}
       {enrollmentFlyout.isOpen ? (
         <EuiPortal>
           <AgentEnrollmentFlyout
-            agentPolicy={agentPolicies.find((p) => p.id === enrollmentFlyout.selectedPolicyId)}
+            agentPolicy={allAgentPolicies.find((p) => p.id === enrollmentFlyout.selectedPolicyId)}
             onClose={() => {
               setEnrollmentFlyoutState({ isOpen: false });
               fetchData();
@@ -344,7 +350,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
               setAgentToUpgrade(undefined);
               refreshAgents();
             }}
-            isUpdating={Boolean(agentToUpgrade.upgrade_started_at && !agentToUpgrade.upgraded_at)}
+            isUpdating={isStuckInUpdating(agentToUpgrade)}
           />
         </EuiPortal>
       )}
@@ -397,7 +403,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       )}
       {/* Search and filter bar */}
       <SearchAndFilterBar
-        agentPolicies={agentPolicies}
+        agentPolicies={allAgentPolicies}
         draftKuery={draftKuery}
         onDraftKueryChange={setDraftKuery}
         onSubmitSearch={onSubmitSearch}
@@ -422,12 +428,15 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         agentsOnCurrentPage={agentsOnCurrentPage}
         onClickAgentActivity={onClickAgentActivity}
         showAgentActivityTour={showAgentActivityTour}
+        latestAgentActionErrors={latestAgentActionErrors.length}
+        sortField={sortField}
+        sortOrder={sortOrder}
       />
       <EuiSpacer size="m" />
       {/* Agent total, bulk actions and status bar */}
       <AgentTableHeader
-        showInactive={showInactive}
         totalAgents={nAgentsInTable}
+        totalManagedAgents={totalManagedAgentIds.length || 0}
         agentStatus={agentsStatus}
         selectableAgents={agentsOnCurrentPage?.filter(isAgentSelectable).length || 0}
         managedAgentsOnCurrentPage={managedAgentsOnCurrentPage}

@@ -84,11 +84,9 @@
         "label": "LazyReplacementCard",
         "description": [],
         "signature": [
-          "React.ExoticComponent<",
+          "React.LazyExoticComponent<({ eprPackageName }: ",
           "Props",
-          "> & { readonly _result: ({ eprPackageName }: ",
-          "Props",
-          ") => JSX.Element | null; }"
+          ") => React.JSX.Element | null>"
         ],
         "path": "src/plugins/custom_integrations/public/components/index.tsx",
         "deprecated": false,
@@ -105,7 +103,7 @@
             "signature": [
               "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -253,7 +251,7 @@
           "label": "ContextProvider",
           "description": [],
           "signature": [
-            "React.FunctionComponent<{}>"
+            "React.FunctionComponent<{ children?: React.ReactNode; }>"
           ],
           "path": "src/plugins/custom_integrations/public/types.ts",
           "deprecated": false,
@@ -263,14 +261,14 @@
             {
               "parentPluginId": "customIntegrations",
               "id": "def-public.CustomIntegrationsStart.ContextProvider.$1",
-              "type": "CompoundType",
+              "type": "Uncategorized",
               "tags": [],
               "label": "props",
               "description": [],
               "signature": [
-                "P & { children?: React.ReactNode; }"
+                "P"
               ],
-              "path": "node_modules/@types/react/index.d.ts",
+              "path": "node_modules/@types/react/ts5.0/index.d.ts",
               "deprecated": false,
               "trackAdoption": false
             },
@@ -284,7 +282,7 @@
               "signature": [
                 "any"
               ],
-              "path": "node_modules/@types/react/index.d.ts",
+              "path": "node_modules/@types/react/ts5.0/index.d.ts",
               "deprecated": false,
               "trackAdoption": false
             }
@@ -452,7 +450,7 @@
             "label": "shipper",
             "description": [],
             "signature": [
-              "\"beats\" | \"enterprise_search\" | \"language_clients\" | \"other\" | \"sample_data\" | \"tests\" | \"tutorial\" | \"placeholders\""
+              "\"search\" | \"other\" | \"beats\" | \"language_clients\" | \"sample_data\" | \"tests\" | \"tutorial\" | \"placeholders\""
             ],
             "path": "src/plugins/custom_integrations/common/index.ts",
             "deprecated": false,
@@ -742,7 +740,7 @@
             "label": "shipper",
             "description": [],
             "signature": [
-              "\"beats\" | \"enterprise_search\" | \"language_clients\" | \"other\" | \"sample_data\" | \"tests\" | \"tutorial\" | \"placeholders\""
+              "\"search\" | \"other\" | \"beats\" | \"language_clients\" | \"sample_data\" | \"tests\" | \"tutorial\" | \"placeholders\""
             ],
             "path": "src/plugins/custom_integrations/common/index.ts",
             "deprecated": false,
@@ -945,7 +943,7 @@
           "\nThe list of all known shippers."
         ],
         "signature": [
-          "(\"beats\" | \"enterprise_search\" | \"language_clients\" | \"other\" | \"sample_data\" | \"tests\" | \"tutorial\" | \"placeholders\")[]"
+          "(\"search\" | \"other\" | \"beats\" | \"language_clients\" | \"sample_data\" | \"tests\" | \"tutorial\" | \"placeholders\")[]"
         ],
         "path": "src/plugins/custom_integrations/common/index.ts",
         "deprecated": false,
@@ -962,7 +960,7 @@
           "\nA shipper-- an internal or external system capable of storing data in ES/Kibana-- applicable to an Integration."
         ],
         "signature": [
-          "\"beats\" | \"enterprise_search\" | \"language_clients\" | \"other\" | \"sample_data\" | \"tests\" | \"tutorial\" | \"placeholders\""
+          "\"search\" | \"other\" | \"beats\" | \"language_clients\" | \"sample_data\" | \"tests\" | \"tutorial\" | \"placeholders\""
         ],
         "path": "src/plugins/custom_integrations/common/index.ts",
         "deprecated": false,
@@ -1121,41 +1119,6 @@
               {
                 "parentPluginId": "customIntegrations",
                 "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.application_observability.parent_id",
-                "type": "string",
-                "tags": [],
-                "label": "parent_id",
-                "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "customIntegrations",
-            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.app_search",
-            "type": "Object",
-            "tags": [],
-            "label": "app_search",
-            "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "customIntegrations",
-                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.app_search.title",
-                "type": "string",
-                "tags": [],
-                "label": "title",
-                "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "customIntegrations",
-                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.app_search.parent_id",
                 "type": "string",
                 "tags": [],
                 "label": "parent_id",
@@ -2038,44 +2001,6 @@
           },
           {
             "parentPluginId": "customIntegrations",
-            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.enterprise_search",
-            "type": "Object",
-            "tags": [],
-            "label": "enterprise_search",
-            "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "customIntegrations",
-                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.enterprise_search.title",
-                "type": "string",
-                "tags": [],
-                "label": "title",
-                "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "customIntegrations",
-                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.enterprise_search.parent_id",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "parent_id",
-                "description": [],
-                "signature": [
-                  "undefined"
-                ],
-                "path": "src/plugins/custom_integrations/common/index.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "customIntegrations",
             "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.firewall_security",
             "type": "Object",
             "tags": [],
@@ -2902,6 +2827,44 @@
           },
           {
             "parentPluginId": "customIntegrations",
+            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.search",
+            "type": "Object",
+            "tags": [],
+            "label": "search",
+            "description": [],
+            "path": "src/plugins/custom_integrations/common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.search.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.search.parent_id",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "parent_id",
+                "description": [],
+                "signature": [
+                  "undefined"
+                ],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "customIntegrations",
             "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.security",
             "type": "Object",
             "tags": [],
@@ -3436,10 +3399,10 @@
           },
           {
             "parentPluginId": "customIntegrations",
-            "id": "def-common.SHIPPER_DISPLAY.enterprise_search",
+            "id": "def-common.SHIPPER_DISPLAY.search",
             "type": "string",
             "tags": [],
-            "label": "enterprise_search",
+            "label": "search",
             "description": [],
             "path": "src/plugins/custom_integrations/common/index.ts",
             "deprecated": false,

@@ -10,37 +10,30 @@ import React, { memo } from 'react';
 import { EuiButtonIcon, EuiCopy, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { NewChatByTitle } from '@kbn/elastic-assistant';
-import { URL_PARAM_KEY } from '../../../../common/hooks/use_url_state';
-import { copyFunction } from '../../../shared/utils/copy_to_clipboard';
-import { useGetAlertDetailsFlyoutLink } from '../../../../timelines/components/side_panel/event_details/use_get_alert_details_flyout_link';
-import { useBasicDataFromDetailsData } from '../../../../timelines/components/side_panel/event_details/helpers';
+import { useGetFlyoutLink } from '../hooks/use_get_flyout_link';
+import { useBasicDataFromDetailsData } from '../../shared/hooks/use_basic_data_from_details_data';
 import { useAssistant } from '../hooks/use_assistant';
 import {
   ALERT_SUMMARY_CONVERSATION_ID,
   EVENT_SUMMARY_CONVERSATION_ID,
 } from '../../../../common/components/event_details/translations';
-import { useRightPanelContext } from '../context';
+import { useDocumentDetailsContext } from '../../shared/context';
 import { SHARE_BUTTON_TEST_ID } from './test_ids';
 
 /**
  * Actions displayed in the header menu in the right section of alerts flyout
  */
 export const HeaderActions: VFC = memo(() => {
-  const { dataFormattedForFieldBrowser, eventId, indexName } = useRightPanelContext();
+  const { dataFormattedForFieldBrowser, eventId, indexName } = useDocumentDetailsContext();
   const { isAlert, timestamp } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
 
-  const alertDetailsLink = useGetAlertDetailsFlyoutLink({
-    _id: eventId,
-    _index: indexName,
+  const alertDetailsLink = useGetFlyoutLink({
+    eventId,
+    indexName,
     timestamp,
   });
 
   const showShareAlertButton = isAlert && alertDetailsLink;
-
-  const modifier = (value: string) => {
-    const query = new URLSearchParams(window.location.search);
-    return `${value}&${URL_PARAM_KEY.eventFlyout}=${query.get(URL_PARAM_KEY.eventFlyout)}`;
-  };
 
   const { showAssistant, promptContextId } = useAssistant({
     dataFormattedForFieldBrowser,
@@ -84,8 +77,8 @@ export const HeaderActions: VFC = memo(() => {
                     { defaultMessage: 'Share alert' }
                   )}
                   data-test-subj={SHARE_BUTTON_TEST_ID}
-                  onClick={() => copyFunction(copy, alertDetailsLink, modifier)}
-                  onKeyDown={() => copyFunction(copy, alertDetailsLink, modifier)}
+                  onClick={copy}
+                  onKeyDown={copy}
                 />
               )}
             </EuiCopy>

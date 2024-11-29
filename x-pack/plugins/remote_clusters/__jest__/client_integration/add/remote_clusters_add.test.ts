@@ -11,6 +11,7 @@ import { act } from 'react-dom/test-utils';
 import { setupEnvironment, RemoteClustersActions } from '../helpers';
 import { setup } from './remote_clusters_add.helpers';
 import { NON_ALPHA_NUMERIC_CHARS, ACCENTED_CHARS } from './special_characters';
+import { MAX_NODE_CONNECTIONS } from '../../../common/constants';
 
 const notInArray = (array: string[]) => (value: string) => array.indexOf(value) < 0;
 
@@ -40,12 +41,12 @@ describe('Create Remote cluster', () => {
     test('should have a toggle to Skip unavailable remote cluster', () => {
       expect(actions.skipUnavailableSwitch.exists()).toBe(true);
 
-      // By default it should be set to "false"
-      expect(actions.skipUnavailableSwitch.isChecked()).toBe(false);
+      // By default it should be set to "true"
+      expect(actions.skipUnavailableSwitch.isChecked()).toBe(true);
 
       actions.skipUnavailableSwitch.toggle();
 
-      expect(actions.skipUnavailableSwitch.isChecked()).toBe(true);
+      expect(actions.skipUnavailableSwitch.isChecked()).toBe(false);
     });
 
     describe('on prem', () => {
@@ -273,6 +274,17 @@ describe('Create Remote cluster', () => {
 
           actions.seedsInput.setValue('192.168.1.1:abc');
           expect(actions.getErrorMessages()).toContain('A port is required.');
+        });
+      });
+
+      describe('node connections', () => {
+        test('should require a valid number of node connections', async () => {
+          await actions.saveButton.click();
+
+          actions.nodeConnectionsInput.setValue(String(MAX_NODE_CONNECTIONS + 1));
+          expect(actions.getErrorMessages()).toContain(
+            `This number must be equal or less than ${MAX_NODE_CONNECTIONS}.`
+          );
         });
       });
 

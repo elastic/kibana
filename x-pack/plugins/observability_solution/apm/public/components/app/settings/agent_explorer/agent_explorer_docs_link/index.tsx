@@ -17,10 +17,7 @@ interface AgentExplorerDocsLinkProps {
   repositoryUrl?: string;
 }
 
-export function AgentExplorerDocsLink({
-  agentName,
-  repositoryUrl,
-}: AgentExplorerDocsLinkProps) {
+export function AgentExplorerDocsLink({ agentName, repositoryUrl }: AgentExplorerDocsLinkProps) {
   if (!repositoryUrl) {
     return <>{NOT_AVAILABLE_LABEL}</>;
   }
@@ -44,12 +41,9 @@ export function AgentExplorerDocsLink({
         <EuiIcon
           type="logoElastic"
           size="m"
-          title={i18n.translate(
-            'xpack.apm.agentExplorer.docsLink.elastic.logo',
-            {
-              defaultMessage: 'Elastic logo',
-            }
-          )}
+          title={i18n.translate('xpack.apm.agentExplorer.docsLink.elastic.logo', {
+            defaultMessage: 'Elastic logo',
+          })}
         />
       )}{' '}
       {i18n.translate('xpack.apm.agentExplorer.docsLink.message', {

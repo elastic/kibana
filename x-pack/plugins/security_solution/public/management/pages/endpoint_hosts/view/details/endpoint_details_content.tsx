@@ -5,39 +5,27 @@
  * 2.0.
  */
 
-import styled from 'styled-components';
 import {
   EuiDescriptionList,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHealth,
   EuiLink,
-  EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 import React, { memo, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EndpointAgentStatus } from '../../../../../common/components/endpoint/endpoint_agent_status';
+import { WorkflowInsights } from './components/insights/workflow_insights';
 import { isPolicyOutOfDate } from '../../utils';
+import { AgentStatus } from '../../../../../common/components/endpoint/agents/agent_status';
 import type { HostInfo } from '../../../../../../common/endpoint/types';
 import { useEndpointSelector } from '../hooks';
-import {
-  getEndpointPendingActionsCallback,
-  nonExistingPolicies,
-  uiQueryParams,
-} from '../../store/selectors';
+import { nonExistingPolicies, uiQueryParams } from '../../store/selectors';
 import { POLICY_STATUS_TO_BADGE_COLOR } from '../host_constants';
 import { FormattedDate } from '../../../../../common/components/formatted_date';
 import { useNavigateByRouterEventHandler } from '../../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
 import { getEndpointDetailsPath } from '../../../../common/routing';
 import { EndpointPolicyLink } from '../../../../components/endpoint_policy_link';
-import { OutOfDate } from '../components/out_of_date';
-
-const EndpointDetailsContentStyled = styled.div`
-  .policyLineText {
-    padding-right: 5px;
-  }
-`;
 
 const ColumnTitle = ({ children }: { children: React.ReactNode }) => {
   return (
@@ -59,7 +47,6 @@ export const EndpointDetailsContent = memo<EndpointDetailsContentProps>(
       () => hostInfo.metadata.Endpoint.policy.applied.status,
       [hostInfo]
     );
-    const getHostPendingActions = useEndpointSelector(getEndpointPendingActionsCallback);
     const missingPolicies = useEndpointSelector(nonExistingPolicies);
 
     const policyResponseRoutePath = useMemo(() => {
@@ -95,12 +82,7 @@ export const EndpointDetailsContent = memo<EndpointDetailsContentProps>(
               />
             </ColumnTitle>
           ),
-          description: (
-            <EndpointAgentStatus
-              pendingActions={getHostPendingActions(hostInfo.metadata.agent.id)}
-              endpointHostInfo={hostInfo}
-            />
-          ),
+          description: <AgentStatus agentId={hostInfo.metadata.agent.id} agentType="endpoint" />,
         },
         {
           title: (
@@ -130,35 +112,15 @@ export const EndpointDetailsContent = memo<EndpointDetailsContentProps>(
             </ColumnTitle>
           ),
           description: (
-            <EuiText size="xs" className={'eui-textBreakWord'}>
-              <EndpointPolicyLink
-                policyId={hostInfo.metadata.Endpoint.policy.applied.id}
-                data-test-subj="policyDetailsValue"
-                className={'policyLineText'}
-                missingPolicies={missingPolicies}
-              >
-                {hostInfo.metadata.Endpoint.policy.applied.name}
-              </EndpointPolicyLink>
-              {hostInfo.metadata.Endpoint.policy.applied.endpoint_policy_version && (
-                <EuiText
-                  color="subdued"
-                  size="xs"
-                  className={'eui-displayInlineBlock eui-textNoWrap policyLineText'}
-                  data-test-subj="policyDetailsRevNo"
-                >
-                  <FormattedMessage
-                    id="xpack.securitySolution.endpoint.details.policy.revisionNumber"
-                    defaultMessage="rev. {revNumber}"
-                    values={{
-                      revNumber: hostInfo.metadata.Endpoint.policy.applied.endpoint_policy_version,
-                    }}
-                  />
-                </EuiText>
-              )}
-              {isPolicyOutOfDate(hostInfo.metadata.Endpoint.policy.applied, policyInfo) && (
-                <OutOfDate />
-              )}
-            </EuiText>
+            <EndpointPolicyLink
+              policyId={hostInfo.metadata.Endpoint.policy.applied.id}
+              revision={hostInfo.metadata.Endpoint.policy.applied.endpoint_policy_version}
+              isOutdated={isPolicyOutOfDate(hostInfo.metadata.Endpoint.policy.applied, policyInfo)}
+              policyExists={!missingPolicies.has(hostInfo.metadata.Endpoint.policy.applied.id)}
+              data-test-subj="policyDetailsValue"
+            >
+              {hostInfo.metadata.Endpoint.policy.applied.name}
+            </EndpointPolicyLink>
           ),
         },
         {
@@ -218,18 +180,11 @@ export const EndpointDetailsContent = memo<EndpointDetailsContentProps>(
           ),
         },
       ];
-    }, [
-      hostInfo,
-      getHostPendingActions,
-      missingPolicies,
-      policyInfo,
-      policyStatus,
-      policyStatusClickHandler,
-    ]);
+    }, [hostInfo, policyInfo, missingPolicies, policyStatus, policyStatusClickHandler]);
 
     return (
-      <EndpointDetailsContentStyled>
-        <EuiSpacer size="s" />
+      <div>
+        <WorkflowInsights />
         <EuiDescriptionList
           columnWidths={[1, 3]}
           compressed
@@ -238,7 +193,7 @@ export const EndpointDetailsContent = memo<EndpointDetailsContentProps>(
           listItems={detailsResults}
           data-test-subj="endpointDetailsList"
         />
-      </EndpointDetailsContentStyled>
+      </div>
     );
   }
 );

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -12,7 +13,7 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { BehaviorSubject } from 'rxjs';
 import { getDiscoverStateMock } from '../../__mocks__/discover_state.mock';
 import { PanelsToggle, type PanelsToggleProps } from './panels_toggle';
-import { DiscoverAppStateProvider } from '../../application/main/services/discover_app_state_container';
+import { DiscoverAppStateProvider } from '../../application/main/state_management/discover_app_state_container';
 import { SidebarToggleState } from '../../application/types';
 
 describe('Panels toggle component', () => {

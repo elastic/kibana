@@ -7,7 +7,10 @@
 
 import type { Client, estypes } from '@elastic/elasticsearch';
 import assert from 'assert';
-import { createEsClient, isServerlessKibanaFlavor } from './stack_services';
+import type { ToolingLog } from '@kbn/tooling-log';
+import { isServerlessKibanaFlavor } from '../../../common/endpoint/utils/kibana_status';
+import { createEsClient } from './stack_services';
+import type { CreatedSecuritySuperuser } from './security_user_services';
 import { createSecuritySuperuser } from './security_user_services';
 
 export interface DeleteAllEndpointDataResponse {
@@ -22,24 +25,49 @@ export interface DeleteAllEndpointDataResponse {
  * **NOTE:** This utility will create a new role and user that has elevated privileges and access to system indexes.
  *
  * @param esClient
+ * @param log
  * @param endpointAgentIds
+ * @param asSuperuser
  */
 export const deleteAllEndpointData = async (
   esClient: Client,
-  endpointAgentIds: string[]
+  log: ToolingLog,
+  endpointAgentIds: string[],
+  /** If true, then a new user will be created that has full privileges to indexes (especially system indexes) */
+  asSuperuser: boolean = true
 ): Promise<DeleteAllEndpointDataResponse> => {
   assert(endpointAgentIds.length > 0, 'At least one endpoint agent id must be defined');
 
-  const isServerless = await isServerlessKibanaFlavor(esClient);
-  const unrestrictedUser = isServerless
-    ? { password: 'changeme', username: 'system_indices_superuser', created: false }
-    : await createSecuritySuperuser(esClient, 'super_superuser');
-  const esUrl = getEsUrlFromClient(esClient);
-  const esClientUnrestricted = createEsClient({
-    url: esUrl,
-    username: unrestrictedUser.username,
-    password: unrestrictedUser.password,
-  });
+  let esClientUnrestricted = esClient;
+
+  if (asSuperuser) {
+    log.debug(`Looking to use a superuser type of account`);
+
+    const isServerless = await isServerlessKibanaFlavor(esClient);
+    let unrestrictedUser: CreatedSecuritySuperuser | undefined;
+
+    if (isServerless) {
+      log.debug(`In serverless mode. Creating new ES Client using 'system_indices_superuser'`);
+
+      unrestrictedUser = {
+        password: 'changeme',
+        username: 'system_indices_superuser',
+        created: false,
+      };
+    } else {
+      log.debug(`Creating new superuser account [super_superuser]`);
+      unrestrictedUser = await createSecuritySuperuser(esClient, 'super_superuser');
+    }
+
+    if (unrestrictedUser) {
+      const esUrl = getEsUrlFromClient(esClient);
+      esClientUnrestricted = createEsClient({
+        url: esUrl,
+        username: unrestrictedUser.username,
+        password: unrestrictedUser.password,
+      });
+    }
+  }
 
   const queryString = endpointAgentIds.map((id) => `(${id})`).join(' OR ');
 
@@ -55,6 +83,8 @@ export const deleteAllEndpointData = async (
     ignore_unavailable: true,
     conflicts: 'proceed',
   });
+
+  log.verbose(`All deleted documents:\n`, deleteResponse);
 
   return {
     count: deleteResponse.deleted ?? 0,

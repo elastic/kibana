@@ -5,19 +5,17 @@
  * 2.0.
  */
 
-import { from, takeUntil } from 'rxjs';
+import { takeUntil, of, map } from 'rxjs';
 
-import { IBasePath } from '@kbn/core-http-server';
 import { GlobalSearchResultProvider } from '@kbn/global-search-plugin/server';
 import { i18n } from '@kbn/i18n';
 
-import { CONNECTOR_DEFINITIONS, ConnectorServerSideDefinition } from '@kbn/search-connectors';
+import { ConnectorServerSideDefinition } from '@kbn/search-connectors';
 
 import { ConfigType } from '..';
 import {
   ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE,
   ENTERPRISE_SEARCH_CONTENT_PLUGIN,
-  APP_SEARCH_PLUGIN,
   AI_SEARCH_PLUGIN,
 } from '../../common/constants';
 
@@ -33,7 +31,6 @@ type ServiceDefinition =
     };
 
 export function toSearchResult({
-  basePath,
   iconPath,
   isCloud,
   isNative,
@@ -42,7 +39,6 @@ export function toSearchResult({
   serviceType,
   url,
 }: {
-  basePath: IBasePath;
   iconPath?: string;
   isCloud: boolean;
   isNative?: boolean;
@@ -57,112 +53,105 @@ export function toSearchResult({
       ? 'native'
       : 'connector_client'
     : null;
+  const newUrl = isCrawler
+    ? `${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}/crawlers/new_crawler`
+    : `${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}/connectors/new_connector?connector_type=${connectorTypeParam}&service_type=${serviceType}`;
 
   return {
-    icon: iconPath
-      ? basePath.prepend(`/plugins/enterpriseSearch/assets/source_icons/${iconPath}`)
-      : 'logoEnterpriseSearch',
+    icon: iconPath || 'logoEnterpriseSearch',
     id: serviceType,
     score,
     title: name,
-    type: i18n.translate('xpack.enterpriseSearch.searchProvider.type.name', {
-      defaultMessage: 'Search',
-    }),
+    type: 'Elasticsearch',
     url: {
-      path:
-        url ??
-        `${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}/search_indices/new_index/${
-          isCrawler
-            ? 'crawler'
-            : `connector?connector_type=${connectorTypeParam}&service_type=${serviceType}`
-        }`,
+      path: url ?? newUrl,
       prependBasePath: true,
     },
   };
 }
 
 export function getSearchResultProvider(
-  basePath: IBasePath,
   config: ConfigType,
-  isCloud: boolean
+  connectorTypes: ConnectorServerSideDefinition[],
+  isCloud: boolean,
+  crawlerIconPath: string
 ): GlobalSearchResultProvider {
   return {
-    find: ({ term, types, tags }, { aborted$, maxResults }) => {
+    find: ({ term, types, tags }, { aborted$, maxResults }, { core: { capabilities } }) => {
       if (
         tags ||
         (types && !(types.includes('integration') || types.includes('enterprise search')))
       ) {
-        return from([[]]);
+        return of([]);
       }
-      const services: ServiceDefinition[] = [
-        ...(config.hasWebCrawler
-          ? [
-              {
-                iconPath: 'crawler.svg',
-                keywords: ['crawler', 'web', 'website', 'internet', 'google'],
-                name: i18n.translate('xpack.enterpriseSearch.searchProvider.webCrawler.name', {
-                  defaultMessage: 'Elastic Web Crawler',
-                }),
-                serviceType: ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE,
-              },
-            ]
-          : []),
-        ...(config.hasConnectors ? CONNECTOR_DEFINITIONS : []),
-        ...(config.canDeployEntSearch
-          ? [
-              {
-                keywords: ['app', 'search', 'engines'],
-                name: i18n.translate('xpack.enterpriseSearch.searchProvider.appSearch.name', {
-                  defaultMessage: 'App Search',
-                }),
-                serviceType: 'app_search',
-                url: APP_SEARCH_PLUGIN.URL,
-              },
-              {
-                keywords: ['esre', 'search'],
-                name: i18n.translate('xpack.enterpriseSearch.searchProvider.aiSearch.name', {
-                  defaultMessage: 'Search AI',
-                }),
-                serviceType: 'ai_search',
-                url: AI_SEARCH_PLUGIN.URL,
-              },
-            ]
-          : []),
-      ];
-      const result = services
-        .map((service) => {
-          const { iconPath, isNative, keywords, name, serviceType } = service;
-          const url = 'url' in service ? service.url : undefined;
-          let score = 0;
-          const searchTerm = (term || '').toLowerCase();
-          const searchName = name.toLowerCase();
-          if (!searchTerm) {
-            score = 80;
-          } else if (searchName === searchTerm) {
-            score = 100;
-          } else if (searchName.startsWith(searchTerm)) {
-            score = 90;
-          } else if (searchName.includes(searchTerm)) {
-            score = 75;
-          } else if (serviceType === searchTerm) {
-            score = 65;
-          } else if (keywords.some((keyword) => keyword.includes(searchTerm))) {
-            score = 50;
+
+      return capabilities.pipe(
+        takeUntil(aborted$),
+        map((caps) => {
+          if (!caps.catalogue.enterpriseSearch) {
+            return [];
           }
-          return toSearchResult({
-            basePath,
-            iconPath,
-            isCloud,
-            isNative,
-            name,
-            score,
-            serviceType,
-            url,
-          });
+
+          const services: ServiceDefinition[] = [
+            ...(config.hasWebCrawler
+              ? [
+                  {
+                    iconPath: crawlerIconPath,
+                    keywords: ['crawler', 'web', 'website', 'internet', 'google'],
+                    name: i18n.translate('xpack.enterpriseSearch.searchProvider.webCrawler.name', {
+                      defaultMessage: 'Elastic Web Crawler',
+                    }),
+                    serviceType: ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE,
+                  },
+                ]
+              : []),
+            ...(config.hasConnectors ? connectorTypes : []),
+
+            {
+              keywords: ['esre', 'search'],
+              name: i18n.translate('xpack.enterpriseSearch.searchProvider.aiSearch.name', {
+                defaultMessage: 'Search AI',
+              }),
+              serviceType: 'ai_search',
+              url: AI_SEARCH_PLUGIN.URL,
+            },
+          ];
+          const result = services
+            .map((service) => {
+              const { iconPath, isNative, keywords, name, serviceType } = service;
+              const url = 'url' in service ? service.url : undefined;
+              let score = 0;
+              const searchTerm = (term || '').toLowerCase();
+              const searchName = name.toLowerCase();
+              if (!searchTerm) {
+                score = 80;
+              } else if (searchName === searchTerm) {
+                score = 100;
+              } else if (searchName.startsWith(searchTerm)) {
+                score = 90;
+              } else if (searchName.includes(searchTerm)) {
+                score = 75;
+              } else if (serviceType === searchTerm) {
+                score = 65;
+              } else if (keywords.some((keyword) => keyword.includes(searchTerm))) {
+                score = 50;
+              }
+              return toSearchResult({
+                iconPath,
+                isCloud,
+                isNative,
+                name,
+                score,
+                serviceType,
+                url,
+              });
+            })
+            .filter(({ score }) => score > 0)
+            .slice(0, maxResults);
+
+          return result;
         })
-        .filter(({ score }) => score > 0)
-        .slice(0, maxResults);
-      return from([result]).pipe(takeUntil(aborted$));
+      );
     },
     getSearchableTypes: () => ['enterprise search', 'integration'],
     id: 'enterpriseSearch',

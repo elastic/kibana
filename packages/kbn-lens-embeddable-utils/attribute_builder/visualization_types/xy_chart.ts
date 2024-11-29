@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type {
@@ -17,6 +18,7 @@ import type {
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SavedObjectReference } from '@kbn/core/server';
 import { AxesSettingsConfig } from '@kbn/visualizations-plugin/common';
+import { LegendValue } from '@elastic/charts';
 import type { Chart, ChartConfig, ChartLayer } from '../types';
 import { DEFAULT_LAYER_ID } from '../utils';
 import { XY_ID } from './constants';
@@ -130,6 +132,7 @@ export const getXYVisualizationState = (
     isVisible: false,
     position: 'right',
     showSingleSeries: false,
+    legendStats: [LegendValue.CurrentAndLastValue],
   },
   valueLabels: 'show',
   yLeftScale: 'linear',
@@ -149,7 +152,6 @@ export const getXYVisualizationState = (
     yRight: true,
   },
   preferredSeriesType: 'line',
-  valuesInLegend: false,
   hideEndzones: true,
   ...custom,
 });

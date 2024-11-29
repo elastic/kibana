@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React, { memo } from 'react';
 import type { AppContextTestRender } from '../../../../common/mock/endpoint';
 import type { trustedAppsAllHttpMocks } from '../../../mocks';
 import type { ArtifactListPageProps } from '../artifact_list_page';
@@ -14,6 +15,7 @@ import type { ArtifactListPageRenderingSetup } from '../mocks';
 import { getArtifactListPageRenderingSetup } from '../mocks';
 import { getDeferred } from '../../../mocks/utils';
 import { useGetEndpointSpecificPolicies } from '../../../services/policies/hooks';
+import type { ArtifactEntryCardDecoratorProps } from '../../artifact_entry_card';
 
 jest.mock('../../../services/policies/hooks', () => ({
   useGetEndpointSpecificPolicies: jest.fn(),
@@ -70,11 +72,9 @@ describe('When using the ArtifactListPage component', () => {
       renderWithListData = async (props) => {
         render(props);
 
-        await act(async () => {
-          await waitFor(() => {
-            expect(renderResult.getByTestId('testPage-list')).toBeTruthy();
-            expect(mockedApi.responseProvider.trustedAppsList).toHaveBeenCalled();
-          });
+        await waitFor(() => {
+          expect(renderResult.getByTestId('testPage-list')).toBeTruthy();
+          expect(mockedApi.responseProvider.trustedAppsList).toHaveBeenCalled();
         });
 
         return renderResult;
@@ -115,9 +115,7 @@ describe('When using the ArtifactListPage component', () => {
 
     it('should persist pagination `page` changes to the URL', async () => {
       const { getByTestId } = await renderWithListData();
-      act(() => {
-        userEvent.click(getByTestId('pagination-button-1'));
-      });
+      await userEvent.click(getByTestId('pagination-button-1'));
 
       await waitFor(() => {
         expect(history.location.search).toMatch(/page=2/);
@@ -126,22 +124,29 @@ describe('When using the ArtifactListPage component', () => {
 
     it('should persist pagination `pageSize` changes to the URL', async () => {
       const { getByTestId } = await renderWithListData();
-      act(() => {
-        userEvent.click(getByTestId('tablePaginationPopoverButton'));
-      });
-      await act(async () => {
-        await waitFor(() => {
-          expect(getByTestId('tablePagination-20-rows')).toBeEnabled();
-        });
+      await userEvent.click(getByTestId('tablePaginationPopoverButton'));
+      await waitFor(() => {
+        expect(getByTestId('tablePagination-20-rows')).toBeEnabled();
       });
 
-      userEvent.click(getByTestId('tablePagination-20-rows'), undefined, {
-        skipPointerEventsCheck: true,
-      });
+      await userEvent.click(getByTestId('tablePagination-20-rows'), { pointerEventsCheck: 0 });
 
       await waitFor(() => {
         expect(history.location.search).toMatch(/pageSize=20/);
       });
+    });
+
+    it('should show per card decoration', async () => {
+      const MockCardDecorator = memo<ArtifactEntryCardDecoratorProps>(({ item: actualItem }) => {
+        return <p>{'mock decorator'}</p>;
+      });
+      MockCardDecorator.displayName = 'MockCardDecorator';
+
+      const { getAllByText } = await renderWithListData({
+        CardDecorator: MockCardDecorator,
+      });
+
+      expect(getAllByText('mock decorator')).toHaveLength(10);
     });
 
     it('should call useGetEndpointSpecificPolicies hook with specific perPage value', () => {
@@ -155,23 +160,18 @@ describe('When using the ArtifactListPage component', () => {
     describe('and interacting with card actions', () => {
       const clickCardAction = async (action: 'edit' | 'delete') => {
         await getFirstCard({ showActions: true });
-        act(() => {
-          switch (action) {
-            case 'delete':
-              userEvent.click(
-                renderResult.getByTestId('testPage-card-cardDeleteAction'),
-                undefined,
-                { skipPointerEventsCheck: true }
-              );
-              break;
 
-            case 'edit':
-              userEvent.click(renderResult.getByTestId('testPage-card-cardEditAction'), undefined, {
-                skipPointerEventsCheck: true,
-              });
-              break;
-          }
-        });
+        switch (action) {
+          case 'delete':
+            return userEvent.click(renderResult.getByTestId('testPage-card-cardDeleteAction'), {
+              pointerEventsCheck: 0,
+            });
+
+          case 'edit':
+            return userEvent.click(renderResult.getByTestId('testPage-card-cardEditAction'), {
+              pointerEventsCheck: 0,
+            });
+        }
       };
 
       it('should display the Edit flyout when edit action is clicked', async () => {
@@ -232,9 +232,7 @@ describe('When using the ArtifactListPage component', () => {
       });
 
       it('should persist filter to the URL params', async () => {
-        act(() => {
-          userEvent.type(renderResult.getByTestId('searchField'), 'fooFooFoo');
-        });
+        await userEvent.type(renderResult.getByTestId('searchField'), 'fooFooFoo');
         clickSearchButton();
 
         await waitFor(() => {
@@ -256,23 +254,17 @@ describe('When using the ArtifactListPage component', () => {
         const policyId = mockedApi.responseProvider.endpointPackagePolicyList().items[0].id;
         const firstPolicyTestId = `policiesSelector-popover-items-${policyId}`;
 
-        await act(async () => {
-          await waitFor(() => {
-            expect(renderResult.getByTestId('policiesSelectorButton')).toBeTruthy();
-          });
+        await waitFor(() => {
+          expect(renderResult.getByTestId('policiesSelectorButton')).toBeTruthy();
         });
 
-        act(() => {
-          userEvent.click(renderResult.getByTestId('policiesSelectorButton'));
+        await userEvent.click(renderResult.getByTestId('policiesSelectorButton'));
+
+        await waitFor(() => {
+          expect(renderResult.getAllByTestId(firstPolicyTestId).length > 0).toBeTruthy();
         });
 
-        await act(async () => {
-          await waitFor(() => {
-            expect(renderResult.getByTestId(firstPolicyTestId)).toBeTruthy();
-          });
-        });
-
-        userEvent.click(renderResult.getByTestId(firstPolicyTestId));
+        await userEvent.click(renderResult.getAllByTestId(firstPolicyTestId)[0]);
 
         await waitFor(() => {
           expect(history.location.search).toMatch(new RegExp(`includedPolicies=${policyId}`));
@@ -304,16 +296,12 @@ describe('When using the ArtifactListPage component', () => {
           };
         });
 
-        act(() => {
-          userEvent.type(renderResult.getByTestId('searchField'), 'fooFooFoo');
-        });
+        await userEvent.type(renderResult.getByTestId('searchField'), 'fooFooFoo');
 
         clickSearchButton();
 
-        await act(async () => {
-          await waitFor(() => {
-            expect(apiNoResultsDone).toBe(true);
-          });
+        await waitFor(() => {
+          expect(apiNoResultsDone).toBe(true);
         });
 
         await waitFor(() => {

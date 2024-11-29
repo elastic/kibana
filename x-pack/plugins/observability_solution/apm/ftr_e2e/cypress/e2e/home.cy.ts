@@ -55,9 +55,7 @@ describe('Home page', () => {
   });
 
   it('includes services with only metric documents', () => {
-    cy.visitKibana(
-      `${serviceInventoryHref}&kuery=not%20(processor.event%3A%22transaction%22)`
-    );
+    cy.visitKibana(`${serviceInventoryHref}&kuery=not%20(processor.event%3A%22transaction%22)`);
     cy.contains('opbeans-java');
     cy.contains('opbeans-node');
   });
@@ -69,10 +67,7 @@ describe('Home page', () => {
       cy.contains('Services');
       cy.contains('opbeans-rum').click({ force: true });
 
-      cy.getByTestSubj('headerFilterTransactionType').should(
-        'have.value',
-        'page-load'
-      );
+      cy.getByTestSubj('headerFilterTransactionType').should('have.value', 'page-load');
     });
   });
 });

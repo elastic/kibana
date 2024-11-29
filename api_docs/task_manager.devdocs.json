@@ -28,9 +28,9 @@
           " implements ",
           {
             "pluginId": "@kbn/core-plugins-server",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnCorePluginsServerPluginApi",
-            "section": "def-common.Plugin",
+            "section": "def-server.Plugin",
             "text": "Plugin"
           },
           "<",
@@ -79,9 +79,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-plugins-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCorePluginsServerPluginApi",
-                    "section": "def-common.PluginInitializerContext",
+                    "section": "def-server.PluginInitializerContext",
                     "text": "PluginInitializerContext"
                   },
                   "<unknown>"
@@ -121,12 +121,20 @@
               "(core: ",
               {
                 "pluginId": "@kbn/core-lifecycle-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreLifecycleServerPluginApi",
-                "section": "def-common.CoreSetup",
+                "section": "def-server.CoreSetup",
                 "text": "CoreSetup"
               },
-              "<object, unknown>, plugins: { usageCollection?: ",
+              "<",
+              {
+                "pluginId": "taskManager",
+                "scope": "server",
+                "docId": "kibTaskManagerPluginApi",
+                "section": "def-server.TaskManagerStartContract",
+                "text": "TaskManagerStartContract"
+              },
+              ", unknown>, plugins: { usageCollection?: ",
               {
                 "pluginId": "usageCollection",
                 "scope": "server",
@@ -157,12 +165,20 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-lifecycle-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreLifecycleServerPluginApi",
-                    "section": "def-common.CoreSetup",
+                    "section": "def-server.CoreSetup",
                     "text": "CoreSetup"
                   },
-                  "<object, unknown>"
+                  "<",
+                  {
+                    "pluginId": "taskManager",
+                    "scope": "server",
+                    "docId": "kibTaskManagerPluginApi",
+                    "section": "def-server.TaskManagerStartContract",
+                    "text": "TaskManagerStartContract"
+                  },
+                  ", unknown>"
                 ],
                 "path": "x-pack/plugins/task_manager/server/plugin.ts",
                 "deprecated": false,
@@ -183,7 +199,7 @@
                   {
                     "parentPluginId": "taskManager",
                     "id": "def-server.TaskManagerPlugin.setup.$2.usageCollection",
-                    "type": "Object",
+                    "type": "CompoundType",
                     "tags": [],
                     "label": "usageCollection",
                     "description": [],
@@ -214,14 +230,16 @@
             "label": "start",
             "description": [],
             "signature": [
-              "({ savedObjects, elasticsearch, executionContext, docLinks, }: ",
+              "({ savedObjects, elasticsearch, executionContext, docLinks }: ",
               {
                 "pluginId": "@kbn/core-lifecycle-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreLifecycleServerPluginApi",
-                "section": "def-common.CoreStart",
+                "section": "def-server.CoreStart",
                 "text": "CoreStart"
               },
+              ", { cloud }: ",
+              "TaskManagerPluginStart",
               ") => ",
               {
                 "pluginId": "taskManager",
@@ -240,14 +258,14 @@
                 "id": "def-server.TaskManagerPlugin.start.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n    savedObjects,\n    elasticsearch,\n    executionContext,\n    docLinks,\n  }",
+                "label": "{ savedObjects, elasticsearch, executionContext, docLinks }",
                 "description": [],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-lifecycle-server",
-                    "scope": "common",
+                    "scope": "server",
                     "docId": "kibKbnCoreLifecycleServerPluginApi",
-                    "section": "def-common.CoreStart",
+                    "section": "def-server.CoreStart",
                     "text": "CoreStart"
                   }
                 ],
@@ -255,8 +273,39 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "taskManager",
+                "id": "def-server.TaskManagerPlugin.start.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "{ cloud }",
+                "description": [],
+                "signature": [
+                  "TaskManagerPluginStart"
+                ],
+                "path": "x-pack/plugins/task_manager/server/plugin.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
               }
             ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "taskManager",
+            "id": "def-server.TaskManagerPlugin.stop",
+            "type": "Function",
+            "tags": [],
+            "label": "stop",
+            "description": [],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "x-pack/plugins/task_manager/server/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
             "returnComment": []
           }
         ],
@@ -618,15 +667,8 @@
               "\nlist of failed tasks and errors caused failure"
             ],
             "signature": [
-              "{ type: string; id: string; error: ",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObjectError",
-                "text": "SavedObjectError"
-              },
-              "; }[]"
+              "ErrorOutput",
+              "[]"
             ],
             "path": "x-pack/plugins/task_manager/server/task_scheduling.ts",
             "deprecated": false,
@@ -854,6 +896,20 @@
             ],
             "signature": [
               "string | null"
+            ],
+            "path": "x-pack/plugins/task_manager/server/task.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "taskManager",
+            "id": "def-server.ConcreteTaskInstance.partition",
+            "type": "number",
+            "tags": [],
+            "label": "partition",
+            "description": [],
+            "signature": [
+              "number | undefined"
             ],
             "path": "x-pack/plugins/task_manager/server/task.ts",
             "deprecated": false,
@@ -1305,6 +1361,20 @@
             "path": "x-pack/plugins/task_manager/server/task.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "taskManager",
+            "id": "def-server.TaskInstance.partition",
+            "type": "number",
+            "tags": [],
+            "label": "partition",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/task_manager/server/task.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1370,6 +1440,29 @@
                 "docId": "kibTaskManagerPluginApi",
                 "section": "def-server.TaskPriority",
                 "text": "TaskPriority"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/task_manager/server/task_type_dictionary.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "taskManager",
+            "id": "def-server.TaskRegisterDefinition.cost",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "cost",
+            "description": [
+              "\nAn optional definition of the cost associated with running the task."
+            ],
+            "signature": [
+              {
+                "pluginId": "taskManager",
+                "scope": "server",
+                "docId": "kibTaskManagerPluginApi",
+                "section": "def-server.TaskCost",
+                "text": "TaskCost"
               },
               " | undefined"
             ],
@@ -1524,33 +1617,24 @@
             "path": "x-pack/plugins/task_manager/server/task_type_dictionary.ts",
             "deprecated": false,
             "trackAdoption": false
-          },
-          {
-            "parentPluginId": "taskManager",
-            "id": "def-server.TaskRegisterDefinition.indirectParamsSchema",
-            "type": "Object",
-            "tags": [],
-            "label": "indirectParamsSchema",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/config-schema",
-                "scope": "common",
-                "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-common.ObjectType",
-                "text": "ObjectType"
-              },
-              "<any> | undefined"
-            ],
-            "path": "x-pack/plugins/task_manager/server/task_type_dictionary.ts",
-            "deprecated": false,
-            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
       }
     ],
     "enums": [
+      {
+        "parentPluginId": "taskManager",
+        "id": "def-server.TaskCost",
+        "type": "Enum",
+        "tags": [],
+        "label": "TaskCost",
+        "description": [],
+        "path": "x-pack/plugins/task_manager/server/task.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "taskManager",
         "id": "def-server.TaskErrorSource",
@@ -1599,22 +1683,7 @@
           "\nA task instance that has an id and is ready for storage."
         ],
         "signature": [
-          "{ scope?: string[] | undefined; params: Record<string, any>; enabled?: boolean | undefined; state: Record<string, any>; taskType: string; }"
-        ],
-        "path": "x-pack/plugins/task_manager/server/task.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "taskManager",
-        "id": "def-server.LoadIndirectParamsResult",
-        "type": "Type",
-        "tags": [],
-        "label": "LoadIndirectParamsResult",
-        "description": [],
-        "signature": [
-          "{ data: T; error?: undefined; } | { data?: undefined; error: Error; }"
+          "{ params: Record<string, any>; scope?: string[] | undefined; enabled?: boolean | undefined; state: Record<string, any>; taskType: string; }"
         ],
         "path": "x-pack/plugins/task_manager/server/task.ts",
         "deprecated": false,
@@ -1919,7 +1988,7 @@
       "signature": [
         "Pick<",
         "TaskScheduling",
-        ", \"schedule\" | \"runSoon\" | \"ephemeralRunNow\" | \"ensureScheduled\" | \"bulkUpdateSchedules\" | \"bulkEnable\" | \"bulkDisable\" | \"bulkSchedule\" | \"bulkUpdateState\"> & Pick<",
+        ", \"schedule\" | \"runSoon\" | \"bulkEnable\" | \"ephemeralRunNow\" | \"ensureScheduled\" | \"bulkUpdateSchedules\" | \"bulkDisable\" | \"bulkSchedule\" | \"bulkUpdateState\"> & Pick<",
         "TaskStore",
         ", \"get\" | \"aggregate\" | \"fetch\" | \"remove\" | \"bulkRemove\"> & { removeIfExists: (id: string) => Promise<void>; } & { supportsEphemeralTasks: () => boolean; getRegisteredTypes: () => string[]; }"
       ],

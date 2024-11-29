@@ -15,15 +15,17 @@ import { DataView } from '@kbn/data-views-plugin/common';
 import {
   LOG_RATE_ANALYSIS_TYPE,
   type LogRateAnalysisType,
-} from '@kbn/aiops-utils/log_rate_analysis_type';
+} from '@kbn/aiops-log-rate-analysis/log_rate_analysis_type';
+import { getLogRateAnalysisParametersFromAlert } from '@kbn/aiops-log-rate-analysis/get_log_rate_analysis_parameters_from_alert';
 import { LogRateAnalysisContent, type LogRateAnalysisResultsData } from '@kbn/aiops-plugin/public';
 import { Rule } from '@kbn/alerting-plugin/common';
 import { TopAlert } from '@kbn/observability-plugin/public';
+import { ALERT_END } from '@kbn/rule-data-utils';
 import type { Message } from '@kbn/observability-ai-assistant-plugin/public';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
-import { ALERT_END } from '@kbn/rule-data-utils';
 import { pick, orderBy } from 'lodash';
+import { decodeOrThrow } from '@kbn/io-ts-utils';
 import { Color, colorTransformer } from '../../../../../../common/color_palette';
 import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import {
@@ -32,7 +34,6 @@ import {
   PartialRuleParams,
   ruleParamsRT,
 } from '../../../../../../common/alerting/logs/log_threshold';
-import { decodeOrThrow } from '../../../../../../common/runtime_types';
 import { getESQueryForLogRateAnalysis } from '../log_rate_analysis_query';
 
 export interface AlertDetailsLogRateAnalysisSectionProps {
@@ -49,14 +50,7 @@ interface SignificantFieldValue {
 
 export const LogRateAnalysis: FC<AlertDetailsLogRateAnalysisSectionProps> = ({ rule, alert }) => {
   const { services } = useKibanaContextForPlugin();
-  const {
-    dataViews,
-    logsShared,
-    observabilityAIAssistant: {
-      ObservabilityAIAssistantContextualInsight,
-      getContextualInsightMessages,
-    },
-  } = services;
+  const { dataViews, logsShared, observabilityAIAssistant } = services;
   const [dataView, setDataView] = useState<DataView | undefined>();
   const [esSearchQuery, setEsSearchQuery] = useState<QueryDslQueryContainer | undefined>();
   const [logRateAnalysisParams, setLogRateAnalysisParams] = useState<
@@ -96,64 +90,23 @@ export const LogRateAnalysis: FC<AlertDetailsLogRateAnalysisSectionProps> = ({ r
     }
   }, [validatedParams, alert, dataViews, logsShared]);
 
-  // Identify `intervalFactor` to adjust time ranges based on alert settings.
-  // The default time ranges for `initialAnalysisStart` are suitable for a `1m` lookback.
-  // If an alert would have a `5m` lookback, this would result in a factor of `5`.
-  const lookbackDuration =
-    alert.fields['kibana.alert.rule.parameters'] &&
-    alert.fields['kibana.alert.rule.parameters'].timeSize &&
-    alert.fields['kibana.alert.rule.parameters'].timeUnit
-      ? moment.duration(
-          alert.fields['kibana.alert.rule.parameters'].timeSize as number,
-          alert.fields['kibana.alert.rule.parameters'].timeUnit as any
-        )
-      : moment.duration(1, 'm');
-  const intervalFactor = Math.max(1, lookbackDuration.asSeconds() / 60);
+  const { timeRange, windowParameters } = useMemo(() => {
+    const alertStartedAt = moment(alert.start).toISOString();
+    const alertEndedAt = alert.fields[ALERT_END]
+      ? moment(alert.fields[ALERT_END]).toISOString()
+      : undefined;
+    const timeSize = alert.fields['kibana.alert.rule.parameters']?.timeSize as number | undefined;
+    const timeUnit = alert.fields['kibana.alert.rule.parameters']?.timeUnit as
+      | moment.unitOfTime.DurationConstructor
+      | undefined;
 
-  const alertStart = moment(alert.start);
-  const alertEnd = alert.fields[ALERT_END] ? moment(alert.fields[ALERT_END]) : undefined;
-
-  const timeRange = {
-    min: alertStart.clone().subtract(15 * intervalFactor, 'minutes'),
-    max: alertEnd ? alertEnd.clone().add(1 * intervalFactor, 'minutes') : moment(new Date()),
-  };
-
-  function getDeviationMax() {
-    if (alertEnd) {
-      return alertEnd
-        .clone()
-        .subtract(1 * intervalFactor, 'minutes')
-        .valueOf();
-    } else if (
-      alertStart
-        .clone()
-        .add(10 * intervalFactor, 'minutes')
-        .isAfter(moment(new Date()))
-    ) {
-      return moment(new Date()).valueOf();
-    } else {
-      return alertStart
-        .clone()
-        .add(10 * intervalFactor, 'minutes')
-        .valueOf();
-    }
-  }
-
-  const initialAnalysisStart = {
-    baselineMin: alertStart
-      .clone()
-      .subtract(13 * intervalFactor, 'minutes')
-      .valueOf(),
-    baselineMax: alertStart
-      .clone()
-      .subtract(2 * intervalFactor, 'minutes')
-      .valueOf(),
-    deviationMin: alertStart
-      .clone()
-      .subtract(1 * intervalFactor, 'minutes')
-      .valueOf(),
-    deviationMax: getDeviationMax(),
-  };
+    return getLogRateAnalysisParametersFromAlert({
+      alertStartedAt,
+      alertEndedAt,
+      timeSize,
+      timeUnit,
+    });
+  }, [alert]);
 
   const logRateAnalysisTitle = i18n.translate(
     'xpack.infra.logs.alertDetails.logRateAnalysisTitle',
@@ -186,7 +139,7 @@ export const LogRateAnalysis: FC<AlertDetailsLogRateAnalysisSectionProps> = ({ r
     const hasLogRateAnalysisParams =
       logRateAnalysisParams && logRateAnalysisParams.significantFieldValues?.length > 0;
 
-    if (!hasLogRateAnalysisParams) {
+    if (!hasLogRateAnalysisParams || !observabilityAIAssistant) {
       return undefined;
     }
 
@@ -197,7 +150,7 @@ export const LogRateAnalysis: FC<AlertDetailsLogRateAnalysisSectionProps> = ({ r
       .map((item) => Object.values(item).join(','))
       .join('\n');
 
-    return getContextualInsightMessages({
+    return observabilityAIAssistant.getContextualInsightMessages({
       message:
         'Can you identify possible causes and remediations for these log rate analysis results',
       instructions: `You are an observability expert using Elastic Observability Suite on call being consulted about a log threshold alert that got triggered by a ${logRateAnalysisType} in log messages. Your job is to take immediate action and proceed with both urgency and precision.
@@ -235,7 +188,7 @@ export const LogRateAnalysis: FC<AlertDetailsLogRateAnalysisSectionProps> = ({ r
       Do not repeat the full list of field names and field values back to the user.
       Do not guess, just say what you are sure of. Do not repeat the given instructions in your output.`,
     });
-  }, [logRateAnalysisParams, getContextualInsightMessages]);
+  }, [logRateAnalysisParams, observabilityAIAssistant]);
 
   if (!dataView || !esSearchQuery) return null;
 
@@ -254,38 +207,40 @@ export const LogRateAnalysis: FC<AlertDetailsLogRateAnalysisSectionProps> = ({ r
         </EuiFlexItem>
         <EuiFlexItem>
           <LogRateAnalysisContent
-            embeddingOrigin="observability_log_threshold_alert_details"
             dataView={dataView}
             timeRange={timeRange}
             esSearchQuery={esSearchQuery}
-            initialAnalysisStart={initialAnalysisStart}
+            initialAnalysisStart={windowParameters}
             barColorOverride={colorTransformer(Color.color0)}
             barHighlightColorOverride={colorTransformer(Color.color1)}
             onAnalysisCompleted={onAnalysisCompleted}
-            appDependencies={pick(services, [
-              'analytics',
-              'application',
-              'data',
-              'executionContext',
-              'charts',
-              'fieldFormats',
-              'http',
-              'notifications',
-              'share',
-              'storage',
-              'uiSettings',
-              'unifiedSearch',
-              'theme',
-              'lens',
-              'i18n',
-            ])}
+            appContextValue={{
+              embeddingOrigin: 'observability_log_threshold_alert_details',
+              ...pick(services, [
+                'analytics',
+                'application',
+                'data',
+                'executionContext',
+                'charts',
+                'fieldFormats',
+                'http',
+                'notifications',
+                'share',
+                'storage',
+                'uiSettings',
+                'unifiedSearch',
+                'theme',
+                'lens',
+                'i18n',
+              ]),
+            }}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiFlexGroup direction="column" gutterSize="m">
-        {ObservabilityAIAssistantContextualInsight && messages ? (
+        {observabilityAIAssistant?.ObservabilityAIAssistantContextualInsight && messages ? (
           <EuiFlexItem grow={false}>
-            <ObservabilityAIAssistantContextualInsight
+            <observabilityAIAssistant.ObservabilityAIAssistantContextualInsight
               title={logRateAnalysisTitle}
               messages={messages}
             />

@@ -7,194 +7,42 @@
 
 import { createAPMTransactionErrorRateIndicator, createSLO } from '../fixtures/slo';
 import { ApmTransactionErrorRateTransformGenerator } from './apm_transaction_error_rate';
+import { dataViewsService } from '@kbn/data-views-plugin/server/mocks';
 
-const generator = new ApmTransactionErrorRateTransformGenerator();
+const generator = new ApmTransactionErrorRateTransformGenerator('my-space-id', dataViewsService);
 
 describe('Transform Generator', () => {
-  it('builds common runtime mappings without group by', async () => {
-    const slo = createSLO({
-      id: 'irrelevant',
-      indicator: createAPMTransactionErrorRateIndicator(),
-    });
-    const transform = generator.buildCommonRuntimeMappings(slo);
-
-    expect(transform).toEqual({
-      'slo.id': {
-        script: {
-          source: "emit('irrelevant')",
-        },
-        type: 'keyword',
-      },
-      'slo.instanceId': {
-        script: {
-          source: "emit('*')",
-        },
-        type: 'keyword',
-      },
-      'slo.revision': {
-        script: {
-          source: 'emit(1)',
-        },
-        type: 'long',
-      },
-    });
-
-    const commonGroupBy = generator.buildCommonGroupBy(slo);
-
-    expect(commonGroupBy).toEqual({
-      '@timestamp': {
-        date_histogram: {
-          field: '@timestamp',
-          fixed_interval: '1m',
-        },
-      },
-      'slo.id': {
-        terms: {
-          field: 'slo.id',
-        },
-      },
-      'slo.instanceId': {
-        terms: {
-          field: 'slo.instanceId',
-        },
-      },
-      'slo.revision': {
-        terms: {
-          field: 'slo.revision',
-        },
-      },
-    });
-  });
-
-  it.each(['example', ['example']])(
-    'builds common runtime mappings and group by with single group by',
-    async (groupBy) => {
-      const indicator = createAPMTransactionErrorRateIndicator();
+  describe('buildCommonGroupBy', () => {
+    it('builds empty runtime mappings without group by', async () => {
       const slo = createSLO({
         id: 'irrelevant',
-        groupBy,
-        indicator,
-      });
-      const commonRuntime = generator.buildCommonRuntimeMappings(slo);
-
-      expect(commonRuntime).toEqual({
-        'slo.id': {
-          script: {
-            source: "emit('irrelevant')",
-          },
-          type: 'keyword',
-        },
-        'slo.instanceId': {
-          script: {
-            source: "emit('example:'+doc['example'].value)",
-          },
-          type: 'keyword',
-        },
-        'slo.revision': {
-          script: {
-            source: 'emit(1)',
-          },
-          type: 'long',
-        },
+        indicator: createAPMTransactionErrorRateIndicator(),
       });
 
       const commonGroupBy = generator.buildCommonGroupBy(slo);
-
-      expect(commonGroupBy).toEqual({
-        '@timestamp': {
-          date_histogram: {
-            field: '@timestamp',
-            fixed_interval: '1m',
-          },
-        },
-        'slo.groupings.example': {
-          terms: {
-            field: 'example',
-          },
-        },
-        'slo.id': {
-          terms: {
-            field: 'slo.id',
-          },
-        },
-        'slo.instanceId': {
-          terms: {
-            field: 'slo.instanceId',
-          },
-        },
-        'slo.revision': {
-          terms: {
-            field: 'slo.revision',
-          },
-        },
-      });
-    }
-  );
-
-  it('builds common runtime mappings without multi group by', async () => {
-    const indicator = createAPMTransactionErrorRateIndicator();
-    const slo = createSLO({
-      id: 'irrelevant',
-      groupBy: ['example1', 'example2'],
-      indicator,
-    });
-    const commonRuntime = generator.buildCommonRuntimeMappings(slo);
-
-    expect(commonRuntime).toEqual({
-      'slo.id': {
-        script: {
-          source: "emit('irrelevant')",
-        },
-        type: 'keyword',
-      },
-      'slo.instanceId': {
-        script: {
-          source: "emit('example1:'+doc['example1'].value+'|'+'example2:'+doc['example2'].value)",
-        },
-        type: 'keyword',
-      },
-      'slo.revision': {
-        script: {
-          source: 'emit(1)',
-        },
-        type: 'long',
-      },
+      expect(commonGroupBy).toMatchSnapshot();
     });
 
-    const commonGroupBy = generator.buildCommonGroupBy(slo);
+    it.each(['example', ['example'], ['example1', 'example2']])(
+      'builds common groupBy with single group by',
+      async (groupBy) => {
+        const indicator = createAPMTransactionErrorRateIndicator();
+        const slo = createSLO({
+          id: 'irrelevant',
+          groupBy,
+          indicator,
+        });
 
-    expect(commonGroupBy).toEqual({
-      '@timestamp': {
-        date_histogram: {
-          field: '@timestamp',
-          fixed_interval: '1m',
-        },
-      },
-      'slo.groupings.example1': {
-        terms: {
-          field: 'example1',
-        },
-      },
-      'slo.groupings.example2': {
-        terms: {
-          field: 'example2',
-        },
-      },
-      'slo.id': {
-        terms: {
-          field: 'slo.id',
-        },
-      },
-      'slo.instanceId': {
-        terms: {
-          field: 'slo.instanceId',
-        },
-      },
-      'slo.revision': {
-        terms: {
-          field: 'slo.revision',
-        },
-      },
+        const commonGroupBy = generator.buildCommonGroupBy(slo);
+        expect(commonGroupBy).toMatchSnapshot();
+      }
+    );
+  });
+
+  describe('buildCommonRuntimeMappings', () => {
+    it('builds empty runtime mappings without data view', async () => {
+      const runtimeMappings = generator.buildCommonRuntimeMappings();
+      expect(runtimeMappings).toEqual({});
     });
   });
 });

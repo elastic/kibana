@@ -1,94 +1,90 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { v4 } from 'uuid';
 import { omit } from 'lodash';
-import { EmbeddableInput, SavedObjectEmbeddableInput } from '@kbn/embeddable-plugin/common';
 
-import { DashboardPanelMap, DashboardPanelState } from '..';
-import { SavedDashboardPanel } from '../content_management';
+import type { SavedObjectEmbeddableInput } from '@kbn/embeddable-plugin/common';
+import type { Reference } from '@kbn/content-management-utils';
+import type { DashboardPanelMap } from '..';
+import type { DashboardPanel } from '../../server/content_management';
 
-export function convertSavedDashboardPanelToPanelState<
-  TEmbeddableInput extends EmbeddableInput | SavedObjectEmbeddableInput = SavedObjectEmbeddableInput
->(savedDashboardPanel: SavedDashboardPanel): DashboardPanelState<TEmbeddableInput> {
-  return {
-    type: savedDashboardPanel.type,
-    gridData: savedDashboardPanel.gridData,
-    panelRefName: savedDashboardPanel.panelRefName,
-    explicitInput: {
-      id: savedDashboardPanel.panelIndex,
-      ...(savedDashboardPanel.id !== undefined && { savedObjectId: savedDashboardPanel.id }),
-      ...(savedDashboardPanel.title !== undefined && { title: savedDashboardPanel.title }),
-      ...savedDashboardPanel.embeddableConfig,
-    } as TEmbeddableInput,
+import {
+  getReferencesForPanelId,
+  prefixReferencesFromPanel,
+} from '../dashboard_container/persistable_state/dashboard_container_references';
 
-    /**
-     * Version information used to be stored in the panel until 8.11 when it was moved
-     * to live inside the explicit Embeddable Input. If version information is given here, we'd like to keep it.
-     * It will be removed on Dashboard save
-     */
-    version: savedDashboardPanel.version,
-  };
-}
-
-export function convertPanelStateToSavedDashboardPanel(
-  panelState: DashboardPanelState,
-  removeLegacyVersion?: boolean
-): SavedDashboardPanel {
-  const savedObjectId = (panelState.explicitInput as SavedObjectEmbeddableInput).savedObjectId;
-  return {
-    /**
-     * Version information used to be stored in the panel until 8.11 when it was moved to live inside the
-     * explicit Embeddable Input. If removeLegacyVersion is not passed, we'd like to keep this information for
-     * the time being.
-     */
-    ...(!removeLegacyVersion ? { version: panelState.version } : {}),
-
-    type: panelState.type,
-    gridData: panelState.gridData,
-    panelIndex: panelState.explicitInput.id,
-    embeddableConfig: omit(panelState.explicitInput, ['id', 'savedObjectId', 'title']),
-    ...(panelState.explicitInput.title !== undefined && { title: panelState.explicitInput.title }),
-    ...(savedObjectId !== undefined && { id: savedObjectId }),
-    ...(panelState.panelRefName !== undefined && { panelRefName: panelState.panelRefName }),
-  };
-}
-
-export const convertSavedPanelsToPanelMap = (panels?: SavedDashboardPanel[]): DashboardPanelMap => {
+export const convertPanelsArrayToPanelMap = (panels?: DashboardPanel[]): DashboardPanelMap => {
   const panelsMap: DashboardPanelMap = {};
   panels?.forEach((panel, idx) => {
-    panelsMap![panel.panelIndex ?? String(idx)] = convertSavedDashboardPanelToPanelState(panel);
+    const panelIndex = panel.panelIndex ?? String(idx);
+    panelsMap![panel.panelIndex ?? String(idx)] = {
+      type: panel.type,
+      gridData: panel.gridData,
+      panelRefName: panel.panelRefName,
+      explicitInput: {
+        id: panelIndex,
+        ...(panel.id !== undefined && { savedObjectId: panel.id }),
+        ...(panel.title !== undefined && { title: panel.title }),
+        ...panel.panelConfig,
+      },
+      version: panel.version,
+    };
   });
   return panelsMap;
 };
 
-export const convertPanelMapToSavedPanels = (
+export const convertPanelMapToPanelsArray = (
   panels: DashboardPanelMap,
   removeLegacyVersion?: boolean
 ) => {
-  return Object.values(panels).map((panel) =>
-    convertPanelStateToSavedDashboardPanel(panel, removeLegacyVersion)
-  );
+  return Object.values(panels).map((panelState) => {
+    const savedObjectId = (panelState.explicitInput as SavedObjectEmbeddableInput).savedObjectId;
+    const panelIndex = panelState.explicitInput.id;
+    return {
+      /**
+       * Version information used to be stored in the panel until 8.11 when it was moved to live inside the
+       * explicit Embeddable Input. If removeLegacyVersion is not passed, we'd like to keep this information for
+       * the time being.
+       */
+      ...(!removeLegacyVersion ? { version: panelState.version } : {}),
+
+      type: panelState.type,
+      gridData: panelState.gridData,
+      panelIndex,
+      panelConfig: omit(panelState.explicitInput, ['id', 'savedObjectId', 'title']),
+      ...(panelState.explicitInput.title !== undefined && {
+        title: panelState.explicitInput.title,
+      }),
+      ...(savedObjectId !== undefined && { id: savedObjectId }),
+      ...(panelState.panelRefName !== undefined && { panelRefName: panelState.panelRefName }),
+    };
+  });
 };
 
 /**
  * When saving a dashboard as a copy, we should generate new IDs for all panels so that they are
  * properly refreshed when navigating between Dashboards
  */
-export const generateNewPanelIds = (panels: DashboardPanelMap) => {
+export const generateNewPanelIds = (panels: DashboardPanelMap, references?: Reference[]) => {
   const newPanelsMap: DashboardPanelMap = {};
-  for (const panel of Object.values(panels)) {
+  const newReferences: Reference[] = [];
+  for (const [oldId, panel] of Object.entries(panels)) {
     const newId = v4();
     newPanelsMap[newId] = {
       ...panel,
       gridData: { ...panel.gridData, i: newId },
       explicitInput: { ...panel.explicitInput, id: newId },
     };
+    newReferences.push(
+      ...prefixReferencesFromPanel(newId, getReferencesForPanelId(oldId, references ?? []))
+    );
   }
-  return newPanelsMap;
+  return { panels: newPanelsMap, references: newReferences };
 };

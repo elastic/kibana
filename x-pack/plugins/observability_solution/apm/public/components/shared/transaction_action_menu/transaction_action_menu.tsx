@@ -7,7 +7,11 @@
 
 import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ObservabilityTriggerId } from '@kbn/observability-shared-plugin/common';
+import {
+  ASSET_DETAILS_LOCATOR_ID,
+  type AssetDetailsLocatorParams,
+  ObservabilityTriggerId,
+} from '@kbn/observability-shared-plugin/common';
 import {
   ActionMenu,
   ActionMenuDivider,
@@ -21,12 +25,9 @@ import {
 import React, { useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import useAsync from 'react-use/lib/useAsync';
-import {
-  AllDatasetsLocatorParams,
-  ALL_DATASETS_LOCATOR_ID,
-} from '@kbn/deeplinks-observability/locators';
 import type { ProfilingLocators } from '@kbn/observability-shared-plugin/public';
 import { getLogsLocatorsFromUrlService } from '@kbn/logs-shared-plugin/common';
+import { uptimeOverviewLocatorID } from '@kbn/observability-plugin/common';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { ApmFeatureFlagName } from '../../../../common/apm_feature_flags';
 import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
@@ -45,13 +46,7 @@ interface Props {
   isLoading: boolean;
 }
 
-function ActionMenuButton({
-  onClick,
-  isLoading,
-}: {
-  onClick: () => void;
-  isLoading: boolean;
-}) {
+function ActionMenuButton({ onClick, isLoading }: { onClick: () => void; isLoading: boolean }) {
   return (
     <EuiButton
       data-test-subj="apmActionMenuButtonInvestigateButton"
@@ -73,8 +68,7 @@ export function TransactionActionMenu({ transaction, isLoading }: Props) {
 
   const [isActionPopoverOpen, setIsActionPopoverOpen] = useState(false);
 
-  const { isProfilingPluginInitialized, profilingLocators } =
-    useProfilingPlugin();
+  const { isProfilingPluginInitialized, profilingLocators } = useProfilingPlugin();
 
   const [isCreateEditFlyoutOpen, setIsCreateEditFlyoutOpen] = useState(false);
 
@@ -102,17 +96,12 @@ export function TransactionActionMenu({ transaction, isLoading }: Props) {
           <ActionMenuButton
             isLoading={isLoading || isProfilingPluginInitialized === undefined}
             onClick={() =>
-              setIsActionPopoverOpen(
-                (prevIsActionPopoverOpen) => !prevIsActionPopoverOpen
-              )
+              setIsActionPopoverOpen((prevIsActionPopoverOpen) => !prevIsActionPopoverOpen)
             }
           />
         }
       >
-        <ActionMenuSections
-          transaction={transaction}
-          profilingLocators={profilingLocators}
-        />
+        <ActionMenuSections transaction={transaction} profilingLocators={profilingLocators} />
         {hasGoldLicense && (
           <CustomLinkMenuSection
             transaction={transaction}
@@ -136,14 +125,14 @@ function ActionMenuSections({
   const apmRouter = useApmRouter();
   const { dataView } = useAdHocApmDataView();
 
-  const allDatasetsLocator = share.url.locators.get<AllDatasetsLocatorParams>(
-    ALL_DATASETS_LOCATOR_ID
-  )!;
   const logsLocators = getLogsLocatorsFromUrlService(share.url);
 
-  const infraLinksAvailable = useApmFeatureFlag(
-    ApmFeatureFlagName.InfraUiAvailable
-  );
+  const uptimeLocator = share.url.locators.get(uptimeOverviewLocatorID);
+
+  const infraLinksAvailable = useApmFeatureFlag(ApmFeatureFlagName.InfraUiAvailable);
+
+  const assetDetailsLocator =
+    share.url.locators.get<AssetDetailsLocatorParams>(ASSET_DETAILS_LOCATOR_ID);
 
   const {
     query: { rangeFrom, rangeTo, environment },
@@ -160,13 +149,14 @@ function ActionMenuSections({
     location,
     apmRouter,
     infraLinksAvailable,
+    uptimeLocator,
     profilingLocators,
     rangeFrom,
     rangeTo,
     environment,
-    allDatasetsLocator,
     logsLocators,
     dataViewId: dataView?.id,
+    assetDetailsLocator,
   });
 
   const externalMenuItems = useAsync(() => {
@@ -205,9 +195,7 @@ function ActionMenuSections({
             {section.map((item) => (
               <Section key={item.key}>
                 {item.title && <SectionTitle>{item.title}</SectionTitle>}
-                {item.subtitle && (
-                  <SectionSubtitle>{item.subtitle}</SectionSubtitle>
-                )}
+                {item.subtitle && <SectionSubtitle>{item.subtitle}</SectionSubtitle>}
                 <SectionLinks>
                   {item.actions.map((action) => (
                     <SectionLink

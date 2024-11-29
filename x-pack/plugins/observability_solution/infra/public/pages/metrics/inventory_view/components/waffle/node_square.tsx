@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { DispatchWithOptionalAction } from '../../../../../hooks/use_boolean';
+import { UseBooleanHandlers } from '@kbn/react-hooks';
 
 type NodeProps<T = HTMLDivElement> = React.DetailedHTMLProps<React.HTMLAttributes<T>, T> & {
   'data-test-subj'?: string;
@@ -66,8 +66,8 @@ const NodeContainerSmall = ({ children, ...props }: NodeProps & { color: string 
     {children}
   </div>
 );
-const ValueInner = ({ children, ...props }: NodeProps<HTMLButtonElement>) => (
-  <button
+const ValueInner = ({ children, ...props }: NodeProps) => (
+  <div
     css={css`
       position: absolute;
       top: 0;
@@ -89,10 +89,11 @@ const ValueInner = ({ children, ...props }: NodeProps<HTMLButtonElement>) => (
         box-shadow: none;
       }
     `}
+    tabIndex={0}
     {...props}
   >
     {children}
-  </button>
+  </div>
 );
 const SquareOuter = ({ children, ...props }: NodeProps & { color: string }) => (
   <div
@@ -154,17 +155,13 @@ const Value = ({ children, ...props }: NodeProps & { color: string }) => (
 export const NodeSquare = ({
   squareSize,
   togglePopover,
-  showToolTip,
-  hideToolTip,
   color,
   nodeName,
   value,
   showBorder,
 }: {
   squareSize: number;
-  togglePopover: DispatchWithOptionalAction<boolean>;
-  showToolTip: () => void;
-  hideToolTip: () => void;
+  togglePopover: UseBooleanHandlers['toggle'];
   color: string;
   nodeName: string;
   value: string;
@@ -184,9 +181,6 @@ export const NodeSquare = ({
       style={{ width: squareSize || 0, height: squareSize || 0 }}
       onClick={togglePopover}
       onKeyPress={togglePopover}
-      onFocus={showToolTip}
-      onMouseOver={showToolTip}
-      onMouseLeave={hideToolTip}
       className="buttonContainer"
     >
       <SquareOuter color={color} style={style}>
@@ -203,6 +197,7 @@ export const NodeSquare = ({
           ) : (
             ellipsisMode && (
               <ValueInner aria-label={nodeAriaLabel}>
+                {/* eslint-disable-next-line @kbn/i18n/strings_should_be_translated_with_i18n */}
                 <Label color={color}>...</Label>
               </ValueInner>
             )
@@ -216,10 +211,8 @@ export const NodeSquare = ({
       style={{ width: squareSize || 0, height: squareSize || 0, ...style }}
       onClick={togglePopover}
       onKeyPress={togglePopover}
-      onMouseOver={showToolTip}
-      onFocus={showToolTip}
-      onMouseLeave={hideToolTip}
       color={color}
+      tabIndex={0}
     />
   );
 };

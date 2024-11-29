@@ -9,11 +9,12 @@ import type { FC } from 'react';
 import React, { useEffect, useState } from 'react';
 import { EuiCallOut, EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useEnabledFeatures } from '../../../../contexts/ml';
 import { ML_DATA_PREVIEW_COUNT } from '../../../../../../common/util/job_utils';
-import { useMlApiContext } from '../../../../contexts/kibana';
+import { useMlApi } from '../../../../contexts/kibana';
 import { usePermissionCheck } from '../../../../capabilities/check_capabilities';
-import type { CombinedJob } from '../../../../../shared';
 import { MLJobEditor } from '../ml_job_editor';
+import type { CombinedJob } from '../../../../../../common/types/anomaly_detection_jobs';
 
 interface Props {
   job: CombinedJob;
@@ -22,7 +23,8 @@ interface Props {
 export const DatafeedPreviewPane: FC<Props> = ({ job }) => {
   const {
     jobs: { datafeedPreview },
-  } = useMlApiContext();
+  } = useMlApi();
+  const { showNodeInfo } = useEnabledFeatures();
 
   const canPreviewDatafeed = usePermissionCheck('canPreviewDatafeed');
   const [loading, setLoading] = useState(false);
@@ -54,7 +56,7 @@ export const DatafeedPreviewPane: FC<Props> = ({ job }) => {
   ) : (
     <>
       {previewJson === null ? (
-        <EmptyResults />
+        <EmptyResults showFrozenTierText={showNodeInfo === true} />
       ) : (
         <MLJobEditor value={previewJson} readOnly={true} />
       )}
@@ -82,7 +84,7 @@ const InsufficientPermissions: FC = () => (
   </EuiCallOut>
 );
 
-const EmptyResults: FC = () => (
+const EmptyResults: FC<{ showFrozenTierText: boolean }> = ({ showFrozenTierText }) => (
   <EuiCallOut
     title={
       <FormattedMessage
@@ -93,11 +95,13 @@ const EmptyResults: FC = () => (
     color="warning"
     iconType="warning"
   >
-    <p>
-      <FormattedMessage
-        id="xpack.ml.jobsList.jobDetails.noResults.text"
-        defaultMessage="Note: Datafeed preview does not return results from frozen tiers."
-      />
-    </p>
+    {showFrozenTierText ? (
+      <p>
+        <FormattedMessage
+          id="xpack.ml.jobsList.jobDetails.noResults.text"
+          defaultMessage="Note: Datafeed preview does not return results from frozen tiers."
+        />
+      </p>
+    ) : null}
   </EuiCallOut>
 );

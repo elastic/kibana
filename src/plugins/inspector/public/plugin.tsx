@@ -1,15 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
 import * as React from 'react';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { SharePluginStart } from '@kbn/share-plugin/public';
 import { InspectorViewRegistry } from './view_registry';
 import { InspectorOptions, InspectorSession } from './types';
@@ -59,9 +60,9 @@ export interface Start {
 export class InspectorPublicPlugin implements Plugin<Setup, Start> {
   views: InspectorViewRegistry | undefined;
 
-  constructor(initializerContext: PluginInitializerContext) {}
+  constructor(_initializerContext: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup) {
+  public setup(_core: CoreSetup) {
     this.views = new InspectorViewRegistry();
 
     this.views.register(getRequestsViewDescription());
@@ -109,7 +110,7 @@ export class InspectorPublicPlugin implements Plugin<Setup, Start> {
               theme: core.theme,
             }}
           />,
-          { theme$: core.theme.theme$ }
+          core
         ),
         {
           'data-test-subj': 'inspectorPanel',

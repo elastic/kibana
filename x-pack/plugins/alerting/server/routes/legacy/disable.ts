@@ -7,6 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import { DocLinksServiceSetup } from '@kbn/core/server';
 import type { AlertingRouter } from '../../types';
 import { ILicenseState } from '../../lib/license_state';
 import { verifyApiAccess } from '../../lib/license_api_access';
@@ -21,13 +22,29 @@ const paramSchema = schema.object({
 export const disableAlertRoute = (
   router: AlertingRouter,
   licenseState: ILicenseState,
-  usageCounter?: UsageCounter
+  docLinks: DocLinksServiceSetup,
+  usageCounter?: UsageCounter,
+  isServerless?: boolean
 ) => {
   router.post(
     {
       path: `${LEGACY_BASE_ALERT_API_PATH}/alert/{id}/_disable`,
       validate: {
         params: paramSchema,
+      },
+      options: {
+        access: isServerless ? 'internal' : 'public',
+        summary: 'Disable an alert',
+        tags: ['oas-tag:alerting'],
+        deprecated: {
+          documentationUrl: docLinks.links.alerting.legacyRuleApiDeprecations,
+          severity: 'warning',
+          reason: {
+            type: 'migrate',
+            newApiMethod: 'POST',
+            newApiPath: '/api/alerting/rule/{id}/_disable',
+          },
+        },
       },
     },
     router.handleLegacyErrors(async function (context, req, res) {
@@ -39,7 +56,7 @@ export const disableAlertRoute = (
       const rulesClient = (await context.alerting).getRulesClient();
       const { id } = req.params;
       try {
-        await rulesClient.disable({ id });
+        await rulesClient.disableRule({ id });
         return res.noContent();
       } catch (e) {
         if (e instanceof RuleTypeDisabledError) {

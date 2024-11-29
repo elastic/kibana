@@ -59,6 +59,8 @@ To control (or mutate) flyout's layout, you can utilize [useExpandableFlyoutApi]
 - **previousPreviewPanel**: navigate to the previous preview panel
 - **closeFlyout**: close the flyout
 
+> The expandable flyout propagates the `onClose` callback from the EuiFlyout component. As we recommend having a single instance of the flyout in your application, it's up to the application's code to dispatch the event (through Redux, window events, observable, prop drilling...). 
+
 ## Usage
 
 To use the expandable flyout in your plugin, first you need wrap your code with the [context provider](https://github.com/elastic/kibana/blob/main/packages/kbn-expandable-flyout/src/context.tsx) at a high enough level as follows:
@@ -81,6 +83,21 @@ Then use the [React UI component](https://github.com/elastic/kibana/tree/main/pa
 <ExpandableFlyout registeredPanels={myPanels} />
 ```
 _where `myPanels` is a list of all the panels that can be rendered in the flyout_
+
+## Optional properties
+
+The expandable flyout now offers a way for users to change some of the flyout's UI properties. These are done via a gear icon in the top right corner of the flyout, to the left of the close icon.
+
+The gear icon can be hidden by setting the `hideSettings` property to `true` in the flyout's custom props.
+The `typeDisabled` property allows to disable the push/overlay toggle.
+```typescript
+flyoutCustomProps?: {
+  hideSettings?: boolean;
+  typeDisabled?: boolean,
+};
+```
+
+At the moment, clicking on the gear icon opens a popover that allows you to toggle the flyout between `overlay` and `push` modes (see [EUI](https://eui.elastic.co/#/layout/flyout#push-versus-overlay)). The default value is `overlay`. The package remembers the selected value in local storage, only for expandable flyout that have a urlKey. The state of memory flyouts is not persisted.
 
 ## Terminology
 

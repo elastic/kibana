@@ -6,10 +6,7 @@
  */
 
 import { offeringBasedSchema, schema, TypeOf } from '@kbn/config-schema';
-import {
-  PluginConfigDescriptor,
-  PluginInitializerContext,
-} from '@kbn/core/server';
+import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 import { maxSuggestions } from '@kbn/observability-plugin/common';
 import { SearchAggregatedTransactionSetting } from '../common/aggregated_transactions';
 
@@ -29,6 +26,7 @@ const configSchema = schema.object({
   serviceMapFingerprintGlobalBucketSize: schema.number({
     defaultValue: 1000,
   }),
+  serviceMapMaxAllowableBytes: schema.number({ defaultValue: 2_576_980_377 }), // 2.4GB
   serviceMapTraceIdBucketSize: schema.number({ defaultValue: 65 }),
   serviceMapTraceIdGlobalBucketSize: schema.number({ defaultValue: 6 }),
   serviceMapMaxTracesPerRequest: schema.number({ defaultValue: 50 }),
@@ -53,7 +51,8 @@ const configSchema = schema.object({
       enabled: schema.boolean({ defaultValue: false }),
     }),
   }),
-  forceSyntheticSource: schema.boolean({ defaultValue: false }),
+
+  forceSyntheticSource: schema.boolean({ defaultValue: false }), // deprecated
   latestAgentVersionsUrl: schema.string({
     defaultValue: 'https://apm-agent-versions.elastic.co/versions.json',
   }),
@@ -78,6 +77,7 @@ const configSchema = schema.object({
      * enabling this feature flag.
      */
     profilingIntegrationAvailable: schema.boolean({ defaultValue: false }),
+    ruleFormV2Enabled: schema.boolean({ defaultValue: false }),
   }),
   serverless: schema.object({
     enabled: offeringBasedSchema({
@@ -89,13 +89,7 @@ const configSchema = schema.object({
 
 // plugin config
 export const config: PluginConfigDescriptor<APMConfig> = {
-  deprecations: ({
-    rename,
-    unused,
-    renameFromRoot,
-    deprecateFromRoot,
-    unusedFromRoot,
-  }) => [
+  deprecations: ({ rename, unused, renameFromRoot, deprecateFromRoot, unusedFromRoot }) => [
     unused('ui.transactionGroupBucketSize', {
       level: 'warning',
     }),
@@ -105,16 +99,15 @@ export const config: PluginConfigDescriptor<APMConfig> = {
     deprecateFromRoot('apm_oss.enabled', '8.0.0', { level: 'warning' }),
     unusedFromRoot('apm_oss.fleetMode', { level: 'warning' }),
     unusedFromRoot('apm_oss.indexPattern', { level: 'warning' }),
-    renameFromRoot(
-      'xpack.apm.maxServiceEnvironments',
-      `uiSettings.overrides[${maxSuggestions}]`,
-      { level: 'warning' }
-    ),
-    renameFromRoot(
-      'xpack.apm.maxServiceSelection',
-      `uiSettings.overrides[${maxSuggestions}]`,
-      { level: 'warning' }
-    ),
+    renameFromRoot('xpack.apm.maxServiceEnvironments', `uiSettings.overrides[${maxSuggestions}]`, {
+      level: 'warning',
+    }),
+    renameFromRoot('xpack.apm.maxServiceSelection', `uiSettings.overrides[${maxSuggestions}]`, {
+      level: 'warning',
+    }),
+    unused('forceSyntheticSource', {
+      level: 'warning',
+    }),
   ],
   exposeToBrowser: {
     serviceMapEnabled: true,

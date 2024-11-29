@@ -1,12 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getMappingConflictsInfo, fieldSupportsMatches } from '.';
+import {
+  getMappingConflictsInfo,
+  fieldSupportsMatches,
+  hasWrongOperatorWithWildcard,
+  hasPartialCodeSignatureEntry,
+} from '.';
 
 describe('Helpers', () => {
   describe('getMappingConflictsInfo', () => {
@@ -178,6 +184,193 @@ describe('Helpers', () => {
     test('it returns false if none of the esTypes map to kibana type string', () => {
       expect(
         fieldSupportsMatches({ name: 'field', type: 'conflict', esTypes: ['bool', 'unmapped'] })
+      ).toBeFalsy();
+    });
+  });
+  describe('hasWrongOperatorWithWildcard', () => {
+    test('it returns true if there is at least one exception entry with a wildcard and the wrong operator', () => {
+      expect(
+        hasWrongOperatorWithWildcard([
+          {
+            description: '',
+            name: '',
+            type: 'simple',
+            entries: [{ type: 'match', value: 'withwildcard*', field: '', operator: 'included' }],
+          },
+        ])
+      ).toBeTruthy();
+      expect(
+        hasWrongOperatorWithWildcard([
+          {
+            description: '',
+            name: '',
+            type: 'simple',
+            entries: [{ type: 'match', value: 'withwildcard?', field: '', operator: 'included' }],
+          },
+        ])
+      ).toBeTruthy();
+    });
+
+    test('it returns true if there are entries joined with an OR that have a wildcard and the wrong operator', () => {
+      expect(
+        hasWrongOperatorWithWildcard([
+          {
+            description: '',
+            name: '',
+            type: 'simple',
+            entries: [{ type: 'match', value: 'withwildcard?', field: '', operator: 'included' }],
+          },
+          {
+            description: '',
+            name: '',
+            type: 'simple',
+            entries: [{ type: 'match', value: 'withwildcard?*', field: '', operator: 'included' }],
+          },
+        ])
+      ).toBeTruthy();
+    });
+
+    test('it returns false if there are no exception entries with a wildcard and the wrong operator', () => {
+      expect(
+        hasWrongOperatorWithWildcard([
+          {
+            description: '',
+            name: '',
+            type: 'simple',
+            entries: [
+              { type: 'match', value: 'nowildcard', field: '', operator: 'excluded' },
+              { type: 'wildcard', value: 'withwildcard*?', field: '', operator: 'included' },
+            ],
+          },
+        ])
+      ).toBeFalsy();
+    });
+
+    test('it returns true if there are nested entries with a wildcard and the wrong operator', () => {
+      expect(
+        hasWrongOperatorWithWildcard([
+          {
+            description: '',
+            name: '',
+            type: 'simple',
+            entries: [
+              { type: 'match', value: 'nowildcard', field: '', operator: 'excluded' },
+              {
+                field: '',
+                type: 'nested',
+                entries: [{ type: 'match', value: 'wildcard?', field: '', operator: 'excluded' }],
+              },
+            ],
+          },
+        ])
+      ).toBeTruthy();
+    });
+  });
+
+  describe('hasPartialCodeSignatureEntry', () => {
+    it('returns false if the entry has neither code signature subject name nor trusted field', () => {
+      expect(
+        hasPartialCodeSignatureEntry([
+          {
+            description: '',
+            name: '',
+            type: 'simple',
+            os_types: ['windows'],
+            entries: [{ type: 'match', value: 'asdf', field: 'someField', operator: 'excluded' }],
+          },
+        ])
+      ).toBeFalsy();
+    });
+    it('returns true if the entry has code signature subject name but not trusted field', () => {
+      expect(
+        hasPartialCodeSignatureEntry([
+          {
+            description: '',
+            name: '',
+            type: 'simple',
+            os_types: ['windows'],
+            entries: [
+              {
+                type: 'match',
+                value: 'asdf',
+                field: 'process.code_signature.subject_name',
+                operator: 'excluded',
+              },
+            ],
+          },
+        ])
+      ).toBeTruthy();
+    });
+    it('returns true if the entry has code signature trusted but not the subject name field', () => {
+      expect(
+        hasPartialCodeSignatureEntry([
+          {
+            description: '',
+            name: '',
+            type: 'simple',
+            os_types: ['windows'],
+            entries: [
+              {
+                type: 'match',
+                value: 'asdf',
+                field: 'process.code_signature.trusted',
+                operator: 'excluded',
+              },
+            ],
+          },
+        ])
+      ).toBeTruthy();
+    });
+    it('returns false if the entry has both code signature subject name and trusted field', () => {
+      expect(
+        hasPartialCodeSignatureEntry([
+          {
+            description: '',
+            name: '',
+            type: 'simple',
+            os_types: ['windows'],
+            entries: [
+              {
+                type: 'match',
+                value: 'asdf',
+                field: 'process.code_signature.subject_name',
+                operator: 'excluded',
+              },
+              {
+                type: 'match',
+                value: 'true',
+                field: 'process.code_signature.trusted',
+                operator: 'excluded',
+              },
+            ],
+          },
+        ])
+      ).toBeFalsy();
+    });
+    it('returns false if the entry has both code signature team_id and trusted fields for mac os', () => {
+      expect(
+        hasPartialCodeSignatureEntry([
+          {
+            description: '',
+            name: '',
+            type: 'simple',
+            os_types: ['macos'],
+            entries: [
+              {
+                type: 'match',
+                value: 'asdf',
+                field: 'process.code_signature.team_id',
+                operator: 'excluded',
+              },
+              {
+                type: 'match',
+                value: 'true',
+                field: 'process.code_signature.trusted',
+                operator: 'excluded',
+              },
+            ],
+          },
+        ])
       ).toBeFalsy();
     });
   });

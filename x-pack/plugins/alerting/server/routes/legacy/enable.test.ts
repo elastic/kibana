@@ -12,6 +12,7 @@ import { mockHandlerArguments } from '../_mock_handler_arguments';
 import { rulesClientMock } from '../../rules_client.mock';
 import { RuleTypeDisabledError } from '../../lib/errors/rule_type_disabled';
 import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
+import { docLinksServiceMock } from '@kbn/core/server/mocks';
 
 const rulesClient = rulesClientMock.create();
 
@@ -28,17 +29,20 @@ beforeEach(() => {
 });
 
 describe('enableAlertRoute', () => {
+  const docLinks = docLinksServiceMock.createSetupContract();
+
   it('enables an alert', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    enableAlertRoute(router, licenseState);
+    enableAlertRoute(router, licenseState, docLinks);
 
     const [config, handler] = router.post.mock.calls[0];
 
     expect(config.path).toMatchInlineSnapshot(`"/api/alerts/alert/{id}/_enable"`);
+    expect(config.options?.access).toBe('public');
 
-    rulesClient.enable.mockResolvedValueOnce();
+    rulesClient.enableRule.mockResolvedValueOnce();
 
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },
@@ -52,8 +56,8 @@ describe('enableAlertRoute', () => {
 
     expect(await handler(context, req, res)).toEqual(undefined);
 
-    expect(rulesClient.enable).toHaveBeenCalledTimes(1);
-    expect(rulesClient.enable.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(rulesClient.enableRule).toHaveBeenCalledTimes(1);
+    expect(rulesClient.enableRule.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
           "id": "1",
@@ -64,15 +68,27 @@ describe('enableAlertRoute', () => {
     expect(res.noContent).toHaveBeenCalled();
   });
 
+  it('should have internal access for serverless', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    enableAlertRoute(router, licenseState, docLinks, undefined, true);
+
+    const [config] = router.post.mock.calls[0];
+
+    expect(config.path).toMatchInlineSnapshot(`"/api/alerts/alert/{id}/_enable"`);
+    expect(config.options?.access).toBe('internal');
+  });
+
   it('ensures the alert type gets validated for the license', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    enableAlertRoute(router, licenseState);
+    enableAlertRoute(router, licenseState, docLinks);
 
     const [, handler] = router.post.mock.calls[0];
 
-    rulesClient.enable.mockRejectedValue(new RuleTypeDisabledError('Fail', 'license_invalid'));
+    rulesClient.enableRule.mockRejectedValue(new RuleTypeDisabledError('Fail', 'license_invalid'));
 
     const [context, req, res] = mockHandlerArguments({ rulesClient }, { params: {}, body: {} }, [
       'ok',
@@ -90,12 +106,38 @@ describe('enableAlertRoute', () => {
     const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
     const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
 
-    enableAlertRoute(router, licenseState, mockUsageCounter);
+    enableAlertRoute(router, licenseState, docLinks, mockUsageCounter);
     const [, handler] = router.post.mock.calls[0];
     const [context, req, res] = mockHandlerArguments({ rulesClient }, { params: { id: '1' } }, [
       'ok',
     ]);
     await handler(context, req, res);
     expect(trackLegacyRouteUsage).toHaveBeenCalledWith('enable', mockUsageCounter);
+  });
+
+  it('should be deprecated', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    enableAlertRoute(router, licenseState, docLinks, undefined, true);
+
+    const [config] = router.post.mock.calls[0];
+
+    expect(config.options?.deprecated).toMatchInlineSnapshot(
+      {
+        documentationUrl: expect.stringMatching(/#breaking-201550$/),
+      },
+      `
+      Object {
+        "documentationUrl": StringMatching /#breaking-201550\\$/,
+        "reason": Object {
+          "newApiMethod": "POST",
+          "newApiPath": "/api/alerting/rule/{id}/_enable",
+          "type": "migrate",
+        },
+        "severity": "warning",
+      }
+    `
+    );
   });
 });

@@ -35,7 +35,7 @@
             "section": "def-common.CloudDetailsPanelProps",
             "text": "CloudDetailsPanelProps"
           },
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "packages/kbn-search-api-panels/components/cloud_details.tsx",
         "deprecated": false,
@@ -74,7 +74,7 @@
         "label": "CodeBox",
         "description": [],
         "signature": [
-          "({ application, codeSnippet, consolePlugin, languageType, languages, assetBasePath, selectedLanguage, setSelectedLanguage, sharePlugin, consoleRequest, }: React.PropsWithChildren<CodeBoxProps>) => JSX.Element"
+          "({ application, codeSnippet, consolePlugin, languageType, languages, assetBasePath, selectedLanguage, setSelectedLanguage, sharePlugin, consoleRequest, consoleTitle, showTopBar, }: CodeBoxProps) => React.JSX.Element"
         ],
         "path": "packages/kbn-search-api-panels/components/code_box.tsx",
         "deprecated": false,
@@ -83,12 +83,12 @@
           {
             "parentPluginId": "@kbn/search-api-panels",
             "id": "def-common.CodeBox.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
-            "label": "{\n  application,\n  codeSnippet,\n  consolePlugin,\n  languageType,\n  languages,\n  assetBasePath,\n  selectedLanguage,\n  setSelectedLanguage,\n  sharePlugin,\n  consoleRequest,\n}",
+            "label": "{\n  application,\n  codeSnippet,\n  consolePlugin,\n  languageType,\n  languages,\n  assetBasePath,\n  selectedLanguage,\n  setSelectedLanguage,\n  sharePlugin,\n  consoleRequest,\n  consoleTitle,\n  showTopBar = true,\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<CodeBoxProps>"
+              "CodeBoxProps"
             ],
             "path": "packages/kbn-search-api-panels/components/code_box.tsx",
             "deprecated": false,
@@ -293,7 +293,7 @@
         "label": "GithubLink",
         "description": [],
         "signature": [
-          "({ assetBasePath, label, href }: React.PropsWithChildren<{ assetBasePath: string; label: string; href: string; }>) => JSX.Element"
+          "({ assetBasePath, label, href, \"aria-label\": ariaLabel }: { assetBasePath: string; label: string; href: string; 'aria-label'?: string | undefined; }) => React.JSX.Element"
         ],
         "path": "packages/kbn-search-api-panels/components/github_link.tsx",
         "deprecated": false,
@@ -302,12 +302,12 @@
           {
             "parentPluginId": "@kbn/search-api-panels",
             "id": "def-common.GithubLink.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
-            "label": "{ assetBasePath, label, href }",
+            "label": "{ assetBasePath, label, href, 'aria-label': ariaLabel }",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<{ assetBasePath: string; label: string; href: string; }>"
+              "{ assetBasePath: string; label: string; href: string; 'aria-label'?: string | undefined; }"
             ],
             "path": "packages/kbn-search-api-panels/components/github_link.tsx",
             "deprecated": false,
@@ -326,7 +326,7 @@
         "label": "IngestData",
         "description": [],
         "signature": [
-          "({ codeSnippet, selectedLanguage, setSelectedLanguage, docLinks, assetBasePath, application, consolePlugin, sharePlugin, languages, consoleRequest, additionalIngestionPanel, }: React.PropsWithChildren<IngestDataProps>) => JSX.Element"
+          "({ codeSnippet, selectedLanguage, selectedPipeline, setSelectedLanguage, docLinks, assetBasePath, application, consolePlugin, sharePlugin, languages, consoleRequest, additionalIngestionPanel, ingestPipelineData, setSelectedPipeline, defaultIngestPipeline, }: IngestDataProps) => React.JSX.Element"
         ],
         "path": "packages/kbn-search-api-panels/components/ingest_data.tsx",
         "deprecated": false,
@@ -335,12 +335,12 @@
           {
             "parentPluginId": "@kbn/search-api-panels",
             "id": "def-common.IngestData.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
-            "label": "{\n  codeSnippet,\n  selectedLanguage,\n  setSelectedLanguage,\n  docLinks,\n  assetBasePath,\n  application,\n  consolePlugin,\n  sharePlugin,\n  languages,\n  consoleRequest,\n  additionalIngestionPanel,\n}",
+            "label": "{\n  codeSnippet,\n  selectedLanguage,\n  selectedPipeline,\n  setSelectedLanguage,\n  docLinks,\n  assetBasePath,\n  application,\n  consolePlugin,\n  sharePlugin,\n  languages,\n  consoleRequest,\n  additionalIngestionPanel,\n  ingestPipelineData,\n  setSelectedPipeline,\n  defaultIngestPipeline,\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<IngestDataProps>"
+              "IngestDataProps"
             ],
             "path": "packages/kbn-search-api-panels/components/ingest_data.tsx",
             "deprecated": false,
@@ -359,7 +359,7 @@
         "label": "IngestionsPanel",
         "description": [],
         "signature": [
-          "({ additionalIngestionPanel, docLinks, assetBasePath, }: React.PropsWithChildren<IngestionPanelProps>) => JSX.Element"
+          "({ additionalIngestionPanel, docLinks, assetBasePath, }: IngestionPanelProps) => React.JSX.Element"
         ],
         "path": "packages/kbn-search-api-panels/components/ingestions_panel.tsx",
         "deprecated": false,
@@ -368,14 +368,47 @@
           {
             "parentPluginId": "@kbn/search-api-panels",
             "id": "def-common.IngestionsPanel.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "{\n  additionalIngestionPanel,\n  docLinks,\n  assetBasePath,\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<IngestionPanelProps>"
+              "IngestionPanelProps"
             ],
             "path": "packages/kbn-search-api-panels/components/ingestions_panel.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-api-panels",
+        "id": "def-common.IngestPipelinePanel",
+        "type": "Function",
+        "tags": [],
+        "label": "IngestPipelinePanel",
+        "description": [],
+        "signature": [
+          "({ selectedPipeline, setSelectedPipeline, ingestPipelinesData, defaultIngestPipeline, }: IngestPipelinePanelProps) => React.JSX.Element"
+        ],
+        "path": "packages/kbn-search-api-panels/components/ingest_pipelines/ingest_pipeline_panel.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-common.IngestPipelinePanel.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  selectedPipeline,\n  setSelectedPipeline,\n  ingestPipelinesData,\n  defaultIngestPipeline,\n}",
+            "description": [],
+            "signature": [
+              "IngestPipelinePanelProps"
+            ],
+            "path": "packages/kbn-search-api-panels/components/ingest_pipelines/ingest_pipeline_panel.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -392,7 +425,7 @@
         "label": "InstallClientPanel",
         "description": [],
         "signature": [
-          "({ codeSnippet, consoleRequest, language, languages, setSelectedLanguage, assetBasePath, application, sharePlugin, isPanelLeft, overviewPanelProps, }: React.PropsWithChildren<InstallClientProps>) => JSX.Element"
+          "({ codeSnippet, consoleRequest, language, languages, setSelectedLanguage, assetBasePath, application, sharePlugin, isPanelLeft, overviewPanelProps, }: InstallClientProps) => React.JSX.Element"
         ],
         "path": "packages/kbn-search-api-panels/components/install_client.tsx",
         "deprecated": false,
@@ -401,12 +434,12 @@
           {
             "parentPluginId": "@kbn/search-api-panels",
             "id": "def-common.InstallClientPanel.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "{\n  codeSnippet,\n  consoleRequest,\n  language,\n  languages,\n  setSelectedLanguage,\n  assetBasePath,\n  application,\n  sharePlugin,\n  isPanelLeft = true,\n  overviewPanelProps,\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<InstallClientProps>"
+              "InstallClientProps"
             ],
             "path": "packages/kbn-search-api-panels/components/install_client.tsx",
             "deprecated": false,
@@ -425,7 +458,7 @@
         "label": "LanguageClientPanel",
         "description": [],
         "signature": [
-          "({ language, setSelectedLanguage, isSelectedLanguage, assetBasePath, src, }: React.PropsWithChildren<SelectClientProps>) => JSX.Element"
+          "({ language, setSelectedLanguage, isSelectedLanguage, assetBasePath, src, }: SelectClientProps) => React.JSX.Element"
         ],
         "path": "packages/kbn-search-api-panels/components/language_client_panel.tsx",
         "deprecated": false,
@@ -434,12 +467,12 @@
           {
             "parentPluginId": "@kbn/search-api-panels",
             "id": "def-common.LanguageClientPanel.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "{\n  language,\n  setSelectedLanguage,\n  isSelectedLanguage,\n  assetBasePath,\n  src,\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<SelectClientProps>"
+              "SelectClientProps"
             ],
             "path": "packages/kbn-search-api-panels/components/language_client_panel.tsx",
             "deprecated": false,
@@ -458,7 +491,7 @@
         "label": "OverviewPanel",
         "description": [],
         "signature": [
-          "({ children, description, leftPanelContent, links, rightPanelContent, title, overviewPanelProps, }: React.PropsWithChildren<OverviewPanelProps>) => JSX.Element"
+          "({ children, description, leftPanelContent, links, rightPanelContent, title, overviewPanelProps, }: React.PropsWithChildren<OverviewPanelProps>) => React.JSX.Element"
         ],
         "path": "packages/kbn-search-api-panels/components/overview_panel.tsx",
         "deprecated": false,
@@ -491,7 +524,7 @@
         "label": "PipelinePanel",
         "description": [],
         "signature": [
-          "({ clusterImage, cutImage, reporterImage, }: React.PropsWithChildren<PipelinePanelProps>) => JSX.Element"
+          "({ clusterImage, cutImage, reporterImage, }: PipelinePanelProps) => React.JSX.Element"
         ],
         "path": "packages/kbn-search-api-panels/components/pipeline_panel.tsx",
         "deprecated": false,
@@ -500,14 +533,47 @@
           {
             "parentPluginId": "@kbn/search-api-panels",
             "id": "def-common.PipelinePanel.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "{\n  clusterImage,\n  cutImage,\n  reporterImage,\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<PipelinePanelProps>"
+              "PipelinePanelProps"
             ],
             "path": "packages/kbn-search-api-panels/components/pipeline_panel.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-api-panels",
+        "id": "def-common.PreprocessDataPanel",
+        "type": "Function",
+        "tags": [],
+        "label": "PreprocessDataPanel",
+        "description": [],
+        "signature": [
+          "({ docLinks, images }: { docLinks: { arrayOrJson: string; dataEnrichment: string; dataFiltering: string; dataTransformation: string; pipelineHandling: string; }; images: { dataEnrichment: string; dataTransformation: string; dataFiltering: string; pipelineHandling: string; arrayHandling: string; }; }) => React.JSX.Element"
+        ],
+        "path": "packages/kbn-search-api-panels/components/preprocess_data.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-common.PreprocessDataPanel.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ docLinks, images }",
+            "description": [],
+            "signature": [
+              "{ docLinks: { arrayOrJson: string; dataEnrichment: string; dataFiltering: string; dataTransformation: string; pipelineHandling: string; }; images: { dataEnrichment: string; dataTransformation: string; dataFiltering: string; pipelineHandling: string; arrayHandling: string; }; }"
+            ],
+            "path": "packages/kbn-search-api-panels/components/preprocess_data.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -532,7 +598,7 @@
             "section": "def-common.SelectClientPanelProps",
             "text": "SelectClientPanelProps"
           },
-          ">) => JSX.Element"
+          ">) => React.JSX.Element"
         ],
         "path": "packages/kbn-search-api-panels/components/select_client.tsx",
         "deprecated": false,
@@ -567,60 +633,13 @@
       },
       {
         "parentPluginId": "@kbn/search-api-panels",
-        "id": "def-common.TryInConsoleButton",
-        "type": "Function",
-        "tags": [],
-        "label": "TryInConsoleButton",
-        "description": [],
-        "signature": [
-          "({ request, application, consolePlugin, sharePlugin, content, showIcon, link, }: ",
-          {
-            "pluginId": "@kbn/search-api-panels",
-            "scope": "common",
-            "docId": "kibKbnSearchApiPanelsPluginApi",
-            "section": "def-common.TryInConsoleButtonProps",
-            "text": "TryInConsoleButtonProps"
-          },
-          ") => JSX.Element | null"
-        ],
-        "path": "packages/kbn-search-api-panels/components/try_in_console_button.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/search-api-panels",
-            "id": "def-common.TryInConsoleButton.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{\n  request,\n  application,\n  consolePlugin,\n  sharePlugin,\n  content,\n  showIcon = true,\n  link = false,\n}",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/search-api-panels",
-                "scope": "common",
-                "docId": "kibKbnSearchApiPanelsPluginApi",
-                "section": "def-common.TryInConsoleButtonProps",
-                "text": "TryInConsoleButtonProps"
-              }
-            ],
-            "path": "packages/kbn-search-api-panels/components/try_in_console_button.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/search-api-panels",
         "id": "def-common.WelcomeBanner",
         "type": "Function",
         "tags": [],
         "label": "WelcomeBanner",
         "description": [],
         "signature": [
-          "({ user, assetBasePath, image, showDescription, }: React.PropsWithChildren<",
+          "({ user, assetBasePath, image, showDescription, }: ",
           {
             "pluginId": "@kbn/search-api-panels",
             "scope": "common",
@@ -628,7 +647,7 @@
             "section": "def-common.WelcomeBannerProps",
             "text": "WelcomeBannerProps"
           },
-          ">) => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "packages/kbn-search-api-panels/index.tsx",
         "deprecated": false,
@@ -637,20 +656,18 @@
           {
             "parentPluginId": "@kbn/search-api-panels",
             "id": "def-common.WelcomeBanner.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "{\n  user,\n  assetBasePath,\n  image,\n  showDescription = true,\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
               {
                 "pluginId": "@kbn/search-api-panels",
                 "scope": "common",
                 "docId": "kibKbnSearchApiPanelsPluginApi",
                 "section": "def-common.WelcomeBannerProps",
                 "text": "WelcomeBannerProps"
-              },
-              ">"
+              }
             ],
             "path": "packages/kbn-search-api-panels/index.tsx",
             "deprecated": false,
@@ -1142,7 +1159,7 @@
             "label": "callout",
             "description": [],
             "signature": [
-              "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
+              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
             ],
             "path": "packages/kbn-search-api-panels/components/select_client.tsx",
             "deprecated": false,
@@ -1158,9 +1175,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-application-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-common.ApplicationStart",
+                "section": "def-public.ApplicationStart",
                 "text": "ApplicationStart"
               },
               " | undefined"
@@ -1229,156 +1246,18 @@
             "path": "packages/kbn-search-api-panels/components/select_client.tsx",
             "deprecated": false,
             "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/search-api-panels",
-        "id": "def-common.TryInConsoleButtonProps",
-        "type": "Interface",
-        "tags": [],
-        "label": "TryInConsoleButtonProps",
-        "description": [],
-        "path": "packages/kbn-search-api-panels/components/try_in_console_button.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/search-api-panels",
-            "id": "def-common.TryInConsoleButtonProps.request",
-            "type": "string",
-            "tags": [],
-            "label": "request",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "packages/kbn-search-api-panels/components/try_in_console_button.tsx",
-            "deprecated": false,
-            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/search-api-panels",
-            "id": "def-common.TryInConsoleButtonProps.application",
-            "type": "Object",
-            "tags": [],
-            "label": "application",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/core-application-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-common.ApplicationStart",
-                "text": "ApplicationStart"
-              },
-              " | undefined"
-            ],
-            "path": "packages/kbn-search-api-panels/components/try_in_console_button.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/search-api-panels",
-            "id": "def-common.TryInConsoleButtonProps.consolePlugin",
-            "type": "Object",
-            "tags": [],
-            "label": "consolePlugin",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "console",
-                "scope": "public",
-                "docId": "kibConsolePluginApi",
-                "section": "def-public.ConsolePluginStart",
-                "text": "ConsolePluginStart"
-              },
-              " | undefined"
-            ],
-            "path": "packages/kbn-search-api-panels/components/try_in_console_button.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/search-api-panels",
-            "id": "def-common.TryInConsoleButtonProps.sharePlugin",
+            "id": "def-common.SelectClientPanelProps.children",
             "type": "CompoundType",
             "tags": [],
-            "label": "sharePlugin",
+            "label": "children",
             "description": [],
             "signature": [
-              "{ toggleShareContextMenu: (options: ",
-              {
-                "pluginId": "share",
-                "scope": "public",
-                "docId": "kibSharePluginApi",
-                "section": "def-public.ShowShareMenuOptions",
-                "text": "ShowShareMenuOptions"
-              },
-              ") => void; } & { url: ",
-              {
-                "pluginId": "share",
-                "scope": "public",
-                "docId": "kibSharePluginApi",
-                "section": "def-public.BrowserUrlService",
-                "text": "BrowserUrlService"
-              },
-              "; navigate(options: ",
-              "RedirectOptions",
-              "<",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
-              },
-              ">): void; }"
+              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
             ],
-            "path": "packages/kbn-search-api-panels/components/try_in_console_button.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/search-api-panels",
-            "id": "def-common.TryInConsoleButtonProps.content",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "content",
-            "description": [],
-            "signature": [
-              "string | React.ReactElement<any, string | React.JSXElementConstructor<any>> | undefined"
-            ],
-            "path": "packages/kbn-search-api-panels/components/try_in_console_button.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/search-api-panels",
-            "id": "def-common.TryInConsoleButtonProps.showIcon",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "showIcon",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "packages/kbn-search-api-panels/components/try_in_console_button.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/search-api-panels",
-            "id": "def-common.TryInConsoleButtonProps.link",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "link",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "packages/kbn-search-api-panels/components/try_in_console_button.tsx",
+            "path": "packages/kbn-search-api-panels/components/select_client.tsx",
             "deprecated": false,
             "trackAdoption": false
           }

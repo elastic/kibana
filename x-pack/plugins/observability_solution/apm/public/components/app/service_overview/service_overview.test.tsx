@@ -9,15 +9,31 @@ import { composeStories } from '@storybook/testing-react';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import * as stories from './service_overview.stories';
+import * as useAdHocApmDataView from '../../../hooks/use_adhoc_apm_data_view';
 
 const { Example } = composeStories(stories);
 
 describe('ServiceOverview', () => {
+  let useAdHocApmDataViewSpy: jest.SpyInstance;
+
+  beforeAll(() => {
+    useAdHocApmDataViewSpy = jest.spyOn(useAdHocApmDataView, 'useAdHocApmDataView');
+
+    useAdHocApmDataViewSpy.mockImplementation(() => {
+      return {
+        dataView: {
+          id: 'foo-1',
+        },
+      };
+    });
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
   it('renders', async () => {
     render(<Example />);
 
-    expect(
-      await screen.findByRole('heading', { name: /Latency/ })
-    ).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Latency' })).toBeInTheDocument();
   });
 });

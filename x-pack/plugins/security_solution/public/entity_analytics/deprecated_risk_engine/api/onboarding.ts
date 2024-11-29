@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import type { HttpSetup, NotificationsStart } from '@kbn/core/public';
+import type { HttpSetup } from '@kbn/core/public';
 
+import type { StartRenderServices } from '../../../types';
 import { INTERNAL_RISK_SCORE_URL } from '../../../../common/constants';
 
 import { RiskScoreEntity } from '../../../../common/search_strategy';
@@ -27,18 +28,19 @@ const toastLifeTimeMs = 600000;
 export const installRiskScore = ({
   errorMessage,
   http,
-  notifications,
   options,
   renderDocLink,
   signal,
+  startServices,
 }: {
   errorMessage?: string;
   http: HttpSetup;
-  notifications?: NotificationsStart;
   options: Options;
   renderDocLink?: (message: string) => React.ReactNode;
   signal?: AbortSignal;
+  startServices: Pick<StartRenderServices, 'notifications'>;
 }) => {
+  const { notifications } = startServices;
   return http
     .post<Response[]>(INTERNAL_RISK_SCORE_URL, {
       version: '1',
@@ -61,7 +63,7 @@ export const installRiskScore = ({
       );
 
       if (resp.error.length > 0) {
-        notifications?.toasts?.addError(new Error(errorMessage ?? INSTALLATION_ERROR), {
+        notifications.toasts.addError(new Error(errorMessage ?? INSTALLATION_ERROR), {
           title: errorMessage ?? INSTALLATION_ERROR,
           toastMessage: renderDocLink
             ? (renderDocLink(resp.error.join(', ')) as unknown as string)
@@ -69,7 +71,7 @@ export const installRiskScore = ({
           toastLifeTimeMs,
         });
       } else {
-        notifications?.toasts?.addSuccess({
+        notifications.toasts.addSuccess({
           'data-test-subj': `${options.riskScoreEntity}EnableSuccessToast`,
           title:
             options.riskScoreEntity === RiskScoreEntity.user
@@ -80,7 +82,7 @@ export const installRiskScore = ({
       }
     })
     .catch((e) => {
-      notifications?.toasts?.addError(new Error(errorMessage ?? INSTALLATION_ERROR), {
+      notifications.toasts.addError(new Error(errorMessage ?? INSTALLATION_ERROR), {
         title: errorMessage ?? INSTALLATION_ERROR,
         toastMessage: renderDocLink ? renderDocLink(e?.body?.message) : e?.body?.message,
         toastLifeTimeMs,

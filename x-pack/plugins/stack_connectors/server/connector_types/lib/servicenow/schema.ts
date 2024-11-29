@@ -6,7 +6,10 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { MAX_ADDITIONAL_FIELDS_LENGTH } from '../../../../common/servicenow/constants';
+import { validateRecordMaxKeys } from '../validators';
 import { DEFAULT_ALERTS_GROUPING_KEY } from './config';
+import { validateOtherFieldsKeys } from './validators';
 
 export const ExternalIncidentServiceConfigurationBase = {
   apiUrl: schema.string(),
@@ -58,7 +61,25 @@ const CommonAttributes = {
   subcategory: schema.nullable(schema.string()),
   correlation_id: schema.nullable(schema.string({ defaultValue: DEFAULT_ALERTS_GROUPING_KEY })),
   correlation_display: schema.nullable(schema.string()),
+  additional_fields: schema.nullable(
+    schema.recordOf(
+      schema.string({
+        validate: (value) => validateOtherFieldsKeys(value),
+      }),
+      schema.any(),
+      {
+        validate: (value) =>
+          validateRecordMaxKeys({
+            record: value,
+            maxNumberOfFields: MAX_ADDITIONAL_FIELDS_LENGTH,
+            fieldName: 'additional_fields',
+          }),
+      }
+    )
+  ),
 };
+
+export const commonIncidentSchemaObjectProperties = Object.keys(CommonAttributes);
 
 // Schema for ServiceNow Incident Management (ITSM)
 export const ExecutorSubActionPushParamsSchemaITSM = schema.object({

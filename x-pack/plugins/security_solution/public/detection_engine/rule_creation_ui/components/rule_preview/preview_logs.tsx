@@ -5,15 +5,21 @@
  * 2.0.
  */
 
+import type { FC, PropsWithChildren } from 'react';
 import React, { Fragment, useMemo } from 'react';
+import { css } from '@emotion/css';
 import { EuiCallOut, EuiText, EuiSpacer, EuiAccordion } from '@elastic/eui';
+
 import type { RulePreviewLogs } from '../../../../../common/api/detection_engine';
 import * as i18n from './translations';
+import { LoggedRequests } from './logged_requests';
+import { useAccordionStyling } from './use_accordion_styling';
 
 interface PreviewLogsProps {
   logs: RulePreviewLogs[];
   hasNoiseWarning: boolean;
   isAborted: boolean;
+  showElasticsearchRequests: boolean;
 }
 
 interface SortedLogs {
@@ -42,7 +48,12 @@ const addLogs = (
   allLogs: SortedLogs[]
 ) => (logs.length ? [{ startedAt, logs, duration }, ...allLogs] : allLogs);
 
-const PreviewLogsComponent: React.FC<PreviewLogsProps> = ({ logs, hasNoiseWarning, isAborted }) => {
+const PreviewLogsComponent: React.FC<PreviewLogsProps> = ({
+  logs,
+  hasNoiseWarning,
+  isAborted,
+  showElasticsearchRequests,
+}) => {
   const sortedLogs = useMemo(
     () =>
       logs.reduce<{
@@ -65,6 +76,7 @@ const PreviewLogsComponent: React.FC<PreviewLogsProps> = ({ logs, hasNoiseWarnin
       <LogAccordion logs={sortedLogs.warnings}>
         {isAborted ? <CustomWarning message={i18n.PREVIEW_TIMEOUT_WARNING} /> : null}
       </LogAccordion>
+      {showElasticsearchRequests ? <LoggedRequests logs={logs} /> : null}
     </>
   );
 };
@@ -72,7 +84,9 @@ const PreviewLogsComponent: React.FC<PreviewLogsProps> = ({ logs, hasNoiseWarnin
 export const PreviewLogs = React.memo(PreviewLogsComponent);
 PreviewLogs.displayName = 'PreviewLogs';
 
-const LogAccordion: React.FC<LogAccordionProps> = ({ logs, isError, children }) => {
+const LogAccordion: FC<PropsWithChildren<LogAccordionProps>> = ({ logs, isError, children }) => {
+  const cssStyles = useAccordionStyling();
+
   const firstLog = logs[0];
   if (!(children || firstLog)) return null;
 
@@ -95,6 +109,10 @@ const LogAccordion: React.FC<LogAccordionProps> = ({ logs, isError, children }) 
           buttonContent={
             isError ? i18n.QUERY_PREVIEW_SEE_ALL_ERRORS : i18n.QUERY_PREVIEW_SEE_ALL_WARNINGS
           }
+          borders="horizontal"
+          css={css`
+            ${cssStyles}
+          `}
         >
           {restOfLogs.map((log, key) => (
             <CalloutGroup
@@ -107,7 +125,6 @@ const LogAccordion: React.FC<LogAccordionProps> = ({ logs, isError, children }) 
           ))}
         </EuiAccordion>
       ) : null}
-      <EuiSpacer size="m" />
     </>
   );
 };

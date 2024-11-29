@@ -6,29 +6,22 @@
  */
 
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
-
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
   BulkUpdateRulesRequestBody,
   validateUpdateRuleProps,
   BulkCrudRulesResponse,
 } from '../../../../../../../common/api/detection_engine/rule_management';
-
-import { buildRouteValidationWithZod } from '../../../../../../utils/build_validation/route_validation';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import { DETECTION_ENGINE_RULES_BULK_UPDATE } from '../../../../../../../common/constants';
-import type { SetupPlugins } from '../../../../../../plugin';
-import { buildMlAuthz } from '../../../../../machine_learning/authz';
-import { throwAuthzError } from '../../../../../machine_learning/validation';
 import { getIdBulkError } from '../../../utils/utils';
-import { transformValidateBulkError } from '../../../utils/validate';
 import {
   transformBulkError,
   buildSiemResponse,
   createBulkErrorObject,
 } from '../../../../routes/utils';
-import { updateRules } from '../../../logic/crud/update_rules';
-import { readRules } from '../../../logic/crud/read_rules';
+import { readRules } from '../../../logic/detection_rules_client/read_rules';
 import { getDeprecatedBulkEndpointHeader, logDeprecatedBulkEndpoint } from '../../deprecation';
 import { validateRuleDefaultExceptionList } from '../../../logic/exceptions/validate_rule_default_exception_list';
 import { validateRulesWithDuplicatedDefaultExceptionsList } from '../../../logic/exceptions/validate_rules_with_duplicated_default_exceptions_list';
@@ -36,18 +29,20 @@ import { RULE_MANAGEMENT_BULK_ACTION_SOCKET_TIMEOUT_MS } from '../../timeouts';
 
 /**
  * @deprecated since version 8.2.0. Use the detection_engine/rules/_bulk_action API instead
+ *
+ * TODO: https://github.com/elastic/kibana/issues/193184 Delete this route and clean up the code
  */
-export const bulkUpdateRulesRoute = (
-  router: SecuritySolutionPluginRouter,
-  ml: SetupPlugins['ml'],
-  logger: Logger
-) => {
+export const bulkUpdateRulesRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {
   router.versioned
     .put({
       access: 'public',
       path: DETECTION_ENGINE_RULES_BULK_UPDATE,
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
       options: {
-        tags: ['access:securitySolution'],
         timeout: {
           idleSocket: RULE_MANAGEMENT_BULK_ACTION_SOCKET_TIMEOUT_MS,
         },
@@ -69,16 +64,8 @@ export const bulkUpdateRulesRoute = (
 
         try {
           const ctx = await context.resolve(['core', 'securitySolution', 'alerting', 'licensing']);
-
           const rulesClient = ctx.alerting.getRulesClient();
-          const savedObjectsClient = ctx.core.savedObjects.client;
-
-          const mlAuthz = buildMlAuthz({
-            license: ctx.licensing.license,
-            ml,
-            request,
-            savedObjectsClient,
-          });
+          const detectionRulesClient = ctx.securitySolution.getDetectionRulesClient();
 
           const rules = await Promise.all(
             request.body.map(async (payloadRule) => {
@@ -93,13 +80,15 @@ export const bulkUpdateRulesRoute = (
                   });
                 }
 
-                throwAuthzError(await mlAuthz.validateRuleType(payloadRule.type));
-
                 const existingRule = await readRules({
                   rulesClient,
                   ruleId: payloadRule.rule_id,
                   id: payloadRule.id,
                 });
+
+                if (!existingRule) {
+                  return getIdBulkError({ id: payloadRule.id, ruleId: payloadRule.rule_id });
+                }
 
                 validateRulesWithDuplicatedDefaultExceptionsList({
                   allRules: request.body,
@@ -113,16 +102,11 @@ export const bulkUpdateRulesRoute = (
                   ruleId: payloadRule.id,
                 });
 
-                const rule = await updateRules({
-                  rulesClient,
-                  existingRule,
+                const updatedRule = await detectionRulesClient.updateRule({
                   ruleUpdate: payloadRule,
                 });
-                if (rule != null) {
-                  return transformValidateBulkError(rule.id, rule);
-                } else {
-                  return getIdBulkError({ id: payloadRule.id, ruleId: payloadRule.rule_id });
-                }
+
+                return updatedRule;
               } catch (err) {
                 return transformBulkError(idOrRuleIdOrUnknown, err);
               }

@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import expect from '@kbn/expect';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
@@ -401,8 +403,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             beforeSave: async () => {
               await testSubjects.click('colorEditorAddColor');
               await testSubjects.setValue('~colorEditorKeyPattern', 'red');
-              await testSubjects.setValue('~colorEditorColorPicker', '#ffffff');
-              await testSubjects.setValue('~colorEditorBackgroundPicker', '#ff0000');
+              await testSubjects.click('~colorEditorColorPicker');
+              await testSubjects.setValue('~euiColorPickerInput_bottom', '#ffffff');
+              await testSubjects.click('~colorEditorBackgroundPicker');
+              await testSubjects.setValue('~euiColorPickerInput_bottom', '#ff0000');
             },
             expect: async (renderedValueContainer) => {
               const span = await renderedValueContainer.findByTagName('span');
@@ -549,13 +553,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           await PageObjects.settings.setFieldFormat(spec.applyFormatterType);
           if (spec.beforeSave) {
-            await spec.beforeSave(await testSubjects.find('formatRow'));
+            await spec.beforeSave();
           }
         });
       });
     });
 
-    describe('check formats', async () => {
+    describe('check formats', () => {
       before(async () => {
         await PageObjects.common.navigateToApp('discover', {
           hash: `/doc/${indexPatternId}/${indexTitle}?id=${testDocumentId}`,
@@ -604,7 +608,7 @@ interface FieldFormatEditorSpecDescriptor {
    * Use it set specific configuration params for applied field formatter
    * @param formatRowContainer - field format editor container
    */
-  beforeSave?: (formatRowContainer: WebElementWrapper) => Promise<void>;
+  beforeSave?: () => Promise<void>;
 
   /**
    * An expected formatted value rendered by Discover app,

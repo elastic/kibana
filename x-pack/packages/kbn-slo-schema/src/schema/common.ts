@@ -43,11 +43,19 @@ const statusSchema = t.union([
   t.literal('VIOLATED'),
 ]);
 
-const summarySchema = t.type({
-  status: statusSchema,
-  sliValue: t.number,
-  errorBudget: errorBudgetSchema,
-});
+const summarySchema = t.intersection([
+  t.type({
+    status: statusSchema,
+    sliValue: t.number,
+    errorBudget: errorBudgetSchema,
+    fiveMinuteBurnRate: t.number,
+    oneHourBurnRate: t.number,
+    oneDayBurnRate: t.number,
+  }),
+  t.partial({
+    summaryUpdatedAt: t.union([t.string, t.null]),
+  }),
+]);
 
 const groupingsSchema = t.record(t.string, t.union([t.string, t.number]));
 
@@ -59,6 +67,11 @@ const metaSchema = t.partial({
   }),
 });
 
+const remoteSchema = t.type({
+  remoteName: t.string,
+  kibanaUrl: t.string,
+});
+
 const groupSummarySchema = t.type({
   total: t.number,
   worst: t.type({
@@ -68,6 +81,7 @@ const groupSummarySchema = t.type({
       id: t.string,
       instanceId: t.string,
       name: t.string,
+      groupings: t.record(t.string, t.unknown),
     }),
   }),
   violated: t.number,
@@ -76,57 +90,10 @@ const groupSummarySchema = t.type({
   noData: t.number,
 });
 
-const historicalSummarySchema = t.intersection([
-  t.type({
-    date: dateType,
-  }),
-  summarySchema,
-]);
-
-const previewDataSchema = t.intersection([
-  t.type({
-    date: dateType,
-    sliValue: t.number,
-  }),
-  t.partial({
-    events: t.type({
-      good: t.number,
-      bad: t.number,
-      total: t.number,
-    }),
-  }),
-]);
-
-const dateRangeSchema = t.type({ from: dateType, to: dateType });
-
-const kqlQuerySchema = t.string;
-
-const kqlWithFiltersSchema = t.type({
-  kqlQuery: t.string,
-  filters: t.array(
-    t.type({
-      meta: t.partial({
-        alias: t.union([t.string, t.null]),
-        disabled: t.boolean,
-        negate: t.boolean,
-        // controlledBy is there to identify who owns the filter
-        controlledBy: t.string,
-        // allows grouping of filters
-        group: t.string,
-        // index and type are optional only because when you create a new filter, there are no defaults
-        index: t.string,
-        isMultiIndex: t.boolean,
-        type: t.string,
-        key: t.string,
-        params: t.any,
-        value: t.string,
-      }),
-      query: t.record(t.string, t.any),
-    })
-  ),
+const dateRangeSchema = t.type({
+  from: dateType,
+  to: dateType,
 });
-
-const querySchema = t.union([kqlQuerySchema, kqlWithFiltersSchema]);
 
 export {
   ALL_VALUE,
@@ -136,13 +103,9 @@ export {
   dateType,
   errorBudgetSchema,
   groupingsSchema,
-  historicalSummarySchema,
-  previewDataSchema,
   statusSchema,
   summarySchema,
   metaSchema,
   groupSummarySchema,
-  kqlWithFiltersSchema,
-  querySchema,
-  kqlQuerySchema,
+  remoteSchema,
 };

@@ -8,6 +8,7 @@
 import type { CasesPublicSetup } from '@kbn/cases-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { registerAnomalyChartsCasesAttachment } from './register_anomaly_charts_attachment';
+import { registerSingleMetricViewerCasesAttachment } from './register_single_metric_viewer_attachment';
 import type { MlStartDependencies } from '../plugin';
 import { registerAnomalySwimLaneCasesAttachment } from './register_anomaly_swim_lane_attachment';
 
@@ -16,6 +17,7 @@ export function registerCasesAttachments(
   coreStart: CoreStart,
   pluginStart: MlStartDependencies
 ) {
-  registerAnomalySwimLaneCasesAttachment(cases, coreStart, pluginStart);
+  registerAnomalySwimLaneCasesAttachment(cases, pluginStart);
   registerAnomalyChartsCasesAttachment(cases, coreStart, pluginStart);
+  registerSingleMetricViewerCasesAttachment(cases, coreStart, pluginStart);
 }

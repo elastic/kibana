@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -21,7 +22,6 @@ import {
   EuiSpacer,
   EuiText,
   EuiToolTip,
-  EuiBadge,
   withEuiTheme,
   EuiTextColor,
   EuiLink,
@@ -243,14 +243,9 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
       <div>
         <EuiPopoverTitle paddingSize="s">
           <EuiFlexGroup alignItems="baseline" responsive={false}>
-            <EuiFlexGroup gutterSize="s">
+            <EuiFlexItem>
               {this.props.mode === 'add' ? strings.getPanelTitleAdd() : strings.getPanelTitleEdit()}
-              <EuiBadge color="hollow">
-                {i18n.translate('unifiedSearch.filter.filterEditor.experimentalLabel', {
-                  defaultMessage: 'Technical preview',
-                })}
-              </EuiBadge>
-            </EuiFlexGroup>
+            </EuiFlexItem>
             <EuiFlexItem grow={false} className="filterEditor__hiddenItem" />
             {toggleEditorFlexItem}
           </EuiFlexGroup>

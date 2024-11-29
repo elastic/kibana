@@ -6,14 +6,16 @@
  */
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { AlertConsumers } from '@kbn/rule-data-utils';
+import { AlertConsumers, ALERT_RULE_PRODUCER } from '@kbn/rule-data-utils';
 import { BrushEndListener, type XYBrushEvent } from '@elastic/charts';
 import { useSummaryTimeRange } from '@kbn/observability-plugin/public';
+import { useBoolean } from '@kbn/react-hooks';
+import type { TimeRange } from '@kbn/es-query';
 import { useKibanaContextForPlugin } from '../../../../../../hooks/use_kibana';
 import { HeightRetainer } from '../../../../../../components/height_retainer';
 import { useUnifiedSearchContext } from '../../../hooks/use_unified_search';
 import { useAlertsQuery } from '../../../hooks/use_alerts_query';
-import { HostsState, HostsStateUpdater } from '../../../hooks/use_unified_search_url_state';
+import type { HostsState } from '../../../hooks/use_unified_search_url_state';
 import { AlertsEsQuery } from '../../../../../../utils/filters/create_alerts_es_query';
 import {
   ALERTS_PER_PAGE,
@@ -21,13 +23,20 @@ import {
   infraAlertFeatureIds,
 } from '../../../../../../components/shared/alerts/constants';
 import AlertsStatusFilter from '../../../../../../components/shared/alerts/alerts_status_filter';
+import { CreateAlertRuleButton } from '../../../../../../components/shared/alerts/links/create_alert_rule_button';
+import { LinkToAlertsPage } from '../../../../../../components/shared/alerts/links/link_to_alerts_page';
+import { INFRA_ALERT_FEATURE_ID } from '../../../../../../../common/constants';
+import { AlertFlyout } from '../../../../../../alerting/inventory/components/alert_flyout';
+import { usePluginConfig } from '../../../../../../containers/plugin_config_context';
 
 export const AlertsTabContent = () => {
   const { services } = useKibanaContextForPlugin();
+  const { featureFlags } = usePluginConfig();
 
   const { alertStatus, setAlertStatus, alertsEsQueryByStatus } = useAlertsQuery();
+  const [isAlertFlyoutVisible, { toggle: toggleAlertFlyout }] = useBoolean(false);
 
-  const { onSubmit, searchCriteria } = useUnifiedSearchContext();
+  const { onDateRangeChange, searchCriteria } = useUnifiedSearchContext();
 
   const { triggersActionsUi } = services;
 
@@ -41,12 +50,29 @@ export const AlertsTabContent = () => {
           <EuiFlexItem grow={false}>
             <AlertsStatusFilter onChange={setAlertStatus} status={alertStatus} />
           </EuiFlexItem>
+          <EuiFlexGroup alignItems="center" justifyContent="flexEnd" responsive={false}>
+            {featureFlags.inventoryThresholdAlertRuleEnabled && (
+              <EuiFlexItem grow={false}>
+                <CreateAlertRuleButton
+                  onClick={toggleAlertFlyout}
+                  data-test-subj="infraHostAlertsTabCreateAlertsRuleButton"
+                />
+              </EuiFlexItem>
+            )}
+            <EuiFlexItem grow={false}>
+              <LinkToAlertsPage
+                dateRange={searchCriteria.dateRange}
+                data-test-subj="infraHostAlertsTabAlertsShowAllButton"
+                kuery={`${ALERT_RULE_PRODUCER}: ${INFRA_ALERT_FEATURE_ID}`}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexGroup>
         <EuiFlexItem>
           <MemoAlertSummaryWidget
             alertsQuery={alertsEsQueryByStatus}
             dateRange={searchCriteria.dateRange}
-            onRangeSelection={onSubmit}
+            onRangeSelection={onDateRangeChange}
           />
         </EuiFlexItem>
         {alertsEsQueryByStatus && (
@@ -56,13 +82,20 @@ export const AlertsTabContent = () => {
               configurationId={AlertConsumers.OBSERVABILITY}
               featureIds={infraAlertFeatureIds}
               id={ALERTS_TABLE_ID}
-              pageSize={ALERTS_PER_PAGE}
+              initialPageSize={ALERTS_PER_PAGE}
               query={alertsEsQueryByStatus}
               showAlertStatusWithFlapping
             />
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
+      {featureFlags.inventoryThresholdAlertRuleEnabled && (
+        <AlertFlyout
+          nodeType="host"
+          setVisible={toggleAlertFlyout}
+          visible={isAlertFlyoutVisible}
+        />
+      )}
     </HeightRetainer>
   );
 };
@@ -70,7 +103,7 @@ export const AlertsTabContent = () => {
 interface MemoAlertSummaryWidgetProps {
   alertsQuery: AlertsEsQuery;
   dateRange: HostsState['dateRange'];
-  onRangeSelection: HostsStateUpdater;
+  onRangeSelection: (dateRange: TimeRange) => void;
 }
 
 const MemoAlertSummaryWidget = React.memo(
@@ -90,7 +123,7 @@ const MemoAlertSummaryWidget = React.memo(
         const from = new Date(start).toISOString();
         const to = new Date(end).toISOString();
 
-        onRangeSelection({ dateRange: { from, to } });
+        onRangeSelection({ from, to });
       }
     };
 

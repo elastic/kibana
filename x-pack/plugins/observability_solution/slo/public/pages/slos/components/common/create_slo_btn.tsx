@@ -8,9 +8,9 @@
 import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useKibana } from '../../../../utils/kibana_react';
+import { useKibana } from '../../../../hooks/use_kibana';
 import { paths } from '../../../../../common/locators/paths';
-import { useCapabilities } from '../../../../hooks/use_capabilities';
+import { usePermissions } from '../../../../hooks/use_permissions';
 
 export function CreateSloBtn() {
   const {
@@ -18,7 +18,7 @@ export function CreateSloBtn() {
     http: { basePath },
   } = useKibana().services;
 
-  const { hasWriteCapabilities } = useCapabilities();
+  const { data: permissions } = usePermissions();
 
   const handleClickCreateSlo = () => {
     navigateToUrl(basePath.prepend(paths.sloCreate));
@@ -27,7 +27,7 @@ export function CreateSloBtn() {
     <EuiButton
       color="primary"
       data-test-subj="slosPageCreateNewSloButton"
-      disabled={!hasWriteCapabilities}
+      disabled={!permissions?.hasAllWriteRequested}
       fill
       onClick={handleClickCreateSlo}
     >

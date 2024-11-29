@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
+import { EventFiltersProcessDescendantIndicator } from '../../../../components/artifact_entry_card/components/card_decorators/event_filters_process_descendant_indicator';
 import { UnsavedChangesConfirmModal } from './unsaved_changes_confirm_modal';
 import { useLicense } from '../../../../../common/hooks/use_license';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
@@ -57,6 +58,7 @@ import { SEARCHABLE_FIELDS as EVENT_FILTERS_SEARCHABLE_FIELDS } from '../../../e
 import { SEARCHABLE_FIELDS as HOST_ISOLATION_EXCEPTIONS_SEARCHABLE_FIELDS } from '../../../host_isolation_exceptions/constants';
 import { SEARCHABLE_FIELDS as BLOCKLISTS_SEARCHABLE_FIELDS } from '../../../blocklist/constants';
 import type { PolicyDetailsRouteState } from '../../../../../../common/endpoint/types';
+import { useHostIsolationExceptionsAccess } from '../../../../hooks/artifacts/use_host_isolation_exceptions_access';
 
 enum PolicyTabKeys {
   SETTINGS = 'settings',
@@ -117,11 +119,12 @@ export const PolicyTabs = React.memo(() => {
     canWriteTrustedApplications,
     canReadEventFilters,
     canWriteEventFilters,
+    canAccessHostIsolationExceptions,
     canReadHostIsolationExceptions,
     canWriteHostIsolationExceptions,
     canReadBlocklist,
     canWriteBlocklist,
-    loading: privilegesLoading,
+    loading: isPrivilegesLoading,
   } = useUserPrivileges().endpointPrivileges;
   const { state: routeState = {} } = useLocation<PolicyDetailsRouteState>();
 
@@ -130,12 +133,34 @@ export const PolicyTabs = React.memo(() => {
   );
   const isEnterprise = useLicense().isEnterprise();
   const isProtectionUpdatesEnabled = isEnterprise && isProtectionUpdatesFeatureEnabled;
+
+  const getHostIsolationExceptionsApiClientInstance = useCallback(
+    () => HostIsolationExceptionsApiClient.getInstance(http),
+    [http]
+  );
+
+  const { hasAccessToHostIsolationExceptions, isHostIsolationExceptionsAccessLoading } =
+    useHostIsolationExceptionsAccess(
+      canAccessHostIsolationExceptions,
+      canReadHostIsolationExceptions,
+      getHostIsolationExceptionsApiClientInstance
+    );
+
   // move the user out of this route if they can't access it
   useEffect(() => {
+    if (isHostIsolationExceptionsAccessLoading || isPrivilegesLoading) {
+      return;
+    }
+
+    const redirectHostIsolationException =
+      isInHostIsolationExceptionsTab &&
+      (!canReadHostIsolationExceptions ||
+        (!isHostIsolationExceptionsAccessLoading && !hasAccessToHostIsolationExceptions));
+
     if (
       (isInTrustedAppsTab && !canReadTrustedApplications) ||
       (isInEventFiltersTab && !canReadEventFilters) ||
-      (isInHostIsolationExceptionsTab && !canReadHostIsolationExceptions) ||
+      redirectHostIsolationException ||
       (isInBlocklistsTab && !canReadBlocklist)
     ) {
       history.replace(getPolicyDetailPath(policyId));
@@ -151,12 +176,15 @@ export const PolicyTabs = React.memo(() => {
     canReadEventFilters,
     canReadHostIsolationExceptions,
     canReadTrustedApplications,
+    hasAccessToHostIsolationExceptions,
     history,
+    isHostIsolationExceptionsAccessLoading,
     isInBlocklistsTab,
     isInEventFiltersTab,
     isInHostIsolationExceptionsTab,
     isInProtectionUpdatesTab,
     isInTrustedAppsTab,
+    isPrivilegesLoading,
     policyId,
     toasts,
   ]);
@@ -168,11 +196,6 @@ export const PolicyTabs = React.memo(() => {
 
   const getEventFiltersApiClientInstance = useCallback(
     () => EventFiltersApiClient.getInstance(http),
-    [http]
-  );
-
-  const getHostIsolationExceptionsApiClientInstance = useCallback(
-    () => HostIsolationExceptionsApiClient.getInstance(http),
     [http]
   );
 
@@ -290,13 +313,14 @@ export const PolicyTabs = React.memo(() => {
                   getArtifactPath={getEventFiltersListPath}
                   getPolicyArtifactsPath={getPolicyEventFiltersPath}
                   canWriteArtifact={canWriteEventFilters}
+                  CardDecorator={EventFiltersProcessDescendantIndicator}
                 />
               </>
             ),
             'data-test-subj': 'policyEventFiltersTab',
           }
         : undefined,
-      [PolicyTabKeys.HOST_ISOLATION_EXCEPTIONS]: canReadHostIsolationExceptions
+      [PolicyTabKeys.HOST_ISOLATION_EXCEPTIONS]: hasAccessToHostIsolationExceptions
         ? {
             id: PolicyTabKeys.HOST_ISOLATION_EXCEPTIONS,
             name: i18n.translate(
@@ -377,7 +401,7 @@ export const PolicyTabs = React.memo(() => {
     canReadEventFilters,
     getEventFiltersApiClientInstance,
     canWriteEventFilters,
-    canReadHostIsolationExceptions,
+    hasAccessToHostIsolationExceptions,
     getHostIsolationExceptionsApiClientInstance,
     canWriteHostIsolationExceptions,
     canReadBlocklist,
@@ -457,7 +481,7 @@ export const PolicyTabs = React.memo(() => {
       cancelUnsavedChangesModal,
       history,
       policyId,
-      routeState.backLink,
+      routeState?.backLink,
       unsavedChangesModal.showModal,
     ]
   );
@@ -483,7 +507,7 @@ export const PolicyTabs = React.memo(() => {
   }, [changeTab, unsavedChangesModal.nextTab]);
 
   // show loader for privileges validation
-  if (privilegesLoading) {
+  if (isPrivilegesLoading || isHostIsolationExceptionsAccessLoading) {
     return <ManagementPageLoader data-test-subj="privilegesLoading" />;
   }
 

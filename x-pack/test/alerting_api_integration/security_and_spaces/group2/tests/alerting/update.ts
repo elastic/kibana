@@ -7,8 +7,12 @@
 
 import expect from '@kbn/expect';
 import { Response as SupertestResponse } from 'supertest';
-import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
-import { UserAtSpaceScenarios } from '../../../scenarios';
+import { RuleNotifyWhen, RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
+import { RawRule } from '@kbn/alerting-plugin/server/types';
+import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import { SavedObject } from '@kbn/core-saved-objects-api-server';
+import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
+import { SuperuserAtSpace1, systemActionScenario, UserAtSpaceScenarios } from '../../../scenarios';
 import {
   checkAAD,
   getUrlPrefix,
@@ -24,6 +28,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const retry = getService('retry');
+  const es = getService('es');
 
   function getAlertingTaskById(taskId: string) {
     return supertest
@@ -37,7 +42,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
 
     after(() => objectRemover.removeAll());
 
-    for (const scenario of UserAtSpaceScenarios) {
+    for (const scenario of [...UserAtSpaceScenarios, systemActionScenario]) {
       const { user, space } = scenario;
       describe(scenario.id, () => {
         it('should handle update alert request appropriately', async () => {
@@ -75,6 +80,10 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             ],
             throttle: '1m',
             notify_when: 'onThrottleInterval',
+            flapping: {
+              look_back_window: 10,
+              status_change_threshold: 10,
+            },
           };
           const response = await supertestWithoutAuth
             .put(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdAlert.id}`)
@@ -104,6 +113,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             case 'superuser at space1':
             case 'space_1_all at space1':
             case 'space_1_all_with_restricted_fixture at space1':
+            case 'system_actions at space1':
               expect(response.statusCode).to.eql(200);
               expect(response.body).to.eql({
                 ...updatedData,
@@ -132,6 +142,10 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
                 updated_at: response.body.updated_at,
                 execution_status: response.body.execution_status,
                 revision: 1,
+                flapping: {
+                  look_back_window: 10,
+                  status_change_threshold: 10,
+                },
                 ...(response.body.next_run ? { next_run: response.body.next_run } : {}),
                 ...(response.body.last_run ? { last_run: response.body.last_run } : {}),
               });
@@ -179,6 +193,10 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             actions: [],
             throttle: '1m',
             notify_when: 'onThrottleInterval',
+            flapping: {
+              look_back_window: 10,
+              status_change_threshold: 10,
+            },
           };
           const response = await supertestWithoutAuth
             .put(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdAlert.id}`)
@@ -205,6 +223,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               break;
             case 'superuser at space1':
             case 'space_1_all_with_restricted_fixture at space1':
+            case 'system_actions at space1':
               expect(response.statusCode).to.eql(200);
               expect(response.body).to.eql({
                 ...updatedData,
@@ -224,6 +243,10 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
                 updated_at: response.body.updated_at,
                 execution_status: response.body.execution_status,
                 revision: 1,
+                flapping: {
+                  look_back_window: 10,
+                  status_change_threshold: 10,
+                },
                 ...(response.body.next_run ? { next_run: response.body.next_run } : {}),
                 ...(response.body.last_run ? { last_run: response.body.last_run } : {}),
               });
@@ -271,6 +294,10 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             actions: [],
             throttle: '1m',
             notify_when: 'onThrottleInterval',
+            flapping: {
+              look_back_window: 10,
+              status_change_threshold: 10,
+            },
           };
           const response = await supertestWithoutAuth
             .put(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdAlert.id}`)
@@ -297,6 +324,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             case 'space_1_all_alerts_none_actions at space1':
             case 'superuser at space1':
             case 'space_1_all_with_restricted_fixture at space1':
+            case 'system_actions at space1':
               expect(response.statusCode).to.eql(200);
               expect(response.body).to.eql({
                 ...updatedData,
@@ -316,6 +344,10 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
                 updated_at: response.body.updated_at,
                 execution_status: response.body.execution_status,
                 revision: 1,
+                flapping: {
+                  look_back_window: 10,
+                  status_change_threshold: 10,
+                },
                 ...(response.body.next_run ? { next_run: response.body.next_run } : {}),
                 ...(response.body.last_run ? { last_run: response.body.last_run } : {}),
               });
@@ -363,6 +395,10 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             actions: [],
             throttle: '1m',
             notify_when: 'onThrottleInterval',
+            flapping: {
+              look_back_window: 10,
+              status_change_threshold: 10,
+            },
           };
           const response = await supertestWithoutAuth
             .put(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdAlert.id}`)
@@ -396,6 +432,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               break;
             case 'superuser at space1':
             case 'space_1_all_with_restricted_fixture at space1':
+            case 'system_actions at space1':
               expect(response.statusCode).to.eql(200);
               expect(response.body).to.eql({
                 ...updatedData,
@@ -415,6 +452,10 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
                 updated_at: response.body.updated_at,
                 execution_status: response.body.execution_status,
                 revision: 1,
+                flapping: {
+                  look_back_window: 10,
+                  status_change_threshold: 10,
+                },
                 ...(response.body.next_run ? { next_run: response.body.next_run } : {}),
                 ...(response.body.last_run ? { last_run: response.body.last_run } : {}),
               });
@@ -471,6 +512,10 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             actions: [],
             throttle: '1m',
             notify_when: 'onThrottleInterval',
+            flapping: {
+              look_back_window: 10,
+              status_change_threshold: 10,
+            },
           };
           const response = await supertestWithoutAuth
             .put(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdAlert.id}`)
@@ -493,6 +538,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             case 'space_1_all at space1':
             case 'space_1_all_alerts_none_actions at space1':
             case 'space_1_all_with_restricted_fixture at space1':
+            case 'system_actions at space1':
               expect(response.statusCode).to.eql(200);
               expect(response.body).to.eql({
                 ...updatedData,
@@ -512,6 +558,10 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
                 updated_at: response.body.updated_at,
                 execution_status: response.body.execution_status,
                 revision: 1,
+                flapping: {
+                  look_back_window: 10,
+                  status_change_threshold: 10,
+                },
                 ...(response.body.next_run ? { next_run: response.body.next_run } : {}),
                 ...(response.body.last_run ? { last_run: response.body.last_run } : {}),
               });
@@ -554,6 +604,10 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             actions: [],
             throttle: '1m',
             notify_when: 'onActiveAlert',
+            flapping: {
+              look_back_window: 10,
+              status_change_threshold: 10,
+            },
           };
           const response = await supertestWithoutAuth
             .put(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdAlert.id}`)
@@ -576,6 +630,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             case 'space_1_all at space1':
             case 'space_1_all_alerts_none_actions at space1':
             case 'space_1_all_with_restricted_fixture at space1':
+            case 'system_actions at space1':
               expect(response.statusCode).to.eql(200);
               expect(response.body.name).to.eql(' leading and trailing whitespace ');
               break;
@@ -617,6 +672,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             case 'space_1_all_alerts_none_actions at space1':
             case 'space_1_all_with_restricted_fixture at space1':
             case 'superuser at space1':
+            case 'system_actions at space1':
               expect(response.body).to.eql({
                 statusCode: 404,
                 error: 'Not Found',
@@ -661,6 +717,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             case 'space_1_all at space1':
             case 'space_1_all_alerts_none_actions at space1':
             case 'space_1_all_with_restricted_fixture at space1':
+            case 'system_actions at space1':
               expect(response.statusCode).to.eql(400);
               expect(response.body).to.eql({
                 statusCode: 400,
@@ -688,6 +745,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             case 'space_1_all at space1':
             case 'space_1_all_alerts_none_actions at space1':
             case 'space_1_all_with_restricted_fixture at space1':
+            case 'system_actions at space1':
               expect(response.statusCode).to.eql(400);
               expect(response.body).to.eql({
                 statusCode: 400,
@@ -744,6 +802,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             case 'space_1_all at space1':
             case 'space_1_all_alerts_none_actions at space1':
             case 'space_1_all_with_restricted_fixture at space1':
+            case 'system_actions at space1':
               expect(response.statusCode).to.eql(400);
               expect(response.body).to.eql({
                 statusCode: 400,
@@ -778,6 +837,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             case 'space_1_all at space1':
             case 'space_1_all_alerts_none_actions at space1':
             case 'space_1_all_with_restricted_fixture at space1':
+            case 'system_actions at space1':
               expect(response.statusCode).to.eql(400);
               expect(response.body).to.eql({
                 statusCode: 400,
@@ -841,6 +901,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             case 'space_1_all at space1':
             case 'space_1_all_alerts_none_actions at space1':
             case 'space_1_all_with_restricted_fixture at space1':
+            case 'system_actions at space1':
               expect(response.statusCode).to.eql(200);
               await retry.try(async () => {
                 const alertTask = (await getAlertingTaskById(createdAlert.scheduled_task_id))
@@ -856,7 +917,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
         });
 
         it('should handle updates for a long running alert type without failing the underlying tasks due to invalidated ApiKey', async () => {
-          const { body: createdAlert } = await supertest
+          const { body: createdRule } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send({
@@ -872,7 +933,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               notify_when: 'onThrottleInterval',
             })
             .expect(200);
-          objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
+          objectRemover.add(space.id, createdRule.id, 'rule', 'alerting');
           const updatedData = {
             name: 'bcd',
             tags: ['bar'],
@@ -884,15 +945,23 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             throttle: '1m',
             notify_when: 'onThrottleInterval',
           };
+
+          // Update the rule which should invalidate the first API key
           const response = await supertestWithoutAuth
-            .put(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdAlert.id}`)
+            .put(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdRule.id}`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
             .send(updatedData);
 
+          // Invoke the invalidate API key task
+          await supertest
+            .post('/api/alerts_fixture/api_key_invalidation/_run_soon')
+            .set('kbn-xsrf', 'xxx')
+            .expect(200);
+
           const statusUpdates: string[] = [];
           await retry.try(async () => {
-            const alertTask = (await getAlertingTaskById(createdAlert.scheduled_task_id)).docs[0];
+            const alertTask = (await getAlertingTaskById(createdRule.scheduled_task_id)).docs[0];
             statusUpdates.push(alertTask.status);
             expect(alertTask.status).to.eql('idle');
           });
@@ -914,9 +983,10 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             case 'space_1_all at space1':
             case 'space_1_all_alerts_none_actions at space1':
             case 'space_1_all_with_restricted_fixture at space1':
+            case 'system_actions at space1':
               expect(response.statusCode).to.eql(200);
               await retry.try(async () => {
-                const alertTask = (await getAlertingTaskById(createdAlert.scheduled_task_id))
+                const alertTask = (await getAlertingTaskById(createdRule.scheduled_task_id))
                   .docs[0];
                 expect(alertTask.status).to.eql('idle');
                 // ensure the alert is rescheduled to a minute from now
@@ -978,6 +1048,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             case 'space_1_all at space1':
             case 'space_1_all_alerts_none_actions at space1':
             case 'space_1_all_with_restricted_fixture at space1':
+            case 'system_actions at space1':
               expect(response.statusCode).to.eql(200);
               await retry.try(async () => {
                 const alertTask = (await getAlertingTaskById(createdAlert.scheduled_task_id))
@@ -990,7 +1061,362 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
           }
         });
+
+        it('should handle create alert request appropriately with system actions', async () => {
+          const connectorId = 'system-connector-test.system-action-kibana-privileges';
+          const reference = `actions-enqueue-${scenario.id}:${space.id}:${connectorId}`;
+
+          const systemActionWithKibanaPrivileges = {
+            id: connectorId,
+            group: 'default',
+            params: { index: ES_TEST_INDEX_NAME, reference },
+          };
+
+          const { body: createdAlert } = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
+            .set('kbn-xsrf', 'foo')
+            .send(getTestRuleData())
+            .expect(200);
+
+          objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
+
+          const updatedData = {
+            name: 'bcd',
+            tags: ['bar'],
+            params: {
+              foo: true,
+            },
+            schedule: { interval: '12s' },
+            actions: [systemActionWithKibanaPrivileges],
+            throttle: '1m',
+            notify_when: 'onThrottleInterval',
+          };
+
+          const response = await supertestWithoutAuth
+            .put(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdAlert.id}`)
+            .set('kbn-xsrf', 'foo')
+            .auth(user.username, user.password)
+            .send(updatedData);
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'global_read at space1':
+            case 'space_1_all at space2':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: getUnauthorizedErrorMessage('update', 'test.noop', 'alertsFixture'),
+                statusCode: 403,
+              });
+              break;
+            case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: 'Unauthorized to execute actions',
+                statusCode: 403,
+              });
+              break;
+            case 'space_1_all_alerts_none_actions at space1':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: `Unauthorized to get actions`,
+                statusCode: 403,
+              });
+              break;
+            case 'superuser at space1':
+            case 'system_actions at space1':
+              expect(response.statusCode).to.eql(200);
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
       });
     }
+
+    describe('Actions', () => {
+      const { user, space } = SuperuserAtSpace1;
+
+      it('should update a rule with actions correctly', async () => {
+        const { body: createdAction } = await supertest
+          .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: 'MY action',
+            connector_type_id: 'test.noop',
+            config: {},
+            secrets: {},
+          })
+          .expect(200);
+
+        const { body: createdRule } = await supertest
+          .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(getTestRuleData())
+          .expect(200);
+
+        const updateResponse = await supertestWithoutAuth
+          .put(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdRule.id}`)
+          .set('kbn-xsrf', 'foo')
+          .auth(user.username, user.password)
+          .send({
+            name: 'bcd',
+            tags: ['bar'],
+            params: {
+              foo: true,
+            },
+            schedule: { interval: '12s' },
+            throttle: '1m',
+            notify_when: 'onThrottleInterval',
+            actions: [
+              {
+                id: createdAction.id,
+                group: 'default',
+                params: {},
+              },
+              {
+                id: 'system-connector-test.system-action',
+                params: {},
+              },
+            ],
+          })
+          .expect(200);
+
+        objectRemover.add(space.id, updateResponse.body.id, 'rule', 'alerting');
+
+        const action = updateResponse.body.actions[0];
+        const systemAction = updateResponse.body.actions[1];
+        const { uuid, ...restAction } = action;
+        const { uuid: systemActionUuid, ...restSystemAction } = systemAction;
+
+        expect([restAction, restSystemAction]).to.eql([
+          {
+            id: createdAction.id,
+            connector_type_id: 'test.noop',
+            group: 'default',
+            params: {},
+          },
+          {
+            id: 'system-connector-test.system-action',
+            connector_type_id: 'test.system-action',
+            params: {},
+          },
+          ,
+        ]);
+
+        const esResponse = await es.get<SavedObject<RawRule>>(
+          {
+            index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+            id: `alert:${updateResponse.body.id}`,
+          },
+          { meta: true }
+        );
+
+        expect(esResponse.statusCode).to.eql(200);
+        expect((esResponse.body._source as any)?.alert.systemActions).to.be(undefined);
+        const rawActions = (esResponse.body._source as any)?.alert.actions ?? [];
+
+        const rawAction = rawActions[0];
+        const rawSystemAction = rawActions[1];
+
+        const { uuid: rawActionUuid, ...rawActionRest } = rawAction;
+        const { uuid: rawSystemActionUuid, ...rawSystemActionRest } = rawSystemAction;
+
+        expect(rawActionRest).to.eql({
+          actionRef: 'action_0',
+          actionTypeId: 'test.noop',
+          params: {},
+          group: 'default',
+        });
+
+        expect(rawSystemActionRest).to.eql({
+          actionRef: 'system_action:system-connector-test.system-action',
+          actionTypeId: 'test.system-action',
+          params: {},
+        });
+
+        expect(rawActionUuid).to.not.be(undefined);
+        expect(rawSystemActionUuid).to.not.be(undefined);
+      });
+
+      it('should throw 400 if the system action is missing required params', async () => {
+        const { body: createdRule } = await supertest
+          .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(getTestRuleData())
+          .expect(200);
+
+        objectRemover.add(space.id, createdRule.id, 'rule', 'alerting');
+
+        await supertestWithoutAuth
+          .put(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdRule.id}`)
+          .set('kbn-xsrf', 'foo')
+          .auth(user.username, user.password)
+          .send({
+            name: 'bcd',
+            tags: ['bar'],
+            params: {
+              foo: true,
+            },
+            schedule: { interval: '12s' },
+            throttle: '1m',
+            notify_when: 'onThrottleInterval',
+            actions: [
+              {
+                params: {},
+              },
+            ],
+          })
+          .expect(400);
+      });
+
+      it('strips out properties from system actions that are part of the default actions', async () => {
+        const { body: createdRule } = await supertest
+          .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(getTestRuleData())
+          .expect(200);
+
+        objectRemover.add(space.id, createdRule.id, 'rule', 'alerting');
+
+        for (const propertyToAdd of [
+          { group: 'default' },
+          {
+            frequency: {
+              summary: false,
+              throttle: '1s',
+              notify_when: RuleNotifyWhen.THROTTLE,
+            },
+          },
+          {
+            alerts_filter: {
+              query: { kql: 'kibana.alert.rule.name:abc', filters: [] },
+            },
+          },
+        ]) {
+          const updateResponse = await supertestWithoutAuth
+            .put(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdRule.id}`)
+            .set('kbn-xsrf', 'foo')
+            .auth(user.username, user.password)
+            .send({
+              name: 'bcd',
+              tags: ['bar'],
+              params: {
+                foo: true,
+              },
+              schedule: { interval: '12s' },
+              throttle: '1m',
+              notify_when: 'onThrottleInterval',
+              actions: [
+                {
+                  id: 'system-connector-test.system-action',
+                  params: {},
+                  ...propertyToAdd,
+                },
+              ],
+            })
+            .expect(200);
+
+          expect(updateResponse.body.actions[0][Object.keys(propertyToAdd)[0]]).to.be(undefined);
+
+          const esResponse = await es.get<SavedObject<RawRule>>(
+            {
+              index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+              id: `alert:${updateResponse.body.id}`,
+            },
+            { meta: true }
+          );
+
+          expect(esResponse.statusCode).to.eql(200);
+          expect((esResponse.body._source as any)?.alert.systemActions).to.be(undefined);
+
+          const rawActions = (esResponse.body._source as any)?.alert.actions ?? [];
+          expect(rawActions[0][Object.keys(propertyToAdd)[0]]).to.be(undefined);
+        }
+      });
+
+      it('should throw 400 when using the same system action twice', async () => {
+        const { body: createdRule } = await supertest
+          .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(getTestRuleData())
+          .expect(200);
+
+        objectRemover.add(space.id, createdRule.id, 'rule', 'alerting');
+
+        await supertestWithoutAuth
+          .put(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdRule.id}`)
+          .set('kbn-xsrf', 'foo')
+          .auth(user.username, user.password)
+          .send({
+            name: 'bcd',
+            tags: ['bar'],
+            params: {
+              foo: true,
+            },
+            schedule: { interval: '12s' },
+            throttle: '1m',
+            notify_when: 'onThrottleInterval',
+            actions: [
+              {
+                id: 'system-connector-test.system-action',
+                params: {},
+              },
+              {
+                id: 'system-connector-test.system-action',
+                params: {},
+              },
+            ],
+          })
+          .expect(400);
+      });
+
+      it('should not allow creating a default action without group', async () => {
+        const { body: createdAction } = await supertest
+          .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: 'MY action',
+            connector_type_id: 'test.noop',
+            config: {},
+            secrets: {},
+          })
+          .expect(200);
+
+        const { body: createdRule } = await supertest
+          .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(getTestRuleData())
+          .expect(200);
+
+        objectRemover.add(space.id, createdRule.id, 'rule', 'alerting');
+
+        await supertestWithoutAuth
+          .put(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdRule.id}`)
+          .set('kbn-xsrf', 'foo')
+          .auth(user.username, user.password)
+          .send({
+            name: 'bcd',
+            tags: ['bar'],
+            params: {
+              foo: true,
+            },
+            schedule: { interval: '12s' },
+            throttle: '1m',
+            notify_when: 'onThrottleInterval',
+            actions: [
+              {
+                // group is missing
+                id: createdAction.id,
+                params: {},
+              },
+            ],
+          })
+          .expect(400);
+      });
+    });
   });
 }

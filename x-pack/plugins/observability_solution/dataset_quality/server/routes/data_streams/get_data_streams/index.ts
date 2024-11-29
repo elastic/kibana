@@ -6,21 +6,43 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { streamPartsToIndexPattern } from '../../../../common/utils';
 import { DataStreamType } from '../../../../common/types';
-import { dataStreamService } from '../../../services';
+import { dataStreamService, datasetQualityPrivileges } from '../../../services';
 
 export async function getDataStreams(options: {
   esClient: ElasticsearchClient;
-  type?: DataStreamType;
+  types?: DataStreamType[];
   datasetQuery?: string;
-  uncategorisedOnly: boolean;
+  uncategorisedOnly?: boolean;
 }) {
-  const { esClient, type, datasetQuery, uncategorisedOnly } = options;
+  const { esClient, types = [], datasetQuery, uncategorisedOnly } = options;
 
-  const allDataStreams = await dataStreamService.getMatchingDataStreams(esClient, {
-    type: type ?? '*',
-    dataset: datasetQuery ? `*${datasetQuery}*` : '*',
-  });
+  const datasetNames = datasetQuery
+    ? [datasetQuery]
+    : types.map((type) =>
+        streamPartsToIndexPattern({
+          typePattern: type,
+          datasetPattern: '*-*',
+        })
+      );
+
+  const datasetUserPrivileges = await datasetQualityPrivileges.getDatasetPrivileges(
+    esClient,
+    datasetNames.join(',')
+  );
+
+  if (!datasetUserPrivileges.canMonitor) {
+    return {
+      dataStreams: [],
+      datasetUserPrivileges,
+    };
+  }
+
+  const allDataStreams = await dataStreamService.getMatchingDataStreams(
+    esClient,
+    datasetNames.join(',')
+  );
 
   const filteredDataStreams = uncategorisedOnly
     ? allDataStreams.filter((stream) => {
@@ -28,12 +50,26 @@ export async function getDataStreams(options: {
       })
     : allDataStreams;
 
+  const dataStreamsPrivileges = filteredDataStreams.length
+    ? await datasetQualityPrivileges.getHasIndexPrivileges(
+        esClient,
+        filteredDataStreams.map(({ name }) => name),
+        ['monitor']
+      )
+    : {};
+
   const mappedDataStreams = filteredDataStreams.map((dataStream) => ({
     name: dataStream.name,
     integration: dataStream._meta?.package?.name,
+    // @ts-expect-error
+    lastActivity: dataStream.maximum_timestamp,
+    userPrivileges: {
+      canMonitor: dataStreamsPrivileges[dataStream.name],
+    },
   }));
 
   return {
-    items: mappedDataStreams,
+    dataStreams: mappedDataStreams,
+    datasetUserPrivileges,
   };
 }

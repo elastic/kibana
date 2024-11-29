@@ -7,32 +7,22 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/server';
+import { ConfigType, args } from '@kbn/screenshotting-server';
 import { getDataPath } from '@kbn/utils';
 import { spawn } from 'child_process';
 import del from 'del';
 import fs from 'fs';
 import { uniq } from 'lodash';
 import path from 'path';
-import puppeteer, { Browser, ConsoleMessage, Page, Viewport, PageEvents } from 'puppeteer';
+import puppeteer, { Browser, ConsoleMessage, Page, PageEvents, Viewport } from 'puppeteer';
 import { createInterface } from 'readline';
 import * as Rx from 'rxjs';
-import {
-  catchError,
-  concatMap,
-  ignoreElements,
-  mergeMap,
-  map,
-  reduce,
-  takeUntil,
-  tap,
-} from 'rxjs/operators';
-import { PerformanceMetrics } from '../../../../common/types';
+import { catchError, concatMap, ignoreElements, map, mergeMap, reduce, takeUntil, tap } from 'rxjs';
 import { getChromiumDisconnectedError } from '..';
 import { errors } from '../../../../common';
-import { ConfigType } from '../../../config';
+import { PerformanceMetrics } from '../../../../common/types';
 import { safeChildProcess } from '../../safe_child_process';
 import { HeadlessChromiumDriver } from '../driver';
-import { args } from './args';
 import { getMetrics } from './metrics';
 
 interface CreatePageOptions {
@@ -157,10 +147,10 @@ export class HeadlessChromiumDriverFactory {
         let browser: Browser | undefined;
         try {
           browser = await puppeteer.launch({
-            pipe: !this.config.browser.chromium.inspect,
+            pipe: true,
             userDataDir: this.userDataDir,
             executablePath: this.binaryPath,
-            ignoreHTTPSErrors: true,
+            acceptInsecureCerts: true,
             handleSIGHUP: false,
             args: chromiumArgs,
             defaultViewport: viewport,
@@ -235,7 +225,7 @@ export class HeadlessChromiumDriverFactory {
         observer.add(() => {
           if (page.isClosed()) return; // avoid emitting a log unnecessarily
           logger.debug(`It looks like the browser is no longer being used. Closing the browser...`);
-          childProcess.kill(); // ignore async
+          void childProcess.kill(); // ignore async
         });
 
         // make the observer subscribe to terminate$
@@ -281,7 +271,7 @@ export class HeadlessChromiumDriverFactory {
             logger.error(error);
           });
         });
-      })();
+      })().catch(() => {});
     });
   }
 

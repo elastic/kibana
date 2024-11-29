@@ -7,11 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { ValuesType } from 'utility-types';
-import type {
-  AsDuration,
-  AsPercent,
-  TimeUnitChar,
-} from '@kbn/observability-plugin/common';
+import type { AsDuration, AsPercent, TimeUnitChar } from '@kbn/observability-plugin/common';
 import type { ActionGroup } from '@kbn/alerting-plugin/common';
 import { formatDurationFromTimeUnitChar } from '@kbn/observability-plugin/common';
 import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
@@ -38,7 +34,7 @@ export enum AggregationType {
 
 export const THRESHOLD_MET_GROUP_ID = 'threshold_met';
 export type ThresholdMetActionGroupId = typeof THRESHOLD_MET_GROUP_ID;
-const THRESHOLD_MET_GROUP: ActionGroup<ThresholdMetActionGroupId> = {
+export const THRESHOLD_MET_GROUP: ActionGroup<ThresholdMetActionGroupId> = {
   id: THRESHOLD_MET_GROUP_ID,
   name: i18n.translate('xpack.apm.a.thresholdMet', {
     defaultMessage: 'Threshold met',
@@ -64,22 +60,13 @@ const getFieldNameLabel = (field: string): string => {
   }
 };
 
-export const getFieldValueLabel = (
-  field: string,
-  fieldValue: string
-): string => {
-  return field === SERVICE_ENVIRONMENT
-    ? getEnvironmentLabel(fieldValue)
-    : fieldValue;
+export const getFieldValueLabel = (field: string, fieldValue: string): string => {
+  return field === SERVICE_ENVIRONMENT ? getEnvironmentLabel(fieldValue) : fieldValue;
 };
 
 const formatGroupByFields = (groupByFields: Record<string, string>): string => {
   const groupByFieldLabels = Object.keys(groupByFields).map(
-    (field) =>
-      `${getFieldNameLabel(field)}: ${getFieldValueLabel(
-        field,
-        groupByFields[field]
-      )}`
+    (field) => `${getFieldNameLabel(field)}: ${getFieldValueLabel(field, groupByFields[field])}`
   );
   return groupByFieldLabels.join(', ');
 };
@@ -102,10 +89,7 @@ export function formatErrorCountReason({
     values: {
       threshold,
       measured,
-      interval: formatDurationFromTimeUnitChar(
-        windowSize,
-        windowUnit as TimeUnitChar
-      ),
+      interval: formatDurationFromTimeUnitChar(windowSize, windowUnit as TimeUnitChar),
       group: formatGroupByFields(groupByFields),
     },
   });
@@ -128,10 +112,8 @@ export function formatTransactionDurationReason({
   windowUnit: string;
   groupByFields: Record<string, string>;
 }) {
-  let aggregationTypeFormatted =
-    aggregationType.charAt(0).toUpperCase() + aggregationType.slice(1);
-  if (aggregationTypeFormatted === 'Avg')
-    aggregationTypeFormatted = aggregationTypeFormatted + '.';
+  let aggregationTypeFormatted = aggregationType.charAt(0).toUpperCase() + aggregationType.slice(1);
+  if (aggregationTypeFormatted === 'Avg') aggregationTypeFormatted = aggregationTypeFormatted + '.';
 
   return i18n.translate('xpack.apm.alertTypes.transactionDuration.reason', {
     defaultMessage: `{aggregationType} latency is {measured} in the last {interval} for {group}. Alert when > {threshold}.`,
@@ -139,10 +121,7 @@ export function formatTransactionDurationReason({
       threshold: asDuration(threshold),
       measured: asDuration(measured),
       aggregationType: aggregationTypeFormatted,
-      interval: formatDurationFromTimeUnitChar(
-        windowSize,
-        windowUnit as TimeUnitChar
-      ),
+      interval: formatDurationFromTimeUnitChar(windowSize, windowUnit as TimeUnitChar),
       group: formatGroupByFields(groupByFields),
     },
   });
@@ -168,10 +147,7 @@ export function formatTransactionErrorRateReason({
     values: {
       threshold: asPercent(threshold, 100),
       measured: asPercent(measured, 100),
-      interval: formatDurationFromTimeUnitChar(
-        windowSize,
-        windowUnit as TimeUnitChar
-      ),
+      interval: formatDurationFromTimeUnitChar(windowSize, windowUnit as TimeUnitChar),
       group: formatGroupByFields(groupByFields),
     },
   });
@@ -192,22 +168,16 @@ export function formatAnomalyReason({
   windowUnit: string;
   detectorType: AnomalyDetectorType;
 }) {
-  return i18n.translate(
-    'xpack.apm.alertTypes.transactionDurationAnomaly.reason',
-    {
-      defaultMessage: `{severityLevel} {detectorTypeLabel} anomaly with a score of {anomalyScore}, was detected in the last {interval} for {serviceName}.`,
-      values: {
-        serviceName,
-        severityLevel,
-        detectorTypeLabel: getApmMlDetectorLabel(detectorType),
-        anomalyScore,
-        interval: formatDurationFromTimeUnitChar(
-          windowSize,
-          windowUnit as TimeUnitChar
-        ),
-      },
-    }
-  );
+  return i18n.translate('xpack.apm.alertTypes.transactionDurationAnomaly.reason', {
+    defaultMessage: `{severityLevel} {detectorTypeLabel} anomaly with a score of {anomalyScore}, was detected in the last {interval} for {serviceName}.`,
+    values: {
+      serviceName,
+      severityLevel,
+      detectorTypeLabel: getApmMlDetectorLabel(detectorType),
+      anomalyScore,
+      interval: formatDurationFromTimeUnitChar(windowSize, windowUnit as TimeUnitChar),
+    },
+  });
 }
 
 export const RULE_TYPES_CONFIG: Record<
@@ -294,9 +264,7 @@ export const ANOMALY_ALERT_SEVERITY_TYPES = [
   },
 ] as const;
 
-export type AnomalyAlertSeverityType = ValuesType<
-  typeof ANOMALY_ALERT_SEVERITY_TYPES
->['type'];
+export type AnomalyAlertSeverityType = ValuesType<typeof ANOMALY_ALERT_SEVERITY_TYPES>['type'];
 
 export function getApmMlDetectorLabel(type: AnomalyDetectorType) {
   switch (type) {
@@ -305,19 +273,13 @@ export function getApmMlDetectorLabel(type: AnomalyDetectorType) {
         defaultMessage: 'latency',
       });
     case AnomalyDetectorType.txThroughput:
-      return i18n.translate(
-        'xpack.apm.alerts.anomalyDetector.throughputLabel',
-        {
-          defaultMessage: 'throughput',
-        }
-      );
+      return i18n.translate('xpack.apm.alerts.anomalyDetector.throughputLabel', {
+        defaultMessage: 'throughput',
+      });
     case AnomalyDetectorType.txFailureRate:
-      return i18n.translate(
-        'xpack.apm.alerts.anomalyDetector.failedTransactionRateLabel',
-        {
-          defaultMessage: 'failed transaction rate',
-        }
-      );
+      return i18n.translate('xpack.apm.alerts.anomalyDetector.failedTransactionRateLabel', {
+        defaultMessage: 'failed transaction rate',
+      });
   }
 }
 

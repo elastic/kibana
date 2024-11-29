@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { ANALYTICS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
@@ -14,6 +15,9 @@ import {
   SCHEMA_SEARCH_V8_8_0,
   SCHEMA_SEARCH_MODEL_VERSION_1,
   SCHEMA_SEARCH_MODEL_VERSION_2,
+  SCHEMA_SEARCH_MODEL_VERSION_3,
+  SCHEMA_SEARCH_MODEL_VERSION_4,
+  SCHEMA_SEARCH_MODEL_VERSION_5,
 } from './schema';
 
 export function getSavedSearchObjectType(
@@ -52,6 +56,27 @@ export function getSavedSearchObjectType(
         schemas: {
           forwardCompatibility: SCHEMA_SEARCH_MODEL_VERSION_2.extends({}, { unknowns: 'ignore' }),
           create: SCHEMA_SEARCH_MODEL_VERSION_2,
+        },
+      },
+      3: {
+        changes: [],
+        schemas: {
+          forwardCompatibility: SCHEMA_SEARCH_MODEL_VERSION_3.extends({}, { unknowns: 'ignore' }),
+          create: SCHEMA_SEARCH_MODEL_VERSION_3,
+        },
+      },
+      4: {
+        changes: [],
+        schemas: {
+          forwardCompatibility: SCHEMA_SEARCH_MODEL_VERSION_4.extends({}, { unknowns: 'ignore' }),
+          create: SCHEMA_SEARCH_MODEL_VERSION_4,
+        },
+      },
+      5: {
+        changes: [],
+        schemas: {
+          forwardCompatibility: SCHEMA_SEARCH_MODEL_VERSION_5.extends({}, { unknowns: 'ignore' }),
+          create: SCHEMA_SEARCH_MODEL_VERSION_5,
         },
       },
     },

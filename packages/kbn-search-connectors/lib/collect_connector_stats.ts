@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { AggregationsCardinalityAggregate } from '@elastic/elasticsearch/lib/api/types';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { AggregationsCardinalityAggregate } from '@elastic/elasticsearch/lib/api/types';
 import {
   Connector,
   ConnectorConfigProperties,
@@ -113,6 +114,7 @@ export const collectConnectorStats = async (
     const connectorStats: ConnectorStats = {
       id: connectorId,
       isDeleted: true,
+      serviceType: orphanedSyncJobs[0].connector.service_type,
       syncJobs: syncJobsStats(orphanedSyncJobs),
     };
     connectorStatsArray.push(connectorStats);
@@ -362,6 +364,8 @@ function syncJobsStatsByState(syncJobs: ConnectorSyncJob[]): SyncJobStatsByState
   let idle = 0;
   let running = 0;
   let duration = 0;
+  const errors = new Map<string, number>();
+  let topErrors: string[] = [];
 
   for (const syncJob of syncJobs) {
     completed += syncJob.status === SyncStatus.COMPLETED ? 1 : 0;
@@ -386,6 +390,18 @@ function syncJobsStatsByState(syncJobs: ConnectorSyncJob[]): SyncJobStatsByState
         duration += Math.floor((completedAt.getTime() - startedAt.getTime()) / 1000);
       }
     }
+    if (syncJob.status === SyncStatus.ERROR && syncJob.error) {
+      errors.set(syncJob.error, (errors.get(syncJob.error) ?? 0) + 1);
+    }
+  }
+
+  if (errors.size <= 5) {
+    topErrors = [...errors.keys()];
+  } else {
+    topErrors = [...errors.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .map((a) => a[0])
+      .slice(0, 5);
   }
 
   return {
@@ -399,5 +415,6 @@ function syncJobsStatsByState(syncJobs: ConnectorSyncJob[]): SyncJobStatsByState
     idle,
     running,
     totalDurationSeconds: duration,
+    topErrors,
   } as SyncJobStatsByState;
 }

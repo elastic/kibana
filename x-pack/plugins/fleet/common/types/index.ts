@@ -30,10 +30,26 @@ export interface FleetConfigType {
       hosts?: string[];
     };
   };
+  agentless?: {
+    enabled: boolean;
+    api?: {
+      url?: string;
+      tls?: {
+        certificate?: string;
+        key?: string;
+        ca?: string;
+      };
+    };
+  };
+  spaceSettings?: Array<{
+    space_id: string;
+    allowed_namespace_prefixes: string[] | null;
+  }>;
   agentPolicies?: PreconfiguredAgentPolicy[];
   packages?: PreconfiguredPackage[];
   outputs?: PreconfiguredOutput[];
   agentIdVerificationEnabled?: boolean;
+  eventIngestedEnabled?: boolean;
   enableExperimental?: string[];
   packageVerification?: {
     gpgKeyPath?: string;
@@ -50,6 +66,7 @@ export interface FleetConfigType {
     disableBundledPackagesCache?: boolean;
   };
   internal?: {
+    useMeteringApi?: boolean;
     disableILMPolicies: boolean;
     fleetServerStandalone: boolean;
     onlyAllowAgentUpgradeToKnownVersions: boolean;

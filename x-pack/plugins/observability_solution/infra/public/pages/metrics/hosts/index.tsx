@@ -10,25 +10,21 @@ import React from 'react';
 import { useTrackPageview, FeatureFeedbackButton } from '@kbn/observability-shared-plugin/public';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
+import { OnboardingFlow } from '../../../components/shared/templates/no_data_config';
+import { InfraPageTemplate } from '../../../components/shared/templates/infra_page_template';
+import { SYSTEM_INTEGRATION } from '../../../../common/constants';
 import { useKibanaEnvironmentContext } from '../../../hooks/use_kibana';
-import { SourceErrorPage } from '../../../components/source_error_page';
-import { SourceLoadingPage } from '../../../components/source_loading_page';
-import { useSourceContext } from '../../../containers/metrics_source';
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
-import { MetricsPageTemplate } from '../page_template';
 import { hostsTitle } from '../../../translations';
-import { MetricsDataViewProvider } from './hooks/use_metrics_data_view';
 import { fullHeightContentStyles } from '../../../page_template.styles';
 import { HostContainer } from './components/hosts_container';
-import { BetaBadge } from '../../../components/beta_badge';
-import { NoRemoteCluster } from '../../../components/empty_states';
 
 const HOSTS_FEEDBACK_LINK =
   'https://docs.google.com/forms/d/e/1FAIpQLScRHG8TIVb1Oq8ZhD4aks3P1TmgiM58TY123QpDCcBz83YC6w/viewform';
 
+const DATA_AVAILABILITY_MODULES = [SYSTEM_INTEGRATION];
+
 export const HostsPage = () => {
-  const { isLoading, loadSourceFailureMessage, loadSource, source } = useSourceContext();
   const { kibanaVersion, isCloudEnv, isServerlessEnv } = useKibanaEnvironmentContext();
 
   useTrackPageview({ app: 'infra_metrics', path: 'hosts' });
@@ -40,28 +36,12 @@ export const HostsPage = () => {
     },
   ]);
 
-  const { metricIndicesExist, remoteClustersExist } = source?.status ?? {};
-
-  if (isLoading && !source) return <SourceLoadingPage />;
-
-  if (!remoteClustersExist) {
-    return <NoRemoteCluster />;
-  }
-
-  if (!metricIndicesExist) {
-    return (
-      <MetricsPageTemplate hasData={metricIndicesExist} data-test-subj="noMetricsIndicesPrompt" />
-    );
-  }
-
-  if (loadSourceFailureMessage)
-    return <SourceErrorPage errorMessage={loadSourceFailureMessage || ''} retry={loadSource} />;
-
   return (
     <EuiErrorBoundary>
       <div className={APP_WRAPPER_CLASS}>
-        <MetricsPageTemplate
-          hasData={metricIndicesExist}
+        <InfraPageTemplate
+          dataAvailabilityModules={DATA_AVAILABILITY_MODULES}
+          onboardingFlow={OnboardingFlow.Hosts}
           pageHeader={{
             alignItems: 'center',
             pageTitle: (
@@ -73,12 +53,6 @@ export const HostsPage = () => {
                 `}
               >
                 <h1>{hostsTitle}</h1>
-                <BetaBadge
-                  tooltipContent={i18n.translate('xpack.infra.hostsViewPage.betaBadgeDescription', {
-                    defaultMessage:
-                      'This feature is currently in beta. If you encounter any bugs or have feedback, we’d love to hear from you. Please open a support issue and/or share your feedback via the "Tell us what you think!" feedback button.',
-                  })}
-                />
               </div>
             ),
             rightSideItems: [
@@ -97,12 +71,8 @@ export const HostsPage = () => {
             },
           }}
         >
-          {source && (
-            <MetricsDataViewProvider metricAlias={source.configuration.metricAlias}>
-              <HostContainer />
-            </MetricsDataViewProvider>
-          )}
-        </MetricsPageTemplate>
+          <HostContainer />
+        </InfraPageTemplate>
       </div>
     </EuiErrorBoundary>
   );

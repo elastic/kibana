@@ -17,13 +17,10 @@ export function SuccessfulMigrationCard() {
       title={i18n.translate('xpack.apm.settings.schema.success.title', {
         defaultMessage: 'Elastic Agent successfully setup!',
       })}
-      description={i18n.translate(
-        'xpack.apm.settings.schema.success.description',
-        {
-          defaultMessage:
-            'Your APM integration is now setup and ready to receive data from your currently instrumented agents. Feel free to review the policies applied to your integtration.',
-        }
-      )}
+      description={i18n.translate('xpack.apm.settings.schema.success.description', {
+        defaultMessage:
+          'Your APM integration is now setup and ready to receive data from your currently instrumented agents. Feel free to review the policies applied to your integtration.',
+      })}
       footer={<CardFooterContent />}
     />
   );

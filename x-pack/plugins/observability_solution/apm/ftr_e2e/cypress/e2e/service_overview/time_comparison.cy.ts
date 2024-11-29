@@ -20,8 +20,7 @@ const serviceOverviewHref = url.format({
 
 const apisToIntercept = [
   {
-    endpoint:
-      '/internal/apm/services/opbeans-java/transactions/charts/latency?*',
+    endpoint: '/internal/apm/services/opbeans-java/transactions/charts/latency?*',
     name: 'latencyChartRequest',
   },
   {
@@ -29,18 +28,15 @@ const apisToIntercept = [
     name: 'throughputChartRequest',
   },
   {
-    endpoint:
-      '/internal/apm/services/opbeans-java/transactions/charts/error_rate?*',
+    endpoint: '/internal/apm/services/opbeans-java/transactions/charts/error_rate?*',
     name: 'errorRateChartRequest',
   },
   {
-    endpoint:
-      '/internal/apm/services/opbeans-java/transactions/groups/detailed_statistics?*',
+    endpoint: '/internal/apm/services/opbeans-java/transactions/groups/detailed_statistics?*',
     name: 'transactionGroupsDetailedRequest',
   },
   {
-    endpoint:
-      '/internal/apm/services/opbeans-java/errors/groups/detailed_statistics?*',
+    endpoint: '/internal/apm/services/opbeans-java/errors/groups/detailed_statistics?*',
     name: 'errorGroupsDetailedRequest',
   },
   {
@@ -50,7 +46,8 @@ const apisToIntercept = [
   },
 ];
 
-describe('Service overview: Time Comparison', () => {
+// See details: https://github.com/elastic/kibana/issues/191961
+describe.skip('Service overview: Time Comparison', () => {
   before(() => {
     synthtrace.index(
       opbeans({
@@ -65,17 +62,15 @@ describe('Service overview: Time Comparison', () => {
   });
 
   beforeEach(() => {
-    cy.intercept(
-      'GET',
-      '/internal/apm/services/opbeans-java/transactions/charts/latency?*'
-    ).as('latencyChartRequest');
+    cy.intercept('GET', '/internal/apm/services/opbeans-java/transactions/charts/latency?*').as(
+      'latencyChartRequest'
+    );
     cy.intercept('GET', '/internal/apm/services/opbeans-java/throughput?*').as(
       'throughputChartRequest'
     );
-    cy.intercept(
-      'GET',
-      '/internal/apm/services/opbeans-java/transactions/charts/error_rate?*'
-    ).as('errorRateChartRequest');
+    cy.intercept('GET', '/internal/apm/services/opbeans-java/transactions/charts/error_rate?*').as(
+      'errorRateChartRequest'
+    );
     cy.intercept(
       'GET',
       '/internal/apm/services/opbeans-java/transactions/groups/detailed_statistics?*'
@@ -117,22 +112,13 @@ describe('Service overview: Time Comparison', () => {
       cy.contains('Day before');
       cy.contains('Week before');
 
-      cy.selectAbsoluteTimeRange(
-        '2021-10-10T00:00:00.000Z',
-        '2021-10-20T00:00:00.000Z'
-      );
+      cy.selectAbsoluteTimeRange('2021-10-10T00:00:00.000Z', '2021-10-20T00:00:00.000Z');
 
       cy.getByTestSubj('querySubmitButton').click();
 
       cy.getByTestSubj('comparisonSelect').should('have.value', '864000000ms');
-      cy.getByTestSubj('comparisonSelect').should(
-        'not.contain.text',
-        'Day before'
-      );
-      cy.getByTestSubj('comparisonSelect').should(
-        'not.contain.text',
-        'Week before'
-      );
+      cy.getByTestSubj('comparisonSelect').should('not.contain.text', 'Day before');
+      cy.getByTestSubj('comparisonSelect').should('not.contain.text', 'Week before');
     });
     it('when selecting Today from time range, comparison should display both day and week options', () => {
       cy.visitKibana(serviceOverviewHref);
@@ -146,14 +132,8 @@ describe('Service overview: Time Comparison', () => {
       cy.visitKibana(serviceOverviewHref);
       cy.changeTimeRange('Last 7 days');
       cy.getByTestSubj('comparisonSelect').should('have.value', '1w');
-      cy.getByTestSubj('comparisonSelect').should(
-        'contain.text',
-        'Week before'
-      );
-      cy.getByTestSubj('comparisonSelect').should(
-        'not.contain.text',
-        'Day before'
-      );
+      cy.getByTestSubj('comparisonSelect').should('contain.text', 'Week before');
+      cy.getByTestSubj('comparisonSelect').should('not.contain.text', 'Day before');
     });
   });
 
@@ -199,13 +179,11 @@ describe('Service overview: Time Comparison', () => {
       const offset = `offset=1d`;
 
       // When the page loads it fetches all APIs with comparison time range
-      cy.wait(apisToIntercept.map(({ name }) => `@${name}`)).then(
-        (interceptions) => {
-          interceptions.map((interception) => {
-            expect(interception.request.url).include(offset);
-          });
-        }
-      );
+      cy.wait(apisToIntercept.map(({ name }) => `@${name}`)).then((interceptions) => {
+        interceptions.map((interception) => {
+          expect(interception.request.url).include(offset);
+        });
+      });
 
       cy.contains('opbeans-java');
 
@@ -213,13 +191,11 @@ describe('Service overview: Time Comparison', () => {
       cy.contains('Comparison').click();
       cy.getByTestSubj('comparisonSelect').should('be.disabled');
       // When comparison is disabled APIs are called withou comparison time range
-      cy.wait(apisToIntercept.map(({ name }) => `@${name}`)).then(
-        (interceptions) => {
-          interceptions.map((interception) => {
-            expect(interception.request.url).not.include(offset);
-          });
-        }
-      );
+      cy.wait(apisToIntercept.map(({ name }) => `@${name}`)).then((interceptions) => {
+        interceptions.map((interception) => {
+          expect(interception.request.url).not.include(offset);
+        });
+      });
     });
   });
 });

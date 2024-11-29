@@ -22,10 +22,13 @@ export const PLI_PRODUCT_FEATURES: PliProductFeatures = {
     complete: [
       ProductFeatureKey.advancedInsights,
       ProductFeatureKey.assistant,
+      ProductFeatureKey.attackDiscovery,
       ProductFeatureKey.investigationGuide,
+      ProductFeatureKey.investigationGuideInteractions,
       ProductFeatureKey.threatIntelligence,
       ProductFeatureKey.casesConnectors,
       ProductFeatureKey.externalRuleActions,
+      ProductFeatureKey.integrationAssistant,
     ],
   },
   endpoint: {
@@ -35,15 +38,16 @@ export const PLI_PRODUCT_FEATURES: PliProductFeatures = {
       ProductFeatureKey.endpointExceptions,
     ],
     complete: [
+      ProductFeatureKey.endpointHostIsolationExceptions,
       ProductFeatureKey.endpointResponseActions,
       ProductFeatureKey.osqueryAutomatedResponseActions,
       ProductFeatureKey.endpointAgentTamperProtection,
-      ProductFeatureKey.endpointExceptions,
+      ProductFeatureKey.endpointCustomNotification,
       ProductFeatureKey.endpointProtectionUpdates,
     ],
   },
   cloud: {
-    essentials: [],
+    essentials: [ProductFeatureKey.cloudSecurityPosture],
     complete: [],
   },
 } as const;

@@ -6,10 +6,10 @@
  */
 
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import type { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { NavigationWarningPromptProvider } from '@kbn/observability-shared-plugin/public';
 import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
@@ -20,26 +20,19 @@ import {
   useKibanaEnvironmentContextProvider,
 } from '../hooks/use_kibana';
 import { InfraClientStartDeps, InfraClientStartExports } from '../types';
-import { HeaderActionMenuProvider } from '../utils/header_action_menu_provider';
-import { TriggersActionsProvider } from '../utils/triggers_actions_context';
+import { HeaderActionMenuProvider } from '../containers/header_action_menu_provider';
+import { TriggersActionsProvider } from '../containers/triggers_actions_context';
 import { useIsDarkMode } from '../hooks/use_is_dark_mode';
 
-export const CommonInfraProviders: React.FC<{
-  appName: string;
-  storage: Storage;
-  triggersActionsUI: TriggersAndActionsUIPublicPluginStart;
-  observabilityAIAssistant: ObservabilityAIAssistantPublicStart;
-  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
-  theme$: AppMountParameters['theme$'];
-}> = ({
-  children,
-  triggersActionsUI,
-  observabilityAIAssistant: { service: observabilityAIAssistantService },
-  setHeaderActionMenu,
-  appName,
-  storage,
-  theme$,
-}) => {
+export const CommonInfraProviders: FC<
+  PropsWithChildren<{
+    appName: string;
+    storage: Storage;
+    triggersActionsUI: TriggersAndActionsUIPublicPluginStart;
+    setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
+    theme$: AppMountParameters['theme$'];
+  }>
+> = ({ children, triggersActionsUI, setHeaderActionMenu, appName, storage, theme$ }) => {
   const darkMode = useIsDarkMode();
 
   return (
@@ -63,12 +56,11 @@ export interface CoreProvidersProps {
   kibanaEnvironment?: KibanaEnvContext;
 }
 
-export const CoreProviders: React.FC<CoreProvidersProps> = ({
+export const CoreProviders: FC<PropsWithChildren<CoreProvidersProps>> = ({
   children,
   core,
   pluginStart,
   plugins,
-  theme$,
   kibanaEnvironment,
 }) => {
   const KibanaContextProviderForPlugin = useKibanaContextForPluginProvider(
@@ -80,24 +72,27 @@ export const CoreProviders: React.FC<CoreProvidersProps> = ({
   const KibanaEnvContextForPluginProvider = useKibanaEnvironmentContextProvider(kibanaEnvironment);
 
   return (
-    <RedirectAppLinks
-      coreStart={{
-        application: core.application,
-      }}
-    >
-      <KibanaContextProviderForPlugin services={{ ...core, ...plugins, ...pluginStart }}>
-        <KibanaEnvContextForPluginProvider kibanaEnv={kibanaEnvironment}>
-          <core.i18n.Context>
-            <KibanaThemeProvider theme$={theme$}>{children}</KibanaThemeProvider>
-          </core.i18n.Context>
-        </KibanaEnvContextForPluginProvider>
-      </KibanaContextProviderForPlugin>
-    </RedirectAppLinks>
+    <KibanaRenderContextProvider {...core}>
+      <RedirectAppLinks
+        coreStart={{
+          application: core.application,
+        }}
+      >
+        <KibanaContextProviderForPlugin services={{ ...core, ...plugins, ...pluginStart }}>
+          <KibanaEnvContextForPluginProvider kibanaEnv={kibanaEnvironment}>
+            {children}
+          </KibanaEnvContextForPluginProvider>
+        </KibanaContextProviderForPlugin>
+      </RedirectAppLinks>
+    </KibanaRenderContextProvider>
   );
 };
 
-const DataUIProviders: React.FC<{ appName: string; storage: Storage }> = ({
-  appName,
-  children,
-  storage,
-}) => <KibanaContextProvider services={{ appName, storage }}>{children}</KibanaContextProvider>;
+const DataUIProviders: FC<
+  PropsWithChildren<{
+    appName: string;
+    storage: Storage;
+  }>
+> = ({ appName, children, storage }) => (
+  <KibanaContextProvider services={{ appName, storage }}>{children}</KibanaContextProvider>
+);

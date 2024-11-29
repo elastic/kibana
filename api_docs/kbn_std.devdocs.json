@@ -936,6 +936,56 @@
       },
       {
         "parentPluginId": "@kbn/std",
+        "id": "def-common.isInternalURL",
+        "type": "Function",
+        "tags": [],
+        "label": "isInternalURL",
+        "description": [
+          "\nDetermine if url is outside of this Kibana install."
+        ],
+        "signature": [
+          "(url: string, basePath: string) => boolean"
+        ],
+        "path": "packages/kbn-std/src/is_internal_url.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/std",
+            "id": "def-common.isInternalURL.$1",
+            "type": "string",
+            "tags": [],
+            "label": "url",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-std/src/is_internal_url.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/std",
+            "id": "def-common.isInternalURL.$2",
+            "type": "string",
+            "tags": [],
+            "label": "basePath",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-std/src/is_internal_url.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/std",
         "id": "def-common.isPromise",
         "type": "Function",
         "tags": [],
@@ -1490,6 +1540,71 @@
       },
       {
         "parentPluginId": "@kbn/std",
+        "id": "def-common.parseNextURL",
+        "type": "Function",
+        "tags": [],
+        "label": "parseNextURL",
+        "description": [
+          "\nParse the url value from query param. By default\n\nBy default query param is set to next."
+        ],
+        "signature": [
+          "(href: string, basePath: string, nextUrlQueryParam: string) => string"
+        ],
+        "path": "packages/kbn-std/src/parse_next_url.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/std",
+            "id": "def-common.parseNextURL.$1",
+            "type": "string",
+            "tags": [],
+            "label": "href",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-std/src/parse_next_url.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/std",
+            "id": "def-common.parseNextURL.$2",
+            "type": "string",
+            "tags": [],
+            "label": "basePath",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-std/src/parse_next_url.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/std",
+            "id": "def-common.parseNextURL.$3",
+            "type": "string",
+            "tags": [],
+            "label": "nextUrlQueryParam",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-std/src/parse_next_url.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/std",
         "id": "def-common.pick",
         "type": "Function",
         "tags": [],
@@ -1563,56 +1678,6 @@
               "string"
             ],
             "path": "packages/kbn-std/src/strip_version_qualifier.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/std",
-        "id": "def-common.unset",
-        "type": "Function",
-        "tags": [],
-        "label": "unset",
-        "description": [
-          "\nUnset a (potentially nested) key from given object.\nThis mutates the original object.\n"
-        ],
-        "signature": [
-          "(obj: OBJ, atPath: string) => void"
-        ],
-        "path": "packages/kbn-std/src/unset.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/std",
-            "id": "def-common.unset.$1",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "obj",
-            "description": [],
-            "signature": [
-              "OBJ"
-            ],
-            "path": "packages/kbn-std/src/unset.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/std",
-            "id": "def-common.unset.$2",
-            "type": "string",
-            "tags": [],
-            "label": "atPath",
-            "description": [],
-            "signature": [
-              "string"
-            ],
-            "path": "packages/kbn-std/src/unset.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

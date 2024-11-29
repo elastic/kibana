@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Dispatch, ReactNode } from 'react';
+import type { Dispatch, ReactNode, FC, PropsWithChildren } from 'react';
 
 import { merge } from 'lodash';
 import React, { useCallback, useMemo, useReducer } from 'react';
@@ -15,7 +15,6 @@ import { FilesContext } from '@kbn/shared-ux-file-context';
 
 import type { QueryClient } from '@tanstack/react-query';
 import { QueryClientProvider } from '@tanstack/react-query';
-import type { CasesContextStoreAction } from './cases_context_reducer';
 import type {
   CasesFeaturesAllRequired,
   CasesFeatures,
@@ -29,7 +28,9 @@ import { CasesGlobalComponents } from './cases_global_components';
 import { DEFAULT_FEATURES } from '../../../common/constants';
 import { constructFileKindIdByOwner } from '../../../common/files';
 import { DEFAULT_BASE_PATH } from '../../common/navigation';
-import { casesContextReducer, getInitialCasesContextState } from './cases_context_reducer';
+import type { CasesContextStoreAction } from './state/cases_context_reducer';
+import { casesContextReducer, getInitialCasesContextState } from './state/cases_context_reducer';
+import { CasesStateContext } from './state/cases_state_context';
 import { isRegisteredOwner } from '../../files';
 import { casesQueryClient } from './query_client';
 
@@ -62,7 +63,12 @@ export interface CasesContextProps
 
 export const CasesContext = React.createContext<CasesContextValue | undefined>(undefined);
 
-export const CasesProvider: React.FC<{ value: CasesContextProps; queryClient?: QueryClient }> = ({
+export const CasesProvider: FC<
+  PropsWithChildren<{
+    value: CasesContextProps;
+    queryClient?: QueryClient;
+  }>
+> = ({
   children,
   value: {
     externalReferenceAttachmentTypeRegistry,
@@ -92,6 +98,8 @@ export const CasesProvider: React.FC<{ value: CasesContextProps; queryClient?: Q
         read: permissions.read,
         settings: permissions.settings,
         update: permissions.update,
+        reopenCase: permissions.reopenCase,
+        createComment: permissions.createComment,
       },
       basePath,
       /**
@@ -121,6 +129,8 @@ export const CasesProvider: React.FC<{ value: CasesContextProps; queryClient?: Q
       permissions.read,
       permissions.settings,
       permissions.update,
+      permissions.reopenCase,
+      permissions.createComment,
     ]
   );
 
@@ -147,14 +157,16 @@ export const CasesProvider: React.FC<{ value: CasesContextProps; queryClient?: Q
 
   return (
     <QueryClientProvider client={queryClient}>
-      <CasesContext.Provider value={value}>
-        {applyFilesContext(
-          <>
-            <CasesGlobalComponents state={state} />
-            {children}
-          </>
-        )}
-      </CasesContext.Provider>
+      <CasesStateContext.Provider value={state}>
+        <CasesContext.Provider value={value}>
+          {applyFilesContext(
+            <>
+              <CasesGlobalComponents state={state} />
+              {children}
+            </>
+          )}
+        </CasesContext.Provider>
+      </CasesStateContext.Provider>
     </QueryClientProvider>
   );
 };

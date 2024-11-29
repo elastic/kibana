@@ -1,0 +1,15 @@
+[role="xpack"]
+[[inference-endpoints]]
+== Inference endpoints UI
+
+Inference endpoints streamline the deployment and management of machine learning models in
+{es}. The *Inference endpoints* page in {kib} provides an interface for displaying inference 
+endpoints that have been created using the {ref}/put-inference-api.html[Inference API].
+
+[role="screenshot"]
+image::images/inference-endpoints-ui.png[Inference endpoints UI]
+
+Available actions:
+
+* Copy the inference endpoint ID
+* Delete endpoints

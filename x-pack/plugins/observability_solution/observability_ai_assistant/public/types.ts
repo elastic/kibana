@@ -6,22 +6,21 @@
  */
 
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
-import type { MlPluginSetup, MlPluginStart } from '@kbn/ml-plugin/public';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
+import type { AssistantScope } from '@kbn/ai-assistant-common';
 import type {
+  ChatCompletionChunkEvent,
   MessageAddEvent,
   StreamingChatResponseEventWithoutError,
 } from '../common/conversation_complete';
-import type {
-  ContextDefinition,
-  FunctionDefinition,
-  FunctionResponse,
-} from '../common/functions/types';
+import type { FunctionDefinition, FunctionResponse } from '../common/functions/types';
 import type {
   Message,
   ObservabilityAIAssistantScreenContext,
   PendingMessage,
+  AdHocInstruction,
 } from '../common/types';
 import type { TelemetryEventTypeWithPayload } from './analytics';
 import type { ObservabilityAIAssistantAPIClient } from './api';
@@ -32,12 +31,18 @@ import { ObservabilityAIAssistantMultipaneFlyoutContext } from './context/observ
 import { useChat } from './hooks/use_chat';
 import type { UseGenAIConnectorsResult } from './hooks/use_genai_connectors';
 import { useObservabilityAIAssistantChatService } from './hooks/use_observability_ai_assistant_chat_service';
-import type { UseUserPreferredLanguageResult } from './hooks/use_user_preferred_language';
 import { createScreenContextAction } from './utils/create_screen_context_action';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
 export type { PendingMessage };
+
+export interface DiscoveredDataset {
+  title: string;
+  description: string;
+  indexPatterns: string[];
+  columns: unknown[];
+}
 
 export interface ObservabilityAIAssistantChatService {
   sendAnalyticsEvent: (event: TelemetryEventTypeWithPayload) => void;
@@ -46,22 +51,35 @@ export interface ObservabilityAIAssistantChatService {
     options: {
       messages: Message[];
       connectorId: string;
-      function?: 'none' | 'auto';
+      functions?: Array<Pick<FunctionDefinition, 'name' | 'description' | 'parameters'>>;
+      functionCall?: string;
       signal: AbortSignal;
+      scopes: AssistantScope[];
     }
-  ) => Observable<StreamingChatResponseEventWithoutError>;
+  ) => Observable<ChatCompletionChunkEvent>;
   complete: (options: {
     getScreenContexts: () => ObservabilityAIAssistantScreenContext[];
     conversationId?: string;
     connectorId: string;
     messages: Message[];
     persist: boolean;
+    disableFunctions:
+      | boolean
+      | {
+          except: string[];
+        };
     signal: AbortSignal;
-    responseLanguage: string;
+    instructions?: AdHocInstruction[];
+    scopes: AssistantScope[];
   }) => Observable<StreamingChatResponseEventWithoutError>;
-  getContexts: () => ContextDefinition[];
-  getFunctions: (options?: { contexts?: string[]; filter?: string }) => FunctionDefinition[];
+  getFunctions: (options?: {
+    contexts?: string[];
+    filter?: string;
+    scopes: AssistantScope[];
+  }) => FunctionDefinition[];
+  functions$: BehaviorSubject<FunctionDefinition[]>;
   hasFunction: (name: string) => boolean;
+  getSystemMessage: () => Message;
   hasRenderFunction: (name: string) => boolean;
   renderFunction: (
     name: string,
@@ -69,11 +87,20 @@ export interface ObservabilityAIAssistantChatService {
     response: { data?: string; content?: string },
     onActionClick: ChatActionClickHandler
   ) => React.ReactNode;
+  getScopes: () => AssistantScope[];
 }
 
 export interface ObservabilityAIAssistantConversationService {
-  openNewConversation: ({}: { messages: Message[]; title?: string }) => void;
-  predefinedConversation$: Observable<{ messages: Message[]; title?: string }>;
+  openNewConversation: ({}: {
+    messages: Message[];
+    title?: string;
+    hideConversationList?: boolean;
+  }) => void;
+  predefinedConversation$: Observable<{
+    messages: Message[];
+    title?: string;
+    hideConversationList?: boolean;
+  }>;
 }
 
 export interface ObservabilityAIAssistantService {
@@ -85,6 +112,9 @@ export interface ObservabilityAIAssistantService {
   getScreenContexts: () => ObservabilityAIAssistantScreenContext[];
   conversations: ObservabilityAIAssistantConversationService;
   navigate: (callback: () => void) => Promise<Observable<MessageAddEvent>>;
+  scope$: BehaviorSubject<AssistantScope[]>;
+  setScopes: (scope: AssistantScope[]) => void;
+  getScopes: () => AssistantScope[];
 }
 
 export type RenderFunction<TArguments, TResponse extends FunctionResponse> = (options: {
@@ -95,25 +125,25 @@ export type RenderFunction<TArguments, TResponse extends FunctionResponse> = (op
 
 export type RegisterRenderFunctionDefinition<
   TFunctionArguments = any,
-  TFunctionResponse extends FunctionResponse = FunctionResponse
+  TFunctionResponse extends FunctionResponse = any
 > = (name: string, render: RenderFunction<TFunctionArguments, TFunctionResponse>) => void;
 
 export type ChatRegistrationRenderFunction = ({}: {
   registerRenderFunction: RegisterRenderFunctionDefinition;
 }) => Promise<void>;
 
-export interface ConfigSchema {}
+export interface ConfigSchema {
+  scope?: AssistantScope;
+}
 
 export interface ObservabilityAIAssistantPluginSetupDependencies {
   licensing: {};
   security: SecurityPluginSetup;
-  ml: MlPluginSetup;
 }
 
 export interface ObservabilityAIAssistantPluginStartDependencies {
   licensing: LicensingPluginStart;
   security: SecurityPluginStart;
-  ml: MlPluginStart;
 }
 
 export interface ObservabilityAIAssistantPublicSetup {}
@@ -126,7 +156,6 @@ export interface ObservabilityAIAssistantPublicStart {
   useObservabilityAIAssistantChatService: typeof useObservabilityAIAssistantChatService;
   useGenAIConnectors: () => UseGenAIConnectorsResult;
   useChat: typeof useChat;
-  useUserPreferredLanguage: () => UseUserPreferredLanguageResult;
   getContextualInsightMessages: ({}: { message: string; instructions: string }) => Message[];
   createScreenContextAction: typeof createScreenContextAction;
 }

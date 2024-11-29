@@ -14,9 +14,6 @@ const templateMock = {
     number_of_shards: 1,
   },
   mappings: {
-    _source: {
-      enabled: false,
-    },
     properties: {
       host_name: {
         type: 'keyword',
@@ -31,6 +28,22 @@ const templateMock = {
     alias1: {},
   },
 };
+
+const getTemplateMock = (isMappingsSourceFieldEnabled: boolean) => {
+  if (isMappingsSourceFieldEnabled) {
+    return {
+      ...templateMock,
+      mappings: {
+        ...templateMock.mappings,
+        _source: {
+          enabled: false,
+        },
+      },
+    };
+  }
+  return templateMock;
+};
+
 export function templatesHelpers(getService: FtrProviderContext['getService']) {
   const es = getService('es');
 
@@ -39,13 +52,15 @@ export function templatesHelpers(getService: FtrProviderContext['getService']) {
   const getTemplatePayload = (
     name: string,
     indexPatterns: string[] = INDEX_PATTERNS,
-    isLegacy: boolean = false
+    isLegacy: boolean = false,
+    isMappingsSourceFieldEnabled: boolean = true
   ) => {
     const baseTemplate: TemplateDeserialized = {
       name,
       indexPatterns,
       version: 1,
-      template: { ...templateMock },
+      indexMode: 'standard',
+      template: { ...getTemplateMock(isMappingsSourceFieldEnabled) },
       _kbnMeta: {
         isLegacy,
         type: 'default',
@@ -63,10 +78,13 @@ export function templatesHelpers(getService: FtrProviderContext['getService']) {
     return baseTemplate;
   };
 
-  const getSerializedTemplate = (indexPatterns: string[] = INDEX_PATTERNS): TemplateSerialized => {
+  const getSerializedTemplate = (
+    indexPatterns: string[] = INDEX_PATTERNS,
+    isMappingsSourceFieldEnabled: boolean = true
+  ): TemplateSerialized => {
     return {
       index_patterns: indexPatterns,
-      template: { ...templateMock },
+      template: { ...getTemplateMock(isMappingsSourceFieldEnabled) },
     };
   };
 

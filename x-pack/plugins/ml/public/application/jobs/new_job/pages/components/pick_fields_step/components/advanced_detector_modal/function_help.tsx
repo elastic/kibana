@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { useState, memo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -20,7 +19,7 @@ import {
 } from '@elastic/eui';
 import { useMlKibana } from '../../../../../../../contexts/kibana';
 
-export const FunctionHelpPopover: FC = memo(() => {
+export const FunctionHelpPopover = memo(() => {
   const {
     services: { docLinks },
   } = useMlKibana();
@@ -29,7 +28,18 @@ export const FunctionHelpPopover: FC = memo(() => {
   const onHelpClick = () => setIsHelpOpen((prevIsHelpOpen) => !prevIsHelpOpen);
   const closeHelp = () => setIsHelpOpen(false);
 
-  const helpButton = <EuiButtonIcon onClick={onHelpClick} iconType="help" />;
+  const helpButton = (
+    <EuiButtonIcon
+      onClick={onHelpClick}
+      iconType="help"
+      aria-label={i18n.translate(
+        'xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorModal.functionHelpAriaLabel',
+        {
+          defaultMessage: 'Show help',
+        }
+      )}
+    />
+  );
 
   const columns = [
     {
@@ -243,7 +253,7 @@ export const FunctionHelpPopover: FC = memo(() => {
           items={items}
           compressed={true}
           columns={columns}
-          responsive={false}
+          responsiveBreakpoint={false}
         />
       </EuiPanel>
       <EuiPanel color="transparent" paddingSize="s">

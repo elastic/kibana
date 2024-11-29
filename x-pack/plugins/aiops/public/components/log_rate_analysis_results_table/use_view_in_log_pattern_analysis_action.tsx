@@ -11,13 +11,13 @@ import type { SerializableRecord } from '@kbn/utility-types';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { isSignificantItem, type SignificantItem, SIGNIFICANT_ITEM_TYPE } from '@kbn/ml-agg-utils';
+import type { GroupTableItem, TableItemAction } from '@kbn/aiops-log-rate-analysis/state';
 
 import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 
 import { TableActionButton } from './table_action_button';
 import { getTableItemAsKQL } from './get_table_item_as_kql';
-import type { GroupTableItem, TableItemAction } from './types';
 
 const isLogPattern = (tableItem: SignificantItem | GroupTableItem) =>
   isSignificantItem(tableItem) && tableItem.type === SIGNIFICANT_ITEM_TYPE.LOG_PATTERN;
@@ -32,7 +32,7 @@ const viewInLogPatternAnalysisMessage = i18n.translate(
 export const useViewInLogPatternAnalysisAction = (dataViewId?: string): TableItemAction => {
   const { application, share, data } = useAiopsAppContext();
 
-  const mlLocator = useMemo(() => share.url.locators.get('ML_APP_LOCATOR'), [share.url.locators]);
+  const mlLocator = useMemo(() => share?.url.locators.get('ML_APP_LOCATOR'), [share?.url.locators]);
 
   const generateLogPatternAnalysisUrl = async (
     groupTableItem: GroupTableItem | SignificantItem
@@ -104,7 +104,7 @@ export const useViewInLogPatternAnalysisAction = (dataViewId?: string): TableIte
       return (
         <TableActionButton
           dataTestSubjPostfix="LogPatternAnalysis"
-          iconType="logstashQueue"
+          iconType="logPatternAnalysis"
           isDisabled={isDisabled}
           label={viewInLogPatternAnalysisMessage}
           tooltipText={

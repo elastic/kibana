@@ -1,0 +1,52 @@
+post:
+  summary: Create a service annotation
+  description: Create a new annotation for a specific service.
+  operationId: createAnnotation
+  tags:
+    - APM annotations
+  parameters:
+    - $ref: '../components/headers/elastic_api_version.yaml'
+    - $ref: '../components/headers/kbn_xsrf.yaml'
+    - name: serviceName
+      in: path
+      required: true
+      description: The name of the service
+      schema:
+        type: string
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../components/schemas/create_annotation_object.yaml'
+  responses:
+    '200':
+      description: Annotation created successfully
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/create_annotation_response.yaml'
+    '400':
+      description: Bad Request response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/400_response.yaml'
+    '401':
+      description: Unauthorized response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/401_response.yaml'
+    '403':
+      description: Forbidden response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/403_response.yaml'
+    '404':
+      description: Not found response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/404_response.yaml'

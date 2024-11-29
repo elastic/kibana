@@ -33,6 +33,7 @@ export interface EncryptedSavedObjectTypeRegistration {
   readonly type: string;
   readonly attributesToEncrypt: ReadonlySet<string | AttributeToEncrypt>;
   readonly attributesToIncludeInAAD?: ReadonlySet<string>;
+  readonly enforceRandomId?: boolean;
 }
 
 /**
@@ -150,6 +151,16 @@ export class EncryptedSavedObjectsService {
    */
   public isRegistered(type: string) {
     return this.typeDefinitions.has(type);
+  }
+
+  /**
+   * Checks whether the ESO type has explicitly opted out of enforcing random IDs.
+   * @param type Saved object type.
+   * @returns boolean - true unless explicitly opted out by setting enforceRandomId to false
+   */
+  public shouldEnforceRandomId(type: string) {
+    const typeDefinition = this.typeDefinitions.get(type);
+    return typeDefinition?.enforceRandomId !== false;
   }
 
   /**
@@ -308,11 +319,12 @@ export class EncryptedSavedObjectsService {
     const encryptedAttributesKeys = Object.keys(encryptedAttributes);
     if (encryptedAttributesKeys.length !== typeDefinition.attributesToEncrypt.size) {
       this.options.logger.debug(
-        `The following attributes of saved object "${descriptorToArray(
-          descriptor
-        )}" should have been encrypted: ${Array.from(
-          typeDefinition.attributesToEncrypt
-        )}, but found only: ${encryptedAttributesKeys}`
+        () =>
+          `The following attributes of saved object "${descriptorToArray(
+            descriptor
+          )}" should have been encrypted: ${Array.from(
+            typeDefinition.attributesToEncrypt
+          )}, but found only: ${encryptedAttributesKeys}`
       );
     }
 
@@ -569,11 +581,12 @@ export class EncryptedSavedObjectsService {
     const decryptedAttributesKeys = Object.keys(decryptedAttributes);
     if (decryptedAttributesKeys.length !== typeDefinition.attributesToEncrypt.size) {
       this.options.logger.debug(
-        `The following attributes of saved object "${descriptorToArray(
-          descriptor
-        )}" should have been decrypted: ${Array.from(
-          typeDefinition.attributesToEncrypt
-        )}, but found only: ${decryptedAttributesKeys}`
+        () =>
+          `The following attributes of saved object "${descriptorToArray(
+            descriptor
+          )}" should have been decrypted: ${Array.from(
+            typeDefinition.attributesToEncrypt
+          )}, but found only: ${decryptedAttributesKeys}`
       );
     }
 
@@ -605,9 +618,10 @@ export class EncryptedSavedObjectsService {
 
     if (Object.keys(attributesAAD).length === 0) {
       this.options.logger.debug(
-        `The AAD for saved object "${descriptorToArray(
-          descriptor
-        )}" does not include any attributes.`
+        () =>
+          `The AAD for saved object "${descriptorToArray(
+            descriptor
+          )}" does not include any attributes.`
       );
     }
 

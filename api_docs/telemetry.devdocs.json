@@ -119,7 +119,7 @@
               "Should the telemetry payloads be sent from the server or the browser?"
             ],
             "signature": [
-              "\"browser\" | \"server\""
+              "\"server\" | \"browser\""
             ],
             "path": "src/plugins/telemetry/public/plugin.ts",
             "deprecated": false,
@@ -630,7 +630,7 @@
               "When the data comes from a matching index-pattern, the name of the pattern"
             ],
             "signature": [
-              "\"search\" | \"logstash\" | \"apm\" | \"metricbeat\" | \"enterprise-search\" | \"app-search\" | \"magento2\" | \"magento\" | \"shopify\" | \"wordpress\" | \"drupal\" | \"joomla\" | \"sharepoint\" | \"squarespace\" | \"sitecore\" | \"weebly\" | \"acquia\" | \"filebeat\" | \"functionbeat\" | \"heartbeat\" | \"fluentd\" | \"telegraf\" | \"prometheusbeat\" | \"fluentbit\" | \"nginx\" | \"apache\" | \"endgame\" | \"logs-endpoint\" | \"metrics-endpoint\" | \"siem-signals\" | \"auditbeat\" | \"winlogbeat\" | \"packetbeat\" | \"tomcat\" | \"artifactory\" | \"aruba\" | \"barracuda\" | \"bluecoat\" | \"arcsight\" | \"checkpoint\" | \"cisco\" | \"citrix\" | \"cyberark\" | \"cylance\" | \"fireeye\" | \"fortinet\" | \"infoblox\" | \"kaspersky\" | \"mcafee\" | \"paloaltonetworks\" | \"rsa\" | \"snort\" | \"sonicwall\" | \"sophos\" | \"squid\" | \"symantec\" | \"tippingpoint\" | \"trendmicro\" | \"tripwire\" | \"zscaler\" | \"zeek\" | \"sigma_doc\" | \"ecs-corelight\" | \"suricata\" | \"wazuh\" | \"meow\" | \"host_risk_score\" | \"user_risk_score\" | undefined"
+              "\"search\" | \"logstash\" | \"alerts\" | \"apm\" | \"metricbeat\" | \"suricata\" | \"zeek\" | \"enterprise-search\" | \"app-search\" | \"magento2\" | \"magento\" | \"shopify\" | \"wordpress\" | \"drupal\" | \"joomla\" | \"sharepoint\" | \"squarespace\" | \"sitecore\" | \"weebly\" | \"acquia\" | \"filebeat\" | \"generic-filebeat\" | \"generic-metricbeat\" | \"functionbeat\" | \"generic-functionbeat\" | \"heartbeat\" | \"generic-heartbeat\" | \"generic-logstash\" | \"fluentd\" | \"telegraf\" | \"prometheusbeat\" | \"fluentbit\" | \"nginx\" | \"apache\" | \"dsns-logs\" | \"generic-logs\" | \"endgame\" | \"logs-endpoint\" | \"metrics-endpoint\" | \"siem-signals\" | \"auditbeat\" | \"winlogbeat\" | \"packetbeat\" | \"tomcat\" | \"artifactory\" | \"aruba\" | \"barracuda\" | \"bluecoat\" | \"arcsight\" | \"checkpoint\" | \"cisco\" | \"citrix\" | \"cyberark\" | \"cylance\" | \"fireeye\" | \"fortinet\" | \"infoblox\" | \"kaspersky\" | \"mcafee\" | \"paloaltonetworks\" | \"rsa\" | \"snort\" | \"sonicwall\" | \"sophos\" | \"squid\" | \"symantec\" | \"tippingpoint\" | \"trendmicro\" | \"tripwire\" | \"zscaler\" | \"sigma_doc\" | \"ecs-corelight\" | \"wazuh\" | \"meow\" | \"host_risk_score\" | \"user_risk_score\" | undefined"
             ],
             "path": "src/plugins/telemetry/server/telemetry_collection/get_data_telemetry/get_data_telemetry.ts",
             "deprecated": false,
@@ -806,6 +806,10 @@
             {
               "plugin": "fleet",
               "path": "x-pack/plugins/fleet/server/telemetry/sender.ts"
+            },
+            {
+              "plugin": "datasetQuality",
+              "path": "x-pack/plugins/observability_solution/dataset_quality/server/services/data_telemetry/data_telemetry_service.ts"
             },
             {
               "plugin": "securitySolution",

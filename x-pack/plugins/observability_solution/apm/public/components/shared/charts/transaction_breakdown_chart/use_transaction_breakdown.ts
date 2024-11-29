@@ -24,15 +24,11 @@ export function useTransactionBreakdown({
 
   const {
     query: { rangeFrom, rangeTo },
-  } = useAnyOfApmParams(
-    '/services/{serviceName}',
-    '/mobile-services/{serviceName}'
-  );
+  } = useAnyOfApmParams('/services/{serviceName}', '/mobile-services/{serviceName}');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-  const { transactionType, serviceName, transactionTypeStatus } =
-    useApmServiceContext();
+  const { transactionType, serviceName, transactionTypeStatus } = useApmServiceContext();
 
   const {
     data = { timeseries: undefined },
@@ -45,22 +41,19 @@ export function useTransactionBreakdown({
       }
 
       if (serviceName && start && end && transactionType) {
-        return callApmApi(
-          'GET /internal/apm/services/{serviceName}/transaction/charts/breakdown',
-          {
-            params: {
-              path: { serviceName },
-              query: {
-                environment,
-                kuery,
-                start,
-                end,
-                transactionName,
-                transactionType,
-              },
+        return callApmApi('GET /internal/apm/services/{serviceName}/transaction/charts/breakdown', {
+          params: {
+            path: { serviceName },
+            query: {
+              environment,
+              kuery,
+              start,
+              end,
+              transactionName,
+              transactionType,
             },
-          }
-        );
+          },
+        });
       }
     },
     [

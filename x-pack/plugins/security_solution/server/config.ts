@@ -128,7 +128,7 @@ export const configSchema = schema.object({
    * Complete External Response Actions task: Timeout value for how long the task should run
    */
   completeExternalResponseActionsTaskTimeout: schema.string({
-    defaultValue: '20m',
+    defaultValue: '5m',
     validate: isValidTaskManagerDuration,
   }),
 
@@ -164,6 +164,24 @@ export const configSchema = schema.object({
    */
   offeringSettings: schema.recordOf(schema.string(), schema.boolean(), {
     defaultValue: {},
+  }),
+  entityAnalytics: schema.object({
+    riskEngine: schema.object({
+      alertSampleSizePerShard: schema.number({ defaultValue: 10_000 }),
+    }),
+    assetCriticality: schema.object({
+      csvUpload: schema.object({
+        errorRetries: schema.number({ defaultValue: 1 }),
+        maxBulkRequestBodySizeBytes: schema.number({ defaultValue: 100_000 }), // 100KB
+      }),
+    }),
+    entityStore: schema.object({
+      syncDelay: schema.duration({ defaultValue: '60s' }),
+      frequency: schema.duration({ defaultValue: '60s' }),
+      developer: schema.object({
+        pipelineDebugMode: schema.boolean({ defaultValue: false }),
+      }),
+    }),
   }),
 });
 

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { v4 as uuidv4 } from 'uuid';
@@ -29,47 +30,59 @@ import {
   take,
   takeUntil,
   tap,
-} from 'rxjs/operators';
+} from 'rxjs';
 import { estypes } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import type { HttpSetup, IHttpFetchError } from '@kbn/core-http-browser';
 import { type Start as InspectorStart, RequestAdapter } from '@kbn/inspector-plugin/public';
 
-import {
+import type {
+  AnalyticsServiceStart,
   ApplicationStart,
   CoreStart,
   DocLinksStart,
   ExecutionContextSetup,
+  I18nStart,
   IUiSettingsClient,
-  ThemeServiceSetup,
+  ThemeServiceStart,
   ToastsSetup,
 } from '@kbn/core/public';
 
 import { BatchedFunc, BfetchPublicSetup, DISABLE_BFETCH } from '@kbn/bfetch-plugin/public';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { AbortError, KibanaServerError } from '@kbn/kibana-utils-plugin/public';
 import { BfetchRequestError } from '@kbn/bfetch-error';
+import type {
+  SanitizedConnectionRequestParams,
+  IKibanaSearchRequest,
+  ISearchOptionsSerializable,
+} from '@kbn/search-types';
 import { createEsError, isEsError, renderSearchError } from '@kbn/search-errors';
+import type { IKibanaSearchResponse, ISearchOptions } from '@kbn/search-types';
+import {
+  AsyncSearchGetResponse,
+  ErrorResponseBase,
+  SqlGetAsyncResponse,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   ENHANCED_ES_SEARCH_STRATEGY,
+  ESQL_ASYNC_SEARCH_STRATEGY,
+  getTotalLoaded,
   IAsyncSearchOptions,
-  IKibanaSearchRequest,
-  IKibanaSearchResponse,
   isRunningResponse,
-  ISearchOptions,
-  ISearchOptionsSerializable,
   pollSearch,
+  shimHitsTotal,
   UI_SETTINGS,
-  type SanitizedConnectionRequestParams,
 } from '../../../common';
 import { SearchUsageCollector } from '../collectors';
 import { SearchTimeoutError, TimeoutErrorMode } from './timeout_error';
 import { SearchSessionIncompleteWarning } from './search_session_incomplete_warning';
+import { toPartialResponseAfterTimeout } from './to_partial_response';
 import { ISessionService, SearchSessionState } from '../session';
 import { SearchResponseCache } from './search_response_cache';
 import { SearchAbortController } from './search_abort_controller';
-import { SearchConfigSchema } from '../../../config';
+import type { SearchConfigSchema } from '../../../server/config';
 import type { SearchServiceStartDependencies } from '../search_service';
 import { createRequestHash } from './create_request_hash';
 
@@ -82,7 +95,6 @@ export interface SearchInterceptorDeps {
   toasts: ToastsSetup;
   usageCollector?: SearchUsageCollector;
   session: ISessionService;
-  theme: ThemeServiceSetup;
   searchConfig: SearchConfigSchema;
 }
 
@@ -116,14 +128,26 @@ export class SearchInterceptor {
   private inspector!: InspectorStart;
 
   /*
+   * Services for toMountPoint
+   * @internal
+   */
+  private startRenderServices!: {
+    analytics: Pick<AnalyticsServiceStart, 'reportEvent'>;
+    i18n: I18nStart;
+    theme: Pick<ThemeServiceStart, 'theme$'>;
+  };
+
+  /*
    * @internal
    */
   constructor(private readonly deps: SearchInterceptorDeps) {
     this.deps.http.addLoadingCountSource(this.pendingCount$);
 
     this.deps.startServices.then(([coreStart, depsStart]) => {
-      this.application = coreStart.application;
-      this.docLinks = coreStart.docLinks;
+      const { application, docLinks, analytics, i18n: i18nStart, theme } = coreStart;
+      this.application = application;
+      this.docLinks = docLinks;
+      this.startRenderServices = { analytics, i18n: i18nStart, theme };
       this.inspector = (depsStart as SearchServiceStartDependencies).inspector;
     });
 
@@ -257,6 +281,8 @@ export class SearchInterceptor {
 
     if (combined.sessionId !== undefined) serializableOptions.sessionId = combined.sessionId;
     if (combined.isRestore !== undefined) serializableOptions.isRestore = combined.isRestore;
+    if (combined.retrieveResults !== undefined)
+      serializableOptions.retrieveResults = combined.retrieveResults;
     if (combined.legacyHitsTotal !== undefined)
       serializableOptions.legacyHitsTotal = combined.legacyHitsTotal;
     if (combined.strategy !== undefined) serializableOptions.strategy = combined.strategy;
@@ -284,7 +310,7 @@ export class SearchInterceptor {
     const search = () => {
       const [{ isSearchStored }, afterPoll] = searchTracker?.beforePoll() ?? [
         { isSearchStored: false },
-        ({ isSearchStored: boolean }) => {},
+        () => {},
       ];
       return this.runSearch(
         { id, ...request },
@@ -336,11 +362,20 @@ export class SearchInterceptor {
           isSavedToBackground = true;
         });
 
-    const sendCancelRequest = once(() => {
-      this.deps.http.delete(`/internal/search/${strategy}/${id}`, { version: '1' });
-    });
+    const sendCancelRequest = once(() =>
+      this.deps.http.delete(`/internal/search/${strategy}/${id}`, { version: '1' })
+    );
 
-    const cancel = () => id && !isSavedToBackground && sendCancelRequest();
+    const cancel = async () => {
+      // If the request times out, we handle cancellation after we make the last call to retrieve the results
+      if (!id || isSavedToBackground || searchAbortController.isTimeout()) return;
+      try {
+        await sendCancelRequest();
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.error(e);
+      }
+    };
 
     // Async search requires a series of requests
     // 1) POST /<index pattern>/_async_search/
@@ -375,9 +410,22 @@ export class SearchInterceptor {
           : response;
       }),
       catchError((e: Error) => {
-        searchTracker?.error();
-        cancel();
-        return throwError(e);
+        // If we aborted (search:timeout advanced setting) and there was a partial response, return it instead of just erroring out
+        if (searchAbortController.isTimeout()) {
+          return from(
+            this.runSearch({ id, ...request }, { ...options, retrieveResults: true })
+          ).pipe(
+            map(toPartialResponseAfterTimeout),
+            tap(async () => {
+              await sendCancelRequest();
+              this.handleSearchError(e, request?.params?.body ?? {}, options, true);
+            })
+          );
+        } else {
+          searchTracker?.error();
+          cancel();
+          return throwError(e);
+        }
       }),
       finalize(() => {
         searchAbortController.cleanup();
@@ -405,14 +453,75 @@ export class SearchInterceptor {
     if (this.bFetchDisabled) {
       const { executionContext, strategy, ...searchOptions } = this.getSerializableOptions(options);
       return this.deps.http
-        .post(`/internal/search/${strategy}${request.id ? `/${request.id}` : ''}`, {
-          version: '1',
-          signal: abortSignal,
-          context: executionContext,
-          body: JSON.stringify({
-            ...request,
-            ...searchOptions,
-          }),
+        .post<IKibanaSearchResponse | ErrorResponseBase>(
+          `/internal/search/${strategy}${request.id ? `/${request.id}` : ''}`,
+          {
+            version: '1',
+            signal: abortSignal,
+            context: executionContext,
+            body: JSON.stringify({
+              ...request,
+              ...searchOptions,
+              stream:
+                strategy === ESQL_ASYNC_SEARCH_STRATEGY ||
+                strategy === ENHANCED_ES_SEARCH_STRATEGY ||
+                strategy === undefined, // undefined strategy is treated as enhanced ES
+            }),
+            asResponse: true,
+          }
+        )
+        .then((rawResponse) => {
+          const warning = rawResponse.response?.headers.get('warning');
+          const requestParams =
+            rawResponse.body && 'requestParams' in rawResponse.body
+              ? rawResponse.body.requestParams
+              : JSON.parse(rawResponse.response?.headers.get('kbn-search-request-params') || '{}');
+          const isRestored =
+            rawResponse.body && 'isRestored' in rawResponse.body
+              ? rawResponse.body.isRestored
+              : rawResponse.response?.headers.get('kbn-search-is-restored') === '?1';
+
+          if (rawResponse.body && 'error' in rawResponse.body) {
+            // eslint-disable-next-line no-throw-literal
+            throw {
+              attributes: {
+                error: rawResponse.body.error,
+                rawResponse: rawResponse.body,
+                requestParams,
+                isRestored,
+              },
+            };
+          }
+
+          switch (strategy) {
+            case ENHANCED_ES_SEARCH_STRATEGY:
+              if (rawResponse.body?.rawResponse) return rawResponse.body;
+              const typedResponse = rawResponse.body as unknown as AsyncSearchGetResponse;
+              const shimmedResponse = shimHitsTotal(typedResponse.response, {
+                legacyHitsTotal: searchOptions.legacyHitsTotal,
+              });
+              return {
+                id: typedResponse.id,
+                isPartial: typedResponse.is_partial,
+                isRunning: typedResponse.is_running,
+                rawResponse: shimmedResponse,
+                warning,
+                requestParams,
+                isRestored,
+                ...getTotalLoaded(shimmedResponse),
+              };
+            case ESQL_ASYNC_SEARCH_STRATEGY:
+              const esqlResponse = rawResponse.body as unknown as SqlGetAsyncResponse;
+              return {
+                id: esqlResponse.id,
+                rawResponse: esqlResponse,
+                isPartial: esqlResponse.is_partial,
+                isRunning: esqlResponse.is_running,
+                warning,
+              };
+            default:
+              return rawResponse.body;
+          }
         })
         .catch((e: IHttpFetchError<KibanaServerError>) => {
           if (e?.body) {
@@ -537,10 +646,10 @@ export class SearchInterceptor {
     );
   }
 
-  private showTimeoutErrorToast = (e: SearchTimeoutError, sessionId?: string) => {
+  private showTimeoutErrorToast = (e: SearchTimeoutError, _sessionId?: string) => {
     this.deps.toasts.addDanger({
       title: 'Timed out',
-      text: toMountPoint(e.getErrorMessage(this.application), { theme$: this.deps.theme.theme$ }),
+      text: toMountPoint(e.getErrorMessage(this.application), this.startRenderServices),
     });
   };
 
@@ -551,13 +660,11 @@ export class SearchInterceptor {
     }
   );
 
-  private showRestoreWarningToast = (sessionId?: string) => {
+  private showRestoreWarningToast = (_sessionId?: string) => {
     this.deps.toasts.addWarning(
       {
         title: 'Your search session is still running',
-        text: toMountPoint(SearchSessionIncompleteWarning(this.docLinks), {
-          theme$: this.deps.theme.theme$,
-        }),
+        text: toMountPoint(SearchSessionIncompleteWarning(this.docLinks), this.startRenderServices),
       },
       {
         toastLifeTimeMs: 60000,
@@ -590,7 +697,7 @@ export class SearchInterceptor {
     if (searchErrorDisplay) {
       this.deps.toasts.addDanger({
         title: searchErrorDisplay.title,
-        text: toMountPoint(searchErrorDisplay.body, { theme$: this.deps.theme.theme$ }),
+        text: toMountPoint(searchErrorDisplay.body, this.startRenderServices),
       });
     } else {
       this.deps.toasts.addError(e, {

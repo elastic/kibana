@@ -8,9 +8,8 @@
 import React from 'react';
 import { ComponentMeta } from '@storybook/react';
 import { LIGHT_THEME } from '@elastic/charts';
-
-import { Comparator } from '../../../../common/custom_threshold_rule/types';
-import { Props, Threshold as Component } from './custom_threshold';
+import { COMPARATORS } from '@kbn/alerting-comparators';
+import { Props, Threshold as Component } from './threshold';
 
 export default {
   component: Component,
@@ -31,12 +30,12 @@ export default {
 
 const defaultProps: Props = {
   chartProps: { baseTheme: LIGHT_THEME },
-  comparator: Comparator.GT,
+  comparator: COMPARATORS.GREATER_THAN,
   id: 'componentId',
   threshold: [90],
   title: 'Threshold breached',
   value: 93,
-  valueFormatter: (d) => `${d}%`,
+  valueFormatter: (d: number) => `${d}%`,
 };
 
 export const Default = {

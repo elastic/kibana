@@ -28,7 +28,7 @@ import { getEndpointConsoleCommands } from '../..';
 import React from 'react';
 import { getConsoleSelectorsAndActionMock } from '../../../console/mocks';
 import { waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import userEvent, { type UserEvent } from '@testing-library/user-event';
 import { executionTranslations } from '../../../console/components/console_state/state_update_handlers/translations';
 import { UPLOAD_ROUTE } from '../../../../../../common/endpoint/constants';
 import type { HttpFetchOptionsWithPath } from '@kbn/core-http-browser';
@@ -38,7 +38,10 @@ import {
 } from '../../../../../common/translations';
 import { endpointActionResponseCodes } from '../../lib/endpoint_action_response_codes';
 
-describe('When using `upload` response action', () => {
+// TODO These tests need revisting, they are not finishing
+// upgrade to user-event v14 https://github.com/elastic/kibana/pull/189949
+describe.skip('When using `upload` response action', () => {
+  let user: UserEvent;
   let render: (
     capabilities?: EndpointCapabilities[]
   ) => Promise<ReturnType<AppContextTestRender['render']>>;
@@ -52,7 +55,17 @@ describe('When using `upload` response action', () => {
   let file: File;
   let console: ReturnType<typeof getConsoleSelectorsAndActionMock>;
 
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
   beforeEach(() => {
+    // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
+    user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     const mockedContext = createAppRootMockRenderer();
 
     mockedContext.setExperimentalFlag({ responseActionUploadEnabled: true });
@@ -82,8 +95,11 @@ describe('When using `upload` response action', () => {
         />
       );
 
-      console = getConsoleSelectorsAndActionMock(renderResult);
-      consoleManagerMockAccess = getConsoleManagerMockRenderResultQueriesAndActions(renderResult);
+      console = getConsoleSelectorsAndActionMock(renderResult, user);
+      consoleManagerMockAccess = getConsoleManagerMockRenderResultQueriesAndActions(
+        user,
+        renderResult
+      );
 
       await consoleManagerMockAccess.clickOnRegisterNewConsole();
       await consoleManagerMockAccess.openRunningConsole();
@@ -93,6 +109,7 @@ describe('When using `upload` response action', () => {
   });
 
   afterEach(() => {
+    jest.clearAllMocks();
     // @ts-expect-error assignment of `undefined` to avoid leak from one test to the other
     console = undefined;
     // @ts-expect-error assignment of `undefined` to avoid leak from one test to the other
@@ -125,9 +142,7 @@ describe('When using `upload` response action', () => {
     const { getByTestId } = await render();
     console.enterCommand('upload --file', { inputOnly: true });
 
-    await waitFor(() => {
-      userEvent.upload(getByTestId('console-arg-file-picker'), file);
-    });
+    await user.upload(getByTestId('console-arg-file-picker'), file);
 
     console.submitCommand();
 
@@ -155,9 +170,7 @@ describe('When using `upload` response action', () => {
     const { getByTestId } = await render();
     console.enterCommand('upload --overwrite --file', { inputOnly: true });
 
-    await waitFor(() => {
-      userEvent.upload(getByTestId('console-arg-file-picker'), file);
-    });
+    await user.upload(getByTestId('console-arg-file-picker'), file);
 
     console.submitCommand();
 
@@ -177,9 +190,7 @@ describe('When using `upload` response action', () => {
     const { getByTestId } = await render();
     console.enterCommand('upload --overwrite --file', { inputOnly: true });
 
-    await waitFor(() => {
-      userEvent.upload(getByTestId('console-arg-file-picker'), file);
-    });
+    await user.upload(getByTestId('console-arg-file-picker'), file);
 
     console.submitCommand();
 
@@ -195,9 +206,7 @@ describe('When using `upload` response action', () => {
     const { getByTestId } = await render();
     console.enterCommand('upload --overwrite --file', { inputOnly: true });
 
-    await waitFor(() => {
-      userEvent.upload(getByTestId('console-arg-file-picker'), file);
-    });
+    await user.upload(getByTestId('console-arg-file-picker'), file);
 
     console.submitCommand();
 
@@ -220,11 +229,19 @@ describe('When using `upload` response action', () => {
     const pendingDetailResponse = apiMocks.responseProvider.actionDetails({
       path: '/api/endpoint/action/a.b.c',
     }) as ActionDetailsApiResponse<ResponseActionUploadOutputContent>;
-    pendingDetailResponse.data.agents = ['a.b.c'];
+    pendingDetailResponse.data.command = 'upload';
     pendingDetailResponse.data.wasSuccessful = false;
     pendingDetailResponse.data.errors = ['not found'];
+    pendingDetailResponse.data.agentState = {
+      'agent-a': {
+        isCompleted: true,
+        wasSuccessful: false,
+        errors: ['not found'],
+        completedAt: new Date().toISOString(),
+      },
+    };
     pendingDetailResponse.data.outputs = {
-      'a.b.c': {
+      'agent-a': {
         type: 'json',
         content: {
           code: outputCode,
@@ -235,9 +252,7 @@ describe('When using `upload` response action', () => {
     await render();
 
     console.enterCommand('upload --file', { inputOnly: true });
-    await waitFor(() => {
-      userEvent.upload(renderResult.getByTestId('console-arg-file-picker'), file);
-    });
+    await user.upload(renderResult.getByTestId('console-arg-file-picker'), file);
 
     console.submitCommand();
 

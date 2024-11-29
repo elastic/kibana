@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -11,7 +12,7 @@ import type { FtrProviderContext } from '../../functional/ftr_provider_context';
 
 const TEST_START_TIME = 'Jan 2, 2021 @ 00:00:00.000';
 const TEST_END_TIME = 'Jan 2, 2022 @ 00:00:00.000';
-const metaFields = ['_id', '_index', '_score'];
+const metaFields = ['_id', '_index', '_score', '_ignored'];
 
 const fieldsWithData = [
   'ts',

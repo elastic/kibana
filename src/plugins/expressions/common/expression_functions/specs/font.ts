@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
@@ -150,7 +151,7 @@ export const font: ExpressionFunctionFont = {
     if (!Object.values(FontWeight).includes(args.weight!)) {
       throw new Error(
         i18n.translate('expressions.functions.font.invalidFontWeightErrorMessage', {
-          defaultMessage: "Invalid font weight: '{weight}'",
+          defaultMessage: "Invalid font weight: ''{weight}''",
           values: {
             weight: args.weight,
           },
@@ -160,7 +161,7 @@ export const font: ExpressionFunctionFont = {
     if (!Object.values(TextAlignment).includes(args.align!)) {
       throw new Error(
         i18n.translate('expressions.functions.font.invalidTextAlignmentErrorMessage', {
-          defaultMessage: "Invalid text alignment: '{align}'",
+          defaultMessage: "Invalid text alignment: ''{align}''",
           values: {
             align: args.align,
           },
@@ -176,7 +177,7 @@ export const font: ExpressionFunctionFont = {
     if (args.sizeUnit && !availableSizeUnits.includes(args.sizeUnit)) {
       throw new Error(
         i18n.translate('expressions.functions.font.invalidSizeUnitErrorMessage', {
-          defaultMessage: "Invalid size unit: '{sizeUnit}'",
+          defaultMessage: "Invalid size unit: ''{sizeUnit}''",
           values: {
             sizeUnit: args.sizeUnit,
           },

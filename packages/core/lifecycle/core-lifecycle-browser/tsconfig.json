@@ -28,7 +28,9 @@
     "@kbn/core-chrome-browser",
     "@kbn/core-custom-branding-browser",
     "@kbn/core-plugins-contracts-browser",
-    "@kbn/core-security-browser"
+    "@kbn/core-security-browser",
+    "@kbn/core-user-profile-browser",
+    "@kbn/core-feature-flags-browser"
   ],
   "exclude": [
     "target/**/*",

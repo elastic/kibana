@@ -58,6 +58,7 @@ describe('browser normalizers', () => {
     ];
     const monitors: ProjectMonitor[] = [
       {
+        type: MonitorTypeEnum.BROWSER,
         id: 'test-id-1',
         screenshot: ScreenshotOption.OFF,
         name: 'test-name-1',
@@ -74,6 +75,7 @@ describe('browser normalizers', () => {
         hash: testHash,
       } as ProjectMonitor, // test that normalizers defaults to browser when type is omitted
       {
+        type: MonitorTypeEnum.BROWSER,
         id: 'test-id-2',
         screenshot: ScreenshotOption.ON,
         name: 'test-name-2',
@@ -89,7 +91,6 @@ describe('browser normalizers', () => {
         locations: ['us_central', 'us_east'],
         tags: ['tag3', 'tag4'],
         ignoreHTTPSErrors: false,
-        type: MonitorTypeEnum.BROWSER,
         hash: testHash,
       },
       {
@@ -255,6 +256,7 @@ describe('browser normalizers', () => {
                 id: 'germany',
                 isServiceManaged: false,
                 label: 'Germany',
+                agentPolicyId: 'germany',
               },
             ],
             name: 'test-name-3',

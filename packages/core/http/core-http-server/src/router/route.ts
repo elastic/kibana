@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { RouteValidatorFullConfig } from './route_validator';
+import type { RouteValidator } from './route_validator';
 
 /**
  * The set of valid body.output
@@ -86,7 +87,7 @@ export interface RouteConfigOptionsBody {
    *
    * Default value: 'data', unless no validation.body is provided in the route definition. In that case the default is 'stream' to alleviate memory pressure.
    */
-  output?: typeof validBodyOutput[number];
+  output?: (typeof validBodyOutput)[number];
 
   /**
    * Determines if the incoming payload is processed or presented raw. Available values:
@@ -98,6 +99,183 @@ export interface RouteConfigOptionsBody {
    * Default value: true, unless no validation.body is provided in the route definition. In that case the default is false to alleviate memory pressure.
    */
   parse?: boolean | 'gunzip';
+}
+
+/**
+ * Route access level.
+ *
+ * Public routes are stable and intended for external access and are subject to
+ * stricter change management and have long term maintenance windows.
+ *
+ * @remark as of 9.0, access to internal routes is restricted by default. See https://github.com/elastic/kibana/issues/163654.
+ */
+export type RouteAccess = 'public' | 'internal';
+
+export type Privilege = string;
+
+/**
+ * Route Deprecation info
+ * This information will assist Kibana HTTP API users when upgrading to new versions
+ * of the Elastic stack (via Upgrade Assistant) and will be surfaced in documentation
+ * created from HTTP API introspection (like OAS).
+ */
+export interface RouteDeprecationInfo {
+  /**
+   * link to the documentation for more details on the deprecation.
+   */
+  documentationUrl: string;
+  /**
+   * The description message to be displayed for the deprecation.
+   * Check the README for writing deprecations in `src/core/server/deprecations/README.mdx`
+   */
+  message?: string;
+  /**
+   * levels:
+   * - warning: will not break deployment upon upgrade.
+   * - critical: needs to be addressed before upgrade.
+   */
+  severity: 'warning' | 'critical';
+  /**
+   * API deprecation reason:
+   * - bump: New version of the API is available.
+   * - remove: API was fully removed with no replacement.
+   * - migrate: API has been migrated to a different path.
+   * - deprecated: the deprecated API is deprecated, it might be removed or migrated, or got a version bump in the future.
+   *   It is a catch-all deprecation for APIs but the API will work in the next upgrades.
+   */
+  reason:
+    | VersionBumpDeprecationType
+    | RemovalApiDeprecationType
+    | MigrationApiDeprecationType
+    | DeprecateApiDeprecationType;
+}
+
+interface VersionBumpDeprecationType {
+  /**
+   * bump deprecation reason denotes a new version of the API is available
+   */
+  type: 'bump';
+  /**
+   * new version of the API to be used instead.
+   */
+  newApiVersion: string;
+}
+
+interface RemovalApiDeprecationType {
+  /**
+   * remove deprecation reason denotes the API was fully removed with no replacement
+   */
+  type: 'remove';
+}
+
+interface MigrationApiDeprecationType {
+  /**
+   * migrate deprecation reason denotes the API has been migrated to a different API path
+   * Please make sure that if you are only incrementing the version of the API to use 'bump' instead
+   */
+  type: 'migrate';
+  /**
+   * new API path to be used instead
+   */
+  newApiPath: string;
+  /**
+   * new API method (GET POST PUT DELETE) to be used with the new API.
+   */
+  newApiMethod: string;
+}
+
+interface DeprecateApiDeprecationType {
+  /**
+   * deprecate deprecation reason denotes the API is deprecated but it doesnt have a replacement
+   * or a clear version that it will be removed in. This is useful to alert users that the API is deprecated
+   * to allow them as much time as possible to work around this fact before the deprecation
+   * turns into a `remove` or `migrate` or `bump` type.
+   *
+   * Recommended to pair this with `severity: 'warning'` to avoid blocking the upgrades for this type.
+   */
+  type: 'deprecate';
+}
+
+/**
+ * A set of privileges that can be used to define complex authorization requirements.
+ *
+ * - `anyRequired`: An array of privileges where at least one must be satisfied to meet the authorization requirement.
+ * - `allRequired`: An array of privileges where all listed privileges must be satisfied to meet the authorization requirement.
+ */
+export interface PrivilegeSet {
+  anyRequired?: Privilege[];
+  allRequired?: Privilege[];
+}
+
+/**
+ * An array representing a combination of simple privileges or complex privilege sets.
+ */
+type Privileges = Array<Privilege | PrivilegeSet>;
+
+/**
+ * Describes the authorization requirements when authorization is enabled.
+ *
+ * - `requiredPrivileges`: An array of privileges or privilege sets that are required for the route.
+ */
+export interface AuthzEnabled {
+  requiredPrivileges: Privileges;
+}
+
+/**
+ * Describes the state when authorization is disabled.
+ *
+ * - `enabled`: A boolean indicating that authorization is not enabled (`false`).
+ * - `reason`: A string explaining why authorization is disabled.
+ */
+export interface AuthzDisabled {
+  enabled: false;
+  reason: string;
+}
+
+/**
+ * Describes the authentication status when authentication is enabled.
+ *
+ * - `enabled`: A boolean or string indicating the authentication status. Can be `true` (authentication required) or `'optional'` (authentication is optional).
+ */
+export interface AuthcEnabled {
+  enabled: true | 'optional';
+}
+
+/**
+ * Describes the state when authentication is disabled.
+ *
+ * - `enabled`: A boolean indicating that authentication is not enabled (`false`).
+ * - `reason`: A string explaining why authentication is disabled.
+ */
+export interface AuthcDisabled {
+  enabled: false;
+  reason: string;
+}
+
+/**
+ * Represents the authentication status for a route. It can either be enabled (`AuthcEnabled`) or disabled (`AuthcDisabled`).
+ */
+export type RouteAuthc = AuthcEnabled | AuthcDisabled;
+
+/**
+ * Represents the authorization status for a route. It can either be enabled (`AuthzEnabled`) or disabled (`AuthzDisabled`).
+ */
+export type RouteAuthz = AuthzEnabled | AuthzDisabled;
+
+/**
+ * Describes the security requirements for a route, including authorization and authentication.
+ */
+export interface RouteSecurity {
+  authz: RouteAuthz;
+  authc?: RouteAuthc;
+}
+
+/**
+ * A set of reserved privileges that can be used to check access to the route.
+ */
+export enum ReservedPrivilegesSet {
+  operator = 'operator',
+  superuser = 'superuser',
 }
 
 /**
@@ -128,12 +306,12 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
   /**
    * Defines intended request origin of the route:
    * - public. The route is public, declared stable and intended for external access.
-   *           In the future, may require an incomming request to contain a specified header.
+   *           In the future, may require an incoming request to contain a specified header.
    * - internal. The route is internal and intended for internal access only.
    *
    * Defaults to 'internal' If not declared,
    */
-  access?: 'public' | 'internal';
+  access?: RouteAccess;
 
   /**
    * Additional metadata tag strings to attach to the route.
@@ -158,6 +336,97 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
      * Milliseconds the socket can be idle before it's closed
      */
     idleSocket?: number;
+  };
+
+  /**
+   * Short summary of this route. Required for all routes used in OAS documentation.
+   *
+   * @example
+   * ```ts
+   * router.get({
+   *  path: '/api/foo/{id}',
+   *  access: 'public',
+   *  summary: `Get foo resources for an ID`,
+   * })
+   * ```
+   */
+  summary?: string;
+
+  /**
+   * Optional API description, which supports [CommonMark](https://spec.commonmark.org) markdown formatting
+   *
+   * @example
+   * ```ts
+   * router.get({
+   *  path: '/api/foo/{id}',
+   *  access: 'public',
+   *  summary: `Get foo resources for an ID`,
+   *  description: `Foo resources require **X** and **Y** `read` permissions to access.`,
+   * })
+   * ```
+   */
+  description?: string;
+
+  /**
+   * Description of deprecations for this HTTP API.
+   *
+   * @remark This will assist Kibana HTTP API users when upgrading to new versions
+   * of the Elastic stack (via Upgrade Assistant) and will be surfaced in documentation
+   * created from HTTP API introspection (like OAS).
+   *
+   * Setting this object marks the route as deprecated.
+   *
+   * @remarks This may be surfaced in OAS documentation.
+   * @public
+   */
+  deprecated?: RouteDeprecationInfo;
+
+  /**
+   * Whether this route should be treated as "invisible" and excluded from router
+   * OAS introspection.
+   *
+   * @default false
+   */
+  excludeFromOAS?: boolean;
+
+  /**
+   * Release version or date that this route will be removed
+   * Use with `deprecated: true`
+   *
+   * @remarks This will be surfaced in OAS documentation.
+   * @example 9.0.0
+   */
+  discontinued?: string;
+
+  /**
+   * Whether this endpoint is being used to serve generated or static HTTP resources
+   * like JS, CSS or HTML. _Do not set to `true` for HTTP APIs._
+   *
+   * @note Unless you need this setting for a special case, rather use the
+   *       {@link HttpResources} service exposed to plugins directly.
+   *
+   * @note This is not a security feature. It may affect aspects of the HTTP
+   *       response like headers.
+   *
+   * @default false
+   */
+  httpResource?: boolean;
+
+  /**
+   * Based on the the ES API specification (see https://github.com/elastic/elasticsearch-specification)
+   * Kibana APIs can also specify some metadata about API availability.
+   *
+   * This setting is only applicable if your route `access` is `public`.
+   *
+   * @remark intended to be used for informational purposes only.
+   */
+  availability?: {
+    /** @default stable */
+    stability?: 'experimental' | 'beta' | 'stable';
+    /**
+     * The stack version in which the route was introduced (eg: 8.15.0).
+     */
+    since?: string;
   };
 }
 
@@ -237,10 +506,24 @@ export interface RouteConfig<P, Q, B, Method extends RouteMethod> {
    * });
    * ```
    */
-  validate: RouteValidatorFullConfig<P, Q, B> | false;
+  validate: RouteValidator<P, Q, B> | (() => RouteValidator<P, Q, B>) | false;
+
+  /**
+   * Defines the security requirements for a route, including authorization and authentication.
+   */
+  security?: RouteSecurity;
 
   /**
    * Additional route options {@link RouteConfigOptions}.
    */
   options?: RouteConfigOptions<Method>;
+}
+
+/**
+ * Post Validation Route emitter metadata.
+ */
+export interface PostValidationMetadata {
+  deprecated?: RouteDeprecationInfo;
+  isInternalApiRequest: boolean;
+  isPublicAccess: boolean;
 }

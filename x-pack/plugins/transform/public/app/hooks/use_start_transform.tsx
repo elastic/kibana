@@ -11,11 +11,11 @@ import { useMutation } from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 
-import { addInternalBasePath } from '../../../common/constants';
 import type {
   StartTransformsRequestSchema,
   StartTransformsResponseSchema,
-} from '../../../common/api_schemas/start_transforms';
+} from '../../../server/routes/api_schemas/start_transforms';
+import { addInternalBasePath } from '../../../common/constants';
 import { getErrorMessage } from '../../../common/utils/errors';
 
 import { useAppDependencies, useToastNotifications } from '../app_dependencies';
@@ -24,7 +24,7 @@ import { ToastNotificationText } from '../components';
 import { useRefreshTransformList } from './use_refresh_transform_list';
 
 export const useStartTransforms = () => {
-  const { http, i18n: i18nStart, theme } = useAppDependencies();
+  const { http, ...startServices } = useAppDependencies();
   const refreshTransformList = useRefreshTransformList();
   const toastNotifications = useToastNotifications();
 
@@ -42,15 +42,12 @@ export const useStartTransforms = () => {
             defaultMessage: 'An error occurred calling the start transforms request.',
           }
         ),
-        text: toMountPoint(<ToastNotificationText text={getErrorMessage(error)} />, {
-          theme,
-          i18n: i18nStart,
-        }),
+        text: toMountPoint(<ToastNotificationText text={getErrorMessage(error)} />, startServices),
       }),
     onSuccess: (results) => {
       for (const transformId in results) {
         // hasOwnProperty check to ensure only properties on object itself, and not its prototypes
-        if (results.hasOwnProperty(transformId)) {
+        if (Object.hasOwn(results, transformId)) {
           const result = results[transformId];
           if (!result.success) {
             toastNotifications.addError(

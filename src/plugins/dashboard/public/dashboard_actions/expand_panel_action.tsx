@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { apiCanExpandPanels, CanExpandPanels } from '@kbn/presentation-containers';
@@ -15,6 +16,8 @@ import {
   HasUniqueId,
 } from '@kbn/presentation-publishing';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { skip } from 'rxjs';
+import { DASHBOARD_ACTION_GROUP } from '.';
 
 import { dashboardExpandPanelActionStrings } from './_dashboard_actions_strings';
 
@@ -28,9 +31,8 @@ const isApiCompatible = (api: unknown | null): api is ExpandPanelActionApi =>
 export class ExpandPanelAction implements Action<EmbeddableApiContext> {
   public readonly type = ACTION_EXPAND_PANEL;
   public readonly id = ACTION_EXPAND_PANEL;
-  public order = 7;
-
-  constructor() {}
+  public order = 9;
+  public grouping = [DASHBOARD_ACTION_GROUP];
 
   public getDisplayName({ embeddable }: EmbeddableApiContext) {
     if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
@@ -48,10 +50,22 @@ export class ExpandPanelAction implements Action<EmbeddableApiContext> {
     return isApiCompatible(embeddable);
   }
 
+  public couldBecomeCompatible({ embeddable }: EmbeddableApiContext) {
+    return apiHasParentApi(embeddable) && apiCanExpandPanels(embeddable.parentApi);
+  }
+
+  public subscribeToCompatibilityChanges(
+    { embeddable }: EmbeddableApiContext,
+    onChange: (isCompatible: boolean, action: ExpandPanelAction) => void
+  ) {
+    if (!isApiCompatible(embeddable)) return;
+    return embeddable.parentApi.expandedPanelId.pipe(skip(1)).subscribe(() => {
+      onChange(isApiCompatible(embeddable), this);
+    });
+  }
+
   public async execute({ embeddable }: EmbeddableApiContext) {
     if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
-    embeddable.parentApi.expandPanel(
-      embeddable.parentApi.expandedPanelId.value ? undefined : embeddable.uuid
-    );
+    embeddable.parentApi.expandPanel(embeddable.uuid);
   }
 }

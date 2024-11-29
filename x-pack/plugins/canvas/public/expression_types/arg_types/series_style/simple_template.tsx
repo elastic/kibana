@@ -44,7 +44,7 @@ export const SimpleTemplate: FunctionComponent<Props> = (props) => {
   const { name } = typeInstance;
   const chain = get(argValue, 'chain.0', {});
   const chainArgs = get(chain, 'arguments', {});
-  const color: string = get(chainArgs, 'color.0', '');
+  const color: string = get(chainArgs, 'color.0', '') as string;
 
   const handleChange: <T extends Argument>(key: T, val: string) => void = (argName, val) => {
     const fn = val === '' ? del : set;

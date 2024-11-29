@@ -6,11 +6,12 @@
  */
 
 import type { Logger } from '@kbn/core/server';
+import { DEFAULT_DIAGNOSTIC_INDEX_PATTERN } from '../../../../common/endpoint/constants';
 import type { ITelemetryEventsSender } from '../sender';
 import type { ITelemetryReceiver } from '../receiver';
 import type { TaskExecutionPeriod } from '../task';
 import type { ITaskMetricsService } from '../task_metrics.types';
-import { DEFAULT_DIAGNOSTIC_INDEX, TELEMETRY_CHANNEL_TIMELINE } from '../constants';
+import { TELEMETRY_CHANNEL_TIMELINE } from '../constants';
 import { ranges, TelemetryTimelineFetcher, newTelemetryLogger } from '../helpers';
 
 export function createTelemetryDiagnosticTimelineTaskConfig() {
@@ -30,13 +31,12 @@ export function createTelemetryDiagnosticTimelineTaskConfig() {
       taskMetricsService: ITaskMetricsService,
       taskExecutionPeriod: TaskExecutionPeriod
     ) => {
-      const log = newTelemetryLogger(logger.get('timelines_diagnostic')).l;
+      const mdc = { task_id: taskId, task_execution_period: taskExecutionPeriod };
+      const log = newTelemetryLogger(logger.get('timelines_diagnostic'), mdc);
       const trace = taskMetricsService.start(taskType);
       const fetcher = new TelemetryTimelineFetcher(receiver);
 
-      log(
-        `Running task: ${taskId} [last: ${taskExecutionPeriod.last} - current: ${taskExecutionPeriod.current}]`
-      );
+      log.l('Running telemetry task');
 
       try {
         let counter = 0;
@@ -44,12 +44,12 @@ export function createTelemetryDiagnosticTimelineTaskConfig() {
         const { rangeFrom, rangeTo } = ranges(taskExecutionPeriod);
 
         const alerts = await receiver.fetchTimelineAlerts(
-          DEFAULT_DIAGNOSTIC_INDEX,
+          DEFAULT_DIAGNOSTIC_INDEX_PATTERN,
           rangeFrom,
           rangeTo
         );
 
-        log(`found ${alerts.length} alerts to process`);
+        log.l('found alerts to process', { length: alerts.length });
 
         for (const alert of alerts) {
           const result = await fetcher.fetchTimeline(alert);
@@ -67,20 +67,21 @@ export function createTelemetryDiagnosticTimelineTaskConfig() {
           });
 
           if (result.timeline) {
-            sender.sendOnDemand(TELEMETRY_CHANNEL_TIMELINE, [result.timeline]);
+            await sender.sendOnDemand(TELEMETRY_CHANNEL_TIMELINE, [result.timeline]);
             counter += 1;
           } else {
-            log('no events in timeline');
+            log.debug('no events in timeline');
           }
         }
 
-        log(`sent ${counter} timelines. Concluding timeline task.`);
+        log.l('Concluding timeline task.', { counter });
 
-        taskMetricsService.end(trace);
+        await taskMetricsService.end(trace);
 
         return counter;
       } catch (err) {
-        taskMetricsService.end(trace, err);
+        logger.error('could not complete task', { error: err });
+        await taskMetricsService.end(trace, err);
         return 0;
       }
     },

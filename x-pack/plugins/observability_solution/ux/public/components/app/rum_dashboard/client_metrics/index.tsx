@@ -6,13 +6,7 @@
  */
 
 import * as React from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-  EuiTitle,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { I18LABELS } from '../translations';
 import { getPercentileLabel } from '../ux_metrics/translations';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';

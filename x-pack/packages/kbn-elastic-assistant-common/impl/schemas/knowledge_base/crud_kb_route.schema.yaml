@@ -1,12 +1,13 @@
 openapi: 3.0.0
 info:
   title: KnowledgeBase API endpoints
-  version: '2023-10-31'
+  version: '1'
 paths:
   /internal/elastic_assistant/knowledge_base/{resource}:
     post:
-      operationId: CreateKnowledgeBase
       x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: CreateKnowledgeBase
       summary: Create a KnowledgeBase
       description: Create a KnowledgeBase
       tags:
@@ -17,6 +18,19 @@ paths:
           description: The KnowledgeBase `resource` value.
           schema:
             type: string
+        - name: modelId
+          in: query
+          description: Optional ELSER modelId to use when setting up the Knowledge Base
+          required: false
+          schema:
+            type: string
+        - name: ignoreSecurityLabs
+          in: query
+          description: Indicates whether we should or should not install Security Labs docs when setting up the Knowledge Base
+          required: false
+          schema:
+            type: boolean
+            default: false
       responses:
         200:
           description: Indicates a successful call.
@@ -38,8 +52,9 @@ paths:
                   message:
                     type: string
     get:
-      operationId: ReadKnowledgeBase
       x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: ReadKnowledgeBase
       description: Read a single KB
       summary: Read a KnowledgeBase
       tags:
@@ -62,41 +77,16 @@ paths:
                     type: boolean
                   index_exists:
                     type: boolean
+                  is_setup_available:
+                    type: boolean
+                  is_setup_in_progress:
+                    type: boolean
                   pipeline_exists:
                     type: boolean
-        400:
-          description: Generic Error
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  statusCode:
-                    type: number
-                  error:
-                    type: string
-                  message:
-                    type: string
-    delete:
-      operationId: DeleteKnowledgeBase
-      x-codegen-enabled: true
-      description: Deletes KnowledgeBase with the `resource` field.
-      summary: Deletes a KnowledgeBase
-      tags:
-        - KnowledgeBase API
-      parameters:
-        - name: resource
-          in: path
-          description: The KnowledgeBase `resource` value.
-          schema:
-            type: string
-      responses:
-        200:
-          description: Indicates a successful call.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/KnowledgeBaseResponse'
+                  security_labs_exists:
+                    type: boolean
+                  user_data_exists:
+                    type: boolean
         400:
           description: Generic Error
           content:

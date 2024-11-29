@@ -25,27 +25,22 @@ import { filterForEnabledFeatureModels } from './trained_models';
  * Routes for management service
  */
 export function managementRoutes({ router, routeGuard, getEnabledFeatures }: RouteInitialization) {
-  /**
-   * @apiGroup Management
-   *
-   * @api {get} /internal/ml/management/list/:listType Management list
-   * @apiName ManagementList
-   * @apiDescription Returns a list of anomaly detection jobs, data frame analytics jobs or trained models
-   *
-   * @apiSchema (params) listTypeSchema
-   *
-   */
   router.versioned
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/management/list/{listType}`,
       access: 'internal',
-      options: {
-        tags: [
-          'access:ml:canCreateJob',
-          'access:ml:canCreateDataFrameAnalytics',
-          'access:ml:canCreateTrainedModels',
-        ],
+      security: {
+        authz: {
+          requiredPrivileges: [
+            'ml:canCreateJob',
+            'ml:canCreateDataFrameAnalytics',
+            'ml:canCreateTrainedModels',
+          ],
+        },
       },
+      summary: 'Gets management list',
+      description:
+        'Retrieves the list of anomaly detection jobs, data frame analytics jobs or trained models.',
     })
     .addVersion(
       {

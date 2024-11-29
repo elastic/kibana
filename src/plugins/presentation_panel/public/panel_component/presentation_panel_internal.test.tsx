@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
@@ -36,7 +37,7 @@ describe('Presentation panel', () => {
       <PresentationPanel {...props} Component={getMockPresentationPanelCompatibleComponent(api)} />
     );
     await waitFor(() => {
-      expect(screen.getByTestId('embeddablePanelToggleMenuIcon')).toBeInTheDocument();
+      expect(screen.getByTestId('embeddablePanel')).toBeInTheDocument();
     });
   };
 
@@ -119,7 +120,7 @@ describe('Presentation panel', () => {
       };
       const getActions = jest.fn().mockReturnValue([mockAction('actionA'), mockAction('actionB')]);
       await renderPresentationPanel({ api, props: { getActions } });
-      userEvent.click(screen.getByTestId('embeddablePanelToggleMenuIcon'));
+      await userEvent.click(screen.getByTestId('embeddablePanelToggleMenuIcon'));
       await waitForEuiPopoverOpen();
       await waitFor(() => {
         expect(screen.getByTestId('embeddablePanelContextMenuOpen')).toBeInTheDocument();
@@ -157,14 +158,37 @@ describe('Presentation panel', () => {
   });
 
   describe('titles', () => {
-    it('renders the panel title from the api', async () => {
+    it('renders the panel title from the api and not the default title', async () => {
+      const api: DefaultPresentationPanelApi = {
+        uuid: 'test',
+        panelTitle: new BehaviorSubject<string | undefined>('SUPER TITLE'),
+        defaultPanelTitle: new BehaviorSubject<string | undefined>('SO Title'),
+      };
+      await renderPresentationPanel({ api });
+      await waitFor(() => {
+        expect(screen.getByTestId('embeddablePanelTitleInner')).toHaveTextContent('SUPER TITLE');
+      });
+    });
+
+    it('renders the default title from the api when a panel title is not provided', async () => {
+      const api: DefaultPresentationPanelApi = {
+        uuid: 'test',
+        defaultPanelTitle: new BehaviorSubject<string | undefined>('SO Title'),
+      };
+      await renderPresentationPanel({ api });
+      await waitFor(() => {
+        expect(screen.getByTestId('embeddablePanelTitleInner')).toHaveTextContent('SO Title');
+      });
+    });
+
+    it("does not render an info icon when the api doesn't provide a panel description or default description", async () => {
       const api: DefaultPresentationPanelApi = {
         uuid: 'test',
         panelTitle: new BehaviorSubject<string | undefined>('SUPER TITLE'),
       };
       await renderPresentationPanel({ api });
       await waitFor(() => {
-        expect(screen.getByTestId('embeddablePanelTitleInner')).toHaveTextContent('SUPER TITLE');
+        expect(screen.queryByTestId('embeddablePanelTitleDescriptionIcon')).toBe(null);
       });
     });
 
@@ -180,6 +204,18 @@ describe('Presentation panel', () => {
       });
     });
 
+    it('renders an info icon when the api provides a default description', async () => {
+      const api: DefaultPresentationPanelApi = {
+        uuid: 'test',
+        panelTitle: new BehaviorSubject<string | undefined>('SUPER TITLE'),
+        defaultPanelDescription: new BehaviorSubject<string | undefined>('SO Description'),
+      };
+      await renderPresentationPanel({ api });
+      await waitFor(() => {
+        expect(screen.getByTestId('embeddablePanelTitleDescriptionIcon')).toBeInTheDocument();
+      });
+    });
+
     it('does not render a title when in view mode when the provided title is blank', async () => {
       const api: DefaultPresentationPanelApi & PublishesViewMode = {
         uuid: 'test',
@@ -187,12 +223,10 @@ describe('Presentation panel', () => {
         viewMode: new BehaviorSubject<ViewMode>('view'),
       };
       await renderPresentationPanel({ api });
-      const header = await screen.findByTestId('embeddablePanelHeading');
-      const titleComponent = screen.queryByTestId('dashboardPanelTitle');
-      expect(header).not.toContainElement(titleComponent);
+      expect(screen.queryByTestId('presentationPanelTitle')).not.toBeInTheDocument();
     });
 
-    it('renders a placeholder title when in edit mode and the provided title is blank', async () => {
+    it('does not render a title when in edit mode and the provided title is blank', async () => {
       const api: DefaultPresentationPanelApi & PublishesDataViews & PublishesViewMode = {
         uuid: 'test',
         panelTitle: new BehaviorSubject<string | undefined>(''),
@@ -200,9 +234,7 @@ describe('Presentation panel', () => {
         dataViews: new BehaviorSubject<DataView[] | undefined>([]),
       };
       await renderPresentationPanel({ api });
-      await waitFor(() => {
-        expect(screen.getByTestId('embeddablePanelTitleInner')).toHaveTextContent('[No Title]');
-      });
+      expect(screen.queryByTestId('presentationPanelTitle')).not.toBeInTheDocument();
     });
 
     it('opens customize panel flyout on title click when in edit mode', async () => {
@@ -238,7 +270,7 @@ describe('Presentation panel', () => {
       expect(screen.queryByTestId('embeddablePanelTitleLink')).not.toBeInTheDocument();
     });
 
-    it('hides title when API hide title option is true', async () => {
+    it('hides title in view mode when API hide title option is true', async () => {
       const api: DefaultPresentationPanelApi & PublishesViewMode = {
         uuid: 'test',
         panelTitle: new BehaviorSubject<string | undefined>('SUPER TITLE'),
@@ -249,13 +281,38 @@ describe('Presentation panel', () => {
       expect(screen.queryByTestId('presentationPanelTitle')).not.toBeInTheDocument();
     });
 
-    it('hides title when parent hide title option is true', async () => {
+    it('hides title in edit mode when API hide title option is true', async () => {
+      const api: DefaultPresentationPanelApi & PublishesViewMode = {
+        uuid: 'test',
+        panelTitle: new BehaviorSubject<string | undefined>('SUPER TITLE'),
+        hidePanelTitle: new BehaviorSubject<boolean | undefined>(true),
+        viewMode: new BehaviorSubject<ViewMode>('edit'),
+      };
+      await renderPresentationPanel({ api });
+      expect(screen.queryByTestId('presentationPanelTitle')).not.toBeInTheDocument();
+    });
+
+    it('hides title in view mode when parent hide title option is true', async () => {
       const api: DefaultPresentationPanelApi & PublishesViewMode = {
         uuid: 'test',
         panelTitle: new BehaviorSubject<string | undefined>('SUPER TITLE'),
         viewMode: new BehaviorSubject<ViewMode>('view'),
         parentApi: {
           viewMode: new BehaviorSubject<ViewMode>('view'),
+          ...getMockPresentationContainer(),
+        },
+      };
+      await renderPresentationPanel({ api });
+      expect(screen.queryByTestId('presentationPanelTitle')).not.toBeInTheDocument();
+    });
+
+    it('hides title in edit mode when parent hide title option is true', async () => {
+      const api: DefaultPresentationPanelApi & PublishesViewMode = {
+        uuid: 'test',
+        panelTitle: new BehaviorSubject<string | undefined>('SUPER TITLE'),
+        viewMode: new BehaviorSubject<ViewMode>('edit'),
+        parentApi: {
+          viewMode: new BehaviorSubject<ViewMode>('edit'),
           ...getMockPresentationContainer(),
         },
       };

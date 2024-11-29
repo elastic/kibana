@@ -5,28 +5,4 @@
  * 2.0.
  */
 
-import { ApmDocumentType } from './document_type';
-import { RollupInterval } from './rollup';
-
-type AnyApmDocumentType =
-  | ApmDocumentType.ServiceTransactionMetric
-  | ApmDocumentType.TransactionMetric
-  | ApmDocumentType.TransactionEvent
-  | ApmDocumentType.ServiceDestinationMetric
-  | ApmDocumentType.ServiceSummaryMetric
-  | ApmDocumentType.ErrorEvent
-  | ApmDocumentType.SpanEvent;
-
-export interface ApmDataSource<
-  TDocumentType extends AnyApmDocumentType = AnyApmDocumentType
-> {
-  rollupInterval: RollupInterval;
-  documentType: TDocumentType;
-}
-
-export type ApmDataSourceWithSummary<
-  T extends AnyApmDocumentType = AnyApmDocumentType
-> = ApmDataSource<T> & {
-  hasDurationSummaryField: boolean;
-  hasDocs: boolean;
-};
+export type { ApmDataSource, ApmDataSourceWithSummary } from '@kbn/apm-data-access-plugin/common';

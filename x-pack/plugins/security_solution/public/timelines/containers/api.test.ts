@@ -9,7 +9,7 @@ import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import { buildDataViewMock, shallowMockedFields } from '@kbn/discover-utils/src/__mocks__';
 import * as api from './api';
 import { KibanaServices } from '../../common/lib/kibana';
-import { TimelineType, TimelineStatus } from '../../../common/api/timeline';
+import { TimelineTypeEnum, TimelineStatusEnum } from '../../../common/api/timeline';
 import { TIMELINE_DRAFT_URL, TIMELINE_URL, TIMELINE_COPY_URL } from '../../../common/constants';
 import type { ImportDataProps } from '../../detection_engine/rule_management/logic/types';
 
@@ -70,7 +70,7 @@ const timelineData = {
     filterQuery: null,
   },
   title: '',
-  timelineType: TimelineType.default,
+  timelineType: TimelineTypeEnum.default,
   templateTimelineVersion: null,
   templateTimelineId: null,
   dateRange: {
@@ -84,39 +84,25 @@ const timelineData = {
       sortDirection: 'desc',
     },
   ],
-  status: TimelineStatus.active,
+  status: TimelineStatusEnum.active,
   savedSearchId: null,
 };
 const mockPatchTimelineResponse = {
-  data: {
-    persistTimeline: {
-      code: 200,
-      message: 'success',
-      timeline: {
-        ...timelineData,
-        savedObjectId: '9d5693e0-a42a-11ea-b8f4-c5434162742a',
-        version: 'WzM0NSwxXQ==',
-      },
-    },
-  },
+  ...timelineData,
+  savedObjectId: '9d5693e0-a42a-11ea-b8f4-c5434162742a',
+  version: 'WzM0NSwxXQ==',
 };
 describe('persistTimeline', () => {
   describe('create draft timeline', () => {
     const timelineId = null;
     const initialDraftTimeline = {
       ...timelineData,
-      status: TimelineStatus.draft,
+      status: TimelineStatusEnum.draft,
     };
     const mockDraftResponse = {
-      data: {
-        persistTimeline: {
-          timeline: {
-            ...initialDraftTimeline,
-            savedObjectId: '9d5693e0-a42a-11ea-b8f4-c5434162742a',
-            version: 'WzMzMiwxXQ==',
-          },
-        },
-      },
+      ...initialDraftTimeline,
+      savedObjectId: '9d5693e0-a42a-11ea-b8f4-c5434162742a',
+      version: 'WzMzMiwxXQ==',
     };
 
     const version = null;
@@ -161,14 +147,13 @@ describe('persistTimeline', () => {
 
     test("it should update timeline from clean draft timeline's response", () => {
       expect(JSON.parse(patchMock.mock.calls[0][1].body)).toEqual({
-        timelineId: mockDraftResponse.data.persistTimeline.timeline.savedObjectId,
+        timelineId: mockDraftResponse.savedObjectId,
         timeline: {
           ...initialDraftTimeline,
-          templateTimelineId: mockDraftResponse.data.persistTimeline.timeline.templateTimelineId,
-          templateTimelineVersion:
-            mockDraftResponse.data.persistTimeline.timeline.templateTimelineVersion,
+          templateTimelineId: mockDraftResponse.templateTimelineId,
+          templateTimelineVersion: mockDraftResponse.templateTimelineVersion,
         },
-        version: mockDraftResponse.data.persistTimeline.timeline.version ?? '',
+        version: mockDraftResponse.version ?? '',
       });
     });
   });
@@ -177,7 +162,7 @@ describe('persistTimeline', () => {
     const timelineId = null;
     const initialDraftTimeline = {
       ...timelineData,
-      status: TimelineStatus.draft,
+      status: TimelineStatusEnum.draft,
     };
 
     const version = null;
@@ -211,13 +196,8 @@ describe('persistTimeline', () => {
         version,
       });
       expect(persist).toEqual({
-        data: {
-          persistTimeline: {
-            code: 403,
-            message: 'you do not have the permission',
-            timeline: { ...initialDraftTimeline, savedObjectId: '', version: '' },
-          },
-        },
+        statusCode: 403,
+        message: 'you do not have the permission',
       });
     });
   });
@@ -226,15 +206,9 @@ describe('persistTimeline', () => {
     const timelineId = null;
     const importTimeline = timelineData;
     const mockPostTimelineResponse = {
-      data: {
-        persistTimeline: {
-          timeline: {
-            ...timelineData,
-            savedObjectId: '9d5693e0-a42a-11ea-b8f4-c5434162742a',
-            version: 'WzMzMiwxXQ==',
-          },
-        },
-      },
+      ...timelineData,
+      savedObjectId: '9d5693e0-a42a-11ea-b8f4-c5434162742a',
+      version: 'WzMzMiwxXQ==',
     };
 
     const version = null;
@@ -273,17 +247,11 @@ describe('persistTimeline', () => {
     const timelineId = '9d5693e0-a42a-11ea-b8f4-c5434162742a';
     const inputTimeline = timelineData;
     const mockPatchTimelineResponseNew = {
-      data: {
-        persistTimeline: {
-          timeline: {
-            ...mockPatchTimelineResponse.data.persistTimeline.timeline,
-            version: 'WzMzMiwxXQ==',
-            description: 'x',
-            created: 1591092702804,
-            updated: 1591092705206,
-          },
-        },
-      },
+      ...mockPatchTimelineResponse,
+      version: 'WzMzMiwxXQ==',
+      description: 'x',
+      created: 1591092702804,
+      updated: 1591092705206,
     };
 
     const version = 'initial version';
@@ -388,7 +356,7 @@ describe('exportSelectedTimeline', () => {
 });
 
 describe('getDraftTimeline', () => {
-  const timelineType = { timelineType: TimelineType.default };
+  const timelineType = { timelineType: TimelineTypeEnum.default };
   const getMock = jest.fn();
 
   beforeAll(() => {
@@ -426,7 +394,7 @@ describe('cleanDraftTimeline', () => {
   });
 
   test('should pass correct args to KibanaServices - timeline', () => {
-    const args = { timelineType: TimelineType.default };
+    const args = { timelineType: TimelineTypeEnum.default };
 
     api.cleanDraftTimeline(args);
 
@@ -438,7 +406,7 @@ describe('cleanDraftTimeline', () => {
 
   test('should pass correct args to KibanaServices - timeline template', () => {
     const args = {
-      timelineType: TimelineType.template,
+      timelineType: TimelineTypeEnum.template,
       templateTimelineId: 'test-123',
       templateTimelineVersion: 1,
     };
@@ -454,15 +422,9 @@ describe('cleanDraftTimeline', () => {
 
 describe('copyTimeline', () => {
   const mockPostTimelineResponse = {
-    data: {
-      persistTimeline: {
-        timeline: {
-          ...timelineData,
-          savedObjectId: '9d5693e0-a42a-11ea-b8f4-c5434162742a',
-          version: 'WzMzMiwxXQ==',
-        },
-      },
-    },
+    ...timelineData,
+    savedObjectId: '9d5693e0-a42a-11ea-b8f4-c5434162742a',
+    version: 'WzMzMiwxXQ==',
   };
 
   const saveSavedSearchMock = jest.fn();

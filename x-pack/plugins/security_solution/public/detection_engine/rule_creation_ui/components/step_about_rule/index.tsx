@@ -24,7 +24,7 @@ import { AddMitreAttackThreat } from '../mitre';
 import type { FieldHook, FormHook } from '../../../../shared_imports';
 import { Field, Form, getUseField, UseField } from '../../../../shared_imports';
 
-import { defaultRiskScoreBySeverity, severityOptions } from './data';
+import { defaultRiskScoreBySeverity } from './data';
 import { isUrlInvalid } from '../../../../common/utils/validators';
 import { schema as defaultSchema } from './schema';
 import * as I18n from './translations';
@@ -32,14 +32,18 @@ import { StepContentWrapper } from '../../../rule_creation/components/step_conte
 import { MarkdownEditorForm } from '../../../../common/components/markdown_editor/eui_form';
 import { SeverityField } from '../severity_mapping';
 import { RiskScoreField } from '../risk_score_mapping';
-import { AutocompleteField } from '../autocomplete_field';
+import { EsFieldSelectorField } from '../es_field_selector_field';
 import { useFetchIndex } from '../../../../common/containers/source';
-import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../../../common/constants';
+import {
+  DEFAULT_INDICATOR_SOURCE_PATH,
+  DEFAULT_MAX_SIGNALS,
+} from '../../../../../common/constants';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useRuleIndices } from '../../../rule_management/logic/use_rule_indices';
 import { EsqlAutocomplete } from '../esql_autocomplete';
 import { MultiSelectFieldsAutocomplete } from '../multi_select_fields';
-import { useInvestigationFields } from '../../hooks/use_investigation_fields';
+import { useAllEsqlRuleFields } from '../../hooks';
+import { MaxSignals } from '../max_signals';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -129,10 +133,11 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
     [getFields]
   );
 
-  const { investigationFields, isLoading: isInvestigationFieldsLoading } = useInvestigationFields({
-    esqlQuery: isEsqlRuleValue ? esqlQuery : undefined,
-    indexPatternsFields: indexPattern.fields,
-  });
+  const { fields: investigationFields, isLoading: isInvestigationFieldsLoading } =
+    useAllEsqlRuleFields({
+      esqlQuery: isEsqlRuleValue ? esqlQuery : undefined,
+      indexPatternsFields: indexPattern.fields,
+    });
 
   return (
     <>
@@ -171,7 +176,6 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
                 dataTestSubj: 'detectionEngineStepAboutRuleSeverityField',
                 idAria: 'detectionEngineStepAboutRuleSeverityField',
                 isDisabled: isLoading || indexPatternLoading,
-                options: severityOptions,
                 indices: indexPattern,
                 setRiskScore,
               }}
@@ -254,6 +258,18 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
             />
             <EuiSpacer size="l" />
             <UseField
+              path="setup"
+              component={MarkdownEditorForm}
+              componentProps={{
+                idAria: 'detectionEngineStepAboutRuleSetup',
+                isDisabled: isLoading,
+                dataTestSubj: 'detectionEngineStepAboutRuleSetup',
+                placeholder: I18n.ADD_RULE_SETUP_HELP_TEXT,
+                includePlugins: false,
+              }}
+            />
+            <EuiSpacer size="l" />
+            <UseField
               path="note"
               component={MarkdownEditorForm}
               componentProps={{
@@ -315,6 +331,18 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
               />
             </EuiFormRow>
             <EuiSpacer size="l" />
+            <EuiFormRow fullWidth>
+              <UseField
+                path="maxSignals"
+                component={MaxSignals}
+                componentProps={{
+                  idAria: 'detectionEngineStepAboutRuleMaxSignals',
+                  dataTestSubj: 'detectionEngineStepAboutRuleMaxSignals',
+                  isDisabled: isLoading,
+                  placeholder: DEFAULT_MAX_SIGNALS,
+                }}
+              />
+            </EuiFormRow>
             {isThreatMatchRuleValue && (
               <>
                 <CommonUseField
@@ -347,14 +375,13 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
             ) : (
               <UseField
                 path="ruleNameOverride"
-                component={AutocompleteField}
+                component={EsFieldSelectorField}
                 componentProps={{
                   dataTestSubj: 'detectionEngineStepAboutRuleRuleNameOverride',
                   fieldType: 'string',
                   idAria: 'detectionEngineStepAboutRuleRuleNameOverride',
                   indices: indexPattern,
                   isDisabled: isLoading || indexPatternLoading,
-                  placeholder: '',
                 }}
               />
             )}
@@ -362,14 +389,13 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
             <EuiSpacer size="l" />
             <UseField
               path="timestampOverride"
-              component={AutocompleteField}
+              component={EsFieldSelectorField}
               componentProps={{
                 dataTestSubj: 'detectionEngineStepAboutRuleTimestampOverride',
                 fieldType: 'date',
                 idAria: 'detectionEngineStepAboutRuleTimestampOverride',
                 indices: indexPattern,
                 isDisabled: isLoading || indexPatternLoading,
-                placeholder: '',
               }}
             />
             {!!timestampOverride && timestampOverride !== '@timestamp' && (

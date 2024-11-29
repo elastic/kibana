@@ -5,10 +5,10 @@
  * 2.0.
  */
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiToolTip } from '@elastic/eui';
-import { useLinkProps } from '@kbn/observability-shared-plugin/public';
 import { CloudProviderIcon } from '@kbn/custom-icons';
-import { useNodeDetailsRedirect } from '../../../../link_to';
+import { useAssetDetailsRedirect } from '@kbn/metrics-data-access-plugin/public';
 import type { HostNodeRow } from '../../hooks/use_hosts_table';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
 
@@ -19,46 +19,53 @@ interface EntryTitleProps {
 
 export const EntryTitle = ({ onClick, title }: EntryTitleProps) => {
   const { name, cloudProvider } = title;
-  const { getNodeDetailUrl } = useNodeDetailsRedirect();
   const { parsedDateRange } = useUnifiedSearchContext();
+  const { getAssetDetailUrl } = useAssetDetailsRedirect();
 
-  const link = useLinkProps({
-    ...getNodeDetailUrl({
-      assetId: name,
-      assetType: 'host',
-      search: {
-        from: parsedDateRange?.from ? new Date(parsedDateRange?.from).getTime() : undefined,
-        to: parsedDateRange?.to ? new Date(parsedDateRange.to).getTime() : undefined,
-        name,
-      },
-    }),
+  const link = getAssetDetailUrl({
+    assetId: name,
+    assetType: 'host',
+    search: {
+      from: parsedDateRange?.from ? new Date(parsedDateRange?.from).getTime() : undefined,
+      to: parsedDateRange?.to ? new Date(parsedDateRange.to).getTime() : undefined,
+      name,
+    },
   });
 
   const providerName = cloudProvider ?? 'Unknown';
-
   return (
-    <EuiFlexGroup
-      alignItems="center"
-      className="eui-textTruncate"
-      gutterSize="s"
-      responsive={false}
+    <EuiToolTip
+      delay="long"
+      anchorClassName="eui-displayBlock"
+      content={i18n.translate('xpack.infra.hostsViewPage.table.nameTooltip', {
+        defaultMessage: '{providerName}: {name}',
+        values: {
+          providerName,
+          name,
+        },
+      })}
     >
-      <EuiFlexItem grow={false}>
-        <EuiToolTip delay="long" content={providerName}>
-          <CloudProviderIcon cloudProvider={cloudProvider} size="m" title={name} />
-        </EuiToolTip>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false} className="eui-textTruncate" onClick={onClick}>
-        <EuiToolTip delay="long" content={name}>
-          <EuiLink
-            data-test-subj="hostsViewTableEntryTitleLink"
-            className="eui-displayBlock eui-textTruncate"
-            {...link}
-          >
-            {name}
-          </EuiLink>
-        </EuiToolTip>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+      <EuiLink data-test-subj="hostsViewTableEntryTitleLink" {...link}>
+        <EuiFlexGroup
+          className="eui-textTruncate"
+          alignItems="center"
+          gutterSize="s"
+          responsive={false}
+          onClick={onClick}
+        >
+          <EuiFlexItem grow={false}>
+            <CloudProviderIcon
+              cloudProvider={cloudProvider}
+              size="m"
+              title={providerName}
+              role="presentation"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem className="eui-textTruncate">
+            <span className="eui-textTruncate">{name}</span>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiLink>
+    </EuiToolTip>
   );
 };

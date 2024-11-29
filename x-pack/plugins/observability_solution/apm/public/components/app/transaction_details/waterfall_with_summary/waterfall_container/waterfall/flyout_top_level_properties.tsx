@@ -7,10 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import {
-  SERVICE_NAME,
-  TRANSACTION_NAME,
-} from '../../../../../../../common/es_fields/apm';
+import { SERVICE_NAME, TRANSACTION_NAME } from '../../../../../../../common/es_fields/apm';
 import { getNextEnvironmentUrlParam } from '../../../../../../../common/environment_filter_values';
 import { LatencyAggregationType } from '../../../../../../../common/latency_aggregation_types';
 import { Transaction } from '../../../../../../../typings/es_schemas/ui/transaction';

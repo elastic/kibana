@@ -6,25 +6,46 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { capitalize } from 'lodash';
 import React from 'react';
 import { DatePicker } from '../date_picker/date_picker';
 import { useTabSwitcherContext } from '../hooks/use_tab_switcher';
-import { Anomalies, Logs, Metadata, Osquery, Overview, Processes, Profiling } from '../tabs';
+import {
+  Anomalies,
+  Dashboards,
+  Logs,
+  Metadata,
+  Metrics,
+  Osquery,
+  Overview,
+  Processes,
+  Profiling,
+} from '../tabs';
 import { ContentTabIds } from '../types';
+import { Callouts } from './callouts';
 
 export const Content = () => {
   return (
     <EuiFlexGroup direction="column" gutterSize="xs">
       <EuiFlexItem grow={false}>
-        <DatePickerWrapper
-          visibleFor={[
-            ContentTabIds.OVERVIEW,
-            ContentTabIds.LOGS,
-            ContentTabIds.METADATA,
-            ContentTabIds.PROCESSES,
-            ContentTabIds.ANOMALIES,
-          ]}
-        />
+        <EuiFlexGroup direction="column" gutterSize="m">
+          <EuiFlexItem grow={false}>
+            <Callouts />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <DatePickerWrapper
+              visibleFor={[
+                ContentTabIds.OVERVIEW,
+                ContentTabIds.LOGS,
+                ContentTabIds.METADATA,
+                ContentTabIds.METRICS,
+                ContentTabIds.PROCESSES,
+                ContentTabIds.ANOMALIES,
+                ContentTabIds.DASHBOARDS,
+              ]}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <TabPanel activeWhen={ContentTabIds.ANOMALIES}>
@@ -39,6 +60,9 @@ export const Content = () => {
         <TabPanel activeWhen={ContentTabIds.METADATA}>
           <Metadata />
         </TabPanel>
+        <TabPanel activeWhen={ContentTabIds.METRICS}>
+          <Metrics />
+        </TabPanel>
         <TabPanel activeWhen={ContentTabIds.OSQUERY}>
           <Osquery />
         </TabPanel>
@@ -47,6 +71,9 @@ export const Content = () => {
         </TabPanel>
         <TabPanel activeWhen={ContentTabIds.PROFILING}>
           <Profiling />
+        </TabPanel>
+        <TabPanel activeWhen={ContentTabIds.DASHBOARDS}>
+          <Dashboards />
         </TabPanel>
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -73,6 +100,11 @@ const TabPanel = ({
   const { renderedTabsSet, activeTabId } = useTabSwitcherContext();
 
   return renderedTabsSet.current.has(activeWhen) ? (
-    <div hidden={activeTabId !== activeWhen}>{children}</div>
+    <div
+      hidden={activeTabId !== activeWhen}
+      data-test-subj={`infraAssetDetails${capitalize(activeWhen)}TabContent`}
+    >
+      {children}
+    </div>
   ) : null;
 };

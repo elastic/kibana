@@ -12,6 +12,7 @@ import { EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { CoreStart } from '@kbn/core/public';
+import { Query } from '@kbn/es-query';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { type DataView, DataViewField, FieldSpec } from '@kbn/data-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
@@ -41,8 +42,8 @@ import type { FormBasedPrivateState } from './types';
 import { IndexPatternServiceAPI } from '../../data_views_service/service';
 import { FieldItem } from '../common/field_item';
 
-export type Props = Omit<
-  DatasourceDataPanelProps<FormBasedPrivateState>,
+export type FormBasedDataPanelProps = Omit<
+  DatasourceDataPanelProps<FormBasedPrivateState, Query>,
   'core' | 'onChangeIndexPattern'
 > & {
   data: DataPublicPluginStart;
@@ -97,7 +98,7 @@ export function FormBasedDataPanel({
   onIndexPatternRefresh,
   usedIndexPatterns,
   layerFields,
-}: Props) {
+}: FormBasedDataPanelProps) {
   const { indexPatterns, indexPatternRefs } = frame.dataViews;
   const { currentIndexPatternId } = state;
 
@@ -185,7 +186,7 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
   showNoDataPopover,
   activeIndexPatterns,
 }: Omit<
-  DatasourceDataPanelProps,
+  DatasourceDataPanelProps<unknown, Query>,
   'state' | 'setState' | 'core' | 'onChangeIndexPattern' | 'usedIndexPatterns'
 > & {
   data: DataPublicPluginStart;
@@ -241,7 +242,7 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
     [layerFields]
   );
 
-  const onOverrideFieldGroupDetails = useCallback((groupName) => {
+  const onOverrideFieldGroupDetails = useCallback((groupName: string) => {
     if (groupName === FieldsGroupNames.AvailableFields) {
       return {
         helpText: i18n.translate('xpack.lens.indexPattern.allFieldsLabelHelp', {
@@ -307,7 +308,7 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
       editPermission
         ? async (fieldName?: string, uiAction: 'edit' | 'add' = 'edit') => {
             const indexPatternInstance = await dataViews.get(currentIndexPattern?.id);
-            closeFieldEditor.current = indexPatternFieldEditor.openEditor({
+            closeFieldEditor.current = await indexPatternFieldEditor.openEditor({
               ctx: {
                 dataView: indexPatternInstance,
               },
@@ -339,7 +340,7 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
       editPermission
         ? async (fieldName: string) => {
             const indexPatternInstance = await dataViews.get(currentIndexPattern?.id);
-            closeFieldEditor.current = indexPatternFieldEditor.openDeleteModal({
+            closeFieldEditor.current = await indexPatternFieldEditor.openDeleteModal({
               ctx: {
                 dataView: indexPatternInstance,
               },

@@ -10,7 +10,7 @@ import 'cypress-axe';
 import moment from 'moment';
 import '@frsource/cypress-plugin-visual-regression-diff';
 import { AXE_CONFIG, AXE_OPTIONS } from '@kbn/axe-config';
-import { ApmUsername } from '../../../server/test_helpers/create_apm_users/authentication';
+import { ApmUsername } from '@kbn/apm-plugin/server/test_helpers/create_apm_users/authentication';
 
 Cypress.Commands.add('loginAsSuperUser', () => {
   return cy.loginAs({ username: 'elastic', password: 'changeme' });
@@ -38,29 +38,49 @@ Cypress.Commands.add('loginAsApmManageOwnAndCreateAgentKeys', () => {
   });
 });
 
+Cypress.Commands.add('loginAsApmAllPrivilegesWithoutWriteSettingsUser', () => {
+  return cy.loginAs({
+    username: ApmUsername.apmAllPrivilegesWithoutWriteSettings,
+    password: 'changeme',
+  });
+});
+
+Cypress.Commands.add('loginAsApmReadPrivilegesWithWriteSettingsUser', () => {
+  return cy.loginAs({
+    username: ApmUsername.apmReadPrivilegesWithWriteSettings,
+    password: 'changeme',
+  });
+});
+
 Cypress.Commands.add(
   'loginAs',
   ({ username, password }: { username: string; password: string }) => {
-    // cy.session(username, () => {
-    const kibanaUrl = Cypress.env('KIBANA_URL');
-    cy.log(`Logging in as ${username} on ${kibanaUrl}`);
-    cy.visit('/');
-    cy.request({
-      log: true,
-      method: 'POST',
-      url: `${kibanaUrl}/internal/security/login`,
-      body: {
-        providerType: 'basic',
-        providerName: 'basic',
-        currentURL: `${kibanaUrl}/login`,
-        params: { username, password },
+    cy.session(
+      username,
+      () => {
+        const kibanaUrl = Cypress.env('KIBANA_URL');
+        cy.log(`Logging in as ${username} on ${kibanaUrl}`);
+        cy.visit('/');
+        cy.request({
+          log: true,
+          method: 'POST',
+          url: `${kibanaUrl}/internal/security/login`,
+          body: {
+            providerType: 'basic',
+            providerName: 'basic',
+            currentURL: `${kibanaUrl}/login`,
+            params: { username, password },
+          },
+          headers: {
+            'kbn-xsrf': 'e2e_test',
+          },
+        });
+        cy.visit('/');
       },
-      headers: {
-        'kbn-xsrf': 'e2e_test',
-      },
-      // });
-    });
-    cy.visit('/');
+      {
+        cacheAcrossSpecs: true,
+      }
+    );
   }
 );
 
@@ -73,8 +93,14 @@ Cypress.Commands.add('changeTimeRange', (value: string) => {
   cy.contains(value).click();
 });
 
-Cypress.Commands.add('visitKibana', (url: string) => {
-  cy.visit(url);
+Cypress.Commands.add('visitKibana', (url, options) => {
+  cy.visit(url, {
+    onBeforeLoad(win) {
+      if (options?.localStorageOptions && options.localStorageOptions.length > 0) {
+        options.localStorageOptions.forEach(([key, value]) => win.localStorage.setItem(key, value));
+      }
+    },
+  });
   cy.getByTestSubj('kbnLoadingMessage').should('exist');
   cy.getByTestSubj('kbnLoadingMessage').should('not.exist', {
     timeout: 50000,
@@ -84,38 +110,25 @@ Cypress.Commands.add('visitKibana', (url: string) => {
 // This command expects from and to both values to be present on the URL where
 // this command is being executed. If from and to values are not present,
 // the date picker renders singleValueInput where this command won't work.
-Cypress.Commands.add(
-  'selectAbsoluteTimeRange',
-  (start: string, end: string) => {
-    const format = 'MMM D, YYYY @ HH:mm:ss.SSS';
+Cypress.Commands.add('selectAbsoluteTimeRange', (start: string, end: string) => {
+  const format = 'MMM D, YYYY @ HH:mm:ss.SSS';
 
-    cy.getByTestSubj('superDatePickerstartDatePopoverButton').click();
-    cy.contains('Start date')
-      .nextAll()
-      .find('[data-test-subj="superDatePickerAbsoluteDateInput"]')
-      .clear({ force: true })
-      .type(moment(start).format(format), { force: true })
-      .type('{enter}');
+  cy.getByTestSubj('superDatePickerstartDatePopoverButton').click();
+  cy.getByTestSubj('superDatePickerAbsoluteDateInput').clear({ force: true });
+  cy.getByTestSubj('superDatePickerAbsoluteDateInput')
+    .type(moment(start).format(format), { force: true })
+    .type('{enter}');
 
-    cy.getByTestSubj('superDatePickerendDatePopoverButton').click();
-    cy.contains('End date')
-      .nextAll()
-      .find('[data-test-subj="superDatePickerAbsoluteDateInput"]')
-      .clear({ force: true })
-      .type(moment(end).format(format), { force: true })
-      .type('{enter}');
-  }
-);
+  cy.getByTestSubj('superDatePickerendDatePopoverButton').click();
+  cy.getByTestSubj('superDatePickerAbsoluteDateInput').clear({ force: true });
+  cy.getByTestSubj('superDatePickerAbsoluteDateInput')
+    .type(moment(end).format(format), { force: true })
+    .type('{enter}');
+});
 
 Cypress.Commands.add(
   'expectAPIsToHaveBeenCalledWith',
-  ({
-    apisIntercepted,
-    value,
-  }: {
-    apisIntercepted: string[];
-    value: string;
-  }) => {
+  ({ apisIntercepted, value }: { apisIntercepted: string[]; value: string }) => {
     cy.wait(apisIntercepted).then((interceptions) => {
       if (Array.isArray(interceptions)) {
         interceptions.map((interception) => {
@@ -128,37 +141,28 @@ Cypress.Commands.add(
   }
 );
 
-Cypress.Commands.add(
-  'updateAdvancedSettings',
-  (settings: Record<string, unknown>) => {
-    const kibanaUrl = Cypress.env('KIBANA_URL');
-    cy.request({
-      log: false,
-      method: 'POST',
-      url: `${kibanaUrl}/internal/kibana/settings`,
-      body: { changes: settings },
-      headers: {
-        'kbn-xsrf': 'e2e_test',
-      },
-      auth: { user: 'editor', pass: 'changeme' },
-    });
-  }
-);
-
-Cypress.Commands.add('dismissServiceGroupsTour', () => {
-  window.localStorage.setItem(
-    'apm.serviceGroupsTour',
-    JSON.stringify({
-      createGroup: false,
-      editGroup: false,
-    })
-  );
+Cypress.Commands.add('updateAdvancedSettings', (settings: Record<string, unknown>) => {
+  const kibanaUrl = Cypress.env('KIBANA_URL');
+  cy.request({
+    log: false,
+    method: 'POST',
+    url: `${kibanaUrl}/internal/kibana/settings`,
+    body: { changes: settings },
+    headers: {
+      'kbn-xsrf': 'e2e_test',
+    },
+    auth: { user: 'editor', pass: 'changeme' },
+  });
 });
 
 Cypress.Commands.add('withHidden', (selector, callback) => {
   cy.get(selector).invoke('attr', 'style', 'display: none');
   callback();
   cy.get(selector).invoke('attr', 'style', '');
+});
+
+Cypress.Commands.add('waitUntilPageContentIsLoaded', () => {
+  cy.getByTestSubj('kbnAppWrapper visibleChrome').find('[aria-busy=false]').should('be.visible');
 });
 
 // A11y configuration

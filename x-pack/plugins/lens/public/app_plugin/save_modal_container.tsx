@@ -11,25 +11,29 @@ import { isFilterPinned } from '@kbn/es-query';
 import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import type { SavedObjectReference } from '@kbn/core/public';
 import { EuiLoadingSpinner } from '@elastic/eui';
+import { omit } from 'lodash';
 import { SaveModal } from './save_modal';
 import type { LensAppProps, LensAppServices } from './types';
 import type { SaveProps } from './app';
-import { Document, checkForDuplicateTitle, SavedObjectIndexStore } from '../persistence';
-import type { LensByReferenceInput, LensEmbeddableInput } from '../embeddable';
+import { checkForDuplicateTitle, SavedObjectIndexStore, LensDocument } from '../persistence';
 import { APP_ID, getFullPath } from '../../common/constants';
 import type { LensAppState } from '../state_management';
-import { getPersisted } from '../state_management/init_middleware/load_initial';
-import { VisualizeEditorContext } from '../types';
+import { getFromPreloaded } from '../state_management/init_middleware/load_initial';
+import { Simplify, VisualizeEditorContext } from '../types';
 import { redirectToDashboard } from './save_modal_container_helpers';
+import { LensSerializedState } from '../react_embeddable/types';
+import { isLegacyEditorEmbeddable } from './app_helpers';
 
-type ExtraProps = Pick<LensAppProps, 'initialInput'> &
-  Partial<Pick<LensAppProps, 'redirectToOrigin' | 'redirectTo' | 'onAppLeave'>>;
+type ExtraProps = Simplify<
+  Pick<LensAppProps, 'initialInput'> &
+    Partial<Pick<LensAppProps, 'redirectToOrigin' | 'redirectTo' | 'onAppLeave'>>
+>;
 
 export type SaveModalContainerProps = {
   originatingApp?: string;
   getOriginatingPath?: (dashboardId: string) => string;
-  persistedDoc?: Document;
-  lastKnownDoc?: Document;
+  persistedDoc?: LensDocument;
+  lastKnownDoc?: LensDocument;
   returnToOriginSwitchLabel?: string;
   onClose: () => void;
   onSave?: (saveProps: SaveProps) => void;
@@ -41,11 +45,13 @@ export type SaveModalContainerProps = {
     | 'attributeService'
     | 'savedObjectsTagging'
     | 'application'
-    | 'dashboardFeatureFlag'
     | 'notifications'
     | 'http'
     | 'chrome'
     | 'overlays'
+    | 'analytics'
+    | 'i18n'
+    | 'theme'
     | 'stateTransfer'
     | 'savedObjectStore'
   >;
@@ -76,19 +82,14 @@ export function SaveModalContainer({
   let description;
   let savedObjectId;
   const [initializing, setInitializing] = useState(true);
-  const [lastKnownDoc, setLastKnownDoc] = useState<Document | undefined>(initLastKnownDoc);
+  const [lastKnownDoc, setLastKnownDoc] = useState<LensDocument | undefined>(initLastKnownDoc);
   if (lastKnownDoc) {
     title = lastKnownDoc.title;
     description = lastKnownDoc.description;
     savedObjectId = lastKnownDoc.savedObjectId;
   }
 
-  if (
-    !lastKnownDoc?.title &&
-    initialContext &&
-    'isEmbeddable' in initialContext &&
-    initialContext.isEmbeddable
-  ) {
+  if (!lastKnownDoc?.title && isLegacyEditorEmbeddable(initialContext)) {
     title = i18n.translate('xpack.lens.app.convertedLabel', {
       defaultMessage: '{title} (converted)',
       values: {
@@ -97,7 +98,7 @@ export function SaveModalContainer({
     });
   }
 
-  const { attributeService, savedObjectsTagging, application, dashboardFeatureFlag } = lensServices;
+  const { attributeService, savedObjectsTagging, application } = lensServices;
 
   useEffect(() => {
     setLastKnownDoc(initLastKnownDoc);
@@ -107,7 +108,7 @@ export function SaveModalContainer({
     let isMounted = true;
 
     if (initialInput) {
-      getPersisted({
+      getFromPreloaded({
         initialInput,
         lensServices,
       })
@@ -131,31 +132,29 @@ export function SaveModalContainer({
       ? savedObjectsTagging.ui.getTagIdsFromReferences(persistedDoc.references)
       : [];
 
-  const runLensSave = (saveProps: SaveProps, options: { saveToLibrary: boolean }) => {
+  const runLensSave = async (saveProps: SaveProps, options: { saveToLibrary: boolean }) => {
     if (runSave) {
       // inside lens, we use the function that's passed to it
-      runSave(saveProps, options);
-    } else if (attributeService && lastKnownDoc) {
-      runSaveLensVisualization(
+      return runSave(saveProps, options);
+    }
+    if (attributeService && lastKnownDoc) {
+      await runSaveLensVisualization(
         {
           ...lensServices,
           lastKnownDoc,
           initialInput,
-          attributeService,
           redirectTo,
           redirectToOrigin,
           originatingApp,
           getOriginatingPath,
-          getIsByValueMode: () => false,
           onAppLeave: () => {},
-          savedObjectStore: lensServices.savedObjectStore,
+          ...lensServices,
         },
         saveProps,
         options
-      ).then(() => {
-        onSave?.(saveProps);
-        onClose();
-      });
+      );
+      onSave?.(saveProps);
+      onClose();
     }
   };
 
@@ -170,7 +169,6 @@ export function SaveModalContainer({
       originatingApp={originatingApp}
       getOriginatingPath={getOriginatingPath}
       savingToLibraryPermitted={savingToLibraryPermitted}
-      allowByValueEmbeddables={dashboardFeatureFlag?.allowByValueEmbeddables}
       savedObjectsTagging={savedObjectsTagging}
       tagsIds={tagsIds}
       onSave={(saveProps, options) => {
@@ -188,11 +186,24 @@ export function SaveModalContainer({
   );
 }
 
+function fromDocumentToSerializedState(
+  doc: LensDocument,
+  panelSettings: Partial<LensSerializedState>,
+  originalInput?: LensAppProps['initialInput']
+): LensSerializedState {
+  return {
+    ...originalInput,
+    attributes: omit(doc, 'savedObjectId'),
+    savedObjectId: doc.savedObjectId,
+    ...panelSettings,
+  };
+}
+
 const getDocToSave = (
-  lastKnownDoc: Document,
+  lastKnownDoc: LensDocument,
   saveProps: SaveProps,
   references: SavedObjectReference[]
-) => {
+): LensDocument => {
   const docToSave = {
     ...removePinnedFilters(lastKnownDoc)!,
     references,
@@ -209,11 +220,10 @@ const getDocToSave = (
   return docToSave;
 };
 
-export const runSaveLensVisualization = async (
-  props: {
-    lastKnownDoc?: Document;
-    getIsByValueMode: () => boolean;
-    persistedDoc?: Document;
+export type SaveVisualizationProps = Simplify<
+  {
+    lastKnownDoc?: LensDocument;
+    persistedDoc?: LensDocument;
     originatingApp?: string;
     getOriginatingPath?: (dashboardId: string) => string;
     textBasedLanguageSave?: boolean;
@@ -225,12 +235,18 @@ export const runSaveLensVisualization = async (
       | 'application'
       | 'chrome'
       | 'overlays'
+      | 'analytics'
+      | 'i18n'
+      | 'theme'
       | 'notifications'
       | 'stateTransfer'
-      | 'dashboardFeatureFlag'
       | 'attributeService'
       | 'savedObjectsTagging'
-    >,
+    >
+>;
+
+export const runSaveLensVisualization = async (
+  props: SaveVisualizationProps,
   saveProps: SaveProps,
   options: { saveToLibrary: boolean }
 ): Promise<Partial<LensAppState> | undefined> => {
@@ -239,27 +255,27 @@ export const runSaveLensVisualization = async (
     initialInput,
     lastKnownDoc,
     persistedDoc,
-    overlays,
     notifications,
     stateTransfer,
     attributeService,
     savedObjectsTagging,
-    getIsByValueMode,
     redirectToOrigin,
     onAppLeave,
     redirectTo,
-    dashboardFeatureFlag,
     textBasedLanguageSave,
     switchDatasource,
     application,
     savedObjectStore,
+    getOriginatingPath,
+    originatingApp,
+    ...startServices
   } = props;
 
   if (!lastKnownDoc) {
     return;
   }
 
-  let references = lastKnownDoc.references;
+  let references = lastKnownDoc.references || initialInput?.attributes?.references;
 
   if (savedObjectsTagging) {
     const tagsIds =
@@ -274,71 +290,92 @@ export const runSaveLensVisualization = async (
 
   const docToSave = getDocToSave(lastKnownDoc, saveProps, references);
 
-  // Required to serialize filters in by value mode until
-  // https://github.com/elastic/kibana/issues/77588 is fixed
-  if (getIsByValueMode()) {
-    docToSave.state.filters.forEach((filter) => {
-      if (typeof filter.meta.value === 'function') {
-        delete filter.meta.value;
+  const originalInput = saveProps.newCopyOnSave ? undefined : initialInput;
+  const originalSavedObjectId = originalInput?.savedObjectId;
+  if (options.saveToLibrary) {
+    // this is a lower level call that the Lens attribute service one
+    // @TODO: check if it's worth to replace it witht he attribute service one
+    await checkForDuplicateTitle(
+      {
+        id: originalSavedObjectId,
+        title: docToSave.title,
+        displayName: i18n.translate('xpack.lens.app.saveModalType', {
+          defaultMessage: 'Lens visualization',
+        }),
+        lastSavedTitle: lastKnownDoc.title,
+        copyOnSave: saveProps.newCopyOnSave,
+        isTitleDuplicateConfirmed: saveProps.isTitleDuplicateConfirmed,
+      },
+      saveProps.onTitleDuplicate,
+      {
+        client: savedObjectStore,
+        ...startServices,
       }
-    });
+    );
+    // ignore duplicate title failure, user notified in save modal
   }
 
-  const originalInput = saveProps.newCopyOnSave ? undefined : initialInput;
-  const originalSavedObjectId = (originalInput as LensByReferenceInput)?.savedObjectId;
-  if (options.saveToLibrary) {
-    try {
-      await checkForDuplicateTitle(
-        {
-          id: originalSavedObjectId,
-          title: docToSave.title,
-          displayName: i18n.translate('xpack.lens.app.saveModalType', {
-            defaultMessage: 'Lens visualization',
-          }),
-          lastSavedTitle: lastKnownDoc.title,
-          copyOnSave: saveProps.newCopyOnSave,
-          isTitleDuplicateConfirmed: saveProps.isTitleDuplicateConfirmed,
-        },
-        saveProps.onTitleDuplicate,
-        {
-          client: savedObjectStore,
-          overlays,
-        }
-      );
-    } catch (e) {
-      // ignore duplicate title failure, user notified in save modal
-      throw e;
-    }
-  }
   try {
-    let newInput = (await attributeService.wrapAttributes(
+    // wrap the doc into a serializable state
+    const newDoc = fromDocumentToSerializedState(
       docToSave,
-      options.saveToLibrary,
+      {
+        timeRange: saveProps.panelTimeRange ?? originalInput?.timeRange,
+        savedObjectId: options.saveToLibrary ? originalSavedObjectId : undefined,
+      },
       originalInput
-    )) as LensEmbeddableInput;
-    if (saveProps.panelTimeRange) {
-      newInput = {
-        ...newInput,
-        timeRange: saveProps.panelTimeRange,
-      };
+    );
+
+    let savedObjectId: string | undefined;
+    try {
+      savedObjectId =
+        newDoc.attributes && options.saveToLibrary
+          ? await attributeService.saveToLibrary(
+              newDoc.attributes,
+              newDoc.attributes.references || [],
+              originalSavedObjectId
+            )
+          : undefined;
+    } catch (error) {
+      notifications.toasts.addDanger({
+        title: i18n.translate('xpack.lens.app.saveVisualization.errorNotificationText', {
+          defaultMessage: `An error occurred while saving. Error: {errorMessage}`,
+          values: {
+            errorMessage: error.message,
+          },
+        }),
+      });
+      // trigger a reject to jump to the final catch clause
+      throw error;
     }
-    if (saveProps.returnToOrigin && redirectToOrigin) {
+
+    const shouldNavigateBackToOrigin = saveProps.returnToOrigin && redirectToOrigin;
+    const hasRedirect = shouldNavigateBackToOrigin || saveProps.dashboardId;
+
+    // if a redirect was set, prevent the validation on app leave
+    if (hasRedirect) {
       // disabling the validation on app leave because the document has been saved.
       onAppLeave?.((actions) => {
         return actions.default();
       });
-      redirectToOrigin({ input: newInput, isCopied: saveProps.newCopyOnSave });
+    }
+
+    if (shouldNavigateBackToOrigin) {
+      redirectToOrigin({
+        state: { ...newDoc, savedObjectId },
+        isCopied: saveProps.newCopyOnSave,
+      });
       return;
-    } else if (saveProps.dashboardId) {
-      // disabling the validation on app leave because the document has been saved.
-      onAppLeave?.((actions) => {
-        return actions.default();
-      });
+    }
+    // should we make it more robust here and better check the context of the saving
+    // or keep the responsability of the consumer of the function to provide the right set
+    // of args here in case the user is within a by value chart AND want's to save it in the library
+    // without redirect?
+    if (saveProps.dashboardId) {
       redirectToDashboard({
-        embeddableInput: newInput,
+        embeddableInput: { ...newDoc, savedObjectId },
         dashboardId: saveProps.dashboardId,
         stateTransfer,
-        dashboardFeatureFlag,
         originatingApp: props.originatingApp,
         getOriginatingPath: props.getOriginatingPath,
       });
@@ -347,22 +384,15 @@ export const runSaveLensVisualization = async (
 
     notifications.toasts.addSuccess(
       i18n.translate('xpack.lens.app.saveVisualization.successNotificationText', {
-        defaultMessage: `Saved '{visTitle}'`,
+        defaultMessage: `Saved ''{visTitle}''`,
         values: {
           visTitle: docToSave.title,
         },
       })
     );
 
-    if (
-      attributeService.inputIsRefType(newInput) &&
-      newInput.savedObjectId !== originalSavedObjectId
-    ) {
-      chrome.recentlyAccessed.add(
-        getFullPath(newInput.savedObjectId),
-        docToSave.title,
-        newInput.savedObjectId
-      );
+    if (savedObjectId && savedObjectId !== originalSavedObjectId) {
+      chrome.recentlyAccessed.add(getFullPath(savedObjectId), docToSave.title, savedObjectId);
 
       // remove editor state so the connection is still broken after reload
       stateTransfer.clearEditorState?.(APP_ID);
@@ -370,18 +400,13 @@ export const runSaveLensVisualization = async (
         switchDatasource?.();
         application.navigateToApp('lens', { path: '/' });
       } else {
-        redirectTo?.(newInput.savedObjectId);
+        redirectTo?.(savedObjectId);
       }
       return { isLinkedToOriginatingApp: false };
     }
 
-    const newDoc = {
-      ...docToSave,
-      ...newInput,
-    };
-
     return {
-      persistedDoc: newDoc,
+      persistedDoc: newDoc.attributes,
       isLinkedToOriginatingApp: false,
     };
   } catch (e) {
@@ -391,7 +416,7 @@ export const runSaveLensVisualization = async (
   }
 };
 
-export function removePinnedFilters(doc?: Document) {
+export function removePinnedFilters(doc?: LensDocument) {
   if (!doc) return undefined;
   return {
     ...doc,

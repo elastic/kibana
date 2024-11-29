@@ -21,8 +21,9 @@ import {
   EuiButtonEmpty,
   EuiButton,
   EuiFlexItem,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
-import type { HttpSetup } from '@kbn/core-http-browser';
+import type { HttpSetup, IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import type { ErrorToastOptions, Toast, ToastInput } from '@kbn/core-notifications-browser';
 import { i18n as translate } from '@kbn/i18n';
 import type { ListDetails } from '@kbn/securitysolution-exception-list-components';
@@ -108,22 +109,22 @@ export const CreateSharedListFlyout = memo(
       http,
     ]);
 
-    const handleCreateSuccess = useCallback(
-      (response) => {
-        addSuccess({
-          text: getSuccessText(newListDetails.name),
-          title: SUCCESS_TITLE,
-        });
-        handleRefresh();
+    const handleCreateSuccess = useCallback(() => {
+      addSuccess({
+        text: getSuccessText(newListDetails.name),
+        title: SUCCESS_TITLE,
+      });
+      handleRefresh();
 
-        handleCloseFlyout();
-      },
-      [addSuccess, handleCloseFlyout, handleRefresh, newListDetails]
-    );
+      handleCloseFlyout();
+    }, [addSuccess, handleCloseFlyout, handleRefresh, newListDetails]);
 
     const handleCreateError = useCallback(
-      (error) => {
-        if (!error.message.includes('AbortError') && !error?.body?.message.includes('AbortError')) {
+      (error: IHttpFetchError<ResponseErrorBody> | undefined) => {
+        if (
+          !error?.message?.includes('AbortError') &&
+          !error?.body?.message.includes('AbortError')
+        ) {
           addError(error, {
             title: translate.translate(
               'xpack.securitySolution.exceptions.createSharedExceptionListErrorTitle',
@@ -140,9 +141,11 @@ export const CreateSharedListFlyout = memo(
     useEffect(() => {
       if (!createSharedExceptionListState.loading) {
         if (createSharedExceptionListState?.result) {
-          handleCreateSuccess(createSharedExceptionListState.result);
+          handleCreateSuccess();
         } else if (createSharedExceptionListState?.error) {
-          handleCreateError(createSharedExceptionListState?.error);
+          handleCreateError(
+            createSharedExceptionListState?.error as IHttpFetchError<ResponseErrorBody>
+          );
         }
       }
     }, [
@@ -153,16 +156,26 @@ export const CreateSharedListFlyout = memo(
       handleCreateSuccess,
     ]);
 
+    const createSharedExceptionListFlyoutTitleId = useGeneratedHtmlId({
+      prefix: 'createSharedExceptionListFlyout',
+    });
+
     return (
       <EuiFlyout
         ownFocus
         size="s"
         onClose={handleCloseFlyout}
         data-test-subj="createSharedExceptionListFlyout"
+        aria-labelledby={createSharedExceptionListFlyoutTitleId}
       >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
-            <h2 data-test-subj="createSharedExceptionListTitle">{CREATE_SHARED_LIST_TITLE}</h2>
+            <h2
+              id={createSharedExceptionListFlyoutTitleId}
+              data-test-subj="createSharedExceptionListTitle"
+            >
+              {CREATE_SHARED_LIST_TITLE}
+            </h2>
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>

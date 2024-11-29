@@ -18,13 +18,7 @@ export interface ChartContainerProps {
   id?: string;
 }
 
-export function ChartContainer({
-  children,
-  height,
-  status,
-  hasData,
-  id,
-}: ChartContainerProps) {
+export function ChartContainer({ children, height, status, hasData, id }: ChartContainerProps) {
   if (!hasData && isPending(status)) {
     return <LoadingChartPlaceholder height={height} />;
   }
@@ -59,8 +53,7 @@ function FailedChartPlaceholder({ height }: { height: number }) {
   return (
     <EuiText color="subdued" style={{ height }}>
       {i18n.translate('xpack.apm.chart.error', {
-        defaultMessage:
-          'An error happened when trying to fetch data. Please try again',
+        defaultMessage: 'An error happened when trying to fetch data. Please try again',
       })}
     </EuiText>
   );

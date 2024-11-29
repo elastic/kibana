@@ -37,7 +37,7 @@
             "section": "def-common.KibanaThemeProviderProps",
             "text": "KibanaThemeProviderProps"
           },
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "packages/react/kibana_context/theme/theme_provider.tsx",
         "deprecated": false,
@@ -85,7 +85,7 @@
             "section": "def-common.ThemeServiceStart",
             "text": "ThemeServiceStart"
           },
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "packages/react/kibana_context/theme/with_theme.tsx",
         "deprecated": false,
@@ -158,6 +158,19 @@
             "label": "darkMode",
             "description": [
               "is dark mode enabled or not"
+            ],
+            "path": "packages/react/kibana_context/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/react-kibana-context-theme",
+            "id": "def-common.KibanaTheme.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [
+              "\nName of the active theme"
             ],
             "path": "packages/react/kibana_context/common/types.ts",
             "deprecated": false,
@@ -241,6 +254,17 @@
             "signature": [
               "false"
             ],
+            "path": "packages/react/kibana_context/common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/react-kibana-context-theme",
+            "id": "def-common.defaultTheme.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
             "path": "packages/react/kibana_context/common/index.ts",
             "deprecated": false,
             "trackAdoption": false

@@ -5,16 +5,11 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import { useMetricsExplorerState } from './use_metric_explorer_state';
 import { MetricsExplorerOptionsContainer } from './use_metrics_explorer_options';
 import React from 'react';
-import {
-  source,
-  derivedIndexPattern,
-  resp,
-  createSeries,
-} from '../../../../utils/fixtures/metrics_explorer';
+import { resp, createSeries } from '../../../../utils/fixtures/metrics_explorer';
 
 jest.mock('../../../../hooks/use_kibana_timefilter_time', () => ({
   useKibanaTimefilterTime: (defaults: { from: string; to: string }) => [() => defaults],
@@ -30,9 +25,8 @@ jest.mock('../../../../alerting/use_alert_prefill', () => ({
 }));
 
 const renderUseMetricsExplorerStateHook = () =>
-  renderHook((props) => useMetricsExplorerState(props.source, props.derivedIndexPattern), {
-    initialProps: { source, derivedIndexPattern },
-    wrapper: ({ children }) => (
+  renderHook(() => useMetricsExplorerState(), {
+    wrapper: ({ children }: React.PropsWithChildren<{}>) => (
       <MetricsExplorerOptionsContainer>{children}</MetricsExplorerOptionsContainer>
     ),
   });
@@ -81,6 +75,10 @@ describe('useMetricsExplorerState', () => {
     delete STORE.MetricsExplorerTimeRange;
   });
 
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('should just work', async () => {
     mockedUseMetricsExplorerData.mockReturnValue({
       isLoading: false,
@@ -98,12 +96,14 @@ describe('useMetricsExplorerState', () => {
   describe('handleRefresh', () => {
     it('should trigger an addition request when handleRefresh is called', async () => {
       const { result } = renderUseMetricsExplorerStateHook();
-      expect(result.all.length).toBe(2);
-      const numberOfHookCalls = result.all.length;
+
+      const numberOfHookCalls = mockedUseMetricsExplorerData.mock.calls.length;
+
+      expect(numberOfHookCalls).toEqual(2);
       act(() => {
         result.current.refresh();
       });
-      expect(result.all.length).toBe(numberOfHookCalls + 1);
+      expect(mockedUseMetricsExplorerData).toHaveBeenCalledTimes(numberOfHookCalls + 1);
     });
   });
 

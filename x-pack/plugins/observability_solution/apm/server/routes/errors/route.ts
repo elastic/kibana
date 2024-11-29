@@ -7,11 +7,9 @@
 
 import { jsonRt, toNumberRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
+import { notFound } from '@hapi/boom';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
-import {
-  ErrorDistributionResponse,
-  getErrorDistribution,
-} from './distribution/get_distribution';
+import { ErrorDistributionResponse, getErrorDistribution } from './distribution/get_distribution';
 import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
 import {
   ErrorGroupMainStatisticsResponse,
@@ -37,8 +35,7 @@ import {
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 
 const errorsMainStatisticsRoute = createApmServerRoute({
-  endpoint:
-    'GET /internal/apm/services/{serviceName}/errors/groups/main_statistics',
+  endpoint: 'GET /internal/apm/services/{serviceName}/errors/groups/main_statistics',
   params: t.type({
     path: t.type({
       serviceName: t.string,
@@ -59,15 +56,7 @@ const errorsMainStatisticsRoute = createApmServerRoute({
     const { params } = resources;
     const apmEventClient = await getApmEventClient(resources);
     const { serviceName } = params.path;
-    const {
-      environment,
-      kuery,
-      sortField,
-      sortDirection,
-      start,
-      end,
-      searchQuery,
-    } = params.query;
+    const { environment, kuery, sortField, sortDirection, start, end, searchQuery } = params.query;
 
     return await getErrorGroupMainStatistics({
       environment,
@@ -131,8 +120,7 @@ const errorsMainStatisticsByTransactionNameRoute = createApmServerRoute({
 });
 
 const errorsDetailedStatisticsRoute = createApmServerRoute({
-  endpoint:
-    'POST /internal/apm/services/{serviceName}/errors/groups/detailed_statistics',
+  endpoint: 'POST /internal/apm/services/{serviceName}/errors/groups/detailed_statistics',
   params: t.type({
     path: t.type({
       serviceName: t.string,
@@ -202,8 +190,7 @@ const errorGroupsSamplesRoute = createApmServerRoute({
 });
 
 const errorGroupSampleDetailsRoute = createApmServerRoute({
-  endpoint:
-    'GET /internal/apm/services/{serviceName}/errors/{groupId}/error/{errorId}',
+  endpoint: 'GET /internal/apm/services/{serviceName}/errors/{groupId}/error/{errorId}',
   params: t.type({
     path: t.type({
       serviceName: t.string,
@@ -219,7 +206,7 @@ const errorGroupSampleDetailsRoute = createApmServerRoute({
     const { serviceName, errorId } = params.path;
     const { environment, kuery, start, end } = params.query;
 
-    return getErrorSampleDetails({
+    const { transaction, error } = await getErrorSampleDetails({
       environment,
       errorId,
       kuery,
@@ -228,6 +215,12 @@ const errorGroupSampleDetailsRoute = createApmServerRoute({
       start,
       end,
     });
+
+    if (!error) {
+      throw notFound();
+    }
+
+    return { error, transaction };
   },
 });
 
@@ -267,8 +260,7 @@ const errorDistributionRoute = createApmServerRoute({
 });
 
 const topErroneousTransactionsRoute = createApmServerRoute({
-  endpoint:
-    'GET /internal/apm/services/{serviceName}/errors/{groupId}/top_erroneous_transactions',
+  endpoint: 'GET /internal/apm/services/{serviceName}/errors/{groupId}/top_erroneous_transactions',
   params: t.type({
     path: t.type({
       serviceName: t.string,

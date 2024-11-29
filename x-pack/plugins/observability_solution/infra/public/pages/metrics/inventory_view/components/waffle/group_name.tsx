@@ -9,7 +9,7 @@ import { EuiLink, EuiToolTip } from '@elastic/eui';
 import React from 'react';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { InfraWaffleMapGroup, InfraWaffleMapOptions } from '../../../../../lib/lib';
+import { InfraWaffleMapGroup, InfraWaffleMapOptions } from '../../../../../common/inventory/types';
 
 interface Props {
   onDrilldown: (filter: string) => void;

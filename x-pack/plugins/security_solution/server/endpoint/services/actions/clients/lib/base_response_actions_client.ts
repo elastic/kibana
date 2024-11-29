@@ -13,9 +13,25 @@ import { AttachmentType, ExternalReferenceStorageType } from '@kbn/cases-plugin/
 import type { CaseAttachments } from '@kbn/cases-plugin/public/types';
 import { i18n } from '@kbn/i18n';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { fetchActionResponses } from '../../fetch_action_responses';
+import {
+  ENDPOINT_RESPONSE_ACTION_SENT_EVENT,
+  ENDPOINT_RESPONSE_ACTION_SENT_ERROR_EVENT,
+  ENDPOINT_RESPONSE_ACTION_STATUS_CHANGE_EVENT,
+} from '../../../../../lib/telemetry/event_based/events';
+import { NotFoundError } from '../../../../errors';
+import { fetchActionRequestById } from '../../utils/fetch_action_request_by_id';
+import { SimpleMemCache } from '../../../../lib/simple_mem_cache';
+import {
+  fetchActionResponses,
+  fetchEndpointActionResponses,
+} from '../../utils/fetch_action_responses';
 import { createEsSearchIterable } from '../../../../utils/create_es_search_iterable';
-import { categorizeResponseResults, getActionRequestExpiration } from '../../utils';
+import {
+  getActionCompletionInfo,
+  getActionRequestExpiration,
+  mapResponsesByActionId,
+  mapToNormalizedActionRequest,
+} from '../../utils';
 import { isActionSupportedByAgentType } from '../../../../../../common/endpoint/service/response_actions/is_response_action_supported';
 import type { EndpointAppContextService } from '../../../../endpoint_app_context_services';
 import { APP_ID } from '../../../../../../common';
@@ -31,6 +47,7 @@ import {
 } from '../../../../../../common/endpoint/constants';
 import type {
   CommonResponseActionMethodOptions,
+  GetFileDownloadMethodResponse,
   ProcessPendingActionsMethodOptions,
   ResponseActionsClient,
 } from './types';
@@ -39,32 +56,48 @@ import type {
   EndpointActionDataParameterTypes,
   EndpointActionResponseDataOutput,
   GetProcessesActionOutputContent,
-  KillOrSuspendProcessRequestBody,
   KillProcessActionOutputContent,
   LogsEndpointAction,
   LogsEndpointActionResponse,
   ResponseActionExecuteOutputContent,
   ResponseActionGetFileOutputContent,
   ResponseActionGetFileParameters,
-  ResponseActionParametersWithPidOrEntityId,
+  ResponseActionParametersWithProcessData,
+  ResponseActionScanOutputContent,
   ResponseActionsExecuteParameters,
+  ResponseActionScanParameters,
   ResponseActionUploadOutputContent,
   ResponseActionUploadParameters,
   SuspendProcessActionOutputContent,
+  UploadedFileInfo,
   WithAllKeys,
 } from '../../../../../../common/endpoint/types';
 import type {
   ExecuteActionRequestBody,
   GetProcessesRequestBody,
   IsolationRouteRequestBody,
+  KillProcessRequestBody,
   ResponseActionGetFileRequestBody,
   ResponseActionsRequestBody,
+  ScanActionRequestBody,
+  SuspendProcessRequestBody,
+  UnisolationRouteRequestBody,
   UploadActionApiRequestBody,
 } from '../../../../../../common/api/endpoint';
 import { stringify } from '../../../../utils/stringify';
 import { CASE_ATTACHMENT_ENDPOINT_TYPE_ID } from '../../../../../../common/constants';
 import { EMPTY_COMMENT } from '../../../../utils/translations';
-import { ActivityLogItemTypes } from '../../../../../../common/endpoint/types';
+
+const ELASTIC_RESPONSE_ACTION_MESSAGE = (
+  username: string = 'system',
+  command: ResponseActionsApiCommandNames,
+  responseActionId: string
+): string => {
+  return i18n.translate('xpack.securitySolution.responseActions.comment.message', {
+    values: { username, command, responseActionId },
+    defaultMessage: `Action triggered from Elastic Security by user [{username}] for action [{command} (action id: {responseActionId})]`,
+  });
+};
 
 const ENTERPRISE_LICENSE_REQUIRED_MSG = i18n.translate(
   'xpack.securitySolution.responseActionsList.error.licenseTooLow',
@@ -111,19 +144,24 @@ export interface ResponseActionsClientUpdateCasesOptions {
   actionId: string;
 }
 
-export type ResponseActionsClientWriteActionRequestToEndpointIndexOptions =
-  ResponseActionsRequestBody &
-    Pick<CommonResponseActionMethodOptions, 'ruleName' | 'ruleId' | 'hosts' | 'error'> & {
-      command: ResponseActionsApiCommandNames;
-      actionId?: string;
-    };
+export type ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
+  TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
+  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
+  TMeta extends {} = {}
+> = ResponseActionsRequestBody &
+  Pick<CommonResponseActionMethodOptions, 'ruleName' | 'ruleId' | 'hosts' | 'error'> &
+  Pick<LogsEndpointAction<TParameters, TOutputContent, TMeta>, 'meta'> & {
+    command: ResponseActionsApiCommandNames;
+    actionId?: string;
+  };
 
 export type ResponseActionsClientWriteActionResponseToEndpointIndexOptions<
-  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput
+  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
+  TMeta extends {} = {}
 > = {
   agentId: LogsEndpointActionResponse['agent']['id'];
   actionId: string;
-} & Pick<LogsEndpointActionResponse, 'error'> &
+} & Pick<LogsEndpointActionResponse<TOutputContent, TMeta>, 'error' | 'meta'> &
   Pick<LogsEndpointActionResponse<TOutputContent>['EndpointActions'], 'data'>;
 
 export type ResponseActionsClientValidateRequestResponse =
@@ -136,11 +174,29 @@ export type ResponseActionsClientValidateRequestResponse =
       error: ResponseActionsClientError;
     };
 
+export interface FetchActionResponseEsDocsResponse<
+  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
+  TMeta extends {} = {}
+> {
+  [agentId: string]: LogsEndpointActionResponse<TOutputContent, TMeta>;
+}
+
+export interface ResponseActionsClientPendingAction<
+  TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
+  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
+  TMeta extends {} = {}
+> {
+  action: LogsEndpointAction<TParameters, TOutputContent, TMeta>;
+  pendingAgentIds: string[];
+}
+
 /**
  * Base class for a Response Actions client
  */
 export abstract class ResponseActionsClientImpl implements ResponseActionsClient {
   protected readonly log: Logger;
+
+  protected readonly cache = new SimpleMemCache();
 
   protected abstract readonly agentType: ResponseActionAgentType;
 
@@ -208,7 +264,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
       return;
     }
 
-    this.log.debug(`Updating cases:\n${stringify(allCases)}`);
+    this.log.debug(() => `Updating cases:\n${stringify(allCases)}`);
 
     const attachments: CaseAttachments = [
       {
@@ -249,7 +305,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
       })
     );
 
-    this.log.debug(`Update to cases done:\n${stringify(casesUpdateResponse)}`);
+    this.log.debug(() => `Update to cases done:\n${stringify(casesUpdateResponse)}`);
   }
 
   protected getMethodOptions<
@@ -276,6 +332,68 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
       this.options.esClient,
       this.options.endpointService.getEndpointMetadataService(),
       actionId
+    );
+  }
+
+  /**
+   * Fetches the Action request ES document for a given action id
+   * @param actionId
+   * @protected
+   */
+  protected async fetchActionRequestEsDoc<
+    TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
+    TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
+    TMeta extends {} = {}
+  >(actionId: string): Promise<LogsEndpointAction<TParameters, TOutputContent, TMeta>> {
+    const cacheKey = `fetchActionRequestEsDoc-${actionId}`;
+    const cachedResponse =
+      this.cache.get<LogsEndpointAction<TParameters, TOutputContent, TMeta>>(cacheKey);
+
+    if (cachedResponse) {
+      this.log.debug(
+        `fetchActionRequestEsDoc(): returning cached response for action id ${actionId}`
+      );
+      return cachedResponse;
+    }
+
+    return fetchActionRequestById<TParameters, TOutputContent, TMeta>(
+      this.options.esClient,
+      actionId
+    ).then((actionRequestDoc) => {
+      this.cache.set(cacheKey, actionRequestDoc);
+      return actionRequestDoc;
+    });
+  }
+
+  /**
+   * Fetches the Response Action ES response documents for a given action id
+   * @param actionId
+   * @param agentIds
+   * @protected
+   */
+  protected async fetchActionResponseEsDocs<
+    TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
+    TMeta extends {} = {}
+  >(
+    actionId: string,
+    /** Specific Agent IDs to retrieve. default is to retrieve all */
+    agentIds?: string[]
+  ): Promise<FetchActionResponseEsDocsResponse<TOutputContent, TMeta>> {
+    const responseDocs = await fetchEndpointActionResponses<TOutputContent, TMeta>({
+      esClient: this.options.esClient,
+      actionIds: [actionId],
+      agentIds,
+    });
+
+    return responseDocs.reduce<FetchActionResponseEsDocsResponse<TOutputContent, TMeta>>(
+      (acc, response) => {
+        const agentId = Array.isArray(response.agent.id) ? response.agent.id[0] : response.agent.id;
+
+        acc[agentId] = response;
+
+        return acc;
+      },
+      {}
     );
   }
 
@@ -327,9 +445,17 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
    * Creates a Response Action request document in the Endpoint index (`.logs-endpoint.actions-default`)
    * @protected
    */
-  protected async writeActionRequestToEndpointIndex(
-    actionRequest: ResponseActionsClientWriteActionRequestToEndpointIndexOptions
-  ): Promise<LogsEndpointAction> {
+  protected async writeActionRequestToEndpointIndex<
+    TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
+    TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
+    TMeta extends {} = {}
+  >(
+    actionRequest: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
+      TParameters,
+      TOutputContent,
+      TMeta
+    >
+  ): Promise<LogsEndpointAction<TParameters, TOutputContent, TMeta>> {
     let errorMsg = String(actionRequest.error ?? '').trim();
 
     if (!errorMsg) {
@@ -346,7 +472,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
 
     this.notifyUsage(actionRequest.command);
 
-    const doc: LogsEndpointAction = {
+    const doc: LogsEndpointAction<TParameters, TOutputContent, TMeta> = {
       '@timestamp': new Date().toISOString(),
       agent: {
         id: actionRequest.endpoint_ids,
@@ -361,12 +487,13 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
           comment: actionRequest.comment ?? undefined,
           ...(actionRequest.alert_ids ? { alert_id: actionRequest.alert_ids } : {}),
           ...(actionRequest.hosts ? { hosts: actionRequest.hosts } : {}),
-          parameters: actionRequest.parameters as EndpointActionDataParameterTypes,
+          parameters: actionRequest.parameters as TParameters,
         },
       },
       user: {
         id: this.options.username,
       },
+      meta: actionRequest.meta,
       ...(errorMsg ? { error: { message: errorMsg } } : {}),
       ...(actionRequest.ruleId && actionRequest.ruleName
         ? { rule: { id: actionRequest.ruleId, name: actionRequest.ruleName } }
@@ -391,8 +518,12 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
         );
       }
 
+      this.sendActionCreationTelemetry(doc);
+
       return doc;
     } catch (err) {
+      this.sendActionCreationErrorTelemetry(actionRequest.command, err);
+
       if (!(err instanceof ResponseActionsClientError)) {
         throw new ResponseActionsClientError(
           `Failed to create action request document: ${err.message}`,
@@ -407,15 +538,20 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
 
   protected buildActionResponseEsDoc<
     // Default type purposely set to empty object in order to ensure proper types are used when calling the method
-    TOutputContent extends EndpointActionResponseDataOutput = Record<string, never>
+    TOutputContent extends EndpointActionResponseDataOutput = Record<string, never>,
+    TMeta extends {} = {}
   >({
     actionId,
     error,
     agentId,
     data,
-  }: ResponseActionsClientWriteActionResponseToEndpointIndexOptions<TOutputContent>): LogsEndpointActionResponse<TOutputContent> {
+    meta,
+  }: ResponseActionsClientWriteActionResponseToEndpointIndexOptions<
+    TOutputContent,
+    TMeta
+  >): LogsEndpointActionResponse<TOutputContent, TMeta> {
     const timestamp = new Date().toISOString();
-    const doc: LogsEndpointActionResponse<TOutputContent> = {
+    const doc: LogsEndpointActionResponse<TOutputContent, TMeta> = {
       '@timestamp': timestamp,
       agent: {
         id: agentId,
@@ -428,6 +564,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
         data,
       },
       error,
+      meta,
     };
 
     return doc;
@@ -444,9 +581,13 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
   >(
     options: ResponseActionsClientWriteActionResponseToEndpointIndexOptions<TOutputContent>
   ): Promise<LogsEndpointActionResponse<TOutputContent>> {
+    // FIXME:PT need to ensure we use a index below that has the proper `namespace` when agent type is Endpoint
+    //        Background: Endpoint responses require that the document be written to an index that has the
+    //        correct `namespace` as defined by the Integration/Agent policy and that logic is not currently implemented.
+
     const doc = this.buildActionResponseEsDoc(options);
 
-    this.log.debug(`Writing response action response:\n${stringify(doc)}`);
+    this.log.debug(() => `Writing response action response:\n${stringify(doc)}`);
 
     await this.options.esClient
       .index<LogsEndpointActionResponse<TOutputContent>>({
@@ -457,7 +598,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
       .catch((err) => {
         throw new ResponseActionsClientError(
           `Failed to create action response document: ${err.message}`,
-          err.statusCode ?? 500,
+          500,
           err
         );
       });
@@ -479,7 +620,38 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     usageService.notifyUsage(featureKey);
   }
 
-  protected fetchAllPendingActions(): AsyncIterable<LogsEndpointAction[]> {
+  /**
+   * Builds a comment for use in response action requests sent to external EDR systems
+   * @protected
+   */
+  protected buildExternalComment(
+    actionRequestIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions
+  ): string {
+    const { actionId = uuidv4(), comment, command } = actionRequestIndexOptions;
+
+    // If the action request index options does not yet have an actionId assigned to it, then do it now.
+    // Need to ensure we have an action id for cross-reference.
+    if (!actionRequestIndexOptions.actionId) {
+      actionRequestIndexOptions.actionId = actionId;
+    }
+
+    return (
+      ELASTIC_RESPONSE_ACTION_MESSAGE(this.options.username, command, actionId) +
+      (comment ? `: ${comment}` : '')
+    );
+  }
+
+  protected async ensureValidActionId(actionId: string): Promise<void> {
+    const actionRequest = await this.fetchActionRequestEsDoc(actionId);
+
+    if (actionRequest.EndpointActions.input_type !== this.agentType) {
+      throw new NotFoundError(
+        `Action id [${actionId}] with agent type of [${this.agentType}] not found`
+      );
+    }
+  }
+
+  protected fetchAllPendingActions(): AsyncIterable<ResponseActionsClientPendingAction[]> {
     const esClient = this.options.esClient;
     const query: QueryDslQueryContainer = {
       bool: {
@@ -505,62 +677,42 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
         sort: '@timestamp',
         query,
       },
-      resultsMapper: async (data): Promise<LogsEndpointAction[]> => {
+      resultsMapper: async (data): Promise<ResponseActionsClientPendingAction[]> => {
         const actionRequests = data.hits.hits.map((hit) => hit._source as LogsEndpointAction);
-        const pendingRequests: LogsEndpointAction[] = [];
+        const pendingRequests: ResponseActionsClientPendingAction[] = [];
 
         if (actionRequests.length > 0) {
-          const actionResults = (
-            await fetchActionResponses({
-              esClient,
-              actionIds: actionRequests.map((action) => action.EndpointActions.action_id),
-            })
-          ).data;
-          const categorizedResults = categorizeResponseResults({ results: actionResults });
-
-          // An object whose keys are the Action ID and values are an array of agent IDs that have sent their responses
-          // ex: { uuid-1: [ agentA, agentB ] }
-          const agentResponsesForActionId = categorizedResults.reduce((acc, categoriezedResult) => {
-            let actionId = '';
-            let agentId = '';
-
-            if (categoriezedResult.type === ActivityLogItemTypes.RESPONSE) {
-              actionId = categoriezedResult.item.data.EndpointActions.action_id;
-              agentId = Array.isArray(categoriezedResult.item.data.agent.id)
-                ? categoriezedResult.item.data.agent.id[0]
-                : categoriezedResult.item.data.agent.id;
-            } else {
-              actionId = categoriezedResult.item.data.action_id;
-              agentId = categoriezedResult.item.data.agent_id;
-            }
-
-            if (!acc[actionId]) {
-              acc[actionId] = [];
-            }
-
-            acc[actionId].push(agentId);
-
-            return acc;
-          }, {} as Record<string, string[]>);
+          const actionResults = await fetchActionResponses({
+            esClient,
+            actionIds: actionRequests.map((action) => action.EndpointActions.action_id),
+          });
+          const responsesByActionId = mapResponsesByActionId(actionResults);
 
           // Determine what actions are still pending
           for (const actionRequest of actionRequests) {
-            const thisActionAgentResponses =
-              agentResponsesForActionId[actionRequest.EndpointActions.action_id];
-
-            if (!thisActionAgentResponses) {
-              pendingRequests.push(actionRequest);
-            } else {
-              const thisActionAgentIds = Array.isArray(actionRequest.agent.id)
-                ? actionRequest.agent.id
-                : [actionRequest.agent.id];
-
-              // If at least one Agent has not yet sent a response, then this action is still pending
-              if (
-                !thisActionAgentIds.every((agentId) => thisActionAgentResponses.includes(agentId))
-              ) {
-                pendingRequests.push(actionRequest);
+            const actionCompleteInfo = getActionCompletionInfo(
+              mapToNormalizedActionRequest(actionRequest),
+              responsesByActionId[actionRequest.EndpointActions.action_id] ?? {
+                endpointResponses: [],
+                fleetResponses: [],
               }
+            );
+
+            // If not completed, add action to the pending list and calculate the list of agent IDs
+            // whose response we are still waiting on
+            if (!actionCompleteInfo.isCompleted) {
+              const pendingActionData: ResponseActionsClientPendingAction = {
+                action: actionRequest,
+                pendingAgentIds: [],
+              };
+
+              for (const [agentId, agentIdState] of Object.entries(actionCompleteInfo.agentState)) {
+                if (!agentIdState.isCompleted) {
+                  pendingActionData.pendingAgentIds.push(agentId);
+                }
+              }
+
+              pendingRequests.push(pendingActionData);
             }
           }
         }
@@ -568,6 +720,58 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
         return pendingRequests;
       },
     });
+  }
+
+  protected sendActionCreationTelemetry(actionRequest: LogsEndpointAction): void {
+    if (!this.options.endpointService.experimentalFeatures.responseActionsTelemetryEnabled) {
+      return;
+    }
+    this.options.endpointService
+      .getTelemetryService()
+      .reportEvent(ENDPOINT_RESPONSE_ACTION_SENT_EVENT.eventType, {
+        responseActions: {
+          actionId: actionRequest.EndpointActions.action_id,
+          agentType: this.agentType,
+          command: actionRequest.EndpointActions.data.command,
+          isAutomated: this.options.isAutomated ?? false,
+        },
+      });
+  }
+
+  protected sendActionCreationErrorTelemetry(
+    command: ResponseActionsApiCommandNames,
+    error: Error
+  ): void {
+    if (!this.options.endpointService.experimentalFeatures.responseActionsTelemetryEnabled) {
+      return;
+    }
+    this.options.endpointService
+      .getTelemetryService()
+      .reportEvent(ENDPOINT_RESPONSE_ACTION_SENT_ERROR_EVENT.eventType, {
+        responseActions: {
+          agentType: this.agentType,
+          command,
+          error: error.message,
+        },
+      });
+  }
+
+  protected sendActionResponseTelemetry(responseList: LogsEndpointActionResponse[]): void {
+    if (!this.options.endpointService.experimentalFeatures.responseActionsTelemetryEnabled) {
+      return;
+    }
+    for (const response of responseList) {
+      this.options.endpointService
+        .getTelemetryService()
+        .reportEvent(ENDPOINT_RESPONSE_ACTION_STATUS_CHANGE_EVENT.eventType, {
+          responseActions: {
+            actionId: response.EndpointActions.action_id,
+            agentType: this.agentType,
+            actionStatus: response.error ? 'failed' : 'successful',
+            command: response.EndpointActions.data.command,
+          },
+        });
+    }
   }
 
   public async isolate(
@@ -578,26 +782,26 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
   }
 
   public async release(
-    actionRequest: IsolationRouteRequestBody,
+    actionRequest: UnisolationRouteRequestBody,
     options?: CommonResponseActionMethodOptions
   ): Promise<ActionDetails> {
     throw new ResponseActionsNotSupportedError('unisolate');
   }
 
   public async killProcess(
-    actionRequest: KillOrSuspendProcessRequestBody,
+    actionRequest: KillProcessRequestBody,
     options?: CommonResponseActionMethodOptions
   ): Promise<
-    ActionDetails<KillProcessActionOutputContent, ResponseActionParametersWithPidOrEntityId>
+    ActionDetails<KillProcessActionOutputContent, ResponseActionParametersWithProcessData>
   > {
     throw new ResponseActionsNotSupportedError('kill-process');
   }
 
   public async suspendProcess(
-    actionRequest: KillOrSuspendProcessRequestBody,
+    actionRequest: SuspendProcessRequestBody,
     options?: CommonResponseActionMethodOptions
   ): Promise<
-    ActionDetails<SuspendProcessActionOutputContent, ResponseActionParametersWithPidOrEntityId>
+    ActionDetails<SuspendProcessActionOutputContent, ResponseActionParametersWithProcessData>
   > {
     throw new ResponseActionsNotSupportedError('suspend-process');
   }
@@ -630,7 +834,25 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     throw new ResponseActionsNotSupportedError('upload');
   }
 
+  public async scan(
+    actionRequest: ScanActionRequestBody,
+    options?: CommonResponseActionMethodOptions
+  ): Promise<ActionDetails<ResponseActionScanOutputContent, ResponseActionScanParameters>> {
+    throw new ResponseActionsNotSupportedError('scan');
+  }
+
   public async processPendingActions(_: ProcessPendingActionsMethodOptions): Promise<void> {
     this.log.debug(`#processPendingActions() method is not implemented for ${this.agentType}!`);
+  }
+
+  public async getFileDownload(
+    actionId: string,
+    fileId: string
+  ): Promise<GetFileDownloadMethodResponse> {
+    throw new ResponseActionsClientError(`Method getFileDownload() not implemented`, 501);
+  }
+
+  public async getFileInfo(actionId: string, fileId: string): Promise<UploadedFileInfo> {
+    throw new ResponseActionsClientError(`Method getFileInfo() not implemented`, 501);
   }
 }

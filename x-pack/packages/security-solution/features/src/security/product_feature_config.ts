@@ -42,6 +42,16 @@ export const securityDefaultProductFeaturesConfig: DefaultSecurityProductFeature
       },
     },
   },
+  [ProductFeatureSecurityKey.investigationGuideInteractions]: {
+    privileges: {
+      all: {
+        ui: ['investigation-guide-interactions'],
+      },
+      read: {
+        ui: ['investigation-guide-interactions'],
+      },
+    },
+  },
 
   [ProductFeatureSecurityKey.threatIntelligence]: {
     privileges: {
@@ -69,10 +79,16 @@ export const securityDefaultProductFeaturesConfig: DefaultSecurityProductFeature
 
   [ProductFeatureSecurityKey.endpointArtifactManagement]: {
     subFeatureIds: [
+      SecuritySubFeatureId.hostIsolationExceptionsBasic,
       SecuritySubFeatureId.trustedApplications,
       SecuritySubFeatureId.blocklist,
       SecuritySubFeatureId.eventFilters,
     ],
+  },
+
+  // Endpoint Complete Tier:
+  // Allows access to create/update HIEs
+  [ProductFeatureSecurityKey.endpointHostIsolationExceptions]: {
     subFeaturesPrivileges: [
       {
         id: 'host_isolation_exceptions_all',
@@ -89,12 +105,12 @@ export const securityDefaultProductFeaturesConfig: DefaultSecurityProductFeature
 
   [ProductFeatureSecurityKey.endpointResponseActions]: {
     subFeatureIds: [
-      SecuritySubFeatureId.hostIsolationExceptions,
       SecuritySubFeatureId.responseActionsHistory,
       SecuritySubFeatureId.hostIsolation,
       SecuritySubFeatureId.processOperations,
       SecuritySubFeatureId.fileOperations,
       SecuritySubFeatureId.executeAction,
+      SecuritySubFeatureId.scanAction,
     ],
     subFeaturesPrivileges: [
       {
@@ -106,8 +122,14 @@ export const securityDefaultProductFeaturesConfig: DefaultSecurityProductFeature
   },
 
   // Product features without RBAC
+  // Endpoint/Osquery PLIs
   [ProductFeatureSecurityKey.osqueryAutomatedResponseActions]: {},
   [ProductFeatureSecurityKey.endpointProtectionUpdates]: {},
   [ProductFeatureSecurityKey.endpointAgentTamperProtection]: {},
+  [ProductFeatureSecurityKey.endpointCustomNotification]: {},
   [ProductFeatureSecurityKey.externalRuleActions]: {},
+  [ProductFeatureSecurityKey.cloudSecurityPosture]: {},
+
+  // Security PLIs
+  [ProductFeatureSecurityKey.integrationAssistant]: {},
 };

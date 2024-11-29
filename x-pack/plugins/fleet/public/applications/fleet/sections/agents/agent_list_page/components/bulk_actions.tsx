@@ -31,6 +31,8 @@ import { getCommonTags } from '../utils';
 
 import { AgentRequestDiagnosticsModal } from '../../components/agent_request_diagnostics_modal';
 
+import { useExportCSV } from '../hooks/export_csv';
+
 import type { SelectionMode } from './types';
 import { TagsAddRemove } from './tags_add_remove';
 
@@ -44,6 +46,8 @@ export interface Props {
   refreshAgents: (args?: { refreshTags?: boolean }) => void;
   allTags: string[];
   agentPolicies: AgentPolicy[];
+  sortField?: string;
+  sortOrder?: 'asc' | 'desc';
 }
 
 export const AgentBulkActions: React.FunctionComponent<Props> = ({
@@ -56,6 +60,8 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
   refreshAgents,
   allTags,
   agentPolicies,
+  sortField,
+  sortOrder,
 }) => {
   const licenseService = useLicense();
   const isLicenceAllowingScheduleUpgrade = licenseService.hasAtLeast(LICENSE_FOR_SCHEDULE_UPGRADE);
@@ -68,7 +74,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
   // Actions states
   const [isReassignFlyoutOpen, setIsReassignFlyoutOpen] = useState<boolean>(false);
   const [isUnenrollModalOpen, setIsUnenrollModalOpen] = useState<boolean>(false);
-  const [updateModalState, setUpgradeModalState] = useState({
+  const [upgradeModalState, setUpgradeModalState] = useState({
     isOpen: false,
     isScheduled: false,
     isUpdating: false,
@@ -77,7 +83,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
   const [isRequestDiagnosticsModalOpen, setIsRequestDiagnosticsModalOpen] =
     useState<boolean>(false);
 
-  // update the query removing the "managed" agents
+  // update the query removing the "managed" agents in any state (unenrolled, offline, etc)
   const selectionQuery = useMemo(() => {
     if (totalManagedAgentIds.length) {
       const excludedKuery = `${AGENTS_PREFIX}.agent.id : (${totalManagedAgentIds
@@ -96,7 +102,9 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
       : nAgentsInTable - totalManagedAgentIds?.length;
 
   const [tagsPopoverButton, setTagsPopoverButton] = useState<HTMLElement>();
-  const { diagnosticFileUploadEnabled } = ExperimentalFeaturesService.get();
+  const { diagnosticFileUploadEnabled, enableExportCSV } = ExperimentalFeaturesService.get();
+
+  const { generateReportingJobCSV } = useExportCSV(enableExportCSV);
 
   const menuItems = [
     {
@@ -125,23 +133,6 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
       onClick: () => {
         closeMenu();
         setIsReassignFlyoutOpen(true);
-      },
-    },
-    {
-      name: (
-        <FormattedMessage
-          id="xpack.fleet.agentBulkActions.unenrollAgents"
-          data-test-subj="agentBulkActionsUnenroll"
-          defaultMessage="Unenroll {agentCount, plural, one {# agent} other {# agents}}"
-          values={{
-            agentCount,
-          }}
-        />
-      ),
-      icon: <EuiIcon type="trash" size="m" />,
-      onClick: () => {
-        closeMenu();
-        setIsUnenrollModalOpen(true);
       },
     },
     {
@@ -179,45 +170,86 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
         setUpgradeModalState({ isOpen: true, isScheduled: true, isUpdating: false });
       },
     },
-  ];
-
-  menuItems.push({
-    name: (
-      <FormattedMessage
-        id="xpack.fleet.agentBulkActions.restartUpgradeAgents"
-        data-test-subj="agentBulkActionsRestartUpgrade"
-        defaultMessage="Restart upgrade {agentCount, plural, one {# agent} other {# agents}}"
-        values={{
-          agentCount,
-        }}
-      />
-    ),
-    icon: <EuiIcon type="refresh" size="m" />,
-    onClick: () => {
-      closeMenu();
-      setUpgradeModalState({ isOpen: true, isScheduled: false, isUpdating: true });
-    },
-  });
-
-  if (diagnosticFileUploadEnabled) {
-    menuItems.push({
+    {
       name: (
         <FormattedMessage
-          id="xpack.fleet.agentBulkActions.requestDiagnostics"
-          data-test-subj="agentBulkActionsRequestDiagnostics"
-          defaultMessage="Request diagnostics for {agentCount, plural, one {# agent} other {# agents}}"
+          id="xpack.fleet.agentBulkActions.restartUpgradeAgents"
+          data-test-subj="agentBulkActionsRestartUpgrade"
+          defaultMessage="Restart upgrade {agentCount, plural, one {# agent} other {# agents}}"
           values={{
             agentCount,
           }}
         />
       ),
-      icon: <EuiIcon type="download" size="m" />,
+      icon: <EuiIcon type="refresh" size="m" />,
       onClick: () => {
         closeMenu();
-        setIsRequestDiagnosticsModalOpen(true);
+        setUpgradeModalState({ isOpen: true, isScheduled: false, isUpdating: true });
       },
-    });
-  }
+    },
+    ...(diagnosticFileUploadEnabled
+      ? [
+          {
+            name: (
+              <FormattedMessage
+                id="xpack.fleet.agentBulkActions.requestDiagnostics"
+                data-test-subj="agentBulkActionsRequestDiagnostics"
+                defaultMessage="Request diagnostics for {agentCount, plural, one {# agent} other {# agents}}"
+                values={{
+                  agentCount,
+                }}
+              />
+            ),
+            icon: <EuiIcon type="download" size="m" />,
+            onClick: () => {
+              closeMenu();
+              setIsRequestDiagnosticsModalOpen(true);
+            },
+          },
+        ]
+      : []),
+    {
+      name: (
+        <FormattedMessage
+          id="xpack.fleet.agentBulkActions.unenrollAgents"
+          data-test-subj="agentBulkActionsUnenroll"
+          defaultMessage="Unenroll {agentCount, plural, one {# agent} other {# agents}}"
+          values={{
+            agentCount,
+          }}
+        />
+      ),
+      icon: <EuiIcon type="trash" size="m" />,
+      onClick: () => {
+        closeMenu();
+        setIsUnenrollModalOpen(true);
+      },
+    },
+    ...(enableExportCSV
+      ? [
+          {
+            name: (
+              <FormattedMessage
+                id="xpack.fleet.agentBulkActions.exportAgents"
+                data-test-subj="bulkAgentExportBtn"
+                defaultMessage="Export {agentCount, plural, one {# agent} other {# agents}} as CSV"
+                values={{
+                  agentCount,
+                }}
+              />
+            ),
+            icon: <EuiIcon type="exportAction" size="m" />,
+            onClick: () => {
+              closeMenu();
+              generateReportingJobCSV(agents, {
+                field: sortField,
+                direction: sortOrder,
+              });
+            },
+          },
+        ]
+      : []),
+  ];
 
   const panels = [
     {
@@ -256,13 +288,13 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
           />
         </EuiPortal>
       )}
-      {updateModalState.isOpen && (
+      {upgradeModalState.isOpen && (
         <EuiPortal>
           <AgentUpgradeAgentModal
             agents={agents}
             agentCount={agentCount}
-            isScheduled={updateModalState.isScheduled}
-            isUpdating={updateModalState.isUpdating}
+            isScheduled={upgradeModalState.isScheduled}
+            isUpdating={upgradeModalState.isUpdating}
             onClose={() => {
               setUpgradeModalState({ isOpen: false, isScheduled: false, isUpdating: false });
               refreshAgents();

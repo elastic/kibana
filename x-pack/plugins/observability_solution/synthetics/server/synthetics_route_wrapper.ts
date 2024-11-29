@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { KibanaResponse } from '@kbn/core-http-router-server-internal';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { isEmpty } from 'lodash';
-import { isTestUser, UptimeEsClient } from './lib';
+import { isKibanaResponse } from '@kbn/core-http-server';
+import { isTestUser, SyntheticsEsClient } from './lib';
 import { checkIndicesReadPrivileges } from './synthetics_service/authentication/check_has_privilege';
 import { SYNTHETICS_INDEX_PATTERN } from '../common/constants';
 import { syntheticsServiceApiKey } from './saved_objects/service_api_key';
@@ -20,8 +20,12 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
 ) => ({
   ...uptimeRoute,
   options: {
-    tags: ['access:uptime-read', ...(uptimeRoute?.writeAccess ? ['access:uptime-write'] : [])],
     ...(uptimeRoute.options ?? {}),
+  },
+  security: {
+    authz: {
+      requiredPrivileges: ['uptime-read', ...(uptimeRoute?.writeAccess ? ['uptime-write'] : [])],
+    },
   },
   handler: async (context, request, response) => {
     const { elasticsearch, savedObjects, uiSettings } = await context.core;
@@ -34,20 +38,20 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
     // specifically needed for the synthetics service api key generation
     server.authSavedObjectsClient = savedObjectsClient;
 
-    const uptimeEsClient = new UptimeEsClient(savedObjectsClient, esClient.asCurrentUser, {
+    const syntheticsEsClient = new SyntheticsEsClient(savedObjectsClient, esClient.asCurrentUser, {
       request,
       uiSettings,
       isDev: Boolean(server.isDev) && !isTestUser(server),
       heartbeatIndices: SYNTHETICS_INDEX_PATTERN,
     });
 
-    server.uptimeEsClient = uptimeEsClient;
+    server.syntheticsEsClient = syntheticsEsClient;
 
     const spaceId = server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
 
     try {
       const res = await uptimeRoute.handler({
-        uptimeEsClient,
+        syntheticsEsClient,
         savedObjectsClient,
         context,
         request,
@@ -56,11 +60,11 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
         spaceId,
         syntheticsMonitorClient,
       });
-      if (res instanceof KibanaResponse) {
+      if (isKibanaResponse(res)) {
         return res;
       }
 
-      const inspectData = await uptimeEsClient.getInspectData(uptimeRoute.path);
+      const inspectData = await syntheticsEsClient.getInspectData(uptimeRoute.path);
 
       if (Array.isArray(res)) {
         if (isEmpty(inspectData)) {
@@ -80,12 +84,12 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
       return response.ok({
         body: {
           ...res,
-          ...(await uptimeEsClient.getInspectData(uptimeRoute.path)),
+          ...(await syntheticsEsClient.getInspectData(uptimeRoute.path)),
         },
       });
     } catch (e) {
       if (e.statusCode === 403) {
-        const privileges = await checkIndicesReadPrivileges(uptimeEsClient);
+        const privileges = await checkIndicesReadPrivileges(syntheticsEsClient);
         if (!privileges.has_all_requested) {
           return response.forbidden({
             body: {
@@ -95,6 +99,7 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
           });
         }
       }
+      server.logger.error(e);
       throw e;
     }
   },

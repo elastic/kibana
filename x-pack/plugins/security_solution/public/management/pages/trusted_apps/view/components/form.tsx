@@ -7,7 +7,7 @@
 
 import type { ChangeEventHandler } from 'react';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
-import type { EuiSuperSelectOption } from '@elastic/eui';
+import type { EuiFieldTextProps, EuiSuperSelectOption } from '@elastic/eui';
 import {
   EuiFieldText,
   EuiForm,
@@ -19,15 +19,15 @@ import {
   EuiTitle,
   EuiSpacer,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { AllConditionEntryFields, EntryTypes } from '@kbn/securitysolution-utils';
 import {
   hasSimpleExecutableName,
-  hasWildcardAndInvalidOperator,
+  validateHasWildcardWithWrongOperator,
   isPathValid,
   ConditionEntryField,
   OperatingSystem,
 } from '@kbn/securitysolution-utils';
-import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { WildCardWithWrongOperatorCallout } from '@kbn/securitysolution-exception-list-components';
 import type {
   TrustedAppConditionEntry,
@@ -42,11 +42,9 @@ import {
 import {
   isArtifactGlobal,
   getPolicyIdsFromArtifact,
+  getArtifactTagsByPolicySelection,
 } from '../../../../../../common/endpoint/service/artifacts';
-import {
-  isMacosLinuxTrustedAppCondition,
-  isWindowsTrustedAppCondition,
-} from '../../state/type_guards';
+import { isSignerFieldExcluded } from '../../state/type_guards';
 
 import {
   CONDITIONS_HEADER,
@@ -58,21 +56,15 @@ import {
   NAME_LABEL,
   POLICY_SELECT_DESCRIPTION,
   SELECT_OS_LABEL,
-  CONFIRM_WARNING_MODAL_LABELS,
 } from '../translations';
-import { OS_TITLES } from '../../../../common/translations';
+import { OS_TITLES, CONFIRM_WARNING_MODAL_LABELS } from '../../../../common/translations';
 import type { LogicalConditionBuilderProps } from './logical_condition';
 import { LogicalConditionBuilder } from './logical_condition';
 import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
 import { useLicense } from '../../../../../common/hooks/use_license';
 import type { EffectedPolicySelection } from '../../../../components/effected_policy_select';
 import { EffectedPolicySelect } from '../../../../components/effected_policy_select';
-import {
-  GLOBAL_ARTIFACT_TAG,
-  BY_POLICY_ARTIFACT_TAG_PREFIX,
-} from '../../../../../../common/endpoint/service/artifacts/constants';
 import type { ArtifactFormComponentProps } from '../../../../components/artifact_list_page';
-import { isGlobalPolicyEffected } from '../../../../components/effected_policy_select/utils';
 import { TrustedAppsArtifactsDocsLink } from './artifacts_docs_link';
 
 interface FieldValidationState {
@@ -166,18 +158,27 @@ const validateValues = (values: ArtifactFormComponentProps['item']): ValidationR
       });
 
       if (
-        hasWildcardAndInvalidOperator({
+        validateHasWildcardWithWrongOperator({
           operator: entry.type as EntryTypes,
           value: (entry as TrustedAppConditionEntry).value,
         })
       ) {
-        extraWarning = true;
-        addResultToValidation(
-          validation,
-          'entries',
-          'warnings',
-          INPUT_ERRORS.wildcardWithWrongOperatorWarning(index)
-        );
+        if (entry.field === ConditionEntryField.PATH) {
+          extraWarning = true;
+          addResultToValidation(
+            validation,
+            'entries',
+            'warnings',
+            INPUT_ERRORS.wildcardWithWrongOperatorWarning(index)
+          );
+        } else {
+          addResultToValidation(
+            validation,
+            'entries',
+            'warnings',
+            INPUT_ERRORS.wildcardWithWrongField(index)
+          );
+        }
       }
 
       if (!entry.field || !(entry as TrustedAppConditionEntry).value.trim()) {
@@ -244,13 +245,13 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
 
     const [selectedPolicies, setSelectedPolicies] = useState<PolicyData[]>([]);
     const isPlatinumPlus = useLicense().isPlatinumPlus();
-    const isGlobal = useMemo(() => isArtifactGlobal(item as ExceptionListItemSchema), [item]);
-    const [wasByPolicy, setWasByPolicy] = useState(!isGlobalPolicyEffected(item.tags));
+    const isGlobal = useMemo(() => isArtifactGlobal(item), [item]);
+    const [wasByPolicy, setWasByPolicy] = useState(!isArtifactGlobal(item));
     const [hasFormChanged, setHasFormChanged] = useState(false);
 
     useEffect(() => {
       if (!hasFormChanged && item.tags) {
-        setWasByPolicy(!isGlobalPolicyEffected(item.tags));
+        setWasByPolicy(!isArtifactGlobal({ tags: item.tags }));
       }
     }, [item.tags, hasFormChanged]);
 
@@ -287,7 +288,11 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
           item: updatedFormValues,
           isValid: updatedValidationResult.isValid,
           confirmModalLabels: updatedValidationResult.extraWarning
-            ? CONFIRM_WARNING_MODAL_LABELS
+            ? CONFIRM_WARNING_MODAL_LABELS(
+                i18n.translate('xpack.securitySolution.trustedApps.flyoutForm.confirmModal.name', {
+                  defaultMessage: 'trusted application',
+                })
+              )
             : undefined,
         });
       },
@@ -296,9 +301,7 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
 
     const handleOnPolicyChange = useCallback(
       (change: EffectedPolicySelection) => {
-        const tags = change.isGlobal
-          ? [GLOBAL_ARTIFACT_TAG]
-          : change.selected.map((policy) => `${BY_POLICY_ARTIFACT_TAG_PREFIX}${policy.id}`);
+        const tags = getArtifactTagsByPolicySelection(change);
 
         const nextItem = { ...item, tags };
         // Preserve old selected policies when switching to global
@@ -326,7 +329,7 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
       [item, processChanged]
     );
 
-    const handleOnNameBlur = useCallback(
+    const handleOnNameBlur = useCallback<NonNullable<EuiFieldTextProps['onBlur']>>(
       ({ target: { name } }) => {
         processChanged(item);
         setVisited((prevVisited) => ({ ...prevVisited, [name]: true }));
@@ -358,16 +361,38 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
           entries: [] as ArtifactFormComponentProps['item']['entries'],
         };
 
-        if (os !== OperatingSystem.WINDOWS) {
-          const macOsLinuxConditionEntry = item.entries.filter((entry) =>
-            isMacosLinuxTrustedAppCondition(entry as TrustedAppConditionEntry)
-          );
-          nextItem.entries.push(...macOsLinuxConditionEntry);
-          if (item.entries.length === 0) {
-            nextItem.entries.push(defaultConditionEntry());
-          }
-        } else {
-          nextItem.entries.push(...item.entries);
+        switch (os) {
+          case OperatingSystem.LINUX:
+            nextItem.entries = item.entries.filter((entry) =>
+              isSignerFieldExcluded(entry as TrustedAppConditionEntry)
+            );
+            if (item.entries.length === 0) {
+              nextItem.entries.push(defaultConditionEntry());
+            }
+            break;
+          case OperatingSystem.MAC:
+            nextItem.entries = item.entries.map((entry) =>
+              entry.field === ConditionEntryField.SIGNER
+                ? { ...entry, field: ConditionEntryField.SIGNER_MAC }
+                : entry
+            );
+            if (item.entries.length === 0) {
+              nextItem.entries.push(defaultConditionEntry());
+            }
+            break;
+          case OperatingSystem.WINDOWS:
+            nextItem.entries = item.entries.map((entry) =>
+              entry.field === ConditionEntryField.SIGNER_MAC
+                ? { ...entry, field: ConditionEntryField.SIGNER }
+                : entry
+            );
+            if (item.entries.length === 0) {
+              nextItem.entries.push(defaultConditionEntry());
+            }
+            break;
+          default:
+            nextItem.entries.push(...item.entries);
+            break;
         }
 
         processChanged(nextItem);
@@ -423,17 +448,15 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
         entries: [],
       };
       const os = ((item.os_types ?? [])[0] as OperatingSystem) ?? OperatingSystem.WINDOWS;
-      if (os === OperatingSystem.WINDOWS) {
-        nextItem.entries = [...item.entries, defaultConditionEntry()].filter((entry) =>
-          isWindowsTrustedAppCondition(entry as TrustedAppConditionEntry)
-        );
-      } else {
+      if (os === OperatingSystem.LINUX) {
         nextItem.entries = [
           ...item.entries.filter((entry) =>
-            isMacosLinuxTrustedAppCondition(entry as TrustedAppConditionEntry)
+            isSignerFieldExcluded(entry as TrustedAppConditionEntry)
           ),
           defaultConditionEntry(),
         ];
+      } else {
+        nextItem.entries = [...item.entries, defaultConditionEntry()];
       }
       processChanged(nextItem);
       setHasFormChanged(true);

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { RequestHandlerContextBase } from '@kbn/core-http-server';
@@ -12,6 +13,8 @@ import type { SavedObjectsRequestHandlerContext } from '@kbn/core-saved-objects-
 import type { DeprecationsRequestHandlerContext } from '@kbn/core-deprecations-server';
 import type { UiSettingsRequestHandlerContext } from '@kbn/core-ui-settings-server';
 import type { SecurityRequestHandlerContext } from '@kbn/core-security-server';
+import type { UserProfileRequestHandlerContext } from '@kbn/core-user-profile-server';
+import type { FeatureFlagsRequestHandlerContext } from '@kbn/core-feature-flags-server';
 
 /**
  * The `core` context provided to route handler.
@@ -28,11 +31,34 @@ import type { SecurityRequestHandlerContext } from '@kbn/core-security-server';
  * @public
  */
 export interface CoreRequestHandlerContext {
+  /**
+   * {@link SavedObjectsRequestHandlerContext}
+   */
   savedObjects: SavedObjectsRequestHandlerContext;
+  /**
+   * {@link ElasticsearchRequestHandlerContext}
+   */
   elasticsearch: ElasticsearchRequestHandlerContext;
+  /**
+   * {@link FeatureFlagsRequestHandlerContext}
+   */
+  featureFlags: FeatureFlagsRequestHandlerContext;
+  /**
+   * {@link UiSettingsRequestHandlerContext}
+   */
   uiSettings: UiSettingsRequestHandlerContext;
+  /**
+   * {@link DeprecationsRequestHandlerContext}
+   */
   deprecations: DeprecationsRequestHandlerContext;
+  /**
+   * {@link SecurityRequestHandlerContext}
+   */
   security: SecurityRequestHandlerContext;
+  /**
+   * {@link UserProfileRequestHandlerContext}
+   */
+  userProfile: UserProfileRequestHandlerContext;
 }
 
 /**
@@ -41,6 +67,9 @@ export interface CoreRequestHandlerContext {
  * @public
  */
 export interface RequestHandlerContext extends RequestHandlerContextBase {
+  /**
+   * Promise that resolves the {@link CoreRequestHandlerContext}
+   */
   core: Promise<CoreRequestHandlerContext>;
 }
 

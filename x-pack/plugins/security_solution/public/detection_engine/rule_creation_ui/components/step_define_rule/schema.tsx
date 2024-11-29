@@ -10,37 +10,44 @@ import { i18n } from '@kbn/i18n';
 import { EuiText } from '@elastic/eui';
 import React from 'react';
 
-import { fromKueryExpression } from '@kbn/es-query';
 import {
   singleEntryThreat,
   containsInvalidItems,
   customValidators,
 } from '../../../../common/components/threat_match/helpers';
 import {
+  isEqlRule,
+  isEqlSequenceQuery,
   isEsqlRule,
   isNewTermsRule,
-  isQueryRule,
   isThreatMatchRule,
   isThresholdRule,
+  isSuppressionRuleConfiguredWithGroupBy,
 } from '../../../../../common/detection_engine/utils';
 import { MAX_NUMBER_OF_NEW_TERMS_FIELDS } from '../../../../../common/constants';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
-import type { FieldValueQueryBar } from '../query_bar';
 import type { ERROR_CODE, FormSchema, ValidationFunc } from '../../../../shared_imports';
 import { FIELD_TYPES, fieldValidators } from '../../../../shared_imports';
 import type { DefineStepRule } from '../../../../detections/pages/detection_engine/rules/types';
 import { DataSourceType } from '../../../../detections/pages/detection_engine/rules/types';
-import { debounceAsync, eqlValidator } from '../eql_query_bar/validators';
-import { esqlValidator } from '../../../rule_creation/logic/esql_validator';
+import { dataViewIdValidatorFactory } from '../../validators/data_view_id_validator_factory';
+import { indexPatternValidatorFactory } from '../../validators/index_pattern_validator_factory';
+import { alertSuppressionFieldsValidatorFactory } from '../../validators/alert_suppression_fields_validator_factory';
 import {
-  CUSTOM_QUERY_REQUIRED,
-  INVALID_CUSTOM_QUERY,
+  ALERT_SUPPRESSION_DURATION_FIELD_NAME,
+  ALERT_SUPPRESSION_FIELDS_FIELD_NAME,
+  ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME,
+} from '../../../rule_creation/components/alert_suppression_edit';
+import * as alertSuppressionEditI81n from '../../../rule_creation/components/alert_suppression_edit/components/translations';
+import {
   INDEX_HELPER_TEXT,
   THREAT_MATCH_INDEX_HELPER_TEXT,
   THREAT_MATCH_REQUIRED,
   THREAT_MATCH_EMPTIES,
+  EQL_SEQUENCE_SUPPRESSION_GROUPBY_VALIDATION_TEXT,
 } from './translations';
-import { getQueryRequiredMessage } from './utils';
+import { queryRequiredValidatorFactory } from '../../validators/query_required_validator_factory';
+import { kueryValidatorFactory } from '../../validators/kuery_validator_factory';
 
 export const schema: FormSchema<DefineStepRule> = {
   index: {
@@ -56,27 +63,18 @@ export const schema: FormSchema<DefineStepRule> = {
     helpText: <EuiText size="xs">{INDEX_HELPER_TEXT}</EuiText>,
     validations: [
       {
-        validator: (
-          ...args: Parameters<ValidationFunc>
-        ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
+        validator: (...args) => {
           const [{ formData }] = args;
-          const skipValidation =
+
+          if (
             isMlRule(formData.ruleType) ||
             isEsqlRule(formData.ruleType) ||
-            formData.dataSourceType !== DataSourceType.IndexPatterns;
-
-          if (skipValidation) {
+            formData.dataSourceType !== DataSourceType.IndexPatterns
+          ) {
             return;
           }
 
-          return fieldValidators.emptyField(
-            i18n.translate(
-              'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.outputIndiceNameFieldRequiredError',
-              {
-                defaultMessage: 'A minimum of one index pattern is required.',
-              }
-            )
-          )(...args);
+          return indexPatternValidatorFactory()(...args);
         },
       },
     ],
@@ -91,32 +89,14 @@ export const schema: FormSchema<DefineStepRule> = {
     fieldsToValidateOnChange: ['dataViewId'],
     validations: [
       {
-        validator: (
-          ...args: Parameters<ValidationFunc>
-        ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
-          const [{ path, formData }] = args;
-          // the dropdown defaults the dataViewId to an empty string somehow on render..
-          // need to figure this out.
-          const notEmptyDataViewId = formData.dataViewId != null && formData.dataViewId !== '';
+        validator: (...args) => {
+          const [{ formData }] = args;
 
-          const skipValidation =
-            isMlRule(formData.ruleType) ||
-            notEmptyDataViewId ||
-            formData.dataSourceType !== DataSourceType.DataView;
-
-          if (skipValidation) {
+          if (isMlRule(formData.ruleType) || formData.dataSourceType !== DataSourceType.DataView) {
             return;
           }
 
-          return {
-            path,
-            message: i18n.translate(
-              'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.dataViewSelectorFieldRequired',
-              {
-                defaultMessage: 'Please select an available Data View or Index Pattern.',
-              }
-            ),
-          };
+          return dataViewIdValidatorFactory()(...args);
         },
       },
     ],
@@ -134,60 +114,24 @@ export const schema: FormSchema<DefineStepRule> = {
     fieldsToValidateOnChange: ['eqlOptions', 'queryBar'],
   },
   queryBar: {
+    fieldsToValidateOnChange: ['queryBar', ALERT_SUPPRESSION_FIELDS_FIELD_NAME],
     validations: [
       {
-        validator: (
-          ...args: Parameters<ValidationFunc>
-        ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
-          const [{ value, path, formData }] = args;
-          const { query, filters, saved_id: savedId } = value as FieldValueQueryBar;
-          const needsValidation = !isMlRule(formData.ruleType);
-          if (!needsValidation) {
-            return undefined;
-          }
-          const isFieldEmpty = isEmpty(query.query as string) && isEmpty(filters);
-          if (!isFieldEmpty) {
-            return undefined;
-          }
-          if (savedId) {
+        validator: (...args) => {
+          const [{ value, formData }] = args;
+
+          if (isMlRule(formData.ruleType) || value.saved_id) {
             // Ignore field validation error in this case.
             // Instead, we show the error toast when saved query object does not exist.
             // https://github.com/elastic/kibana/issues/159060
-            return undefined;
-          }
-          const message = getQueryRequiredMessage(formData.ruleType);
-          return { code: 'ERR_FIELD_MISSING', path, message };
-        },
-      },
-      {
-        validator: (
-          ...args: Parameters<ValidationFunc>
-        ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
-          const [{ value, path, formData }] = args;
-          const { query } = value as FieldValueQueryBar;
-          const needsValidation = !isMlRule(formData.ruleType);
-          if (!needsValidation) {
             return;
           }
 
-          if (!isEmpty(query.query as string) && query.language === 'kuery') {
-            try {
-              fromKueryExpression(query.query);
-            } catch (err) {
-              return {
-                code: 'ERR_FIELD_FORMAT',
-                path,
-                message: INVALID_CUSTOM_QUERY,
-              };
-            }
-          }
+          return queryRequiredValidatorFactory(formData.ruleType)(...args);
         },
       },
       {
-        validator: debounceAsync(eqlValidator, 300),
-      },
-      {
-        validator: debounceAsync(esqlValidator, 300),
+        validator: kueryValidatorFactory(),
       },
     ],
   },
@@ -241,16 +185,11 @@ export const schema: FormSchema<DefineStepRule> = {
     ],
   },
   relatedIntegrations: {
+    type: FIELD_TYPES.JSON,
     label: i18n.translate(
       'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldRelatedIntegrationsLabel',
       {
         defaultMessage: 'Related integrations',
-      }
-    ),
-    helpText: i18n.translate(
-      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldRelatedIntegrationsHelpText',
-      {
-        defaultMessage: 'Integration related to this Rule.',
       }
     ),
   },
@@ -528,124 +467,19 @@ export const schema: FormSchema<DefineStepRule> = {
     ),
     validations: [
       {
-        validator: (
-          ...args: Parameters<ValidationFunc>
-        ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
-          const [{ value, path, formData }] = args;
-          const needsValidation = isThreatMatchRule(formData.ruleType);
-          if (!needsValidation) {
-            return;
-          }
-
-          const { query, filters } = value as FieldValueQueryBar;
-
-          return isEmpty(query.query as string) && isEmpty(filters)
-            ? {
-                code: 'ERR_FIELD_MISSING',
-                path,
-                message: CUSTOM_QUERY_REQUIRED,
-              }
-            : undefined;
-        },
-      },
-      {
-        validator: (
-          ...args: Parameters<ValidationFunc>
-        ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
-          const [{ value, path, formData }] = args;
-          const needsValidation = isThreatMatchRule(formData.ruleType);
-          if (!needsValidation) {
-            return;
-          }
-          const { query } = value as FieldValueQueryBar;
-
-          if (!isEmpty(query.query as string) && query.language === 'kuery') {
-            try {
-              fromKueryExpression(query.query);
-            } catch (err) {
-              return {
-                code: 'ERR_FIELD_FORMAT',
-                path,
-                message: INVALID_CUSTOM_QUERY,
-              };
-            }
-          }
-        },
-      },
-    ],
-  },
-  groupByFields: {
-    type: FIELD_TYPES.COMBO_BOX,
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.groupByFieldsLabel',
-      {
-        defaultMessage: 'Suppress alerts by',
-      }
-    ),
-    labelAppend: (
-      <EuiText color="subdued" size="xs">
-        {i18n.translate(
-          'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.groupByFieldsLabelAppend',
-          {
-            defaultMessage: 'Optional (Technical Preview)',
-          }
-        )}
-      </EuiText>
-    ),
-    helpText: i18n.translate(
-      'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldGroupByFieldHelpText',
-      {
-        defaultMessage: 'Select field(s) to use for suppressing extra alerts',
-      }
-    ),
-    validations: [
-      {
-        validator: (
-          ...args: Parameters<ValidationFunc>
-        ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
+        validator: (...args) => {
           const [{ formData }] = args;
-          const needsValidation =
-            isQueryRule(formData.ruleType) || isThreatMatchRule(formData.ruleType);
-          if (!needsValidation) {
+          if (!isThreatMatchRule(formData.ruleType)) {
             return;
           }
-          return fieldValidators.maxLengthField({
-            length: 3,
-            message: i18n.translate(
-              'xpack.securitySolution.detectionEngine.validations.stepDefineRule.groupByFieldsMax',
-              {
-                defaultMessage: 'Number of grouping fields must be at most 3',
-              }
-            ),
-          })(...args);
+
+          return queryRequiredValidatorFactory(formData.ruleType)(...args);
         },
       },
+      {
+        validator: kueryValidatorFactory(),
+      },
     ],
-  },
-  groupByRadioSelection: {},
-  groupByDuration: {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.groupByDurationValueLabel',
-      {
-        defaultMessage: 'Suppress alerts for',
-      }
-    ),
-    helpText: i18n.translate(
-      'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldGroupByDurationValueHelpText',
-      {
-        defaultMessage: 'Suppress alerts for',
-      }
-    ),
-    value: {},
-    unit: {},
-  },
-  suppressionMissingFields: {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.suppressionMissingFieldsLabel',
-      {
-        defaultMessage: 'If a suppression field is missing',
-      }
-    ),
   },
   newTermsFields: {
     type: FIELD_TYPES.COMBO_BOX,
@@ -717,12 +551,83 @@ export const schema: FormSchema<DefineStepRule> = {
         defaultMessage: "New terms rules only alert if terms don't appear in historical data.",
       }
     ),
+    validations: [
+      {
+        validator: (
+          ...args: Parameters<ValidationFunc>
+        ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
+          const [{ path, formData }] = args;
+          const needsValidation = isNewTermsRule(formData.ruleType);
+
+          if (!needsValidation) {
+            return;
+          }
+
+          const filterTimeVal = formData.historyWindowSize.match(/\d+/g);
+
+          if (filterTimeVal <= 0) {
+            return {
+              code: 'ERR_MIN_LENGTH',
+              path,
+              message: i18n.translate(
+                'xpack.securitySolution.detectionEngine.validations.stepDefineRule.historyWindowSize.errMin',
+                {
+                  defaultMessage: 'History window size must be greater than 0.',
+                }
+              ),
+            };
+          }
+        },
+      },
+    ],
+  },
+  [ALERT_SUPPRESSION_FIELDS_FIELD_NAME]: {
+    validations: [
+      {
+        validator: (...args: Parameters<ValidationFunc>) => {
+          const [{ formData }] = args;
+          const needsValidation = isSuppressionRuleConfiguredWithGroupBy(formData.ruleType);
+
+          if (!needsValidation) {
+            return;
+          }
+
+          return alertSuppressionFieldsValidatorFactory()(...args);
+        },
+      },
+      {
+        validator: (
+          ...args: Parameters<ValidationFunc>
+        ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
+          const [{ formData, value }] = args;
+
+          if (!isEqlRule(formData.ruleType) || !Array.isArray(value) || value.length === 0) {
+            return;
+          }
+
+          const query: string = formData.queryBar?.query?.query ?? '';
+
+          if (isEqlSequenceQuery(query)) {
+            return {
+              message: EQL_SEQUENCE_SUPPRESSION_GROUPBY_VALIDATION_TEXT,
+            };
+          }
+        },
+      },
+    ],
+  },
+  [ALERT_SUPPRESSION_DURATION_FIELD_NAME]: {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.groupByDurationValueLabel',
+      {
+        defaultMessage: 'Suppress alerts for',
+      }
+    ),
+  },
+  [ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME]: {
+    label: alertSuppressionEditI81n.ALERT_SUPPRESSION_MISSING_FIELDS_LABEL,
   },
   shouldLoadQueryDynamically: {
-    type: FIELD_TYPES.CHECKBOX,
-    defaultValue: false,
-  },
-  enableThresholdSuppression: {
     type: FIELD_TYPES.CHECKBOX,
     defaultValue: false,
   },

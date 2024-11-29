@@ -10,7 +10,6 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiFormRow } from '@elastic/eui';
 import type { DataViewBase } from '@kbn/es-query';
 import type { ThreatMapEntries } from '../../../../common/components/threat_match/types';
 import { ThreatMatchComponent } from '../../../../common/components/threat_match';
-import type { BrowserField } from '../../../../common/containers/source';
 import type { FieldHook } from '../../../../shared_imports';
 import {
   Field,
@@ -20,7 +19,7 @@ import {
 } from '../../../../shared_imports';
 import type { DefineStepRule } from '../../../../detections/pages/detection_engine/rules/types';
 import { schema } from '../step_define_rule/schema';
-import { QueryBarDefineRule } from '../query_bar';
+import { QueryBarField } from '../query_bar_field';
 import * as i18n from '../step_define_rule/translations';
 import { MyLabelButton } from '../step_define_rule';
 
@@ -28,7 +27,6 @@ const CommonUseField = getUseField({ component: Field });
 
 interface ThreatMatchInputProps {
   threatMapping: FieldHook;
-  threatBrowserFields: Readonly<Record<string, Partial<BrowserField>>>;
   threatIndexPatterns: DataViewBase;
   indexPatterns: DataViewBase;
   threatIndexPatternsLoading: boolean;
@@ -44,7 +42,6 @@ const ThreatMatchInputComponent: React.FC<ThreatMatchInputProps> = ({
   indexPatterns,
   threatIndexPatterns,
   threatIndexPatternsLoading,
-  threatBrowserFields,
   onValidityChange,
 }: ThreatMatchInputProps) => {
   const { setValue, value: threatItems } = threatMapping;
@@ -99,9 +96,8 @@ const ThreatMatchInputComponent: React.FC<ThreatMatchInputProps> = ({
               ...schema.threatQueryBar,
               labelAppend: null,
             }}
-            component={QueryBarDefineRule}
+            component={QueryBarField}
             componentProps={{
-              browserFields: threatBrowserFields,
               idAria: 'detectionEngineStepDefineThreatRuleQueryBar',
               indexPattern: threatIndexPatterns,
               isDisabled: false,

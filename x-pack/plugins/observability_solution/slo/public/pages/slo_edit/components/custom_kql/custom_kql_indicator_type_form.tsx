@@ -9,49 +9,32 @@ import { EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useFormContext } from 'react-hook-form';
+import { IndexAndTimestampField } from '../custom_common/index_and_timestamp_field';
 import { GroupByField } from '../common/group_by_field';
 import { useCreateDataView } from '../../../../hooks/use_create_data_view';
 import { CreateSLOForm } from '../../types';
 import { DataPreviewChart } from '../common/data_preview_chart';
-import { IndexFieldSelector } from '../common/index_field_selector';
 import { QueryBuilder } from '../common/query_builder';
-import { IndexSelection } from '../custom_common/index_selection';
+import { DATA_VIEW_FIELD } from '../custom_common/index_selection';
 
 export function CustomKqlIndicatorTypeForm() {
   const { watch } = useFormContext<CreateSLOForm>();
   const index = watch('indicator.params.index');
+  const dataViewId = watch(DATA_VIEW_FIELD);
 
   const { dataView, loading: isIndexFieldsLoading } = useCreateDataView({
     indexPatternString: index,
+    dataViewId,
   });
-  const timestampFields = dataView?.fields?.filter((field) => field.type === 'date') ?? [];
 
   return (
     <EuiFlexGroup direction="column" gutterSize="l">
-      <EuiFlexGroup direction="row" gutterSize="l">
-        <EuiFlexItem>
-          <IndexSelection />
-        </EuiFlexItem>
-
-        <IndexFieldSelector
-          indexFields={timestampFields}
-          name="indicator.params.timestampField"
-          label={i18n.translate('xpack.slo.sloEdit.timestampField.label', {
-            defaultMessage: 'Timestamp field',
-          })}
-          placeholder={i18n.translate('xpack.slo.sloEdit.timestampField.placeholder', {
-            defaultMessage: 'Select a timestamp field',
-          })}
-          isLoading={!!index && isIndexFieldsLoading}
-          isDisabled={!index}
-          isRequired
-        />
-      </EuiFlexGroup>
+      <IndexAndTimestampField dataView={dataView} isLoading={isIndexFieldsLoading} />
 
       <EuiFlexItem>
         <QueryBuilder
           dataTestSubj="customKqlIndicatorFormQueryFilterInput"
-          indexPatternString={watch('indicator.params.index')}
+          dataView={dataView}
           label={i18n.translate('xpack.slo.sloEdit.sliType.customKql.queryFilter', {
             defaultMessage: 'Query filter',
           })}
@@ -74,7 +57,7 @@ export function CustomKqlIndicatorTypeForm() {
       <EuiFlexItem>
         <QueryBuilder
           dataTestSubj="customKqlIndicatorFormGoodQueryInput"
-          indexPatternString={watch('indicator.params.index')}
+          dataView={dataView}
           label={i18n.translate('xpack.slo.sloEdit.sliType.customKql.goodQuery', {
             defaultMessage: 'Good query',
           })}
@@ -98,7 +81,7 @@ export function CustomKqlIndicatorTypeForm() {
       <EuiFlexItem>
         <QueryBuilder
           dataTestSubj="customKqlIndicatorFormTotalQueryInput"
-          indexPatternString={watch('indicator.params.index')}
+          dataView={dataView}
           label={i18n.translate('xpack.slo.sloEdit.sliType.customKql.totalQuery', {
             defaultMessage: 'Total query',
           })}

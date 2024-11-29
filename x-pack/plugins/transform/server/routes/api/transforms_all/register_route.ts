@@ -13,7 +13,7 @@ import type { RouteDependencies } from '../../../types';
 
 import { routeHandler } from './route_handler';
 
-export function registerRoute({ router, license }: RouteDependencies) {
+export function registerRoute({ router, getLicense }: RouteDependencies) {
   /**
    * @apiGroup Transforms
    *
@@ -29,13 +29,23 @@ export function registerRoute({ router, license }: RouteDependencies) {
       path: addInternalBasePath('transforms'),
       access: 'internal',
     })
-    .addVersion(
+    .addVersion<estypes.TransformGetTransformRequest, undefined, undefined>(
       {
         version: '1',
+        security: {
+          authz: {
+            enabled: false,
+            reason:
+              'This route is opted out from authorization because permissions will be checked by elasticsearch',
+          },
+        },
         validate: false,
       },
-      license.guardApiRoute<estypes.TransformGetTransformRequest, undefined, undefined>(
-        routeHandler
-      )
+      async (ctx, request, response) => {
+        const license = await getLicense();
+        return license.guardApiRoute<estypes.TransformGetTransformRequest, undefined, undefined>(
+          routeHandler
+        )(ctx, request, response);
+      }
     );
 }

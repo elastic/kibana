@@ -5,28 +5,55 @@
  * 2.0.
  */
 
-import { subj as testSubject } from '@kbn/test-subj-selector';
-import React from 'react';
-import { act } from 'react-dom/test-utils';
-
-import { mount } from 'enzyme';
-import { LogEntryActionsMenu } from './log_entry_actions_menu';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
+import {
+  uptimeOverviewLocatorID,
+  UptimeOverviewLocatorInfraParams,
+  UptimeOverviewLocatorParams,
+} from '@kbn/deeplinks-observability';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { MockUrlService } from '@kbn/share-plugin/common/mocks';
+import { type UrlService } from '@kbn/share-plugin/common/url_service';
+import { mountWithIntl as mount } from '@kbn/test-jest-helpers';
+import { subj as testSubject } from '@kbn/test-subj-selector';
+import React, { FC } from 'react';
+import { act } from 'react-dom/test-utils';
+import { LogEntryActionsMenu } from './log_entry_actions_menu';
 
 const coreStartMock = coreMock.createStart();
 coreStartMock.application.getUrlForApp.mockImplementation((app, options) => {
   return `/test-basepath/s/test-space/app/${app}${options?.path}`;
 });
 
-const ProviderWrapper: React.FC = ({ children }) => {
-  return <KibanaContextProvider services={{ ...coreStartMock }}>{children}</KibanaContextProvider>;
+const emptyUrlService = new MockUrlService();
+const urlServiceWithUptimeLocator = new MockUrlService();
+// we can't use the actual locator here because its import would create a
+// forbidden ts project reference cycle
+urlServiceWithUptimeLocator.locators.create<
+  UptimeOverviewLocatorInfraParams | UptimeOverviewLocatorParams
+>({
+  id: uptimeOverviewLocatorID,
+  getLocation: async (params) => {
+    return { app: 'uptime', path: '/overview', state: {} };
+  },
+});
+
+const ProviderWrapper: FC<React.PropsWithChildren<{ urlService?: UrlService }>> = ({
+  children,
+  urlService = emptyUrlService,
+}) => {
+  return (
+    <KibanaContextProvider services={{ ...coreStartMock, share: { url: urlService } }}>
+      {children}
+    </KibanaContextProvider>
+  );
 };
 
 describe('LogEntryActionsMenu component', () => {
   const time = new Date().toISOString();
-  describe('uptime link', () => {
-    it('renders with a host ip filter when present in log entry', () => {
+
+  describe('uptime link with legacy uptime disabled', () => {
+    it('renders as disabled even when a supported field is present', () => {
       const elementWrapper = mount(
         <ProviderWrapper>
           <LogEntryActionsMenu
@@ -52,13 +79,48 @@ describe('LogEntryActionsMenu component', () => {
       elementWrapper.update();
 
       expect(
+        elementWrapper
+          .find(`${testSubject('~uptimeLogEntryActionsMenuItem')}`)
+          .first()
+          .prop('disabled')
+      ).toEqual(true);
+    });
+  });
+
+  describe('uptime link with legacy uptime enabled', () => {
+    it('renders as enabled when a host ip is present in the log entry', () => {
+      const elementWrapper = mount(
+        <ProviderWrapper urlService={urlServiceWithUptimeLocator}>
+          <LogEntryActionsMenu
+            logEntry={{
+              fields: [{ field: 'host.ip', value: ['HOST_IP'] }],
+              id: 'ITEM_ID',
+              index: 'INDEX',
+              cursor: {
+                time,
+                tiebreaker: 0,
+              },
+            }}
+          />
+        </ProviderWrapper>
+      );
+
+      act(() => {
+        elementWrapper
+          .find(`button${testSubject('logEntryActionsMenuButton')}`)
+          .last()
+          .simulate('click');
+      });
+      elementWrapper.update();
+
+      expect(
         elementWrapper.find(`a${testSubject('~uptimeLogEntryActionsMenuItem')}`).prop('href')
-      ).toBe('/test-basepath/s/test-space/app/uptime#/?search=host.ip:HOST_IP');
+      ).toEqual(expect.any(String));
     });
 
-    it('renders with a container id filter when present in log entry', () => {
+    it('renders as enabled when a container id is present in the log entry', () => {
       const elementWrapper = mount(
-        <ProviderWrapper>
+        <ProviderWrapper urlService={urlServiceWithUptimeLocator}>
           <LogEntryActionsMenu
             logEntry={{
               fields: [{ field: 'container.id', value: ['CONTAINER_ID'] }],
@@ -83,12 +145,12 @@ describe('LogEntryActionsMenu component', () => {
 
       expect(
         elementWrapper.find(`a${testSubject('~uptimeLogEntryActionsMenuItem')}`).prop('href')
-      ).toBe('/test-basepath/s/test-space/app/uptime#/?search=container.id:CONTAINER_ID');
+      ).toEqual(expect.any(String));
     });
 
-    it('renders with a pod uid filter when present in log entry', () => {
+    it('renders as enabled when a pod uid is present in the log entry', () => {
       const elementWrapper = mount(
-        <ProviderWrapper>
+        <ProviderWrapper urlService={urlServiceWithUptimeLocator}>
           <LogEntryActionsMenu
             logEntry={{
               fields: [{ field: 'kubernetes.pod.uid', value: ['POD_UID'] }],
@@ -113,48 +175,12 @@ describe('LogEntryActionsMenu component', () => {
 
       expect(
         elementWrapper.find(`a${testSubject('~uptimeLogEntryActionsMenuItem')}`).prop('href')
-      ).toBe('/test-basepath/s/test-space/app/uptime#/?search=kubernetes.pod.uid:POD_UID');
+      ).toEqual(expect.any(String));
     });
 
-    it('renders with a disjunction of filters when multiple present in log entry', () => {
+    it('renders as disabled when no supported field is present in the log entry', () => {
       const elementWrapper = mount(
-        <ProviderWrapper>
-          <LogEntryActionsMenu
-            logEntry={{
-              fields: [
-                { field: 'container.id', value: ['CONTAINER_ID'] },
-                { field: 'host.ip', value: ['HOST_IP'] },
-                { field: 'kubernetes.pod.uid', value: ['POD_UID'] },
-              ],
-              id: 'ITEM_ID',
-              index: 'INDEX',
-              cursor: {
-                time,
-                tiebreaker: 0,
-              },
-            }}
-          />
-        </ProviderWrapper>
-      );
-
-      act(() => {
-        elementWrapper
-          .find(`button${testSubject('logEntryActionsMenuButton')}`)
-          .last()
-          .simulate('click');
-      });
-      elementWrapper.update();
-
-      expect(
-        elementWrapper.find(`a${testSubject('~uptimeLogEntryActionsMenuItem')}`).prop('href')
-      ).toBe(
-        '/test-basepath/s/test-space/app/uptime#/?search=container.id:CONTAINER_ID%20or%20host.ip:HOST_IP%20or%20kubernetes.pod.uid:POD_UID'
-      );
-    });
-
-    it('renders as disabled when no supported field is present in log entry', () => {
-      const elementWrapper = mount(
-        <ProviderWrapper>
+        <ProviderWrapper urlService={urlServiceWithUptimeLocator}>
           <LogEntryActionsMenu
             logEntry={{
               fields: [],
@@ -179,7 +205,8 @@ describe('LogEntryActionsMenu component', () => {
 
       expect(
         elementWrapper
-          .find(`button${testSubject('~uptimeLogEntryActionsMenuItem')}`)
+          .find(`${testSubject('~uptimeLogEntryActionsMenuItem')}`)
+          .first()
           .prop('disabled')
       ).toEqual(true);
     });

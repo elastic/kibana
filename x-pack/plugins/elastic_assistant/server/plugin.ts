@@ -9,6 +9,7 @@ import { PluginInitializerContext, CoreStart, Plugin, Logger } from '@kbn/core/s
 
 import { AssistantFeatures } from '@kbn/elastic-assistant-common';
 import { ReplaySubject, type Subject } from 'rxjs';
+import { MlPluginSetup } from '@kbn/ml-plugin/server';
 import { events } from './lib/telemetry/event_based_telemetry';
 import {
   AssistantTool,
@@ -24,6 +25,7 @@ import { RequestContextFactory } from './routes/request_context_factory';
 import { PLUGIN_ID } from '../common/constants';
 import { registerRoutes } from './routes/register_routes';
 import { appContextService } from './services/app_context';
+import { createGetElserId } from './ai_assistant_service/helpers';
 
 export class ElasticAssistantPlugin
   implements
@@ -38,6 +40,8 @@ export class ElasticAssistantPlugin
   private assistantService: AIAssistantService | undefined;
   private pluginStop$: Subject<void>;
   private readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
+  private mlTrainedModelsProvider?: MlPluginSetup['trainedModelsProvider'];
+  private getElserId?: () => Promise<string>;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.pluginStop$ = new ReplaySubject(1);
@@ -53,6 +57,7 @@ export class ElasticAssistantPlugin
 
     this.assistantService = new AIAssistantService({
       logger: this.logger.get('service'),
+      ml: plugins.ml,
       taskManager: plugins.taskManager,
       kibanaVersion: this.kibanaVersion,
       elasticsearchClientPromise: core
@@ -76,8 +81,11 @@ export class ElasticAssistantPlugin
     );
     events.forEach((eventConfig) => core.analytics.registerEventType(eventConfig));
 
-    // this.assistantService registerKBTask
-    registerRoutes(router, this.logger, plugins);
+    this.mlTrainedModelsProvider = plugins.ml.trainedModelsProvider;
+    this.getElserId = createGetElserId(this.mlTrainedModelsProvider);
+
+    registerRoutes(router, this.logger, this.getElserId);
+
     return {
       actions: plugins.actions,
       getRegisteredFeatures: (pluginName: string) => {
@@ -96,8 +104,15 @@ export class ElasticAssistantPlugin
     this.logger.debug('elasticAssistant: Started');
     appContextService.start({ logger: this.logger });
 
+    plugins.licensing.license$.subscribe(() => {
+      if (this.mlTrainedModelsProvider) {
+        this.getElserId = createGetElserId(this.mlTrainedModelsProvider);
+      }
+    });
+
     return {
       actions: plugins.actions,
+      inference: plugins.inference,
       getRegisteredFeatures: (pluginName: string) => {
         return appContextService.getRegisteredFeatures(pluginName);
       },

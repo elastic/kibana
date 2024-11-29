@@ -9,18 +9,10 @@
     "objects": []
   },
   "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
     "classes": [
       {
         "parentPluginId": "@kbn/optimizer",
-        "id": "def-common.OptimizerConfig",
+        "id": "def-server.OptimizerConfig",
         "type": "Class",
         "tags": [],
         "label": "OptimizerConfig",
@@ -31,7 +23,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/optimizer",
-            "id": "def-common.OptimizerConfig.parseOptions",
+            "id": "def-server.OptimizerConfig.parseOptions",
             "type": "Function",
             "tags": [],
             "label": "parseOptions",
@@ -46,7 +38,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/optimizer",
-                "id": "def-common.OptimizerConfig.parseOptions.$1",
+                "id": "def-server.OptimizerConfig.parseOptions.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -64,7 +56,7 @@
           },
           {
             "parentPluginId": "@kbn/optimizer",
-            "id": "def-common.OptimizerConfig.create",
+            "id": "def-server.OptimizerConfig.create",
             "type": "Function",
             "tags": [],
             "label": "create",
@@ -73,9 +65,9 @@
               "(inputOptions: Options) => ",
               {
                 "pluginId": "@kbn/optimizer",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnOptimizerPluginApi",
-                "section": "def-common.OptimizerConfig",
+                "section": "def-server.OptimizerConfig",
                 "text": "OptimizerConfig"
               }
             ],
@@ -85,7 +77,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/optimizer",
-                "id": "def-common.OptimizerConfig.create.$1",
+                "id": "def-server.OptimizerConfig.create.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "inputOptions",
@@ -103,7 +95,7 @@
           },
           {
             "parentPluginId": "@kbn/optimizer",
-            "id": "def-common.OptimizerConfig.Unnamed",
+            "id": "def-server.OptimizerConfig.Unnamed",
             "type": "Function",
             "tags": [],
             "label": "Constructor",
@@ -117,7 +109,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/optimizer",
-                "id": "def-common.OptimizerConfig.Unnamed.$1",
+                "id": "def-server.OptimizerConfig.Unnamed.$1",
                 "type": "Array",
                 "tags": [],
                 "label": "bundles",
@@ -133,7 +125,7 @@
               },
               {
                 "parentPluginId": "@kbn/optimizer",
-                "id": "def-common.OptimizerConfig.Unnamed.$2",
+                "id": "def-server.OptimizerConfig.Unnamed.$2",
                 "type": "Array",
                 "tags": [],
                 "label": "filteredBundles",
@@ -149,7 +141,7 @@
               },
               {
                 "parentPluginId": "@kbn/optimizer",
-                "id": "def-common.OptimizerConfig.Unnamed.$3",
+                "id": "def-server.OptimizerConfig.Unnamed.$3",
                 "type": "boolean",
                 "tags": [],
                 "label": "cache",
@@ -164,7 +156,7 @@
               },
               {
                 "parentPluginId": "@kbn/optimizer",
-                "id": "def-common.OptimizerConfig.Unnamed.$4",
+                "id": "def-server.OptimizerConfig.Unnamed.$4",
                 "type": "boolean",
                 "tags": [],
                 "label": "watch",
@@ -179,7 +171,7 @@
               },
               {
                 "parentPluginId": "@kbn/optimizer",
-                "id": "def-common.OptimizerConfig.Unnamed.$5",
+                "id": "def-server.OptimizerConfig.Unnamed.$5",
                 "type": "boolean",
                 "tags": [],
                 "label": "inspectWorkers",
@@ -194,7 +186,7 @@
               },
               {
                 "parentPluginId": "@kbn/optimizer",
-                "id": "def-common.OptimizerConfig.Unnamed.$6",
+                "id": "def-server.OptimizerConfig.Unnamed.$6",
                 "type": "Array",
                 "tags": [],
                 "label": "plugins",
@@ -210,7 +202,7 @@
               },
               {
                 "parentPluginId": "@kbn/optimizer",
-                "id": "def-common.OptimizerConfig.Unnamed.$7",
+                "id": "def-server.OptimizerConfig.Unnamed.$7",
                 "type": "string",
                 "tags": [],
                 "label": "repoRoot",
@@ -225,7 +217,7 @@
               },
               {
                 "parentPluginId": "@kbn/optimizer",
-                "id": "def-common.OptimizerConfig.Unnamed.$8",
+                "id": "def-server.OptimizerConfig.Unnamed.$8",
                 "type": "number",
                 "tags": [],
                 "label": "maxWorkerCount",
@@ -240,7 +232,7 @@
               },
               {
                 "parentPluginId": "@kbn/optimizer",
-                "id": "def-common.OptimizerConfig.Unnamed.$9",
+                "id": "def-server.OptimizerConfig.Unnamed.$9",
                 "type": "boolean",
                 "tags": [],
                 "label": "dist",
@@ -255,7 +247,7 @@
               },
               {
                 "parentPluginId": "@kbn/optimizer",
-                "id": "def-common.OptimizerConfig.Unnamed.$10",
+                "id": "def-server.OptimizerConfig.Unnamed.$10",
                 "type": "boolean",
                 "tags": [],
                 "label": "profileWebpack",
@@ -270,13 +262,19 @@
               },
               {
                 "parentPluginId": "@kbn/optimizer",
-                "id": "def-common.OptimizerConfig.Unnamed.$11",
+                "id": "def-server.OptimizerConfig.Unnamed.$11",
                 "type": "Object",
                 "tags": [],
                 "label": "themeTags",
                 "description": [],
                 "signature": [
-                  "ThemeTags"
+                  {
+                    "pluginId": "@kbn/core-ui-settings-common",
+                    "scope": "common",
+                    "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+                    "section": "def-common.ThemeTags",
+                    "text": "ThemeTags"
+                  }
                 ],
                 "path": "packages/kbn-optimizer/src/optimizer/optimizer_config.ts",
                 "deprecated": false,
@@ -288,7 +286,7 @@
           },
           {
             "parentPluginId": "@kbn/optimizer",
-            "id": "def-common.OptimizerConfig.getWorkerConfig",
+            "id": "def-server.OptimizerConfig.getWorkerConfig",
             "type": "Function",
             "tags": [],
             "label": "getWorkerConfig",
@@ -303,7 +301,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/optimizer",
-                "id": "def-common.OptimizerConfig.getWorkerConfig.$1",
+                "id": "def-server.OptimizerConfig.getWorkerConfig.$1",
                 "type": "Unknown",
                 "tags": [],
                 "label": "optimizerCacheKey",
@@ -321,7 +319,7 @@
           },
           {
             "parentPluginId": "@kbn/optimizer",
-            "id": "def-common.OptimizerConfig.getCacheableWorkerConfig",
+            "id": "def-server.OptimizerConfig.getCacheableWorkerConfig",
             "type": "Function",
             "tags": [],
             "label": "getCacheableWorkerConfig",
@@ -343,7 +341,7 @@
     "functions": [
       {
         "parentPluginId": "@kbn/optimizer",
-        "id": "def-common.logOptimizerProgress",
+        "id": "def-server.logOptimizerProgress",
         "type": "Function",
         "tags": [],
         "label": "logOptimizerProgress",
@@ -362,9 +360,9 @@
           "<",
           {
             "pluginId": "@kbn/optimizer",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnOptimizerPluginApi",
-            "section": "def-common.OptimizerUpdate",
+            "section": "def-server.OptimizerUpdate",
             "text": "OptimizerUpdate"
           },
           ">"
@@ -375,7 +373,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/optimizer",
-            "id": "def-common.logOptimizerProgress.$1",
+            "id": "def-server.logOptimizerProgress.$1",
             "type": "Object",
             "tags": [],
             "label": "log",
@@ -400,7 +398,7 @@
       },
       {
         "parentPluginId": "@kbn/optimizer",
-        "id": "def-common.logOptimizerState",
+        "id": "def-server.logOptimizerState",
         "type": "Function",
         "tags": [],
         "label": "logOptimizerState",
@@ -417,25 +415,25 @@
           ", config: ",
           {
             "pluginId": "@kbn/optimizer",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnOptimizerPluginApi",
-            "section": "def-common.OptimizerConfig",
+            "section": "def-server.OptimizerConfig",
             "text": "OptimizerConfig"
           },
           ") => Operator<",
           {
             "pluginId": "@kbn/optimizer",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnOptimizerPluginApi",
-            "section": "def-common.OptimizerUpdate",
+            "section": "def-server.OptimizerUpdate",
             "text": "OptimizerUpdate"
           },
           ", ",
           {
             "pluginId": "@kbn/optimizer",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnOptimizerPluginApi",
-            "section": "def-common.OptimizerUpdate",
+            "section": "def-server.OptimizerUpdate",
             "text": "OptimizerUpdate"
           },
           ">"
@@ -446,7 +444,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/optimizer",
-            "id": "def-common.logOptimizerState.$1",
+            "id": "def-server.logOptimizerState.$1",
             "type": "Object",
             "tags": [],
             "label": "log",
@@ -467,7 +465,7 @@
           },
           {
             "parentPluginId": "@kbn/optimizer",
-            "id": "def-common.logOptimizerState.$2",
+            "id": "def-server.logOptimizerState.$2",
             "type": "Object",
             "tags": [],
             "label": "config",
@@ -475,9 +473,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/optimizer",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnOptimizerPluginApi",
-                "section": "def-common.OptimizerConfig",
+                "section": "def-server.OptimizerConfig",
                 "text": "OptimizerConfig"
               }
             ],
@@ -492,7 +490,7 @@
       },
       {
         "parentPluginId": "@kbn/optimizer",
-        "id": "def-common.readLimits",
+        "id": "def-server.readLimits",
         "type": "Function",
         "tags": [],
         "label": "readLimits",
@@ -507,7 +505,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/optimizer",
-            "id": "def-common.readLimits.$1",
+            "id": "def-server.readLimits.$1",
             "type": "string",
             "tags": [],
             "label": "path",
@@ -526,7 +524,7 @@
       },
       {
         "parentPluginId": "@kbn/optimizer",
-        "id": "def-common.reportOptimizerTimings",
+        "id": "def-server.reportOptimizerTimings",
         "type": "Function",
         "tags": [],
         "label": "reportOptimizerTimings",
@@ -543,25 +541,25 @@
           ", config: ",
           {
             "pluginId": "@kbn/optimizer",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnOptimizerPluginApi",
-            "section": "def-common.OptimizerConfig",
+            "section": "def-server.OptimizerConfig",
             "text": "OptimizerConfig"
           },
           ") => Operator<",
           {
             "pluginId": "@kbn/optimizer",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnOptimizerPluginApi",
-            "section": "def-common.OptimizerUpdate",
+            "section": "def-server.OptimizerUpdate",
             "text": "OptimizerUpdate"
           },
           ", ",
           {
             "pluginId": "@kbn/optimizer",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnOptimizerPluginApi",
-            "section": "def-common.OptimizerUpdate",
+            "section": "def-server.OptimizerUpdate",
             "text": "OptimizerUpdate"
           },
           ">"
@@ -572,7 +570,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/optimizer",
-            "id": "def-common.reportOptimizerTimings.$1",
+            "id": "def-server.reportOptimizerTimings.$1",
             "type": "Object",
             "tags": [],
             "label": "log",
@@ -593,7 +591,7 @@
           },
           {
             "parentPluginId": "@kbn/optimizer",
-            "id": "def-common.reportOptimizerTimings.$2",
+            "id": "def-server.reportOptimizerTimings.$2",
             "type": "Object",
             "tags": [],
             "label": "config",
@@ -601,9 +599,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/optimizer",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnOptimizerPluginApi",
-                "section": "def-common.OptimizerConfig",
+                "section": "def-server.OptimizerConfig",
                 "text": "OptimizerConfig"
               }
             ],
@@ -618,7 +616,7 @@
       },
       {
         "parentPluginId": "@kbn/optimizer",
-        "id": "def-common.runFindBabelHelpersInEntryBundlesCli",
+        "id": "def-server.runFindBabelHelpersInEntryBundlesCli",
         "type": "Function",
         "tags": [],
         "label": "runFindBabelHelpersInEntryBundlesCli",
@@ -635,7 +633,7 @@
       },
       {
         "parentPluginId": "@kbn/optimizer",
-        "id": "def-common.runFindNodeLibsBrowserPolyfillsInEntryBundlesCli",
+        "id": "def-server.runFindNodeLibsBrowserPolyfillsInEntryBundlesCli",
         "type": "Function",
         "tags": [],
         "label": "runFindNodeLibsBrowserPolyfillsInEntryBundlesCli",
@@ -652,7 +650,7 @@
       },
       {
         "parentPluginId": "@kbn/optimizer",
-        "id": "def-common.runKbnOptimizerCli",
+        "id": "def-server.runKbnOptimizerCli",
         "type": "Function",
         "tags": [],
         "label": "runKbnOptimizerCli",
@@ -666,7 +664,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/optimizer",
-            "id": "def-common.runKbnOptimizerCli.$1",
+            "id": "def-server.runKbnOptimizerCli.$1",
             "type": "Object",
             "tags": [],
             "label": "options",
@@ -677,7 +675,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/optimizer",
-                "id": "def-common.runKbnOptimizerCli.$1.defaultLimitsPath",
+                "id": "def-server.runKbnOptimizerCli.$1.defaultLimitsPath",
                 "type": "string",
                 "tags": [],
                 "label": "defaultLimitsPath",
@@ -694,7 +692,7 @@
       },
       {
         "parentPluginId": "@kbn/optimizer",
-        "id": "def-common.runOptimizer",
+        "id": "def-server.runOptimizer",
         "type": "Function",
         "tags": [],
         "label": "runOptimizer",
@@ -703,9 +701,9 @@
           "(config: ",
           {
             "pluginId": "@kbn/optimizer",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnOptimizerPluginApi",
-            "section": "def-common.OptimizerConfig",
+            "section": "def-server.OptimizerConfig",
             "text": "OptimizerConfig"
           },
           ") => ",
@@ -713,9 +711,9 @@
           "<",
           {
             "pluginId": "@kbn/optimizer",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnOptimizerPluginApi",
-            "section": "def-common.OptimizerUpdate",
+            "section": "def-server.OptimizerUpdate",
             "text": "OptimizerUpdate"
           },
           ">"
@@ -726,7 +724,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/optimizer",
-            "id": "def-common.runOptimizer.$1",
+            "id": "def-server.runOptimizer.$1",
             "type": "Object",
             "tags": [],
             "label": "config",
@@ -734,9 +732,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/optimizer",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnOptimizerPluginApi",
-                "section": "def-common.OptimizerConfig",
+                "section": "def-server.OptimizerConfig",
                 "text": "OptimizerConfig"
               }
             ],
@@ -751,7 +749,7 @@
       },
       {
         "parentPluginId": "@kbn/optimizer",
-        "id": "def-common.updateBundleLimits",
+        "id": "def-server.updateBundleLimits",
         "type": "Function",
         "tags": [],
         "label": "updateBundleLimits",
@@ -765,7 +763,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/optimizer",
-            "id": "def-common.updateBundleLimits.$1",
+            "id": "def-server.updateBundleLimits.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  log,\n  config,\n  dropMissing,\n  limitsPath,\n}",
@@ -784,7 +782,7 @@
       },
       {
         "parentPluginId": "@kbn/optimizer",
-        "id": "def-common.validateLimitsForAllBundles",
+        "id": "def-server.validateLimitsForAllBundles",
         "type": "Function",
         "tags": [],
         "label": "validateLimitsForAllBundles",
@@ -801,9 +799,9 @@
           ", config: ",
           {
             "pluginId": "@kbn/optimizer",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnOptimizerPluginApi",
-            "section": "def-common.OptimizerConfig",
+            "section": "def-server.OptimizerConfig",
             "text": "OptimizerConfig"
           },
           ", limitsPath: string) => void"
@@ -814,7 +812,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/optimizer",
-            "id": "def-common.validateLimitsForAllBundles.$1",
+            "id": "def-server.validateLimitsForAllBundles.$1",
             "type": "Object",
             "tags": [],
             "label": "log",
@@ -835,7 +833,7 @@
           },
           {
             "parentPluginId": "@kbn/optimizer",
-            "id": "def-common.validateLimitsForAllBundles.$2",
+            "id": "def-server.validateLimitsForAllBundles.$2",
             "type": "Object",
             "tags": [],
             "label": "config",
@@ -843,9 +841,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/optimizer",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnOptimizerPluginApi",
-                "section": "def-common.OptimizerConfig",
+                "section": "def-server.OptimizerConfig",
                 "text": "OptimizerConfig"
               }
             ],
@@ -856,7 +854,7 @@
           },
           {
             "parentPluginId": "@kbn/optimizer",
-            "id": "def-common.validateLimitsForAllBundles.$3",
+            "id": "def-server.validateLimitsForAllBundles.$3",
             "type": "string",
             "tags": [],
             "label": "limitsPath",
@@ -879,7 +877,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/optimizer",
-        "id": "def-common.OptimizerUpdate",
+        "id": "def-server.OptimizerUpdate",
         "type": "Type",
         "tags": [],
         "label": "OptimizerUpdate",
@@ -899,7 +897,7 @@
       },
       {
         "parentPluginId": "@kbn/optimizer",
-        "id": "def-common.OptimizerUpdate$",
+        "id": "def-server.OptimizerUpdate$",
         "type": "Type",
         "tags": [],
         "label": "OptimizerUpdate$",
@@ -909,9 +907,9 @@
           "<",
           {
             "pluginId": "@kbn/optimizer",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnOptimizerPluginApi",
-            "section": "def-common.OptimizerUpdate",
+            "section": "def-server.OptimizerUpdate",
             "text": "OptimizerUpdate"
           },
           ">"
@@ -922,6 +920,14 @@
         "initialIsOpen": false
       }
     ],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": []
   }
 }

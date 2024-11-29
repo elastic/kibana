@@ -17,19 +17,12 @@ import {
 import { ValuesType } from 'utility-types';
 import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { SparkPlot } from '../../../shared/charts/spark_plot';
-import {
-  ChartType,
-  getTimeSeriesColor,
-} from '../../../shared/charts/helper/get_timeseries_color';
+import { ChartType, getTimeSeriesColor } from '../../../shared/charts/helper/get_timeseries_color';
 import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { TransactionDetailLink } from '../../../shared/links/apm/transaction_detail_link';
 import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
-import {
-  useFetcher,
-  FETCH_STATUS,
-  isPending,
-} from '../../../../hooks/use_fetcher';
+import { useFetcher, FETCH_STATUS, isPending } from '../../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { asInteger } from '../../../../../common/utils/formatters';
 
@@ -50,8 +43,7 @@ export function TopErroneousTransactions({ serviceName }: Props) {
     path: { groupId },
   } = useApmParams('/services/{serviceName}/errors/{groupId}');
 
-  const { rangeFrom, rangeTo, environment, kuery, offset, comparisonEnabled } =
-    query;
+  const { rangeFrom, rangeTo, environment, kuery, offset, comparisonEnabled } = query;
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
@@ -72,44 +64,27 @@ export function TopErroneousTransactions({ serviceName }: Props) {
                 start,
                 end,
                 numBuckets: 20,
-                offset:
-                  comparisonEnabled && isTimeComparison(offset)
-                    ? offset
-                    : undefined,
+                offset: comparisonEnabled && isTimeComparison(offset) ? offset : undefined,
               },
             },
           }
         );
       }
     },
-    [
-      environment,
-      kuery,
-      serviceName,
-      start,
-      end,
-      groupId,
-      comparisonEnabled,
-      offset,
-    ]
+    [environment, kuery, serviceName, start, end, groupId, comparisonEnabled, offset]
   );
 
   const loading = isPending(status);
 
   const columns: Array<
-    EuiBasicTableColumn<
-      ValuesType<ErroneousTransactions['topErroneousTransactions']>
-    >
+    EuiBasicTableColumn<ValuesType<ErroneousTransactions['topErroneousTransactions']>>
   > = [
     {
       field: 'transactionName',
       width: '60%',
-      name: i18n.translate(
-        'xpack.apm.errorGroupTopTransactions.column.transactionName',
-        {
-          defaultMessage: 'Transaction name',
-        }
-      ),
+      name: i18n.translate('xpack.apm.errorGroupTopTransactions.column.transactionName', {
+        defaultMessage: 'Transaction name',
+      }),
       render: (_, { transactionName, transactionType }) => {
         return (
           <TruncateWithTooltip
@@ -131,18 +106,12 @@ export function TopErroneousTransactions({ serviceName }: Props) {
     },
     {
       field: 'occurrences',
-      name: i18n.translate(
-        'xpack.apm.errorGroupTopTransactions.column.occurrences',
-        {
-          defaultMessage: 'Error occurrences',
-        }
-      ),
+      name: i18n.translate('xpack.apm.errorGroupTopTransactions.column.occurrences', {
+        defaultMessage: 'Error occurrences',
+      }),
       align: RIGHT_ALIGNMENT,
       dataType: 'number',
-      render: (
-        _,
-        { occurrences, currentPeriodTimeseries, previousPeriodTimeseries }
-      ) => {
+      render: (_, { occurrences, currentPeriodTimeseries, previousPeriodTimeseries }) => {
         const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
           ChartType.ERROR_OCCURRENCES
         );
@@ -162,9 +131,7 @@ export function TopErroneousTransactions({ serviceName }: Props) {
             )}
             series={currentPeriodTimeseries}
             comparisonSeries={
-              comparisonEnabled && isTimeComparison(offset)
-                ? previousPeriodTimeseries
-                : undefined
+              comparisonEnabled && isTimeComparison(offset) ? previousPeriodTimeseries : undefined
             }
             color={currentPeriodColor}
             comparisonSeriesColor={previousPeriodColor}
@@ -187,14 +154,14 @@ export function TopErroneousTransactions({ serviceName }: Props) {
       <EuiBasicTable
         items={data.topErroneousTransactions}
         columns={columns}
+        rowHeader="transactionName"
         loading={loading}
         data-test-subj="topErroneousTransactionsTable"
         error={
           status === FETCH_STATUS.FAILURE
-            ? i18n.translate(
-                'xpack.apm.errorGroupTopTransactions.errorMessage',
-                { defaultMessage: 'Failed to fetch' }
-              )
+            ? i18n.translate('xpack.apm.errorGroupTopTransactions.errorMessage', {
+                defaultMessage: 'Failed to fetch',
+              })
             : ''
         }
         noItemsMessage={

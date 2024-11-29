@@ -1,11 +1,10 @@
-[[esql-example-queries]]
-
-The following is an example ES|QL query:
-
-```
+// 2. hunting scheduled task with suspicious actions via registry.data.bytes
+// Helpful when answering questions on regex based searches and replacements (RLIKE and REPLACE), base64 conversions, and dealing with case sensitivity
 from logs-*
-| grok dns.question.name "%{DATA}\\.%{GREEDYDATA:dns.question.registered_domain:string}"
-| stats unique_queries = count_distinct(dns.question.name) by dns.question.registered_domain, process.name
-| where unique_queries > 5
-| sort unique_queries desc
-```
+| where host.os.type == "windows" and event.category == "registry" and event.action == "modification" and
+registry.path like """HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Schedule\\TaskCache\\Tasks\\*Actions*"""
+| eval scheduled_task_action = replace(TO_LOWER(FROM_BASE64(registry.data.bytes)), """\u0000""", "")
+| eval scheduled_task_action = replace(scheduled_task_action, """(\u0003\fauthorfff|\u0003\fauthorff\u000e)""", "")
+| where scheduled_task_action rlike """.*(users\\public\\|\\appdata\\roaming|programdata|powershell|rundll32|regsvr32|mshta.exe|cscript.exe|wscript.exe|cmd.exe|forfiles|msiexec).*""" and not scheduled_task_action like "localsystem*"
+| keep scheduled_task_action, registry.path, agent.id
+| stats count_agents = count_distinct(agent.id) by scheduled_task_action | where count_agents == 1 

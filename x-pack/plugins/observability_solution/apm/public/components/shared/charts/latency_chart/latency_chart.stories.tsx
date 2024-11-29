@@ -20,10 +20,7 @@ import { ApmTimeRangeMetadataContextProvider } from '../../../../context/time_ra
 import { MockUrlParamsContextProvider } from '../../../../context/url_params_context/mock_url_params_context_provider';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { mockApmApiCallResponse } from '../../../../services/rest/call_apm_api_spy';
-import {
-  APIReturnType,
-  createCallApmApi,
-} from '../../../../services/rest/create_call_apm_api';
+import { APIReturnType, createCallApmApi } from '../../../../services/rest/create_call_apm_api';
 
 interface Args {
   latencyChartResponse: APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/charts/latency'>;
@@ -89,6 +86,7 @@ const stories: Meta<Args> = {
                         transactionTypes: [],
                         fallbackToTransactions: false,
                         serviceAgentStatus: FETCH_STATUS.SUCCESS,
+                        serviceEntitySummaryStatus: FETCH_STATUS.SUCCESS,
                       }}
                     >
                       <ChartPointerEventContextProvider>

@@ -7,6 +7,8 @@
 
 import { EuiIcon, EuiLink, EuiText, EuiToolTip } from '@elastic/eui';
 import React from 'react';
+import type { CriticalityLevelWithUnassigned } from '../../../../../common/entity_analytics/asset_criticality/types';
+import { AssetCriticalityBadge } from '../../../../entity_analytics/components/asset_criticality';
 import {
   SecurityCellActions,
   CellActionsMode,
@@ -162,6 +164,23 @@ export const getHostsColumns = (
       },
     });
   }
+
+  columns.push({
+    field: 'node.criticality',
+    name: i18n.ASSET_CRITICALITY,
+    truncateText: false,
+    mobileOptions: { show: true },
+    sortable: false,
+    render: (assetCriticality: CriticalityLevelWithUnassigned) => {
+      if (!assetCriticality) return getEmptyTagValue();
+      return (
+        <AssetCriticalityBadge
+          criticalityLevel={assetCriticality}
+          css={{ verticalAlign: 'middle' }}
+        />
+      );
+    },
+  });
 
   return columns;
 };

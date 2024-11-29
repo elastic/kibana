@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { SavedObjectsModelVersion } from '@kbn/core-saved-objects-server';
 import { SECURITY_SOLUTION_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import type { SavedObjectsType } from '@kbn/core/server';
 
@@ -32,6 +32,9 @@ export const riskEngineConfigurationTypeMappings: SavedObjectsType['mappings'] =
     pageSize: {
       type: 'integer',
     },
+    alertSampleSizePerShard: {
+      type: 'integer',
+    },
     range: {
       properties: {
         start: {
@@ -42,7 +45,43 @@ export const riskEngineConfigurationTypeMappings: SavedObjectsType['mappings'] =
         },
       },
     },
+    excludeAlertStatuses: {
+      type: 'keyword',
+    },
   },
+};
+
+const version1: SavedObjectsModelVersion = {
+  changes: [
+    {
+      type: 'mappings_addition',
+      addedMappings: {
+        alertSampleSizePerShard: { type: 'integer' },
+      },
+    },
+  ],
+};
+
+const version2: SavedObjectsModelVersion = {
+  changes: [
+    {
+      type: 'mappings_addition',
+      addedMappings: {
+        excludeAlertStatuses: { type: 'keyword' },
+      },
+    },
+    {
+      type: 'data_backfill',
+      backfillFn: (document) => {
+        return {
+          attributes: {
+            ...document.attributes,
+            excludeAlertStatuses: document.attributes.excludeAlertStatuses || ['closed'],
+          },
+        };
+      },
+    },
+  ],
 };
 
 export const riskEngineConfigurationType: SavedObjectsType = {
@@ -51,4 +90,8 @@ export const riskEngineConfigurationType: SavedObjectsType = {
   hidden: false,
   namespaceType: 'multiple-isolated',
   mappings: riskEngineConfigurationTypeMappings,
+  modelVersions: {
+    1: version1,
+    2: version2,
+  },
 };

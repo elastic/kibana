@@ -14,19 +14,13 @@ import {
   getQueryConversationParams,
   getUpdateConversationSchemaMock,
 } from '../../__mocks__/conversations_schema.mock';
+import { authenticatedUser } from '../../__mocks__/user';
 import { appendConversationMessageRoute } from './append_conversation_messages_route';
-import { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 
 describe('Append conversation messages route', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
-  const mockUser1 = {
-    username: 'my_username',
-    authentication_realm: {
-      type: 'my_realm_type',
-      name: 'my_realm_name',
-    },
-  } as AuthenticatedUser;
+  const mockUser1 = authenticatedUser;
 
   beforeEach(() => {
     server = serverMock.create();

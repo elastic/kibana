@@ -65,13 +65,7 @@ export function getContainerIcon(container?: ContainerType) {
   }
 }
 
-type Icons =
-  | 'service'
-  | 'opentelemetry'
-  | 'container'
-  | 'serverless'
-  | 'cloud'
-  | 'alerts';
+type Icons = 'service' | 'opentelemetry' | 'container' | 'serverless' | 'cloud' | 'alerts';
 
 export interface PopoverItem {
   key: Icons;
@@ -85,23 +79,19 @@ export interface PopoverItem {
 }
 
 export function ServiceIcons({ start, end, serviceName, environment }: Props) {
-  const [selectedIconPopover, setSelectedIconPopover] =
-    useState<Icons | null>();
+  const [selectedIconPopover, setSelectedIconPopover] = useState<Icons | null>();
 
   const theme = useTheme();
 
   const { data: icons, status: iconsFetchStatus } = useFetcher(
     (callApmApi) => {
       if (serviceName && start && end) {
-        return callApmApi(
-          'GET /internal/apm/services/{serviceName}/metadata/icons',
-          {
-            params: {
-              path: { serviceName },
-              query: { start, end },
-            },
-          }
-        );
+        return callApmApi('GET /internal/apm/services/{serviceName}/metadata/icons', {
+          params: {
+            path: { serviceName },
+            query: { start, end },
+          },
+        });
       }
     },
     [serviceName, start, end]
@@ -110,16 +100,13 @@ export function ServiceIcons({ start, end, serviceName, environment }: Props) {
   const { data: details, status: detailsFetchStatus } = useFetcher(
     (callApmApi) => {
       if (selectedIconPopover && serviceName && start && end && environment) {
-        return callApmApi(
-          'GET /internal/apm/services/{serviceName}/metadata/details',
-          {
-            isCachable: true,
-            params: {
-              path: { serviceName },
-              query: { start, end, environment },
-            },
-          }
-        );
+        return callApmApi('GET /internal/apm/services/{serviceName}/metadata/details', {
+          isCachable: true,
+          params: {
+            path: { serviceName },
+            query: { start, end, environment },
+          },
+        });
       }
     },
     [selectedIconPopover, serviceName, start, end, environment]
@@ -148,17 +135,11 @@ export function ServiceIcons({ start, end, serviceName, environment }: Props) {
       icon: {
         type: getAgentIcon('opentelemetry', theme.darkMode),
       },
-      isVisible:
-        !!icons?.agentName && isOpenTelemetryAgentName(icons.agentName),
+      isVisible: !!icons?.agentName && isOpenTelemetryAgentName(icons.agentName),
       title: i18n.translate('xpack.apm.serviceIcons.opentelemetry', {
         defaultMessage: 'OpenTelemetry',
       }),
-      component: (
-        <OTelDetails
-          opentelemetry={details?.opentelemetry}
-          agentName={icons?.agentName}
-        />
-      ),
+      component: <OTelDetails opentelemetry={details?.opentelemetry} />,
     },
     {
       key: 'container',
@@ -170,10 +151,7 @@ export function ServiceIcons({ start, end, serviceName, environment }: Props) {
         defaultMessage: 'Container',
       }),
       component: (
-        <ContainerDetails
-          container={details?.container}
-          kubernetes={details?.kubernetes}
-        />
+        <ContainerDetails container={details?.container} kubernetes={details?.kubernetes} />
       ),
     },
     {
@@ -194,12 +172,7 @@ export function ServiceIcons({ start, end, serviceName, environment }: Props) {
       title: i18n.translate('xpack.apm.serviceIcons.cloud', {
         defaultMessage: 'Cloud',
       }),
-      component: (
-        <CloudDetails
-          cloud={details?.cloud}
-          isServerless={!!details?.serverless}
-        />
-      ),
+      component: <CloudDetails cloud={details?.cloud} isServerless={!!details?.serverless} />,
     },
   ];
 

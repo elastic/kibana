@@ -6,20 +6,19 @@
  */
 
 import { cloneDeep, getOr } from 'lodash/fp';
-import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+import type { IEsSearchResponse } from '@kbn/search-types';
 import { buildAlertFieldsRequest as buildFieldsRequest } from '@kbn/alerts-as-data-utils';
+import { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { TimelineEventsQueries } from '../../../../../../common/api/search_strategy';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
 import {
   EventHit,
   TimelineEventsAllStrategyResponse,
-  TimelineEdges,
 } from '../../../../../../common/search_strategy';
 import { TimelineFactory } from '../../types';
 import { buildTimelineEventsAllQuery } from './query.events_all.dsl';
 import { inspectStringifyObject } from '../../../../../utils/build_query';
 import { formatTimelineData } from '../../helpers/format_timeline_data';
-import { TIMELINE_EVENTS_FIELDS } from '../../helpers/constants';
 
 export const timelineEventsAll: TimelineFactory<TimelineEventsQueries.all> = {
   buildDsl: ({ authFilter, ...options }) => {
@@ -46,21 +45,17 @@ export const timelineEventsAll: TimelineFactory<TimelineEventsQueries.all> = {
     } = options;
     const producerBuckets = getOr([], 'aggregations.producers.buckets', response.rawResponse);
     const totalCount = response.rawResponse.hits.total || 0;
-    const hits = response.rawResponse.hits.hits;
+    const hits: SearchHit[] = getOr([], 'rawResponse.hits.hits', response);
 
     if (fieldRequested.includes('*') && hits.length > 0) {
       const fieldsReturned = hits.flatMap((hit) => Object.keys(hit.fields ?? {}));
       fieldRequested = [...new Set(fieldsReturned)];
     }
 
-    const edges: TimelineEdges[] = await Promise.all(
-      hits.map((hit) =>
-        formatTimelineData(
-          fieldRequested,
-          options.excludeEcsData ? [] : TIMELINE_EVENTS_FIELDS,
-          hit as EventHit
-        )
-      )
+    const edges = await formatTimelineData(
+      hits as EventHit[],
+      fieldRequested,
+      options.excludeEcsData ?? false
     );
 
     const consumers = producerBuckets.reduce(

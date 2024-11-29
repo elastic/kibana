@@ -38,8 +38,7 @@ export function transformCoreWebVitalsResponse<T>(
   percentile = PERCENTILE_DEFAULT
 ): UXMetrics | undefined {
   if (!response) return response;
-  const { lcp, cls, tbt, fcp, lcpRanks, clsRanks, coreVitalPages } =
-    response.aggregations ?? {};
+  const { lcp, cls, tbt, fcp, lcpRanks, clsRanks, coreVitalPages } = response.aggregations ?? {};
 
   const pkey = percentile.toFixed(1);
 

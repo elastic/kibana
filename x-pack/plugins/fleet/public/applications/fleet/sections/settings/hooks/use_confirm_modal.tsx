@@ -62,14 +62,16 @@ export function withConfirmModalProvider<T>(WrappedComponent: React.FunctionComp
   );
 }
 
-export const ConfirmModalProvider: React.FunctionComponent = ({ children }) => {
+export const ConfirmModalProvider: React.FunctionComponent<{ children?: React.ReactNode }> = ({
+  children,
+}) => {
   const [isVisible, setIsVisible] = useState(false);
   const [modal, setModal] = useState<ModalState>({
     onCancel: () => {},
     onConfirm: () => {},
   });
 
-  const showModal = useCallback(({ title, description, onConfirm, onCancel, options }) => {
+  const showModal = useCallback(({ title, description, onConfirm, onCancel, options }: any) => {
     setIsVisible(true);
     setModal({
       title,

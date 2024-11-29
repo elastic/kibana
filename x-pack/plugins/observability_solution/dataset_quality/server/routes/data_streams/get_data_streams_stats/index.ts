@@ -6,31 +6,37 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { DataStreamType } from '../../../../common/types';
 import { dataStreamService } from '../../../services';
+import { indexStatsService } from '../../../services';
 
-export async function getDataStreamsStats(options: {
+export async function getDataStreamsStats({
+  esClient,
+  dataStreams,
+}: {
   esClient: ElasticsearchClient;
-  type?: DataStreamType;
-  datasetQuery?: string;
-}) {
-  const { esClient, type, datasetQuery } = options;
+  dataStreams: string[];
+}): Promise<Record<string, { size: string; sizeBytes: number; totalDocs: number }>> {
+  if (!dataStreams.length) {
+    return {};
+  }
 
-  const matchingDataStreamsStats = await dataStreamService.getMatchingDataStreamsStats(esClient, {
-    type: type ?? '*',
-    dataset: datasetQuery ? `*${datasetQuery}*` : '*',
-  });
+  const matchingDataStreamsStats = dataStreamService.getStreamsStats(esClient, dataStreams);
+  const indicesDocsCount = indexStatsService.getIndicesDocCounts(esClient, dataStreams);
 
-  const mappedDataStreams = matchingDataStreamsStats.map((dataStream) => {
-    return {
-      name: dataStream.data_stream,
-      size: dataStream.store_size?.toString(),
-      sizeBytes: dataStream.store_size_bytes,
-      lastActivity: dataStream.maximum_timestamp,
-    };
-  });
+  const [indicesDocsCountStats, dataStreamsStats] = await Promise.all([
+    indicesDocsCount,
+    matchingDataStreamsStats,
+  ]);
 
-  return {
-    items: mappedDataStreams,
-  };
+  return dataStreamsStats.reduce(
+    (acc, dataStream) => ({
+      ...acc,
+      [dataStream.data_stream]: {
+        size: dataStream.store_size!.toString(),
+        sizeBytes: dataStream.store_size_bytes,
+        totalDocs: indicesDocsCountStats!.docsCountPerDataStream[dataStream.data_stream],
+      },
+    }),
+    {}
+  );
 }

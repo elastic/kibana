@@ -7,18 +7,20 @@
 
 import { Logger } from '@kbn/logging';
 import { SortResults } from '@elastic/elasticsearch/lib/api/types';
-import {
-  QueryDslQueryContainer,
-  Sort,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { QueryDslQueryContainer, Sort } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { rangeQuery } from '@kbn/observability-plugin/server';
-import { last } from 'lodash';
+import { last, omit } from 'lodash';
+import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import { APMConfig } from '../..';
 import {
   AGENT_NAME,
   CHILD_ID,
-  ERROR_EXCEPTION,
+  ERROR_CULPRIT,
+  ERROR_EXC_HANDLED,
+  ERROR_EXC_MESSAGE,
+  ERROR_EXC_TYPE,
   ERROR_GROUP_ID,
   ERROR_ID,
   ERROR_LOG_LEVEL,
@@ -40,7 +42,7 @@ import {
   SPAN_SUBTYPE,
   SPAN_SYNC,
   SPAN_TYPE,
-  TIMESTAMP,
+  TIMESTAMP_US,
   TRACE_ID,
   TRANSACTION_DURATION,
   TRANSACTION_ID,
@@ -87,6 +89,26 @@ export async function getTraceItems({
   const maxTraceItems = maxTraceItemsFromUrlParam ?? config.ui.maxTraceItems;
   const excludedLogLevels = ['debug', 'info', 'warning'];
 
+  const requiredFields = asMutableArray([
+    TIMESTAMP_US,
+    TRACE_ID,
+    SERVICE_NAME,
+    ERROR_ID,
+    ERROR_GROUP_ID,
+    PROCESSOR_EVENT,
+  ] as const);
+
+  const optionalFields = asMutableArray([
+    PARENT_ID,
+    TRANSACTION_ID,
+    SPAN_ID,
+    ERROR_CULPRIT,
+    ERROR_LOG_MESSAGE,
+    ERROR_EXC_MESSAGE,
+    ERROR_EXC_HANDLED,
+    ERROR_EXC_TYPE,
+  ] as const);
+
   const errorResponsePromise = apmEventClient.search('get_errors_docs', {
     apm: {
       sources: [
@@ -99,26 +121,14 @@ export async function getTraceItems({
     body: {
       track_total_hits: false,
       size: 1000,
-      _source: [
-        TIMESTAMP,
-        TRACE_ID,
-        TRANSACTION_ID,
-        PARENT_ID,
-        SERVICE_NAME,
-        ERROR_ID,
-        ERROR_LOG_MESSAGE,
-        ERROR_EXCEPTION,
-        ERROR_GROUP_ID,
-      ],
       query: {
         bool: {
-          filter: [
-            { term: { [TRACE_ID]: traceId } },
-            ...rangeQuery(start, end),
-          ],
+          filter: [{ term: { [TRACE_ID]: traceId } }, ...rangeQuery(start, end)],
           must_not: { terms: { [ERROR_LOG_LEVEL]: excludedLogLevels } },
         },
       },
+      fields: [...requiredFields, ...optionalFields],
+      _source: [ERROR_LOG_MESSAGE, ERROR_EXC_MESSAGE, ERROR_EXC_HANDLED, ERROR_EXC_TYPE],
     },
   });
 
@@ -139,8 +149,32 @@ export async function getTraceItems({
 
   const traceDocsTotal = traceResponse.total;
   const exceedsMax = traceDocsTotal > maxTraceItems;
-  const traceDocs = traceResponse.hits.map((hit) => hit._source);
-  const errorDocs = errorResponse.hits.hits.map((hit) => hit._source);
+
+  const traceDocs = traceResponse.hits.map(({ hit }) => hit);
+
+  const errorDocs = errorResponse.hits.hits.map((hit) => {
+    const errorSource = 'error' in hit._source ? hit._source : undefined;
+
+    const event = unflattenKnownApmEventFields(hit.fields, requiredFields);
+
+    const waterfallErrorEvent: WaterfallError = {
+      ...event,
+      parent: {
+        ...event?.parent,
+        id: event?.parent?.id ?? event?.span?.id,
+      },
+      error: {
+        ...(event.error ?? {}),
+        exception:
+          (errorSource?.error.exception?.length ?? 0) > 1
+            ? errorSource?.error.exception
+            : event?.error.exception && [event.error.exception],
+        log: errorSource?.error.log,
+      },
+    };
+
+    return waterfallErrorEvent;
+  });
 
   return {
     exceedsMax,
@@ -226,41 +260,54 @@ async function getTraceDocsPerPage({
   start: number;
   end: number;
   searchAfter?: SortResults;
-}) {
+}): Promise<{
+  hits: Array<{ hit: WaterfallTransaction | WaterfallSpan; sort: SortResults | undefined }>;
+  total: number;
+}> {
   const size = Math.min(maxTraceItems, MAX_ITEMS_PER_PAGE);
+
+  const requiredFields = asMutableArray([
+    AGENT_NAME,
+    TIMESTAMP_US,
+    TRACE_ID,
+    SERVICE_NAME,
+    PROCESSOR_EVENT,
+  ] as const);
+
+  const requiredTxFields = asMutableArray([
+    TRANSACTION_ID,
+    TRANSACTION_DURATION,
+    TRANSACTION_NAME,
+    TRANSACTION_TYPE,
+  ] as const);
+
+  const requiredSpanFields = asMutableArray([
+    SPAN_ID,
+    SPAN_TYPE,
+    SPAN_NAME,
+    SPAN_DURATION,
+  ] as const);
+
+  const optionalFields = asMutableArray([
+    PARENT_ID,
+    SERVICE_ENVIRONMENT,
+    EVENT_OUTCOME,
+    TRANSACTION_RESULT,
+    FAAS_COLDSTART,
+    SPAN_SUBTYPE,
+    SPAN_ACTION,
+    SPAN_COMPOSITE_COUNT,
+    SPAN_COMPOSITE_COMPRESSION_STRATEGY,
+    SPAN_COMPOSITE_SUM,
+    SPAN_SYNC,
+    CHILD_ID,
+  ] as const);
 
   const body = {
     track_total_hits: true,
     size,
     search_after: searchAfter,
-    _source: [
-      TIMESTAMP,
-      TRACE_ID,
-      PARENT_ID,
-      SERVICE_NAME,
-      SERVICE_ENVIRONMENT,
-      AGENT_NAME,
-      EVENT_OUTCOME,
-      PROCESSOR_EVENT,
-      TRANSACTION_DURATION,
-      TRANSACTION_ID,
-      TRANSACTION_NAME,
-      TRANSACTION_TYPE,
-      TRANSACTION_RESULT,
-      FAAS_COLDSTART,
-      SPAN_ID,
-      SPAN_TYPE,
-      SPAN_SUBTYPE,
-      SPAN_ACTION,
-      SPAN_NAME,
-      SPAN_DURATION,
-      SPAN_LINKS,
-      SPAN_COMPOSITE_COUNT,
-      SPAN_COMPOSITE_COMPRESSION_STRATEGY,
-      SPAN_COMPOSITE_SUM,
-      SPAN_SYNC,
-      CHILD_ID,
-    ],
+    _source: [SPAN_LINKS],
     query: {
       bool: {
         filter: [
@@ -272,6 +319,7 @@ async function getTraceDocsPerPage({
         },
       },
     },
+    fields: [...requiredFields, ...requiredTxFields, ...requiredSpanFields, ...optionalFields],
     sort: [
       { _score: 'asc' },
       {
@@ -279,7 +327,7 @@ async function getTraceDocsPerPage({
           type: 'number',
           script: {
             lang: 'painless',
-            source: `if (doc['${TRANSACTION_DURATION}'].size() > 0) { return doc['${TRANSACTION_DURATION}'].value } else { return doc['${SPAN_DURATION}'].value }`,
+            source: `$('${TRANSACTION_DURATION}', $('${SPAN_DURATION}', 0))`,
           },
           order: 'desc',
         },
@@ -297,7 +345,51 @@ async function getTraceDocsPerPage({
   });
 
   return {
-    hits: res.hits.hits,
+    hits: res.hits.hits.map((hit) => {
+      const sort = hit.sort;
+      const spanLinksSource = 'span' in hit._source ? hit._source.span?.links : undefined;
+
+      if (hit.fields[PROCESSOR_EVENT]?.[0] === ProcessorEvent.span) {
+        const spanEvent = unflattenKnownApmEventFields(hit.fields, [
+          ...requiredFields,
+          ...requiredSpanFields,
+        ]);
+
+        const spanWaterfallEvent: WaterfallSpan = {
+          ...omit(spanEvent, 'child'),
+          processor: {
+            event: 'span',
+          },
+          span: {
+            ...spanEvent.span,
+            composite: spanEvent.span.composite
+              ? (spanEvent.span.composite as Required<WaterfallSpan['span']>['composite'])
+              : undefined,
+            links: spanLinksSource,
+          },
+          ...(spanEvent.child ? { child: spanEvent.child as WaterfallSpan['child'] } : {}),
+        };
+
+        return { sort, hit: spanWaterfallEvent };
+      }
+
+      const txEvent = unflattenKnownApmEventFields(hit.fields, [
+        ...requiredFields,
+        ...requiredTxFields,
+      ]);
+      const txWaterfallEvent: WaterfallTransaction = {
+        ...txEvent,
+        processor: {
+          event: 'transaction',
+        },
+        span: {
+          ...txEvent.span,
+          links: spanLinksSource,
+        },
+      };
+
+      return { hit: txWaterfallEvent, sort };
+    }),
     total: res.hits.total.value,
   };
 }

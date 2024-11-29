@@ -25,6 +25,11 @@ import {
   ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
   CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
 } from '../constants/saved_objects';
+import {
+  actionTaskParamsModelVersions,
+  connectorModelVersions,
+  connectorTokenModelVersions,
+} from './model_versions';
 
 export function setupSavedObjects(
   savedObjects: SavedObjectsServiceSetup,
@@ -60,6 +65,7 @@ export function setupSavedObjects(
         };
       },
     },
+    modelVersions: connectorModelVersions,
   });
 
   // Encrypted attributes
@@ -94,6 +100,7 @@ export function setupSavedObjects(
         },
       };
     },
+    modelVersions: actionTaskParamsModelVersions,
   });
   encryptedSavedObjects.registerType({
     type: ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
@@ -117,6 +124,7 @@ export function setupSavedObjects(
     management: {
       importableAndExportable: false,
     },
+    modelVersions: connectorTokenModelVersions,
   });
 
   encryptedSavedObjects.registerType({

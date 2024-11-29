@@ -5,49 +5,50 @@
  * 2.0.
  */
 
-import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
-import { ALERT_REASON } from '@kbn/rule-data-utils';
 import { ObservabilityRuleTypeRegistry } from '@kbn/observability-plugin/public/rules/create_observability_rule_type_registry';
-import { SLO_BURN_RATE_RULE_TYPE_ID } from '@kbn/rule-data-utils';
+import { ALERT_REASON, SLO_BURN_RATE_RULE_TYPE_ID } from '@kbn/rule-data-utils';
+import { lazy } from 'react';
 import { SLO_ID_FIELD, SLO_INSTANCE_ID_FIELD } from '../../common/field_names/slo';
 import { validateBurnRateRule } from '../components/burn_rate_rule_editor/validation';
+import { LazyWithContextProviders } from '../utils/get_lazy_with_context_providers';
 
 const sloBurnRateDefaultActionMessage = i18n.translate(
   'xpack.slo.rules.burnRate.defaultActionMessage',
   {
-    defaultMessage: `\\{\\{context.reason\\}\\}
+    defaultMessage: `'{{context.reason}}'
 
-\\{\\{rule.name\\}\\} is active with the following conditions:
+'{{rule.name}}' is active with the following conditions:
 
-- SLO: \\{\\{context.sloName\\}\\}'
-- The burn rate over the last \\{\\{context.longWindow.duration\\}\\} is \\{\\{context.longWindow.burnRate\\}\\}
-- The burn rate over the last \\{\\{context.shortWindow.duration\\}\\} is \\{\\{context.shortWindow.burnRate\\}\\}
-- Threshold: \\{\\{context.burnRateThreshold\\}\\}
+- SLO: '{{context.sloName}}'
+- The burn rate over the last '{{context.longWindow.duration}}' is '{{context.longWindow.burnRate}}'
+- The burn rate over the last '{{context.shortWindow.duration}}' is '{{context.shortWindow.burnRate}}'
+- Threshold: '{{context.burnRateThreshold}}'
 
-[View alert details](\\{\\{context.alertDetailsUrl\\}\\})
+[View alert details]('{{context.alertDetailsUrl}}')
 `,
   }
 );
 const sloBurnRateDefaultRecoveryMessage = i18n.translate(
   'xpack.slo.rules.burnRate.defaultRecoveryMessage',
   {
-    defaultMessage: `\\{\\{context.reason\\}\\}
+    defaultMessage: `'{{context.reason}}'
 
-\\{\\{rule.name\\}\\} has recovered.
+'{{rule.name}}' has recovered.
 
-- SLO: \\{\\{context.sloName\\}\\}'
-- The burn rate over the last \\{\\{context.longWindow.duration\\}\\} is \\{\\{context.longWindow.burnRate\\}\\}
-- The burn rate over the last \\{\\{context.shortWindow.duration\\}\\} is \\{\\{context.shortWindow.burnRate\\}\\}
-- Threshold: \\{\\{context.burnRateThreshold\\}\\}
+- SLO: '{{context.sloName}}'
+- The burn rate over the last '{{context.longWindow.duration}}' is '{{context.longWindow.burnRate}}'
+- The burn rate over the last '{{context.shortWindow.duration}}' is '{{context.shortWindow.burnRate}}'
+- Threshold: '{{context.burnRateThreshold}}'
 
-[View alert details](\\{\\{context.alertDetailsUrl\\}\\})
+[View alert details]('{{context.alertDetailsUrl}}')
 `,
   }
 );
 
-export const registerBurnRateRuleType = async (
-  observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry
+export const registerBurnRateRuleType = (
+  observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry,
+  lazyWithContextProviders: LazyWithContextProviders
 ) => {
   observabilityRuleTypeRegistry.register({
     id: SLO_BURN_RATE_RULE_TYPE_ID,
@@ -66,13 +67,15 @@ export const registerBurnRateRuleType = async (
     documentationUrl(docLinks) {
       return `${docLinks.links.observability.sloBurnRateRule}`;
     },
-    ruleParamsExpression: lazy(() => import('../components/burn_rate_rule_editor')),
+    ruleParamsExpression: lazyWithContextProviders(
+      lazy(() => import('../components/burn_rate_rule_editor'))
+    ),
     validate: validateBurnRateRule,
     requiresAppContext: false,
     defaultActionMessage: sloBurnRateDefaultActionMessage,
     defaultRecoveryMessage: sloBurnRateDefaultRecoveryMessage,
-    alertDetailsAppSection: lazy(
-      () => import('../components/slo/burn_rate/alert_details/alert_details_app_section')
+    alertDetailsAppSection: lazyWithContextProviders(
+      lazy(() => import('../components/alert_details/alert_details_app_section'))
     ),
     priority: 100,
   });

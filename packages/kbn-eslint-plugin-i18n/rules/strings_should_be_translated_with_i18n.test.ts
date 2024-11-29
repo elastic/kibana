@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { RuleTester } from 'eslint';
@@ -169,7 +170,7 @@ function TestComponent() {
 }`,
   },
   {
-    name: 'JSX elements that have a label or aria-label prop with a string value should be translated with i18n',
+    name: 'JSX elements that have a label, aria-label or title prop with a string value should be translated with i18n',
     filename: '/x-pack/plugins/observability_solution/observability/public/test_component.tsx',
     code: `
 import React from 'react';
@@ -179,10 +180,28 @@ function TestComponent() {
   return (
     <SomeChildComponent label="This is a test" />
   )
+}
+function TestComponent2() {
+  return (
+    <SomeChildComponent aria-label="This is a test" />
+  )
+}
+function TestComponent3() {
+  return (
+    <SomeChildComponent title="This is a test" />
+  )
 }`,
     errors: [
       {
         line: 7,
+        message: RULE_WARNING_MESSAGE,
+      },
+      {
+        line: 12,
+        message: RULE_WARNING_MESSAGE,
+      },
+      {
+        line: 17,
         message: RULE_WARNING_MESSAGE,
       },
     ],
@@ -194,10 +213,76 @@ function TestComponent() {
   return (
     <SomeChildComponent label={i18n.translate('xpack.observability.testComponent.someChildComponent.thisIsATestLabel', { defaultMessage: 'This is a test' })} />
   )
+}
+function TestComponent2() {
+  return (
+    <SomeChildComponent aria-label={i18n.translate('xpack.observability.testComponent2.someChildComponent.thisIsATestLabel', { defaultMessage: 'This is a test' })} />
+  )
+}
+function TestComponent3() {
+  return (
+    <SomeChildComponent title={i18n.translate('xpack.observability.testComponent3.someChildComponent.thisIsATestLabel', { defaultMessage: 'This is a test' })} />
+  )
 }`,
   },
   {
-    name: 'JSX elements that have a label or aria-label prop with a JSXExpression value that is a string should be translated with i18n',
+    name: 'JSX elements that have a label, aria-label or title prop with a string value with quotes should be correctly translated with i18n',
+    filename: '/x-pack/plugins/observability_solution/observability/public/test_component.tsx',
+    code: `
+import React from 'react';
+import { i18n } from '@kbn/i18n';
+
+function TestComponent() {
+  return (
+    <SomeChildComponent label="This is a 'test'" />
+  )
+}
+function TestComponent2() {
+  return (
+    <SomeChildComponent aria-label="This is a 'test'" />
+  )
+}
+function TestComponent3() {
+  return (
+    <SomeChildComponent title="This is a 'test'" />
+  )
+}`,
+    errors: [
+      {
+        line: 7,
+        message: RULE_WARNING_MESSAGE,
+      },
+      {
+        line: 12,
+        message: RULE_WARNING_MESSAGE,
+      },
+      {
+        line: 17,
+        message: RULE_WARNING_MESSAGE,
+      },
+    ],
+    output: `
+import React from 'react';
+import { i18n } from '@kbn/i18n';
+
+function TestComponent() {
+  return (
+    <SomeChildComponent label={i18n.translate('xpack.observability.testComponent.someChildComponent.thisIsAtestLabel', { defaultMessage: 'This is a \\'test\\'' })} />
+  )
+}
+function TestComponent2() {
+  return (
+    <SomeChildComponent aria-label={i18n.translate('xpack.observability.testComponent2.someChildComponent.thisIsAtestLabel', { defaultMessage: 'This is a \\'test\\'' })} />
+  )
+}
+function TestComponent3() {
+  return (
+    <SomeChildComponent title={i18n.translate('xpack.observability.testComponent3.someChildComponent.thisIsAtestLabel', { defaultMessage: 'This is a \\'test\\'' })} />
+  )
+}`,
+  },
+  {
+    name: 'JSX elements that have a label, aria-label or title prop with a JSXExpression value that is a string should be translated with i18n',
     filename: '/x-pack/plugins/observability_solution/observability/public/test_component.tsx',
     code: `
 import React from 'react';
@@ -207,10 +292,28 @@ function TestComponent() {
   return (
     <SomeChildComponent label={'This is a test'} />
   )
+}
+function TestComponent2() {
+  return (
+    <SomeChildComponent aria-label={'This is a test'} />
+  )
+}
+function TestComponent3() {
+  return (
+    <SomeChildComponent title={'This is a test'} />
+  )
 }`,
     errors: [
       {
         line: 7,
+        message: RULE_WARNING_MESSAGE,
+      },
+      {
+        line: 12,
+        message: RULE_WARNING_MESSAGE,
+      },
+      {
+        line: 17,
         message: RULE_WARNING_MESSAGE,
       },
     ],
@@ -221,6 +324,72 @@ import { i18n } from '@kbn/i18n';
 function TestComponent() {
   return (
     <SomeChildComponent label={i18n.translate('xpack.observability.testComponent.someChildComponent.thisIsATestLabel', { defaultMessage: 'This is a test' })} />
+  )
+}
+function TestComponent2() {
+  return (
+    <SomeChildComponent aria-label={i18n.translate('xpack.observability.testComponent2.someChildComponent.thisIsATestLabel', { defaultMessage: 'This is a test' })} />
+  )
+}
+function TestComponent3() {
+  return (
+    <SomeChildComponent title={i18n.translate('xpack.observability.testComponent3.someChildComponent.thisIsATestLabel', { defaultMessage: 'This is a test' })} />
+  )
+}`,
+  },
+  {
+    name: 'JSX elements that have a label, aria-label or title prop with a JSXExpression value that is a string with quotes in it should be correctly translated with i18n',
+    filename: '/x-pack/plugins/observability_solution/observability/public/test_component.tsx',
+    code: `
+import React from 'react';
+import { i18n } from '@kbn/i18n';
+
+function TestComponent() {
+  return (
+    <SomeChildComponent label={"This here'a is a 'test'"} />
+  )
+}
+function TestComponent2() {
+  return (
+    <SomeChildComponent aria-label={"This here'a is a 'test'"} />
+  )
+}
+function TestComponent3() {
+  return (
+    <SomeChildComponent title={"This here'a is a 'test'"} />
+  )
+}`,
+    errors: [
+      {
+        line: 7,
+        message: RULE_WARNING_MESSAGE,
+      },
+      {
+        line: 12,
+        message: RULE_WARNING_MESSAGE,
+      },
+      {
+        line: 17,
+        message: RULE_WARNING_MESSAGE,
+      },
+    ],
+    output: `
+import React from 'react';
+import { i18n } from '@kbn/i18n';
+
+function TestComponent() {
+  return (
+    <SomeChildComponent label={i18n.translate('xpack.observability.testComponent.someChildComponent.thisHereaIsALabel', { defaultMessage: 'This here\\'a is a \\'test\\'' })} />
+  )
+}
+function TestComponent2() {
+  return (
+    <SomeChildComponent aria-label={i18n.translate('xpack.observability.testComponent2.someChildComponent.thisHereaIsALabel', { defaultMessage: 'This here\\'a is a \\'test\\'' })} />
+  )
+}
+function TestComponent3() {
+  return (
+    <SomeChildComponent title={i18n.translate('xpack.observability.testComponent3.someChildComponent.thisHereaIsALabel', { defaultMessage: 'This here\\'a is a \\'test\\'' })} />
   )
 }`,
   },

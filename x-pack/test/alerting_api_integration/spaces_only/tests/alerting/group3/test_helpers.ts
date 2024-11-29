@@ -6,13 +6,15 @@
  */
 
 import moment from 'moment';
+import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import type { RetryService } from '@kbn/ftr-common-functional-services';
 import type { IValidatedEvent } from '@kbn/event-log-plugin/server';
-import type { SuperTest, Test } from 'supertest';
+import type { Agent as SuperTestAgent } from 'supertest';
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { getUrlPrefix, getTestRuleData, ObjectRemover, getEventLog } from '../../../../common/lib';
 import { Spaces } from '../../../scenarios';
+import { TEST_CACHE_EXPIRATION_TIME } from '../create_test_data';
 
 export const createRule = async ({
   actionId,
@@ -22,8 +24,8 @@ export const createRule = async ({
   overwrites,
 }: {
   actionId: string;
-  pattern: { instance: boolean[] };
-  supertest: SuperTest<Test>;
+  pattern?: { instance: boolean[] };
+  supertest: SuperTestAgent;
   objectRemover: ObjectRemover;
   overwrites?: any;
 }) => {
@@ -65,7 +67,7 @@ export const createAction = async ({
   supertest,
   objectRemover,
 }: {
-  supertest: SuperTest<Test>;
+  supertest: SuperTestAgent;
   objectRemover: ObjectRemover;
 }) => {
   const { body: createdAction } = await supertest
@@ -79,7 +81,7 @@ export const createAction = async ({
     })
     .expect(200);
 
-  objectRemover.add(Spaces.space1.id, createdAction.id, 'action', 'actions');
+  objectRemover.add(Spaces.space1.id, createdAction.id, 'connector', 'actions');
   return createdAction;
 };
 
@@ -89,7 +91,7 @@ export const createMaintenanceWindow = async ({
   objectRemover,
 }: {
   overwrites?: any;
-  supertest: SuperTest<Test>;
+  supertest: SuperTestAgent;
   objectRemover: ObjectRemover;
 }) => {
   const { body: window } = await supertest
@@ -109,14 +111,13 @@ export const createMaintenanceWindow = async ({
     .expect(200);
 
   objectRemover.add(Spaces.space1.id, window.id, 'rules/maintenance_window', 'alerting', true);
+
+  // wait so cache expires
+  await setTimeoutAsync(TEST_CACHE_EXPIRATION_TIME);
   return window;
 };
 
-export const getActiveMaintenanceWindows = async ({
-  supertest,
-}: {
-  supertest: SuperTest<Test>;
-}) => {
+export const getActiveMaintenanceWindows = async ({ supertest }: { supertest: SuperTestAgent }) => {
   const { body: activeMaintenanceWindows } = await supertest
     .get(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/maintenance_window/_active`)
     .set('kbn-xsrf', 'foo')
@@ -130,14 +131,17 @@ export const finishMaintenanceWindow = async ({
   supertest,
 }: {
   id: string;
-  supertest: SuperTest<Test>;
+  supertest: SuperTestAgent;
 }) => {
-  return supertest
+  await supertest
     .post(
       `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/maintenance_window/${id}/_finish`
     )
     .set('kbn-xsrf', 'foo')
     .expect(200);
+
+  // wait so cache expires
+  await setTimeoutAsync(TEST_CACHE_EXPIRATION_TIME);
 };
 
 export const getRuleEvents = async ({
@@ -188,7 +192,7 @@ export const expectNoActionsFired = async ({
   retry,
 }: {
   id: string;
-  supertest: SuperTest<Test>;
+  supertest: SuperTestAgent;
   retry: RetryService;
 }) => {
   const events = await retry.try(async () => {
@@ -215,7 +219,7 @@ export const runSoon = async ({
   retry,
 }: {
   id: string;
-  supertest: SuperTest<Test>;
+  supertest: SuperTestAgent;
   retry: RetryService;
 }) => {
   return retry.try(async () => {

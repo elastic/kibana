@@ -12,9 +12,7 @@ import { SyntheticsRunner } from './helpers/synthetics_runner';
 const { headless, grep, bail: pauseOnError } = argv;
 
 async function runE2ETests({ readConfigFile }: FtrConfigProviderContext) {
-  const kibanaConfig = await readConfigFile(
-    require.resolve('@kbn/synthetics-plugin/e2e/config')
-  );
+  const kibanaConfig = await readConfigFile(require.resolve('@kbn/synthetics-e2e/config'));
 
   return {
     ...kibanaConfig.getAll(),
@@ -29,10 +27,7 @@ async function runE2ETests({ readConfigFile }: FtrConfigProviderContext) {
 
       const fixturesDir = path.join(__dirname, '../e2e/fixtures/');
 
-      await syntheticsRunner.loadTestData(fixturesDir, [
-        'rum_8.0.0',
-        'rum_test_data',
-      ]);
+      await syntheticsRunner.loadTestData(fixturesDir, ['rum_8.0.0', 'rum_test_data']);
       await syntheticsRunner.loadTestFiles(async () => {
         require('./journeys');
       });

@@ -5,15 +5,8 @@
  * 2.0.
  */
 
-import {
-  termQuery,
-  kqlQuery,
-  rangeQuery,
-} from '@kbn/observability-plugin/server';
-import {
-  NETWORK_CONNECTION_TYPE,
-  SERVICE_NAME,
-} from '../../../common/es_fields/apm';
+import { termQuery, kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
+import { NETWORK_CONNECTION_TYPE, SERVICE_NAME } from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { ApmDocumentType } from '../../../common/document_type';
 import { RollupInterval } from '../../../common/rollup';

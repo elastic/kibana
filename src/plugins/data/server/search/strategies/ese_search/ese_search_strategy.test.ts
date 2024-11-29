@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
@@ -18,6 +19,27 @@ import { createSearchSessionsClientMock } from '../../mocks';
 import { getMockSearchConfig } from '../../../../config.mock';
 import { DataViewType } from '@kbn/data-views-plugin/common';
 
+const mockAsyncStatusResponse = (isComplete = false) => ({
+  body: {
+    id: 'FlVYVkw0clJIUS1TMHpHdXA3a29pZUEedldKX1c1bnBRVXFmalZ4emV1cjFCUToxNjYzMDgx',
+    is_running: !isComplete,
+    is_partial: !isComplete,
+    start_time_in_millis: 1710451842532,
+    expiration_time_in_millis: 1710451907469,
+    _shards: {
+      total: 10,
+      successful: 0,
+      skipped: 0,
+      failed: 0,
+    },
+  },
+  headers: {
+    'x-elasticsearch-async-id':
+      'FlVYVkw0clJIUS1TMHpHdXA3a29pZUEedldKX1c1bnBRVXFmalZ4emV1cjFCUToxNjYzMDgx',
+    'x-elasticsearch-async-is-running': isComplete ? '?0' : '?1',
+  },
+});
+
 const mockAsyncResponse = {
   body: {
     id: 'foo',
@@ -29,6 +51,10 @@ const mockAsyncResponse = {
         successful: 7,
       },
     },
+  },
+  headers: {
+    'x-elasticsearch-async-id': 'foo',
+    'x-elasticsearch-async-is-running': '?0',
   },
 };
 
@@ -45,11 +71,13 @@ const mockRollupResponse = {
 
 describe('ES search strategy', () => {
   const mockApiCaller = jest.fn();
+  const mockStatusCaller = jest.fn();
   const mockGetCaller = jest.fn();
   const mockSubmitCaller = jest.fn();
   const mockDeleteCaller = jest.fn();
   const mockLogger: any = {
-    debug: () => {},
+    debug: jest.fn(),
+    error: jest.fn(),
   };
   const mockDeps = {
     uiSettingsClient: {
@@ -58,6 +86,7 @@ describe('ES search strategy', () => {
     esClient: {
       asCurrentUser: {
         asyncSearch: {
+          status: mockStatusCaller,
           get: mockGetCaller,
           submit: mockSubmitCaller,
           delete: mockDeleteCaller,
@@ -82,6 +111,7 @@ describe('ES search strategy', () => {
 
   beforeEach(() => {
     mockApiCaller.mockClear();
+    mockStatusCaller.mockClear();
     mockGetCaller.mockClear();
     mockSubmitCaller.mockClear();
     mockDeleteCaller.mockClear();
@@ -118,7 +148,26 @@ describe('ES search strategy', () => {
         expect(request).toHaveProperty('keep_alive', '60000ms');
       });
 
+      it('returns status if incomplete', async () => {
+        mockStatusCaller.mockResolvedValueOnce(mockAsyncStatusResponse(false));
+
+        const params = { index: 'logstash-*', body: { query: {} } };
+        const esSearch = await enhancedEsSearchStrategyProvider(
+          mockLegacyConfig$,
+          mockSearchConfig,
+          mockLogger
+        );
+
+        const response = await firstValueFrom(esSearch.search({ id: 'foo', params }, {}, mockDeps));
+
+        expect(mockGetCaller).not.toBeCalled();
+        expect(response).toHaveProperty('id');
+        expect(response).toHaveProperty('isPartial', true);
+        expect(response).toHaveProperty('isRunning', true);
+      });
+
       it('makes a GET request to async search with ID', async () => {
+        mockStatusCaller.mockResolvedValueOnce(mockAsyncStatusResponse(true));
         mockGetCaller.mockResolvedValueOnce(mockAsyncResponse);
 
         const params = { index: 'logstash-*', body: { query: {} } };
@@ -138,6 +187,7 @@ describe('ES search strategy', () => {
       });
 
       it('allows overriding keep_alive and wait_for_completion_timeout', async () => {
+        mockStatusCaller.mockResolvedValueOnce(mockAsyncStatusResponse(true));
         mockGetCaller.mockResolvedValueOnce(mockAsyncResponse);
 
         const params = {
@@ -193,6 +243,7 @@ describe('ES search strategy', () => {
       });
 
       it('sets transport options on GET requests', async () => {
+        mockStatusCaller.mockResolvedValueOnce(mockAsyncStatusResponse(true));
         mockGetCaller.mockResolvedValueOnce(mockAsyncResponse);
         const params = { index: 'logstash-*', body: { query: {} } };
         const esSearch = enhancedEsSearchStrategyProvider(
@@ -293,7 +344,56 @@ describe('ES search strategy', () => {
             ...mockAsyncResponse.body,
             is_running: true,
           },
+          headers: {
+            ...mockAsyncResponse.headers,
+            'x-elasticsearch-async-is-running': '?1',
+          },
         });
+
+        const params = { index: 'logstash-*', body: { query: {} } };
+        const esSearch = await enhancedEsSearchStrategyProvider(
+          mockLegacyConfig$,
+          mockSearchConfig,
+          mockLogger
+        );
+        const abortController = new AbortController();
+        const abortSignal = abortController.signal;
+
+        // Abort after an incomplete first response is returned
+        setTimeout(() => abortController.abort(), 100);
+
+        let err: KbnServerError | undefined;
+        try {
+          await esSearch.search({ params }, { abortSignal }, mockDeps).toPromise();
+        } catch (e) {
+          err = e;
+        }
+        expect(mockSubmitCaller).toBeCalled();
+        expect(err).not.toBeUndefined();
+        expect(mockDeleteCaller).toBeCalled();
+      });
+
+      it('should not throw when encountering an error deleting', async () => {
+        mockSubmitCaller.mockResolvedValueOnce({
+          ...mockAsyncResponse,
+          body: {
+            ...mockAsyncResponse.body,
+            is_running: true,
+          },
+          headers: {
+            ...mockAsyncResponse.headers,
+            'x-elasticsearch-async-is-running': '?1',
+          },
+        });
+
+        const errResponse = new errors.ResponseError({
+          body: xContentParseException,
+          statusCode: 400,
+          headers: {},
+          warnings: [],
+          meta: {} as any,
+        });
+        mockDeleteCaller.mockRejectedValueOnce(errResponse);
 
         const params = { index: 'logstash-*', body: { query: {} } };
         const esSearch = await enhancedEsSearchStrategyProvider(
@@ -361,6 +461,7 @@ describe('ES search strategy', () => {
       });
 
       it('makes a GET request to async search with short keepalive, if session is not saved', async () => {
+        mockStatusCaller.mockResolvedValueOnce(mockAsyncStatusResponse(true));
         mockGetCaller.mockResolvedValueOnce(mockAsyncResponse);
 
         const params = { index: 'logstash-*', body: { query: {} } };
@@ -380,6 +481,7 @@ describe('ES search strategy', () => {
       });
 
       it('makes a GET request to async search with long keepalive, if session is saved', async () => {
+        mockStatusCaller.mockResolvedValueOnce(mockAsyncStatusResponse(true));
         mockGetCaller.mockResolvedValueOnce(mockAsyncResponse);
 
         const params = { index: 'logstash-*', body: { query: {} } };
@@ -401,6 +503,7 @@ describe('ES search strategy', () => {
       });
 
       it('makes a GET request to async search with no keepalive, if session is session saved and search is stored', async () => {
+        mockStatusCaller.mockResolvedValueOnce(mockAsyncStatusResponse(true));
         mockGetCaller.mockResolvedValueOnce(mockAsyncResponse);
 
         const params = { index: 'logstash-*', body: { query: {} } };
@@ -431,6 +534,10 @@ describe('ES search strategy', () => {
           body: {
             ...mockAsyncResponse.body,
             is_running: true,
+          },
+          headers: {
+            ...mockAsyncResponse.headers,
+            'x-elasticsearch-async-is-running': '?1',
           },
         });
 
@@ -592,6 +699,7 @@ describe('ES search strategy', () => {
 
     it('throws normalized error on ElasticsearchClientError', async () => {
       const errResponse = new errors.ElasticsearchClientError('something is wrong with EsClient');
+      mockStatusCaller.mockResolvedValueOnce(mockAsyncStatusResponse(true));
       mockGetCaller.mockRejectedValue(errResponse);
 
       const id = 'some_other_id';

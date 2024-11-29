@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { config as pathConfig } from '@kbn/utils';
@@ -14,7 +15,12 @@ import { coreDeprecationProvider } from '@kbn/core-config-server-internal';
 import { nodeConfig } from '@kbn/core-node-server-internal';
 import { pidConfig } from '@kbn/core-environment-server-internal';
 import { executionContextConfig } from '@kbn/core-execution-context-server-internal';
-import { config as httpConfig, cspConfig, externalUrlConfig } from '@kbn/core-http-server-internal';
+import {
+  config as httpConfig,
+  cspConfig,
+  externalUrlConfig,
+  permissionsPolicyConfig,
+} from '@kbn/core-http-server-internal';
 import { config as elasticsearchConfig } from '@kbn/core-elasticsearch-server-internal';
 import { config as coreAppConfig } from '@kbn/core-apps-server-internal';
 import { opsConfig } from '@kbn/core-metrics-server-internal';
@@ -26,21 +32,24 @@ import { config as i18nConfig } from '@kbn/core-i18n-server-internal';
 import { config as deprecationConfig } from '@kbn/core-deprecations-server-internal';
 import { statusConfig } from '@kbn/core-status-server-internal';
 import { uiSettingsConfig } from '@kbn/core-ui-settings-server-internal';
-
 import { config as pluginsConfig } from '@kbn/core-plugins-server-internal';
+import { featureFlagsConfig } from '@kbn/core-feature-flags-server-internal';
 import { elasticApmConfig } from './root/elastic_config';
 import { serverlessConfig } from './root/serverless_config';
+import { coreConfig } from './core_config';
 
 const rootConfigPath = '';
 
 export function registerServiceConfig(configService: ConfigService) {
   const configDescriptors: Array<ServiceConfigDescriptor<unknown>> = [
+    coreConfig,
     cspConfig,
     deprecationConfig,
     elasticsearchConfig,
     coreAppConfig,
     elasticApmConfig,
     executionContextConfig,
+    featureFlagsConfig,
     externalUrlConfig,
     httpConfig,
     i18nConfig,
@@ -55,6 +64,7 @@ export function registerServiceConfig(configService: ConfigService) {
     serverlessConfig,
     statusConfig,
     uiSettingsConfig,
+    permissionsPolicyConfig,
   ];
 
   configService.addDeprecationProvider(rootConfigPath, coreDeprecationProvider);

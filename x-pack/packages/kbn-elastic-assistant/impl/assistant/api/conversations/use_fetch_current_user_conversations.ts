@@ -8,14 +8,14 @@
 import { HttpSetup } from '@kbn/core/public';
 import { useQuery } from '@tanstack/react-query';
 import {
+  API_VERSIONS,
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND,
-  ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
 } from '@kbn/elastic-assistant-common';
 import { Conversation } from '../../../assistant_context/types';
 
 export interface FetchConversationsResponse {
   page: number;
-  perPage: number;
+  per_page: number;
   total: number;
   data: Conversation[];
 }
@@ -24,6 +24,8 @@ export interface UseFetchCurrentUserConversationsParams {
   http: HttpSetup;
   onFetch: (result: FetchConversationsResponse) => Record<string, Conversation>;
   signal?: AbortSignal | undefined;
+  refetchOnWindowFocus?: boolean;
+  isAssistantEnabled: boolean;
 }
 
 /**
@@ -36,33 +38,39 @@ export interface UseFetchCurrentUserConversationsParams {
  *
  * @returns {useQuery} hook for getting the status of the conversations
  */
+const query = {
+  page: 1,
+  per_page: 99,
+};
+
+export const CONVERSATIONS_QUERY_KEYS = [
+  ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND,
+  query.page,
+  query.per_page,
+  API_VERSIONS.public.v1,
+];
+
 export const useFetchCurrentUserConversations = ({
   http,
   onFetch,
   signal,
-}: UseFetchCurrentUserConversationsParams) => {
-  const query = {
-    page: 1,
-    perPage: 100,
-  };
-
-  const cachingKeys = [
-    ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND,
-    query.page,
-    query.perPage,
-    ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
-  ];
-
-  return useQuery([cachingKeys, query], async () => {
-    const res = await http.fetch<FetchConversationsResponse>(
-      ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND,
-      {
+  refetchOnWindowFocus = true,
+  isAssistantEnabled,
+}: UseFetchCurrentUserConversationsParams) =>
+  useQuery(
+    CONVERSATIONS_QUERY_KEYS,
+    async () =>
+      http.fetch<FetchConversationsResponse>(ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND, {
         method: 'GET',
-        version: ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
+        version: API_VERSIONS.public.v1,
         query,
         signal,
-      }
-    );
-    return onFetch(res);
-  });
-};
+      }),
+    {
+      select: (data) => onFetch(data),
+      keepPreviousData: true,
+      initialData: { ...query, total: 0, data: [] },
+      refetchOnWindowFocus,
+      enabled: isAssistantEnabled,
+    }
+  );

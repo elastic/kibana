@@ -22,7 +22,7 @@ import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DataViewBase } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { adjustThresholdBasedOnFormat } from '../../helpers/adjust_threshold_based_on_format';
+import { convertToApiThreshold } from '../../helpers/threshold_unit';
 import {
   Aggregators,
   CustomThresholdExpressionMetric,
@@ -81,7 +81,7 @@ export function CustomEquationEditor({
         ...expression,
         metrics: nextMetrics,
         equation,
-        threshold: adjustThresholdBasedOnFormat(previous, nextMetrics, expression.threshold),
+        threshold: convertToApiThreshold(previous, nextMetrics, expression.threshold),
       });
       return nextMetrics;
     });
@@ -96,7 +96,7 @@ export function CustomEquationEditor({
           ...expression,
           metrics: finalMetrics,
           equation,
-          threshold: adjustThresholdBasedOnFormat(previous, nextMetrics, expression.threshold),
+          threshold: convertToApiThreshold(previous, nextMetrics, expression.threshold),
         });
         return finalMetrics;
       });
@@ -112,7 +112,7 @@ export function CustomEquationEditor({
           ...expression,
           metrics: nextMetrics,
           equation,
-          threshold: adjustThresholdBasedOnFormat(previous, nextMetrics, expression.threshold),
+          threshold: convertToApiThreshold(previous, nextMetrics, expression.threshold),
         });
         return nextMetrics;
       });
@@ -185,7 +185,7 @@ export function CustomEquationEditor({
                 'xpack.observability.customThreshold.rule.alertFlyout.customEquationEditor.equationAndThreshold',
                 { defaultMessage: 'Equation and threshold' }
               )}
-              error={[errors.equation]}
+              error={[errors.equation as string]}
             >
               <>
                 <EuiSpacer size="xs" />

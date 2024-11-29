@@ -14,13 +14,18 @@ import type { caseDomainV1 } from '../../../../common/types/domain';
 export const patchCaseRoute = createCasesRoute({
   method: 'patch',
   path: CASES_URL,
+  routerOptions: {
+    access: 'public',
+    summary: 'Update cases',
+    tags: ['oas-tag:cases'],
+  },
   handler: async ({ context, request, response }) => {
     try {
       const caseContext = await context.cases;
       const casesClient = await caseContext.getCasesClient();
       const cases = request.body as caseApiV1.CasesPatchRequest;
 
-      const res: caseDomainV1.Cases = await casesClient.cases.update(cases);
+      const res: caseDomainV1.Cases = await casesClient.cases.bulkUpdate(cases);
 
       return response.ok({
         body: res,

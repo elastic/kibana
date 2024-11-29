@@ -7,32 +7,29 @@
 
 import type { IKibanaResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import type { PatchRuleResponse } from '../../../../../../../common/api/detection_engine/rule_management';
 import {
   PatchRuleRequestBody,
   validatePatchRuleRequestBody,
 } from '../../../../../../../common/api/detection_engine/rule_management';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
-import type { SetupPlugins } from '../../../../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
-import { buildRouteValidationWithZod } from '../../../../../../utils/build_validation/route_validation';
-import { buildMlAuthz } from '../../../../../machine_learning/authz';
-import { throwAuthzError } from '../../../../../machine_learning/validation';
 import { buildSiemResponse } from '../../../../routes/utils';
-import { patchRules } from '../../../logic/crud/patch_rules';
-import { readRules } from '../../../logic/crud/read_rules';
+import { readRules } from '../../../logic/detection_rules_client/read_rules';
 import { checkDefaultRuleExceptionListReferences } from '../../../logic/exceptions/check_for_default_rule_exception_list';
 import { validateRuleDefaultExceptionList } from '../../../logic/exceptions/validate_rule_default_exception_list';
 import { getIdError } from '../../../utils/utils';
-import { transformValidate } from '../../../utils/validate';
 
-export const patchRuleRoute = (router: SecuritySolutionPluginRouter, ml: SetupPlugins['ml']) => {
+export const patchRuleRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
     .patch({
       access: 'public',
       path: DETECTION_ENGINE_RULES_URL,
-      options: {
-        tags: ['access:securitySolution'],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
       },
     })
     .addVersion(
@@ -56,27 +53,20 @@ export const patchRuleRoute = (router: SecuritySolutionPluginRouter, ml: SetupPl
         try {
           const params = request.body;
           const rulesClient = (await context.alerting).getRulesClient();
-          const savedObjectsClient = (await context.core).savedObjects.client;
-
-          const mlAuthz = buildMlAuthz({
-            license: (await context.licensing).license,
-            ml,
-            request,
-            savedObjectsClient,
-          });
-          if (params.type) {
-            // reject an unauthorized "promotion" to ML
-            throwAuthzError(await mlAuthz.validateRuleType(params.type));
-          }
+          const detectionRulesClient = (await context.securitySolution).getDetectionRulesClient();
 
           const existingRule = await readRules({
             rulesClient,
             ruleId: params.rule_id,
             id: params.id,
           });
-          if (existingRule?.params.type) {
-            // reject an unauthorized modification of an ML rule
-            throwAuthzError(await mlAuthz.validateRuleType(existingRule?.params.type));
+
+          if (!existingRule) {
+            const error = getIdError({ id: params.id, ruleId: params.rule_id });
+            return siemResponse.error({
+              body: error.message,
+              statusCode: error.statusCode,
+            });
           }
 
           checkDefaultRuleExceptionListReferences({ exceptionLists: params.exceptions_list });
@@ -87,22 +77,13 @@ export const patchRuleRoute = (router: SecuritySolutionPluginRouter, ml: SetupPl
             ruleId: params.id,
           });
 
-          const rule = await patchRules({
-            rulesClient,
-            existingRule,
-            nextParams: params,
+          const patchedRule = await detectionRulesClient.patchRule({
+            rulePatch: params,
           });
-          if (rule != null && rule.enabled != null && rule.name != null) {
-            return response.ok({
-              body: transformValidate(rule),
-            });
-          } else {
-            const error = getIdError({ id: params.id, ruleId: params.rule_id });
-            return siemResponse.error({
-              body: error.message,
-              statusCode: error.statusCode,
-            });
-          }
+
+          return response.ok({
+            body: patchedRule,
+          });
         } catch (err) {
           const error = transformError(err);
           return siemResponse.error({

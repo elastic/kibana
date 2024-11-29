@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isCCSRemoteIndexName } from '@kbn/es-query';
 import { ERROR_CORRELATION_THRESHOLD } from '../../../../common/correlations/constants';
 import type { FailedTransactionsCorrelation } from '../../../../common/correlations/failed_transactions_correlations/types';
 
@@ -102,10 +103,9 @@ export const fetchPValues = async ({
     }
   });
 
-  const index =
-    apmEventClient.indices[eventType as keyof typeof apmEventClient.indices];
+  const index = apmEventClient.indices[eventType as keyof typeof apmEventClient.indices];
 
-  const ccsWarning = rejected.length > 0 && index.includes(':');
+  const ccsWarning = rejected.length > 0 && isCCSRemoteIndexName(index);
 
   return { failedTransactionsCorrelations, ccsWarning, fallbackResult };
 };

@@ -69,6 +69,11 @@ export class ServerlessSearchPlugin
         },
       }),
     });
+
+    const homeTitle = i18n.translate('xpack.serverlessSearch.app.home.title', {
+      defaultMessage: 'Home',
+    });
+
     core.application.register({
       id: 'serverlessElasticsearch',
       title: i18n.translate('xpack.serverlessSearch.app.elasticsearch.title', {
@@ -76,15 +81,15 @@ export class ServerlessSearchPlugin
       }),
       euiIconType: 'logoElastic',
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
-      appRoute: '/app/elasticsearch',
+      appRoute: '/app/elasticsearch/getting_started',
       async mount({ element, history }: AppMountParameters) {
         const { renderApp } = await import('./application/elasticsearch');
         const [coreStart, services] = await core.getStartServices();
-        const { security } = services;
         docLinks.setDocLinks(coreStart.docLinks.links);
+        coreStart.chrome.docTitle.change(homeTitle);
         let user: AuthenticatedUser | undefined;
         try {
-          const response = await security.authc.getCurrentUser();
+          const response = await coreStart.security.authc.getCurrentUser();
           user = response;
         } catch {
           user = undefined;
@@ -94,11 +99,13 @@ export class ServerlessSearchPlugin
       },
     });
 
+    const connectorsTitle = i18n.translate('xpack.serverlessSearch.app.connectors.title', {
+      defaultMessage: 'Connectors',
+    });
+
     core.application.register({
       id: 'serverlessConnectors',
-      title: i18n.translate('xpack.serverlessSearch.app.connectors.title', {
-        defaultMessage: 'Connectors',
-      }),
+      title: connectorsTitle,
       appRoute: '/app/connectors',
       euiIconType: 'logoElastic',
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
@@ -106,9 +113,47 @@ export class ServerlessSearchPlugin
       async mount({ element, history }: AppMountParameters) {
         const { renderApp } = await import('./application/connectors');
         const [coreStart, services] = await core.getStartServices();
-
+        coreStart.chrome.docTitle.change(connectorsTitle);
         docLinks.setDocLinks(coreStart.docLinks.links);
+
         return await renderApp(element, coreStart, { history, ...services }, queryClient);
+      },
+    });
+
+    const webCrawlersTitle = i18n.translate('xpack.serverlessSearch.app.webCrawlers.title', {
+      defaultMessage: 'Web Crawlers',
+    });
+
+    core.application.register({
+      id: 'serverlessWebCrawlers',
+      title: webCrawlersTitle,
+      appRoute: '/app/web_crawlers',
+      euiIconType: 'logoElastic',
+      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
+      visibleIn: [],
+      async mount({ element, history }: AppMountParameters) {
+        const { renderApp } = await import('./application/web_crawlers');
+        const [coreStart, services] = await core.getStartServices();
+        coreStart.chrome.docTitle.change(webCrawlersTitle);
+        docLinks.setDocLinks(coreStart.docLinks.links);
+
+        return await renderApp(element, coreStart, { history, ...services }, queryClient);
+      },
+    });
+
+    const { searchIndices } = setupDeps;
+    core.application.register({
+      id: 'serverlessHomeRedirect',
+      title: homeTitle,
+      appRoute: '/app/elasticsearch',
+      euiIconType: 'logoElastic',
+      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
+      visibleIn: [],
+      async mount({}: AppMountParameters) {
+        const [coreStart] = await core.getStartServices();
+        coreStart.chrome.docTitle.change(homeTitle);
+        coreStart.application.navigateToApp(searchIndices.startAppId);
+        return () => {};
       },
     });
 
@@ -121,17 +166,22 @@ export class ServerlessSearchPlugin
     core: CoreStart,
     services: ServerlessSearchPluginStartDependencies
   ): ServerlessSearchPluginStart {
-    const { serverless, management, indexManagement } = services;
-    serverless.setProjectHome('/app/elasticsearch');
+    const { serverless, management, indexManagement, security } = services;
+    serverless.setProjectHome(services.searchIndices.startRoute);
 
-    const navigationTree$ = of(navigationTree);
-    serverless.initNavigation(navigationTree$, { dataTestSubj: 'svlSearchSideNav' });
+    const navigationTree$ = of(navigationTree(core.application));
+    serverless.initNavigation('es', navigationTree$, { dataTestSubj: 'svlSearchSideNav' });
 
-    management.setIsSidebarEnabled(false);
+    const extendCardNavDefinitions = serverless.getNavigationCards(
+      security.authz.isRoleManagementEnabled()
+    );
+
     management.setupCardsNavigation({
       enabled: true,
       hideLinksTo: [appIds.MAINTENANCE_WINDOWS],
+      extendCardNavDefinitions,
     });
+
     indexManagement?.extensionsService.setIndexMappingsContent(createIndexMappingsContent(core));
     indexManagement?.extensionsService.addIndexDetailsTab(
       createIndexDocumentsContent(core, services)

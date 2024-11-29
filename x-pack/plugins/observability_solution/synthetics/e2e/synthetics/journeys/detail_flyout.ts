@@ -5,15 +5,18 @@
  * 2.0.
  */
 
-import { expect, journey, step } from '@elastic/synthetics';
-import { recordVideo } from '../../helpers/record_video';
+import { before, expect, journey, step } from '@elastic/synthetics';
+import { cleanTestMonitors } from './services/add_monitor';
 import { syntheticsAppPageProvider } from '../page_objects/synthetics_app';
 
 journey('TestMonitorDetailFlyout', async ({ page, params }) => {
-  recordVideo(page);
-
-  const syntheticsApp = syntheticsAppPageProvider({ page, kibanaUrl: params.kibanaUrl });
+  const syntheticsApp = syntheticsAppPageProvider({ page, kibanaUrl: params.kibanaUrl, params });
   const monitorName = 'test-flyout-http-monitor';
+  const locationId = 'us_central';
+
+  before(async () => {
+    await cleanTestMonitors(params);
+  });
 
   step('Go to monitor-management', async () => {
     await syntheticsApp.navigateToAddMonitor();
@@ -38,7 +41,7 @@ journey('TestMonitorDetailFlyout', async ({ page, params }) => {
   step('open overview flyout', async () => {
     await syntheticsApp.navigateToOverview();
     await syntheticsApp.assertText({ text: monitorName });
-    await page.click(`[data-test-subj="${monitorName}-metric-item"]`);
+    await page.click(`[data-test-subj="${monitorName}-${locationId}-metric-item"]`);
     const flyoutHeader = await page.waitForSelector('.euiFlyoutHeader');
     expect(await flyoutHeader.innerText()).toContain(monitorName);
   });

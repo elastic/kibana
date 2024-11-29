@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC } from 'react';
+import React, { type FC, type PropsWithChildren } from 'react';
 
 import {
   useEuiTheme,
@@ -30,42 +30,46 @@ import { useAnimatedProgressBarBackground } from './use_animated_progress_bar_ba
  * Props for ProgressControlProps
  */
 interface ProgressControlProps {
-  isBrushCleared: boolean;
   progress: number;
   progressMessage: string;
   onRefresh: () => void;
   onCancel: () => void;
   onReset: () => void;
+  isBrushCleared: boolean;
   isRunning: boolean;
   shouldRerunAnalysis: boolean;
   runAnalysisDisabled?: boolean;
+  analysisInfo?: React.ReactNode;
 }
 
 /**
  * ProgressControls React Component
- * Component with ability to Run & cancel analysis
+ * Component with ability to run & cancel analysis
  * by default uses `Baseline` and `Deviation` for the badge name
  *
  * @param props ProgressControls component props
  * @returns The ProgressControls component.
  */
-export const ProgressControls: FC<ProgressControlProps> = (props) => {
+export const ProgressControls: FC<PropsWithChildren<ProgressControlProps>> = (props) => {
   const {
     children,
-    isBrushCleared,
     progress,
     progressMessage,
     onRefresh,
     onCancel,
     onReset,
+    isBrushCleared,
     isRunning,
     shouldRerunAnalysis,
     runAnalysisDisabled = false,
+    analysisInfo = null,
   } = props;
 
+  const progressOutput = Math.round(progress * 100);
+
   const { euiTheme } = useEuiTheme();
+
   const runningProgressBarStyles = useAnimatedProgressBarBackground(euiTheme.colors.success);
-  const analysisCompleteStyle = { display: 'none' };
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s">
@@ -134,34 +138,35 @@ export const ProgressControls: FC<ProgressControlProps> = (props) => {
                 })}
               </small>
             </EuiFlexItem>
+            <EuiFlexItem grow={false} data-test-subj="aiopsAnalysisInfo">
+              {analysisInfo}
+            </EuiFlexItem>
           </EuiFlexGroup>
         ) : null}
-        <EuiFlexGroup
-          direction="column"
-          gutterSize="none"
-          css={progress === 1 ? analysisCompleteStyle : undefined}
-        >
-          <EuiFlexItem data-test-subj="aiopProgressTitle">
-            <EuiText size="xs" color="subdued">
-              <FormattedMessage
-                data-test-subj="aiopsProgressTitleMessage"
-                id="xpack.aiops.progressTitle"
-                defaultMessage="Progress: {progress}% — {progressMessage}"
-                values={{ progress: Math.round(progress * 100), progressMessage }}
+        {progress !== 1 ? (
+          <EuiFlexGroup direction="column" gutterSize="none">
+            <EuiFlexItem data-test-subj="aiopProgressTitle">
+              <EuiText size="xs" color="subdued">
+                <FormattedMessage
+                  data-test-subj="aiopsProgressTitleMessage"
+                  id="xpack.aiops.progressTitle"
+                  defaultMessage="Progress: {progress}% — {progressMessage}"
+                  values={{ progress: progressOutput, progressMessage }}
+                />
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem css={isRunning ? runningProgressBarStyles : undefined}>
+              <EuiProgress
+                aria-label={i18n.translate('xpack.aiops.progressAriaLabel', {
+                  defaultMessage: 'Progress',
+                })}
+                value={progressOutput}
+                max={100}
+                size="m"
               />
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem css={isRunning ? runningProgressBarStyles : undefined}>
-            <EuiProgress
-              aria-label={i18n.translate('xpack.aiops.progressAriaLabel', {
-                defaultMessage: 'Progress',
-              })}
-              value={Math.round(progress * 100)}
-              max={100}
-              size="m"
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ) : null}
       </EuiFlexItem>
       {children}
     </EuiFlexGroup>

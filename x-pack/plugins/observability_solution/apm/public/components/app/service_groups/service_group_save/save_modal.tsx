@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiModal } from '@elastic/eui';
+import { EuiModal, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useHistory } from 'react-router-dom';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -12,10 +12,7 @@ import { callApmApi } from '../../../../services/rest/create_call_apm_api';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { GroupDetails } from './group_details';
 import { SelectServices } from './select_services';
-import {
-  ServiceGroup,
-  SavedServiceGroup,
-} from '../../../../../common/service_groups';
+import { ServiceGroup, SavedServiceGroup } from '../../../../../common/service_groups';
 import { refreshServiceGroups } from '../refresh_service_groups_subscriber';
 
 interface Props {
@@ -35,9 +32,9 @@ export function SaveGroupModal({ onClose, savedServiceGroup }: Props) {
     core: { notifications },
   } = useApmPluginContext();
   const [modalView, setModalView] = useState<ModalView>('group_details');
-  const [stagedServiceGroup, setStagedServiceGroup] = useState<
-    StagedServiceGroup | undefined
-  >(savedServiceGroup);
+  const [stagedServiceGroup, setStagedServiceGroup] = useState<StagedServiceGroup | undefined>(
+    savedServiceGroup
+  );
   const [isLoading, setIsLoading] = useState(false);
   useEffect(() => {
     setStagedServiceGroup(savedServiceGroup);
@@ -89,22 +86,16 @@ export function SaveGroupModal({ onClose, savedServiceGroup }: Props) {
       onClose();
       setIsLoading(false);
     },
-    [
-      savedServiceGroup?.id,
-      notifications.toasts,
-      onClose,
-      isEdit,
-      navigateToServiceGroups,
-    ]
+    [savedServiceGroup?.id, notifications.toasts, onClose, isEdit, navigateToServiceGroups]
   );
+
+  const modalTitleId = useGeneratedHtmlId();
 
   const onDelete = useCallback(
     async function () {
       setIsLoading(true);
       if (!savedServiceGroup) {
-        notifications.toasts.addDanger(
-          getDeleteFailureUnknownIdToastLabels(stagedServiceGroup!)
-        );
+        notifications.toasts.addDanger(getDeleteFailureUnknownIdToastLabels(stagedServiceGroup!));
         return;
       }
       try {
@@ -112,31 +103,21 @@ export function SaveGroupModal({ onClose, savedServiceGroup }: Props) {
           params: { query: { serviceGroupId: savedServiceGroup.id } },
           signal: null,
         });
-        notifications.toasts.addSuccess(
-          getDeleteSuccessToastLabels(stagedServiceGroup!)
-        );
+        notifications.toasts.addSuccess(getDeleteSuccessToastLabels(stagedServiceGroup!));
         refreshServiceGroups();
         navigateToServiceGroups();
       } catch (error) {
         console.error(error);
-        notifications.toasts.addDanger(
-          getDeleteFailureToastLabels(stagedServiceGroup!, error)
-        );
+        notifications.toasts.addDanger(getDeleteFailureToastLabels(stagedServiceGroup!, error));
       }
       onClose();
       setIsLoading(false);
     },
-    [
-      stagedServiceGroup,
-      notifications.toasts,
-      onClose,
-      navigateToServiceGroups,
-      savedServiceGroup,
-    ]
+    [stagedServiceGroup, notifications.toasts, onClose, navigateToServiceGroups, savedServiceGroup]
   );
 
   return (
-    <EuiModal onClose={onClose}>
+    <EuiModal onClose={onClose} aria-labelledby={modalTitleId}>
       {modalView === 'group_details' && (
         <GroupDetails
           serviceGroup={stagedServiceGroup}
@@ -148,6 +129,7 @@ export function SaveGroupModal({ onClose, savedServiceGroup }: Props) {
           }}
           onDeleteGroup={onDelete}
           isLoading={isLoading}
+          titleId={modalTitleId}
         />
       )}
       {modalView === 'select_service' && stagedServiceGroup && (
@@ -160,6 +142,7 @@ export function SaveGroupModal({ onClose, savedServiceGroup }: Props) {
             setModalView('group_details');
           }}
           isLoading={isLoading}
+          titleId={modalTitleId}
         />
       )}
     </EuiModal>
@@ -173,8 +156,7 @@ function getCreateSuccessToastLabels({ groupName }: StagedServiceGroup) {
       values: { groupName },
     }),
     text: i18n.translate('xpack.apm.serviceGroups.createSuccess.toast.text', {
-      defaultMessage:
-        'Your group is now visible in the new Services view for groups.',
+      defaultMessage: 'Your group is now visible in the new Services view for groups.',
     }),
   };
 }
@@ -226,21 +208,15 @@ function getDeleteSuccessToastLabels({ groupName }: StagedServiceGroup) {
   };
 }
 
-function getDeleteFailureUnknownIdToastLabels({
-  groupName,
-}: StagedServiceGroup) {
+function getDeleteFailureUnknownIdToastLabels({ groupName }: StagedServiceGroup) {
   return {
-    title: i18n.translate(
-      'xpack.apm.serviceGroups.deleteFailure.unknownId.toast.title',
-      {
-        defaultMessage: 'Error while deleting "{groupName}" group',
-        values: { groupName },
-      }
-    ),
-    text: i18n.translate(
-      'xpack.apm.serviceGroups.deleteFailure.unknownId.toast.text',
-      { defaultMessage: 'Unable to delete group: unknown service group id.' }
-    ),
+    title: i18n.translate('xpack.apm.serviceGroups.deleteFailure.unknownId.toast.title', {
+      defaultMessage: 'Error while deleting "{groupName}" group',
+      values: { groupName },
+    }),
+    text: i18n.translate('xpack.apm.serviceGroups.deleteFailure.unknownId.toast.text', {
+      defaultMessage: 'Unable to delete group: unknown service group id.',
+    }),
   };
 }
 

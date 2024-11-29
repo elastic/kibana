@@ -10,6 +10,12 @@ import type { KbnClient } from '@kbn/test';
 import pRetry from 'p-retry';
 import { kibanaPackageJson } from '@kbn/repo-info';
 import type { ToolingLog } from '@kbn/tooling-log';
+import {
+  RETRYABLE_TRANSIENT_ERRORS,
+  retryOnError,
+} from '../../../../../common/endpoint/data_loaders/utils';
+import { fetchFleetLatestAvailableAgentVersion } from '../../../../../common/endpoint/utils/fetch_fleet_version';
+import { dump } from '../../../../../scripts/endpoint/common/utils';
 import { STARTED_TRANSFORM_STATES } from '../../../../../common/constants';
 import {
   ENDPOINT_ALERTS_INDEX,
@@ -21,6 +27,8 @@ import {
   METADATA_UNITED_TRANSFORM,
   metadataCurrentIndexPattern,
   metadataTransformPrefix,
+  METADATA_CURRENT_TRANSFORM_V2,
+  METADATA_UNITED_TRANSFORM_V2,
   POLICY_RESPONSE_INDEX,
 } from '../../../../../common/endpoint/constants';
 import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
@@ -42,6 +50,7 @@ export interface CyLoadEndpointDataOptions
   isolation: boolean;
   bothIsolatedAndNormalEndpoints?: boolean;
   alertIds?: string[];
+  isServerless?: boolean;
 }
 
 /**
@@ -70,18 +79,35 @@ export const cyLoadEndpointDataHandler = async (
     isolation,
     numResponseActions,
     alertIds,
+    isServerless = false,
   } = options;
 
+  let agentVersion = version;
+
+  if (isServerless) {
+    agentVersion = await fetchFleetLatestAvailableAgentVersion(kbnClient);
+  }
+
   const DocGenerator = EndpointDocGenerator.custom({
-    CustomMetadataGenerator: EndpointMetadataGenerator.custom({ version, os, isolation }),
+    CustomMetadataGenerator: EndpointMetadataGenerator.custom({
+      version: agentVersion,
+      os,
+      isolation,
+    }),
   });
 
   if (waitUntilTransformed) {
+    log.info(`Stopping transforms...`);
+
     // need this before indexing docs so that the united transform doesn't
     // create a checkpoint with a timestamp after the doc timestamps
-    await stopTransform(esClient, metadataTransformPrefix);
-    await stopTransform(esClient, METADATA_UNITED_TRANSFORM);
+    await stopTransform(esClient, log, metadataTransformPrefix);
+    await stopTransform(esClient, log, METADATA_CURRENT_TRANSFORM_V2);
+    await stopTransform(esClient, log, METADATA_UNITED_TRANSFORM);
+    await stopTransform(esClient, log, METADATA_UNITED_TRANSFORM_V2);
   }
+
+  log.info(`Calling indexHostAndAlerts() to index [${numHosts}] endpoint hosts...`);
 
   // load data into the system
   const indexedData = await indexHostsAndAlerts(
@@ -101,38 +127,71 @@ export const cyLoadEndpointDataHandler = async (
     withResponseActions,
     numResponseActions,
     alertIds,
+    isServerless,
     log
   );
 
+  log.info(`Hosts have been indexed`);
+
   if (waitUntilTransformed) {
-    await startTransform(esClient, metadataTransformPrefix);
+    log.info(`starting transforms...`);
+
+    // missing transforms are ignored, start either name
+    await startTransform(esClient, log, metadataTransformPrefix);
+    await startTransform(esClient, log, METADATA_CURRENT_TRANSFORM_V2);
 
     const metadataIds = Array.from(new Set(indexedData.hosts.map((host) => host.agent.id)));
-    await waitForEndpoints(esClient, 'endpoint_index', metadataIds);
+    await waitForEndpoints(esClient, log, 'endpoint_index', metadataIds);
 
-    await startTransform(esClient, METADATA_UNITED_TRANSFORM);
+    await startTransform(esClient, log, METADATA_UNITED_TRANSFORM);
+    await startTransform(esClient, log, METADATA_UNITED_TRANSFORM_V2);
 
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const agentIds = Array.from(new Set(indexedData.agents.map((agent) => agent.agent!.id)));
-    await waitForEndpoints(esClient, 'united_index', agentIds);
+    await waitForEndpoints(esClient, log, 'united_index', agentIds);
   }
 
+  log.info(`Done - [${numHosts}] endpoint hosts have been indexed and are now available in kibana`);
   return indexedData;
 };
 
-const stopTransform = async (esClient: Client, transformId: string): Promise<void> => {
-  await esClient.transform.stopTransform({
-    transform_id: `${transformId}*`,
-    force: true,
-    wait_for_completion: true,
-    allow_no_match: true,
-  });
+const stopTransform = async (
+  esClient: Client,
+  log: ToolingLog,
+  transformId: string
+): Promise<void> => {
+  log.debug(`Stopping transform id: ${transformId}`);
+
+  await retryOnError(
+    () =>
+      esClient.transform.stopTransform({
+        transform_id: `${transformId}*`,
+        force: true,
+        wait_for_completion: true,
+        allow_no_match: true,
+      }),
+    RETRYABLE_TRANSIENT_ERRORS,
+    log
+  );
 };
 
-const startTransform = async (esClient: Client, transformId: string): Promise<void> => {
-  const transformsResponse = await esClient.transform.getTransformStats({
-    transform_id: `${transformId}*`,
-  });
+const startTransform = async (
+  esClient: Client,
+  log: ToolingLog,
+  transformId: string
+): Promise<void> => {
+  const transformsResponse = await retryOnError(
+    () =>
+      esClient.transform.getTransformStats({
+        transform_id: `${transformId}*`,
+      }),
+    RETRYABLE_TRANSIENT_ERRORS,
+    log
+  );
+
+  log.verbose(
+    `Transform status found for [${transformId}*] returned:\n${dump(transformsResponse)}`
+  );
 
   await Promise.all(
     transformsResponse.transforms.map((transform) => {
@@ -140,7 +199,13 @@ const startTransform = async (esClient: Client, transformId: string): Promise<vo
         return Promise.resolve();
       }
 
-      return esClient.transform.startTransform({ transform_id: transform.id });
+      log.debug(`Staring transform id: [${transform.id}]`);
+
+      return retryOnError(
+        () => esClient.transform.startTransform({ transform_id: transform.id }),
+        RETRYABLE_TRANSIENT_ERRORS,
+        log
+      );
     })
   );
 };
@@ -150,11 +215,13 @@ const startTransform = async (esClient: Client, transformId: string): Promise<vo
  * the united metadata index
  *
  * @param esClient
+ * @param log
  * @param location
  * @param ids
  */
 const waitForEndpoints = async (
   esClient: Client,
+  log: ToolingLog,
   location: 'endpoint_index' | 'united_index',
   ids: string[] = []
 ): Promise<void> => {
@@ -200,8 +267,13 @@ const waitForEndpoints = async (
 
   const expectedSize = ids.length || 1;
 
+  log.info(`Waiting for [${expectedSize}] endpoint hosts to be available`);
+  log.verbose(`Query for searching index [${index}]:\n${dump(body, 10)}`);
+
   await pRetry(
-    async () => {
+    async (attemptCount) => {
+      log.debug(`Attempt [${attemptCount}]: Searching [${index}] to check if hosts are availble`);
+
       const response = await esClient.search({
         index,
         size: expectedSize,
@@ -209,12 +281,16 @@ const waitForEndpoints = async (
         rest_total_hits_as_int: true,
       });
 
+      log.verbose(`Attempt [${attemptCount}]: Search response:\n${dump(response, 10)}`);
+
       // If not the expected number of Endpoints, then throw an error so we keep trying
       if (response.hits.total !== expectedSize) {
         throw new Error(
           `Expected number of endpoints not found. Looking for ${expectedSize} but received ${response.hits.total}`
         );
       }
+
+      log.info(`Attempt [${attemptCount}]: Done - [${expectedSize}] host are now available`);
     },
     { forever: false }
   );

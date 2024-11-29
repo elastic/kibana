@@ -7,7 +7,7 @@
 import React from 'react';
 import { mount, ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
-import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
+import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { nextTick } from '@kbn/test-jest-helpers';
 import { RuleDefinition } from './rule_definition';
 import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
@@ -19,6 +19,10 @@ jest.mock('./rule_actions', () => ({
   RuleActions: () => {
     return <></>;
   },
+}));
+
+jest.mock('../../../../common/get_experimental_features', () => ({
+  getIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(true),
 }));
 
 jest.mock('../../../lib/capabilities', () => ({
@@ -44,10 +48,10 @@ const mockedRuleTypeIndex = new Map(
       recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
       actionVariables: { context: [], state: [] },
       defaultActionGroupId: 'default',
-      producer: ALERTS_FEATURE_ID,
+      producer: ALERTING_FEATURE_ID,
       minimumLicenseRequired: 'basic',
       authorizedConsumers: {
-        [ALERTS_FEATURE_ID]: { read: true, all: false },
+        [ALERTING_FEATURE_ID]: { read: true, all: false },
       },
       ruleTaskTimeout: '1m',
     },
@@ -59,10 +63,10 @@ const mockedRuleTypeIndex = new Map(
       recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
       actionVariables: { context: [], state: [] },
       defaultActionGroupId: 'default',
-      producer: ALERTS_FEATURE_ID,
+      producer: ALERTING_FEATURE_ID,
       minimumLicenseRequired: 'basic',
       authorizedConsumers: {
-        [ALERTS_FEATURE_ID]: { read: true, all: false },
+        [ALERTING_FEATURE_ID]: { read: true, all: false },
       },
       ruleTaskTimeout: '1m',
     },
@@ -74,10 +78,10 @@ const mockedRuleTypeIndex = new Map(
       recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
       actionVariables: { context: [], state: [] },
       defaultActionGroupId: 'default',
-      producer: ALERTS_FEATURE_ID,
+      producer: ALERTING_FEATURE_ID,
       minimumLicenseRequired: 'basic',
       authorizedConsumers: {
-        [ALERTS_FEATURE_ID]: { read: true, all: false },
+        [ALERTING_FEATURE_ID]: { read: true, all: false },
       },
       ruleTaskTimeout: '1m',
     },

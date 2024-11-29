@@ -6,12 +6,14 @@
  */
 
 import expect from '@kbn/expect';
-import type { SuperTest, Test } from 'supertest';
+import type { Agent as SuperTestAgent } from 'supertest';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { createProxyActionConnector, deleteActionConnector } from '../../common/action_connectors';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantAPIClient');
   const supertest = getService('supertest');
+  const log = getService('log');
 
   describe('List connectors', () => {
     before(async () => {
@@ -24,14 +26,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
     it('Returns a 2xx for enterprise license', async () => {
       await observabilityAIAssistantAPIClient
-        .readUser({
+        .editor({
           endpoint: 'GET /internal/observability_ai_assistant/connectors',
         })
         .expect(200);
     });
 
     it('returns an empty list of connectors', async () => {
-      const res = await observabilityAIAssistantAPIClient.readUser({
+      const res = await observabilityAIAssistantAPIClient.editor({
         endpoint: 'GET /internal/observability_ai_assistant/connectors',
       });
 
@@ -39,39 +41,20 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
 
     it("returns the gen ai connector if it's been created", async () => {
-      const connectorCreateResponse = await supertest
-        .post('/api/actions/connector')
-        .set('kbn-xsrf', 'foo')
-        .send({
-          name: 'OpenAI',
-          connector_type_id: '.gen-ai',
-          config: {
-            apiProvider: 'OpenAI',
-            apiUrl: 'http://localhost:9200',
-          },
-          secrets: {
-            apiKey: 'my-api-key',
-          },
-        })
-        .expect(200);
+      const connectorId = await createProxyActionConnector({ supertest, log, port: 1234 });
 
-      const res = await observabilityAIAssistantAPIClient.readUser({
+      const res = await observabilityAIAssistantAPIClient.editor({
         endpoint: 'GET /internal/observability_ai_assistant/connectors',
       });
 
       expect(res.body.length).to.be(1);
 
-      const connectorId = connectorCreateResponse.body.id;
-
-      await supertest
-        .delete(`/api/actions/connector/${connectorId}`)
-        .set('kbn-xsrf', 'foo')
-        .expect(204);
+      await deleteActionConnector({ supertest, connectorId, log });
     });
   });
 }
 
-export async function deleteAllActionConnectors(supertest: SuperTest<Test>): Promise<any> {
+export async function deleteAllActionConnectors(supertest: SuperTestAgent): Promise<any> {
   const res = await supertest.get(`/api/actions/connectors`);
 
   const body = res.body as Array<{ id: string; connector_type_id: string; name: string }>;

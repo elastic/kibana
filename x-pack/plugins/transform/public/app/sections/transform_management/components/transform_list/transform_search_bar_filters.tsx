@@ -14,7 +14,7 @@ import {
   TRANSFORM_FUNCTION,
   TRANSFORM_MODE,
   TRANSFORM_STATE,
-  TRANSFORM_HEALTH,
+  TRANSFORM_HEALTH_STATUS,
 } from '../../../../../../common/constants';
 import { isLatestTransform, isPivotTransform } from '../../../../../../common/types/transform';
 import type { TransformListRow } from '../../../../common';
@@ -24,7 +24,7 @@ import { TransformHealthColoredDot } from './transform_health_colored_dot';
 export const transformFilters: SearchFilterConfig[] = [
   {
     type: 'field_value_selection',
-    field: 'state.state',
+    field: 'stats.state',
     name: i18n.translate('xpack.transform.statusFilter', { defaultMessage: 'Status' }),
     multiSelect: 'or',
     options: Object.values(TRANSFORM_STATE).map((val) => ({
@@ -50,10 +50,10 @@ export const transformFilters: SearchFilterConfig[] = [
   },
   {
     type: 'field_value_selection',
-    field: 'health',
+    field: 'stats.health.status',
     name: i18n.translate('xpack.transform.healthFilter', { defaultMessage: 'Health' }),
     multiSelect: false,
-    options: Object.values(TRANSFORM_HEALTH).map((val) => ({
+    options: Object.values(TRANSFORM_HEALTH_STATUS).map((val) => ({
       value: val,
       name: val,
       view: <TransformHealthColoredDot compact={true} showToolTip={false} healthStatus={val} />,
@@ -62,11 +62,15 @@ export const transformFilters: SearchFilterConfig[] = [
 ];
 
 function stringMatch(str: string | undefined, substr: any) {
-  return (
-    typeof str === 'string' &&
-    typeof substr === 'string' &&
-    (str.toLowerCase().match(substr.toLowerCase()) === null) === false
-  );
+  try {
+    return (
+      typeof str === 'string' &&
+      typeof substr === 'string' &&
+      (str.toLowerCase().match(substr.toLowerCase()) === null) === false
+    );
+  } catch (error) {
+    return false;
+  }
 }
 
 export const filterTransforms = (transforms: TransformListRow[], clauses: Clause[]) => {
@@ -113,7 +117,7 @@ export const filterTransforms = (transforms: TransformListRow[], clauses: Clause
       } else {
         ts = transforms.filter((transform) => {
           if (!transform.stats) return false;
-          if (c.type === 'field' && c.field === 'health') {
+          if (c.type === 'field' && c.field === 'stats.health.status') {
             return transform.stats.health?.status === c.value;
           }
           if (c.type === 'field' && c.field === 'mode') {

@@ -22,9 +22,7 @@ export function getPolicyOptions({
   isCloudEnabled: boolean;
   data: APIResponseType;
 }) {
-  const isCloudVisible = !!(
-    isCloudEnabled && data.cloudStandaloneSetup?.apmServerUrl
-  );
+  const isCloudVisible = !!(isCloudEnabled && data.cloudStandaloneSetup?.apmServerUrl);
 
   const fleetAgentsOptions = data.fleetAgents.map((agent) => {
     return {
@@ -38,9 +36,7 @@ export function getPolicyOptions({
     };
   });
 
-  const hasFleetAgentsSelected = fleetAgentsOptions.some(
-    ({ isSelected }) => isSelected
-  );
+  const hasFleetAgentsSelected = fleetAgentsOptions.some(({ isSelected }) => isSelected);
 
   return [
     {

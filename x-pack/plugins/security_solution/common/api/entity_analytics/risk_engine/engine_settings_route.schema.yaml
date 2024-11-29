@@ -1,20 +1,15 @@
 openapi: 3.0.0
 info:
-  version: 1.0.0
+  version: '1'
   title: Risk Scoring API
   description: These APIs allow the consumer to manage Entity Risk Scores within Entity Analytics.
-servers:
-  - url: 'http://{kibana_host}:{port}'
-    variables:
-      kibana_host:
-        default: localhost
-      port:
-        default: '5601'
-
 paths:
-  /engine/settings:
+  /internal/risk_score/engine/settings:
     get:
-      operationId: RiskEngineSettingsGet
+      x-labels: [ess, serverless]
+      x-internal: true
+      x-codegen-enabled: true
+      operationId: ReadRiskEngineSettings
       summary: Get the settings of the Risk Engine
       responses:
         '200':
@@ -22,12 +17,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RiskEngineSettingsResponse'
-                
-components:
-  schemas:
-    RiskEngineSettingsResponse:
-      type: object
-      properties:
-        range:
-          $ref: '../common/common.schema.yaml#/components/schemas/DateRange'
+                type: object
+                properties:
+                  range:
+                    $ref: '../common/common.schema.yaml#/components/schemas/DateRange'

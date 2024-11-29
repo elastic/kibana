@@ -8,6 +8,7 @@
 import { range } from 'lodash';
 
 import { termQuery } from '@kbn/observability-plugin/server';
+import { isCCSRemoteIndexName } from '@kbn/es-query';
 import type { LatencyCorrelation } from '../../../../common/correlations/latency_correlations/types';
 import type {
   CommonCorrelationsQueryParams,
@@ -15,10 +16,7 @@ import type {
 } from '../../../../common/correlations/types';
 
 import { LatencyDistributionChartType } from '../../../../common/latency_distribution_chart_types';
-import {
-  computeExpectationsAndRanges,
-  splitAllSettledPromises,
-} from '../utils';
+import { computeExpectationsAndRanges, splitAllSettledPromises } from '../utils';
 import { fetchDurationPercentiles } from './fetch_duration_percentiles';
 import { fetchDurationCorrelationWithHistogram } from './fetch_duration_correlation_with_histogram';
 import { fetchDurationFractions } from './fetch_duration_fractions';
@@ -172,10 +170,9 @@ export const fetchSignificantCorrelations = async ({
     }
   }
 
-  const index =
-    apmEventClient.indices[eventType as keyof typeof apmEventClient.indices];
+  const index = apmEventClient.indices[eventType as keyof typeof apmEventClient.indices];
 
-  const ccsWarning = rejected.length > 0 && index.includes(':');
+  const ccsWarning = rejected.length > 0 && isCCSRemoteIndexName(index);
 
   return {
     latencyCorrelations,

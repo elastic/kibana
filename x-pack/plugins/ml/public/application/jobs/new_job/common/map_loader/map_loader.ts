@@ -9,17 +9,24 @@ import memoizeOne from 'memoize-one';
 import { isEqual } from 'lodash';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { ES_GEO_FIELD_TYPE, LayerDescriptor } from '@kbn/maps-plugin/common';
-import type { MapsStartApi } from '@kbn/maps-plugin/public';
+import type { CreateLayerDescriptorParams, MapsStartApi } from '@kbn/maps-plugin/public';
 import type { Query } from '@kbn/es-query';
 import type { Field, SplitField } from '@kbn/ml-anomaly-utils';
 import { ChartLoader } from '../chart_loader';
+import type { MlApi } from '../../../../services/ml_api_service';
+
 const eq = (newArgs: any[], lastArgs: any[]) => isEqual(newArgs, lastArgs);
 
 export class MapLoader extends ChartLoader {
   private _getMapData;
 
-  constructor(indexPattern: DataView, query: object, mapsPlugin: MapsStartApi | undefined) {
-    super(indexPattern, query);
+  constructor(
+    mlApi: MlApi,
+    indexPattern: DataView,
+    query: object,
+    mapsPlugin: MapsStartApi | undefined
+  ) {
+    super(mlApi, indexPattern, query);
 
     this._getMapData = mapsPlugin
       ? memoizeOne(mapsPlugin.createLayerDescriptors.createESSearchSourceLayerDescriptor, eq)
@@ -30,7 +37,6 @@ export class MapLoader extends ChartLoader {
     geoField: Field,
     splitField: SplitField,
     fieldValues: string[],
-    filters?: any[],
     savedSearchQuery?: Query
   ) {
     const layerList: LayerDescriptor[] = [];
@@ -41,11 +47,10 @@ export class MapLoader extends ChartLoader {
           ? `${splitField.name}:${fieldValues[0]} ${query ? `and ${query}` : ''}`
           : `${query ? query : ''}`;
 
-      const params: any = {
+      const params: CreateLayerDescriptorParams = {
         indexPatternId: this._dataView.id,
         geoFieldName: geoField.name,
         geoFieldType: geoField.type as unknown as ES_GEO_FIELD_TYPE,
-        filters: filters ?? [],
         query: { query: queryString, language: 'kuery' },
       };
 

@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { CoreAuthenticationService } from './authc';
-import type { CoreSecurityContract } from './api_provider';
+import type { CoreSecurityDelegateContract } from './api_provider';
 
 /**
  * Setup contract for Core's security service.
@@ -20,7 +21,7 @@ export interface SecurityServiceSetup {
    *
    * @remark this should **exclusively** be used by the security plugin.
    */
-  registerSecurityApi(api: CoreSecurityContract): void;
+  registerSecurityDelegate(api: CoreSecurityDelegateContract): void;
 }
 
 /**

@@ -9,12 +9,14 @@ import {
   BooleanRelation,
   buildCombinedFilter,
   buildPhraseFilter,
-  Filter,
+  type Filter,
   isCombinedFilter,
 } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
+import type { InfraCustomDashboardAssetType } from '../../../common/custom_dashboards';
 
-export const buildCombinedHostsFilter = ({
+export const buildCombinedAssetFilter = ({
   field,
   values,
   dataView,
@@ -34,8 +36,8 @@ export const buildCombinedHostsFilter = ({
       meta: {},
     };
   }
-  const filtersFromValues = values.map((value) => buildPhraseFilter(indexField, value, dataView));
 
+  const filtersFromValues = values.map((value) => buildPhraseFilter(indexField, value, dataView));
   return buildCombinedFilter(BooleanRelation.OR, filtersFromValues, dataView);
 };
 
@@ -51,4 +53,13 @@ export const retrieveFieldsFromFilter = (filters: Filter[], fields: string[] = [
   }
 
   return fields;
+};
+
+export const buildAssetIdFilter = (
+  assetId: string,
+  assetType: InfraCustomDashboardAssetType,
+  dataView: DataView
+): Filter[] => {
+  const assetIdField = dataView.getFieldByName(findInventoryFields(assetType).id);
+  return assetIdField ? [buildPhraseFilter(assetIdField, assetId, dataView)] : [];
 };

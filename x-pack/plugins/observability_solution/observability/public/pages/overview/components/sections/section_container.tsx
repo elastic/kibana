@@ -13,6 +13,7 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import React from 'react';
 import { useKibana } from '../../../../utils/kibana_react';
@@ -22,6 +23,7 @@ import { ExperimentalBadge } from '../../../../components/experimental_badge';
 interface AppLink {
   label: string;
   href?: string;
+  prependBasePath?: boolean;
 }
 
 interface Props {
@@ -42,11 +44,14 @@ export function SectionContainer({
   showExperimentalBadge = false,
 }: Props) {
   const { http } = useKibana().services;
+  const euiAccordionId = useGeneratedHtmlId({ prefix: 'euiAccordion' });
+  const prependBasePath = appLink?.prependBasePath !== undefined ? appLink?.prependBasePath : true;
+
   return (
     <EuiPanel color="subdued">
       <EuiAccordion
         initialIsOpen={initialIsOpen}
-        id={title}
+        id={euiAccordionId}
         buttonContentClassName="accordion-button"
         data-test-subj={`accordion-${title}`}
         buttonContent={
@@ -73,7 +78,7 @@ export function SectionContainer({
               iconType={'sortRight'}
               size="xs"
               color="text"
-              href={http.basePath.prepend(appLink.href)}
+              href={prependBasePath ? http.basePath.prepend(appLink.href) : appLink.href}
             >
               {appLink.label}
             </EuiButtonEmpty>

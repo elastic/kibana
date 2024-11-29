@@ -6,8 +6,9 @@
  */
 import { v5 as uuidv5 } from 'uuid';
 import { omit } from 'lodash';
-import { safeLoad } from 'js-yaml';
+import { load } from 'js-yaml';
 import deepEqual from 'fast-deep-equal';
+import { indexBy } from 'lodash/fp';
 
 import type {
   ElasticsearchClient,
@@ -37,7 +38,8 @@ import type {
   PolicySecretReference,
 } from '../types';
 import {
-  AGENT_POLICY_SAVED_OBJECT_TYPE,
+  LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   DEFAULT_OUTPUT,
   DEFAULT_OUTPUT_ID,
   OUTPUT_SAVED_OBJECT_TYPE,
@@ -51,6 +53,9 @@ import {
   kafkaCompressionType,
   kafkaAcknowledgeReliabilityLevel,
   RESERVED_CONFIG_YML_KEYS,
+  FLEET_APM_PACKAGE,
+  FLEET_SYNTHETICS_PACKAGE,
+  FLEET_SERVER_PACKAGE,
 } from '../../common/constants';
 import { normalizeHostsForAgents } from '../../common/services';
 import {
@@ -63,6 +68,7 @@ import {
 import type { OutputType } from '../types';
 
 import { agentPolicyService } from './agent_policy';
+import { packagePolicyService } from './package_policy';
 import { appContextService } from './app_context';
 import { escapeSearchQueryPhrase } from './saved_object';
 import { auditLoggingService } from './audit_logging';
@@ -124,40 +130,89 @@ function outputSavedObjectToOutput(so: SavedObject<OutputSOAttributes>): Output 
   };
 }
 
-async function getAgentPoliciesPerOutput(
-  soClient: SavedObjectsClientContract,
-  outputId?: string,
-  isDefault?: boolean
-) {
-  let kuery: string;
+async function getAgentPoliciesPerOutput(outputId?: string, isDefault?: boolean) {
+  const internalSoClientWithoutSpaceExtension =
+    appContextService.getInternalUserSOClientWithoutSpaceExtension();
+  let agentPoliciesKuery: string;
+  const packagePoliciesKuery: string = `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.output_id:"${outputId}"`;
   if (outputId) {
     if (isDefault) {
-      kuery = `${AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:"${outputId}" or not ${AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:*`;
+      agentPoliciesKuery = `${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:"${outputId}" or not ${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:*`;
     } else {
-      kuery = `${AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:"${outputId}"`;
+      agentPoliciesKuery = `${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:"${outputId}"`;
     }
   } else {
     if (isDefault) {
-      kuery = `not ${AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:*`;
+      agentPoliciesKuery = `not ${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:*`;
     } else {
       return;
     }
   }
 
-  const agentPolicySO = await agentPolicyService.list(soClient, {
-    kuery,
+  // Get agent policies directly using output
+  const directAgentPolicies = await agentPolicyService.list(internalSoClientWithoutSpaceExtension, {
+    kuery: agentPoliciesKuery,
     perPage: SO_SEARCH_LIMIT,
-    withPackagePolicies: true,
+    spaceId: '*',
   });
-  return agentPolicySO?.items;
+  const directAgentPolicyIds = directAgentPolicies?.items.map((policy) => policy.id);
+
+  // Get package policies using output and derive agent policies from that which
+  // are not already identfied above. The IDs cannot be used as part of the kuery
+  // above since the underlying saved object client .find() only filters on attributes
+  const packagePolicySOs = await packagePolicyService.list(internalSoClientWithoutSpaceExtension, {
+    kuery: packagePoliciesKuery,
+    perPage: SO_SEARCH_LIMIT,
+    spaceId: '*',
+  });
+  const agentPolicyIdsFromPackagePolicies = [
+    ...new Set(
+      packagePolicySOs?.items.reduce((acc: string[], packagePolicy) => {
+        return [
+          ...acc,
+          ...packagePolicy.policy_ids.filter((id) => !directAgentPolicyIds?.includes(id)),
+        ];
+      }, [])
+    ),
+  ];
+  const agentPoliciesFromPackagePolicies = await agentPolicyService.getByIDs(
+    internalSoClientWithoutSpaceExtension,
+    agentPolicyIdsFromPackagePolicies
+  );
+
+  const agentPoliciesIndexedById = indexBy(
+    (policy) => policy.id,
+    [...directAgentPolicies.items, ...agentPoliciesFromPackagePolicies]
+  );
+
+  // Bulk fetch package policies with only needed fields
+  if (Object.keys(agentPoliciesIndexedById).length) {
+    const { items: packagePolicies } = await packagePolicyService.list(
+      internalSoClientWithoutSpaceExtension,
+      {
+        fields: ['policy_ids', 'package.name'],
+        kuery: [FLEET_APM_PACKAGE, FLEET_SYNTHETICS_PACKAGE, FLEET_SERVER_PACKAGE]
+          .map((packageName) => `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${packageName}`)
+          .join(' or '),
+      }
+    );
+    for (const packagePolicy of packagePolicies) {
+      for (const policyId of packagePolicy.policy_ids) {
+        if (agentPoliciesIndexedById[policyId]) {
+          if (!agentPoliciesIndexedById[policyId].package_policies) {
+            agentPoliciesIndexedById[policyId].package_policies = [];
+          }
+          agentPoliciesIndexedById[policyId].package_policies?.push(packagePolicy);
+        }
+      }
+    }
+  }
+
+  return Object.values(agentPoliciesIndexedById);
 }
 
-async function validateLogstashOutputNotUsedInAPMPolicy(
-  soClient: SavedObjectsClientContract,
-  outputId?: string,
-  isDefault?: boolean
-) {
-  const agentPolicies = await getAgentPoliciesPerOutput(soClient, outputId, isDefault);
+async function validateLogstashOutputNotUsedInAPMPolicy(outputId?: string, isDefault?: boolean) {
+  const agentPolicies = await getAgentPoliciesPerOutput(outputId, isDefault);
 
   // Validate no policy with APM use that policy
   if (agentPolicies) {
@@ -169,16 +224,43 @@ async function validateLogstashOutputNotUsedInAPMPolicy(
   }
 }
 
-async function findPoliciesWithFleetServerOrSynthetics(
-  soClient: SavedObjectsClientContract,
-  outputId?: string,
-  isDefault?: boolean
-) {
-  // find agent policies by outputId
-  // otherwise query all the policies
-  const agentPolicies = outputId
-    ? await getAgentPoliciesPerOutput(soClient, outputId, isDefault)
-    : (await agentPolicyService.list(soClient, { withPackagePolicies: true }))?.items;
+async function findPoliciesWithFleetServerOrSynthetics(outputId?: string, isDefault?: boolean) {
+  const internalSoClientWithoutSpaceExtension =
+    appContextService.getInternalUserSOClientWithoutSpaceExtension();
+
+  let agentPolicies: AgentPolicy[] | undefined;
+  if (outputId) {
+    agentPolicies = await getAgentPoliciesPerOutput(outputId, isDefault);
+  } else {
+    const { items: packagePolicies } = await packagePolicyService.list(
+      internalSoClientWithoutSpaceExtension,
+      {
+        fields: ['policy_ids', 'package.name'],
+        spaceId: '*',
+        kuery: [FLEET_APM_PACKAGE, FLEET_SYNTHETICS_PACKAGE, FLEET_SERVER_PACKAGE]
+          .map((packageName) => `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${packageName}`)
+          .join(' or '),
+      }
+    );
+    const agentPolicyIds = _.uniq(packagePolicies.flatMap((p) => p.policy_ids));
+    if (agentPolicyIds.length) {
+      agentPolicies = await agentPolicyService.getByIDs(
+        internalSoClientWithoutSpaceExtension,
+        agentPolicyIds
+      );
+      for (const packagePolicy of packagePolicies) {
+        for (const policyId of packagePolicy.policy_ids) {
+          const agentPolicy = agentPolicies.find((p) => p.id === policyId);
+          if (agentPolicy) {
+            if (!agentPolicy.package_policies) {
+              agentPolicy.package_policies = [];
+            }
+            agentPolicy.package_policies?.push(packagePolicy);
+          }
+        }
+      }
+    }
+  }
 
   const policiesWithFleetServer =
     agentPolicies?.filter((policy) => agentPolicyService.hasFleetServerIntegration(policy)) || [];
@@ -199,13 +281,12 @@ function validateOutputNotUsedInPolicy(
         dataOutputType
       )} output cannot be used with ${integrationName} integration in ${
         agentPolicy.name
-      }. Please create a new ElasticSearch output.`
+      }. Please create a new Elasticsearch output.`
     );
   }
 }
 
 async function validateTypeChanges(
-  soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
   id: string,
   data: Nullable<Partial<OutputSOAttributes>>,
@@ -213,12 +294,14 @@ async function validateTypeChanges(
   defaultDataOutputId: string | null,
   fromPreconfiguration: boolean
 ) {
+  const internalSoClientWithoutSpaceExtension =
+    appContextService.getInternalUserSOClientWithoutSpaceExtension();
   const mergedIsDefault = data.is_default ?? originalOutput.is_default;
   const { policiesWithFleetServer, policiesWithSynthetics } =
-    await findPoliciesWithFleetServerOrSynthetics(soClient, id, mergedIsDefault);
+    await findPoliciesWithFleetServerOrSynthetics(id, mergedIsDefault);
 
   if (data.type === outputType.Logstash || originalOutput.type === outputType.Logstash) {
-    await validateLogstashOutputNotUsedInAPMPolicy(soClient, id, mergedIsDefault);
+    await validateLogstashOutputNotUsedInAPMPolicy(id, mergedIsDefault);
   }
   // prevent changing an ES output to logstash or kafka if it's used by fleet server or synthetics policies
   if (
@@ -230,7 +313,7 @@ async function validateTypeChanges(
     validateOutputNotUsedInPolicy(policiesWithSynthetics, data.type, 'Synthetics');
   }
   await updateAgentPoliciesDataOutputId(
-    soClient,
+    internalSoClientWithoutSpaceExtension,
     esClient,
     data,
     mergedIsDefault,
@@ -274,7 +357,7 @@ class OutputService {
     return appContextService.getInternalUserSOClient(fakeRequest);
   }
 
-  private async _getDefaultDataOutputsSO(soClient: SavedObjectsClientContract) {
+  private async _getDefaultDataOutputsSO() {
     const outputs = await this.encryptedSoClient.find<OutputSOAttributes>({
       type: OUTPUT_SAVED_OBJECT_TYPE,
       searchFields: ['is_default'],
@@ -403,7 +486,7 @@ class OutputService {
   }
 
   public async getDefaultDataOutputId(soClient: SavedObjectsClientContract) {
-    const outputs = await this._getDefaultDataOutputsSO(soClient);
+    const outputs = await this._getDefaultDataOutputsSO();
 
     if (!outputs.saved_objects.length) {
       return null;
@@ -441,7 +524,7 @@ class OutputService {
     if (outputTypeSupportPresets(data.type)) {
       if (
         data.preset === 'balanced' &&
-        outputYmlIncludesReservedPerformanceKey(output.config_yaml ?? '', safeLoad)
+        outputYmlIncludesReservedPerformanceKey(output.config_yaml ?? '', load)
       ) {
         throw new OutputInvalidError(
           `preset cannot be balanced when config_yaml contains one of ${RESERVED_CONFIG_YML_KEYS.join(
@@ -454,7 +537,7 @@ class OutputService {
     const defaultDataOutputId = await this.getDefaultDataOutputId(soClient);
 
     if (output.type === outputType.Logstash || output.type === outputType.Kafka) {
-      await validateLogstashOutputNotUsedInAPMPolicy(soClient, undefined, data.is_default);
+      await validateLogstashOutputNotUsedInAPMPolicy(undefined, data.is_default);
       if (!appContextService.getEncryptedSavedObjectsSetup()?.canEncrypt) {
         throw new FleetEncryptedSavedObjectEncryptionKeyRequired(
           `${output.type} output needs encrypted saved object api key to be set`
@@ -462,7 +545,7 @@ class OutputService {
       }
     }
     const { policiesWithFleetServer, policiesWithSynthetics } =
-      await findPoliciesWithFleetServerOrSynthetics(soClient);
+      await findPoliciesWithFleetServerOrSynthetics();
     await updateAgentPoliciesDataOutputId(
       soClient,
       esClient,
@@ -517,11 +600,11 @@ class OutputService {
     }
 
     if (!data.preset && data.type === outputType.Elasticsearch) {
-      data.preset = getDefaultPresetForEsOutput(data.config_yaml ?? '', safeLoad);
+      data.preset = getDefaultPresetForEsOutput(data.config_yaml ?? '', load);
     }
 
     if (output.config_yaml) {
-      const configJs = safeLoad(output.config_yaml);
+      const configJs = load(output.config_yaml);
       const isShipperDisabled = !configJs?.shipper || configJs?.shipper?.enabled === false;
 
       if (isShipperDisabled && output.shipper) {
@@ -622,11 +705,7 @@ class OutputService {
     return outputSavedObjectToOutput(newSo);
   }
 
-  public async bulkGet(
-    soClient: SavedObjectsClientContract,
-    ids: string[],
-    { ignoreNotFound = false } = { ignoreNotFound: true }
-  ) {
+  public async bulkGet(ids: string[], { ignoreNotFound = false } = { ignoreNotFound: true }) {
     const res = await this.encryptedSoClient.bulkGet<OutputSOAttributes>(
       ids.map((id) => ({ id: outputIdToUuid(id), type: SAVED_OBJECT_TYPE }))
     );
@@ -740,11 +819,17 @@ class OutputService {
       throw new OutputUnauthorizedError(`Default monitoring output ${id} cannot be deleted.`);
     }
 
-    await agentPolicyService.removeOutputFromAll(
-      soClient,
+    await packagePolicyService.removeOutputFromAll(
       appContextService.getInternalUserESClient(),
-      id
+      id,
+      {
+        force: fromPreconfiguration,
+      }
     );
+
+    await agentPolicyService.removeOutputFromAll(appContextService.getInternalUserESClient(), id, {
+      force: fromPreconfiguration,
+    });
 
     auditLoggingService.writeCustomSoAuditLog({
       action: 'delete',
@@ -795,7 +880,7 @@ class OutputService {
     if (updateData.type && outputTypeSupportPresets(updateData.type)) {
       if (
         updateData.preset === 'balanced' &&
-        outputYmlIncludesReservedPerformanceKey(updateData.config_yaml ?? '', safeLoad)
+        outputYmlIncludesReservedPerformanceKey(updateData.config_yaml ?? '', load)
       ) {
         throw new OutputInvalidError(
           `preset cannot be balanced when config_yaml contains one of ${RESERVED_CONFIG_YML_KEYS.join(
@@ -806,16 +891,18 @@ class OutputService {
     }
 
     const mergedType = data.type ?? originalOutput.type;
+    const mergedIsDefault = data.is_default ?? originalOutput.is_default;
     const defaultDataOutputId = await this.getDefaultDataOutputId(soClient);
-    await validateTypeChanges(
-      soClient,
-      esClient,
-      id,
-      updateData,
-      originalOutput,
-      defaultDataOutputId,
-      fromPreconfiguration
-    );
+    if (mergedType !== originalOutput.type || originalOutput.is_default !== mergedIsDefault) {
+      await validateTypeChanges(
+        esClient,
+        id,
+        updateData,
+        originalOutput,
+        defaultDataOutputId,
+        fromPreconfiguration
+      );
+    }
 
     const removeKafkaFields = (target: Nullable<Partial<OutputSoKafkaAttributes>>) => {
       target.version = null;
@@ -832,7 +919,6 @@ class OutputService {
       target.random = null;
       target.round_robin = null;
       target.hash = null;
-      target.topics = null;
       target.topic = null;
       target.headers = null;
       target.timeout = null;
@@ -981,7 +1067,7 @@ class OutputService {
     }
 
     if (!data.preset && data.type === outputType.Elasticsearch) {
-      updateData.preset = getDefaultPresetForEsOutput(data.config_yaml ?? '', safeLoad);
+      updateData.preset = getDefaultPresetForEsOutput(data.config_yaml ?? '', load);
     }
 
     // Remove the shipper data if the shipper is not enabled from the yaml config
@@ -989,7 +1075,7 @@ class OutputService {
       updateData.shipper = null;
     }
     if (data.config_yaml) {
-      const configJs = safeLoad(data.config_yaml);
+      const configJs = load(data.config_yaml);
       const isShipperDisabled = !configJs?.shipper || configJs?.shipper?.enabled === false;
 
       if (isShipperDisabled && data.shipper) {
@@ -1067,7 +1153,7 @@ class OutputService {
     await pMap(
       outputs.items.filter((output) => outputTypeSupportPresets(output.type) && !output.preset),
       async (output) => {
-        const preset = getDefaultPresetForEsOutput(output.config_yaml ?? '', safeLoad);
+        const preset = getDefaultPresetForEsOutput(output.config_yaml ?? '', load);
 
         await outputService.update(
           soClient,
@@ -1076,7 +1162,7 @@ class OutputService {
           { preset },
           { fromPreconfiguration: true }
         );
-        await agentPolicyService.bumpAllAgentPoliciesForOutput(soClient, esClient, output.id);
+        await agentPolicyService.bumpAllAgentPoliciesForOutput(esClient, output.id);
       },
       {
         concurrency: 5,

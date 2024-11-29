@@ -19,7 +19,7 @@ import type { PostAgentUpgradeResponse } from '../../../common/types';
 import type { PostAgentUpgradeRequestSchema, PostBulkAgentUpgradeRequestSchema } from '../../types';
 import * as AgentService from '../../services/agents';
 import { appContextService } from '../../services';
-import { defaultFleetErrorHandler, AgentRequestInvalidError } from '../../errors';
+import { AgentRequestInvalidError } from '../../errors';
 import {
   getRecentUpgradeInfoForAgent,
   AGENT_UPGRADE_COOLDOWN_IN_MIN,
@@ -32,7 +32,7 @@ import { checkFleetServerVersion } from '../../../common/services/check_fleet_se
 import { getAgentById } from '../../services/agents';
 
 import { getAllFleetServerAgents } from '../../collectors/get_all_fleet_server_agents';
-import { getLatestAvailableVersion } from '../../services/agents/versions';
+import { getLatestAvailableAgentVersion } from '../../services/agents/versions';
 
 export const postAgentUpgradeHandler: RequestHandler<
   TypeOf<typeof PostAgentUpgradeRequestSchema.params>,
@@ -44,7 +44,7 @@ export const postAgentUpgradeHandler: RequestHandler<
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const { version, source_uri: sourceUri, force, skipRateLimitCheck } = request.body;
   const kibanaVersion = appContextService.getKibanaVersion();
-  const latestAgentVersion = await getLatestAvailableVersion();
+  const latestAgentVersion = await getLatestAvailableAgentVersion();
   try {
     checkKibanaVersion(version, kibanaVersion, force);
   } catch (err) {
@@ -55,88 +55,84 @@ export const postAgentUpgradeHandler: RequestHandler<
       },
     });
   }
-  try {
-    const agent = await getAgentById(esClient, soClient, request.params.agentId);
+  const agent = await getAgentById(esClient, soClient, request.params.agentId);
 
-    const fleetServerAgents = await getAllFleetServerAgents(soClient, esClient);
-    const agentIsFleetServer = fleetServerAgents.some(
-      (fleetServerAgent) => fleetServerAgent.id === agent.id
-    );
-    if (!agentIsFleetServer) {
-      try {
-        checkFleetServerVersion(version, fleetServerAgents);
-      } catch (err) {
-        return response.customError({
-          statusCode: 400,
-          body: {
-            message: err.message,
-          },
-        });
-      }
-    }
-
-    const { hasBeenUpgradedRecently, timeToWaitMs } = getRecentUpgradeInfoForAgent(agent);
-    const timeToWaitString = moment
-      .utc(moment.duration(timeToWaitMs).asMilliseconds())
-      .format('mm[m]ss[s]');
-
-    if (!skipRateLimitCheck && hasBeenUpgradedRecently) {
-      return response.customError({
-        statusCode: 429,
-        body: {
-          message: `agent ${request.params.agentId} was upgraded less than ${AGENT_UPGRADE_COOLDOWN_IN_MIN} minutes ago. Please wait ${timeToWaitString} before trying again to ensure the upgrade will not be rolled back.`,
-        },
-        headers: {
-          // retry-after expects seconds
-          'retry-after': Math.ceil(timeToWaitMs / 1000).toString(),
-        },
-      });
-    }
-
-    if (agent.unenrollment_started_at || agent.unenrolled_at) {
+  const fleetServerAgents = await getAllFleetServerAgents(soClient, esClient);
+  const agentIsFleetServer = fleetServerAgents.some(
+    (fleetServerAgent) => fleetServerAgent.id === agent.id
+  );
+  if (!agentIsFleetServer) {
+    try {
+      checkFleetServerVersion(version, fleetServerAgents);
+    } catch (err) {
       return response.customError({
         statusCode: 400,
         body: {
-          message: 'cannot upgrade an unenrolling or unenrolled agent',
+          message: err.message,
         },
       });
     }
-
-    if (!force && isAgentUpgrading(agent)) {
-      return response.customError({
-        statusCode: 400,
-        body: {
-          message: `agent ${request.params.agentId} is already upgrading`,
-        },
-      });
-    }
-
-    if (!force && !skipRateLimitCheck && !isAgentUpgradeableToVersion(agent, version)) {
-      return response.customError({
-        statusCode: 400,
-        body: {
-          message: `Agent ${request.params.agentId} is not upgradeable: ${getNotUpgradeableMessage(
-            agent,
-            latestAgentVersion,
-            version
-          )}`,
-        },
-      });
-    }
-
-    await AgentService.sendUpgradeAgentAction({
-      soClient,
-      esClient,
-      agentId: request.params.agentId,
-      version,
-      sourceUri,
-    });
-
-    const body: PostAgentUpgradeResponse = {};
-    return response.ok({ body });
-  } catch (error) {
-    return defaultFleetErrorHandler({ error, response });
   }
+
+  const { hasBeenUpgradedRecently, timeToWaitMs } = getRecentUpgradeInfoForAgent(agent);
+  const timeToWaitString = moment
+    .utc(moment.duration(timeToWaitMs).asMilliseconds())
+    .format('mm[m]ss[s]');
+
+  if (!skipRateLimitCheck && hasBeenUpgradedRecently) {
+    return response.customError({
+      statusCode: 429,
+      body: {
+        message: `agent ${request.params.agentId} was upgraded less than ${AGENT_UPGRADE_COOLDOWN_IN_MIN} minutes ago. Please wait ${timeToWaitString} before trying again to ensure the upgrade will not be rolled back.`,
+      },
+      headers: {
+        // retry-after expects seconds
+        'retry-after': Math.ceil(timeToWaitMs / 1000).toString(),
+      },
+    });
+  }
+
+  if (agent.unenrollment_started_at || agent.unenrolled_at) {
+    return response.customError({
+      statusCode: 400,
+      body: {
+        message: 'cannot upgrade an unenrolling or unenrolled agent',
+      },
+    });
+  }
+
+  if (!force && isAgentUpgrading(agent)) {
+    return response.customError({
+      statusCode: 400,
+      body: {
+        message: `agent ${request.params.agentId} is already upgrading`,
+      },
+    });
+  }
+
+  if (!force && !skipRateLimitCheck && !isAgentUpgradeableToVersion(agent, version)) {
+    return response.customError({
+      statusCode: 400,
+      body: {
+        message: `Agent ${request.params.agentId} is not upgradeable: ${getNotUpgradeableMessage(
+          agent,
+          latestAgentVersion,
+          version
+        )}`,
+      },
+    });
+  }
+
+  await AgentService.sendUpgradeAgentAction({
+    soClient,
+    esClient,
+    agentId: request.params.agentId,
+    version,
+    sourceUri,
+  });
+
+  const body: PostAgentUpgradeResponse = {};
+  return response.ok({ body });
 };
 
 export const postBulkAgentsUpgradeHandler: RequestHandler<
@@ -171,26 +167,22 @@ export const postBulkAgentsUpgradeHandler: RequestHandler<
     });
   }
 
-  try {
-    const agentOptions = Array.isArray(agents)
-      ? { agentIds: agents }
-      : { kuery: agents, showInactive: request.body.includeInactive };
-    const upgradeOptions = {
-      ...agentOptions,
-      sourceUri,
-      version,
-      force,
-      skipRateLimitCheck,
-      upgradeDurationSeconds,
-      startTime,
-      batchSize,
-    };
-    const results = await AgentService.sendUpgradeAgentsActions(soClient, esClient, upgradeOptions);
+  const agentOptions = Array.isArray(agents)
+    ? { agentIds: agents }
+    : { kuery: agents, showInactive: request.body.includeInactive };
+  const upgradeOptions = {
+    ...agentOptions,
+    sourceUri,
+    version,
+    force,
+    skipRateLimitCheck,
+    upgradeDurationSeconds,
+    startTime,
+    batchSize,
+  };
+  const results = await AgentService.sendUpgradeAgentsActions(soClient, esClient, upgradeOptions);
 
-    return response.ok({ body: { actionId: results.actionId } });
-  } catch (error) {
-    return defaultFleetErrorHandler({ error, response });
-  }
+  return response.ok({ body: { actionId: results.actionId } });
 };
 
 export const checkKibanaVersion = (version: string, kibanaVersion: string, force = false) => {

@@ -5,78 +5,73 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { HttpSetup } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
+import { Replacements } from '@kbn/elastic-assistant-common';
+import { useKnowledgeBaseStatus } from '../api/knowledge_base/use_knowledge_base_status';
+import { DataStreamApis } from '../use_data_stream_apis';
+import { NEW_CHAT } from '../conversations/conversation_sidepanel/translations';
+import type { ClientMessage } from '../../assistant_context/types';
 import { SelectedPromptContext } from '../prompt_context/types';
 import { useSendMessage } from '../use_send_message';
 import { useConversation } from '../use_conversation';
 import { getCombinedMessage } from '../prompt/helpers';
-import { Conversation, Message, Prompt, useAssistantContext } from '../../..';
+import { Conversation, useAssistantContext } from '../../..';
 import { getMessageFromRawResponse } from '../helpers';
-import { getDefaultSystemPrompt } from '../use_conversation/helpers';
 
 export interface UseChatSendProps {
-  allSystemPrompts: Prompt[];
-  currentConversation: Conversation;
-  editingSystemPromptId: string | undefined;
+  currentConversation?: Conversation;
   http: HttpSetup;
+  refetchCurrentUserConversations: DataStreamApis['refetchCurrentUserConversations'];
   selectedPromptContexts: Record<string, SelectedPromptContext>;
-  setEditingSystemPromptId: React.Dispatch<React.SetStateAction<string | undefined>>;
-  setPromptTextPreview: React.Dispatch<React.SetStateAction<string>>;
   setSelectedPromptContexts: React.Dispatch<
     React.SetStateAction<Record<string, SelectedPromptContext>>
   >;
-  setUserPrompt: React.Dispatch<React.SetStateAction<string | null>>;
-  refresh: () => Promise<Conversation | undefined>;
-  setCurrentConversation: React.Dispatch<React.SetStateAction<Conversation>>;
+  setCurrentConversation: React.Dispatch<React.SetStateAction<Conversation | undefined>>;
 }
 
 export interface UseChatSend {
-  handleButtonSendMessage: (m: string) => void;
-  handleOnChatCleared: () => void;
-  handlePromptChange: (prompt: string) => void;
-  handleSendMessage: (promptText: string) => void;
+  abortStream: () => void;
+  handleOnChatCleared: () => Promise<void>;
   handleRegenerateResponse: () => void;
+  handleChatSend: (promptText: string) => Promise<void>;
+  setUserPrompt: React.Dispatch<React.SetStateAction<string | null>>;
   isLoading: boolean;
+  userPrompt: string | null;
 }
 
 /**
- *  handles sending messages to an API and updating the conversation state.
- *  Provides a set of functions that can be used to handle user input, send messages to an API,
- *  and update the conversation state based on the API response.
+ * Handles sending user messages to the API and updating the conversation state.
  */
 export const useChatSend = ({
-  allSystemPrompts,
   currentConversation,
-  editingSystemPromptId,
   http,
+  refetchCurrentUserConversations,
   selectedPromptContexts,
-  setEditingSystemPromptId,
-  setPromptTextPreview,
   setSelectedPromptContexts,
-  setUserPrompt,
-  refresh,
   setCurrentConversation,
 }: UseChatSendProps): UseChatSend => {
   const {
     assistantTelemetry,
-    knowledgeBase: { isEnabledKnowledgeBase, isEnabledRAGAlerts },
     toasts,
+    assistantAvailability: { isAssistantEnabled },
   } = useAssistantContext();
+  const [userPrompt, setUserPrompt] = useState<string | null>(null);
 
-  const { isLoading, sendMessage } = useSendMessage();
+  const { isLoading, sendMessage, abortStream } = useSendMessage();
   const { clearConversation, removeLastMessage } = useConversation();
-
-  const handlePromptChange = (prompt: string) => {
-    setPromptTextPreview(prompt);
-    setUserPrompt(prompt);
-  };
+  const { data: kbStatus } = useKnowledgeBaseStatus({ http, enabled: isAssistantEnabled });
+  const isSetupComplete =
+    kbStatus?.elser_exists &&
+    kbStatus?.index_exists &&
+    kbStatus?.pipeline_exists &&
+    kbStatus?.security_labs_exists;
 
   // Handles sending latest user prompt to API
   const handleSendMessage = useCallback(
     async (promptText: string) => {
-      if (!currentConversation.apiConfig) {
+      if (!currentConversation?.apiConfig) {
         toasts?.addError(
           new Error('The conversation needs a connector configured in order to send a message.'),
           {
@@ -87,17 +82,24 @@ export const useChatSend = ({
         );
         return;
       }
-      const systemPrompt = allSystemPrompts.find((prompt) => prompt.id === editingSystemPromptId);
 
       const userMessage = getCombinedMessage({
-        isNewChat: currentConversation.messages.length === 0,
         currentReplacements: currentConversation.replacements,
         promptText,
         selectedPromptContexts,
-        selectedSystemPrompt: systemPrompt,
       });
 
-      const replacements = userMessage.replacements ?? currentConversation.replacements;
+      const baseReplacements: Replacements =
+        userMessage.replacements ?? currentConversation.replacements;
+
+      const selectedPromptContextsReplacements = Object.values(
+        selectedPromptContexts
+      ).reduce<Replacements>((acc, context) => ({ ...acc, ...context.replacements }), {});
+
+      const replacements: Replacements = {
+        ...baseReplacements,
+        ...selectedPromptContextsReplacements,
+      };
       const updatedMessages = [...currentConversation.messages, userMessage].map((m) => ({
         ...m,
         content: m.content ?? '',
@@ -110,7 +112,6 @@ export const useChatSend = ({
 
       // Reset prompt context selection and preview before sending:
       setSelectedPromptContexts({});
-      setPromptTextPreview('');
 
       const rawResponse = await sendMessage({
         apiConfig: currentConversation.apiConfig,
@@ -123,11 +124,13 @@ export const useChatSend = ({
       assistantTelemetry?.reportAssistantMessageSent({
         conversationId: currentConversation.title,
         role: userMessage.role,
-        isEnabledKnowledgeBase,
-        isEnabledRAGAlerts,
+        actionTypeId: currentConversation.apiConfig.actionTypeId,
+        model: currentConversation.apiConfig.model,
+        provider: currentConversation.apiConfig.provider,
+        isEnabledKnowledgeBase: isSetupComplete ?? false,
       });
 
-      const responseMessage: Message = getMessageFromRawResponse(rawResponse);
+      const responseMessage: ClientMessage = getMessageFromRawResponse(rawResponse);
 
       setCurrentConversation({
         ...currentConversation,
@@ -137,29 +140,27 @@ export const useChatSend = ({
       assistantTelemetry?.reportAssistantMessageSent({
         conversationId: currentConversation.title,
         role: responseMessage.role,
-        isEnabledKnowledgeBase,
-        isEnabledRAGAlerts,
+        actionTypeId: currentConversation.apiConfig.actionTypeId,
+        model: currentConversation.apiConfig.model,
+        provider: currentConversation.apiConfig.provider,
+        isEnabledKnowledgeBase: isSetupComplete ?? false,
       });
     },
     [
-      allSystemPrompts,
       assistantTelemetry,
       currentConversation,
-      editingSystemPromptId,
       http,
-      isEnabledKnowledgeBase,
-      isEnabledRAGAlerts,
+      isSetupComplete,
       selectedPromptContexts,
       sendMessage,
       setCurrentConversation,
-      setPromptTextPreview,
       setSelectedPromptContexts,
       toasts,
     ]
   );
 
   const handleRegenerateResponse = useCallback(async () => {
-    if (!currentConversation.apiConfig) {
+    if (!currentConversation?.apiConfig) {
       toasts?.addError(
         new Error('The conversation needs a connector configured in order to send a message.'),
         {
@@ -182,54 +183,55 @@ export const useChatSend = ({
       http,
       // do not send any new messages, the previous conversation is already stored
       conversationId: currentConversation.id,
-      replacements: [],
+      replacements: {},
     });
 
-    const responseMessage: Message = getMessageFromRawResponse(rawResponse);
+    const responseMessage: ClientMessage = getMessageFromRawResponse(rawResponse);
     setCurrentConversation({
       ...currentConversation,
       messages: [...updatedMessages, responseMessage],
     });
   }, [currentConversation, http, removeLastMessage, sendMessage, setCurrentConversation, toasts]);
 
-  const handleButtonSendMessage = useCallback(
-    (message: string) => {
-      handleSendMessage(message);
-      setUserPrompt('');
-    },
-    [handleSendMessage, setUserPrompt]
-  );
-
-  const handleOnChatCleared = useCallback(async () => {
-    const defaultSystemPromptId = getDefaultSystemPrompt({
-      allSystemPrompts,
-      conversation: currentConversation,
-    })?.id;
-
-    setPromptTextPreview('');
+  const onChatCleared = useCallback(async () => {
     setUserPrompt('');
     setSelectedPromptContexts({});
-    await clearConversation(currentConversation.id);
-    await refresh();
-
-    setEditingSystemPromptId(defaultSystemPromptId);
+    if (currentConversation) {
+      const updatedConversation = await clearConversation(currentConversation);
+      if (updatedConversation) {
+        setCurrentConversation(updatedConversation);
+      }
+    }
   }, [
-    allSystemPrompts,
     clearConversation,
     currentConversation,
-    refresh,
-    setEditingSystemPromptId,
-    setPromptTextPreview,
+    setCurrentConversation,
     setSelectedPromptContexts,
     setUserPrompt,
   ]);
 
+  const handleOnChatCleared = useCallback(async () => {
+    await onChatCleared();
+    await refetchCurrentUserConversations();
+  }, [onChatCleared, refetchCurrentUserConversations]);
+
+  const handleChatSend = useCallback(
+    async (promptText: string) => {
+      await handleSendMessage(promptText);
+      if (currentConversation?.title === NEW_CHAT) {
+        await refetchCurrentUserConversations();
+      }
+    },
+    [currentConversation, handleSendMessage, refetchCurrentUserConversations]
+  );
+
   return {
-    handleButtonSendMessage,
     handleOnChatCleared,
-    handlePromptChange,
-    handleSendMessage,
+    handleChatSend,
+    abortStream,
     handleRegenerateResponse,
     isLoading,
+    userPrompt,
+    setUserPrompt,
   };
 };

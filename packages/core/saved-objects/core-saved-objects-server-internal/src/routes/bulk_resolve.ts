@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { schema } from '@kbn/config-schema';
+import type { RouteAccess, RouteDeprecationInfo } from '@kbn/core-http-server';
 import { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-internal';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import type { Logger } from '@kbn/logging';
@@ -21,16 +23,26 @@ interface RouteDependencies {
   config: SavedObjectConfig;
   coreUsageData: InternalCoreUsageDataSetup;
   logger: Logger;
+  access: RouteAccess;
+  deprecationInfo: RouteDeprecationInfo;
 }
 
 export const registerBulkResolveRoute = (
   router: InternalSavedObjectRouter,
-  { config, coreUsageData, logger }: RouteDependencies
+  { config, coreUsageData, logger, access, deprecationInfo }: RouteDependencies
 ) => {
   const { allowHttpApiAccess } = config;
   router.post(
     {
       path: '/_bulk_resolve',
+      options: {
+        summary: `Resolve saved objects`,
+        tags: ['oas-tag:saved objects'],
+        access,
+        deprecated: deprecationInfo,
+        description: `Retrieve multiple Kibana saved objects by ID, using any legacy URL aliases if they exist.
+        Under certain circumstances, when Kibana is upgraded, saved object migrations may necessitate regenerating some object IDs to enable new features. When an object's ID is regenerated, a legacy URL alias is created for that object, preserving its old ID. In such a scenario, that object can be retrieved with the bulk resolve API using either its new ID or its old ID.`,
+      },
       validate: {
         body: schema.arrayOf(
           schema.object({
@@ -40,25 +52,26 @@ export const registerBulkResolveRoute = (
         ),
       },
     },
-    catchAndReturnBoomErrors(async (context, req, res) => {
+    catchAndReturnBoomErrors(async (context, request, response) => {
       logWarnOnExternalRequest({
         method: 'post',
         path: '/api/saved_objects/_bulk_resolve',
-        req,
+        request,
         logger,
       });
+      const types = [...new Set(request.body.map(({ type }) => type))];
+
       const usageStatsClient = coreUsageData.getClient();
-      usageStatsClient.incrementSavedObjectsBulkResolve({ request: req }).catch(() => {});
+      usageStatsClient.incrementSavedObjectsBulkResolve({ request, types }).catch(() => {});
 
       const { savedObjects } = await context.core;
-      const typesToCheck = [...new Set(req.body.map(({ type }) => type))];
       if (!allowHttpApiAccess) {
-        throwIfAnyTypeNotVisibleByAPI(typesToCheck, savedObjects.typeRegistry);
+        throwIfAnyTypeNotVisibleByAPI(types, savedObjects.typeRegistry);
       }
-      const result = await savedObjects.client.bulkResolve(req.body, {
+      const result = await savedObjects.client.bulkResolve(request.body, {
         migrationVersionCompatibility: 'compatible',
       });
-      return res.ok({ body: result });
+      return response.ok({ body: result });
     })
   );
 };

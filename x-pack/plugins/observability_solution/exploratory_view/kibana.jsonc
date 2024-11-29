@@ -1,12 +1,19 @@
 {
   "type": "plugin",
   "id": "@kbn/exploratory-view-plugin",
-  "owner": "@elastic/obs-ux-infra_services-team",
+  "owner": [
+    "@elastic/obs-ux-management-team"
+  ],
+  "group": "observability",
+  "visibility": "private",
   "plugin": {
     "id": "exploratoryView",
-    "server": false,
     "browser": true,
-    "configPath": ["xpack", "exploratory_view"],
+    "server": false,
+    "configPath": [
+      "xpack",
+      "exploratory_view"
+    ],
     "requiredPlugins": [
       "alerting",
       "cases",
@@ -21,10 +28,17 @@
       "security",
       "share",
       "triggersActionsUi",
-      "unifiedSearch",
+      "unifiedSearch"
+    ],
+    "optionalPlugins": [
+      "discover",
+      "embeddable",
+      "home",
+      "licensing",
+      "spaces",
+      "usageCollection",
       "observabilityAIAssistant"
     ],
-    "optionalPlugins": ["discover", "embeddable", "home", "licensing", "spaces", "usageCollection"],
     "requiredBundles": [
       "dataViews",
       "embeddable",
@@ -35,6 +49,8 @@
       "unifiedSearch",
       "visualizations"
     ],
-    "extraPublicDirs": ["common"]
+    "extraPublicDirs": [
+      "common"
+    ]
   }
 }

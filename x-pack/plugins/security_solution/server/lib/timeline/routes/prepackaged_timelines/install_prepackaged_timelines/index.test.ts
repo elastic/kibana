@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
-
 import {
   serverMock,
   requestContextMock,
@@ -14,7 +12,6 @@ import {
 } from '../../../../detection_engine/routes/__mocks__';
 
 import {
-  mockGetCurrentUser,
   mockCheckTimelinesStatusBeforeInstallResult,
   mockCheckTimelinesStatusAfterInstallResult,
 } from '../../../__mocks__/import_timelines';
@@ -39,7 +36,6 @@ jest.mock('../../../utils/check_timelines_status', () => {
 
 describe('installPrepackagedTimelines', () => {
   let server: ReturnType<typeof serverMock.create>;
-  let securitySetup: SecurityPluginSetup;
   let { context } = requestContextMock.createTools();
 
   beforeEach(() => {
@@ -49,14 +45,7 @@ describe('installPrepackagedTimelines', () => {
     server = serverMock.create();
     context = requestContextMock.createTools().context;
 
-    securitySetup = {
-      authc: {
-        getCurrentUser: jest.fn().mockReturnValue(mockGetCurrentUser),
-      },
-      authz: {},
-    } as unknown as SecurityPluginSetup;
-
-    installPrepackedTimelinesRoute(server.router, createMockConfig(), securitySetup);
+    installPrepackedTimelinesRoute(server.router, createMockConfig());
   });
 
   test('should call installPrepackagedTimelines ', async () => {

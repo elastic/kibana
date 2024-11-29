@@ -15,10 +15,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
-import {
-  asDynamicBytes,
-  asMillisecondDuration,
-} from '../../../../../common/utils/formatters';
+import { asDynamicBytes, asMillisecondDuration } from '../../../../../common/utils/formatters';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
@@ -65,10 +62,9 @@ export function ServerlessFunctions() {
   const columns: Array<EuiBasicTableColumn<ServerlessFunctionOverview>> = [
     {
       field: 'serverlessFunctionName',
-      name: i18n.translate(
-        'xpack.apm.serverlessMetrics.serverlessFunctions.functionName',
-        { defaultMessage: 'Function name' }
-      ),
+      name: i18n.translate('xpack.apm.serverlessMetrics.serverlessFunctions.functionName', {
+        defaultMessage: 'Function name',
+      }),
       sortable: true,
       truncateText: true,
       render: (_, item) => {
@@ -82,10 +78,9 @@ export function ServerlessFunctions() {
     },
     {
       field: 'serverlessDurationAvg',
-      name: i18n.translate(
-        'xpack.apm.serverlessMetrics.serverlessFunctions.functionDuration',
-        { defaultMessage: 'Function duration' }
-      ),
+      name: i18n.translate('xpack.apm.serverlessMetrics.serverlessFunctions.functionDuration', {
+        defaultMessage: 'Function duration',
+      }),
       sortable: true,
       render: (_, { serverlessDurationAvg }) => {
         return asMillisecondDuration(serverlessDurationAvg);
@@ -93,10 +88,9 @@ export function ServerlessFunctions() {
     },
     {
       field: 'billedDurationAvg',
-      name: i18n.translate(
-        'xpack.apm.serverlessMetrics.serverlessFunctions.billedDuration',
-        { defaultMessage: 'Billed duration' }
-      ),
+      name: i18n.translate('xpack.apm.serverlessMetrics.serverlessFunctions.billedDuration', {
+        defaultMessage: 'Billed duration',
+      }),
       sortable: true,
       render: (_, { billedDurationAvg }) => {
         return asMillisecondDuration(billedDurationAvg);
@@ -104,10 +98,9 @@ export function ServerlessFunctions() {
     },
     {
       field: 'avgMemoryUsed',
-      name: i18n.translate(
-        'xpack.apm.serverlessMetrics.serverlessFunctions.memoryUsageAvg',
-        { defaultMessage: 'Memory usage avg.' }
-      ),
+      name: i18n.translate('xpack.apm.serverlessMetrics.serverlessFunctions.memoryUsageAvg', {
+        defaultMessage: 'Memory usage avg.',
+      }),
       sortable: true,
       render: (_, { avgMemoryUsed }) => {
         return asDynamicBytes(avgMemoryUsed);
@@ -115,10 +108,9 @@ export function ServerlessFunctions() {
     },
     {
       field: 'memorySize',
-      name: i18n.translate(
-        'xpack.apm.serverlessMetrics.serverlessFunctions.memorySize',
-        { defaultMessage: 'Memory size' }
-      ),
+      name: i18n.translate('xpack.apm.serverlessMetrics.serverlessFunctions.memorySize', {
+        defaultMessage: 'Memory size',
+      }),
       sortable: true,
       render: (_, { memorySize }) => {
         return asDynamicBytes(memorySize);
@@ -126,10 +118,9 @@ export function ServerlessFunctions() {
     },
     {
       field: 'coldStartCount',
-      name: i18n.translate(
-        'xpack.apm.serverlessMetrics.serverlessFunctions.coldStart',
-        { defaultMessage: 'Cold start' }
-      ),
+      name: i18n.translate('xpack.apm.serverlessMetrics.serverlessFunctions.coldStart', {
+        defaultMessage: 'Cold start',
+      }),
       sortable: true,
     },
   ];
@@ -154,10 +145,9 @@ export function ServerlessFunctions() {
             <EuiFlexItem grow={false}>
               <EuiTitle size="s">
                 <h2>
-                  {i18n.translate(
-                    'xpack.apm.serverlessMetrics.serverlessFunctions.title',
-                    { defaultMessage: 'Lambda functions' }
-                  )}
+                  {i18n.translate('xpack.apm.serverlessMetrics.serverlessFunctions.title', {
+                    defaultMessage: 'Lambda functions',
+                  })}
                 </h2>
               </EuiTitle>
             </EuiFlexItem>

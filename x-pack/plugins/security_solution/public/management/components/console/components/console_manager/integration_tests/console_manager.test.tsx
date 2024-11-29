@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { RenderHookResult } from '@testing-library/react-hooks';
-import { renderHook as _renderHook, act } from '@testing-library/react-hooks';
 import { useConsoleManager } from '../console_manager';
 import React from 'react';
 import type {
@@ -21,13 +19,14 @@ import {
   getConsoleManagerMockRenderResultQueriesAndActions,
   getNewConsoleRegistrationMock,
 } from '../mocks';
-import userEvent from '@testing-library/user-event';
-import { waitFor } from '@testing-library/react';
+import userEvent, { type UserEvent } from '@testing-library/user-event';
+import type { RenderHookResult } from '@testing-library/react';
+import { waitFor, act, renderHook as _renderHook } from '@testing-library/react';
 import { enterConsoleCommand } from '../../../mocks';
 
 describe('When using ConsoleManager', () => {
   describe('and using the ConsoleManagerInterface via the hook', () => {
-    type RenderResultInterface = RenderHookResult<never, ConsoleManagerClient>;
+    type RenderResultInterface = RenderHookResult<ConsoleManagerClient, never>;
 
     let renderHook: () => RenderResultInterface;
     let renderResult: RenderResultInterface;
@@ -103,20 +102,27 @@ describe('When using ConsoleManager', () => {
       );
     });
 
-    it('should hide a console by `id`', () => {
+    it('should hide a console by `id`', async () => {
       renderHook();
       const { id: consoleId } = registerNewConsole();
+
+      let consoleClient: ReturnType<ConsoleManagerClient['getOne']>;
+
+      act(() => {
+        consoleClient = renderResult.result.current.getOne(consoleId);
+      });
+
       act(() => {
         renderResult.result.current.show(consoleId);
       });
 
-      expect(renderResult.result.current.getOne(consoleId)!.isVisible()).toBe(true);
+      await waitFor(() => expect(consoleClient!.isVisible()).toBe(true));
 
       act(() => {
         renderResult.result.current.hide(consoleId);
       });
 
-      expect(renderResult.result.current.getOne(consoleId)!.isVisible()).toBe(false);
+      await waitFor(() => expect(consoleClient!.isVisible()).toBe(false));
     });
 
     it('should throw if attempting to hide a console with invalid `id`', () => {
@@ -163,7 +169,9 @@ describe('When using ConsoleManager', () => {
       beforeEach(() => {
         renderHook();
         ({ id: consoleId } = registerNewConsole());
-        registeredConsole = renderResult.result.current.getOne(consoleId)!;
+        act(() => {
+          registeredConsole = renderResult.result.current.getOne(consoleId)!;
+        });
       });
 
       it('should have the expected interface', () => {
@@ -178,27 +186,31 @@ describe('When using ConsoleManager', () => {
       });
 
       it('should display the console when `.show()` is called', async () => {
-        registeredConsole.show();
-        await renderResult.waitForNextUpdate();
-
-        expect(registeredConsole.isVisible()).toBe(true);
+        act(() => {
+          registeredConsole.show();
+        });
+        await waitFor(() => expect(registeredConsole.isVisible()).toBe(true));
       });
 
       it('should hide the console when `.hide()` is called', async () => {
-        registeredConsole.show();
-        await renderResult.waitForNextUpdate();
-        expect(registeredConsole.isVisible()).toBe(true);
+        act(() => {
+          registeredConsole.show();
+        });
 
-        registeredConsole.hide();
-        await renderResult.waitForNextUpdate();
-        expect(registeredConsole.isVisible()).toBe(false);
+        await waitFor(() => expect(registeredConsole.isVisible()).toBe(true));
+
+        act(() => {
+          registeredConsole.hide();
+        });
+
+        await waitFor(() => expect(registeredConsole.isVisible()).toBe(false));
       });
 
       it('should un-register the console when `.terminate() is called', async () => {
-        registeredConsole.terminate();
-        await renderResult.waitForNextUpdate();
-
-        expect(renderResult.result.current.getOne(consoleId)).toBeUndefined();
+        act(() => {
+          registeredConsole.terminate();
+        });
+        await waitFor(() => expect(renderResult.result.current.getOne(consoleId)).toBeUndefined());
       });
     });
   });
@@ -208,20 +220,31 @@ describe('When using ConsoleManager', () => {
       typeof getConsoleManagerMockRenderResultQueriesAndActions
     >;
 
+    let user: UserEvent;
     let render: () => Promise<ReturnType<AppContextTestRender['render']>>;
     let renderResult: ReturnType<AppContextTestRender['render']>;
     let clickOnRegisterNewConsole: ConsoleManagerQueriesAndActions['clickOnRegisterNewConsole'];
     let openRunningConsole: ConsoleManagerQueriesAndActions['openRunningConsole'];
     let hideOpenedConsole: ConsoleManagerQueriesAndActions['hideOpenedConsole'];
 
+    beforeAll(() => {
+      jest.useFakeTimers();
+    });
+
+    afterAll(() => {
+      jest.useRealTimers();
+    });
+
     beforeEach(() => {
+      // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
+      user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
       const mockedContext = createAppRootMockRenderer();
 
       render = async () => {
         renderResult = mockedContext.render(<ConsoleManagerTestComponent />);
 
         ({ clickOnRegisterNewConsole, openRunningConsole, hideOpenedConsole } =
-          getConsoleManagerMockRenderResultQueriesAndActions(renderResult));
+          getConsoleManagerMockRenderResultQueriesAndActions(user, renderResult));
 
         await clickOnRegisterNewConsole();
 
@@ -263,15 +286,19 @@ describe('When using ConsoleManager', () => {
 
     it('should hide the console page overlay', async () => {
       await render();
-      userEvent.click(renderResult.getByTestId('consolePageOverlay-header-back-link'));
+      await user.click(renderResult.getByTestId('consolePageOverlay-header-back-link'));
 
       expect(renderResult.queryByTestId('consolePageOverlay')).toBeNull();
     });
 
     it("should persist a console's command output history on hide/show", async () => {
       await render();
-      enterConsoleCommand(renderResult, 'help', { dataTestSubj: 'testRunningConsole' });
-      enterConsoleCommand(renderResult, 'cmd1', { dataTestSubj: 'testRunningConsole' });
+      await enterConsoleCommand(renderResult, user, 'help', {
+        dataTestSubj: 'testRunningConsole',
+      });
+      await enterConsoleCommand(renderResult, user, 'cmd1', {
+        dataTestSubj: 'testRunningConsole',
+      });
 
       await waitFor(() => {
         expect(renderResult.queryAllByTestId('testRunningConsole-historyItem')).toHaveLength(2);
@@ -290,7 +317,9 @@ describe('When using ConsoleManager', () => {
     it('should provide console rendering state between show/hide', async () => {
       const expectedStoreValue = JSON.stringify({ foo: 'bar' }, null, 2);
       await render();
-      enterConsoleCommand(renderResult, 'cmd1', { dataTestSubj: 'testRunningConsole' });
+      await enterConsoleCommand(renderResult, user, 'cmd1', {
+        dataTestSubj: 'testRunningConsole',
+      });
 
       // Command should have `pending` status and no store values
       expect(renderResult.getByTestId('exec-output-statusState').textContent).toEqual(

@@ -11,7 +11,12 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const PageObjects = getPageObjects(['common', 'header', 'discover', 'timePicker', 'dashboard']);
+  const { common, header, discover, dashboard } = getPageObjects([
+    'common',
+    'header',
+    'discover',
+    'dashboard',
+  ]);
   const dashboardAddPanel = getService('dashboardAddPanel');
   const dataGrid = getService('dataGrid');
   const panelActions = getService('dashboardPanelActions');
@@ -19,6 +24,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const queryBar = getService('queryBar');
   const filterBar = getService('filterBar');
   const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
   const ecommerceSOPath = 'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce.json';
   const defaultSettings = {
     defaultIndex: 'logstash-*',
@@ -34,7 +40,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
       await kibanaServer.importExport.load(ecommerceSOPath);
       await kibanaServer.uiSettings.update(defaultSettings);
-      await PageObjects.common.setTime({ from, to });
+      await common.setTime({ from, to });
     });
 
     after('clean up archives', async () => {
@@ -42,58 +48,61 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
       await kibanaServer.importExport.unload(ecommerceSOPath);
       await kibanaServer.uiSettings.unset('doc_table:legacy');
-      await PageObjects.common.unsetTime();
+      await common.unsetTime();
     });
 
     describe('Customize time range', () => {
       it('should be possible to customize time range for saved searches on dashboards', async () => {
-        await PageObjects.dashboard.navigateToApp();
-        await PageObjects.dashboard.clickNewDashboard();
+        await dashboard.navigateToApp();
+        await dashboard.clickNewDashboard();
         await dashboardAddPanel.clickOpenAddPanel();
         await dashboardAddPanel.addSavedSearch('Ecommerce Data');
         expect(await dataGrid.getDocCount()).to.be(500);
 
         await panelActions.customizePanel();
         await dashboardCustomizePanel.enableCustomTimeRange();
-        await dashboardCustomizePanel.openDatePickerQuickMenu();
+        await retry.waitFor('quick menu', async () => {
+          await dashboardCustomizePanel.openDatePickerQuickMenu();
+          return await testSubjects.exists('superDatePickerCommonlyUsed_Last_90 days');
+        });
         await dashboardCustomizePanel.clickCommonlyUsedTimeRange('Last_90 days');
         await dashboardCustomizePanel.clickSaveButton();
 
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await header.waitUntilLoadingHasFinished();
         expect(await dataGrid.hasNoResults()).to.be(true);
       });
     });
 
     it(`should unselect saved search when navigating to a 'new'`, async function () {
-      await PageObjects.common.navigateToApp('discover');
-      await PageObjects.discover.selectIndexPattern('ecommerce');
+      await common.navigateToApp('discover');
+      await discover.selectIndexPattern('ecommerce');
       await filterBar.addFilter({ field: 'category', operation: 'is', value: `Men's Shoes` });
       await queryBar.setQuery('customer_gender:MALE');
       await queryBar.submitQuery();
 
-      await PageObjects.discover.saveSearch('test-unselect-saved-search');
+      await discover.saveSearch('test-unselect-saved-search');
 
       expect(await filterBar.hasFilter('category', `Men's Shoes`)).to.be(true);
       expect(await queryBar.getQueryString()).to.eql('customer_gender:MALE');
 
-      await PageObjects.discover.clickNewSearchButton();
+      await discover.clickNewSearchButton();
 
       expect(await testSubjects.getVisibleText('discover-dataView-switch-link')).to.be('ecommerce');
 
       expect(await filterBar.hasFilter('category', `Men's Shoes`)).to.be(false);
       expect(await queryBar.getQueryString()).to.eql('');
 
-      await PageObjects.discover.selectIndexPattern('logstash-*');
+      await discover.selectIndexPattern('logstash-*');
 
       expect(await filterBar.hasFilter('category', `Men's Shoes`)).to.be(false);
       expect(await queryBar.getQueryString()).to.eql('');
 
-      await PageObjects.discover.selectIndexPattern('ecommerce');
+      await discover.selectIndexPattern('ecommerce');
 
       expect(await filterBar.hasFilter('category', `Men's Shoes`)).to.be(false);
       expect(await queryBar.getQueryString()).to.eql('');
 
-      await PageObjects.discover.clickNewSearchButton();
+      await discover.clickNewSearchButton();
       expect(await testSubjects.getVisibleText('discover-dataView-switch-link')).to.be('ecommerce');
     });
   });

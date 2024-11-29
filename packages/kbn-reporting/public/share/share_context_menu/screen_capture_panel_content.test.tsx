@@ -1,19 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
+import * as Rx from 'rxjs';
+import { coreMock } from '@kbn/core/public/mocks';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { mount } from 'enzyme';
 import React from 'react';
 import { ReportingAPIClient } from '../..';
 import { ScreenCapturePanelContent } from './screen_capture_panel_content';
 
-const { http, uiSettings, ...coreSetup } = coreMock.createSetup();
+const { http, uiSettings, getStartServices } = coreMock.createSetup();
+const startServices$ = Rx.from(getStartServices());
 uiSettings.get.mockImplementation((key: string) => {
   switch (key) {
     case 'dateFormat:tz':
@@ -28,8 +31,6 @@ const getJobParamsDefault = () => ({
   browserTimezone: 'America/New_York',
 });
 
-const theme = themeServiceMock.createSetupContract();
-
 test('ScreenCapturePanelContent renders the default view properly', () => {
   const component = mount(
     <IntlProvider locale="en">
@@ -37,10 +38,8 @@ test('ScreenCapturePanelContent renders the default view properly', () => {
         reportType="Analytical App"
         requiresSavedState={false}
         apiClient={apiClient}
-        uiSettings={uiSettings}
-        toasts={coreSetup.notifications.toasts}
         getJobParams={getJobParamsDefault}
-        theme={theme}
+        startServices$={startServices$}
       />
     </IntlProvider>
   );
@@ -57,10 +56,8 @@ test('ScreenCapturePanelContent properly renders a view with "canvas" layout opt
         reportType="Analytical App"
         requiresSavedState={false}
         apiClient={apiClient}
-        uiSettings={uiSettings}
-        toasts={coreSetup.notifications.toasts}
         getJobParams={getJobParamsDefault}
-        theme={theme}
+        startServices$={startServices$}
       />
     </IntlProvider>
   );
@@ -76,11 +73,9 @@ test('ScreenCapturePanelContent allows POST URL to be copied when objectId is pr
         reportType="Analytical App"
         requiresSavedState={false}
         apiClient={apiClient}
-        uiSettings={uiSettings}
-        toasts={coreSetup.notifications.toasts}
         getJobParams={getJobParamsDefault}
         objectId={'1234-5'}
-        theme={theme}
+        startServices$={startServices$}
       />
     </IntlProvider>
   );
@@ -96,10 +91,8 @@ test('ScreenCapturePanelContent does not allow POST URL to be copied when object
         reportType="Analytical App"
         requiresSavedState={false}
         apiClient={apiClient}
-        uiSettings={uiSettings}
-        toasts={coreSetup.notifications.toasts}
         getJobParams={getJobParamsDefault}
-        theme={theme}
+        startServices$={startServices$}
       />
     </IntlProvider>
   );
@@ -115,10 +108,8 @@ test('ScreenCapturePanelContent properly renders a view with "print" layout opti
         reportType="Analytical App"
         requiresSavedState={false}
         apiClient={apiClient}
-        uiSettings={uiSettings}
-        toasts={coreSetup.notifications.toasts}
         getJobParams={getJobParamsDefault}
-        theme={theme}
+        startServices$={startServices$}
       />
     </IntlProvider>
   );
@@ -135,10 +126,8 @@ test('ScreenCapturePanelContent decorated job params are visible in the POST URL
         requiresSavedState={false}
         isDirty={false}
         apiClient={apiClient}
-        uiSettings={uiSettings}
-        toasts={coreSetup.notifications.toasts}
         getJobParams={getJobParamsDefault}
-        theme={theme}
+        startServices$={startServices$}
       />
     </IntlProvider>
   );

@@ -11,7 +11,6 @@ import { snakeCase } from 'lodash';
 import moment from 'moment';
 import { v4 as uuidv4 } from 'uuid';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { waitForIndexStatus } from '@kbn/core-saved-objects-migration-server-internal';
 import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import { ElasticsearchCapabilities } from '@kbn/core-elasticsearch-server';
 import { ML_ERRORS } from '../../../common/anomaly_detection';
@@ -44,23 +43,27 @@ export async function createAnomalyDetectionJobs({
     throw Boom.notImplemented(ML_ERRORS.ML_NOT_AVAILABLE);
   }
 
-  const uniqueMlJobEnvs = await getUniqueMlJobEnvs(
-    mlClient,
-    environments,
-    logger
-  );
+  const uniqueMlJobEnvs = await getUniqueMlJobEnvs(mlClient, environments, logger);
   if (uniqueMlJobEnvs.length === 0) {
     return [];
   }
 
   return withApmSpan('create_anomaly_detection_jobs', async () => {
-    logger.info(
-      `Creating ML anomaly detection jobs for environments: [${uniqueMlJobEnvs}].`
-    );
-
+    logger.info(`Creating ML anomaly detection jobs for environments: [${uniqueMlJobEnvs}].`);
     const apmMetricIndex = indices.metric;
     const responses = [];
     const failedJobs = [];
+
+    if (!esCapabilities.serverless) {
+      // Waiting for the index is not enabled in serverless, this could potentially cause
+      // problems when creating jobs in parallel
+      try {
+        await waitForIndexStatus(esClient, apmMetricIndex, 'yellow');
+      } catch (err) {
+        logger.warn(`Error waiting for ${apmMetricIndex} to turn yellow before creating ML jobs`);
+      }
+    }
+
     // Avoid the creation of multiple ml jobs in parallel
     // https://github.com/elastic/elasticsearch/issues/36271
     for (const environment of uniqueMlJobEnvs) {
@@ -68,10 +71,8 @@ export async function createAnomalyDetectionJobs({
         responses.push(
           await createAnomalyDetectionJob({
             mlClient,
-            esClient,
             environment,
             apmMetricIndex,
-            esCapabilities,
           })
         );
       } catch (e) {
@@ -85,11 +86,7 @@ export async function createAnomalyDetectionJobs({
     const jobResponses = responses.flatMap((response) => response.jobs);
 
     if (failedJobs.length > 0) {
-      throw new Error(
-        `An error occurred while creating ML jobs: ${JSON.stringify(
-          failedJobs
-        )}`
-      );
+      throw new Error(`An error occurred while creating ML jobs: ${JSON.stringify(failedJobs)}`);
     }
 
     return jobResponses;
@@ -98,19 +95,13 @@ export async function createAnomalyDetectionJobs({
 
 async function createAnomalyDetectionJob({
   mlClient,
-  esClient,
   environment,
   apmMetricIndex,
-  esCapabilities,
 }: {
   mlClient: Required<MlClient>;
-  esClient: ElasticsearchClient;
   environment: string;
   apmMetricIndex: string;
-  esCapabilities: ElasticsearchCapabilities;
 }) {
-  const { serverless } = esCapabilities;
-
   return withApmSpan('create_anomaly_detection_job', async () => {
     const randomToken = uuidv4().substr(-4);
 
@@ -144,35 +135,18 @@ async function createAnomalyDetectionJob({
       ],
     });
 
-    // Waiting for the index is not enabled in serverless, this could potentially cause
-    // problems when creating jobs in parallels
-    if (!serverless) {
-      await waitForIndexStatus({
-        client: esClient,
-        index: '.ml-*',
-        timeout: DEFAULT_TIMEOUT,
-        status: 'yellow',
-      })();
-    }
-
     return anomalyDetectionJob;
   });
 }
 
-async function getUniqueMlJobEnvs(
-  mlClient: MlClient,
-  environments: Environment[],
-  logger: Logger
-) {
+async function getUniqueMlJobEnvs(mlClient: MlClient, environments: Environment[], logger: Logger) {
   // skip creation of duplicate ML jobs
   const jobs = await getAnomalyDetectionJobs(mlClient);
   const existingMlJobEnvs = jobs
     .filter((job) => job.version === 3)
     .map(({ environment }) => environment);
 
-  const requestedExistingMlJobEnvs = environments.filter((env) =>
-    existingMlJobEnvs.includes(env)
-  );
+  const requestedExistingMlJobEnvs = environments.filter((env) => existingMlJobEnvs.includes(env));
 
   if (requestedExistingMlJobEnvs.length) {
     logger.warn(
@@ -181,4 +155,23 @@ async function getUniqueMlJobEnvs(
   }
 
   return environments.filter((env) => !existingMlJobEnvs.includes(env));
+}
+
+async function waitForIndexStatus(
+  esClient: ElasticsearchClient,
+  index: string,
+  waitForStatus: 'yellow' | 'green',
+  timeout = DEFAULT_TIMEOUT
+) {
+  return await esClient.cluster.health(
+    {
+      index,
+      wait_for_status: waitForStatus,
+      timeout,
+    },
+    {
+      retryOnTimeout: true,
+      maxRetries: 3,
+    }
+  );
 }

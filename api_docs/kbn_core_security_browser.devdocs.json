@@ -3,26 +3,10 @@
   "client": {
     "classes": [],
     "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-security-browser",
-        "id": "def-common.CoreAuthenticationService",
+        "id": "def-public.CoreAuthenticationService",
         "type": "Interface",
         "tags": [],
         "label": "CoreAuthenticationService",
@@ -35,7 +19,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-security-browser",
-            "id": "def-common.CoreAuthenticationService.getCurrentUser",
+            "id": "def-public.CoreAuthenticationService.getCurrentUser",
             "type": "Function",
             "tags": [],
             "label": "getCurrentUser",
@@ -64,10 +48,10 @@
       },
       {
         "parentPluginId": "@kbn/core-security-browser",
-        "id": "def-common.CoreSecurityContract",
+        "id": "def-public.CoreSecurityDelegateContract",
         "type": "Interface",
         "tags": [],
-        "label": "CoreSecurityContract",
+        "label": "CoreSecurityDelegateContract",
         "description": [
           "\nThe contract exposed by the security provider for Core to\nconsume and re-expose via its security service.\n"
         ],
@@ -77,7 +61,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-security-browser",
-            "id": "def-common.CoreSecurityContract.authc",
+            "id": "def-public.CoreSecurityDelegateContract.authc",
             "type": "Object",
             "tags": [],
             "label": "authc",
@@ -85,9 +69,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-security-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreSecurityBrowserPluginApi",
-                "section": "def-common.CoreAuthenticationService",
+                "section": "def-public.CoreAuthenticationService",
                 "text": "CoreAuthenticationService"
               }
             ],
@@ -100,7 +84,7 @@
       },
       {
         "parentPluginId": "@kbn/core-security-browser",
-        "id": "def-common.SecurityServiceSetup",
+        "id": "def-public.SecurityServiceSetup",
         "type": "Interface",
         "tags": [],
         "label": "SecurityServiceSetup",
@@ -113,10 +97,10 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-security-browser",
-            "id": "def-common.SecurityServiceSetup.registerSecurityApi",
+            "id": "def-public.SecurityServiceSetup.registerSecurityDelegate",
             "type": "Function",
             "tags": [],
-            "label": "registerSecurityApi",
+            "label": "registerSecurityDelegate",
             "description": [
               "\nRegister the security implementation that then will be used and re-exposed by Core.\n"
             ],
@@ -124,10 +108,10 @@
               "(api: ",
               {
                 "pluginId": "@kbn/core-security-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreSecurityBrowserPluginApi",
-                "section": "def-common.CoreSecurityContract",
-                "text": "CoreSecurityContract"
+                "section": "def-public.CoreSecurityDelegateContract",
+                "text": "CoreSecurityDelegateContract"
               },
               ") => void"
             ],
@@ -137,7 +121,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-security-browser",
-                "id": "def-common.SecurityServiceSetup.registerSecurityApi.$1",
+                "id": "def-public.SecurityServiceSetup.registerSecurityDelegate.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "api",
@@ -145,10 +129,10 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-security-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreSecurityBrowserPluginApi",
-                    "section": "def-common.CoreSecurityContract",
-                    "text": "CoreSecurityContract"
+                    "section": "def-public.CoreSecurityDelegateContract",
+                    "text": "CoreSecurityDelegateContract"
                   }
                 ],
                 "path": "packages/core/security/core-security-browser/src/contracts.ts",
@@ -164,7 +148,7 @@
       },
       {
         "parentPluginId": "@kbn/core-security-browser",
-        "id": "def-common.SecurityServiceStart",
+        "id": "def-public.SecurityServiceStart",
         "type": "Interface",
         "tags": [],
         "label": "SecurityServiceStart",
@@ -177,7 +161,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-security-browser",
-            "id": "def-common.SecurityServiceStart.authc",
+            "id": "def-public.SecurityServiceStart.authc",
             "type": "Object",
             "tags": [],
             "label": "authc",
@@ -187,9 +171,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-security-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreSecurityBrowserPluginApi",
-                "section": "def-common.CoreAuthenticationService",
+                "section": "def-public.CoreAuthenticationService",
                 "text": "CoreAuthenticationService"
               }
             ],
@@ -205,7 +189,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/core-security-browser",
-        "id": "def-common.AuthenticationServiceContract",
+        "id": "def-public.AuthenticationServiceContract",
         "type": "Type",
         "tags": [],
         "label": "AuthenticationServiceContract",
@@ -213,9 +197,9 @@
         "signature": [
           {
             "pluginId": "@kbn/core-security-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreSecurityBrowserPluginApi",
-            "section": "def-common.CoreAuthenticationService",
+            "section": "def-public.CoreAuthenticationService",
             "text": "CoreAuthenticationService"
           }
         ],
@@ -225,6 +209,22 @@
         "initialIsOpen": false
       }
     ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": []
   }
 }

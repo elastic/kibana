@@ -3786,10 +3786,6 @@
       "index": {
         "auto_expand_replicas": "0-1",
         "codec": "best_compression",
-        "lifecycle": {
-          "name": "apm-rollover-30-days",
-          "rollover_alias": "apm-8.0.0-error"
-        },
         "mapping": {
           "total_fields": {
             "limit": "2000"
@@ -4243,8 +4239,7 @@
             "transaction.message.queue.name",
             "fields.*"
           ]
-        },
-        "refresh_interval": "1ms"
+        }
       }
     }
   }
@@ -8183,10 +8178,6 @@
       "index": {
         "auto_expand_replicas": "0-1",
         "codec": "best_compression",
-        "lifecycle": {
-          "name": "apm-rollover-30-days",
-          "rollover_alias": "apm-8.0.0-metric"
-        },
         "mapping": {
           "total_fields": {
             "limit": "2000"
@@ -8640,8 +8631,7 @@
             "transaction.message.queue.name",
             "fields.*"
           ]
-        },
-        "refresh_interval": "1ms"
+        }
       }
     }
   }
@@ -12871,8 +12861,7 @@
             "transaction.message.queue.name",
             "fields.*"
           ]
-        },
-        "refresh_interval": "1ms"
+        }
       }
     }
   }
@@ -16653,10 +16642,6 @@
       "index": {
         "auto_expand_replicas": "0-1",
         "codec": "best_compression",
-        "lifecycle": {
-          "name": "apm-rollover-30-days",
-          "rollover_alias": "apm-8.0.0-profile"
-        },
         "mapping": {
           "total_fields": {
             "limit": "2000"
@@ -17110,8 +17095,7 @@
             "transaction.message.queue.name",
             "fields.*"
           ]
-        },
-        "refresh_interval": "1ms"
+        }
       }
     }
   }
@@ -20899,10 +20883,6 @@
       "index": {
         "auto_expand_replicas": "0-1",
         "codec": "best_compression",
-        "lifecycle": {
-          "name": "apm-rollover-30-days",
-          "rollover_alias": "apm-8.0.0-span"
-        },
         "mapping": {
           "total_fields": {
             "limit": "2000"
@@ -21356,8 +21336,7 @@
             "transaction.message.queue.name",
             "fields.*"
           ]
-        },
-        "refresh_interval": "1ms"
+        }
       }
     }
   }
@@ -22986,6 +22965,9 @@
               "type": "keyword"
             },
             "multi-line": {
+              "type": "keyword"
+            },
+            "served_from_cache": {
               "type": "keyword"
             },
             "this-is-a-very-long-tag-name-without-any-spaces": {
@@ -25239,10 +25221,6 @@
       "index": {
         "auto_expand_replicas": "0-1",
         "codec": "best_compression",
-        "lifecycle": {
-          "name": "apm-rollover-30-days",
-          "rollover_alias": "apm-8.0.0-transaction"
-        },
         "mapping": {
           "total_fields": {
             "limit": "2000"
@@ -25696,8 +25674,7 @@
             "transaction.message.queue.name",
             "fields.*"
           ]
-        },
-        "refresh_interval": "1ms"
+        }
       }
     }
   }

@@ -62,17 +62,13 @@ function setup({
   } as Partial<CoreStart>);
 
   // mock transaction types
-  jest
-    .spyOn(useServiceTransactionTypesHook, 'useServiceTransactionTypesFetcher')
-    .mockReturnValue({
-      transactionTypes: serviceTransactionTypes,
-      status: useFetcherHook.FETCH_STATUS.SUCCESS,
-    });
+  jest.spyOn(useServiceTransactionTypesHook, 'useServiceTransactionTypesFetcher').mockReturnValue({
+    transactionTypes: serviceTransactionTypes,
+    status: useFetcherHook.FETCH_STATUS.SUCCESS,
+  });
 
   // mock transaction types
-  jest
-    .spyOn(useApmDataViewHook, 'useAdHocApmDataView')
-    .mockReturnValue({ dataView: undefined });
+  jest.spyOn(useApmDataViewHook, 'useAdHocApmDataView').mockReturnValue({ dataView: undefined });
 
   jest.spyOn(useFetcherHook, 'useFetcher').mockReturnValue({} as any);
 

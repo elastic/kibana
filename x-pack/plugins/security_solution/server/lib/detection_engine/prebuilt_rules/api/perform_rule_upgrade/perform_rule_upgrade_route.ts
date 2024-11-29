@@ -6,39 +6,41 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import {
   PERFORM_RULE_UPGRADE_URL,
-  SkipRuleUpgradeReason,
   PerformRuleUpgradeRequestBody,
-  PickVersionValues,
+  ModeEnum,
 } from '../../../../../../common/api/detection_engine/prebuilt_rules';
-import type {
-  PerformRuleUpgradeResponseBody,
-  SkippedRuleUpgrade,
-} from '../../../../../../common/api/detection_engine/prebuilt_rules';
-import { assertUnreachable } from '../../../../../../common/utility_types';
+import type { PerformRuleUpgradeResponseBody } from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
-import { buildRouteValidation } from '../../../../../utils/build_validation/route_validation';
-import type { PromisePoolError } from '../../../../../utils/promise_pool';
 import { buildSiemResponse } from '../../../routes/utils';
-import { internalRuleToAPIResponse } from '../../../rule_management/normalization/rule_converters';
 import { aggregatePrebuiltRuleErrors } from '../../logic/aggregate_prebuilt_rule_errors';
 import { performTimelinesInstallation } from '../../logic/perform_timelines_installation';
 import { createPrebuiltRuleAssetsClient } from '../../logic/rule_assets/prebuilt_rule_assets_client';
 import { createPrebuiltRuleObjectsClient } from '../../logic/rule_objects/prebuilt_rule_objects_client';
 import { upgradePrebuiltRules } from '../../logic/rule_objects/upgrade_prebuilt_rules';
 import { fetchRuleVersionsTriad } from '../../logic/rule_versions/fetch_rule_versions_triad';
-import type { PrebuiltRuleAsset } from '../../model/rule_assets/prebuilt_rule_asset';
-import { getVersionBuckets } from '../../model/rule_versions/get_version_buckets';
 import { PREBUILT_RULES_OPERATION_SOCKET_TIMEOUT_MS } from '../../constants';
+import { getUpgradeableRules } from './get_upgradeable_rules';
+import { createModifiedPrebuiltRuleAssets } from './create_upgradeable_rules_payload';
+import { getRuleGroups } from '../../model/rule_groups/get_rule_groups';
+import type { ConfigType } from '../../../../../config';
 
-export const performRuleUpgradeRoute = (router: SecuritySolutionPluginRouter) => {
+export const performRuleUpgradeRoute = (
+  router: SecuritySolutionPluginRouter,
+  config: ConfigType
+) => {
   router.versioned
     .post({
       access: 'internal',
       path: PERFORM_RULE_UPGRADE_URL,
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
       options: {
-        tags: ['access:securitySolution'],
         timeout: {
           idleSocket: PREBUILT_RULES_OPERATION_SOCKET_TIMEOUT_MS,
         },
@@ -49,7 +51,7 @@ export const performRuleUpgradeRoute = (router: SecuritySolutionPluginRouter) =>
         version: '1',
         validate: {
           request: {
-            body: buildRouteValidation(PerformRuleUpgradeRequestBody),
+            body: buildRouteValidationWithZod(PerformRuleUpgradeRequestBody),
           },
         },
       },
@@ -60,106 +62,41 @@ export const performRuleUpgradeRoute = (router: SecuritySolutionPluginRouter) =>
           const ctx = await context.resolve(['core', 'alerting', 'securitySolution']);
           const soClient = ctx.core.savedObjects.client;
           const rulesClient = ctx.alerting.getRulesClient();
+          const detectionRulesClient = ctx.securitySolution.getDetectionRulesClient();
           const ruleAssetsClient = createPrebuiltRuleAssetsClient(soClient);
           const ruleObjectsClient = createPrebuiltRuleObjectsClient(rulesClient);
 
-          const { mode, pick_version: globalPickVersion = PickVersionValues.TARGET } = request.body;
+          const { mode } = request.body;
 
-          const fetchErrors: Array<PromisePoolError<{ rule_id: string }>> = [];
-          const targetRules: PrebuiltRuleAsset[] = [];
-          const skippedRules: SkippedRuleUpgrade[] = [];
-
-          const versionSpecifiers = mode === 'ALL_RULES' ? undefined : request.body.rules;
-          const versionSpecifiersMap = new Map(
-            versionSpecifiers?.map((rule) => [rule.rule_id, rule])
-          );
-          const ruleVersionsMap = await fetchRuleVersionsTriad({
+          const versionSpecifiers = mode === ModeEnum.ALL_RULES ? undefined : request.body.rules;
+          const ruleTriadsMap = await fetchRuleVersionsTriad({
             ruleAssetsClient,
             ruleObjectsClient,
             versionSpecifiers,
           });
-          const versionBuckets = getVersionBuckets(ruleVersionsMap);
-          const { currentRules } = versionBuckets;
-          // The upgradeable rules list is mutable; we can remove rules from it because of version mismatch
-          let upgradeableRules = versionBuckets.upgradeableRules;
+          const ruleGroups = getRuleGroups(ruleTriadsMap);
 
-          // Perform all the checks we can before we start the upgrade process
-          if (mode === 'SPECIFIC_RULES') {
-            const installedRuleIds = new Set(currentRules.map((rule) => rule.rule_id));
-            const upgradeableRuleIds = new Set(
-              upgradeableRules.map(({ current }) => current.rule_id)
-            );
-            request.body.rules.forEach((rule) => {
-              // Check that the requested rule was found
-              if (!installedRuleIds.has(rule.rule_id)) {
-                fetchErrors.push({
-                  error: new Error(
-                    `Rule with ID "${rule.rule_id}" and version "${rule.version}" not found`
-                  ),
-                  item: rule,
-                });
-                return;
-              }
-
-              // Check that the requested rule is upgradeable
-              if (!upgradeableRuleIds.has(rule.rule_id)) {
-                skippedRules.push({
-                  rule_id: rule.rule_id,
-                  reason: SkipRuleUpgradeReason.RULE_UP_TO_DATE,
-                });
-                return;
-              }
-
-              // Check that rule revisions match (no update slipped in since the user reviewed the list)
-              const currentRevision = ruleVersionsMap.get(rule.rule_id)?.current?.revision;
-              if (rule.revision !== currentRevision) {
-                fetchErrors.push({
-                  error: new Error(
-                    `Revision mismatch for rule ID ${rule.rule_id}: expected ${rule.revision}, got ${currentRevision}`
-                  ),
-                  item: rule,
-                });
-                // Remove the rule from the list of upgradeable rules
-                upgradeableRules = upgradeableRules.filter(
-                  ({ current }) => current.rule_id !== rule.rule_id
-                );
-              }
-            });
-          }
-
-          // Construct the list of target rule versions
-          upgradeableRules.forEach(({ current, target }) => {
-            const rulePickVersion =
-              versionSpecifiersMap?.get(current.rule_id)?.pick_version ?? globalPickVersion;
-            switch (rulePickVersion) {
-              case PickVersionValues.BASE:
-                const baseVersion = ruleVersionsMap.get(current.rule_id)?.base;
-                if (baseVersion) {
-                  targetRules.push({ ...baseVersion, version: target.version });
-                } else {
-                  fetchErrors.push({
-                    error: new Error(`Could not find base version for rule ${current.rule_id}`),
-                    item: current,
-                  });
-                }
-                break;
-              case PickVersionValues.CURRENT:
-                targetRules.push({ ...current, version: target.version });
-                break;
-              case PickVersionValues.TARGET:
-                targetRules.push(target);
-                break;
-              default:
-                assertUnreachable(rulePickVersion);
-            }
+          const { upgradeableRules, skippedRules, fetchErrors } = getUpgradeableRules({
+            rawUpgradeableRules: ruleGroups.upgradeableRules,
+            currentRules: ruleGroups.currentRules,
+            versionSpecifiers,
+            mode,
           });
 
-          // Perform the upgrade
-          const { results: updatedRules, errors: installationErrors } = await upgradePrebuiltRules(
-            rulesClient,
-            targetRules
+          const { prebuiltRulesCustomizationEnabled } = config.experimentalFeatures;
+          const { modifiedPrebuiltRuleAssets, processingErrors } = createModifiedPrebuiltRuleAssets(
+            {
+              upgradeableRules,
+              requestBody: request.body,
+              prebuiltRulesCustomizationEnabled,
+            }
           );
-          const ruleErrors = [...fetchErrors, ...installationErrors];
+
+          const { results: updatedRules, errors: installationErrors } = await upgradePrebuiltRules(
+            detectionRulesClient,
+            modifiedPrebuiltRuleAssets
+          );
+          const ruleErrors = [...fetchErrors, ...processingErrors, ...installationErrors];
 
           const { error: timelineInstallationError } = await performTimelinesInstallation(
             ctx.securitySolution
@@ -181,7 +118,7 @@ export const performRuleUpgradeRoute = (router: SecuritySolutionPluginRouter) =>
               failed: ruleErrors.length,
             },
             results: {
-              updated: updatedRules.map(({ result }) => internalRuleToAPIResponse(result)),
+              updated: updatedRules.map(({ result }) => result),
               skipped: skippedRules,
             },
             errors: allErrors,

@@ -12,7 +12,7 @@ import {
   CoreStart,
   I18nStart,
 } from '@kbn/core/public';
-import React, { createContext, useContext, useMemo } from 'react';
+import React, { createContext, useContext, useMemo, PropsWithChildren } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ClientPluginsSetup, ClientPluginsStart } from '../../../plugin';
 import { CLIENT_DEFAULTS, CONTEXT_DEFAULTS } from '../../../../common/constants';
@@ -27,18 +27,17 @@ export interface CommonlyUsedDateRange {
 export interface SyntheticsAppProps {
   basePath: string;
   canSave: boolean;
-  core: CoreStart;
+  coreStart: CoreStart;
   darkMode: boolean;
   i18n: I18nStart;
   isApmAvailable: boolean;
   isInfraAvailable: boolean;
   isLogsAvailable: boolean;
-  plugins: ClientPluginsSetup;
+  setupPlugins: ClientPluginsSetup;
   startPlugins: ClientPluginsStart;
   setBadge: (badge?: ChromeBadge) => void;
   renderGlobalHelpControls(): void;
   commonlyUsedRanges: CommonlyUsedDateRange[];
-  setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
   appMountParameters: AppMountParameters;
   isDev: boolean;
   isServerless: boolean;
@@ -78,7 +77,7 @@ const defaultContext: SyntheticsSettingsContextValues = {
 };
 export const SyntheticsSettingsContext = createContext(defaultContext);
 
-export const SyntheticsSettingsContextProvider: React.FC<SyntheticsAppProps> = ({
+export const SyntheticsSettingsContextProvider: React.FC<PropsWithChildren<SyntheticsAppProps>> = ({
   children,
   ...props
 }) => {
@@ -89,7 +88,6 @@ export const SyntheticsSettingsContextProvider: React.FC<SyntheticsAppProps> = (
     isLogsAvailable,
     commonlyUsedRanges,
     isDev,
-    setBreadcrumbs,
     isServerless,
   } = props;
 
@@ -110,7 +108,6 @@ export const SyntheticsSettingsContextProvider: React.FC<SyntheticsAppProps> = (
       commonlyUsedRanges,
       dateRangeStart: dateRangeStart ?? DATE_RANGE_START,
       dateRangeEnd: dateRangeEnd ?? DATE_RANGE_END,
-      setBreadcrumbs,
       isServerless,
     };
   }, [
@@ -123,7 +120,6 @@ export const SyntheticsSettingsContextProvider: React.FC<SyntheticsAppProps> = (
     dateRangeStart,
     dateRangeEnd,
     commonlyUsedRanges,
-    setBreadcrumbs,
     isServerless,
   ]);
 

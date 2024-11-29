@@ -8,15 +8,15 @@
 import { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { v4 as uuidv4 } from 'uuid';
-import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
-import { sourcererActions } from '../../../../common/store/sourcerer';
+import { SourcererScopeName } from '../../../../sourcerer/store/model';
+import { sourcererActions } from '../../../../sourcerer/store';
 import {
   getDataProvider,
   getDataProviderAnd,
-} from '../../../../common/components/event_details/table/use_action_cell_data_provider';
+} from '../../../../common/components/event_details/use_action_cell_data_provider';
 import type { DataProvider, QueryOperator } from '../../../../../common/types/timeline';
 import { TimelineId } from '../../../../../common/types/timeline';
-import { TimelineType } from '../../../../../common/api/timeline';
+import { TimelineTypeEnum } from '../../../../../common/api/timeline';
 import { useCreateTimeline } from '../../../../timelines/hooks/use_create_timeline';
 import { updateProviders } from '../../../../timelines/store/actions';
 import { sourcererSelectors } from '../../../../common/store';
@@ -36,13 +36,13 @@ export const useNavigateToTimeline = () => {
 
   const clearTimeline = useCreateTimeline({
     timelineId: TimelineId.active,
-    timelineType: TimelineType.default,
+    timelineType: TimelineTypeEnum.default,
   });
 
   const navigateToTimeline = useCallback(
-    (dataProviders: DataProvider[], timeRange?: TimeRange) => {
+    async (dataProviders: DataProvider[], timeRange?: TimeRange) => {
       // Reset the current timeline
-      clearTimeline({ timeRange });
+      await clearTimeline({ timeRange });
       // Update the timeline's providers to match the current prevalence field query
       dispatch(
         updateProviders({
@@ -71,7 +71,7 @@ export const useNavigateToTimeline = () => {
    * @param timeRange Defines the timeline time range field and removes the time range lock
    */
   const openTimelineWithFilters = useCallback(
-    (filters: Array<[...Filter[]]>, timeRange?: TimeRange) => {
+    async (filters: Array<[...Filter[]]>, timeRange?: TimeRange) => {
       const dataProviders = [];
 
       for (const orFilterGroup of filters) {
@@ -94,7 +94,7 @@ export const useNavigateToTimeline = () => {
         }
       }
 
-      navigateToTimeline(dataProviders, timeRange);
+      await navigateToTimeline(dataProviders, timeRange);
     },
     [navigateToTimeline]
   );

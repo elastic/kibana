@@ -12,6 +12,7 @@ import type {
   ElasticsearchClient,
   SavedObjectsClientContract,
   IBasePath,
+  SecurityServiceStart,
 } from '@kbn/core/server';
 import type { ISavedObjectsSerializer } from '@kbn/core-saved-objects-server';
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
@@ -20,7 +21,7 @@ import type {
   SecurityPluginSetup,
   SecurityPluginStart,
 } from '@kbn/security-plugin/server';
-import type { PluginStartContract as FeaturesPluginStart } from '@kbn/features-plugin/server';
+import type { FeaturesPluginStart } from '@kbn/features-plugin/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
@@ -35,7 +36,7 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { FilesStart } from '@kbn/files-plugin/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import { SAVED_OBJECT_TYPES } from '../../common/constants';
+import { KIBANA_SYSTEM_USERNAME, SAVED_OBJECT_TYPES } from '../../common/constants';
 import { Authorization } from '../authorization/authorization';
 import {
   CaseConfigureService,
@@ -59,6 +60,7 @@ import { BidirectionalSyncClient } from '../connectors/bidirectional_sync/client
 interface CasesClientFactoryArgs {
   securityPluginSetup: SecurityPluginSetup;
   securityPluginStart: SecurityPluginStart;
+  securityServiceStart: SecurityServiceStart;
   spacesPluginStart?: SpacesPluginStart;
   featuresPluginStart: FeaturesPluginStart;
   actionsPluginStart: ActionsPluginStart;
@@ -263,6 +265,7 @@ export class CasesClientFactory {
 
     try {
       const userProfile = await this.options.securityPluginStart.userProfiles.getCurrent({
+        // todo: Access userProfiles from core's UserProfileService contract
         request,
       });
 
@@ -279,7 +282,7 @@ export class CasesClientFactory {
     }
 
     try {
-      const user = this.options.securityPluginStart.authc.getCurrentUser(request);
+      const user = this.options.securityServiceStart.authc.getCurrentUser(request);
 
       if (user != null) {
         return {
@@ -290,6 +293,14 @@ export class CasesClientFactory {
       }
     } catch (error) {
       this.logger.debug(`Failed to retrieve user info from authc: ${error}`);
+    }
+
+    if (request.isFakeRequest) {
+      return {
+        username: KIBANA_SYSTEM_USERNAME,
+        full_name: null,
+        email: null,
+      };
     }
 
     return {

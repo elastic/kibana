@@ -1,26 +1,30 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiButton,
-  EuiPageTemplate,
-  EuiEmptyPrompt,
-  EuiComboBox,
-  EuiInlineEditTitle,
-  EuiFormRow,
-  EuiSpacer,
-  EuiComboBoxOptionOption,
   EuiButtonEmpty,
+  EuiComboBox,
+  EuiEmptyPrompt,
+  EuiFormRow,
+  EuiInlineEditTitle,
+  EuiPageTemplate,
+  EuiSpacer,
 } from '@elastic/eui';
-import React, { ChangeEvent, useEffect, useState, useRef } from 'react';
-import { FormikProvider, useFormik, Field, Form } from 'formik';
+import { Field, Form, FormikProvider, useFormik } from 'formik';
+import type { ChangeEvent } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+
+import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { CoreStart } from '@kbn/core-lifecycle-browser';
+
 import { useAuthenticator } from './role_switcher';
 
 export const LoginPage = () => {
@@ -139,13 +143,14 @@ export const LoginPage = () => {
               actions={[
                 <EuiButton
                   type="submit"
+                  data-test-subj="loginButton"
                   disabled={!formik.isValid || !isRolesDefined()}
                   isLoading={formik.isSubmitting}
                   fill
                 >
                   Log in
                 </EuiButton>,
-                <EuiButtonEmpty size="xs" href="/">
+                <EuiButtonEmpty size="xs" href="/login">
                   More login options
                 </EuiButtonEmpty>,
               ]}

@@ -19,6 +19,7 @@ env:
   SKIP_NODE_SETUP: true
   TEAM_CHANNEL: "#kibana-mission-control"
   ENVIRONMENT: ${ENVIRONMENT?}
+  DEPLOYMENT_SLICES: ${DEPLOYMENT_SLICES:-""}
 
 steps:
   - label: ":pipeline::grey_question::seedling: Trigger Kibana Tests for ${ENVIRONMENT}"
@@ -26,7 +27,7 @@ steps:
       QG_PIPELINE_LOCATION: ".buildkite/pipelines/quality-gates"
     command: "make -C /agent run-environment-tests" # will trigger https://buildkite.com/elastic/kibana-tests
     agents:
-      image: "docker.elastic.co/ci-agent-images/quality-gate-seedling:0.0.2"
+      image: "docker.elastic.co/ci-agent-images/quality-gate-seedling:0.0.4"
 
 notify:
   - slack: "${TEAM_CHANNEL?}"

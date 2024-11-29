@@ -9,37 +9,52 @@ import React, { useMemo } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import { EuiFlexGroup } from '@elastic/eui';
-import { buildCombinedHostsFilter } from '../../../../../utils/filters/build';
+import {
+  findInventoryFields,
+  type InventoryItemType,
+} from '@kbn/metrics-data-access-plugin/common';
+import { buildCombinedAssetFilter } from '../../../../../utils/filters/build';
 import { HostKpiCharts } from '../../../components/kpis/host_kpi_charts';
-import { useLoadingStateContext } from '../../../hooks/use_loading_state';
+import { ContainerKpiCharts } from '../../../components/kpis/container_kpi_charts';
+import { useSearchSessionContext } from '../../../../../hooks/use_search_session';
 
 interface Props {
   dataView?: DataView;
-  assetName: string;
+  assetId: string;
+  assetType: InventoryItemType;
   dateRange: TimeRange;
 }
 
-export const KPIGrid = ({ assetName, dataView, dateRange }: Props) => {
-  const { searchSessionId } = useLoadingStateContext();
+export const KPIGrid = ({ assetId, assetType, dataView, dateRange }: Props) => {
+  const { searchSessionId } = useSearchSessionContext();
 
   const filters = useMemo(() => {
     return [
-      buildCombinedHostsFilter({
-        field: 'host.name',
-        values: [assetName],
+      buildCombinedAssetFilter({
+        field: findInventoryFields(assetType).id,
+        values: [assetId],
         dataView,
       }),
     ];
-  }, [dataView, assetName]);
+  }, [dataView, assetId, assetType]);
 
   return (
     <EuiFlexGroup direction="row" gutterSize="s" data-test-subj="infraAssetDetailsKPIGrid">
-      <HostKpiCharts
-        dataView={dataView}
-        filters={filters}
-        dateRange={dateRange}
-        searchSessionId={searchSessionId}
-      />
+      {assetType === 'host' ? (
+        <HostKpiCharts
+          dataView={dataView}
+          filters={filters}
+          dateRange={dateRange}
+          searchSessionId={searchSessionId}
+        />
+      ) : (
+        <ContainerKpiCharts
+          dataView={dataView}
+          filters={filters}
+          dateRange={dateRange}
+          searchSessionId={searchSessionId}
+        />
+      )}
     </EuiFlexGroup>
   );
 };

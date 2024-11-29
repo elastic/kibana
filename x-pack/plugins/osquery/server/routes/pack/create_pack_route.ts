@@ -7,11 +7,11 @@
 
 import moment from 'moment-timezone';
 import { set } from '@kbn/safer-lodash-set';
-import { has, unset, find, some, mapKeys } from 'lodash';
+import { has, unset, some, mapKeys } from 'lodash';
 import { produce } from 'immer';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import {
-  AGENT_POLICY_SAVED_OBJECT_TYPE,
+  LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
 } from '@kbn/fleet-plugin/common';
 import type { IRouter } from '@kbn/core/server';
@@ -40,7 +40,11 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
     .post({
       access: 'public',
       path: '/api/osquery/packs',
-      options: { tags: [`access:${PLUGIN_ID}-writePacks`] },
+      security: {
+        authz: {
+          requiredPrivileges: [`${PLUGIN_ID}-writePacks`],
+        },
+      },
     })
     .addVersion(
       {
@@ -64,7 +68,7 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         const agentPolicyService = osqueryContext.service.getAgentPolicyService();
 
         const packagePolicyService = osqueryContext.service.getPackagePolicyService();
-        const currentUser = await osqueryContext.security.authc.getCurrentUser(request)?.username;
+        const currentUser = coreContext.security.authc.getCurrentUser()?.username;
 
         // eslint-disable-next-line @typescript-eslint/naming-convention
         const { name, description, queries, enabled, policy_ids, shards = {} } = request.body;
@@ -89,7 +93,16 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           }
         )) ?? { items: [] };
 
-        const policiesList = getInitialPolicies(packagePolicies, policy_ids, shards);
+        const { policiesList, invalidPolicies } = getInitialPolicies(
+          packagePolicies,
+          policy_ids,
+          shards
+        );
+        if (invalidPolicies?.length) {
+          return response.badRequest({
+            body: `The following policy ids are invalid: ${invalidPolicies.join(', ')}`,
+          });
+        }
 
         const agentPolicies = await agentPolicyService?.getByIds(
           internalSavedObjectsClient,
@@ -103,7 +116,7 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         const references = policiesList.map((id) => ({
           id,
           name: agentPoliciesIdMap[id]?.name,
-          type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+          type: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
         }));
 
         const packSO = await savedObjectsClient.create<PackSavedObjectLimited>(
@@ -128,7 +141,9 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         if (enabled && policiesList.length) {
           await Promise.all(
             policiesList.map((agentPolicyId) => {
-              const packagePolicy = find(packagePolicies, ['policy_id', agentPolicyId]);
+              const packagePolicy = packagePolicies.find((policy) =>
+                policy.policy_ids.includes(agentPolicyId)
+              );
               if (packagePolicy) {
                 return packagePolicyService?.update(
                   internalSavedObjectsClient,
@@ -141,9 +156,7 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                     }
 
                     set(draft, `inputs[0].config.osquery.value.packs.${packSO.attributes.name}`, {
-                      shard: policyShards[packagePolicy.policy_id]
-                        ? policyShards[packagePolicy.policy_id]
-                        : 100,
+                      shard: policyShards[agentPolicyId] ?? 100,
                       queries: convertSOQueriesToPackConfig(queries),
                     });
 

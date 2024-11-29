@@ -42,12 +42,11 @@ describe('Transaction error rate alert', () => {
     });
 
     await executor({ params });
-    expect(services.alertFactory.create).not.toBeCalled();
+    expect(services.alertsClient.report).not.toBeCalled();
   });
 
   it('sends alerts for services that exceeded the threshold', async () => {
-    const { services, dependencies, executor, scheduleActions } =
-      createRuleTypeMocks();
+    const { services, dependencies, executor } = createRuleTypeMocks();
 
     registerTransactionErrorRateRuleType({
       ...dependencies,
@@ -107,6 +106,8 @@ describe('Transaction error rate alert', () => {
       },
     });
 
+    services.alertsClient.report.mockReturnValue({ uuid: 'test-uuid' });
+
     const params = {
       threshold: 10,
       windowSize: 5,
@@ -115,33 +116,49 @@ describe('Transaction error rate alert', () => {
 
     await executor({ params });
 
-    expect(services.alertFactory.create).toHaveBeenCalledTimes(1);
+    expect(services.alertsClient.report).toHaveBeenCalledTimes(1);
 
-    expect(services.alertFactory.create).toHaveBeenCalledWith(
-      'foo_env-foo_type-foo'
-    );
-    expect(services.alertFactory.create).not.toHaveBeenCalledWith(
-      'bar_env-bar_type-bar'
-    );
+    expect(services.alertsClient.report).toHaveBeenCalledWith({
+      actionGroup: 'threshold_met',
+      id: 'foo_env-foo_type-foo',
+    });
+    expect(services.alertsClient.report).not.toHaveBeenCalledWith({
+      actionGroup: 'threshold_met',
+      id: 'bar_env-bar_type-bar',
+    });
 
-    expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
-      serviceName: 'foo',
-      transactionType: 'type-foo',
-      environment: 'env-foo',
-      reason:
-        'Failed transactions is 10% in the last 5 mins for service: foo, env: env-foo, type: type-foo. Alert when > 10%.',
-      threshold: 10,
-      triggerValue: '10',
-      interval: '5 mins',
-      viewInAppUrl:
-        'http://localhost:5601/eyr/app/apm/services/foo?transactionType=type-foo&environment=env-foo',
-      alertDetailsUrl: 'mockedAlertsLocator > getLocation',
+    expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
+      context: {
+        alertDetailsUrl: 'http://localhost:5601/eyr/app/observability/alerts/test-uuid',
+        environment: 'env-foo',
+        interval: '5 mins',
+        reason:
+          'Failed transactions is 10% in the last 5 mins for service: foo, env: env-foo, type: type-foo. Alert when > 10%.',
+        serviceName: 'foo',
+        threshold: 10,
+        transactionName: undefined,
+        transactionType: 'type-foo',
+        triggerValue: '10',
+        viewInAppUrl:
+          'http://localhost:5601/eyr/app/apm/services/foo?transactionType=type-foo&environment=env-foo',
+      },
+      id: 'foo_env-foo_type-foo',
+      payload: {
+        'kibana.alert.evaluation.threshold': 10,
+        'kibana.alert.evaluation.value': 10,
+        'kibana.alert.reason':
+          'Failed transactions is 10% in the last 5 mins for service: foo, env: env-foo, type: type-foo. Alert when > 10%.',
+        'processor.event': 'transaction',
+        'service.environment': 'env-foo',
+        'service.name': 'foo',
+        'transaction.name': undefined,
+        'transaction.type': 'type-foo',
+      },
     });
   });
 
   it('sends alert when rule is configured with group by on transaction.name', async () => {
-    const { services, dependencies, executor, scheduleActions } =
-      createRuleTypeMocks();
+    const { services, dependencies, executor } = createRuleTypeMocks();
 
     registerTransactionErrorRateRuleType({
       ...dependencies,
@@ -201,48 +218,60 @@ describe('Transaction error rate alert', () => {
       },
     });
 
+    services.alertsClient.report.mockReturnValue({ uuid: 'test-uuid' });
+
     const params = {
       threshold: 10,
       windowSize: 5,
       windowUnit: 'm',
-      groupBy: [
-        'service.name',
-        'service.environment',
-        'transaction.type',
-        'transaction.name',
-      ],
+      groupBy: ['service.name', 'service.environment', 'transaction.type', 'transaction.name'],
     };
 
     await executor({ params });
 
-    expect(services.alertFactory.create).toHaveBeenCalledTimes(1);
+    expect(services.alertsClient.report).toHaveBeenCalledTimes(1);
 
-    expect(services.alertFactory.create).toHaveBeenCalledWith(
-      'foo_env-foo_type-foo_tx-name-foo'
-    );
-    expect(services.alertFactory.create).not.toHaveBeenCalledWith(
-      'bar_env-bar_type-bar_tx-name-bar'
-    );
+    expect(services.alertsClient.report).toHaveBeenCalledWith({
+      actionGroup: 'threshold_met',
+      id: 'foo_env-foo_type-foo_tx-name-foo',
+    });
+    expect(services.alertsClient.report).not.toHaveBeenCalledWith({
+      actionGroup: 'threshold_met',
+      id: 'bar_env-bar_type-bar_tx-name-bar',
+    });
 
-    expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
-      serviceName: 'foo',
-      transactionType: 'type-foo',
-      environment: 'env-foo',
-      reason:
-        'Failed transactions is 10% in the last 5 mins for service: foo, env: env-foo, type: type-foo, name: tx-name-foo. Alert when > 10%.',
-      threshold: 10,
-      triggerValue: '10',
-      interval: '5 mins',
-      viewInAppUrl:
-        'http://localhost:5601/eyr/app/apm/services/foo?transactionType=type-foo&environment=env-foo',
-      transactionName: 'tx-name-foo',
-      alertDetailsUrl: 'mockedAlertsLocator > getLocation',
+    expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
+      context: {
+        alertDetailsUrl: 'http://localhost:5601/eyr/app/observability/alerts/test-uuid',
+        environment: 'env-foo',
+        interval: '5 mins',
+        reason:
+          'Failed transactions is 10% in the last 5 mins for service: foo, env: env-foo, type: type-foo, name: tx-name-foo. Alert when > 10%.',
+        serviceName: 'foo',
+        threshold: 10,
+        transactionName: 'tx-name-foo',
+        transactionType: 'type-foo',
+        triggerValue: '10',
+        viewInAppUrl:
+          'http://localhost:5601/eyr/app/apm/services/foo?transactionType=type-foo&environment=env-foo',
+      },
+      id: 'foo_env-foo_type-foo_tx-name-foo',
+      payload: {
+        'kibana.alert.evaluation.threshold': 10,
+        'kibana.alert.evaluation.value': 10,
+        'kibana.alert.reason':
+          'Failed transactions is 10% in the last 5 mins for service: foo, env: env-foo, type: type-foo, name: tx-name-foo. Alert when > 10%.',
+        'processor.event': 'transaction',
+        'service.environment': 'env-foo',
+        'service.name': 'foo',
+        'transaction.name': 'tx-name-foo',
+        'transaction.type': 'type-foo',
+      },
     });
   });
 
   it('sends alert when rule is configured with preselected group by', async () => {
-    const { services, dependencies, executor, scheduleActions } =
-      createRuleTypeMocks();
+    const { services, dependencies, executor } = createRuleTypeMocks();
 
     registerTransactionErrorRateRuleType({
       ...dependencies,
@@ -309,35 +338,53 @@ describe('Transaction error rate alert', () => {
       groupBy: ['service.name', 'service.environment', 'transaction.type'],
     };
 
+    services.alertsClient.report.mockReturnValue({ uuid: 'test-uuid' });
+
     await executor({ params });
 
-    expect(services.alertFactory.create).toHaveBeenCalledTimes(1);
+    expect(services.alertsClient.report).toHaveBeenCalledTimes(1);
 
-    expect(services.alertFactory.create).toHaveBeenCalledWith(
-      'foo_env-foo_type-foo'
-    );
-    expect(services.alertFactory.create).not.toHaveBeenCalledWith(
-      'bar_env-bar_type-bar'
-    );
+    expect(services.alertsClient.report).toHaveBeenCalledWith({
+      actionGroup: 'threshold_met',
+      id: 'foo_env-foo_type-foo',
+    });
+    expect(services.alertsClient.report).not.toHaveBeenCalledWith({
+      actionGroup: 'threshold_met',
+      id: 'bar_env-bar_type-bar',
+    });
 
-    expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
-      serviceName: 'foo',
-      transactionType: 'type-foo',
-      environment: 'env-foo',
-      reason:
-        'Failed transactions is 10% in the last 5 mins for service: foo, env: env-foo, type: type-foo. Alert when > 10%.',
-      threshold: 10,
-      triggerValue: '10',
-      interval: '5 mins',
-      viewInAppUrl:
-        'http://localhost:5601/eyr/app/apm/services/foo?transactionType=type-foo&environment=env-foo',
-      alertDetailsUrl: 'mockedAlertsLocator > getLocation',
+    expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
+      context: {
+        alertDetailsUrl: 'http://localhost:5601/eyr/app/observability/alerts/test-uuid',
+        environment: 'env-foo',
+        interval: '5 mins',
+        reason:
+          'Failed transactions is 10% in the last 5 mins for service: foo, env: env-foo, type: type-foo. Alert when > 10%.',
+        serviceName: 'foo',
+        threshold: 10,
+        transactionName: undefined,
+        transactionType: 'type-foo',
+        triggerValue: '10',
+        viewInAppUrl:
+          'http://localhost:5601/eyr/app/apm/services/foo?transactionType=type-foo&environment=env-foo',
+      },
+      id: 'foo_env-foo_type-foo',
+      payload: {
+        'kibana.alert.evaluation.threshold': 10,
+        'kibana.alert.evaluation.value': 10,
+        'kibana.alert.reason':
+          'Failed transactions is 10% in the last 5 mins for service: foo, env: env-foo, type: type-foo. Alert when > 10%.',
+        'processor.event': 'transaction',
+        'service.environment': 'env-foo',
+        'service.name': 'foo',
+        'transaction.name': undefined,
+        'transaction.type': 'type-foo',
+      },
     });
   });
 
   it('sends alert when service.environment field does not exist in the source', async () => {
-    const { services, dependencies, executor, scheduleActions } =
-      createRuleTypeMocks();
+    const { services, dependencies, executor } = createRuleTypeMocks();
 
     registerTransactionErrorRateRuleType({
       ...dependencies,
@@ -397,6 +444,8 @@ describe('Transaction error rate alert', () => {
       },
     });
 
+    services.alertsClient.report.mockReturnValue({ uuid: 'test-uuid' });
+
     const params = {
       threshold: 10,
       windowSize: 5,
@@ -406,33 +455,49 @@ describe('Transaction error rate alert', () => {
 
     await executor({ params });
 
-    expect(services.alertFactory.create).toHaveBeenCalledTimes(1);
+    expect(services.alertsClient.report).toHaveBeenCalledTimes(1);
 
-    expect(services.alertFactory.create).toHaveBeenCalledWith(
-      'foo_ENVIRONMENT_NOT_DEFINED_type-foo'
-    );
-    expect(services.alertFactory.create).not.toHaveBeenCalledWith(
-      'bar_ENVIRONMENT_NOT_DEFINED_type-bar'
-    );
+    expect(services.alertsClient.report).toHaveBeenCalledWith({
+      actionGroup: 'threshold_met',
+      id: 'foo_ENVIRONMENT_NOT_DEFINED_type-foo',
+    });
+    expect(services.alertsClient.report).not.toHaveBeenCalledWith({
+      actionGroup: 'threshold_met',
+      id: 'bar_ENVIRONMENT_NOT_DEFINED_type-bar',
+    });
 
-    expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
-      serviceName: 'foo',
-      transactionType: 'type-foo',
-      environment: 'Not defined',
-      reason:
-        'Failed transactions is 10% in the last 5 mins for service: foo, env: Not defined, type: type-foo. Alert when > 10%.',
-      threshold: 10,
-      triggerValue: '10',
-      interval: '5 mins',
-      viewInAppUrl:
-        'http://localhost:5601/eyr/app/apm/services/foo?transactionType=type-foo&environment=ENVIRONMENT_ALL',
-      alertDetailsUrl: 'mockedAlertsLocator > getLocation',
+    expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
+      context: {
+        alertDetailsUrl: 'http://localhost:5601/eyr/app/observability/alerts/test-uuid',
+        environment: 'Not defined',
+        interval: '5 mins',
+        reason:
+          'Failed transactions is 10% in the last 5 mins for service: foo, env: Not defined, type: type-foo. Alert when > 10%.',
+        serviceName: 'foo',
+        threshold: 10,
+        transactionName: undefined,
+        transactionType: 'type-foo',
+        triggerValue: '10',
+        viewInAppUrl:
+          'http://localhost:5601/eyr/app/apm/services/foo?transactionType=type-foo&environment=ENVIRONMENT_ALL',
+      },
+      id: 'foo_ENVIRONMENT_NOT_DEFINED_type-foo',
+      payload: {
+        'kibana.alert.evaluation.threshold': 10,
+        'kibana.alert.evaluation.value': 10,
+        'kibana.alert.reason':
+          'Failed transactions is 10% in the last 5 mins for service: foo, env: Not defined, type: type-foo. Alert when > 10%.',
+        'processor.event': 'transaction',
+        'service.environment': 'ENVIRONMENT_NOT_DEFINED',
+        'service.name': 'foo',
+        'transaction.name': undefined,
+        'transaction.type': 'type-foo',
+      },
     });
   });
 
   it('sends alert when rule is configured with a filter query', async () => {
-    const { services, dependencies, executor, scheduleActions } =
-      createRuleTypeMocks();
+    const { services, dependencies, executor } = createRuleTypeMocks();
 
     registerTransactionErrorRateRuleType({
       ...dependencies,
@@ -477,6 +542,8 @@ describe('Transaction error rate alert', () => {
       },
     });
 
+    services.alertsClient.report.mockReturnValue({ uuid: 'test-uuid' });
+
     const params = {
       threshold: 10,
       windowSize: 5,
@@ -493,24 +560,40 @@ describe('Transaction error rate alert', () => {
 
     await executor({ params });
 
-    expect(services.alertFactory.create).toHaveBeenCalledTimes(1);
+    expect(services.alertsClient.report).toHaveBeenCalledTimes(1);
 
-    expect(services.alertFactory.create).toHaveBeenCalledWith(
-      'bar_env-bar_type-bar'
-    );
+    expect(services.alertsClient.report).toHaveBeenCalledWith({
+      actionGroup: 'threshold_met',
+      id: 'bar_env-bar_type-bar',
+    });
 
-    expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
-      serviceName: 'bar',
-      transactionType: 'type-bar',
-      environment: 'env-bar',
-      reason:
-        'Failed transactions is 10% in the last 5 mins for service: bar, env: env-bar, type: type-bar. Alert when > 10%.',
-      threshold: 10,
-      triggerValue: '10',
-      interval: '5 mins',
-      viewInAppUrl:
-        'http://localhost:5601/eyr/app/apm/services/bar?transactionType=type-bar&environment=env-bar',
-      alertDetailsUrl: 'mockedAlertsLocator > getLocation',
+    expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
+      context: {
+        alertDetailsUrl: 'http://localhost:5601/eyr/app/observability/alerts/test-uuid',
+        environment: 'env-bar',
+        interval: '5 mins',
+        reason:
+          'Failed transactions is 10% in the last 5 mins for service: bar, env: env-bar, type: type-bar. Alert when > 10%.',
+        serviceName: 'bar',
+        threshold: 10,
+        transactionName: undefined,
+        transactionType: 'type-bar',
+        triggerValue: '10',
+        viewInAppUrl:
+          'http://localhost:5601/eyr/app/apm/services/bar?transactionType=type-bar&environment=env-bar',
+      },
+      id: 'bar_env-bar_type-bar',
+      payload: {
+        'kibana.alert.evaluation.threshold': 10,
+        'kibana.alert.evaluation.value': 10,
+        'kibana.alert.reason':
+          'Failed transactions is 10% in the last 5 mins for service: bar, env: env-bar, type: type-bar. Alert when > 10%.',
+        'processor.event': 'transaction',
+        'service.environment': 'env-bar',
+        'service.name': 'bar',
+        'transaction.name': undefined,
+        'transaction.type': 'type-bar',
+      },
     });
   });
 });

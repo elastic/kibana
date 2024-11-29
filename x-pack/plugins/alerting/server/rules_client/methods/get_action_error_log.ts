@@ -19,7 +19,7 @@ import { IExecutionErrorsResult } from '../../../common';
 import { formatExecutionErrorsResult } from '../../lib/format_execution_log_errors';
 import { parseDate } from '../common';
 import { RulesClientContext } from '../types';
-import { get } from './get';
+import { getRule } from '../../application/rule/methods/get/get_rule';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
 const actionErrorLogDefaultFilter =
@@ -41,7 +41,7 @@ export async function getActionErrorLog(
   { id, dateStart, dateEnd, filter, page, perPage, sort }: GetActionErrorLogByIdParams
 ): Promise<IExecutionErrorsResult> {
   context.logger.debug(`getActionErrorLog(): getting action error logs for rule ${id}`);
-  const rule = (await get(context, { id, includeLegacyId: true })) as SanitizedRuleWithLegacyId;
+  const rule = (await getRule(context, { id, includeLegacyId: true })) as SanitizedRuleWithLegacyId;
 
   try {
     await context.authorization.ensureAuthorized({
@@ -54,7 +54,7 @@ export async function getActionErrorLog(
     context.auditLogger?.log(
       ruleAuditEvent({
         action: RuleAuditAction.GET_ACTION_ERROR_LOG,
-        savedObject: { type: RULE_SAVED_OBJECT_TYPE, id },
+        savedObject: { type: RULE_SAVED_OBJECT_TYPE, id, name: rule.name },
         error,
       })
     );
@@ -64,7 +64,7 @@ export async function getActionErrorLog(
   context.auditLogger?.log(
     ruleAuditEvent({
       action: RuleAuditAction.GET_ACTION_ERROR_LOG,
-      savedObject: { type: RULE_SAVED_OBJECT_TYPE, id },
+      savedObject: { type: RULE_SAVED_OBJECT_TYPE, id, name: rule.name },
     })
   );
 

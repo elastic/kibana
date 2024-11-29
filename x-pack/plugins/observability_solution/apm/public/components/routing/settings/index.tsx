@@ -52,33 +52,31 @@ export const settingsRoute = {
         title={i18n.translate('xpack.apm.views.listSettings.title', {
           defaultMessage: 'Settings',
         })}
+        omitOnServerless
       >
         <Outlet />
       </Breadcrumb>
     ),
     children: {
       '/settings/general-settings': page({
-        title: i18n.translate(
-          'xpack.apm.views.settings.generalSettings.title',
-          { defaultMessage: 'General settings' }
-        ),
+        title: i18n.translate('xpack.apm.views.settings.generalSettings.title', {
+          defaultMessage: 'General settings',
+        }),
         element: <GeneralSettings />,
         tab: 'general-settings',
       }),
       '/settings/agent-configuration': page({
         tab: 'agent-configuration',
-        title: i18n.translate(
-          'xpack.apm.views.settings.agentConfiguration.title',
-          { defaultMessage: 'Agent Configuration' }
-        ),
+        title: i18n.translate('xpack.apm.views.settings.agentConfiguration.title', {
+          defaultMessage: 'Agent Configuration',
+        }),
         element: <AgentConfigurations />,
       }),
       '/settings/agent-configuration/create': {
         ...page({
-          title: i18n.translate(
-            'xpack.apm.views.settings.createAgentConfiguration.title',
-            { defaultMessage: 'Create Agent Configuration' }
-          ),
+          title: i18n.translate('xpack.apm.views.settings.createAgentConfiguration.title', {
+            defaultMessage: 'Create Agent Configuration',
+          }),
           tab: 'agent-configuration',
           element: <CreateAgentConfigurationRouteView />,
         }),
@@ -90,10 +88,9 @@ export const settingsRoute = {
       },
       '/settings/agent-configuration/edit': {
         ...page({
-          title: i18n.translate(
-            'xpack.apm.views.settings.editAgentConfiguration.title',
-            { defaultMessage: 'Edit Agent Configuration' }
-          ),
+          title: i18n.translate('xpack.apm.views.settings.editAgentConfiguration.title', {
+            defaultMessage: 'Edit Agent Configuration',
+          }),
           tab: 'agent-configuration',
           element: <EditAgentConfigurationRouteView />,
         }),
@@ -127,12 +124,9 @@ export const settingsRoute = {
         tab: 'schema',
       }),
       '/settings/anomaly-detection': page({
-        title: i18n.translate(
-          'xpack.apm.views.settings.anomalyDetection.title',
-          {
-            defaultMessage: 'Anomaly detection',
-          }
-        ),
+        title: i18n.translate('xpack.apm.views.settings.anomalyDetection.title', {
+          defaultMessage: 'Anomaly detection',
+        }),
         element: <AnomalyDetection />,
         tab: 'anomaly-detection',
       }),
@@ -145,12 +139,9 @@ export const settingsRoute = {
       }),
       '/settings/agent-explorer': {
         ...page({
-          title: i18n.translate(
-            'xpack.apm.views.settings.agentExplorer.title',
-            {
-              defaultMessage: 'Agent explorer',
-            }
-          ),
+          title: i18n.translate('xpack.apm.views.settings.agentExplorer.title', {
+            defaultMessage: 'Agent explorer',
+          }),
           element: <AgentExplorer />,
           tab: 'agent-explorer',
         }),

@@ -14,6 +14,7 @@ import { rulesClientMock } from '../../rules_client.mock';
 import { AlertSummary } from '../../types';
 import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
+import { docLinksServiceMock } from '@kbn/core/server/mocks';
 
 const rulesClient = rulesClientMock.create();
 jest.mock('../../lib/license_api_access', () => ({
@@ -29,6 +30,7 @@ beforeEach(() => {
 });
 
 describe('getAlertInstanceSummaryRoute', () => {
+  const docLinks = docLinksServiceMock.createSetupContract();
   const dateString = new Date().toISOString();
   const mockedAlertInstanceSummary: AlertSummary = {
     id: '',
@@ -55,11 +57,12 @@ describe('getAlertInstanceSummaryRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    getAlertInstanceSummaryRoute(router, licenseState);
+    getAlertInstanceSummaryRoute(router, licenseState, docLinks);
 
     const [config, handler] = router.get.mock.calls[0];
 
     expect(config.path).toMatchInlineSnapshot(`"/api/alerts/alert/{id}/_instance_summary"`);
+    expect(config.options?.access).toBe('public');
 
     rulesClient.getAlertSummary.mockResolvedValueOnce(mockedAlertInstanceSummary);
 
@@ -89,11 +92,23 @@ describe('getAlertInstanceSummaryRoute', () => {
     expect(res.ok).toHaveBeenCalled();
   });
 
+  it('should have internal access for serverless', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    getAlertInstanceSummaryRoute(router, licenseState, docLinks, undefined, true);
+
+    const [config] = router.get.mock.calls[0];
+
+    expect(config.path).toMatchInlineSnapshot(`"/api/alerts/alert/{id}/_instance_summary"`);
+    expect(config.options?.access).toBe('internal');
+  });
+
   it('returns NOT-FOUND when alert is not found', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    getAlertInstanceSummaryRoute(router, licenseState);
+    getAlertInstanceSummaryRoute(router, licenseState, docLinks);
 
     const [, handler] = router.get.mock.calls[0];
 
@@ -123,7 +138,7 @@ describe('getAlertInstanceSummaryRoute', () => {
     const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
     const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
 
-    getAlertInstanceSummaryRoute(router, licenseState, mockUsageCounter);
+    getAlertInstanceSummaryRoute(router, licenseState, docLinks, mockUsageCounter);
     const [, handler] = router.get.mock.calls[0];
 
     rulesClient.getAlertSummary.mockResolvedValueOnce(mockedAlertInstanceSummary);
@@ -134,5 +149,29 @@ describe('getAlertInstanceSummaryRoute', () => {
     );
     await handler(context, req, res);
     expect(trackLegacyRouteUsage).toHaveBeenCalledWith('instanceSummary', mockUsageCounter);
+  });
+
+  it('should be deprecated', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    getAlertInstanceSummaryRoute(router, licenseState, docLinks);
+
+    const [config] = router.get.mock.calls[0];
+
+    expect(config.options?.deprecated).toMatchInlineSnapshot(
+      {
+        documentationUrl: expect.stringMatching(/#breaking-201550$/),
+      },
+      `
+      Object {
+        "documentationUrl": StringMatching /#breaking-201550\\$/,
+        "reason": Object {
+          "type": "remove",
+        },
+        "severity": "warning",
+      }
+    `
+    );
   });
 });

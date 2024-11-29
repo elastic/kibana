@@ -10,9 +10,7 @@ import React from 'react';
 import { APMLinkExtendProps, useAPMHref } from './apm_link';
 
 export function useServiceMapHref(serviceName?: string) {
-  const path = serviceName
-    ? `/services/${serviceName}/service-map`
-    : '/service-map';
+  const path = serviceName ? `/services/${serviceName}/service-map` : '/service-map';
   return useAPMHref({ path });
 }
 
@@ -22,7 +20,5 @@ interface ServiceMapLinkProps extends APMLinkExtendProps {
 
 export function ServiceMapLink({ serviceName, ...rest }: ServiceMapLinkProps) {
   const href = useServiceMapHref(serviceName);
-  return (
-    <EuiLink data-test-subj="apmServiceMapLinkLink" href={href} {...rest} />
-  );
+  return <EuiLink data-test-subj="apmServiceMapLinkLink" href={href} {...rest} />;
 }

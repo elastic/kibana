@@ -182,25 +182,16 @@ describe('filterByAgent', () => {
     });
 
     it('android/java', () => {
-      expect(getSettingKeysForAgent('android/java')).toEqual([
-        'recording',
-        'session_sample_rate',
-      ]);
+      expect(getSettingKeysForAgent('android/java')).toEqual(['recording', 'session_sample_rate']);
     });
 
     it('iOS/swift', () => {
-      expect(getSettingKeysForAgent('iOS/swift')).toEqual([
-        'recording',
-        'session_sample_rate',
-      ]);
+      expect(getSettingKeysForAgent('iOS/swift')).toEqual(['recording', 'session_sample_rate']);
     });
 
     it('"All" services (no agent name)', () => {
       expect(getSettingKeysForAgent(undefined)).toEqual(
-        expect.arrayContaining([
-          'transaction_max_spans',
-          'transaction_sample_rate',
-        ])
+        expect.arrayContaining(['transaction_max_spans', 'transaction_sample_rate'])
       );
     });
   });

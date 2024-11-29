@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mount } from 'enzyme';
+import { mount, type ComponentType as EnzymeComponentType } from 'enzyme';
 import { AlertContextMenu } from './alert_context_menu';
 import { TestProviders } from '../../../../common/mock';
 import React from 'react';
@@ -88,6 +88,8 @@ jest.mock('../../../../common/lib/kibana', () => {
               update: true,
               delete: true,
               push: true,
+              createComment: true,
+              reopenCase: true,
             }),
             getRuleIdFromEvent: jest.fn(),
           },
@@ -115,7 +117,7 @@ describe('Alert table context menu', () => {
   describe('Case actions', () => {
     test('it render AddToCase context menu item if timelineId === TimelineId.detectionsPage', () => {
       const wrapper = mount(<AlertContextMenu {...props} scopeId={TableId.alertsOnAlertsPage} />, {
-        wrappingComponent: TestProviders,
+        wrappingComponent: TestProviders as EnzymeComponentType<{}>,
       });
 
       wrapper.find(actionMenuButton).simulate('click');
@@ -127,7 +129,7 @@ describe('Alert table context menu', () => {
       const wrapper = mount(
         <AlertContextMenu {...props} scopeId={TableId.alertsOnRuleDetailsPage} />,
         {
-          wrappingComponent: TestProviders,
+          wrappingComponent: TestProviders as EnzymeComponentType<{}>,
         }
       );
 
@@ -138,7 +140,7 @@ describe('Alert table context menu', () => {
 
     test('it render AddToCase context menu item if timelineId === TimelineId.active', () => {
       const wrapper = mount(<AlertContextMenu {...props} scopeId={TimelineId.active} />, {
-        wrappingComponent: TestProviders,
+        wrappingComponent: TestProviders as EnzymeComponentType<{}>,
       });
 
       wrapper.find(actionMenuButton).simulate('click');
@@ -148,7 +150,7 @@ describe('Alert table context menu', () => {
 
     test('it does NOT render AddToCase context menu item when timelineId is not in the allowed list', () => {
       const wrapper = mount(<AlertContextMenu {...props} scopeId="timeline-test" />, {
-        wrappingComponent: TestProviders,
+        wrappingComponent: TestProviders as EnzymeComponentType<{}>,
       });
       wrapper.find(actionMenuButton).simulate('click');
       expect(wrapper.find(addToExistingCaseButton).first().exists()).toEqual(false);
@@ -159,7 +161,7 @@ describe('Alert table context menu', () => {
   describe('Alert status actions', () => {
     test('it renders the correct status action buttons', () => {
       const wrapper = mount(<AlertContextMenu {...props} scopeId={TimelineId.active} />, {
-        wrappingComponent: TestProviders,
+        wrappingComponent: TestProviders as EnzymeComponentType<{}>,
       });
 
       wrapper.find(actionMenuButton).simulate('click');
@@ -189,7 +191,7 @@ describe('Alert table context menu', () => {
           const wrapper = mount(
             <AlertContextMenu {...endpointEventProps} scopeId={TimelineId.active} />,
             {
-              wrappingComponent: TestProviders,
+              wrappingComponent: TestProviders as EnzymeComponentType<{}>,
             }
           );
 
@@ -202,7 +204,7 @@ describe('Alert table context menu', () => {
           const wrapper = mount(
             <AlertContextMenu {...endpointEventProps} scopeId={TableId.hostsPageEvents} />,
             {
-              wrappingComponent: TestProviders,
+              wrappingComponent: TestProviders as EnzymeComponentType<{}>,
             }
           );
 
@@ -221,7 +223,7 @@ describe('Alert table context menu', () => {
           const wrapper = mount(
             <AlertContextMenu {...customProps} scopeId={TableId.hostsPageEvents} />,
             {
-              wrappingComponent: TestProviders,
+              wrappingComponent: TestProviders as EnzymeComponentType<{}>,
             }
           );
 
@@ -234,7 +236,7 @@ describe('Alert table context menu', () => {
           const wrapper = mount(
             <AlertContextMenu {...endpointEventProps} scopeId={TableId.usersPageEvents} />,
             {
-              wrappingComponent: TestProviders,
+              wrappingComponent: TestProviders as EnzymeComponentType<{}>,
             }
           );
 
@@ -253,7 +255,7 @@ describe('Alert table context menu', () => {
           const wrapper = mount(
             <AlertContextMenu {...customProps} scopeId={TableId.usersPageEvents} />,
             {
-              wrappingComponent: TestProviders,
+              wrappingComponent: TestProviders as EnzymeComponentType<{}>,
             }
           );
 
@@ -275,7 +277,7 @@ describe('Alert table context menu', () => {
           const wrapper = mount(
             <AlertContextMenu {...endpointEventProps} scopeId={TableId.hostsPageEvents} />,
             {
-              wrappingComponent: TestProviders,
+              wrappingComponent: TestProviders as EnzymeComponentType<{}>,
             }
           );
 
@@ -287,7 +289,7 @@ describe('Alert table context menu', () => {
           const wrapper = mount(
             <AlertContextMenu {...endpointEventProps} scopeId={TableId.usersPageEvents} />,
             {
-              wrappingComponent: TestProviders,
+              wrappingComponent: TestProviders as EnzymeComponentType<{}>,
             }
           );
 
@@ -301,7 +303,7 @@ describe('Alert table context menu', () => {
   describe('Apply alert tags action', () => {
     test('it renders the apply alert tags action button', () => {
       const wrapper = mount(<AlertContextMenu {...props} scopeId={TimelineId.active} />, {
-        wrappingComponent: TestProviders,
+        wrappingComponent: TestProviders as EnzymeComponentType<{}>,
       });
 
       wrapper.find(actionMenuButton).simulate('click');
@@ -313,7 +315,7 @@ describe('Alert table context menu', () => {
   describe('Assign alert action', () => {
     test('it renders the assign alert action button', () => {
       const wrapper = mount(<AlertContextMenu {...props} scopeId={TimelineId.active} />, {
-        wrappingComponent: TestProviders,
+        wrappingComponent: TestProviders as EnzymeComponentType<{}>,
       });
 
       wrapper.find(actionMenuButton).simulate('click');

@@ -8,10 +8,12 @@ import { errors } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
 import { CoreSetup, Logger, RouteRegistrar } from '@kbn/core/server';
 import {
+  IoTsParamsObject,
   ServerRouteRepository,
   decodeRequestParams,
+  stripNullishRequestParameters,
   parseEndpoint,
-  routeValidationObject,
+  passThroughValidationObject,
 } from '@kbn/server-route-repository';
 import * as t from 'io-ts';
 import { DatasetQualityRequestHandlerContext } from '../types';
@@ -22,32 +24,43 @@ interface RegisterRoutes {
   repository: ServerRouteRepository;
   logger: Logger;
   plugins: DatasetQualityRouteHandlerResources['plugins'];
+  getEsCapabilities: DatasetQualityRouteHandlerResources['getEsCapabilities'];
 }
 
-export function registerRoutes({ repository, core, logger, plugins }: RegisterRoutes) {
+export function registerRoutes({
+  repository,
+  core,
+  logger,
+  plugins,
+  getEsCapabilities,
+}: RegisterRoutes) {
   const routes = Object.values(repository);
 
   const router = core.http.createRouter();
 
   routes.forEach((route) => {
-    const { endpoint, options, handler, params } = route;
+    const { endpoint, handler } = route;
     const { pathname, method } = parseEndpoint(endpoint);
+
+    const params = 'params' in route ? route.params : undefined;
+    const options = 'options' in route ? route.options : {};
 
     (router[method] as RouteRegistrar<typeof method, DatasetQualityRequestHandlerContext>)(
       {
         path: pathname,
-        validate: routeValidationObject,
+        validate: passThroughValidationObject,
         options,
+        security: route.security,
       },
       async (context, request, response) => {
         try {
           const decodedParams = decodeRequestParams(
-            {
+            stripNullishRequestParameters({
               params: request.params,
               body: request.body,
               query: request.query,
-            },
-            params ?? t.strict({})
+            }),
+            (params as IoTsParamsObject) ?? t.strict({})
           );
 
           const data = (await handler({
@@ -56,6 +69,7 @@ export function registerRoutes({ repository, core, logger, plugins }: RegisterRo
             logger,
             params: decodedParams,
             plugins,
+            getEsCapabilities,
           })) as any;
 
           if (data === undefined) {

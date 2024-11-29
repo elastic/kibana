@@ -6,10 +6,5 @@
  */
 
 /** This mock returns the reverse of `value` */
-export const mockGetAnonymizedValue = ({
-  currentReplacements,
-  rawValue,
-}: {
-  currentReplacements: Record<string, string> | undefined;
-  rawValue: string;
-}): string => rawValue.split('').reverse().join('');
+export const mockGetAnonymizedValue = ({ rawValue }: { rawValue: string }): string =>
+  rawValue.split('').reverse().join('');

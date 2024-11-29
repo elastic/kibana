@@ -19,6 +19,8 @@ export const SyntheticsParamsReadonlyCodec = t.intersection([
   }),
 ]);
 
+export const SyntheticsParamsReadonlyCodecList = t.array(SyntheticsParamsReadonlyCodec);
+
 export type SyntheticsParamsReadonly = t.TypeOf<typeof SyntheticsParamsReadonlyCodec>;
 
 export const SyntheticsParamsCodec = t.intersection([
@@ -30,10 +32,15 @@ export type SyntheticsParams = t.TypeOf<typeof SyntheticsParamsCodec>;
 
 export type SyntheticsParamSOAttributes = t.TypeOf<typeof SyntheticsParamsCodec>;
 
-export const DeleteParamsResponseCodec = t.interface({
-  id: t.string,
-  deleted: t.boolean,
-});
+export const DeleteParamsResponseCodec = t.intersection([
+  t.interface({
+    id: t.string,
+    deleted: t.boolean,
+  }),
+  t.partial({
+    error: t.string,
+  }),
+]);
 
 export type DeleteParamsResponse = t.TypeOf<typeof DeleteParamsResponseCodec>;
 

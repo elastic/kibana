@@ -11,54 +11,108 @@ import type { EqlSearchStrategyRequest, EqlSearchStrategyResponse } from '@kbn/d
 import { EQL_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import type { EqlOptionsSelected } from '../../../../common/search_strategy';
+import type { EqlOptions } from '../../../../common/search_strategy';
 import {
   getValidationErrors,
   isErrorResponse,
-  isValidationErrorResponse,
+  isMappingErrorResponse,
+  isParsingErrorResponse,
+  isVerificationErrorResponse,
 } from '../../../../common/search_strategy/eql';
+
+export enum EQL_ERROR_CODES {
+  FAILED_REQUEST = 'EQL_ERR_FAILED_REQUEST',
+  INVALID_EQL = 'EQL_ERR_INVALID_EQL',
+  INVALID_SYNTAX = 'EQL_ERR_INVALID_SYNTAX',
+  MISSING_DATA_SOURCE = 'EQL_ERR_MISSING_DATA_SOURCE',
+}
 
 interface Params {
   dataViewTitle: string;
   query: string;
   data: DataPublicPluginStart;
-  signal: AbortSignal;
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
-  options: Omit<EqlOptionsSelected, 'query' | 'size'> | undefined;
+  eqlOptions: Omit<EqlOptions, 'query' | 'size'> | undefined;
+  signal?: AbortSignal;
+}
+
+export interface EqlResponseError {
+  code: EQL_ERROR_CODES;
+  messages?: string[];
+  error?: Error;
+}
+
+export interface ValidateEqlResponse {
+  valid: boolean;
+  error?: EqlResponseError;
 }
 
 export const validateEql = async ({
   data,
   dataViewTitle,
   query,
-  signal,
   runtimeMappings,
-  options,
-}: Params): Promise<{ valid: boolean; errors: string[] }> => {
-  const { rawResponse: response } = await firstValueFrom(
-    data.search.search<EqlSearchStrategyRequest, EqlSearchStrategyResponse>(
-      {
-        params: {
-          index: dataViewTitle,
-          body: { query, runtime_mappings: runtimeMappings, size: 0 },
-          timestamp_field: options?.timestampField,
-          tiebreaker_field: options?.tiebreakerField || undefined,
-          event_category_field: options?.eventCategoryField,
+  eqlOptions,
+  signal,
+}: Params): Promise<ValidateEqlResponse> => {
+  try {
+    const { rawResponse: response } = await firstValueFrom(
+      data.search.search<EqlSearchStrategyRequest, EqlSearchStrategyResponse>(
+        {
+          params: {
+            index: dataViewTitle,
+            body: { query, runtime_mappings: runtimeMappings, size: 0 },
+            // Prevent passing empty string values
+            timestamp_field: eqlOptions?.timestampField ? eqlOptions.timestampField : undefined,
+            tiebreaker_field: eqlOptions?.tiebreakerField ? eqlOptions.tiebreakerField : undefined,
+            event_category_field: eqlOptions?.eventCategoryField
+              ? eqlOptions.eventCategoryField
+              : undefined,
+          },
+          options: { ignore: [400] },
         },
-        options: { ignore: [400] },
-      },
-      {
-        strategy: EQL_SEARCH_STRATEGY,
-        abortSignal: signal,
-      }
-    )
-  );
+        {
+          strategy: EQL_SEARCH_STRATEGY,
+          abortSignal: signal,
+        }
+      )
+    );
+    if (isParsingErrorResponse(response)) {
+      return {
+        valid: false,
+        error: { code: EQL_ERROR_CODES.INVALID_SYNTAX, messages: getValidationErrors(response) },
+      };
+    }
 
-  if (isValidationErrorResponse(response)) {
-    return { valid: false, errors: getValidationErrors(response) };
-  } else if (isErrorResponse(response)) {
-    throw new Error(JSON.stringify(response));
-  } else {
-    return { valid: true, errors: [] };
+    if (isVerificationErrorResponse(response) || isMappingErrorResponse(response)) {
+      return {
+        valid: false,
+        error: { code: EQL_ERROR_CODES.INVALID_EQL, messages: getValidationErrors(response) },
+      };
+    }
+
+    if (isErrorResponse(response)) {
+      return {
+        valid: false,
+        error: { code: EQL_ERROR_CODES.FAILED_REQUEST, error: new Error(JSON.stringify(response)) },
+      };
+    }
+
+    return { valid: true };
+  } catch (error) {
+    if (error instanceof Error && error.message.startsWith('index_not_found_exception')) {
+      return {
+        valid: false,
+        error: { code: EQL_ERROR_CODES.MISSING_DATA_SOURCE, messages: [error.message] },
+      };
+    }
+
+    return {
+      valid: false,
+      error: {
+        code: EQL_ERROR_CODES.FAILED_REQUEST,
+        error,
+      },
+    };
   }
 };

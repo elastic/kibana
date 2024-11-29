@@ -5,33 +5,28 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSkeletonText, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSkeletonText, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import moment from 'moment';
 import React from 'react';
+import { SloRemoteBadge } from '../../slos/components/badges/slo_remote_badge';
 import { SLOGroupings } from '../../slos/components/common/slo_groupings';
 import { SloStatusBadge } from '../../../components/slo/slo_status_badge';
 
 export interface Props {
-  slo: SLOWithSummaryResponse | undefined;
+  slo?: SLOWithSummaryResponse;
   isLoading: boolean;
-  showTitle?: boolean;
 }
 
-export function HeaderTitle({ isLoading, slo, showTitle = true }: Props) {
+export function HeaderTitle({ isLoading, slo }: Props) {
   if (isLoading || !slo) {
     return <EuiSkeletonText lines={1} data-test-subj="loadingTitle" />;
   }
 
   return (
     <EuiFlexGroup direction="column" gutterSize="xs">
-      {showTitle && (
-        <>
-          <EuiFlexItem grow={false}>{slo.name}</EuiFlexItem>
-          <SLOGroupings slo={slo} />
-        </>
-      )}
+      <SLOGroupings slo={slo} />
 
       <EuiFlexGroup
         direction="row"
@@ -42,6 +37,7 @@ export function HeaderTitle({ isLoading, slo, showTitle = true }: Props) {
         wrap={true}
       >
         <SloStatusBadge slo={slo} />
+        <SloRemoteBadge slo={slo} />
         <EuiFlexItem grow={false}>
           <EuiText color="subdued" size="xs">
             <strong>
@@ -65,6 +61,7 @@ export function HeaderTitle({ isLoading, slo, showTitle = true }: Props) {
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
+      <EuiSpacer size="s" />
     </EuiFlexGroup>
   );
 }

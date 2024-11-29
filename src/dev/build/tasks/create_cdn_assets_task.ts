@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { readFileSync } from 'fs';
@@ -12,11 +13,13 @@ import { access } from 'fs/promises';
 import { resolve, dirname } from 'path';
 import { asyncForEach } from '@kbn/std';
 import { Jsonc } from '@kbn/repo-packages';
+import { getKibanaTranslationFiles, supportedLocale } from '@kbn/core-i18n-server-internal';
+import { i18n, i18nLoader } from '@kbn/i18n';
 
 import del from 'del';
 import globby from 'globby';
 
-import { mkdirp, compressTar, Task, copyAll } from '../lib';
+import { mkdirp, compressTar, Task, copyAll, write } from '../lib';
 
 export const CreateCdnAssets: Task = {
   description: 'Creating CDN assets',
@@ -31,9 +34,19 @@ export const CreateCdnAssets: Task = {
     await del(assets);
     await mkdirp(assets);
 
-    // Plugins
-
     const plugins = globby.sync([`${buildSource}/node_modules/@kbn/**/*/kibana.jsonc`]);
+
+    // translation files
+    const pluginPaths = plugins.map((plugin) => resolve(dirname(plugin)));
+    for (const locale of supportedLocale) {
+      const translationFileContent = await generateTranslationFile(locale, pluginPaths);
+      await write(
+        resolve(assets, buildSha, `translations`, `${locale}.json`),
+        translationFileContent
+      );
+    }
+
+    // Plugins static assets
     await asyncForEach(plugins, async (path) => {
       const manifest = Jsonc.parse(readFileSync(path, 'utf8')) as any;
       if (manifest?.plugin?.id) {
@@ -76,7 +89,10 @@ export const CreateCdnAssets: Task = {
       resolve(buildSource, 'node_modules/@kbn/core/target/public'),
       resolve(bundles, 'core')
     );
-    await copyAll(resolve(buildSource, 'node_modules/@kbn/monaco'), resolve(bundles, 'kbn-monaco'));
+    await copyAll(
+      resolve(buildSource, 'node_modules/@kbn/monaco/target_workers'),
+      resolve(bundles, 'kbn-monaco')
+    );
 
     // packages/core/apps/core-apps-server-internal/src/core_app.ts
     await copyAll(
@@ -98,3 +114,11 @@ export const CreateCdnAssets: Task = {
     });
   },
 };
+
+async function generateTranslationFile(locale: string, pluginPaths: string[]) {
+  const translationFiles = await getKibanaTranslationFiles(locale, pluginPaths);
+  i18nLoader.registerTranslationFiles(translationFiles);
+  const translations = await i18nLoader.getTranslationsByLocale(locale);
+  i18n.init(translations);
+  return JSON.stringify(i18n.getTranslation());
+}

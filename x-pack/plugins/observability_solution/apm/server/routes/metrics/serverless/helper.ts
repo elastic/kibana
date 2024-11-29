@@ -5,10 +5,7 @@
  * 2.0.
  */
 import { isFiniteNumber } from '../../../../common/utils/is_finite_number';
-import {
-  AwsLambdaArchitecture,
-  AWSLambdaPriceFactor,
-} from './get_serverless_summary';
+import { AwsLambdaArchitecture, AWSLambdaPriceFactor } from './get_serverless_summary';
 
 export function calcMemoryUsedRate({
   memoryFree,
@@ -51,10 +48,7 @@ export function convertComputeUsageToGbSec({
   computeUsageBytesMs?: number | null;
   countInvocations?: number | null;
 }) {
-  if (
-    !isFiniteNumber(computeUsageBytesMs) ||
-    !isFiniteNumber(countInvocations)
-  ) {
+  if (!isFiniteNumber(computeUsageBytesMs) || !isFiniteNumber(countInvocations)) {
     return undefined;
   }
   const computeUsageGbSec = computeUsageBytesMs / GB / 1000;

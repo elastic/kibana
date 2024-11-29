@@ -7,43 +7,15 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGrid, EuiFlexItem, EuiText, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
-import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
-import useAsync from 'react-use/lib/useAsync';
 import { HostMetricsExplanationContent } from '../../../../../../components/lens';
 import { Chart } from './chart';
 import { Popover } from '../../common/popover';
-import { useMetricsDataViewContext } from '../../../hooks/use_metrics_data_view';
+import { useMetricsDataViewContext } from '../../../../../../containers/metrics_source';
+import { useMetricsCharts } from '../../../hooks/use_metrics_charts';
 
 export const MetricsGrid = () => {
-  const model = findInventoryModel('host');
-  const { dataView } = useMetricsDataViewContext();
-
-  const { value: charts = [] } = useAsync(async () => {
-    const { cpu, disk, memory, network } = await model.metrics.getCharts();
-    return [
-      cpu.xy.cpuUsage,
-      cpu.xy.normalizedLoad1m,
-      memory.xy.memoryUsage,
-      memory.xy.memoryFree,
-      disk.xy.diskUsage,
-      disk.xy.diskSpaceAvailable,
-      disk.xy.diskIORead,
-      disk.xy.diskIOWrite,
-      disk.xy.diskReadThroughput,
-      disk.xy.diskWriteThroughput,
-      network.xy.rx,
-      network.xy.tx,
-    ].map((chart) => ({
-      ...chart,
-      ...(dataView?.id
-        ? {
-            dataset: {
-              index: dataView.id,
-            },
-          }
-        : {}),
-    }));
-  }, [dataView?.id]);
+  const { metricsView } = useMetricsDataViewContext();
+  const charts = useMetricsCharts({ dataViewId: metricsView?.dataViewReference.id });
 
   return (
     <>

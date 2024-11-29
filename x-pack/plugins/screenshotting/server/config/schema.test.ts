@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ConfigSchema } from './schema';
+import { ConfigSchema } from '@kbn/screenshotting-server';
 
 describe('ConfigSchema', () => {
   it(`should produce correct config for context {"dev": false,"dist": false}`, () => {
@@ -74,7 +74,6 @@ describe('ConfigSchema', () => {
         "browser": Object {
           "autoDownload": false,
           "chromium": Object {
-            "inspect": false,
             "proxy": Object {
               "enabled": false,
             },

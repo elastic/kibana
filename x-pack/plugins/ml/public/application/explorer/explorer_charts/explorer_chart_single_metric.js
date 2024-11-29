@@ -14,8 +14,9 @@ import PropTypes from 'prop-types';
 import React from 'react';
 
 import d3 from 'd3';
-import $ from 'jquery';
 import moment from 'moment';
+
+import { EuiPopover } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import {
@@ -26,6 +27,10 @@ import {
 import { formatHumanReadableDateTime } from '@kbn/ml-date-utils';
 import { context } from '@kbn/kibana-react-plugin/public';
 
+import { getTableItemClosestToTimestamp } from '../../../../common/util/anomalies_table_utils';
+
+import { LinksMenuUI } from '../../components/anomalies_table/links_menu';
+import { RuleEditorFlyout } from '../../components/rule_editor';
 import { formatValue } from '../../formatters/format_value';
 import {
   LINE_CHART_ANOMALY_RADIUS,
@@ -40,27 +45,54 @@ import {
   getMultiBucketImpactTooltipValue,
 } from '../../util/chart_utils';
 import { LoadingIndicator } from '../../components/loading_indicator/loading_indicator';
-import { TRANSPARENT_BACKGROUND } from './constants';
+import { CHART_HEIGHT, TRANSPARENT_BACKGROUND } from './constants';
+import { filter } from 'rxjs';
+import { drawCursor } from './utils/draw_anomaly_explorer_charts_cursor';
 
+const popoverMenuOffset = 0;
 const CONTENT_WRAPPER_HEIGHT = 215;
 const CONTENT_WRAPPER_CLASS = 'ml-explorer-chart-content-wrapper';
 
 export class ExplorerChartSingleMetric extends React.Component {
   static contextType = context;
-
   static propTypes = {
     tooManyBuckets: PropTypes.bool,
     seriesConfig: PropTypes.object,
     severity: PropTypes.number.isRequired,
+    tableData: PropTypes.object,
     tooltipService: PropTypes.object.isRequired,
     timeBuckets: PropTypes.object.isRequired,
     onPointerUpdate: PropTypes.func.isRequired,
     chartTheme: PropTypes.object.isRequired,
-    cursor: PropTypes.object,
+    cursor$: PropTypes.object,
+    id: PropTypes.string.isRequired,
   };
+
+  constructor(props) {
+    super(props);
+    this.chartScales = undefined;
+    this.state = { popoverData: null, popoverCoords: [0, 0], showRuleEditorFlyout: () => {} };
+  }
 
   componentDidMount() {
     this.renderChart();
+
+    this.cursorStateSubscription = this.props.cursor$
+      .pipe(filter((c) => c.isDateHistogram))
+      .subscribe((cursor) => {
+        drawCursor(
+          cursor.cursor,
+          this.rootNode,
+          this.props.id,
+          this.props.seriesConfig,
+          this.chartScales,
+          this.props.chartTheme
+        );
+      });
+  }
+
+  componentWillUnmount() {
+    this.cursorStateSubscription?.unsubscribe();
   }
 
   componentDidUpdate() {
@@ -74,8 +106,7 @@ export class ExplorerChartSingleMetric extends React.Component {
       timeBuckets,
       showSelectedInterval,
       onPointerUpdate,
-      chartTheme,
-      cursor,
+      id: chartId,
     } = this.props;
 
     const element = this.rootNode;
@@ -93,7 +124,6 @@ export class ExplorerChartSingleMetric extends React.Component {
     );
 
     let vizWidth = 0;
-    const chartHeight = 170;
 
     // Left margin is adjusted later for longest y-axis label.
     const margin = { top: 10, right: 0, bottom: 30, left: 60 };
@@ -107,26 +137,25 @@ export class ExplorerChartSingleMetric extends React.Component {
     drawLineChart(config.chartData);
 
     function init(chartLimits) {
-      const $el = $('.ml-explorer-chart');
-
       // Clear any existing elements from the visualization,
       // then build the svg elements for the chart.
       const chartElement = d3.select(element).select(`.${CONTENT_WRAPPER_CLASS}`);
       chartElement.select('svg').remove();
 
-      const svgWidth = $el.width();
-      const svgHeight = chartHeight + margin.top + margin.bottom;
+      const svgWidth = element.clientWidth;
+      const svgHeight = CHART_HEIGHT + margin.top + margin.bottom;
 
       const svg = chartElement
         .append('svg')
         .classed('ml-explorer-chart-svg', true)
+        .attr('id', 'ml-explorer-chart-svg' + chartId)
         .attr('width', svgWidth)
         .attr('height', svgHeight);
 
       // Set the size of the left margin according to the width of the largest y axis tick label.
       lineChartYScale = d3.scale
         .linear()
-        .range([chartHeight, 0])
+        .range([CHART_HEIGHT, 0])
         .domain([chartLimits.min, chartLimits.max])
         .nice();
 
@@ -191,7 +220,7 @@ export class ExplorerChartSingleMetric extends React.Component {
         .append('rect')
         .attr('x', 0)
         .attr('y', 0)
-        .attr('height', chartHeight)
+        .attr('height', CHART_HEIGHT)
         .attr('width', vizWidth)
         .style('stroke', '#cccccc')
         .style('fill', 'none')
@@ -199,18 +228,18 @@ export class ExplorerChartSingleMetric extends React.Component {
 
       drawLineChartAxes();
       drawLineChartHighlightedSpan();
-      drawSyncedCursorLine(lineChartGroup);
+      drawCursorListener(lineChartGroup);
       drawLineChartPaths(data);
       drawLineChartDots(data, lineChartGroup, lineChartValuesLine);
       drawLineChartMarkers(data);
     }
 
-    function drawSyncedCursorLine(lineChartGroup) {
+    function drawCursorListener(lineChartGroup) {
       lineChartGroup
         .append('rect')
         .attr('x', 0)
         .attr('y', 0)
-        .attr('height', chartHeight)
+        .attr('height', CHART_HEIGHT)
         .attr('width', vizWidth)
         .on('mouseout', function () {
           onPointerUpdate({
@@ -238,35 +267,6 @@ export class ExplorerChartSingleMetric extends React.Component {
           }
         })
         .style('fill', TRANSPARENT_BACKGROUND);
-
-      const cursorData =
-        cursor &&
-        cursor.type === 'Over' &&
-        cursor.x >= config.plotEarliest &&
-        cursor.x <= config.plotLatest
-          ? [cursor.x]
-          : [];
-
-      const cursorMouseLine = lineChartGroup
-        .append('g')
-        .attr('class', 'ml-anomaly-chart-cursor')
-        .selectAll('.ml-anomaly-chart-cursor-line')
-        .data(cursorData);
-
-      cursorMouseLine
-        .enter()
-        .append('path')
-        .attr('class', 'ml-anomaly-chart-cursor-line')
-        .attr('d', (ts) => {
-          const xPosition = lineChartXScale(ts);
-          return `M${xPosition},${chartHeight} ${xPosition},0`;
-        })
-        // Use elastic chart's cursor line style if possible
-        .style('stroke', chartTheme.crosshair.line.stroke)
-        .style('stroke-width', `${chartTheme.crosshair.line.strokeWidth}px`)
-        .style('stroke-dasharray', chartTheme.crosshair.line.dash?.join(',') ?? '4,4');
-
-      cursorMouseLine.exit().remove();
     }
 
     function drawLineChartAxes() {
@@ -284,7 +284,7 @@ export class ExplorerChartSingleMetric extends React.Component {
         .axis()
         .scale(lineChartXScale)
         .orient('bottom')
-        .innerTickSize(-chartHeight)
+        .innerTickSize(-CHART_HEIGHT)
         .outerTickSize(0)
         .tickPadding(10)
         .tickFormat((d) => moment(d).format(xAxisTickFormat));
@@ -323,7 +323,7 @@ export class ExplorerChartSingleMetric extends React.Component {
       const gAxis = axes
         .append('g')
         .attr('class', 'x axis')
-        .attr('transform', 'translate(0,' + chartHeight + ')')
+        .attr('transform', 'translate(0,' + CHART_HEIGHT + ')')
         .call(xAxis);
 
       axes.append('g').attr('class', 'y axis').call(yAxis);
@@ -351,7 +351,7 @@ export class ExplorerChartSingleMetric extends React.Component {
         .attr('rx', 3)
         .attr('ry', 3)
         .attr('width', rectWidth - 4)
-        .attr('height', chartHeight - 4);
+        .attr('height', CHART_HEIGHT - 4);
     }
 
     function drawLineChartPaths(data) {
@@ -361,11 +361,14 @@ export class ExplorerChartSingleMetric extends React.Component {
         .attr('d', lineChartValuesLine(data));
     }
 
+    const that = this;
+
     function drawLineChartMarkers(data) {
       // Render circle markers for the points.
       // These are used for displaying tooltips on mouseover.
       // Don't render dots where value=null (data gaps, with no anomalies)
       // or for multi-bucket anomalies.
+      // Except for scheduled events.
       const dots = lineChartGroup
         .append('g')
         .attr('class', 'chart-markers')
@@ -373,7 +376,9 @@ export class ExplorerChartSingleMetric extends React.Component {
         .data(
           data.filter(
             (d) =>
-              (d.value !== null || typeof d.anomalyScore === 'number') &&
+              (d.value !== null ||
+                typeof d.anomalyScore === 'number' ||
+                d.scheduledEvents !== undefined) &&
               !showMultiBucketAnomalyMarker(d)
           )
         );
@@ -385,9 +390,17 @@ export class ExplorerChartSingleMetric extends React.Component {
         .enter()
         .append('circle')
         .attr('r', LINE_CHART_ANOMALY_RADIUS)
+        .on('click', function (d) {
+          d3.event.preventDefault();
+          if (d.anomalyScore === undefined) return;
+          showAnomalyPopover(d, this);
+        })
         // Don't use an arrow function since we need access to `this`.
         .on('mouseover', function (d) {
-          showLineChartTooltip(d, this);
+          // Show the tooltip only if the actions menu isn't active
+          if (that.state.popoverData === null) {
+            showLineChartTooltip(d, this);
+          }
         })
         .on('mouseout', () => tooltipService.hide());
 
@@ -397,7 +410,11 @@ export class ExplorerChartSingleMetric extends React.Component {
       // Update all dots to new positions.
       dots
         .attr('cx', (d) => lineChartXScale(d.date))
-        .attr('cy', (d) => lineChartYScale(d.value))
+        // Fallback with domain's min value if value is null
+        // To ensure event markers are rendered properly at the bottom of the chart
+        .attr('cy', (d) =>
+          lineChartYScale(d.value !== null ? d.value : lineChartYScale.domain()[0])
+        )
         .attr('class', (d) => {
           let markerClass = 'metric-value';
           if (isAnomalyVisible(d)) {
@@ -428,6 +445,11 @@ export class ExplorerChartSingleMetric extends React.Component {
           'class',
           (d) => `anomaly-marker multi-bucket ${getSeverityWithLow(d.anomalyScore).id}`
         )
+        .on('click', function (d) {
+          d3.event.preventDefault();
+          if (d.anomalyScore === undefined) return;
+          showAnomalyPopover(d, this);
+        })
         // Don't use an arrow function since we need access to `this`.
         .on('mouseover', function (d) {
           showLineChartTooltip(d, this);
@@ -455,7 +477,43 @@ export class ExplorerChartSingleMetric extends React.Component {
       // Update all markers to new positions.
       scheduledEventMarkers
         .attr('x', (d) => lineChartXScale(d.date) - LINE_CHART_ANOMALY_RADIUS)
-        .attr('y', (d) => lineChartYScale(d.value) - SCHEDULED_EVENT_SYMBOL_HEIGHT / 2);
+        .attr(
+          'y',
+          (d) =>
+            // Fallback with domain's min value if value is null
+            // To ensure event markers are rendered properly at the bottom of the chart
+            lineChartYScale(d.value !== null ? d.value : lineChartYScale.domain()[0]) -
+            SCHEDULED_EVENT_SYMBOL_HEIGHT / 2
+        );
+    }
+
+    function showAnomalyPopover(marker, circle) {
+      const anomalyTime = marker.date;
+
+      const tableItem = getTableItemClosestToTimestamp(
+        that.props.tableData.anomalies,
+        anomalyTime,
+        that.props.seriesConfig.entityFields
+      );
+
+      if (tableItem) {
+        // Overwrite the timestamp of the possibly aggregated table item with the
+        // timestamp of the anomaly clicked in the chart so we're able to pick
+        // the right baseline and deviation time ranges for Log Rate Analysis.
+        tableItem.source.timestamp = anomalyTime;
+
+        // Calculate the relative coordinates of the clicked anomaly marker
+        // so we're able to position the popover actions menu above it.
+        const dotRect = circle.getBoundingClientRect();
+        const rootRect = that.rootNode.getBoundingClientRect();
+        const x = Math.round(dotRect.x + dotRect.width / 2 - rootRect.x);
+        const y = Math.round(dotRect.y + dotRect.height / 2 - rootRect.y) - popoverMenuOffset;
+
+        // Hide any active tooltip
+        that.props.tooltipService.hide();
+        // Set the popover state to enable the actions menu
+        that.setState({ popoverData: tableItem, popoverCoords: [x, y] });
+      }
     }
 
     function showLineChartTooltip(marker, circle) {
@@ -552,7 +610,7 @@ export class ExplorerChartSingleMetric extends React.Component {
             });
           }
         }
-      } else {
+      } else if (marker.value !== null) {
         tooltipData.push({
           label: i18n.translate(
             'xpack.ml.explorer.singleMetricChart.valueWithoutAnomalyScoreLabel',
@@ -586,6 +644,8 @@ export class ExplorerChartSingleMetric extends React.Component {
         y: LINE_CHART_ANOMALY_RADIUS * 2,
       });
     }
+
+    this.chartScales = { lineChartXScale, margin };
   }
 
   shouldComponentUpdate() {
@@ -596,6 +656,22 @@ export class ExplorerChartSingleMetric extends React.Component {
   setRef(componentNode) {
     this.rootNode = componentNode;
   }
+
+  closePopover() {
+    this.setState({ popoverData: null, popoverCoords: [0, 0] });
+  }
+
+  setShowRuleEditorFlyoutFunction = (func) => {
+    this.setState({
+      showRuleEditorFlyout: func,
+    });
+  };
+
+  unsetShowRuleEditorFlyoutFunction = () => {
+    this.setState({
+      showRuleEditorFlyout: () => {},
+    });
+  };
 
   render() {
     const { seriesConfig } = this.props;
@@ -609,10 +685,47 @@ export class ExplorerChartSingleMetric extends React.Component {
     const isLoading = seriesConfig.loading;
 
     return (
-      <div className="ml-explorer-chart" ref={this.setRef.bind(this)}>
-        {isLoading && <LoadingIndicator height={CONTENT_WRAPPER_HEIGHT} />}
-        {!isLoading && <div className={CONTENT_WRAPPER_CLASS} />}
-      </div>
+      <>
+        <RuleEditorFlyout
+          setShowFunction={this.setShowRuleEditorFlyoutFunction}
+          unsetShowFunction={this.unsetShowRuleEditorFlyoutFunction}
+        />
+        {this.state.popoverData !== null && (
+          <div
+            style={{
+              position: 'absolute',
+              marginLeft: this.state.popoverCoords[0],
+              marginTop: this.state.popoverCoords[1],
+            }}
+          >
+            <EuiPopover
+              isOpen={true}
+              closePopover={() => this.closePopover()}
+              panelPaddingSize="none"
+              anchorPosition="upLeft"
+            >
+              <LinksMenuUI
+                anomaly={this.state.popoverData}
+                bounds={{
+                  min: moment(seriesConfig.plotEarliest),
+                  max: moment(seriesConfig.plotLatest),
+                }}
+                showMapsLink={false}
+                showViewSeriesLink={true}
+                isAggregatedData={this.props.tableData.interval !== 'second'}
+                interval={this.props.tableData.interval}
+                showRuleEditorFlyout={this.state.showRuleEditorFlyout}
+                onItemClick={() => this.closePopover()}
+                sourceIndicesWithGeoFields={this.props.sourceIndicesWithGeoFields}
+              />
+            </EuiPopover>
+          </div>
+        )}
+        <div className="ml-explorer-chart" ref={this.setRef.bind(this)}>
+          {isLoading && <LoadingIndicator height={CONTENT_WRAPPER_HEIGHT} />}
+          {!isLoading && <div className={CONTENT_WRAPPER_CLASS} />}
+        </div>
+      </>
     );
   }
 }

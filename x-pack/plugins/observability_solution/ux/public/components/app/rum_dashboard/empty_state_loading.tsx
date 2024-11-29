@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiEmptyPrompt,
-  EuiLoadingSpinner,
-  EuiSpacer,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiEmptyPrompt, EuiLoadingSpinner, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { Fragment } from 'react';
 

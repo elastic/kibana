@@ -40,10 +40,9 @@ export async function saveConfig({
     });
 
     toasts.addSuccess({
-      title: i18n.translate(
-        'xpack.apm.agentConfig.saveConfig.succeeded.title',
-        { defaultMessage: 'Configuration saved' }
-      ),
+      title: i18n.translate('xpack.apm.agentConfig.saveConfig.succeeded.title', {
+        defaultMessage: 'Configuration saved',
+      }),
       text: i18n.translate('xpack.apm.agentConfig.saveConfig.succeeded.text', {
         defaultMessage:
           'The configuration for "{serviceName}" was saved. It will take some time to propagate to the agents.',

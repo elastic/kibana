@@ -16,17 +16,23 @@
     "cypress:dw:serverless": "NODE_OPTIONS=--openssl-legacy-provider node ./scripts/start_cypress_parallel --config-file ./public/management/cypress/cypress_serverless.config.ts --ftr-config-file ../../test/defend_workflows_cypress/serverless_config",
     "cypress:dw:serverless:open": "yarn cypress:dw:serverless open",
     "cypress:dw:serverless:run": "yarn cypress:dw:serverless run",
+    "cypress:dw:qa:serverless": "NODE_OPTIONS=--openssl-legacy-provider node ./scripts/start_cypress_parallel_serverless --config-file ./public/management/cypress/cypress_serverless_qa.config.ts",
+    "cypress:dw:qa:serverless:run": "yarn cypress:dw:qa:serverless run",
     "cypress:dw:serverless:changed-specs-only": "yarn cypress:dw:serverless run --changed-specs-only --env burn=2",
     "cypress:dw:endpoint": "echo '\n** WARNING **: Run script `cypress:dw:endpoint` no longer valid! Use `cypress:dw` instead\n'",
     "cypress:dw:endpoint:run": "echo '\n** WARNING **: Run script `cypress:dw:endpoint:run` no longer valid! Use `cypress:dw:run` instead\n'",
     "cypress:dw:endpoint:open": "echo '\n** WARNING **: Run script `cypress:dw:endpoint:open` no longer valid! Use `cypress:dw:open` instead\n'",
     "junit:merge": "../../../node_modules/.bin/mochawesome-merge ../../../target/kibana-security-solution/cypress/results/mochawesome*.json > ../../../target/kibana-security-solution/cypress/results/output.json && ../../../node_modules/.bin/marge ../../../target/kibana-security-solution/cypress/results/output.json --reportDir ../../../target/kibana-security-solution/cypress/results && yarn junit:transform && mkdir -p ../../../target/junit && cp ../../../target/kibana-security-solution/cypress/results/*.xml ../../../target/junit/",
     "test:generate": "node scripts/endpoint/resolver_generator",
+    "test:generate:serverless-dev": "NODE_TLS_REJECT_UNAUTHORIZED=0 node --no-warnings scripts/endpoint/resolver_generator --node https://elastic_serverless:changeme@127.0.0.1:9200 --kibana http://elastic_serverless:changeme@127.0.0.1:5601",
     "mappings:generate": "node scripts/mappings/mappings_generator",
     "mappings:load": "node scripts/mappings/mappings_loader",
     "junit:transform": "node scripts/junit_transformer --pathPattern '../../../target/kibana-security-solution/cypress/results/*.xml' --rootDirectory ../../../ --reportName 'Security Solution Cypress' --writeInPlace",
     "openapi:generate": "node scripts/openapi/generate",
     "openapi:generate:debug": "node --inspect-brk scripts/openapi/generate",
-    "openapi:bundle": "node scripts/openapi/bundle"
+    "openapi:bundle:detections": "node scripts/openapi/bundle_detections",
+    "openapi:bundle:timeline": "node scripts/openapi/bundle_timeline",
+    "openapi:bundle:entity-analytics": "node scripts/openapi/bundle_entity_analytics",
+    "openapi:bundle:endpoint-management": "node scripts/openapi/bundle_endpoint_management"
   }
 }

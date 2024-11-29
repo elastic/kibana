@@ -11,11 +11,7 @@ import React from 'react';
 import { ApmPluginStartDeps } from '../../../../plugin';
 import { SavedApmCustomDashboard } from '../../../../../common/custom_dashboards';
 
-export function GotoDashboard({
-  currentDashboard,
-}: {
-  currentDashboard: SavedApmCustomDashboard;
-}) {
+export function GotoDashboard({ currentDashboard }: { currentDashboard: SavedApmCustomDashboard }) {
   const {
     services: {
       dashboard: { locator: dashboardLocator },
@@ -30,7 +26,7 @@ export function GotoDashboard({
       data-test-subj="apmGotoDashboardGoToDashboardButton"
       color="text"
       size="s"
-      iconType={'visGauge'}
+      iconType="visGauge"
       href={url}
     >
       {i18n.translate('xpack.apm.serviceDashboards.contextMenu.goToDashboard', {

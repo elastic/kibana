@@ -11,16 +11,14 @@ import { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import { getSeverity } from '@kbn/ml-anomaly-utils/get_severity';
 import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 import { ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils/anomaly_threshold';
+import type { AreaSeriesStyle, RecursivePartial } from '@elastic/charts';
 import { getSeverityColor } from '../../../../../common/anomaly_detection';
 import { ServiceAnomalyTimeseries } from '../../../../../common/anomaly_detection/service_anomaly_timeseries';
 import { APMChartSpec } from '../../../../../typings/timeseries';
 
-export const expectedBoundsTitle = i18n.translate(
-  'xpack.apm.comparison.expectedBoundsTitle',
-  {
-    defaultMessage: 'Expected bounds',
-  }
-);
+export const expectedBoundsTitle = i18n.translate('xpack.apm.comparison.expectedBoundsTitle', {
+  defaultMessage: 'Expected bounds',
+});
 export function getChartAnomalyTimeseries({
   anomalyTimeseries,
   theme,
@@ -72,7 +70,7 @@ export function getChartAnomalyTimeseries({
   const scores: APMChartSpec[] = severities.map(({ severity, threshold }) => {
     const color = getSeverityColor(threshold);
 
-    const style = {
+    const style: RecursivePartial<AreaSeriesStyle> = {
       line: {
         opacity: 0,
       },
@@ -80,7 +78,7 @@ export function getChartAnomalyTimeseries({
         fill: color,
       },
       point: {
-        visible: true,
+        visible: 'always',
         opacity: 0.75,
         radius: 3,
         strokeWidth: 1,
@@ -97,7 +95,7 @@ export function getChartAnomalyTimeseries({
     return {
       title: i18n.translate('xpack.apm.anomalyScore', {
         defaultMessage:
-          '{severity, select, minor {Minor} major {Major} critical {Critical}} anomaly',
+          '{severity, select, minor {Minor} major {Major} critical {Critical} other {unknown severity}} anomaly',
         values: {
           severity,
         },

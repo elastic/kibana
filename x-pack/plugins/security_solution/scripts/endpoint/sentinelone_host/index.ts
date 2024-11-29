@@ -8,6 +8,8 @@
 import type { RunFn } from '@kbn/dev-cli-runner';
 import { run } from '@kbn/dev-cli-runner';
 import { ok } from 'assert';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { ensureSpaceIdExists, fetchActiveSpace } from '../common/spaces';
 import {
   isFleetServerRunning,
   startFleetServer,
@@ -17,6 +19,7 @@ import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils
 import {
   addSentinelOneIntegrationToAgentPolicy,
   DEFAULT_AGENTLESS_INTEGRATIONS_AGENT_POLICY_NAME,
+  enableFleetSpaceAwareness,
   enrollHostVmWithFleet,
   fetchAgentPolicy,
   getOrCreateDefaultAgentPolicy,
@@ -27,7 +30,13 @@ import {
   installSentinelOneAgent,
   S1Client,
 } from './common';
-import { createVm, generateVmName, getMultipassVmCountNotice } from '../common/vm_services';
+import {
+  createMultipassHostVmClient,
+  createVm,
+  findVm,
+  generateVmName,
+  getMultipassVmCountNotice,
+} from '../common/vm_services';
 import { createKbnClient } from '../common/stack_services';
 
 export const cli = async () => {
@@ -50,13 +59,17 @@ console and pushes the data to Elasticsearch.`,
         's1Url',
         's1ApiToken',
         'vmName',
+        'spaceId',
+        'apiKey',
       ],
-      boolean: ['forceFleetServer'],
+      boolean: ['forceFleetServer', 'forceNewS1Host'],
       default: {
         kibanaUrl: 'http://127.0.0.1:5601',
         username: 'elastic',
         password: 'changeme',
         policy: '',
+        spaceId: '',
+        apiKey: '',
       },
       help: `
       --s1Url             Required. The base URL for SentinelOne management console.
@@ -69,9 +82,17 @@ console and pushes the data to Elasticsearch.`,
                           Default: re-uses existing dev policy (if found) or creates a new one
       --forceFleetServer  Optional. If fleet server should be started/configured even if it seems
                           like it is already setup.
+      --forceNewS1Host    Optional. Force a new VM host to be created and enrolled with SentinelOne.
+                          By default, a check is done to see if a host running SentinelOne is
+                          already running and if so, a new one will not be created - unless this
+                          option is used
       --username          Optional. User name to be used for auth against elasticsearch and
                           kibana (Default: elastic).
       --password          Optional. Password associated with the username (Default: changeme)
+      --apiKey            Optional. A Kibana API key to use for authz. When defined, 'username'
+                            and 'password' arguments are ignored.
+      --spaceId           Optional. The space id where the host should be added to in kibana. The
+                            space will be created if it does not exist. Default: default space.
       --kibanaUrl         Optional. The url to Kibana (Default: http://127.0.0.1:5601)
 `,
     },
@@ -85,7 +106,10 @@ const runCli: RunFn = async ({ log, flags }) => {
   const s1Url = flags.s1Url as string;
   const s1ApiToken = flags.s1ApiToken as string;
   const policy = flags.policy as string;
+  const spaceId = flags.spaceId as string;
+  const apiKey = flags.apiKey as string;
   const forceFleetServer = flags.forceFleetServer as boolean;
+  const forceNewS1Host = flags.forceNewS1Host as boolean;
   const getRequiredArgMessage = (argName: string) => `${argName} argument is required`;
 
   createToolingLogger.setDefaultLogLevelFromCliFlags(flags);
@@ -100,38 +124,66 @@ const runCli: RunFn = async ({ log, flags }) => {
     url: kibanaUrl,
     username,
     password,
+    spaceId,
+    apiKey,
   });
 
-  const hostVm = await createVm({
-    type: 'multipass',
-    name: vmName,
-    log,
-    memory: '2G',
-    disk: '10G',
-  });
+  if (spaceId && spaceId !== DEFAULT_SPACE_ID) {
+    await ensureSpaceIdExists(kbnClient, spaceId, { log });
+    await enableFleetSpaceAwareness(kbnClient);
+  }
 
-  const s1Info = await installSentinelOneAgent({
-    hostVm,
-    log,
-    s1Client,
-  });
+  const activeSpaceId = (await fetchActiveSpace(kbnClient)).id;
 
-  log.info(`SentinelOne Agent Status:
-${s1Info.status}`);
+  const runningS1VMs = (
+    await findVm(
+      'multipass',
+      flags.vmName ? vmName : new RegExp(`^${vmName.substring(0, vmName.lastIndexOf('-'))}`)
+    )
+  ).data;
+
+  // Avoid enrolling another VM with SentinelOne if we already have one running
+  const s1HostVm =
+    forceNewS1Host || runningS1VMs.length === 0
+      ? await createVm({
+          type: 'multipass',
+          name: vmName,
+          log,
+          memory: '2G',
+          disk: '10G',
+        }).then((vm) => {
+          return installSentinelOneAgent({
+            hostVm: vm,
+            log,
+            s1Client,
+          }).then((s1Info) => {
+            log.info(`SentinelOne Agent Status:\n${s1Info.status}`);
+
+            return vm;
+          });
+        })
+      : await Promise.resolve(createMultipassHostVmClient(runningS1VMs[0], log)).then((vm) => {
+          log.info(
+            `A host VM running SentinelOne Agent is already running - will reuse it.\nTIP: Use 'forceNewS1Host' to force the creation of a new one if desired`
+          );
+
+          return vm;
+        });
 
   const {
     id: agentPolicyId,
     agents = 0,
     name: agentPolicyName,
+    namespace: agentPolicyNamespace,
   } = policy
     ? await fetchAgentPolicy(kbnClient, policy)
     : await getOrCreateDefaultAgentPolicy({
         kbnClient,
         log,
-        policyName: DEFAULT_AGENTLESS_INTEGRATIONS_AGENT_POLICY_NAME,
+        policyName: `${DEFAULT_AGENTLESS_INTEGRATIONS_AGENT_POLICY_NAME} - ${activeSpaceId}`,
       });
 
-  await addSentinelOneIntegrationToAgentPolicy({
+  const { namespace: integrationPolicyNamespace } = await addSentinelOneIntegrationToAgentPolicy({
     kbnClient,
     log,
     agentPolicyId,
@@ -147,7 +199,7 @@ ${s1Info.status}`);
 
     agentPolicyVm = await createVm({
       type: 'multipass',
-      name: generateVmName('agentless-integrations'),
+      name: generateVmName(`agentless-integrations-${activeSpaceId}`),
     });
 
     if (forceFleetServer || !(await isFleetServerRunning(kbnClient, log))) {
@@ -172,12 +224,20 @@ ${s1Info.status}`);
 
   await Promise.all([
     createSentinelOneStackConnectorIfNeeded({ kbnClient, log, s1ApiToken, s1Url }),
-    createDetectionEngineSentinelOneRuleIfNeeded(kbnClient, log),
+    createDetectionEngineSentinelOneRuleIfNeeded(
+      kbnClient,
+      log,
+      integrationPolicyNamespace || agentPolicyNamespace
+    ),
   ]);
+
+  // Trigger an alert on the SentinelOn host so that we get an alert back in Kibana
+  log.info(`Triggering SentinelOne alert`);
+  await s1HostVm.exec('nslookup elastic.co');
 
   log.info(`Done!
 
-${hostVm.info()}
+${s1HostVm.info()}
 ${agentPolicyVm ? `${agentPolicyVm.info()}\n` : ''}
 ${await getMultipassVmCountNotice(2)}
 `);

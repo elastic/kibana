@@ -10,15 +10,15 @@ import type { IKibanaResponse, KibanaResponseFactory, Logger } from '@kbn/core/s
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
-  ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BULK_ACTION,
-  BulkActionSkipResult,
-  BulkCrudActionResponse,
-  BulkCrudActionResults,
+  ConversationsBulkActionSkipResult,
+  ConversationsBulkCrudActionResponse,
+  ConversationsBulkCrudActionResults,
   BulkCrudActionSummary,
   PerformBulkActionRequestBody,
   PerformBulkActionResponse,
   ConversationResponse,
+  API_VERSIONS,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { CONVERSATIONS_TABLE_MAX_PAGE_SIZE } from '../../../common/constants';
@@ -26,12 +26,16 @@ import { ElasticAssistantPluginRouter } from '../../types';
 import { buildResponse } from '../utils';
 import { getUpdateScript } from '../../ai_assistant_data_clients/conversations/helpers';
 import { transformToCreateScheme } from '../../ai_assistant_data_clients/conversations/create_conversation';
-import { transformESToConversations } from '../../ai_assistant_data_clients/conversations/transforms';
+import {
+  transformESToConversations,
+  transformESSearchToConversations,
+} from '../../ai_assistant_data_clients/conversations/transforms';
 import {
   UpdateConversationSchema,
   transformToUpdateScheme,
 } from '../../ai_assistant_data_clients/conversations/update_conversation';
-import { SearchEsConversationSchema } from '../../ai_assistant_data_clients/conversations/types';
+import { EsConversationSchema } from '../../ai_assistant_data_clients/conversations/types';
+import { performChecks } from '../helpers';
 
 export interface BulkOperationError {
   message: string;
@@ -41,8 +45,6 @@ export interface BulkOperationError {
     name?: string;
   };
 }
-
-export type BulkActionError = BulkOperationError | unknown;
 
 const buildBulkResponse = (
   response: KibanaResponseFactory,
@@ -57,9 +59,9 @@ const buildBulkResponse = (
     updated?: ConversationResponse[];
     created?: ConversationResponse[];
     deleted?: string[];
-    skipped?: BulkActionSkipResult[];
+    skipped?: ConversationsBulkActionSkipResult[];
   }
-): IKibanaResponse<BulkCrudActionResponse> => {
+): IKibanaResponse<ConversationsBulkCrudActionResponse> => {
   const numSucceeded = updated.length + created.length + deleted.length;
   const numSkipped = skipped.length;
   const numFailed = errors.length;
@@ -71,7 +73,7 @@ const buildBulkResponse = (
     total: numSucceeded + numFailed + numSkipped,
   };
 
-  const results: BulkCrudActionResults = {
+  const results: ConversationsBulkCrudActionResults = {
     updated,
     created,
     deleted,
@@ -79,7 +81,7 @@ const buildBulkResponse = (
   };
 
   if (numFailed > 0) {
-    return response.custom<BulkCrudActionResponse>({
+    return response.custom<ConversationsBulkCrudActionResponse>({
       headers: { 'content-type': 'application/json' },
       body: {
         message: summary.succeeded > 0 ? 'Bulk edit partially failed' : 'Bulk edit failed',
@@ -97,7 +99,7 @@ const buildBulkResponse = (
     });
   }
 
-  const responseBody: BulkCrudActionResponse = {
+  const responseBody: ConversationsBulkCrudActionResponse = {
     success: true,
     conversations_count: summary.total,
     attributes: { results, summary },
@@ -112,7 +114,7 @@ export const bulkActionConversationsRoute = (
 ) => {
   router.versioned
     .post({
-      access: 'public',
+      access: 'internal',
       path: ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BULK_ACTION,
       options: {
         tags: ['access:elasticAssistant'],
@@ -123,7 +125,7 @@ export const bulkActionConversationsRoute = (
     })
     .addVersion(
       {
-        version: ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
+        version: API_VERSIONS.internal.v1,
         validate: {
           request: {
             body: buildRouteValidationWithZod(PerformBulkActionRequestBody),
@@ -151,30 +153,36 @@ export const bulkActionConversationsRoute = (
         // when route is finished by timeout, aborted$ is not getting fired
         request.events.completed$.subscribe(() => abortController.abort());
         try {
-          const ctx = await context.resolve(['core', 'elasticAssistant']);
+          const ctx = await context.resolve(['core', 'elasticAssistant', 'licensing']);
+          const checkResponse = performChecks({
+            context: ctx,
+            request,
+            response,
+          });
+          if (!checkResponse.isSuccess) {
+            return checkResponse.response;
+          }
+          const authenticatedUser = checkResponse.currentUser;
           const dataClient = await ctx.elasticAssistant.getAIAssistantConversationsDataClient();
           const spaceId = ctx.elasticAssistant.getSpaceId();
-          const authenticatedUser = ctx.elasticAssistant.getCurrentUser();
-          if (authenticatedUser == null) {
-            return assistantResponse.error({
-              body: `Authenticated user not found`,
-              statusCode: 401,
-            });
-          }
 
           if (body.create && body.create.length > 0) {
-            const result = await dataClient?.findDocuments<SearchEsConversationSchema>({
+            const userFilter = authenticatedUser?.username
+              ? `name: "${authenticatedUser?.username}"`
+              : `id: "${authenticatedUser?.profile_uid}"`;
+            const result = await dataClient?.findDocuments<EsConversationSchema>({
               perPage: 100,
               page: 1,
-              filter: `users:{ id: "${authenticatedUser?.profile_uid}" } AND (${body.create
-                .map((c) => `title:${c.title}`)
+              filter: `users:{ ${userFilter} } AND (${body.create
+                // without stringify, special characters in the title can break this filter
+                .map((c) => `title:${JSON.stringify(c.title)}`)
                 .join(' OR ')})`,
               fields: ['title'],
             });
             if (result?.data != null && result.total > 0) {
               return assistantResponse.error({
                 statusCode: 409,
-                body: `conversations titles: "${transformESToConversations(result.data)
+                body: `conversations titles: "${transformESSearchToConversations(result.data)
                   .map((c) => c.title)
                   .join(',')}" already exists`,
               });
@@ -199,23 +207,20 @@ export const bulkActionConversationsRoute = (
             getUpdateScript: (document: UpdateConversationSchema) =>
               getUpdateScript({ conversation: document, isPatch: true }),
           });
-
-          const created = await dataClient?.findDocuments<SearchEsConversationSchema>({
-            page: 1,
-            perPage: 1000,
-            filter: docsCreated.map((c) => `id:${c}`).join(' OR '),
-            fields: ['id'],
-          });
-          const updated = await dataClient?.findDocuments<SearchEsConversationSchema>({
-            page: 1,
-            perPage: 1000,
-            filter: docsUpdated.map((c) => `id:${c}`).join(' OR '),
-            fields: ['id'],
-          });
+          const created =
+            docsCreated.length > 0
+              ? await dataClient?.findDocuments<EsConversationSchema>({
+                  page: 1,
+                  perPage: 100,
+                  filter: docsCreated.map((c) => `_id:${c}`).join(' OR '),
+                })
+              : undefined;
 
           return buildBulkResponse(response, {
-            updated: updated?.data ? transformESToConversations(updated?.data) : [],
-            created: created?.data ? transformESToConversations(created?.data) : [],
+            updated: docsUpdated
+              ? transformESToConversations(docsUpdated as EsConversationSchema[])
+              : [],
+            created: created?.data ? transformESSearchToConversations(created?.data) : [],
             deleted: docsDeleted ?? [],
             errors,
           });

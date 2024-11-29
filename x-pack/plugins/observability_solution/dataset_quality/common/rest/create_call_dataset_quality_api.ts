@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart } from '@kbn/core/public';
+import type { CoreSetup, CoreStart } from '@kbn/core/public';
 import type {
   ClientRequestParamsOf,
   ReturnOf,
   RouteRepositoryClient,
 } from '@kbn/server-route-repository';
-import { formatRequest } from '@kbn/server-route-repository';
+import { formatRequest } from '@kbn/server-route-repository-utils';
 import { FetchOptions } from '..';
 import type { APIEndpoint, DatasetQualityServerRouteRepository } from '../../server/routes';
 import { CallApi, callApi } from './call_api';
@@ -26,12 +26,12 @@ export type DatasetQualityClientOptions = Omit<
 export type DatasetQualityClient = RouteRepositoryClient<
   DatasetQualityServerRouteRepository,
   DatasetQualityClientOptions
->;
+>['fetch'];
 
 export type AutoAbortedClient = RouteRepositoryClient<
   DatasetQualityServerRouteRepository,
   Omit<DatasetQualityClientOptions, 'signal'>
->;
+>['fetch'];
 
 export type APIReturnType<TEndpoint extends APIEndpoint> = ReturnOf<
   DatasetQualityServerRouteRepository,

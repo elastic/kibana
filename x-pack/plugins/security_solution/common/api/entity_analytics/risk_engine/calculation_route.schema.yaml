@@ -1,0 +1,46 @@
+openapi: 3.0.0
+
+info:
+  title: RiskScoresCalculation types
+  version: '1'
+paths: {}
+
+components:
+  schemas:
+    RiskScoresCalculationResponse:
+      type: object
+      required:
+        - after_keys
+        - errors
+        - scores_written
+      properties:
+        after_keys:
+          description: Used to obtain the next "page" of risk scores. See also the `after_keys` key in a risk scores request. If this key is empty, the calculation is complete.
+          allOf:
+            - $ref: '../common/common.schema.yaml#/components/schemas/AfterKeys'
+        errors:
+          type: array
+          description: A list of errors encountered during the calculation.
+          items:
+            type: string
+        scores_written:
+          type: number
+          format: integer
+          description: The number of risk scores persisted to elasticsearch.
+        scores:
+          type: object
+          properties:
+            host:
+              type: array
+              items:
+                $ref: '../common/common.schema.yaml#/components/schemas/EntityRiskScoreRecord'
+              description: A list of host risk scores
+            user:
+              type: array
+              items:
+                $ref: '../common/common.schema.yaml#/components/schemas/EntityRiskScoreRecord'
+              description: A list of user risk scores
+            refresh:
+              type: string
+              enum: [wait_for]
+              description: If 'wait_for' the request will wait for the index refresh.

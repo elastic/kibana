@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 // imports from npm packages
@@ -48,11 +49,22 @@ describe('KibanaPageTemplateInner', () => {
       );
       expect(component).toMatchSnapshot();
     });
+
+    test('no pageHeader, isEmptyState, emptyPageBody', () => {
+      const component = shallow(
+        <KibanaPageTemplateInner
+          isEmptyState={true}
+          pageHeader={undefined}
+          emptyPageBody={<div>{'custom empty page body'}</div>}
+        />
+      );
+      expect(component).toMatchSnapshot();
+    });
   });
 
   test('page sidebar', () => {
     const component = shallow(<KibanaPageTemplateInner pageSideBar={<>Test</>} />);
     expect(component).toMatchSnapshot();
-    expect(component.find('EuiPageSidebar')).toHaveLength(1);
+    expect(component.find('_EuiPageSidebar')).toHaveLength(1);
   });
 });

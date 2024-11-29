@@ -4,211 +4,9 @@
     "classes": [],
     "functions": [],
     "interfaces": [],
-    "enums": [
-      {
-        "parentPluginId": "infra",
-        "id": "def-public.InfraFormatterType",
-        "type": "Enum",
-        "tags": [],
-        "label": "InfraFormatterType",
-        "description": [],
-        "path": "x-pack/plugins/observability_solution/infra/public/lib/lib.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      }
-    ],
+    "enums": [],
     "misc": [],
-    "objects": [
-      {
-        "parentPluginId": "infra",
-        "id": "def-public.FORMATTERS",
-        "type": "Object",
-        "tags": [],
-        "label": "FORMATTERS",
-        "description": [],
-        "path": "x-pack/plugins/observability_solution/infra/common/formatters/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "infra",
-            "id": "def-public.FORMATTERS.number",
-            "type": "Function",
-            "tags": [],
-            "label": "number",
-            "description": [],
-            "signature": [
-              "(val: number) => string"
-            ],
-            "path": "x-pack/plugins/observability_solution/infra/common/formatters/index.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "infra",
-                "id": "def-public.FORMATTERS.number.$1",
-                "type": "number",
-                "tags": [],
-                "label": "val",
-                "description": [],
-                "path": "x-pack/plugins/observability_solution/infra/common/formatters/number.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "infra",
-            "id": "def-public.FORMATTERS.abbreviatedNumber",
-            "type": "Function",
-            "tags": [],
-            "label": "abbreviatedNumber",
-            "description": [
-              "// Because the implimentation for formatting large numbers is the same as formatting\n// bytes we are re-using the same code, we just format the number using the abbreviated number format."
-            ],
-            "signature": [
-              "(bytes: number) => string"
-            ],
-            "path": "x-pack/plugins/observability_solution/infra/common/formatters/index.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "infra",
-                "id": "def-public.FORMATTERS.abbreviatedNumber.$1",
-                "type": "number",
-                "tags": [],
-                "label": "bytes",
-                "description": [],
-                "path": "x-pack/plugins/observability_solution/infra/common/formatters/bytes.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "infra",
-            "id": "def-public.FORMATTERS.bytes",
-            "type": "Function",
-            "tags": [],
-            "label": "bytes",
-            "description": [
-              "// bytes in bytes formatted string out"
-            ],
-            "signature": [
-              "(bytes: number) => string"
-            ],
-            "path": "x-pack/plugins/observability_solution/infra/common/formatters/index.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "infra",
-                "id": "def-public.FORMATTERS.bytes.$1",
-                "type": "number",
-                "tags": [],
-                "label": "bytes",
-                "description": [],
-                "path": "x-pack/plugins/observability_solution/infra/common/formatters/bytes.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "infra",
-            "id": "def-public.FORMATTERS.bits",
-            "type": "Function",
-            "tags": [],
-            "label": "bits",
-            "description": [
-              "// bytes in bits formatted string out"
-            ],
-            "signature": [
-              "(bytes: number) => string"
-            ],
-            "path": "x-pack/plugins/observability_solution/infra/common/formatters/index.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "infra",
-                "id": "def-public.FORMATTERS.bits.$1",
-                "type": "number",
-                "tags": [],
-                "label": "bytes",
-                "description": [],
-                "path": "x-pack/plugins/observability_solution/infra/common/formatters/bytes.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "infra",
-            "id": "def-public.FORMATTERS.percent",
-            "type": "Function",
-            "tags": [],
-            "label": "percent",
-            "description": [],
-            "signature": [
-              "(val: number) => string"
-            ],
-            "path": "x-pack/plugins/observability_solution/infra/common/formatters/index.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "infra",
-                "id": "def-public.FORMATTERS.percent.$1",
-                "type": "number",
-                "tags": [],
-                "label": "val",
-                "description": [],
-                "path": "x-pack/plugins/observability_solution/infra/common/formatters/percent.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "infra",
-            "id": "def-public.FORMATTERS.highPrecision",
-            "type": "Function",
-            "tags": [],
-            "label": "highPrecision",
-            "description": [],
-            "signature": [
-              "(val: number) => string"
-            ],
-            "path": "x-pack/plugins/observability_solution/infra/common/formatters/index.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "infra",
-                "id": "def-public.FORMATTERS.highPrecision.$1",
-                "type": "number",
-                "tags": [],
-                "label": "val",
-                "description": [],
-                "path": "x-pack/plugins/observability_solution/infra/common/formatters/high_precision.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          }
-        ],
-        "initialIsOpen": false
-      }
-    ],
+    "objects": [],
     "start": {
       "parentPluginId": "infra",
       "id": "def-public.InfraClientStartExports",
@@ -258,20 +56,6 @@
           "description": [],
           "signature": [
             "ITelemetryClient"
-          ],
-          "path": "x-pack/plugins/observability_solution/infra/public/types.ts",
-          "deprecated": false,
-          "trackAdoption": false
-        },
-        {
-          "parentPluginId": "infra",
-          "id": "def-public.InfraClientStartExports.locators",
-          "type": "Object",
-          "tags": [],
-          "label": "locators",
-          "description": [],
-          "signature": [
-            "InfraLocators"
           ],
           "path": "x-pack/plugins/observability_solution/infra/public/types.ts",
           "deprecated": false,
@@ -358,7 +142,7 @@
             "label": "featureFlags",
             "description": [],
             "signature": [
-              "{ customThresholdAlertsEnabled: boolean; logsUIEnabled: boolean; metricsExplorerEnabled: boolean; osqueryEnabled: boolean; inventoryThresholdAlertRuleEnabled: boolean; metricThresholdAlertRuleEnabled: boolean; logThresholdAlertRuleEnabled: boolean; alertsAndRulesDropdownEnabled: boolean; profilingEnabled: boolean; }"
+              "{ customThresholdAlertsEnabled: boolean; logsUIEnabled: boolean; metricsExplorerEnabled: boolean; osqueryEnabled: boolean; inventoryThresholdAlertRuleEnabled: boolean; metricThresholdAlertRuleEnabled: boolean; logThresholdAlertRuleEnabled: boolean; alertsAndRulesDropdownEnabled: boolean; profilingEnabled: boolean; ruleFormV2Enabled: boolean; }"
             ],
             "path": "x-pack/plugins/observability_solution/infra/common/plugin_config_types.ts",
             "deprecated": false,
@@ -443,9 +227,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-common.SavedObjectsClientContract",
+                "section": "def-server.SavedObjectsClientContract",
                 "text": "SavedObjectsClientContract"
               }
             ],
@@ -463,10 +247,46 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-ui-settings-server",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnCoreUiSettingsServerPluginApi",
-                "section": "def-common.IUiSettingsClient",
+                "section": "def-server.IUiSettingsClient",
                 "text": "IUiSettingsClient"
+              }
+            ],
+            "path": "x-pack/plugins/observability_solution/infra/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "infra",
+            "id": "def-server.InfraRequestHandlerContext.getMetricsIndices",
+            "type": "Function",
+            "tags": [],
+            "label": "getMetricsIndices",
+            "description": [],
+            "signature": [
+              "() => Promise<string>"
+            ],
+            "path": "x-pack/plugins/observability_solution/infra/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "infra",
+            "id": "def-server.InfraRequestHandlerContext.entityManager",
+            "type": "Object",
+            "tags": [],
+            "label": "entityManager",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "entityManager",
+                "scope": "server",
+                "docId": "kibEntityManagerPluginApi",
+                "section": "def-server.EntityManagerServerPluginStart",
+                "text": "EntityManagerServerPluginStart"
               }
             ],
             "path": "x-pack/plugins/observability_solution/infra/server/types.ts",

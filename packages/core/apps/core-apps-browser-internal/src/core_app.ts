@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { UnregisterCallback } from 'history';
@@ -18,12 +19,15 @@ import type {
   InternalApplicationSetup,
   InternalApplicationStart,
 } from '@kbn/core-application-browser-internal';
+import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
+import type { I18nStart } from '@kbn/core-i18n-browser';
+import type { ThemeServiceStart } from '@kbn/core-theme-browser';
+import { renderApp as renderStatusApp } from './status';
 import {
   renderApp as renderErrorApp,
   setupPublicBaseUrlConfigWarning,
   setupUrlOverflowDetection,
 } from './errors';
-import { renderApp as renderStatusApp } from './status';
 
 export interface CoreAppsServiceSetupDeps {
   application: InternalApplicationSetup;
@@ -38,6 +42,9 @@ export interface CoreAppsServiceStartDeps {
   http: InternalHttpStart;
   notifications: NotificationsStart;
   uiSettings: IUiSettingsClient;
+  analytics: AnalyticsServiceStart;
+  i18n: I18nStart;
+  theme: ThemeServiceStart;
 }
 
 export class CoreAppsService {
@@ -79,6 +86,9 @@ export class CoreAppsService {
     http,
     notifications,
     uiSettings,
+    analytics,
+    i18n,
+    theme,
   }: CoreAppsServiceStartDeps) {
     if (!application.history) {
       return;
@@ -91,7 +101,7 @@ export class CoreAppsService {
       uiSettings,
     });
 
-    setupPublicBaseUrlConfigWarning({ docLinks, http, notifications });
+    setupPublicBaseUrlConfigWarning({ docLinks, http, notifications, analytics, i18n, theme });
   }
 
   public stop() {

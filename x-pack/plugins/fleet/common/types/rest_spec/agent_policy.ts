@@ -5,18 +5,24 @@
  * 2.0.
  */
 
-import type { AgentPolicy, NewAgentPolicy, FullAgentPolicy } from '../models';
+import type {
+  AgentPolicy,
+  NewAgentPolicy,
+  FullAgentPolicy,
+  OutputsForAgentPolicy,
+} from '../models';
 
 import type { ListResult, ListWithKuery, BulkGetResult } from './common';
 
 export interface GetAgentPoliciesRequest {
   query: ListWithKuery & {
     noAgentCount?: boolean;
+    withAgentCount?: boolean;
     full?: boolean;
   };
 }
 
-export type GetAgentPoliciesResponseItem = AgentPolicy & { agents?: number };
+export type GetAgentPoliciesResponseItem = AgentPolicy;
 
 export type BulkGetAgentPoliciesResponse = BulkGetResult<GetAgentPoliciesResponseItem>;
 export type GetAgentPoliciesResponse = ListResult<GetAgentPoliciesResponseItem>;
@@ -89,4 +95,19 @@ export type FetchAllAgentPoliciesOptions = Pick<
   'perPage' | 'kuery' | 'sortField' | 'sortOrder'
 > & { fields?: string[] };
 
-export type FetchAllAgentPolicyIdsOptions = Pick<ListWithKuery, 'perPage' | 'kuery'>;
+export type FetchAllAgentPolicyIdsOptions = Pick<ListWithKuery, 'perPage' | 'kuery'> & {
+  spaceId?: string;
+};
+
+export interface GetAgentPolicyOutputsResponse {
+  item: OutputsForAgentPolicy;
+}
+export interface GetListAgentPolicyOutputsResponse {
+  items: OutputsForAgentPolicy[];
+}
+
+export interface GetListAgentPolicyOutputsRequest {
+  body: {
+    ids?: string[];
+  };
+}

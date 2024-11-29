@@ -13,9 +13,7 @@ import { expectTextsInDocument } from '../../../utils/test_helpers';
 describe('alerting fields', () => {
   describe('Service Field', () => {
     it('renders with value', () => {
-      const component = render(
-        <ServiceField currentValue="foo" onChange={() => {}} />
-      );
+      const component = render(<ServiceField currentValue="foo" onChange={() => {}} />);
       expectTextsInDocument(component, ['foo']);
     });
     it('renders with All when value is not defined', () => {
@@ -26,16 +24,12 @@ describe('alerting fields', () => {
 
   describe('TransactionTypeField', () => {
     it('renders', () => {
-      const component = render(
-        <TransactionTypeField currentValue="Bar" onChange={() => {}} />
-      );
+      const component = render(<TransactionTypeField currentValue="Bar" onChange={() => {}} />);
       expectTextsInDocument(component, ['Bar']);
     });
 
     it('renders current value when available', () => {
-      const component = render(
-        <TransactionTypeField currentValue="foo" onChange={() => {}} />
-      );
+      const component = render(<TransactionTypeField currentValue="foo" onChange={() => {}} />);
       expectTextsInDocument(component, ['foo']);
     });
   });

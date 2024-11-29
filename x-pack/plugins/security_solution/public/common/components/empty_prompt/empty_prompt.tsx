@@ -14,8 +14,10 @@ import {
   EuiPageHeader,
   useEuiTheme,
   type EuiThemeComputed,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { OnboardingCardId } from '../../../onboarding/constants';
 import { SecurityPageName } from '../../../../common';
 
 import * as i18n from './translations';
@@ -23,8 +25,7 @@ import endpointSvg from './images/endpoint1.svg';
 import cloudSvg from './images/cloud1.svg';
 import siemSvg from './images/siem1.svg';
 import { useNavigateTo } from '../../lib/kibana';
-import { VIDEO_SOURCE } from './constants';
-import { AddIntegrationsSteps } from '../landing_page/onboarding/types';
+import { ONBOARDING_VIDEO_SOURCE } from '../../constants';
 
 const imgUrls = {
   cloud: cloudSvg,
@@ -67,7 +68,7 @@ const footerStyles = css`
   margin: 20px auto 0;
 `;
 
-export const EmptyPromptComponent: React.FC = memo(() => {
+export const EmptyPromptComponent = memo(({ onSkip }: { onSkip?: () => void }) => {
   const { euiTheme } = useEuiTheme();
 
   const { navigateTo } = useNavigateTo();
@@ -75,7 +76,7 @@ export const EmptyPromptComponent: React.FC = memo(() => {
   const navigateToAddIntegrations = useCallback(() => {
     navigateTo({
       deepLinkId: SecurityPageName.landing,
-      path: `#${AddIntegrationsSteps.connectToDataSources}`,
+      path: `#${OnboardingCardId.integrations}`,
     });
   }, [navigateTo]);
 
@@ -115,7 +116,7 @@ export const EmptyPromptComponent: React.FC = memo(() => {
               referrerPolicy="no-referrer"
               sandbox="allow-scripts allow-same-origin"
               scrolling="no"
-              src={VIDEO_SOURCE}
+              src={ONBOARDING_VIDEO_SOURCE}
               title={i18n.SIEM_HEADER}
               width="100%"
             />
@@ -164,9 +165,20 @@ export const EmptyPromptComponent: React.FC = memo(() => {
           textAlign="center"
           title={i18n.UNIFY_TITLE}
           footer={
-            <EuiButton data-test-subj="add-integrations-footer" onClick={onClick}>
-              {i18n.SIEM_CTA}
-            </EuiButton>
+            <EuiFlexGroup gutterSize="s" justifyContent="center">
+              <EuiFlexItem grow={false}>
+                <EuiButton data-test-subj="add-integrations-footer" onClick={onClick}>
+                  {i18n.SIEM_CTA}
+                </EuiButton>
+              </EuiFlexItem>
+              {onSkip && (
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty data-test-subj="skip-integrations-footer" onClick={onSkip}>
+                    {i18n.SIEM_CONTINUE}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
           }
           css={footerStyles}
         />

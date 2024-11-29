@@ -25,9 +25,10 @@ import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import type { Datatable } from '@kbn/expressions-plugin/public';
 import { DropIllustration } from '@kbn/chart-icons';
-import { DragDrop, useDragDropContext, DragDropIdentifier } from '@kbn/dom-drag-drop';
+import { useDragDropContext, DragDropIdentifier, Droppable } from '@kbn/dom-drag-drop';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { ChartSizeSpec, isChartSizeEvent } from '@kbn/chart-expressions-common';
+import { getSuccessfulRequestTimings } from '../../../report_performance_metric_util';
 import { trackUiCounterEvents } from '../../../lens_ui_telemetry';
 import { getSearchWarningMessages } from '../../../utils';
 import {
@@ -43,7 +44,6 @@ import {
   UserMessage,
   UserMessagesGetter,
   AddUserMessages,
-  isMessageRemovable,
   VisualizationDisplayOptions,
 } from '../../../types';
 import { switchToSuggestion } from '../suggestion_helpers';
@@ -193,6 +193,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   // NOTE: initialRenderTime is only set once when the component mounts
   const visualizationRenderStartTime = useRef<number>(NaN);
   const dataReceivedTime = useRef<number>(NaN);
+  const esTookTime = useRef<number>(0);
 
   const onRender$ = useCallback(() => {
     if (renderDeps.current) {
@@ -207,6 +208,8 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
           value1: dataReceivedTime.current - visualizationRenderStartTime.current,
           key2: 'time_to_render',
           value2: currentTime - dataReceivedTime.current,
+          key3: 'es_took',
+          value3: esTookTime.current,
         });
       }
       const datasourceEvents = Object.values(renderDeps.current.datasourceMap).reduce<string[]>(
@@ -245,7 +248,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   const removeExpressionBuildErrorsRef = useRef<() => void>();
 
   const onData$ = useCallback(
-    (_data: unknown, adapters?: Partial<DefaultInspectorAdapters>) => {
+    (_data: unknown, adapters?: DefaultInspectorAdapters) => {
       if (renderDeps.current) {
         dataReceivedTime.current = performance.now();
 
@@ -264,12 +267,13 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
               searchService: plugins.data.search,
             }
           );
+
+          const timings = getSuccessfulRequestTimings(adapters);
+          esTookTime.current = timings ? timings.esTookTotal : 0;
         }
 
         if (requestWarnings.length) {
-          removeSearchWarningMessagesRef.current = addUserMessages(
-            requestWarnings.filter(isMessageRemovable)
-          );
+          removeSearchWarningMessagesRef.current = addUserMessages(requestWarnings);
         } else if (removeSearchWarningMessagesRef.current) {
           removeSearchWarningMessagesRef.current();
           removeSearchWarningMessagesRef.current = undefined;
@@ -279,10 +283,11 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
           dispatchLens(
             onActiveDataChange({
               activeData: Object.entries(adapters.tables?.tables).reduce<Record<string, Datatable>>(
-                (acc, [key, value], _index, tables) => ({
-                  ...acc,
-                  [tables.length === 1 ? defaultLayerId : key]: value,
-                }),
+                (acc, [key, value], _index, tables) => {
+                  const id = tables.length === 1 ? defaultLayerId : key;
+                  acc[id] = value as Datatable;
+                  return acc;
+                },
                 {}
               ),
             })
@@ -484,7 +489,10 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     }
   }, [suggestionForDraggedField, dispatchLens]);
 
-  const IS_DARK_THEME: boolean = useObservable(core.theme.theme$, { darkMode: false }).darkMode;
+  const IS_DARK_THEME: boolean = useObservable(core.theme.theme$, {
+    darkMode: false,
+    name: 'amsterdam',
+  }).darkMode;
 
   const renderDragDropPrompt = () => {
     if (chartSizeSpec) {
@@ -638,19 +646,18 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
       : renderDragDropPrompt;
 
     return (
-      <DragDrop
+      <Droppable
         className={classNames('lnsWorkspacePanel__dragDrop', {
           'lnsWorkspacePanel__dragDrop--fullscreen': isFullscreen,
         })}
         dataTestSubj="lnsWorkspace"
-        draggable={false}
         dropTypes={suggestionForDraggedField ? ['field_add'] : undefined}
         onDrop={onDrop}
         value={dropProps.value}
         order={dropProps.order}
       >
         <div className="lnsWorkspacePanelWrapper__pageContentBody">{renderWorkspaceContents()}</div>
-      </DragDrop>
+      </Droppable>
     );
   };
 
@@ -673,13 +680,13 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
 
 function useReportingState(errors: UserMessage[]): {
   isRenderComplete: boolean;
-  hasDynamicError: boolean;
+  hasRequestError: boolean;
+  setHasRequestError: (state: boolean) => void;
   setIsRenderComplete: (state: boolean) => void;
-  setDynamicError: (state: boolean) => void;
   nodeRef: React.RefObject<HTMLDivElement>;
 } {
   const [isRenderComplete, setIsRenderComplete] = useState(Boolean(errors?.length));
-  const [hasDynamicError, setDynamicError] = useState(false);
+  const [hasRequestError, setHasRequestError] = useState(false);
   const nodeRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -688,8 +695,12 @@ function useReportingState(errors: UserMessage[]): {
     }
   }, [isRenderComplete, errors]);
 
-  return { isRenderComplete, setIsRenderComplete, hasDynamicError, setDynamicError, nodeRef };
+  return { isRenderComplete, setIsRenderComplete, hasRequestError, setHasRequestError, nodeRef };
 }
+
+const dataLoadingErrorTitle = i18n.translate('xpack.lens.editorFrame.dataFailure', {
+  defaultMessage: `An error occurred when loading data`,
+});
 
 export const VisualizationWrapper = ({
   expression,
@@ -716,7 +727,7 @@ export const VisualizationWrapper = ({
   ExpressionRendererComponent: ReactExpressionRendererType;
   core: CoreStart;
   onRender$: () => void;
-  onData$: (data: unknown, adapters?: Partial<DefaultInspectorAdapters>) => void;
+  onData$: (data: unknown, adapters?: DefaultInspectorAdapters) => void;
   onComponentRendered: () => void;
   displayOptions: VisualizationDisplayOptions | undefined;
 }) => {
@@ -727,13 +738,14 @@ export const VisualizationWrapper = ({
 
   const searchContext = useLensSelector(selectExecutionContextSearch);
   // Used for reporting
-  const { isRenderComplete, hasDynamicError, setIsRenderComplete, setDynamicError, nodeRef } =
+  const { isRenderComplete, hasRequestError, setIsRenderComplete, setHasRequestError, nodeRef } =
     useReportingState(errors);
 
   const onRenderHandler = useCallback(() => {
+    setHasRequestError(false);
     setIsRenderComplete(true);
     onRender$();
-  }, [setIsRenderComplete, onRender$]);
+  }, [onRender$, setHasRequestError, setIsRenderComplete]);
 
   const searchSessionId = useLensSelector(selectSearchSessionId);
 
@@ -756,23 +768,20 @@ export const VisualizationWrapper = ({
     );
   }
 
-  const dataLoadingErrorTitle = i18n.translate('xpack.lens.editorFrame.dataFailure', {
-    defaultMessage: `An error occurred when loading data`,
-  });
-
   return (
     <div
       className="lnsExpressionRenderer"
       data-shared-items-container
       data-render-complete={isRenderComplete}
       data-shared-item=""
-      data-render-error={hasDynamicError ? dataLoadingErrorTitle : undefined}
+      data-render-error={hasRequestError ? dataLoadingErrorTitle : undefined}
       ref={nodeRef}
     >
       <ExpressionRendererComponent
         className="lnsExpressionRenderer__component"
         padding={displayOptions?.noPadding ? undefined : 'm'}
         expression={expression!}
+        allowCache={true}
         searchContext={searchContext}
         searchSessionId={searchSessionId}
         onEvent={onEvent}
@@ -780,7 +789,7 @@ export const VisualizationWrapper = ({
         // @ts-expect-error upgrade typescript v4.9.5
         onData$={onData$}
         onRender$={onRenderHandler}
-        inspectorAdapters={lensInspector.adapters}
+        inspectorAdapters={lensInspector.getInspectorAdapters()}
         executionContext={executionContext}
         renderMode="edit"
         renderError={(errorMessage?: string | null, error?: ExpressionRenderError | null) => {
@@ -791,11 +800,13 @@ export const VisualizationWrapper = ({
             ? [errorMessage]
             : [];
 
-          if (!hasDynamicError) {
-            setDynamicError(true);
-          }
-
-          return <WorkspaceErrors errors={visibleErrorMessages} title={dataLoadingErrorTitle} />;
+          return (
+            <WorkspaceErrors
+              errors={visibleErrorMessages}
+              title={dataLoadingErrorTitle}
+              onRender={() => setHasRequestError(true)}
+            />
+          );
         }}
       />
     </div>

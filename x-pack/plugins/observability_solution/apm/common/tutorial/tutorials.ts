@@ -18,8 +18,7 @@ export const apmTutorialCustomIntegration: Omit<CustomIntegration, 'type'> = {
   categories: APM_INTEGRATION_CATEGORIES,
   uiInternalPath: '/app/apm/onboarding',
   description: i18n.translate('xpack.apm.tutorial.introduction', {
-    defaultMessage:
-      'Collect performance metrics from your applications with Elastic APM.',
+    defaultMessage: 'Collect performance metrics from your applications with Elastic APM.',
   }),
   icons: [
     {

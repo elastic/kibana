@@ -1,3 +1,22 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 const { USES_STYLED_COMPONENTS } = require('@kbn/babel-preset/styled_components_files');
 
 module.exports = {
@@ -9,6 +28,7 @@ module.exports = {
     '@kbn/eslint-plugin-imports',
     '@kbn/eslint-plugin-telemetry',
     '@kbn/eslint-plugin-i18n',
+    'eslint-plugin-depend',
     'prettier',
   ],
 
@@ -21,6 +41,19 @@ module.exports = {
   },
 
   rules: {
+    // Suggests better replacements for packages: https://github.com/es-tooling/module-replacements/tree/main/docs/modules
+    'depend/ban-dependencies': [
+      'error',
+      {
+        allowed: [
+          '^@kbn/*', // internal packages
+          'lodash', // https://github.com/es-tooling/module-replacements/blob/main/docs/modules/lodash-underscore.md
+          'moment', // https://github.com/es-tooling/module-replacements/blob/main/docs/modules/momentjs.md
+          'jquery', // https://github.com/es-tooling/module-replacements/blob/main/docs/modules/jquery.md
+        ],
+      },
+    ],
+
     'prettier/prettier': [
       'error',
       {
@@ -80,6 +113,13 @@ module.exports = {
           from: 'react-intl',
           to: '@kbn/i18n-react',
           disallowedMessage: `import from @kbn/i18n-react instead`,
+          exclude: [/packages[\/\\]kbn-i18n-react[\/\\]/],
+        },
+        {
+          from: 'zod',
+          to: '@kbn/zod',
+          disallowedMessage: `import from @kbn/zod instead`,
+          exclude: [/packages[\/\\]kbn-zod[\/\\]/],
         },
         {
           from: 'styled-components',
@@ -87,13 +127,16 @@ module.exports = {
           exclude: USES_STYLED_COMPONENTS,
           disallowedMessage: `Prefer using @emotion/react instead. To use styled-components, ensure you plugin is enabled in packages/kbn-babel-preset/styled_components_files.js.`,
         },
-        ...['@elastic/eui/dist/eui_theme_light.json', '@elastic/eui/dist/eui_theme_dark.json'].map(
-          (from) => ({
-            from,
-            to: false,
-            disallowedMessage: `Use "@kbn/ui-theme" to access theme vars.`,
-          })
-        ),
+        ...[
+          '@elastic/eui/dist/eui_theme_amsterdam_light.json',
+          '@elastic/eui/dist/eui_theme_amsterdam_dark.json',
+          '@elastic/eui/dist/eui_theme_borealis_light.json',
+          '@elastic/eui/dist/eui_theme_borealis_dark.json',
+        ].map((from) => ({
+          from,
+          to: false,
+          disallowedMessage: `Use "@kbn/ui-theme" to access theme vars.`,
+        })),
         {
           from: '@kbn/test/jest',
           to: '@kbn/test-jest-helpers',
@@ -130,6 +173,13 @@ module.exports = {
         {
           from: 'rison-node',
           to: '@kbn/rison',
+        },
+        {
+          from: 'react-dom/client',
+          to: 'react-dom',
+          exact: true,
+          disallowedMessage:
+            'Use `react-dom` instead of `react-dom/client` until upgraded to React 18',
         },
       ],
     ],
@@ -270,13 +320,20 @@ module.exports = {
     '@kbn/disable/no_naked_eslint_disable': 'error',
     '@kbn/eslint/no_async_promise_body': 'error',
     '@kbn/eslint/no_async_foreach': 'error',
+    '@kbn/eslint/no_deprecated_authz_config': 'error',
     '@kbn/eslint/no_trailing_import_slash': 'error',
     '@kbn/eslint/no_constructor_args_in_property_initializers': 'error',
     '@kbn/eslint/no_this_in_property_initializers': 'error',
     '@kbn/eslint/no_unsafe_console': 'error',
+    '@kbn/eslint/no_unsafe_hash': 'error',
     '@kbn/imports/no_unresolvable_imports': 'error',
     '@kbn/imports/uniform_imports': 'error',
     '@kbn/imports/no_unused_imports': 'error',
     '@kbn/imports/no_boundary_crossing': 'error',
+    '@kbn/imports/no_group_crossing_manifests': 'error',
+    '@kbn/imports/no_group_crossing_imports': 'error',
+    'no-new-func': 'error',
+    'no-implied-eval': 'error',
+    'no-prototype-builtins': 'error',
   },
 };

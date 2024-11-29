@@ -38,8 +38,8 @@
     "@kbn/discover-plugin",
     "@kbn/rule-data-utils",
     "@kbn/alerts-as-data-utils",
-    "@kbn/text-based-languages",
-    "@kbn/text-based-editor",
+    "@kbn/esql",
+    "@kbn/esql-editor",
     "@kbn/expressions-plugin",
     "@kbn/core-http-browser",
     "@kbn/core-doc-links-browser",
@@ -50,6 +50,12 @@
     "@kbn/code-editor",
     "@kbn/esql-utils",
     "@kbn/data-view-utils",
+    "@kbn/search-types",
+    "@kbn/alerting-comparators",
+    "@kbn/task-manager-plugin",
+    "@kbn/core-logging-server-mocks",
+    "@kbn/core-saved-objects-server",
+    "@kbn/observability-alerting-rule-utils"
   ],
   "exclude": [
     "target/**/*",

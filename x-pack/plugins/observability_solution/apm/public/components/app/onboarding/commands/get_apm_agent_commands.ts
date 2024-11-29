@@ -5,49 +5,14 @@
  * 2.0.
  */
 import Mustache from 'mustache';
-import {
-  java,
-  javaVariables,
-  javaLineNumbers,
-  javaHighlightLang,
-} from './java';
-import {
-  node,
-  nodeVariables,
-  nodeLineNumbers,
-  nodeHighlightLang,
-} from './node';
-import {
-  django,
-  djangoVariables,
-  djangoLineNumbers,
-  djangoHighlightLang,
-} from './django';
-import {
-  flask,
-  flaskVariables,
-  flaskLineNumbers,
-  flaskHighlightLang,
-} from './flask';
-import {
-  rails,
-  railsVariables,
-  railsLineNumbers,
-  railsHighlightLang,
-} from './rails';
-import {
-  rack,
-  rackVariables,
-  rackLineNumbers,
-  rackHighlightLang,
-} from './rack';
+import { java, javaVariables, javaLineNumbers, javaHighlightLang } from './java';
+import { node, nodeVariables, nodeLineNumbers, nodeHighlightLang } from './node';
+import { django, djangoVariables, djangoLineNumbers, djangoHighlightLang } from './django';
+import { flask, flaskVariables, flaskLineNumbers, flaskHighlightLang } from './flask';
+import { rails, railsVariables, railsLineNumbers, railsHighlightLang } from './rails';
+import { rack, rackVariables, rackLineNumbers, rackHighlightLang } from './rack';
 import { go, goVariables, goLineNumbers, goHighlightLang } from './go';
-import {
-  dotnet,
-  dotnetVariables,
-  dotnetLineNumbers,
-  dotnetHighlightLang,
-} from './dotnet';
+import { dotnet, dotnetVariables, dotnetLineNumbers, dotnetHighlightLang } from './dotnet';
 import { php, phpVariables, phpLineNumbers, phpHighlightLang } from './php';
 import {
   serviceNameHint,
@@ -73,9 +38,9 @@ interface Variables {
   [key: string]: string;
 }
 
-const apmAgentVariablesMap: (
+const apmAgentVariablesMap: (secretToken?: string) => Record<string, Variables> = (
   secretToken?: string
-) => Record<string, Variables> = (secretToken?: string) => ({
+) => ({
   java: javaVariables(secretToken),
   node: nodeVariables(secretToken),
   django: djangoVariables(secretToken),
@@ -91,9 +56,9 @@ interface LineNumbers {
   [key: string]: string | number | object;
 }
 
-const apmAgentLineNumbersMap: (
+const apmAgentLineNumbersMap: (apiKey?: string | null) => Record<string, LineNumbers> = (
   apiKey?: string | null
-) => Record<string, LineNumbers> = (apiKey?: string | null) => ({
+) => ({
   java: javaLineNumbers(apiKey),
   node: nodeLineNumbers(),
   django: djangoLineNumbers(),
@@ -149,10 +114,7 @@ export function getApmAgentVariables(variantId: string, secretToken?: string) {
   return apmAgentVariablesMap(secretToken)[variantId];
 }
 
-export function getApmAgentLineNumbers(
-  variantId: string,
-  apiKey?: string | null
-) {
+export function getApmAgentLineNumbers(variantId: string, apiKey?: string | null) {
   return apmAgentLineNumbersMap(apiKey)[variantId];
 }
 

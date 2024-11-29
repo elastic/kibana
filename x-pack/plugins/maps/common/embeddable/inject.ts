@@ -10,7 +10,7 @@ import type { MapEmbeddablePersistableState } from './types';
 import type { MapAttributes } from '../content_management';
 import { extractReferences, injectReferences } from '../migrations/references';
 
-export const inject: EmbeddableRegistryDefinition['inject'] = (state, references) => {
+export const inject: NonNullable<EmbeddableRegistryDefinition['inject']> = (state, references) => {
   const typedState = state as MapEmbeddablePersistableState;
 
   // by-reference embeddable

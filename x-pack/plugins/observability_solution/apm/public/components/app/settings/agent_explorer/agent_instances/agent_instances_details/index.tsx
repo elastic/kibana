@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiBasicTableColumn,
-  EuiInMemoryTable,
-  EuiLink,
-  EuiText,
-} from '@elastic/eui';
+import { EuiBasicTableColumn, EuiInMemoryTable, EuiLink, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
@@ -50,12 +45,9 @@ export function getInstanceColumns(
   return [
     {
       field: AgentExplorerInstanceFieldName.InstanceName,
-      name: i18n.translate(
-        'xpack.apm.agentExplorerInstanceTable.InstanceColumnLabel',
-        {
-          defaultMessage: 'Instance',
-        }
-      ),
+      name: i18n.translate('xpack.apm.agentExplorerInstanceTable.InstanceColumnLabel', {
+        defaultMessage: 'Instance',
+      }),
       sortable: true,
       render: (_, { serviceNode }) => {
         const displayedName = getServiceNodeName(serviceNode);
@@ -128,24 +120,18 @@ export function getInstanceColumns(
     },
     {
       field: AgentExplorerInstanceFieldName.Environments,
-      name: i18n.translate(
-        'xpack.apm.agentExplorerInstanceTable.environmentColumnLabel',
-        {
-          defaultMessage: 'Environment',
-        }
-      ),
+      name: i18n.translate('xpack.apm.agentExplorerInstanceTable.environmentColumnLabel', {
+        defaultMessage: 'Environment',
+      }),
       width: `${unit * 16}px`,
       sortable: true,
-      render: (_, { environments }) => (
-        <EnvironmentBadge environments={environments} />
-      ),
+      render: (_, { environments }) => <EnvironmentBadge environments={environments} />,
     },
     {
       field: AgentExplorerInstanceFieldName.AgentVersion,
-      name: i18n.translate(
-        'xpack.apm.agentExplorerInstanceTable.agentVersionColumnLabel',
-        { defaultMessage: 'Agent Version' }
-      ),
+      name: i18n.translate('xpack.apm.agentExplorerInstanceTable.agentVersionColumnLabel', {
+        defaultMessage: 'Agent Version',
+      }),
       width: `${unit * 16}px`,
       sortable: true,
       render: (_, { agentVersion }) => {
@@ -157,8 +143,7 @@ export function getInstanceColumns(
               'xpack.apm.agentExplorerInstanceTable.agentVersionColumnLabel.multipleVersions',
               {
                 values: { versionsCount: versions.length },
-                defaultMessage:
-                  '{versionsCount, plural, one {1 version} other {# versions}}',
+                defaultMessage: '{versionsCount, plural, one {1 version} other {# versions}}',
               }
             )}
           />
@@ -167,12 +152,9 @@ export function getInstanceColumns(
     },
     {
       field: AgentExplorerInstanceFieldName.LastReport,
-      name: i18n.translate(
-        'xpack.apm.agentExplorerInstanceTable.lastReportColumnLabel',
-        {
-          defaultMessage: 'Last report',
-        }
-      ),
+      name: i18n.translate('xpack.apm.agentExplorerInstanceTable.lastReportColumnLabel', {
+        defaultMessage: 'Last report',
+      }),
       width: `${unit * 16}px`,
       sortable: true,
       render: (_, { lastReport }) => <TimestampTooltip time={lastReport} />,

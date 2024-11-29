@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import { kibanaPackageJson } from '@kbn/repo-info';
 import type { Client } from '@elastic/elasticsearch';
 
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { KbnClient } from '@kbn/test/src/kbn_client';
+import { kibanaPackageJson } from '@kbn/repo-info';
+import { isServerlessKibanaFlavor } from '../../../../common/endpoint/utils/kibana_status';
+import { fetchFleetLatestAvailableAgentVersion } from '../../../../common/endpoint/utils/fetch_fleet_version';
 import { isFleetServerRunning } from '../../../../scripts/endpoint/common/fleet_server/fleet_server_services';
 import type { HostVm } from '../../../../scripts/endpoint/common/types';
 import type { BaseVmCreateOptions } from '../../../../scripts/endpoint/common/vm_services';
@@ -37,6 +39,8 @@ export interface CreateAndEnrollEndpointHostCIOptions
   agentPolicyId: string;
   /** version of the Agent to install. Defaults to stack version */
   version?: string;
+  /** skip all checks and use provided version */
+  forceVersion?: boolean;
   /** The name for the host. Will also be the name of the VM */
   hostname?: string;
   /** If `version` should be exact, or if this is `true`, then the closest version will be used. Defaults to `false` */
@@ -63,10 +67,19 @@ export const createAndEnrollEndpointHostCI = async ({
   hostname,
   version = kibanaPackageJson.version,
   useClosestVersionMatch = true,
+  forceVersion = false,
 }: CreateAndEnrollEndpointHostCIOptions): Promise<CreateAndEnrollEndpointHostCIResponse> => {
   const vmName = hostname ?? `test-host-${Math.random().toString().substring(2, 6)}`;
+  let agentVersion = version;
 
-  const fileNameNoExtension = getAgentFileName(version);
+  if (!forceVersion) {
+    const isServerless = await isServerlessKibanaFlavor(kbnClient);
+    if (isServerless) {
+      agentVersion = await fetchFleetLatestAvailableAgentVersion(kbnClient);
+    }
+  }
+
+  const fileNameNoExtension = getAgentFileName(agentVersion);
   const agentFileName = `${fileNameNoExtension}.tar.gz`;
   let agentDownload: DownloadedAgentInfo | undefined;
 
@@ -78,7 +91,7 @@ export const createAndEnrollEndpointHostCI = async ({
     log.warning(
       `There is no agent installer for ${agentFileName} present on disk, trying to download it now.`
     );
-    const { url: agentUrl } = await getAgentDownloadUrl(version, useClosestVersionMatch, log);
+    const { url: agentUrl } = await getAgentDownloadUrl(agentVersion, useClosestVersionMatch, log);
     agentDownload = await downloadAndStoreAgent(agentUrl, agentFileName);
   }
 

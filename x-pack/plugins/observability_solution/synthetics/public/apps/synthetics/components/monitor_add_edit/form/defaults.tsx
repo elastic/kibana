@@ -14,6 +14,7 @@ import {
   SyntheticsMonitor,
   BrowserFields,
   HTTPFields,
+  ScheduleUnit,
 } from '../types';
 
 export const getDefaultFormFields = (
@@ -61,9 +62,34 @@ export const formatDefaultFormValues = (monitor?: SyntheticsMonitor) => {
 
   let formMonitorType = monitor[ConfigKey.FORM_MONITOR_TYPE];
   const monitorType = monitor[ConfigKey.MONITOR_TYPE];
+  let schedule = monitor[ConfigKey.SCHEDULE];
+  if (schedule?.unit === 's') {
+    schedule = { number: `${schedule.number}s`, unit: 's' as ScheduleUnit };
+  }
   const monitorWithFormMonitorType = {
     ...monitor,
+    [ConfigKey.SCHEDULE]: schedule,
   };
+
+  const params = monitorWithFormMonitorType[ConfigKey.PARAMS];
+  if (typeof params !== 'string' && params) {
+    try {
+      monitorWithFormMonitorType[ConfigKey.PARAMS] = JSON.stringify(params);
+    } catch (e) {
+      // ignore
+    }
+  }
+  const browserMonitor = monitor as BrowserFields;
+
+  const pwOptions = browserMonitor[ConfigKey.PLAYWRIGHT_OPTIONS];
+  if (typeof pwOptions !== 'string' && pwOptions) {
+    try {
+      (monitorWithFormMonitorType as BrowserFields)[ConfigKey.PLAYWRIGHT_OPTIONS] =
+        JSON.stringify(pwOptions);
+    } catch (e) {
+      // ignore
+    }
+  }
 
   // handle default monitor types from Uptime, which don't contain `ConfigKey.FORM_MONITOR_TYPE`
   if (!formMonitorType) {
@@ -76,7 +102,6 @@ export const formatDefaultFormValues = (monitor?: SyntheticsMonitor) => {
 
   switch (formMonitorType) {
     case FormMonitorType.MULTISTEP:
-      const browserMonitor = monitor as BrowserFields;
       return {
         ...monitorWithFormMonitorType,
         'source.inline': {

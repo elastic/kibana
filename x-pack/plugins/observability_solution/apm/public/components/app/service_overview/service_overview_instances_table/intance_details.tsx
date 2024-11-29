@@ -6,11 +6,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiSkeletonText } from '@elastic/eui';
-import {
-  CloudProvider,
-  getAgentIcon,
-  getCloudProviderIcon,
-} from '@kbn/custom-icons';
+import { CloudProvider, getAgentIcon, getCloudProviderIcon } from '@kbn/custom-icons';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import React from 'react';
@@ -77,12 +73,7 @@ const serviceDetailsKeys = [
   SERVICE_RUNTIME_NAME,
   SERVICE_RUNTIME_VERSION,
 ];
-const containerDetailsKeys = [
-  CONTAINER_ID,
-  HOST_NAME,
-  KUBERNETES_POD_UID,
-  KUBERNETES_POD_NAME,
-];
+const containerDetailsKeys = [CONTAINER_ID, HOST_NAME, KUBERNETES_POD_UID, KUBERNETES_POD_NAME];
 const metricsKubernetesDetailsKeys = [
   KUBERNETES_CONTAINER_NAME,
   KUBERNETES_NAMESPACE,
@@ -97,11 +88,7 @@ const cloudDetailsKeys = [
   CLOUD_PROVIDER,
 ];
 
-export function InstanceDetails({
-  serviceName,
-  serviceNodeName,
-  kuery,
-}: Props) {
+export function InstanceDetails({ serviceName, serviceNodeName, kuery }: Props) {
   const theme = useTheme();
   const history = useHistory();
 
@@ -150,10 +137,9 @@ export function InstanceDetails({
       <EuiFlexItem>
         <KeyValueFilterList
           initialIsOpen
-          title={i18n.translate(
-            'xpack.apm.serviceOverview.instanceTable.details.serviceTitle',
-            { defaultMessage: 'Service' }
-          )}
+          title={i18n.translate('xpack.apm.serviceOverview.instanceTable.details.serviceTitle', {
+            defaultMessage: 'Service',
+          })}
           icon={getAgentIcon(data.agent?.name, theme.darkMode)}
           keyValueList={serviceDetailsKeyValuePairs}
           onClickFilter={addKueryBarFilter}
@@ -161,24 +147,19 @@ export function InstanceDetails({
       </EuiFlexItem>
       <EuiFlexItem>
         <KeyValueFilterList
-          title={i18n.translate(
-            'xpack.apm.serviceOverview.instanceTable.details.containerTitle',
-            { defaultMessage: 'Container' }
-          )}
+          title={i18n.translate('xpack.apm.serviceOverview.instanceTable.details.containerTitle', {
+            defaultMessage: 'Container',
+          })}
           icon={getContainerIcon(containerType)}
-          keyValueList={[
-            ...containerDetailsKeyValuePairs,
-            ...metricsKubernetesKeyValuePairs,
-          ]}
+          keyValueList={[...containerDetailsKeyValuePairs, ...metricsKubernetesKeyValuePairs]}
           onClickFilter={addKueryBarFilter}
         />
       </EuiFlexItem>
       <EuiFlexItem>
         <KeyValueFilterList
-          title={i18n.translate(
-            'xpack.apm.serviceOverview.instanceTable.details.cloudTitle',
-            { defaultMessage: 'Cloud' }
-          )}
+          title={i18n.translate('xpack.apm.serviceOverview.instanceTable.details.cloudTitle', {
+            defaultMessage: 'Cloud',
+          })}
           icon={getCloudProviderIcon(data.cloud?.provider as CloudProvider)}
           keyValueList={cloudDetailsKeyValuePairs}
           onClickFilter={addKueryBarFilter}

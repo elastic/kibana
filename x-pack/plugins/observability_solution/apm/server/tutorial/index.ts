@@ -6,11 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  ArtifactsSchema,
-  TutorialsCategory,
-  TutorialSchema,
-} from '@kbn/home-plugin/server';
+import { ArtifactsSchema, TutorialsCategory, TutorialSchema } from '@kbn/home-plugin/server';
 import { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import { APMConfig } from '..';
@@ -18,8 +14,7 @@ import { createElasticCloudInstructions } from './envs/elastic_cloud';
 import { onPremInstructions } from './envs/on_prem';
 
 const apmIntro = i18n.translate('xpack.apm.tutorial.introduction', {
-  defaultMessage:
-    'Collect performance metrics from your applications with Elastic APM.',
+  defaultMessage: 'Collect performance metrics from your applications with Elastic APM.',
 });
 const moduleName = 'apm';
 
@@ -55,12 +50,9 @@ export const tutorialProvider =
       // @ts-expect-error artifacts.application is readonly
       artifacts.application = {
         path: '/app/apm',
-        label: i18n.translate(
-          'xpack.apm.tutorial.specProvider.artifacts.application.label',
-          {
-            defaultMessage: 'Launch APM',
-          }
-        ),
+        label: i18n.translate('xpack.apm.tutorial.specProvider.artifacts.application.label', {
+          defaultMessage: 'Launch APM',
+        }),
       };
     }
 
@@ -72,20 +64,17 @@ export const tutorialProvider =
       moduleName,
       category: TutorialsCategory.OTHER,
       shortDescription: apmIntro,
-      longDescription: i18n.translate(
-        'xpack.apm.tutorial.specProvider.longDescription',
-        {
-          defaultMessage:
-            'Application Performance Monitoring (APM) collects in-depth \
+      longDescription: i18n.translate('xpack.apm.tutorial.specProvider.longDescription', {
+        defaultMessage:
+          'Application Performance Monitoring (APM) collects in-depth \
 performance metrics and errors from inside your application. \
 It allows you to monitor the performance of thousands of applications in real time. \
 [Learn more]({learnMoreLink}).',
-          values: {
-            learnMoreLink:
-              '{config.docs.base_url}guide/en/apm/guide/{config.docs.version}/index.html',
-          },
-        }
-      ),
+        values: {
+          learnMoreLink:
+            '{config.docs.base_url}guide/en/apm/guide/{config.docs.version}/index.html',
+        },
+      }),
       euiIconType: 'apmApp',
       integrationBrowserCategories: ['observability', 'apm'],
       artifacts,

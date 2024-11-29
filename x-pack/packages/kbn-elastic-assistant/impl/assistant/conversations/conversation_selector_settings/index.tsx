@@ -8,7 +8,6 @@
 import {
   EuiButtonIcon,
   EuiComboBox,
-  EuiComboBoxOptionOption,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -19,15 +18,15 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 
 import { Conversation } from '../../../..';
-import * as i18n from '../conversation_selector/translations';
+import * as i18n from './translations';
 import { SystemPromptSelectorOption } from '../../prompt_editor/system_prompt/system_prompt_modal/system_prompt_selector/system_prompt_selector';
+import { ConversationSelectorSettingsOption } from './types';
 
 interface Props {
   conversations: Record<string, Conversation>;
   onConversationDeleted: (conversationTitle: string) => void;
   onConversationSelectionChange: (conversation?: Conversation | string) => void;
   selectedConversationTitle: string;
-  shouldDisableKeyboardShortcut?: () => boolean;
   isDisabled?: boolean;
 }
 
@@ -49,10 +48,6 @@ const getNextConversationTitle = (
     : conversationTitles[conversationTitles.indexOf(selectedConversationTitle) + 1];
 };
 
-export type ConversationSelectorSettingsOption = EuiComboBoxOptionOption<{
-  isDefault: boolean;
-}>;
-
 /**
  * A disconnected variant of the ConversationSelector component that allows for
  * modifiable settings without persistence. Also changes some styling and removes
@@ -66,9 +61,11 @@ export const ConversationSelectorSettings: React.FC<Props> = React.memo(
     onConversationSelectionChange,
     selectedConversationTitle,
     isDisabled,
-    shouldDisableKeyboardShortcut = () => false,
   }) => {
-    const conversationTitles = useMemo(() => Object.keys(conversations), [conversations]);
+    const conversationTitles = useMemo(
+      () => Object.values(conversations).map((c) => c.title),
+      [conversations]
+    );
 
     const [conversationOptions, setConversationOptions] = useState<
       ConversationSelectorSettingsOption[]
@@ -96,7 +93,6 @@ export const ConversationSelectorSettings: React.FC<Props> = React.memo(
                 (conversation) =>
                   conversation.title === conversationSelectorSettingsOption[0]?.label
               ) ?? conversationSelectorSettingsOption[0]?.label;
-
         onConversationSelectionChange(newConversation);
       },
       [onConversationSelectionChange, conversations]
@@ -104,7 +100,8 @@ export const ConversationSelectorSettings: React.FC<Props> = React.memo(
 
     // Callback for when user types to create a new conversation
     const onCreateOption = useCallback(
-      (searchValue, flattenedOptions = []) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (searchValue: any, flattenedOptions: any = []) => {
         if (!searchValue || !searchValue.trim().toLowerCase()) {
           return;
         }

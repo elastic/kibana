@@ -6,12 +6,13 @@
  */
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
+import { DeleteMonitorAPI } from './services/delete_monitor_api';
 import { SyntheticsRestApiRouteFactory } from '../types';
 import { syntheticsMonitorType } from '../../../common/types/saved_objects';
 import { ConfigKey } from '../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
-import { getMonitors, getKqlFilter } from '../common';
-import { deleteMonitorBulk } from './bulk_cruds/delete_monitor_bulk';
+import { getMonitors, getSavedObjectKqlFilter } from '../common';
+import { validateSpaceId } from './services/validate_space_id';
 
 export const deleteSyntheticsMonitorProjectRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'DELETE',
@@ -25,7 +26,7 @@ export const deleteSyntheticsMonitorProjectRoute: SyntheticsRestApiRouteFactory 
     }),
   },
   handler: async (routeContext): Promise<any> => {
-    const { request, response, savedObjectsClient, server, syntheticsMonitorClient } = routeContext;
+    const { request, response } = routeContext;
     const { projectName } = request.params;
     const { monitors: monitorsToDelete } = request.body;
     const decodedProjectName = decodeURI(projectName);
@@ -37,9 +38,11 @@ export const deleteSyntheticsMonitorProjectRoute: SyntheticsRestApiRouteFactory 
       });
     }
 
+    await validateSpaceId(routeContext);
+
     const deleteFilter = `${syntheticsMonitorType}.attributes.${
       ConfigKey.PROJECT_ID
-    }: "${decodedProjectName}" AND ${getKqlFilter({
+    }: "${decodedProjectName}" AND ${getSavedObjectKqlFilter({
       field: 'journey_id',
       values: monitorsToDelete.map((id: string) => `${id}`),
     })}`;
@@ -55,12 +58,10 @@ export const deleteSyntheticsMonitorProjectRoute: SyntheticsRestApiRouteFactory 
       { fields: [] }
     );
 
-    await deleteMonitorBulk({
+    const deleteMonitorAPI = new DeleteMonitorAPI(routeContext);
+
+    await deleteMonitorAPI.deleteMonitorBulk({
       monitors,
-      server,
-      savedObjectsClient,
-      syntheticsMonitorClient,
-      request,
     });
 
     return {

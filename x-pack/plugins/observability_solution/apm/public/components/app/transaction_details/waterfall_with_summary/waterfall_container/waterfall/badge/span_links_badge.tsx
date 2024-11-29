@@ -14,12 +14,7 @@ type Props = SpanLinksCount & {
   onClick: (flyoutDetailTab: string) => unknown;
 };
 
-export function SpanLinksBadge({
-  linkedParents,
-  linkedChildren,
-  id,
-  onClick,
-}: Props) {
+export function SpanLinksBadge({ linkedParents, linkedChildren, id, onClick }: Props) {
   if (!linkedParents && !linkedChildren) {
     return null;
   }
@@ -28,29 +23,22 @@ export function SpanLinksBadge({
   return (
     <EuiToolTip
       title={i18n.translate('xpack.apm.waterfall.spanLinks.tooltip.title', {
-        defaultMessage:
-          '{total} {total, plural, one {Span link} other {Span links}} found',
+        defaultMessage: '{total} {total, plural, one {Span link} other {Span links}} found',
         values: { total },
       })}
       content={
         <EuiFlexGroup direction="column" gutterSize="xs">
           <EuiFlexItem>
-            {i18n.translate(
-              'xpack.apm.waterfall.spanLinks.tooltip.linkedChildren',
-              {
-                defaultMessage: '{linkedChildren} incoming',
-                values: { linkedChildren },
-              }
-            )}
+            {i18n.translate('xpack.apm.waterfall.spanLinks.tooltip.linkedChildren', {
+              defaultMessage: '{linkedChildren} incoming',
+              values: { linkedChildren },
+            })}
           </EuiFlexItem>
           <EuiFlexItem>
-            {i18n.translate(
-              'xpack.apm.waterfall.spanLinks.tooltip.linkedParents',
-              {
-                defaultMessage: '{linkedParents} outgoing',
-                values: { linkedParents },
-              }
-            )}
+            {i18n.translate('xpack.apm.waterfall.spanLinks.tooltip.linkedParents', {
+              defaultMessage: '{linkedParents} outgoing',
+              values: { linkedParents },
+            })}
           </EuiFlexItem>
         </EuiFlexGroup>
       }
@@ -61,16 +49,12 @@ export function SpanLinksBadge({
           e.stopPropagation();
           onClick(spanLinksFlyoutTab);
         }}
-        onClickAriaLabel={i18n.translate(
-          'xpack.apm.waterfall.spanLinks.badgeAriaLabel',
-          {
-            defaultMessage: 'Open span links details',
-          }
-        )}
+        onClickAriaLabel={i18n.translate('xpack.apm.waterfall.spanLinks.badgeAriaLabel', {
+          defaultMessage: 'Open span links details',
+        })}
       >
         {i18n.translate('xpack.apm.waterfall.spanLinks.badge', {
-          defaultMessage:
-            '{total} {total, plural, one {Span link} other {Span links}}',
+          defaultMessage: '{total} {total, plural, one {Span link} other {Span links}}',
           values: { total },
         })}
       </EuiBadge>

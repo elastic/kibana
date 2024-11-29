@@ -7,7 +7,8 @@
 
 import expect from '@kbn/expect';
 import { adminTestUser } from '@kbn/test';
-import { FtrProviderContext } from '../../ftr_provider_context';
+
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
@@ -97,6 +98,56 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'true')
         .set('authorization', `Bearer ${accessToken}`)
         .expect(401);
+    });
+
+    describe('Post-authentication', () => {
+      it('correctly handles unexpected post-authentication errors', async () => {
+        const { accessToken } = await createToken();
+
+        await supertest
+          .get('/authentication/app/not_auth_flow')
+          .set('authorization', `Bearer ${accessToken}`)
+          .expect(200);
+
+        await supertest
+          .get('/authentication/app/not_auth_flow?statusCode=400')
+          .set('authorization', `Bearer ${accessToken}`)
+          .expect(400);
+
+        const { text: nonauthFlow500ResponseText } = await supertest
+          .get('/authentication/app/not_auth_flow?statusCode=500')
+          .set('authorization', `Bearer ${accessToken}`)
+          .expect(500);
+        expect(nonauthFlow500ResponseText).to.eql(
+          '{"statusCode":500,"error":"Internal Server Error","message":"500 response"}'
+        );
+
+        // Auth-flow routes
+        await supertest
+          .get('/authentication/app/auth_flow')
+          .set('authorization', `Bearer ${accessToken}`)
+          .expect(200);
+
+        const {
+          text: authFlow401ResponseText,
+          headers: { refresh: refresh401Header },
+        } = await supertest
+          .get('/authentication/app/auth_flow?statusCode=401')
+          .set('authorization', `Bearer ${accessToken}`)
+          .expect(401);
+        expect(authFlow401ResponseText).to.contain('<div/>');
+        expect(refresh401Header).to.contain('url=/login');
+
+        const {
+          text: authFlow500ResponseText,
+          headers: { refresh: refresh500Header },
+        } = await supertest
+          .get('/authentication/app/auth_flow?statusCode=500')
+          .set('authorization', `Bearer ${accessToken}`)
+          .expect(500);
+        expect(authFlow500ResponseText).to.contain('<div/>');
+        expect(refresh500Header).to.contain('url=/login');
+      });
     });
   });
 }

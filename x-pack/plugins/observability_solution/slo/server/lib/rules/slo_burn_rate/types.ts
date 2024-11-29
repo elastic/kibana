@@ -15,6 +15,7 @@ import {
   HIGH_PRIORITY_ACTION,
   MEDIUM_PRIORITY_ACTION,
   LOW_PRIORITY_ACTION,
+  SUPPRESSED_PRIORITY_ACTION,
 } from '../../../../common/constants';
 
 export enum AlertStates {
@@ -31,9 +32,15 @@ export interface WindowSchema {
   actionGroup: string;
 }
 
+interface Dependency {
+  ruleId: string;
+  actionGroupsToSuppressOn: string[];
+}
+
 export type BurnRateRuleParams = {
   sloId: string;
   windows: WindowSchema[];
+  dependencies?: Dependency[];
 } & Record<string, any>;
 export type BurnRateRuleTypeState = RuleTypeState; // no specific rule state
 export type BurnRateAlertState = AlertState; // no specific alert state
@@ -43,4 +50,10 @@ export type BurnRateAllowedActionGroups = ActionGroupIdsOf<
   | typeof HIGH_PRIORITY_ACTION
   | typeof MEDIUM_PRIORITY_ACTION
   | typeof LOW_PRIORITY_ACTION
+  | typeof SUPPRESSED_PRIORITY_ACTION
 >;
+
+export interface Group {
+  field: string;
+  value: string;
+}

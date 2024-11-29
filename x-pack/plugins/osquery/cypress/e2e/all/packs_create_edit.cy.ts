@@ -292,7 +292,7 @@ describe('Packs - Create and Edit', { tags: ['@ess', '@serverless'] }, () => {
       })
         .then((response) =>
           loadPack({
-            policy_ids: [response.body.items[0].policy_id],
+            policy_ids: response.body.items[0].policy_ids,
             queries: {
               [savedQueryName]: { ecs_mapping: {}, interval: 3600, query: 'select * from uptime;' },
             },
@@ -349,7 +349,7 @@ describe('Packs - Create and Edit', { tags: ['@ess', '@serverless'] }, () => {
         })
           .then((response) =>
             loadPack({
-              policy_ids: [response.body.items[0].policy_id],
+              policy_ids: response.body.items[0].policy_ids,
               queries: {
                 [savedQueryName]: {
                   ecs_mapping: {},
@@ -401,7 +401,7 @@ describe('Packs - Create and Edit', { tags: ['@ess', '@serverless'] }, () => {
       })
         .then((response) =>
           loadPack({
-            policy_ids: [response.body.items[0].policy_id],
+            policy_ids: response.body.items[0].policy_ids,
             queries: {
               [savedQueryName]: {
                 ecs_mapping: {},
@@ -460,7 +460,7 @@ describe('Packs - Create and Edit', { tags: ['@ess', '@serverless'] }, () => {
         })
           .then((response) =>
             loadPack({
-              policy_ids: [response.body.items[0].policy_id],
+              policy_ids: response.body.items[0].policy_ids,
               queries: {
                 [savedQueryName]: {
                   ecs_mapping: {},
@@ -516,7 +516,7 @@ describe('Packs - Create and Edit', { tags: ['@ess', '@serverless'] }, () => {
       })
         .then((response) =>
           loadPack({
-            policy_ids: [response.body.items[0].policy_id],
+            policy_ids: response.body.items[0].policy_ids,
             queries: {
               [savedQueryName]: { ecs_mapping: {}, interval: 3600, query: 'select * from uptime;' },
             },
@@ -552,7 +552,7 @@ describe('Packs - Create and Edit', { tags: ['@ess', '@serverless'] }, () => {
       })
         .then((response) =>
           loadPack({
-            policy_ids: [response.body.items[0].policy_id],
+            policy_ids: response.body.items[0].policy_ids,
             queries: {
               [savedQueryName]: { ecs_mapping: {}, interval: 60, query: 'select * from uptime;' },
             },
@@ -577,9 +577,11 @@ describe('Packs - Create and Edit', { tags: ['@ess', '@serverless'] }, () => {
           cy.getBySel('docsLoading').should('exist');
           cy.getBySel('docsLoading').should('not.exist');
 
-          return cy.get('tbody .euiTableRow > td:nth-child(5)').invoke('text');
+          return cy
+            .get('tbody .euiTableRow > td:nth-child(5) > .euiTableCellContent')
+            .invoke('text');
         },
-        (response) => response !== 'Docs-',
+        (response) => response !== '-',
         {
           timeout: 300000,
           post: () => {
@@ -607,7 +609,7 @@ describe('Packs - Create and Edit', { tags: ['@ess', '@serverless'] }, () => {
       })
         .then((response) =>
           loadPack({
-            policy_ids: [response.body.items[0].policy_id],
+            policy_ids: response.body.items[0].policy_ids,
             queries: {
               [savedQueryName]: { ecs_mapping: {}, interval: 3600, query: 'select * from uptime;' },
             },
@@ -656,7 +658,7 @@ describe('Packs - Create and Edit', { tags: ['@ess', '@serverless'] }, () => {
         })
           .then((response) =>
             loadPack({
-              policy_ids: [response.body.items[0].policy_id],
+              policy_ids: response.body.items[0].policy_ids,
               queries: {
                 [savedQueryName]: {
                   ecs_mapping: {},
@@ -736,7 +738,7 @@ describe('Packs - Create and Edit', { tags: ['@ess', '@serverless'] }, () => {
       })
         .then((response) =>
           loadPack({
-            policy_ids: [response.body.items[0].policy_id],
+            policy_ids: response.body.items[0].policy_ids,
             queries: {
               [savedQueryName]: { ecs_mapping: {}, interval: 3600, query: 'select * from uptime;' },
             },

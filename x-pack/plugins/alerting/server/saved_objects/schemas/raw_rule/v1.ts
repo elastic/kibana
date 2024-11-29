@@ -11,6 +11,7 @@ const executionStatusWarningReason = schema.oneOf([
   schema.literal('maxExecutableActions'),
   schema.literal('maxAlerts'),
   schema.literal('maxQueuedActions'),
+  schema.literal('ruleExecution'),
 ]);
 
 const executionStatusErrorReason = schema.oneOf([
@@ -166,9 +167,10 @@ const rawRuleAlertsFilterSchema = schema.object({
             isMultiIndex: schema.maybe(schema.boolean()),
             type: schema.maybe(schema.string()),
             key: schema.maybe(schema.string()),
-            params: schema.maybe(schema.recordOf(schema.string(), schema.any())), // better type?
+            params: schema.maybe(schema.any()),
             value: schema.maybe(schema.string()),
             field: schema.maybe(schema.string()),
+            relation: schema.maybe(schema.oneOf([schema.literal('OR'), schema.literal('AND')])),
           }),
           $state: schema.maybe(
             schema.object({
@@ -194,7 +196,7 @@ const rawRuleAlertsFilterSchema = schema.object({
 
 const rawRuleActionSchema = schema.object({
   uuid: schema.maybe(schema.string()),
-  group: schema.string(),
+  group: schema.maybe(schema.string()),
   actionRef: schema.string(),
   actionTypeId: schema.string(),
   params: schema.recordOf(schema.string(), schema.any()),

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
@@ -63,6 +64,21 @@ export const appDefinitions: Record<AppId, AppDefinition> = {
     }),
     icon: 'logstashQueue',
   },
+  [AppIds.DATA_QUALITY]: {
+    category: appCategories.DATA,
+    description: i18n.translate('management.landing.withCardNavigation.dataQualityDescription', {
+      defaultMessage: 'Find and manage quality issues in your log data.',
+    }),
+    icon: 'documents',
+  },
+
+  [AppIds.DATA_USAGE]: {
+    category: appCategories.DATA,
+    description: i18n.translate('management.landing.withCardNavigation.dataUsageDescription', {
+      defaultMessage: 'View data usage and retention.',
+    }),
+    icon: 'stats',
+  },
 
   [AppIds.RULES]: {
     category: appCategories.ALERTS,
@@ -90,6 +106,13 @@ export const appDefinitions: Record<AppId, AppDefinition> = {
     icon: 'wrench',
   },
 
+  [AppIds.SPACES]: {
+    category: appCategories.CONTENT,
+    description: i18n.translate('management.landing.withCardNavigation.spacesDescription', {
+      defaultMessage: 'Organize your saved objects into meaningful categories.',
+    }),
+    icon: 'spaces',
+  },
   [AppIds.SAVED_OBJECTS]: {
     category: appCategories.CONTENT,
     description: i18n.translate('management.landing.withCardNavigation.objectsDescription', {
@@ -119,14 +142,6 @@ export const appDefinitions: Record<AppId, AppDefinition> = {
     icon: 'tag',
   },
 
-  [AppIds.API_KEYS]: {
-    category: appCategories.OTHER,
-    description: i18n.translate('management.landing.withCardNavigation.apiKeysDescription', {
-      defaultMessage: 'Allow programmatic access to your project data and capabilities.',
-    }),
-    icon: 'lockOpen',
-  },
-
   [AppIds.SERVERLESS_SETTINGS]: {
     category: appCategories.OTHER,
     description: i18n.translate('management.landing.withCardNavigation.settingsDescription', {
@@ -135,10 +150,19 @@ export const appDefinitions: Record<AppId, AppDefinition> = {
     icon: 'gear',
   },
 
+  // Access section
+  [AppIds.API_KEYS]: {
+    category: appCategories.ACCESS,
+    description: i18n.translate('management.landing.withCardNavigation.apiKeysDescription', {
+      defaultMessage: 'Allow programmatic access to your project data and capabilities.',
+    }),
+    icon: 'lockOpen',
+  },
   [AppIds.ROLES]: {
-    category: appCategories.OTHER,
+    category: appCategories.ACCESS,
     description: i18n.translate('management.landing.withCardNavigation.rolesDescription', {
-      defaultMessage: 'Allow custom roles to be created for users.',
+      defaultMessage:
+        'Create roles unique to this project and combine the exact set of privileges that your users need.',
     }),
     icon: 'usersRolesApp',
   },

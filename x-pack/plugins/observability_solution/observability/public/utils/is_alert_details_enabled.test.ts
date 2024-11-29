@@ -28,14 +28,13 @@ import { ConfigSchema } from '../plugin';
 import { isAlertDetailsEnabledPerApp } from './is_alert_details_enabled';
 import type { TopAlert } from '../typings/alerts';
 
-const defaultConfig = {
+const defaultConfig: ConfigSchema = {
   unsafe: {
     alertDetails: {
-      metrics: { enabled: false },
       uptime: { enabled: false },
     },
   },
-} as ConfigSchema;
+};
 describe('isAlertDetailsEnabled', () => {
   describe('Logs alert', () => {
     const logsAlert = {
@@ -63,14 +62,13 @@ describe('isAlertDetailsEnabled', () => {
       lastUpdated: 1630588131750,
     } as unknown as TopAlert;
     it('returns TRUE when rule type is logs.alert.document.count', () => {
-      const updatedConfig = {
+      const updatedConfig: ConfigSchema = {
         unsafe: {
           alertDetails: {
-            metrics: { enabled: false },
             uptime: { enabled: false },
           },
         },
-      } as ConfigSchema;
+      };
       expect(isAlertDetailsEnabledPerApp(logsAlert, updatedConfig)).toBeTruthy();
     });
   });
@@ -104,14 +102,13 @@ describe('isAlertDetailsEnabled', () => {
     });
 
     it('returns TRUE when rule type is apm.transaction_duration', () => {
-      const updatedConfig = {
+      const updatedConfig: ConfigSchema = {
         unsafe: {
           alertDetails: {
-            metrics: { enabled: false },
             uptime: { enabled: false },
           },
         },
-      } as ConfigSchema;
+      };
       const apmTransactionDurationAlert = {
         ...APMAlert,
         fields: { ...APMAlert.fields, [ALERT_RULE_TYPE_ID]: 'apm.transaction_duration' },
@@ -129,7 +126,7 @@ describe('isAlertDetailsEnabled', () => {
         [ALERT_WORKFLOW_STATUS]: 'open',
         [ALERT_RULE_UUID]: 'db2ab7c0-0bec-11ec-9ae2-5b10ca924404',
         [ALERT_START]: '2021-09-02T12:54:09.674Z',
-        [ALERT_RULE_TYPE_ID]: 'metrics.alert.inventory.threshold',
+        [ALERT_RULE_TYPE_ID]: 'metrics.alert.threshold',
         [EVENT_ACTION]: 'active',
         [ALERT_EVALUATION_VALUE]: 1957,
         [ALERT_INSTANCE_ID]: '*',
@@ -144,20 +141,8 @@ describe('isAlertDetailsEnabled', () => {
       start: 1630587249674,
       lastUpdated: 1630588131750,
     } as unknown as TopAlert;
-    it('returns FALSE when metrics: { enabled: false }', () => {
-      expect(isAlertDetailsEnabledPerApp(metricsAlert, defaultConfig)).toBeFalsy();
-    });
-
-    it('returns TRUE when metrics: { enabled: true }', () => {
-      const updatedConfig = {
-        unsafe: {
-          alertDetails: {
-            metrics: { enabled: true },
-            uptime: { enabled: false },
-          },
-        },
-      } as ConfigSchema;
-      expect(isAlertDetailsEnabledPerApp(metricsAlert, updatedConfig)).toBeTruthy();
+    it('returns TRUE when rule type is metrics.alert.threshold', () => {
+      expect(isAlertDetailsEnabledPerApp(metricsAlert, defaultConfig)).toBeTruthy();
     });
   });
   describe('Uptime alert', () => {
@@ -231,25 +216,23 @@ describe('isAlertDetailsEnabled', () => {
     });
 
     it('returns FALSE when no alert provided', () => {
-      const updatedConfig = {
+      const updatedConfig: ConfigSchema = {
         unsafe: {
           alertDetails: {
-            metrics: { enabled: true },
             uptime: { enabled: true },
           },
         },
-      } as ConfigSchema;
+      };
       expect(isAlertDetailsEnabledPerApp(null, updatedConfig)).toBeFalsy();
     });
     it('returns FALSE when a none-listed rule type is checked', () => {
-      const updatedConfig = {
+      const updatedConfig: ConfigSchema = {
         unsafe: {
           alertDetails: {
-            metrics: { enabled: true },
             uptime: { enabled: true },
           },
         },
-      } as ConfigSchema;
+      };
       const noneListedRuleType = {
         reason: 'reason message',
         fields: {

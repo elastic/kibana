@@ -63,9 +63,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-ui-settings-browser",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-                    "section": "def-common.IUiSettingsClient",
+                    "section": "def-public.IUiSettingsClient",
                     "text": "IUiSettingsClient"
                   }
                 ],
@@ -1455,9 +1455,9 @@
           "(http: ",
           {
             "pluginId": "@kbn/core-http-browser",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-common.HttpSetup",
+            "section": "def-public.HttpSetup",
             "text": "HttpSetup"
           },
           ") => { isDuplicateTitle: (title: string, id?: string | undefined) => Promise<boolean>; createQuery: (attributes: ",
@@ -1524,9 +1524,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-http-browser",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-common.HttpSetup",
+                "section": "def-public.HttpSetup",
                 "text": "HttpSetup"
               }
             ],
@@ -3430,7 +3430,7 @@
                 "section": "def-common.RefreshInterval",
                 "text": "RefreshInterval"
               },
-              "; setRefreshInterval: (refreshInterval: Partial<",
+              "; getMinRefreshInterval: () => number; setRefreshInterval: (refreshInterval: Partial<",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -3834,7 +3834,7 @@
             "section": "def-common.RefreshInterval",
             "text": "RefreshInterval"
           },
-          "; setRefreshInterval: (refreshInterval: Partial<",
+          "; getMinRefreshInterval: () => number; setRefreshInterval: (refreshInterval: Partial<",
           {
             "pluginId": "data",
             "scope": "common",
@@ -4534,7 +4534,7 @@
           "\nConverts QueryState to expression AST"
         ],
         "signature": [
-          "({\n  filters,\n  query,\n  inputQuery,\n  time,\n  dataView,\n}: Args) => Promise<",
+          "({\n  filters,\n  query,\n  inputQuery,\n  time,\n  dataView,\n  titleForInspector,\n  descriptionForInspector,\n}: Args) => Promise<",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -4553,7 +4553,7 @@
             "id": "def-common.textBasedQueryStateToAstWithValidation.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  filters,\n  query,\n  inputQuery,\n  time,\n  dataView,\n}",
+            "label": "{\n  filters,\n  query,\n  inputQuery,\n  time,\n  dataView,\n  titleForInspector,\n  descriptionForInspector,\n}",
             "description": [],
             "signature": [
               "Args"
@@ -4577,7 +4577,7 @@
           "\nConverts QueryState to expression AST"
         ],
         "signature": [
-          "({\n  filters,\n  query,\n  inputQuery,\n  time,\n  timeFieldName,\n}: Args) => ",
+          "({\n  filters,\n  query,\n  inputQuery,\n  time,\n  timeFieldName,\n  titleForInspector,\n  descriptionForInspector,\n}: Args) => ",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -4595,7 +4595,7 @@
             "id": "def-common.textBasedQueryStateToExpressionAst.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  filters,\n  query,\n  inputQuery,\n  time,\n  timeFieldName,\n}",
+            "label": "{\n  filters,\n  query,\n  inputQuery,\n  time,\n  timeFieldName,\n  titleForInspector,\n  descriptionForInspector,\n}",
             "description": [],
             "signature": [
               "Args"

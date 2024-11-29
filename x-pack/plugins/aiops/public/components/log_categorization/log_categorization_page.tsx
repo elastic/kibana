@@ -10,6 +10,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiHorizontalRule } from '@elastic/eui';
 import {
   EuiButton,
   EuiSpacer,
@@ -27,10 +28,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { usePageUrlState, useUrlState } from '@kbn/ml-url-state';
 import type { FieldValidationResults } from '@kbn/ml-category-validator';
 import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
-import { stringHash } from '@kbn/ml-string-hash';
-import { AIOPS_TELEMETRY_ID } from '../../../common/constants';
-
-import type { Category } from '../../../common/api/log_categorization/types';
+import { AIOPS_ANALYSIS_RUN_ORIGIN } from '@kbn/aiops-common/constants';
+import type { Category } from '@kbn/aiops-log-pattern-analysis/types';
+import { useTableState } from '@kbn/ml-in-memory-table/hooks/use_table_state';
 
 import { useDataSource } from '../../hooks/use_data_source';
 import { useData } from '../../hooks/use_data';
@@ -49,30 +49,30 @@ import { useCategorizeRequest } from './use_categorize_request';
 import { CategoryTable } from './category_table';
 import { DocumentCountChart } from './document_count_chart';
 import { InformationText } from './information_text';
-import { SamplingMenu } from './sampling_menu';
+import { SamplingMenu, useRandomSamplerStorage } from './sampling_menu';
 import { useValidateFieldRequest } from './use_validate_category_field';
 import { FieldValidationCallout } from './category_validation_callout';
-import type { DocumentStats } from '../../hooks/use_document_count_stats';
+import { createDocumentStatsHash } from './utils';
+import { TableHeader } from './category_table/table_header';
+import { useActions } from './category_table/use_actions';
+import { AttachmentsMenu } from './attachments_menu';
 
 const BAR_TARGET = 20;
 const DEFAULT_SELECTED_FIELD = 'message';
 
-interface LogCategorizationPageProps {
-  /** Identifier to indicate the plugin utilizing the component */
-  embeddingOrigin: string;
-}
-
-export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({ embeddingOrigin }) => {
+export const LogCategorizationPage: FC = () => {
   const {
     notifications: { toasts },
+    embeddingOrigin,
   } = useAiopsAppContext();
   const { dataView, savedSearch } = useDataSource();
 
+  const randomSamplerStorage = useRandomSamplerStorage();
   const {
     runCategorizeRequest,
     cancelRequest: cancelCategorizationRequest,
     randomSampler,
-  } = useCategorizeRequest();
+  } = useCategorizeRequest(randomSamplerStorage);
   const { runValidateFieldRequest, cancelRequest: cancelValidationRequest } =
     useValidateFieldRequest();
   const [stateFromUrl, setUrlState] = usePageUrlState<LogCategorizationPageUrlState>(
@@ -81,7 +81,8 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({ embeddin
   );
   const [globalState, setGlobalState] = useUrlState('_g');
   const [selectedField, setSelectedField] = useState<string | undefined>();
-  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
+  const [highlightedCategory, setHighlightedCategory] = useState<Category | null>(null);
+  const [selectedCategories, setSelectedCategories] = useState<Category[]>([]);
   const [selectedSavedSearch, setSelectedSavedSearch] = useState(savedSearch);
   const [previousDocumentStatsHash, setPreviousDocumentStatsHash] = useState<number>(0);
   const [loading, setLoading] = useState(false);
@@ -95,6 +96,7 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({ embeddin
   const [fieldValidationResult, setFieldValidationResult] = useState<FieldValidationResults | null>(
     null
   );
+  const tableState = useTableState<Category>([], 'key');
 
   const cancelRequest = useCallback(() => {
     cancelValidationRequest();
@@ -155,6 +157,16 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({ embeddin
     BAR_TARGET
   );
 
+  const { getActions, openInDiscover } = useActions(
+    dataView.id!,
+    selectedField,
+    selectedCategories,
+    stateFromUrl,
+    timefilter,
+    undefined,
+    undefined
+  );
+
   useEffect(() => {
     if (globalState?.time !== undefined) {
       timefilter.setTime({
@@ -202,13 +214,31 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({ embeddin
       to: latest,
     };
 
+    const runtimeMappings = dataView.getRuntimeMappings();
+
     try {
       const [validationResult, categorizationResult] = await Promise.all([
-        runValidateFieldRequest(index, selectedField, timeField, timeRange, searchQuery, {
-          [AIOPS_TELEMETRY_ID.AIOPS_ANALYSIS_RUN_ORIGIN]: embeddingOrigin,
-        }),
+        runValidateFieldRequest(
+          index,
+          selectedField,
+          timeField,
+          timeRange,
+          searchQuery,
+          runtimeMappings,
+          {
+            [AIOPS_ANALYSIS_RUN_ORIGIN]: embeddingOrigin,
+          }
+        ),
 
-        runCategorizeRequest(index, selectedField, timeField, timeRange, searchQuery, intervalMs),
+        runCategorizeRequest(
+          index,
+          selectedField,
+          timeField,
+          timeRange,
+          searchQuery,
+          runtimeMappings,
+          intervalMs
+        ),
       ]);
 
       setFieldValidationResult(validationResult);
@@ -254,8 +284,6 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({ embeddin
           docCount,
         }))
       );
-      setData(null);
-      setFieldValidationResult(null);
       setTotalCount(documentStats.totalCount);
       if (fieldValidationResult !== null) {
         loadCategories();
@@ -305,6 +333,15 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({ embeddin
     setUrlState({ field });
   };
 
+  const actions = getActions(true);
+
+  const attachmentsMenuProps = {
+    dataView,
+    selectedField,
+    randomSamplerMode: randomSampler.getMode(),
+    randomSamplerProbability: randomSampler.getProbability(),
+  };
+
   return (
     <EuiPageBody data-test-subj="aiopsLogPatternAnalysisPage" paddingSize="none" panelled={false}>
       <PageHeader />
@@ -312,7 +349,6 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({ embeddin
       <EuiFlexGroup gutterSize="none">
         <EuiFlexItem>
           <SearchPanel
-            dataView={dataView}
             searchString={searchString ?? ''}
             searchQuery={searchQuery}
             searchQueryLanguage={searchQueryLanguage}
@@ -362,9 +398,14 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({ embeddin
           )}
         </EuiFlexItem>
         <EuiFlexItem />
-        <EuiFlexItem grow={false} css={{ marginTop: 'auto' }}>
-          <SamplingMenu randomSampler={randomSampler} reload={() => loadCategories()} />
-        </EuiFlexItem>
+        <EuiFlexGroup css={{ marginTop: 'auto' }} alignItems="center" justifyContent="flexEnd">
+          <EuiFlexItem grow={false}>
+            <SamplingMenu randomSampler={randomSampler} reload={() => loadCategories()} />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <AttachmentsMenu {...attachmentsMenuProps} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexGroup>
 
       {eventRate.length ? (
@@ -373,7 +414,7 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({ embeddin
           <DocumentCountChart
             eventRate={eventRate}
             pinnedCategory={pinnedCategory}
-            selectedCategory={selectedCategory}
+            selectedCategory={highlightedCategory}
             totalCount={totalCount}
             documentCountStats={documentStats.documentCountStats}
           />
@@ -389,36 +430,35 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({ embeddin
         loading={loading}
         categoriesLength={data?.categories?.length ?? null}
         eventRateLength={eventRate.length}
-        fieldSelected={selectedField !== null}
       />
 
       {selectedField !== undefined && data !== null && data.categories.length > 0 ? (
-        <CategoryTable
-          categories={data.categories}
-          aiopsListState={stateFromUrl}
-          dataViewId={dataView.id!}
-          eventRate={eventRate}
-          selectedField={selectedField}
-          pinnedCategory={pinnedCategory}
-          setPinnedCategory={setPinnedCategory}
-          selectedCategory={selectedCategory}
-          setSelectedCategory={setSelectedCategory}
-          timefilter={timefilter}
-          displayExamples={data.displayExamples}
-        />
+        <>
+          <TableHeader
+            categoriesCount={data.categories.length}
+            selectedCategoriesCount={selectedCategories.length}
+            openInDiscover={openInDiscover}
+          />
+
+          <EuiSpacer size="xs" />
+          <EuiHorizontalRule margin="none" />
+
+          <CategoryTable
+            categories={data.categories}
+            eventRate={eventRate}
+            mouseOver={{
+              pinnedCategory,
+              setPinnedCategory,
+              highlightedCategory,
+              setHighlightedCategory,
+            }}
+            displayExamples={data.displayExamples}
+            setSelectedCategories={setSelectedCategories}
+            tableState={tableState}
+            actions={actions}
+          />
+        </>
       ) : null}
     </EuiPageBody>
   );
 };
-
-/**
- * Creates a hash from the document stats to determine if the document stats have changed.
- */
-function createDocumentStatsHash(documentStats: DocumentStats) {
-  const lastTimeStampMs = documentStats.documentCountStats?.lastDocTimeStampMs;
-  const totalCount = documentStats.documentCountStats?.totalCount;
-  const times = Object.keys(documentStats.documentCountStats?.buckets ?? {});
-  const firstBucketTimeStamp = times.length ? times[0] : undefined;
-  const lastBucketTimeStamp = times.length ? times[times.length - 1] : undefined;
-  return stringHash(`${lastTimeStampMs}${totalCount}${firstBucketTimeStamp}${lastBucketTimeStamp}`);
-}

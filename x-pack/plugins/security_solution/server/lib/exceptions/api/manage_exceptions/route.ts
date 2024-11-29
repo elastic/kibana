@@ -6,22 +6,27 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import type { ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type { IKibanaResponse } from '@kbn/core/server';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import type { ExceptionList } from '@kbn/securitysolution-exceptions-common/api';
+import {
+  CreateSharedExceptionListRequestBody,
+  CreateSharedExceptionListResponse,
+} from '@kbn/securitysolution-exceptions-common/api';
 
-import { CreateSharedExceptionListRequest } from '../../../../../common/api/detection_engine';
 import { SHARED_EXCEPTION_LIST_URL } from '../../../../../common/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { buildSiemResponse } from '../../../detection_engine/routes/utils';
-import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 
 export const createSharedExceptionListRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
     .post({
       path: SHARED_EXCEPTION_LIST_URL,
       access: 'public',
-      options: {
-        tags: ['access:securitySolution'],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
       },
     })
     .addVersion(
@@ -29,14 +34,11 @@ export const createSharedExceptionListRoute = (router: SecuritySolutionPluginRou
         version: '2023-10-31',
         validate: {
           request: {
-            body: buildRouteValidation<
-              typeof CreateSharedExceptionListRequest,
-              CreateSharedExceptionListRequest
-            >(CreateSharedExceptionListRequest),
+            body: buildRouteValidationWithZod(CreateSharedExceptionListRequestBody),
           },
         },
       },
-      async (context, request, response): Promise<IKibanaResponse<ExceptionListSchema>> => {
+      async (context, request, response): Promise<IKibanaResponse<ExceptionList>> => {
         const siemResponse = buildSiemResponse(response);
         const { description, name } = request.body;
 
@@ -60,7 +62,7 @@ export const createSharedExceptionListRoute = (router: SecuritySolutionPluginRou
             type: 'detection',
             version: 1,
           });
-          return response.ok({ body: createdSharedList });
+          return response.ok({ body: CreateSharedExceptionListResponse.parse(createdSharedList) });
         } catch (exc) {
           return siemResponse.error({
             body: exc.message,

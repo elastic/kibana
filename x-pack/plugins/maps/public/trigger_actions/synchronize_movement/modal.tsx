@@ -16,7 +16,7 @@ import {
   EuiSwitchEvent,
 } from '@elastic/eui';
 import { createReactOverlays } from '@kbn/kibana-react-plugin/public';
-import { mapEmbeddablesSingleton } from '../../embeddable/map_embeddables_singleton';
+import { mapEmbeddablesSingleton } from '../../react_embeddable/map_embeddables_singleton';
 import { getCore } from '../../kibana_services';
 
 export function openModal() {
@@ -42,7 +42,7 @@ class SynchronizeMovementModal extends Component<Props> {
       const hasErrors = synchronizedPanels.length === 1 && mapPanel.getIsMovementSynchronized();
       return (
         <EuiFormRow
-          display="columnCompressedSwitch"
+          display="columnCompressed"
           key={mapPanel.id}
           isInvalid={hasErrors}
           error={

@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import React, { useEffect, useState } from 'react';
@@ -30,9 +24,7 @@ export function CustomLinkOverview() {
   const hasValidLicense = license?.isActive && license?.hasAtLeast('gold');
 
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
-  const [customLinkSelected, setCustomLinkSelected] = useState<
-    CustomLink | undefined
-  >();
+  const [customLinkSelected, setCustomLinkSelected] = useState<CustomLink | undefined>();
 
   const { data, status, refetch } = useFetcher(
     async (callApmApi) => {
@@ -60,8 +52,7 @@ export function CustomLinkOverview() {
     setIsFlyoutOpen(true);
   };
 
-  const showEmptyPrompt =
-    status === FETCH_STATUS.SUCCESS && isEmpty(customLinks);
+  const showEmptyPrompt = status === FETCH_STATUS.SUCCESS && isEmpty(customLinks);
 
   return (
     <>
@@ -117,10 +108,7 @@ export function CustomLinkOverview() {
         showEmptyPrompt ? (
           <EmptyPrompt onCreateCustomLinkClick={onCreateCustomLinkClick} />
         ) : (
-          <CustomLinkTable
-            items={customLinks}
-            onCustomLinkSelected={setCustomLinkSelected}
-          />
+          <CustomLinkTable items={customLinks} onCustomLinkSelected={setCustomLinkSelected} />
         )
       ) : (
         <LicensePrompt text={INVALID_LICENSE} />

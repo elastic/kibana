@@ -21,9 +21,7 @@ export const getAuthenticationAPIKey = (request: KibanaRequest) => {
   }
 
   if (authorizationHeader && authorizationHeader.credentials) {
-    const apiKey = Buffer.from(authorizationHeader.credentials, 'base64')
-      .toString()
-      .split(':');
+    const apiKey = Buffer.from(authorizationHeader.credentials, 'base64').toString().split(':');
     return {
       apiKeyId: apiKey[0],
       apiKey: apiKey[1],

@@ -33,8 +33,12 @@ export const installPrebuiltRulesAndTimelinesRoute = (router: SecuritySolutionPl
     .put({
       access: 'public',
       path: PREBUILT_RULES_URL,
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
       options: {
-        tags: ['access:securitySolution'],
         timeout: {
           idleSocket: PREBUILT_RULES_OPERATION_SOCKET_TIMEOUT_MS,
         },
@@ -85,6 +89,7 @@ export const createPrepackagedRules = async (
   const savedObjectsClient = context.core.savedObjects.client;
   const siemClient = context.getAppClient();
   const exceptionsListClient = context.getExceptionListClient() ?? exceptionsClient;
+  const detectionRulesClient = context.getDetectionRulesClient();
   const ruleAssetsClient = createPrebuiltRuleAssetsClient(savedObjectsClient);
 
   if (!siemClient || !rulesClient) {
@@ -106,14 +111,14 @@ export const createPrepackagedRules = async (
   const rulesToInstall = getRulesToInstall(latestPrebuiltRules, installedPrebuiltRules);
   const rulesToUpdate = getRulesToUpdate(latestPrebuiltRules, installedPrebuiltRules);
 
-  const result = await createPrebuiltRules(rulesClient, rulesToInstall);
+  const result = await createPrebuiltRules(detectionRulesClient, rulesToInstall);
   if (result.errors.length > 0) {
     throw new AggregateError(result.errors, 'Error installing new prebuilt rules');
   }
 
   const { result: timelinesResult } = await performTimelinesInstallation(context);
 
-  await upgradePrebuiltRules(rulesClient, rulesToUpdate);
+  await upgradePrebuiltRules(detectionRulesClient, rulesToUpdate);
 
   const prebuiltRulesOutput: InstallPrebuiltRulesAndTimelinesResponse = {
     rules_installed: rulesToInstall.length,

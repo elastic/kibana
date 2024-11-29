@@ -9,14 +9,13 @@ import React from 'react';
 import { mount } from 'enzyme';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 
-import '../../common/mock/match_media';
 import type { GetCasesColumn } from './use_cases_columns';
 import { ExternalServiceColumn, useCasesColumns } from './use_cases_columns';
 import { useGetCasesMockState } from '../../containers/mock';
 import { connectors, useCaseConfigureResponse } from '../configure_cases/__mock__';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer, readCasesPermissions, TestProviders } from '../../common/mock';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { CaseStatuses, CustomFieldTypes } from '../../../common/types/domain';
 import { userProfilesMap } from '../../containers/user_profiles/api.mock';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
@@ -162,6 +161,7 @@ describe('useCasesColumns ', () => {
           },
         ],
         "isLoadingColumns": false,
+        "rowHeader": "title",
       }
     `);
   });
@@ -257,6 +257,7 @@ describe('useCasesColumns ', () => {
           },
         ],
         "isLoadingColumns": false,
+        "rowHeader": "title",
       }
     `);
   });
@@ -311,6 +312,7 @@ describe('useCasesColumns ', () => {
           },
         ],
         "isLoadingColumns": false,
+        "rowHeader": "title",
       }
     `);
   });
@@ -359,6 +361,7 @@ describe('useCasesColumns ', () => {
           },
         ],
         "isLoadingColumns": false,
+        "rowHeader": "title",
       }
     `);
   });
@@ -407,6 +410,7 @@ describe('useCasesColumns ', () => {
           },
         ],
         "isLoadingColumns": false,
+        "rowHeader": "title",
       }
     `);
   });
@@ -487,6 +491,7 @@ describe('useCasesColumns ', () => {
           },
         ],
         "isLoadingColumns": false,
+        "rowHeader": "title",
       }
     `);
   });
@@ -606,6 +611,7 @@ describe('useCasesColumns ', () => {
           },
         ],
         "isLoadingColumns": false,
+        "rowHeader": "title",
       }
     `);
   });

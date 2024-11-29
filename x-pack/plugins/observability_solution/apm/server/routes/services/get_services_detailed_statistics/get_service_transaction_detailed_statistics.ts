@@ -8,10 +8,7 @@
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { keyBy } from 'lodash';
 import { ApmServiceTransactionDocumentType } from '../../../../common/document_type';
-import {
-  SERVICE_NAME,
-  TRANSACTION_TYPE,
-} from '../../../../common/es_fields/apm';
+import { SERVICE_NAME, TRANSACTION_TYPE } from '../../../../common/es_fields/apm';
 import { RollupInterval } from '../../../../common/rollup';
 import { isDefaultTransactionType } from '../../../../common/transaction_types';
 import { environmentQuery } from '../../../../common/utils/environment_query';
@@ -27,7 +24,7 @@ import {
 import { withApmSpan } from '../../../utils/with_apm_span';
 import { maybe } from '../../../../common/utils/maybe';
 
-interface ServiceTransactionDetailedStat {
+export interface ServiceTransactionDetailedStat {
   serviceName: string;
   latency: Array<{ x: number; y: number | null }>;
   transactionErrorRate?: Array<{ x: number; y: number }>;
@@ -76,58 +73,55 @@ export async function getServiceTransactionDetailedStats({
     ...outcomes,
   };
 
-  const response = await apmEventClient.search(
-    'get_service_transaction_detail_stats',
-    {
-      apm: {
-        sources: [
-          {
-            documentType,
-            rollupInterval,
-          },
-        ],
-      },
-      body: {
-        track_total_hits: false,
-        size: 0,
-        query: {
-          bool: {
-            filter: [
-              { terms: { [SERVICE_NAME]: serviceNames } },
-              ...rangeQuery(startWithOffset, endWithOffset),
-              ...environmentQuery(environment),
-              ...kqlQuery(kuery),
-            ],
-          },
+  const response = await apmEventClient.search('get_service_transaction_detail_stats', {
+    apm: {
+      sources: [
+        {
+          documentType,
+          rollupInterval,
         },
-        aggs: {
-          sample: {
-            random_sampler: randomSampler,
-            aggs: {
-              services: {
-                terms: {
-                  field: SERVICE_NAME,
-                  size: serviceNames.length,
-                },
-                aggs: {
-                  transactionType: {
-                    terms: {
-                      field: TRANSACTION_TYPE,
-                    },
-                    aggs: {
-                      ...metrics,
-                      timeseries: {
-                        date_histogram: {
-                          field: '@timestamp',
-                          fixed_interval: `${bucketSizeInSeconds}s`,
-                          min_doc_count: 0,
-                          extended_bounds: {
-                            min: startWithOffset,
-                            max: endWithOffset,
-                          },
+      ],
+    },
+    body: {
+      track_total_hits: false,
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            { terms: { [SERVICE_NAME]: serviceNames } },
+            ...rangeQuery(startWithOffset, endWithOffset),
+            ...environmentQuery(environment),
+            ...kqlQuery(kuery),
+          ],
+        },
+      },
+      aggs: {
+        sample: {
+          random_sampler: randomSampler,
+          aggs: {
+            services: {
+              terms: {
+                field: SERVICE_NAME,
+                size: serviceNames.length,
+              },
+              aggs: {
+                transactionType: {
+                  terms: {
+                    field: TRANSACTION_TYPE,
+                  },
+                  aggs: {
+                    ...metrics,
+                    timeseries: {
+                      date_histogram: {
+                        field: '@timestamp',
+                        fixed_interval: `${bucketSizeInSeconds}s`,
+                        min_doc_count: 0,
+                        extended_bounds: {
+                          min: startWithOffset,
+                          max: endWithOffset,
                         },
-                        aggs: metrics,
                       },
+                      aggs: metrics,
                     },
                   },
                 },
@@ -136,15 +130,14 @@ export async function getServiceTransactionDetailedStats({
           },
         },
       },
-    }
-  );
+    },
+  });
 
   return keyBy(
     response.aggregations?.sample.services.buckets.map((bucket) => {
       const topTransactionTypeBucket = maybe(
-        bucket.transactionType.buckets.find(({ key }) =>
-          isDefaultTransactionType(key as string)
-        ) ?? bucket.transactionType.buckets[0]
+        bucket.transactionType.buckets.find(({ key }) => isDefaultTransactionType(key as string)) ??
+          bucket.transactionType.buckets[0]
       );
 
       return {
@@ -159,15 +152,13 @@ export async function getServiceTransactionDetailedStats({
             x: dateBucket.key + offsetInMs,
             y: calculateFailedTransactionRate(dateBucket),
           })) ?? undefined,
-        throughput: topTransactionTypeBucket?.timeseries.buckets.map(
-          (dateBucket) => ({
-            x: dateBucket.key + offsetInMs,
-            y: calculateThroughputWithInterval({
-              bucketSize: bucketSizeInSeconds,
-              value: dateBucket.doc_count,
-            }),
-          })
-        ),
+        throughput: topTransactionTypeBucket?.timeseries.buckets.map((dateBucket) => ({
+          x: dateBucket.key + offsetInMs,
+          y: calculateThroughputWithInterval({
+            bucketSize: bucketSizeInSeconds,
+            value: dateBucket.doc_count,
+          }),
+        })),
       };
     }) ?? [],
     'serviceName'

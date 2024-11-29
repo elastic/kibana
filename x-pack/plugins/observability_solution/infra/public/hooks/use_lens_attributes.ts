@@ -6,7 +6,7 @@
  */
 
 import { useCallback } from 'react';
-import { Filter, Query, TimeRange } from '@kbn/es-query';
+import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { i18n } from '@kbn/i18n';
 import useAsync from 'react-use/lib/useAsync';
@@ -31,13 +31,19 @@ export const useLensAttributes = (params: UseLensAttributesParams) => {
       return undefined;
     }
 
-    const builder = new LensConfigBuilder(formulaAPI, dataViews);
+    const builder = new LensConfigBuilder(dataViews, formulaAPI);
 
     return builder.build(params) as Promise<LensAttributes>;
-  }, [params.chartType, params.dataset, dataViews]);
+  }, [params, dataViews, lens]);
 
   const injectFilters = useCallback(
-    ({ filters, query }: { filters: Filter[]; query: Query }): LensAttributes | null => {
+    ({
+      filters,
+      query,
+    }: {
+      filters: Filter[];
+      query: Query | AggregateQuery;
+    }): LensAttributes | null => {
       if (!attributes) {
         return null;
       }
@@ -63,7 +69,7 @@ export const useLensAttributes = (params: UseLensAttributesParams) => {
       }: {
         timeRange: TimeRange;
         filters: Filter[];
-        query: Query;
+        query: Query | AggregateQuery;
         searchSessionId?: string;
       }) =>
       () => {
@@ -94,7 +100,7 @@ export const useLensAttributes = (params: UseLensAttributesParams) => {
     }: {
       timeRange: TimeRange;
       filters?: Filter[];
-      query?: Query;
+      query?: Query | AggregateQuery;
       searchSessionId?: string;
     }) => {
       const openInLens = getOpenInLensAction(

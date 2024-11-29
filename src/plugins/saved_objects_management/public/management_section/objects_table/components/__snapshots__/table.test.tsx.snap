@@ -1,11 +1,17 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Table prevents saved objects from being deleted 1`] = `
+exports[`Table prevents hidden saved objects from being deleted 1`] = `
 <Fragment>
   <EuiSearchBar
     box={
       Object {
         "data-test-subj": "savedObjectSearchBar",
+        "schema": Object {
+          "recognizedFields": Array [
+            "type",
+            "tag",
+          ],
+        },
       }
     }
     filters={
@@ -28,10 +34,9 @@ exports[`Table prevents saved objects from being deleted 1`] = `
       Array [
         <EuiToolTip
           content={
-            <FormattedMessage
-              defaultMessage="Selected objects can’t be deleted because they are either Elastic managed objects or hidden objects."
+            <Memo(MemoizedFormattedMessage)
+              defaultMessage="Selected objects can’t be deleted because they are hidden objects."
               id="savedObjectsManagement.objectsTable.table.deleteDisabledTooltip"
-              values={Object {}}
             />
           }
           delay="regular"
@@ -46,10 +51,9 @@ exports[`Table prevents saved objects from being deleted 1`] = `
             onClick={[Function]}
             title="Unable to delete saved objects"
           >
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Delete"
               id="savedObjectsManagement.objectsTable.table.deleteButtonLabel"
-              values={Object {}}
             />
           </EuiButton>
         </EuiToolTip>,
@@ -62,10 +66,9 @@ exports[`Table prevents saved objects from being deleted 1`] = `
               isDisabled={false}
               onClick={[Function]}
             >
-              <FormattedMessage
+              <Memo(MemoizedFormattedMessage)
                 defaultMessage="Export"
                 id="savedObjectsManagement.objectsTable.table.exportPopoverButtonLabel"
-                values={Object {}}
               />
             </EuiButton>
           }
@@ -78,48 +81,34 @@ exports[`Table prevents saved objects from being deleted 1`] = `
           repositionToCrossAxis={true}
         >
           <EuiFormRow
-            describedByIds={Array []}
-            display="row"
-            hasChildLabel={true}
-            hasEmptyLabelSpace={false}
             label={
-              <FormattedMessage
+              <Memo(MemoizedFormattedMessage)
                 defaultMessage="Options"
                 id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.exportOptionsLabel"
-                values={Object {}}
               />
             }
-            labelType="label"
           >
             <EuiSwitch
               checked={true}
               label={
-                <FormattedMessage
+                <Memo(MemoizedFormattedMessage)
                   defaultMessage="Include related objects"
                   id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.includeReferencesDeepLabel"
-                  values={Object {}}
                 />
               }
               name="includeReferencesDeep"
               onChange={[Function]}
             />
           </EuiFormRow>
-          <EuiFormRow
-            describedByIds={Array []}
-            display="row"
-            hasChildLabel={true}
-            hasEmptyLabelSpace={false}
-            labelType="label"
-          >
+          <EuiFormRow>
             <EuiButton
               fill={true}
               iconType="exportAction"
               onClick={[Function]}
             >
-              <FormattedMessage
+              <Memo(MemoizedFormattedMessage)
                 defaultMessage="Export"
                 id="savedObjectsManagement.objectsTable.table.exportButtonLabel"
-                values={Object {}}
               />
             </EuiButton>
           </EuiFormRow>
@@ -127,9 +116,7 @@ exports[`Table prevents saved objects from being deleted 1`] = `
       ]
     }
   />
-  <EuiSpacer
-    size="s"
-  />
+  <EuiSpacer />
   <div
     data-test-subj="savedObjectsTable"
   >
@@ -144,7 +131,7 @@ exports[`Table prevents saved objects from being deleted 1`] = `
             "name": "Type",
             "render": [Function],
             "sortable": true,
-            "width": "50px",
+            "width": "65px",
           },
           Object {
             "data-test-subj": "savedObjectsTableRowTitle",
@@ -227,7 +214,6 @@ exports[`Table prevents saved objects from being deleted 1`] = `
           "totalItemCount": 3,
         }
       }
-      responsive={true}
       rowProps={[Function]}
       selection={
         Object {
@@ -254,6 +240,12 @@ exports[`Table should render normally 1`] = `
     box={
       Object {
         "data-test-subj": "savedObjectSearchBar",
+        "schema": Object {
+          "recognizedFields": Array [
+            "type",
+            "tag",
+          ],
+        },
       }
     }
     filters={
@@ -275,13 +267,6 @@ exports[`Table should render normally 1`] = `
     toolsRight={
       Array [
         <EuiToolTip
-          content={
-            <FormattedMessage
-              defaultMessage="Selected objects can’t be deleted because they are either Elastic managed objects or hidden objects."
-              id="savedObjectsManagement.objectsTable.table.deleteDisabledTooltip"
-              values={Object {}}
-            />
-          }
           delay="regular"
           display="inlineBlock"
           position="top"
@@ -293,10 +278,9 @@ exports[`Table should render normally 1`] = `
             isDisabled={false}
             onClick={[Function]}
           >
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Delete"
               id="savedObjectsManagement.objectsTable.table.deleteButtonLabel"
-              values={Object {}}
             />
           </EuiButton>
         </EuiToolTip>,
@@ -309,10 +293,9 @@ exports[`Table should render normally 1`] = `
               isDisabled={false}
               onClick={[Function]}
             >
-              <FormattedMessage
+              <Memo(MemoizedFormattedMessage)
                 defaultMessage="Export"
                 id="savedObjectsManagement.objectsTable.table.exportPopoverButtonLabel"
-                values={Object {}}
               />
             </EuiButton>
           }
@@ -325,48 +308,34 @@ exports[`Table should render normally 1`] = `
           repositionToCrossAxis={true}
         >
           <EuiFormRow
-            describedByIds={Array []}
-            display="row"
-            hasChildLabel={true}
-            hasEmptyLabelSpace={false}
             label={
-              <FormattedMessage
+              <Memo(MemoizedFormattedMessage)
                 defaultMessage="Options"
                 id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.exportOptionsLabel"
-                values={Object {}}
               />
             }
-            labelType="label"
           >
             <EuiSwitch
               checked={true}
               label={
-                <FormattedMessage
+                <Memo(MemoizedFormattedMessage)
                   defaultMessage="Include related objects"
                   id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.includeReferencesDeepLabel"
-                  values={Object {}}
                 />
               }
               name="includeReferencesDeep"
               onChange={[Function]}
             />
           </EuiFormRow>
-          <EuiFormRow
-            describedByIds={Array []}
-            display="row"
-            hasChildLabel={true}
-            hasEmptyLabelSpace={false}
-            labelType="label"
-          >
+          <EuiFormRow>
             <EuiButton
               fill={true}
               iconType="exportAction"
               onClick={[Function]}
             >
-              <FormattedMessage
+              <Memo(MemoizedFormattedMessage)
                 defaultMessage="Export"
                 id="savedObjectsManagement.objectsTable.table.exportButtonLabel"
-                values={Object {}}
               />
             </EuiButton>
           </EuiFormRow>
@@ -374,9 +343,7 @@ exports[`Table should render normally 1`] = `
       ]
     }
   />
-  <EuiSpacer
-    size="s"
-  />
+  <EuiSpacer />
   <div
     data-test-subj="savedObjectsTable"
   >
@@ -391,7 +358,7 @@ exports[`Table should render normally 1`] = `
             "name": "Type",
             "render": [Function],
             "sortable": true,
-            "width": "50px",
+            "width": "65px",
           },
           Object {
             "data-test-subj": "savedObjectsTableRowTitle",
@@ -474,7 +441,6 @@ exports[`Table should render normally 1`] = `
           "totalItemCount": 3,
         }
       }
-      responsive={true}
       rowProps={[Function]}
       selection={
         Object {

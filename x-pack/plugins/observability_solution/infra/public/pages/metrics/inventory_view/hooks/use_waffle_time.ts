@@ -12,7 +12,7 @@ import { fold } from 'fp-ts/lib/Either';
 import DateMath from '@kbn/datemath';
 import { constant, identity } from 'fp-ts/lib/function';
 import createContainer from 'constate';
-import { useUrlState } from '../../../../utils/use_url_state';
+import { useUrlState } from '@kbn/observability-shared-plugin/public';
 import { useKibanaTimefilterTime } from '../../../../hooks/use_kibana_timefilter_time';
 export const DEFAULT_WAFFLE_TIME_STATE: WaffleTimeState = {
   currentTime: Date.now(),

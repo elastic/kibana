@@ -36,17 +36,14 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { CONNECTOR_CLIENTS_TYPE, CONNECTOR_NATIVE_TYPE } from '../../../../../../common/constants';
 
-import connectorLogo from '../../../../../assets/source_icons/network_drive.svg';
-import { BACK_BUTTON_LABEL } from '../../../../shared/constants';
+import connectorLogo from '../../../../../assets/images/connector_logo_network_drive_version.svg';
 
 import { KibanaLogic } from '../../../../shared/kibana';
 import { LicensingLogic } from '../../../../shared/licensing';
 import { parseQueryParams } from '../../../../shared/query_params';
 
-import { NEW_CONNECTOR_PATH, NEW_INDEX_PATH } from '../../../routes';
+import { NEW_CONNECTOR_PATH } from '../../../routes';
 import { EnterpriseSearchContentPageTemplate } from '../../layout';
-
-import { CONNECTORS } from '../../search_index/connector/constants';
 
 import { connectorsBreadcrumbs } from '../connectors';
 
@@ -69,7 +66,7 @@ export const parseConnectorFilter = (filter: string | string[] | null): Connecto
 
 export const SelectConnector: React.FC = () => {
   const { search } = useLocation();
-  const { isCloud } = useValues(KibanaLogic);
+  const { connectorTypes, isCloud } = useValues(KibanaLogic);
   const { hasPlatinumLicense } = useValues(LicensingLogic);
   const hasNativeAccess = isCloud;
   const { filter } = parseQueryParams(search);
@@ -83,18 +80,18 @@ export const SelectConnector: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const filteredConnectors = useMemo(() => {
     const nativeConnectors = hasNativeAccess
-      ? CONNECTORS.filter((connector) => connector.isNative).sort((a, b) =>
-          a.name.localeCompare(b.name)
-        )
+      ? connectorTypes
+          .filter((connector) => connector.isNative)
+          .sort((a, b) => a.name.localeCompare(b.name))
       : [];
     const nonNativeConnectors = hasNativeAccess
-      ? CONNECTORS.filter((connector) => !connector.isNative).sort((a, b) =>
-          a.name.localeCompare(b.name)
-        )
-      : CONNECTORS.sort((a, b) => a.name.localeCompare(b.name));
+      ? connectorTypes
+          .filter((connector) => !connector.isNative)
+          .sort((a, b) => a.name.localeCompare(b.name))
+      : connectorTypes.sort((a, b) => a.name.localeCompare(b.name));
     const connectors =
       !hasNativeAccess || useClientsFilter
-        ? CONNECTORS.sort((a, b) => a.name.localeCompare(b.name))
+        ? connectorTypes.sort((a, b) => a.name.localeCompare(b.name))
         : [...nativeConnectors, ...nonNativeConnectors];
 
     return connectors
@@ -121,7 +118,8 @@ export const SelectConnector: React.FC = () => {
         description: i18n.translate(
           'xpack.enterpriseSearch.content.indices.selectConnector.description',
           {
-            defaultMessage: "Choose which third-party data source you'd like to sync to Elastic.",
+            defaultMessage:
+              "Select which third-party data source you'd like to sync to Elastic. All data sources are supported by self-managed connectors. Check the availability for Elastic managed connectors by using the filters.",
           }
         ),
         pageTitle: i18n.translate('xpack.enterpriseSearch.content.indices.selectConnector.title', {
@@ -141,7 +139,7 @@ export const SelectConnector: React.FC = () => {
               <EuiFacetGroup>
                 {hasNativeAccess && (
                   <EuiFacetButton
-                    quantity={CONNECTORS.length}
+                    quantity={connectorTypes.length}
                     isSelected={!useNativeFilter && !useClientsFilter}
                     onClick={() => setSelectedConnectorFilter(null)}
                   >
@@ -155,7 +153,7 @@ export const SelectConnector: React.FC = () => {
                 {hasNativeAccess && (
                   <EuiFacetButton
                     key="native"
-                    quantity={CONNECTORS.filter((connector) => connector.isNative).length}
+                    quantity={connectorTypes.filter((connector) => connector.isNative).length}
                     isSelected={useNativeFilter}
                     onClick={() =>
                       setSelectedConnectorFilter(!useNativeFilter ? CONNECTOR_NATIVE_TYPE : null)
@@ -164,14 +162,14 @@ export const SelectConnector: React.FC = () => {
                     {i18n.translate(
                       'xpack.enterpriseSearch.content.indices.selectConnector.nativeLabel',
                       {
-                        defaultMessage: 'Native connectors',
+                        defaultMessage: 'Elastic managed',
                       }
                     )}
                   </EuiFacetButton>
                 )}
 
                 <EuiFacetButton
-                  quantity={CONNECTORS.length}
+                  quantity={connectorTypes.length}
                   isSelected={(!hasNativeAccess && !useNativeFilter) || useClientsFilter}
                   onClick={() =>
                     setSelectedConnectorFilter(!useClientsFilter ? CONNECTOR_CLIENTS_TYPE : null)
@@ -180,14 +178,14 @@ export const SelectConnector: React.FC = () => {
                   {i18n.translate(
                     'xpack.enterpriseSearch.content.indices.selectConnector.connectorClients',
                     {
-                      defaultMessage: 'Connector clients',
+                      defaultMessage: 'Self-managed',
                     }
                   )}
                 </EuiFacetButton>
                 {!hasNativeAccess && (
                   <EuiFacetButton
                     key="native"
-                    quantity={CONNECTORS.filter((connector) => connector.isNative).length}
+                    quantity={connectorTypes.filter((connector) => connector.isNative).length}
                     isSelected={useNativeFilter}
                     onClick={() =>
                       setSelectedConnectorFilter(!useNativeFilter ? CONNECTOR_NATIVE_TYPE : null)
@@ -196,7 +194,7 @@ export const SelectConnector: React.FC = () => {
                     {i18n.translate(
                       'xpack.enterpriseSearch.content.indices.selectConnector.nativeLabel',
                       {
-                        defaultMessage: 'Native connectors',
+                        defaultMessage: 'Elastic managed',
                       }
                     )}
                   </EuiFacetButton>
@@ -237,7 +235,7 @@ export const SelectConnector: React.FC = () => {
                       <h4>
                         {i18n.translate(
                           'xpack.enterpriseSearch.selectConnector.nativeConnectorsTitleLabel',
-                          { defaultMessage: 'Native connectors' }
+                          { defaultMessage: 'Elastic managed connectors' }
                         )}
                       </h4>
                     </EuiTitle>
@@ -252,7 +250,7 @@ export const SelectConnector: React.FC = () => {
                       'xpack.enterpriseSearch.selectConnector.p.areAvailableDirectlyWithinLabel',
                       {
                         defaultMessage:
-                          'Available directly within Elastic Cloud deployments. No additional infrastructure is required. You can also convert native connectors to self-hosted connector clients.',
+                          'Available directly within Elastic Cloud deployments. No additional infrastructure is required. You can also convert Elastic managed connectors to self-managed connectors.',
                       }
                     )}
                   </p>
@@ -271,7 +269,7 @@ export const SelectConnector: React.FC = () => {
                       <h4>
                         {i18n.translate(
                           'xpack.enterpriseSearch.selectConnector.h4.connectorClientsLabel',
-                          { defaultMessage: 'Connector clients' }
+                          { defaultMessage: 'Self-managed connectors' }
                         )}
                       </h4>
                     </EuiTitle>
@@ -286,7 +284,7 @@ export const SelectConnector: React.FC = () => {
                       'xpack.enterpriseSearch.selectConnector.p.deployConnectorsOnYourLabel',
                       {
                         defaultMessage:
-                          'Deploy connectors on your own infrastructure. You can also customize existing connector clients, or build your own using our connector framework.',
+                          'Deploy connectors on your own infrastructure. You can also customize existing self-managed connectors, or build your own using our connector framework.',
                       }
                     )}
                   </p>
@@ -298,6 +296,8 @@ export const SelectConnector: React.FC = () => {
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFieldSearch
+            data-test-subj="entSearchContent-connectors-selectConnector-searchInput"
+            data-telemetry-id="entSearchContent-connectors-selectConnector-searchInput"
             aria-label={i18n.translate(
               'xpack.enterpriseSearch.content.indices.selectConnector.search.ariaLabel',
               { defaultMessage: 'Search through connectors' }
@@ -319,7 +319,7 @@ export const SelectConnector: React.FC = () => {
                   showNativePopover={(!hasNativeAccess && useNativeFilter) ?? false}
                   showLicensePopover={connector.platinumOnly && !hasPlatinumLicense && !isCloud}
                   isDisabled={(!hasNativeAccess && useNativeFilter) ?? false}
-                  iconType={connector.icon}
+                  iconType={connector.iconPath}
                   isBeta={connector.isBeta}
                   isTechPreview={Boolean(connector.isTechPreview)}
                   showNativeBadge={
@@ -364,10 +364,12 @@ export const SelectConnector: React.FC = () => {
                 <p>
                   <FormattedMessage
                     id="xpack.enterpriseSearch.content.indices.selectConnector.cloudCallout.description"
-                    defaultMessage="Native connectors are hosted on Elastic Cloud. Get started with a free 14-day trial."
+                    defaultMessage="Elastic managed connectors are hosted on Elastic Cloud. Get started with a free 14-day trial."
                   />
                 </p>
                 <EuiButton
+                  data-test-subj="entSearchContent-connectors-selectConnector-cloudCallout-trialButton"
+                  data-telemetry-id="entSearchContent-connectors-selectConnector-cloudCallout-trialButton"
                   color="primary"
                   fill
                   href="https://www.elastic.co/cloud/cloud-trial-overview"
@@ -383,20 +385,6 @@ export const SelectConnector: React.FC = () => {
               </EuiCallOut>
             </>
           )}
-          <EuiSpacer />
-          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-            <EuiFlexItem>
-              <span>
-                <EuiButton
-                  data-telemetry-id="entSearchContent-connector-selectConnector-backButton"
-                  color="primary"
-                  onClick={() => KibanaLogic.values.navigateToUrl(NEW_INDEX_PATH)}
-                >
-                  {BACK_BUTTON_LABEL}
-                </EuiButton>
-              </span>
-            </EuiFlexItem>
-          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EnterpriseSearchContentPageTemplate>

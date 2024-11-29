@@ -13,10 +13,8 @@ describe('getAlertingCapabilities', () => {
   describe('when the alerting plugin is not enabled', () => {
     it('returns isAlertingAvailable = false', () => {
       expect(
-        getAlertingCapabilities(
-          {} as ApmPluginSetupDeps,
-          { apm: {} } as unknown as Capabilities
-        ).isAlertingAvailable
+        getAlertingCapabilities({} as ApmPluginSetupDeps, { apm: {} } as unknown as Capabilities)
+          .isAlertingAvailable
       ).toEqual(false);
     });
   });

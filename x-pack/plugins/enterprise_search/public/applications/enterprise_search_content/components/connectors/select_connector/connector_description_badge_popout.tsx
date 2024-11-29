@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import connectorLogo from '../../../../../assets/source_icons/network_drive.svg';
+import connectorLogo from '../../../../../assets/images/connector_logo_network_drive_version.svg';
 
 const nativePopoverPanels = [
   {
@@ -105,10 +105,10 @@ export const ConnectorDescriptionBadge: React.FC<ConnectorDescriptionBadgeProps>
         >
           {isNative
             ? i18n.translate('xpack.enterpriseSearch.selectConnector.nativeBadgeLabel', {
-                defaultMessage: 'Native',
+                defaultMessage: 'Elastic managed',
               })
             : i18n.translate('xpack.enterpriseSearch.selectConnector.connectorClientBadgeLabel', {
-                defaultMessage: 'Connector client',
+                defaultMessage: 'Self-managed',
               })}
         </EuiBadge>
       }

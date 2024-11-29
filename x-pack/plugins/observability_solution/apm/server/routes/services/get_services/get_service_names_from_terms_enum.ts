@@ -27,30 +27,27 @@ export async function getServiceNamesFromTermsEnum({
   if (environment !== ENVIRONMENT_ALL.value) {
     return [];
   }
-  const response = await apmEventClient.termsEnum(
-    'get_services_from_terms_enum',
-    {
-      apm: {
-        events: [
-          ProcessorEvent.transaction,
-          ProcessorEvent.span,
-          ProcessorEvent.metric,
-          ProcessorEvent.error,
-        ],
-      },
-      size: maxNumberOfServices,
-      field: SERVICE_NAME,
-      index_filter: {
-        range: {
-          ['@timestamp']: {
-            gte: start,
-            lte: end,
-            format: 'epoch_millis',
-          },
+  const response = await apmEventClient.termsEnum('get_services_from_terms_enum', {
+    apm: {
+      events: [
+        ProcessorEvent.transaction,
+        ProcessorEvent.span,
+        ProcessorEvent.metric,
+        ProcessorEvent.error,
+      ],
+    },
+    size: maxNumberOfServices,
+    field: SERVICE_NAME,
+    index_filter: {
+      range: {
+        ['@timestamp']: {
+          gte: start,
+          lte: end,
+          format: 'epoch_millis',
         },
       },
-    }
-  );
+    },
+  });
 
   return response.terms;
 }

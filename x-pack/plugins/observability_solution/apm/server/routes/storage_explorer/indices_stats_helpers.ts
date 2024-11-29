@@ -45,9 +45,7 @@ export function getEstimatedSizeForDocumentsInIndex({
   return estimatedSize;
 }
 
-export async function getApmDiskSpacedUsedPct(
-  context: ApmPluginRequestHandlerContext
-) {
+export async function getApmDiskSpacedUsedPct(context: ApmPluginRequestHandlerContext) {
   const esClient = (await context.core).elasticsearch.client;
   const { nodes: diskSpacePerNode } = await esClient.asCurrentUser.nodes.stats({
     metric: 'fs',
@@ -76,7 +74,7 @@ export async function getIndicesLifecycleStatus({
     filter_path: 'indices.*.phase',
   });
 
-  return indices;
+  return indices || {};
 }
 
 export async function getIndicesInfo({

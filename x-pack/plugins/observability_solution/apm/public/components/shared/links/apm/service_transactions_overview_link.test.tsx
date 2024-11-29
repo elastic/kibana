@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
-import { renderHook } from '@testing-library/react-hooks';
+import { render, renderHook } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import React from 'react';
 import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock_apm_plugin_context';
@@ -19,11 +18,9 @@ import {
 const history = createMemoryHistory();
 
 function wrapper({ queryParams }: { queryParams?: Record<string, unknown> }) {
-  return ({ children }: { children: React.ReactElement }) => (
+  return ({ children }: React.PropsWithChildren) => (
     <MockApmPluginContextWrapper history={history}>
-      <MockUrlParamsContextProvider params={queryParams}>
-        {children}
-      </MockUrlParamsContextProvider>
+      <MockUrlParamsContextProvider params={queryParams}>{children}</MockUrlParamsContextProvider>
     </MockApmPluginContextWrapper>
   );
 }
@@ -43,15 +40,12 @@ describe('Service or transactions overview link', () => {
         () => useServiceOrTransactionsOverviewHref({ serviceName: 'foo' }),
         { wrapper: wrapper({ queryParams: { latencyAggregationType: 'avg' } }) }
       );
-      expect(result.current).toEqual(
-        '/basepath/app/apm/services/foo?latencyAggregationType=avg'
-      );
+      expect(result.current).toEqual('/basepath/app/apm/services/foo?latencyAggregationType=avg');
     });
   });
   describe('ServiceOrTransactionsOverviewLink', () => {
     function getHref(container: HTMLElement) {
-      return ((container as HTMLDivElement).children[0] as HTMLAnchorElement)
-        .href;
+      return ((container as HTMLDivElement).children[0] as HTMLAnchorElement).href;
     }
     it('returns service link', () => {
       const Component = wrapper({});
@@ -62,9 +56,7 @@ describe('Service or transactions overview link', () => {
           </ServiceOrTransactionsOverviewLink>
         </Component>
       );
-      expect(getHref(container)).toEqual(
-        'http://localhost/basepath/app/apm/services/foo'
-      );
+      expect(getHref(container)).toEqual('http://localhost/basepath/app/apm/services/foo');
     });
 
     it('returns service link with persisted query items', () => {

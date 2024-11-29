@@ -6,6 +6,7 @@
  */
 
 import { RuleTypeParams } from '@kbn/alerting-plugin/common';
+import { Dependency } from '../../../common/types';
 
 type DurationUnit = 'm' | 'h' | 'd' | 'w' | 'M';
 
@@ -26,6 +27,7 @@ interface WindowSchema {
 interface BurnRateRuleParams extends RuleTypeParams {
   sloId: string;
   windows: WindowSchema[];
+  dependencies?: Dependency[];
 }
 
 interface ChartData {
@@ -33,4 +35,4 @@ interface ChartData {
   value: number | undefined;
 }
 
-export type { BurnRateRuleParams, ChartData, Duration, DurationUnit, WindowSchema };
+export type { BurnRateRuleParams, ChartData, Duration, DurationUnit, WindowSchema, Dependency };

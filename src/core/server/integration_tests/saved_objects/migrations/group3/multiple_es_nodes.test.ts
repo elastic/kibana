@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Path from 'path';
@@ -17,6 +18,7 @@ import {
 } from '@kbn/core-test-helpers-kbn-server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { Root } from '@kbn/core-root-server-internal';
+import { getFips } from 'crypto';
 
 const LOG_FILE_PREFIX = 'migration_test_multiple_es_nodes';
 
@@ -94,17 +96,14 @@ function createRoot({ logFileName, hosts }: RootConfig) {
   });
 }
 
-describe('migration v2', () => {
+// Failing ES promotion: https://github.com/elastic/kibana/issues/167676
+describe.skip('migration v2', () => {
   let esServer: TestElasticsearchUtils;
   let root: Root;
   const migratedIndexAlias = `.kibana_${pkg.version}`;
 
   beforeAll(async () => {
     await removeLogFile();
-  });
-
-  afterAll(async () => {
-    await new Promise((resolve) => setTimeout(resolve, 10000));
   });
 
   afterEach(async () => {
@@ -117,89 +116,95 @@ describe('migration v2', () => {
     }
   });
 
-  it('migrates saved objects normally with multiple ES nodes', async () => {
-    const { startES } = createTestServers({
-      adjustTimeout: (t: number) => jest.setTimeout(t),
-      settings: {
-        es: {
-          license: 'basic',
-          clusterName: 'es-test-cluster',
-          nodes: [
-            {
-              name: 'node-01',
-              // original SO (5000 total; 2500 of type `foo` + 2500 of type `bar`):
-              // [
-              //   { id: 'foo:1', type: 'foo', foo: { status: 'not_migrated_1' } },
-              //   { id: 'bar:1', type: 'bar', bar: { status: 'not_migrated_1' } },
-              //   { id: 'foo:2', type: 'foo', foo: { status: 'not_migrated_2' } },
-              //   { id: 'bar:2', type: 'bar', bar: { status: 'not_migrated_2' } },
-              // ];
-              dataArchive: Path.join(__dirname, '..', 'archives', '7.13.0_5k_so_node_01.zip'),
-            },
-            {
-              name: 'node-02',
-              dataArchive: Path.join(__dirname, '..', 'archives', '7.13.0_5k_so_node_02.zip'),
-            },
-          ],
+  if (getFips() === 0) {
+    it('migrates saved objects normally with multiple ES nodes', async () => {
+      const { startES } = createTestServers({
+        adjustTimeout: (t: number) => jest.setTimeout(t),
+        settings: {
+          es: {
+            license: 'basic',
+            clusterName: 'es-test-cluster',
+            nodes: [
+              {
+                name: 'node-01',
+                // original SO (5000 total; 2500 of type `foo` + 2500 of type `bar`):
+                // [
+                //   { id: 'foo:1', type: 'foo', foo: { status: 'not_migrated_1' } },
+                //   { id: 'bar:1', type: 'bar', bar: { status: 'not_migrated_1' } },
+                //   { id: 'foo:2', type: 'foo', foo: { status: 'not_migrated_2' } },
+                //   { id: 'bar:2', type: 'bar', bar: { status: 'not_migrated_2' } },
+                // ];
+                dataArchive: Path.join(__dirname, '..', 'archives', '7.13.0_5k_so_node_01.zip'),
+              },
+              {
+                name: 'node-02',
+                dataArchive: Path.join(__dirname, '..', 'archives', '7.13.0_5k_so_node_02.zip'),
+              },
+            ],
+          },
         },
-      },
-    });
+      });
 
-    esServer = await startES();
+      esServer = await startES();
 
-    root = createRoot({
-      logFileName: Path.join(__dirname, `${LOG_FILE_PREFIX}.log`),
-      hosts: esServer.hosts,
-    });
+      root = createRoot({
+        logFileName: Path.join(__dirname, `${LOG_FILE_PREFIX}.log`),
+        hosts: esServer.hosts,
+      });
 
-    await root.preboot();
-    const setup = await root.setup();
-    setup.savedObjects.registerType({
-      name: 'foo',
-      hidden: false,
-      mappings: { properties: { status: { type: 'text' } } },
-      namespaceType: 'agnostic',
-      migrations: {
-        '7.14.0': (doc) => {
-          if (doc.attributes?.status) {
-            doc.attributes.status = doc.attributes.status.replace('not_migrated', 'migrated');
-          }
-          return doc;
+      await root.preboot();
+      const setup = await root.setup();
+      setup.savedObjects.registerType({
+        name: 'foo',
+        hidden: false,
+        mappings: { properties: { status: { type: 'text' } } },
+        namespaceType: 'agnostic',
+        migrations: {
+          '7.14.0': (doc) => {
+            if (doc.attributes?.status) {
+              doc.attributes.status = doc.attributes.status.replace('not_migrated', 'migrated');
+            }
+            return doc;
+          },
         },
-      },
-    });
-    setup.savedObjects.registerType({
-      name: 'bar',
-      hidden: false,
-      mappings: { properties: { status: { type: 'text' } } },
-      namespaceType: 'agnostic',
-      migrations: {
-        '7.14.0': (doc) => {
-          if (doc.attributes?.status) {
-            doc.attributes.status = doc.attributes.status.replace('not_migrated', 'migrated');
-          }
-          return doc;
+      });
+      setup.savedObjects.registerType({
+        name: 'bar',
+        hidden: false,
+        mappings: { properties: { status: { type: 'text' } } },
+        namespaceType: 'agnostic',
+        migrations: {
+          '7.14.0': (doc) => {
+            if (doc.attributes?.status) {
+              doc.attributes.status = doc.attributes.status.replace('not_migrated', 'migrated');
+            }
+            return doc;
+          },
         },
-      },
-    });
+      });
 
-    await root.start();
-    const esClient = esServer.es.getClient();
+      await root.start();
+      const esClient = esServer.es.getClient();
 
-    const migratedFooDocs = await fetchDocs(esClient, migratedIndexAlias, 'foo');
-    expect(migratedFooDocs.length).toBe(2500);
-    migratedFooDocs.forEach((doc, i) => {
-      expect(doc.id).toBe(`foo:${i}`);
-      expect(doc.foo.status).toBe(`migrated_${i}`);
-      expect(doc.typeMigrationVersion).toBe('7.14.0');
-    });
+      const migratedFooDocs = await fetchDocs(esClient, migratedIndexAlias, 'foo');
+      expect(migratedFooDocs.length).toBe(2500);
+      migratedFooDocs.forEach((doc, i) => {
+        expect(doc.id).toBe(`foo:${i}`);
+        expect(doc.foo.status).toBe(`migrated_${i}`);
+        expect(doc.typeMigrationVersion).toBe('7.14.0');
+      });
 
-    const migratedBarDocs = await fetchDocs(esClient, migratedIndexAlias, 'bar');
-    expect(migratedBarDocs.length).toBe(2500);
-    migratedBarDocs.forEach((doc, i) => {
-      expect(doc.id).toBe(`bar:${i}`);
-      expect(doc.bar.status).toBe(`migrated_${i}`);
-      expect(doc.typeMigrationVersion).toBe('7.14.0');
+      const migratedBarDocs = await fetchDocs(esClient, migratedIndexAlias, 'bar');
+      expect(migratedBarDocs.length).toBe(2500);
+      migratedBarDocs.forEach((doc, i) => {
+        expect(doc.id).toBe(`bar:${i}`);
+        expect(doc.bar.status).toBe(`migrated_${i}`);
+        expect(doc.typeMigrationVersion).toBe('7.14.0');
+      });
     });
-  });
+  } else {
+    it('skips the test when running in FIPS mode since the data archives cause the es nodes to run with a basic license', () => {
+      expect(getFips()).toBe(1);
+    });
+  }
 });

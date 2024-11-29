@@ -44,9 +44,8 @@ export interface GroupResourceNodesResponse {
 export function groupResourceNodes(responseData: {
   elements: ConnectionElement[];
 }): GroupResourceNodesResponse {
-  type ElementDefinition = ValuesType<typeof responseData['elements']>;
-  const isEdge = (el: ElementDefinition) =>
-    Boolean(el.data.source && el.data.target);
+  type ElementDefinition = ValuesType<(typeof responseData)['elements']>;
+  const isEdge = (el: ElementDefinition) => Boolean(el.data.source && el.data.target);
   const isNode = (el: ElementDefinition) => !isEdge(el);
   const isElligibleGroupNode = (el: ElementDefinition) => {
     if (isNode(el) && 'span.type' in el.data) {
@@ -94,9 +93,7 @@ export function groupResourceNodes(responseData: {
   nodeGroups.forEach(({ sources, targets }) => {
     targets.forEach((target) => {
       // removes grouped nodes from original node set:
-      const groupedNodeIndex = ungroupedNodes.findIndex(
-        ({ data }) => data.id === target
-      );
+      const groupedNodeIndex = ungroupedNodes.findIndex(({ data }) => data.id === target);
       ungroupedNodes.splice(groupedNodeIndex, 1);
       sources.forEach((source) => {
         // removes edges of grouped nodes from original edge set:
@@ -120,9 +117,7 @@ export function groupResourceNodes(responseData: {
         }),
         groupedConnections: compact(
           targets.map((targetId) => {
-            const targetElement = nodes.find(
-              (element) => element.data.id === targetId
-            );
+            const targetElement = nodes.find((element) => element.data.id === targetId);
             if (!targetElement) {
               return undefined;
             }
@@ -155,11 +150,6 @@ export function groupResourceNodes(responseData: {
   });
 
   return {
-    elements: [
-      ...ungroupedNodes,
-      ...groupedNodes,
-      ...ungroupedEdges,
-      ...groupedEdges,
-    ],
+    elements: [...ungroupedNodes, ...groupedNodes, ...ungroupedEdges, ...groupedEdges],
   };
 }

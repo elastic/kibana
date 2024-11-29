@@ -8,10 +8,10 @@
 import { useMemo } from 'react';
 import { SecurityPageName } from '../../../../common/constants';
 import { NetworkRouteType } from '../../../explore/network/pages/navigation/types';
-import { useSourcererDataView } from '../../containers/sourcerer';
+import { useSourcererDataView } from '../../../sourcerer/containers';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { inputsSelectors } from '../../store';
-import { SourcererScopeName } from '../../store/sourcerer/model';
+import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { useRouteSpy } from '../../utils/route/use_route_spy';
 import type { LensAttributes, UseLensAttributesProps } from './types';
 import {
@@ -72,7 +72,7 @@ export const useLensAttributes = ({
     () =>
       lensAttributes ??
       ((getLensAttributes &&
-        stackByField &&
+        stackByField !== null &&
         getLensAttributes(stackByField, extraOptions)) as LensAttributes),
     [extraOptions, getLensAttributes, lensAttributes, stackByField]
   );
@@ -82,7 +82,7 @@ export const useLensAttributes = ({
   const lensAttrsWithInjectedData = useMemo(() => {
     if (
       lensAttributes == null &&
-      (getLensAttributes == null || stackByField == null || stackByField?.length === 0)
+      (getLensAttributes == null || stackByField === null || stackByField?.length === 0)
     ) {
       return null;
     }

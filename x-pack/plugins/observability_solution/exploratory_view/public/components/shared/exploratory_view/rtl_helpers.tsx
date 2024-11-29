@@ -217,6 +217,7 @@ export function render<ExtraCore>(
           reportConfigMap={obsvReportConfigMap}
           setHeaderActionMenu={jest.fn()}
           theme$={themeServiceMock.createTheme$()}
+          {...defaultCore}
         >
           <UrlStorageContext.Provider value={{ ...seriesContextValue }}>
             {ui}

@@ -9,14 +9,14 @@ import type { FC } from 'react';
 import React, { useEffect, useState } from 'react';
 import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { Query, Filter } from '@kbn/es-query';
+import { type Query, type Filter, buildEsQuery } from '@kbn/es-query';
 import type { TimeRange } from '@kbn/es-query';
-import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import type { DataViewField } from '@kbn/data-views-plugin/public';
 import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
+import { getEsQueryConfig } from '@kbn/data-service';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
-import { createMergedEsQuery } from '../../application/utils/search_utils';
+import { useDataSource } from '../../hooks/use_data_source';
 interface Props {
-  dataView: DataView;
   searchString: Query['query'];
   searchQuery: Query['query'];
   searchQueryLanguage: SearchQueryLanguage;
@@ -34,12 +34,7 @@ interface Props {
   onAddFilter?: (field: DataViewField | string, value: string, type: '+' | '-') => void;
 }
 
-export const SearchPanel: FC<Props> = ({
-  dataView,
-  searchString,
-  searchQueryLanguage,
-  setSearchParams,
-}) => {
+export const SearchPanel: FC<Props> = ({ searchString, searchQueryLanguage, setSearchParams }) => {
   const {
     uiSettings,
     unifiedSearch: {
@@ -48,6 +43,7 @@ export const SearchPanel: FC<Props> = ({
     notifications: { toasts },
     data: { query: queryManager },
   } = useAiopsAppContext();
+  const { dataView } = useDataSource();
 
   // The internal state of the input query bar updated on every key stroke.
   const [searchInput, setSearchInput] = useState<Query>({
@@ -70,11 +66,11 @@ export const SearchPanel: FC<Props> = ({
         queryManager.filterManager.setFilters(mergedFilters);
       }
 
-      const combinedQuery = createMergedEsQuery(
+      const combinedQuery = buildEsQuery(
+        dataView,
         mergedQuery,
         queryManager.filterManager.getFilters() ?? [],
-        dataView,
-        uiSettings
+        uiSettings ? getEsQueryConfig(uiSettings) : undefined
       );
 
       setSearchParams({

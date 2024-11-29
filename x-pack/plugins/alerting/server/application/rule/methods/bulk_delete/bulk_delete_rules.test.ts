@@ -18,6 +18,7 @@ import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
 import { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
+import { ActionsClient } from '@kbn/actions-plugin/server';
 import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
 import { alertingAuthorizationMock } from '../../../../authorization/alerting_authorization.mock';
 import { RecoveredActionGroup } from '../../../../../common';
@@ -28,13 +29,19 @@ import {
   enabledRuleForBulkOps1,
   enabledRuleForBulkOps2,
   enabledRuleForBulkOps3,
-  returnedRuleForBulkDelete1,
-  returnedRuleForBulkDelete2,
-  returnedRuleForBulkDelete3,
+  returnedRuleForBulkOps1,
+  returnedRuleForBulkOps2,
+  returnedRuleForBulkOps3,
   siemRuleForBulkOps1,
+  enabledRuleForBulkOpsWithActions1,
+  enabledRuleForBulkOpsWithActions2,
+  returnedRuleForBulkEnableWithActions1,
+  returnedRuleForBulkEnableWithActions2,
 } from '../../../../rules_client/tests/test_helpers';
 import { migrateLegacyActions } from '../../../../rules_client/lib';
+import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
+import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
 
 jest.mock('../../../../rules_client/lib/siem_legacy_actions/migrate_legacy_actions', () => {
   return {
@@ -60,6 +67,7 @@ const actionsAuthorization = actionsAuthorizationMock.create();
 const auditLogger = auditLoggerMock.create();
 const logger = loggerMock.create();
 const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
+const backfillClient = backfillClientMock.create();
 
 const kibanaVersion = 'v8.2.0';
 const createAPIKeyMock = jest.fn();
@@ -84,8 +92,11 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   minimumScheduleInterval: { value: '1m', enforce: false },
   isAuthenticationTypeAPIKey: jest.fn(),
   getAuthenticationAPIKey: jest.fn(),
+  connectorAdapterRegistry: new ConnectorAdapterRegistry(),
+  isSystemAction: jest.fn(),
   getAlertIndicesAlias: jest.fn(),
   alertsService: null,
+  backfillClient,
   uiSettings: uiSettingsServiceMock.createStartContract(),
 };
 
@@ -109,11 +120,12 @@ setGlobalDate();
 
 describe('bulkDelete', () => {
   let rulesClient: RulesClient;
+  let actionsClient: jest.Mocked<ActionsClient>;
 
   const mockCreatePointInTimeFinderAsInternalUser = (
     response = {
       saved_objects: [enabledRuleForBulkOps1, enabledRuleForBulkOps2, enabledRuleForBulkOps3],
-    }
+    } as unknown
   ) => {
     encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser = jest
       .fn()
@@ -165,6 +177,54 @@ describe('bulkDelete', () => {
       },
       validLegacyConsumers: [],
     });
+
+    actionsClient = (await rulesClientParams.getActionsClient()) as jest.Mocked<ActionsClient>;
+    actionsClient.isSystemAction.mockImplementation((id: string) => id === 'system_action:id');
+    rulesClientParams.getActionsClient.mockResolvedValue(actionsClient);
+  });
+
+  test('should successfully delete two rule and return right actions', async () => {
+    mockCreatePointInTimeFinderAsInternalUser({
+      saved_objects: [enabledRuleForBulkOpsWithActions1, enabledRuleForBulkOpsWithActions2],
+    });
+    unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
+      statuses: [
+        { id: 'id1', type: 'alert', success: true },
+        { id: 'id2', type: 'alert', success: true },
+      ],
+    });
+
+    const result = await rulesClient.bulkDeleteRules({ filter: 'fake_filter' });
+
+    expect(unsecuredSavedObjectsClient.bulkDelete).toHaveBeenCalledTimes(1);
+    expect(unsecuredSavedObjectsClient.bulkDelete).toHaveBeenCalledWith(
+      [enabledRuleForBulkOps1, enabledRuleForBulkOps2].map(({ id }) => ({
+        id,
+        type: 'alert',
+      })),
+      undefined
+    );
+
+    expect(taskManager.bulkRemove).toHaveBeenCalledTimes(1);
+    expect(taskManager.bulkRemove).toHaveBeenCalledWith(['id1', 'id2']);
+    expect(backfillClient.deleteBackfillForRules).toHaveBeenCalledTimes(1);
+    expect(backfillClient.deleteBackfillForRules).toHaveBeenCalledWith({
+      ruleIds: ['id1', 'id2'],
+      namespace: 'default',
+      unsecuredSavedObjectsClient,
+    });
+    expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(1);
+    expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
+      { apiKeys: ['MTIzOmFiYw==', 'MzIxOmFiYw=='] },
+      expect.anything(),
+      expect.anything()
+    );
+    expect(result).toStrictEqual({
+      rules: [returnedRuleForBulkEnableWithActions1, returnedRuleForBulkEnableWithActions2],
+      errors: [],
+      total: 2,
+      taskIdsFailedToBeDeleted: [],
+    });
   });
 
   test('should try to delete rules, two successful and one with 500 error', async () => {
@@ -189,6 +249,12 @@ describe('bulkDelete', () => {
 
     expect(taskManager.bulkRemove).toHaveBeenCalledTimes(1);
     expect(taskManager.bulkRemove).toHaveBeenCalledWith(['id1', 'id3']);
+    expect(backfillClient.deleteBackfillForRules).toHaveBeenCalledTimes(1);
+    expect(backfillClient.deleteBackfillForRules).toHaveBeenCalledWith({
+      ruleIds: ['id1', 'id3'],
+      namespace: 'default',
+      unsecuredSavedObjectsClient,
+    });
     expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(1);
     expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
       { apiKeys: ['MTIzOmFiYw=='] },
@@ -196,7 +262,7 @@ describe('bulkDelete', () => {
       expect.anything()
     );
     expect(result).toStrictEqual({
-      rules: [returnedRuleForBulkDelete1, returnedRuleForBulkDelete3],
+      rules: [returnedRuleForBulkOps1, returnedRuleForBulkOps3],
       errors: [{ message: 'UPS', rule: { id: 'id2', name: 'fakeName' }, status: 500 }],
       total: 2,
       taskIdsFailedToBeDeleted: [],
@@ -253,6 +319,12 @@ describe('bulkDelete', () => {
     expect(unsecuredSavedObjectsClient.bulkDelete).toHaveBeenCalledTimes(4);
     expect(taskManager.bulkRemove).toHaveBeenCalledTimes(1);
     expect(taskManager.bulkRemove).toHaveBeenCalledWith(['id1']);
+    expect(backfillClient.deleteBackfillForRules).toHaveBeenCalledTimes(1);
+    expect(backfillClient.deleteBackfillForRules).toHaveBeenCalledWith({
+      ruleIds: ['id1'],
+      namespace: 'default',
+      unsecuredSavedObjectsClient,
+    });
     expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(1);
     expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
       { apiKeys: ['MTIzOmFiYw=='] },
@@ -260,7 +332,7 @@ describe('bulkDelete', () => {
       expect.anything()
     );
     expect(result).toStrictEqual({
-      rules: [returnedRuleForBulkDelete1],
+      rules: [returnedRuleForBulkOps1],
       errors: [{ message: 'UPS', rule: { id: 'id2', name: 'fakeName' }, status: 409 }],
       total: 2,
       taskIdsFailedToBeDeleted: [],
@@ -311,6 +383,12 @@ describe('bulkDelete', () => {
     expect(unsecuredSavedObjectsClient.bulkDelete).toHaveBeenCalledTimes(2);
     expect(taskManager.bulkRemove).toHaveBeenCalledTimes(1);
     expect(taskManager.bulkRemove).toHaveBeenCalledWith(['id1', 'id2']);
+    expect(backfillClient.deleteBackfillForRules).toHaveBeenCalledTimes(1);
+    expect(backfillClient.deleteBackfillForRules).toHaveBeenCalledWith({
+      ruleIds: ['id1', 'id2'],
+      namespace: 'default',
+      unsecuredSavedObjectsClient,
+    });
     expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(1);
     expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
       { apiKeys: ['MTIzOmFiYw==', 'MzIxOmFiYw=='] },
@@ -318,7 +396,7 @@ describe('bulkDelete', () => {
       expect.anything()
     );
     expect(result).toStrictEqual({
-      rules: [returnedRuleForBulkDelete1, returnedRuleForBulkDelete2],
+      rules: [returnedRuleForBulkOps1, returnedRuleForBulkOps2],
       errors: [],
       total: 2,
       taskIdsFailedToBeDeleted: [],
@@ -517,12 +595,12 @@ describe('bulkDelete', () => {
       expect(auditLogger.log.mock.calls[0][0]?.event?.action).toEqual('rule_delete');
       expect(auditLogger.log.mock.calls[0][0]?.event?.outcome).toEqual('unknown');
       expect(auditLogger.log.mock.calls[0][0]?.kibana).toEqual({
-        saved_object: { id: 'id1', type: RULE_SAVED_OBJECT_TYPE },
+        saved_object: { id: 'id1', type: RULE_SAVED_OBJECT_TYPE, name: 'fakeName' },
       });
       expect(auditLogger.log.mock.calls[1][0]?.event?.action).toEqual('rule_delete');
       expect(auditLogger.log.mock.calls[1][0]?.event?.outcome).toEqual('unknown');
       expect(auditLogger.log.mock.calls[1][0]?.kibana).toEqual({
-        saved_object: { id: 'id2', type: RULE_SAVED_OBJECT_TYPE },
+        saved_object: { id: 'id2', type: RULE_SAVED_OBJECT_TYPE, name: 'fakeName' },
       });
     });
 

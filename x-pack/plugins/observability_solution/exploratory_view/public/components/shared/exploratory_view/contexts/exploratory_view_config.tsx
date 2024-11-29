@@ -6,13 +6,15 @@
  */
 
 import React, { createContext, useContext, useState } from 'react';
-import { AppMountParameters } from '@kbn/core/public';
+import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { AppDataType, ConfigProps, ReportViewType, SeriesConfig } from '../types';
 
 export type ReportConfigMap = Record<string, Array<(config: ConfigProps) => SeriesConfig>>;
 
-interface ExploratoryViewContextValue {
+type StartServices = Pick<CoreStart, 'analytics' | 'i18n' | 'theme'>;
+
+interface ExploratoryViewContextValue extends StartServices {
   dataTypes: Array<{ id: AppDataType; label: string }>;
   reportTypes: Array<{
     reportType: ReportViewType | typeof SELECT_REPORT_TYPE;
@@ -21,6 +23,7 @@ interface ExploratoryViewContextValue {
   reportConfigMap: ReportConfigMap;
   asPanel?: boolean;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
+  // FIXME: use theme from CoreStart
   theme$: AppMountParameters['theme$'];
   isEditMode?: boolean;
   setIsEditMode?: React.Dispatch<React.SetStateAction<boolean>>;
@@ -38,6 +41,7 @@ export function ExploratoryViewContextProvider({
   setHeaderActionMenu,
   asPanel = true,
   theme$,
+  ...startServices
 }: { children: JSX.Element } & ExploratoryViewContextValue) {
   const [isEditMode, setIsEditMode] = useState(false);
 
@@ -50,6 +54,7 @@ export function ExploratoryViewContextProvider({
     theme$,
     isEditMode,
     setIsEditMode,
+    ...startServices,
   };
 
   return (

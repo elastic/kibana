@@ -9,70 +9,74 @@ import React from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { getDefaultSingleMetricViewerPanelTitle } from './single_metric_viewer_embeddable';
-import type { SingleMetricViewerEmbeddableInput, SingleMetricViewerServices } from '..';
-import { resolveJobSelection } from '../common/resolve_job_selection';
+import { tracksOverlays } from '@kbn/presentation-containers';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { SingleMetricViewerEmbeddableUserInput, SingleMetricViewerEmbeddableInput } from '..';
 import { SingleMetricViewerInitializer } from './single_metric_viewer_initializer';
-import type { MlStartDependencies } from '../../plugin';
+import type { MlApi } from '../../application/services/ml_api_service';
 
 export async function resolveEmbeddableSingleMetricViewerUserInput(
   coreStart: CoreStart,
-  pluginStart: MlStartDependencies,
-  input: SingleMetricViewerServices
-): Promise<Partial<SingleMetricViewerEmbeddableInput>> {
-  const { overlays, theme, i18n } = coreStart;
-  const { mlApiServices } = input;
-  const timefilter = pluginStart.data.query.timefilter.timefilter;
+  parentApi: unknown,
+  focusedPanelId: string,
+  services: { data: DataPublicPluginStart; share?: SharePluginStart },
+  mlApi: MlApi,
+  input?: Partial<SingleMetricViewerEmbeddableInput>
+): Promise<SingleMetricViewerEmbeddableUserInput> {
+  const { http, overlays, ...startServices } = coreStart;
+  const { data, share } = services;
+  const timefilter = data.query.timefilter.timefilter;
+  const overlayTracker = tracksOverlays(parentApi) ? parentApi : undefined;
 
   return new Promise(async (resolve, reject) => {
     try {
-      const { jobIds } = await resolveJobSelection(
-        coreStart,
-        pluginStart.data.dataViews,
-        undefined,
-        true
-      );
-      const title = getDefaultSingleMetricViewerPanelTitle(jobIds);
-      const { jobs } = await mlApiServices.getJobs({ jobId: jobIds.join(',') });
-
-      const modalSession = overlays.openModal(
+      const flyoutSession = overlays.openFlyout(
         toMountPoint(
           <KibanaContextProvider
             services={{
-              mlServices: { ...input },
+              mlServices: { mlApi },
+              data,
+              share,
               ...coreStart,
             }}
           >
             <SingleMetricViewerInitializer
-              defaultTitle={title}
+              data-test-subj="mlSingleMetricViewerEmbeddableInitializer"
+              mlApi={mlApi}
+              bounds={timefilter.getBounds()!}
               initialInput={input}
-              job={jobs[0]}
-              bounds={timefilter.getActiveBounds()!}
-              onCreate={({
-                functionDescription,
-                panelTitle,
-                selectedDetectorIndex,
-                selectedEntities,
-              }) => {
-                modalSession.close();
-                resolve({
-                  jobIds,
-                  title: panelTitle,
-                  functionDescription,
-                  panelTitle,
-                  selectedDetectorIndex,
-                  selectedEntities,
-                });
+              onCreate={(explicitInput) => {
+                resolve(explicitInput);
+                flyoutSession.close();
+                overlayTracker?.clearOverlays();
               }}
               onCancel={() => {
-                modalSession.close();
                 reject();
+                flyoutSession.close();
+                overlayTracker?.clearOverlays();
               }}
             />
           </KibanaContextProvider>,
-          { theme, i18n }
-        )
+          startServices
+        ),
+        {
+          type: 'push',
+          ownFocus: true,
+          size: 's',
+          onClose: () => {
+            reject();
+            flyoutSession.close();
+            overlayTracker?.clearOverlays();
+          },
+        }
       );
+      // Close the flyout when user navigates out of the current plugin
+      if (tracksOverlays(parentApi)) {
+        parentApi.openOverlay(flyoutSession, {
+          focusedPanelId,
+        });
+      }
     } catch (error) {
       reject(error);
     }

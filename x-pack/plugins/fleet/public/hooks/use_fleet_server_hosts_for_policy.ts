@@ -9,61 +9,37 @@ import { useMemo } from 'react';
 
 import type { AgentPolicy } from '../types';
 
-import { useGetDownloadSources, useGetFleetProxies, useGetFleetServerHosts } from './use_request';
+import { useGetEnrollmentSettings } from './use_request';
 
 /**
  * Return Fleet server hosts urls and proxy for a given agent policy
  */
-export function useFleetServerHostsForPolicy(agentPolicy?: AgentPolicy | null) {
-  const fleetServerHostsRequest = useGetFleetServerHosts();
-  const fleetProxiesRequest = useGetFleetProxies();
-  const downloadSourceRequest = useGetDownloadSources();
-  const allFleetServerHosts = useMemo(
-    () => fleetServerHostsRequest.data?.items ?? [],
-    [fleetServerHostsRequest]
-  );
-
-  const allFleetProxies = useMemo(
-    () => fleetProxiesRequest.data?.items ?? [],
-    [fleetProxiesRequest]
-  );
-
-  const allDownloadSource = useMemo(
-    () => downloadSourceRequest.data?.items ?? [],
-    [downloadSourceRequest]
-  );
-
-  const [fleetServerHosts, fleetProxy, downloadSource] = useMemo(() => {
-    const fleetServerHost = allFleetServerHosts.find((item) =>
-      agentPolicy?.fleet_server_host_id
-        ? item.id === agentPolicy?.fleet_server_host_id
-        : item.is_default
-    );
-
-    const fleetServerHostProxy = fleetServerHost?.proxy_id
-      ? allFleetProxies.find((proxy) => proxy.id === fleetServerHost.proxy_id)
-      : undefined;
-
-    const currentDownloadSource = agentPolicy?.download_source_id
-      ? allDownloadSource.find((d) => d.id === agentPolicy?.download_source_id)
-      : allDownloadSource.find((d) => d.is_default);
-
-    return [fleetServerHost?.host_urls ?? [], fleetServerHostProxy, currentDownloadSource];
-  }, [agentPolicy, allFleetProxies, allFleetServerHosts, allDownloadSource]);
-
-  const isLoadingInitialRequest =
-    (fleetServerHostsRequest.isLoading && fleetServerHostsRequest.isInitialRequest) ||
-    (fleetProxiesRequest.isLoading && fleetProxiesRequest.isInitialRequest) ||
-    (downloadSourceRequest.isLoading && downloadSourceRequest.isInitialRequest);
+export function useFleetServerHostsForPolicy(agentPolicy?: Pick<AgentPolicy, 'id'> | null) {
+  const {
+    isLoading,
+    isInitialRequest,
+    data: enrollmentSettings,
+  } = useGetEnrollmentSettings({ agentPolicyId: agentPolicy?.id });
 
   return useMemo(
     () => ({
-      isLoadingInitialRequest,
-      fleetServerHosts,
-      fleetProxy,
-      downloadSource,
-      allFleetServerHosts,
+      isLoadingInitialRequest: isLoading && isInitialRequest,
+      fleetServerHost: enrollmentSettings?.fleet_server.host?.host_urls[0] || '',
+      fleetProxy: enrollmentSettings?.fleet_server.host_proxy,
+      esOutput: enrollmentSettings?.fleet_server.es_output,
+      esOutputProxy: enrollmentSettings?.fleet_server.es_output_proxy,
+      downloadSource: enrollmentSettings?.download_source,
+      downloadSourceProxy: enrollmentSettings?.download_source_proxy,
     }),
-    [fleetServerHosts, fleetProxy, downloadSource, allFleetServerHosts, isLoadingInitialRequest]
+    [
+      isLoading,
+      isInitialRequest,
+      enrollmentSettings?.fleet_server.host,
+      enrollmentSettings?.fleet_server.host_proxy,
+      enrollmentSettings?.fleet_server.es_output,
+      enrollmentSettings?.fleet_server.es_output_proxy,
+      enrollmentSettings?.download_source,
+      enrollmentSettings?.download_source_proxy,
+    ]
   );
 }

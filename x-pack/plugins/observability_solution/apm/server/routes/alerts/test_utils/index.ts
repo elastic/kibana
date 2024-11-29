@@ -7,8 +7,6 @@
 
 import { IBasePath, Logger } from '@kbn/core/server';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import type { AlertsLocatorParams } from '@kbn/observability-plugin/common';
-import { LocatorPublic } from '@kbn/share-plugin/common';
 import { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';
 import { PluginSetupContract as AlertingPluginSetupContract } from '@kbn/alerting-plugin/server';
@@ -40,6 +38,9 @@ export const createRuleTypeMocks = () => {
     savedObjectsClient: {
       get: () => ({ attributes: { consumer: APM_SERVER_FEATURE_ID } }),
     },
+    uiSettingsClient: {
+      get: jest.fn(),
+    },
     alertFactory: {
       create: jest.fn(() => ({ scheduleActions, getUuid })),
       done: {},
@@ -47,6 +48,10 @@ export const createRuleTypeMocks = () => {
     alertWithLifecycle: jest.fn(),
     logger: loggerMock,
     shouldWriteAlerts: () => true,
+    alertsClient: {
+      report: jest.fn(),
+      setAlertData: jest.fn(),
+    },
   };
 
   const dependencies = {
@@ -73,11 +78,6 @@ export const createRuleTypeMocks = () => {
     ruleDataClient: ruleRegistryMocks.createRuleDataClient(
       '.alerts-observability.apm.alerts'
     ) as IRuleDataClient,
-    alertsLocator: {
-      getLocation: jest.fn().mockImplementation(() => ({
-        path: 'mockedAlertsLocator > getLocation',
-      })),
-    } as any as LocatorPublic<AlertsLocatorParams>,
   } as unknown as RegisterRuleDependencies;
 
   return {

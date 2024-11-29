@@ -22,18 +22,130 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/deeplinks-observability",
-        "id": "def-common.DatasetQualityLocatorParams",
+        "id": "def-common.DataQualityDetailsLocatorParams",
         "type": "Interface",
         "tags": [],
-        "label": "DatasetQualityLocatorParams",
+        "label": "DataQualityDetailsLocatorParams",
         "description": [],
         "signature": [
           {
             "pluginId": "@kbn/deeplinks-observability",
             "scope": "common",
             "docId": "kibKbnDeeplinksObservabilityPluginApi",
-            "section": "def-common.DatasetQualityLocatorParams",
-            "text": "DatasetQualityLocatorParams"
+            "section": "def-common.DataQualityDetailsLocatorParams",
+            "text": "DataQualityDetailsLocatorParams"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          }
+        ],
+        "path": "packages/deeplinks/observability/locators/dataset_quality_details.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/deeplinks-observability",
+            "id": "def-common.DataQualityDetailsLocatorParams.dataStream",
+            "type": "string",
+            "tags": [],
+            "label": "dataStream",
+            "description": [],
+            "path": "packages/deeplinks/observability/locators/dataset_quality_details.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/deeplinks-observability",
+            "id": "def-common.DataQualityDetailsLocatorParams.timeRange",
+            "type": "Object",
+            "tags": [],
+            "label": "timeRange",
+            "description": [],
+            "signature": [
+              "TimeRangeConfig | undefined"
+            ],
+            "path": "packages/deeplinks/observability/locators/dataset_quality_details.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/deeplinks-observability",
+            "id": "def-common.DataQualityDetailsLocatorParams.breakdownField",
+            "type": "string",
+            "tags": [],
+            "label": "breakdownField",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/deeplinks/observability/locators/dataset_quality_details.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/deeplinks-observability",
+            "id": "def-common.DataQualityDetailsLocatorParams.degradedFields",
+            "type": "Object",
+            "tags": [],
+            "label": "degradedFields",
+            "description": [],
+            "signature": [
+              "{ table?: DegradedFieldsTable | undefined; } | undefined"
+            ],
+            "path": "packages/deeplinks/observability/locators/dataset_quality_details.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/deeplinks-observability",
+            "id": "def-common.DataQualityDetailsLocatorParams.expandedDegradedField",
+            "type": "string",
+            "tags": [],
+            "label": "expandedDegradedField",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/deeplinks/observability/locators/dataset_quality_details.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/deeplinks-observability",
+            "id": "def-common.DataQualityDetailsLocatorParams.showCurrentQualityIssues",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "showCurrentQualityIssues",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/deeplinks/observability/locators/dataset_quality_details.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-observability",
+        "id": "def-common.DataQualityLocatorParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "DataQualityLocatorParams",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/deeplinks-observability",
+            "scope": "common",
+            "docId": "kibKbnDeeplinksObservabilityPluginApi",
+            "section": "def-common.DataQualityLocatorParams",
+            "text": "DataQualityLocatorParams"
           },
           " extends ",
           {
@@ -50,7 +162,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/deeplinks-observability",
-            "id": "def-common.DatasetQualityLocatorParams.filters",
+            "id": "def-common.DataQualityLocatorParams.filters",
             "type": "Object",
             "tags": [],
             "label": "filters",
@@ -285,6 +397,22 @@
             "path": "packages/deeplinks/observability/locators/logs_explorer.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/deeplinks-observability",
+            "id": "def-common.LogsExplorerNavigationParams.breakdownField",
+            "type": "string",
+            "tags": [],
+            "label": "breakdownField",
+            "description": [
+              "\nOptionally set chart's breakdown field"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/deeplinks/observability/locators/logs_explorer.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -369,10 +497,24 @@
             "tags": [],
             "label": "source",
             "description": [
-              "If given, it will load the given map else will load the create a new map page."
+              "If given, it will load the given onboarding flow\nelse will load the main onboarding screen."
             ],
             "signature": [
-              "\"customLogs\" | \"systemLogs\" | undefined"
+              "\"kubernetes\" | \"auto-detect\" | \"customLogs\" | \"otel-logs\" | \"firehose\" | undefined"
+            ],
+            "path": "packages/deeplinks/observability/locators/observability_onboarding.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/deeplinks-observability",
+            "id": "def-common.ObservabilityOnboardingLocatorParams.category",
+            "type": "string",
+            "tags": [],
+            "label": "category",
+            "description": [],
+            "signature": [
+              "string | undefined"
             ],
             "path": "packages/deeplinks/observability/locators/observability_onboarding.ts",
             "deprecated": false,
@@ -484,10 +626,185 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-observability",
+        "id": "def-common.UptimeOverviewLocatorInfraParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "UptimeOverviewLocatorInfraParams",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/deeplinks-observability",
+            "scope": "common",
+            "docId": "kibKbnDeeplinksObservabilityPluginApi",
+            "section": "def-common.UptimeOverviewLocatorInfraParams",
+            "text": "UptimeOverviewLocatorInfraParams"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          }
+        ],
+        "path": "packages/deeplinks/observability/locators/uptime.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/deeplinks-observability",
+            "id": "def-common.UptimeOverviewLocatorInfraParams.ip",
+            "type": "string",
+            "tags": [],
+            "label": "ip",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/deeplinks/observability/locators/uptime.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/deeplinks-observability",
+            "id": "def-common.UptimeOverviewLocatorInfraParams.host",
+            "type": "string",
+            "tags": [],
+            "label": "host",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/deeplinks/observability/locators/uptime.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/deeplinks-observability",
+            "id": "def-common.UptimeOverviewLocatorInfraParams.container",
+            "type": "string",
+            "tags": [],
+            "label": "container",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/deeplinks/observability/locators/uptime.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/deeplinks-observability",
+            "id": "def-common.UptimeOverviewLocatorInfraParams.pod",
+            "type": "string",
+            "tags": [],
+            "label": "pod",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/deeplinks/observability/locators/uptime.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-observability",
+        "id": "def-common.UptimeOverviewLocatorParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "UptimeOverviewLocatorParams",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/deeplinks-observability",
+            "scope": "common",
+            "docId": "kibKbnDeeplinksObservabilityPluginApi",
+            "section": "def-common.UptimeOverviewLocatorParams",
+            "text": "UptimeOverviewLocatorParams"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          }
+        ],
+        "path": "packages/deeplinks/observability/locators/uptime.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/deeplinks-observability",
+            "id": "def-common.UptimeOverviewLocatorParams.dateRangeStart",
+            "type": "string",
+            "tags": [],
+            "label": "dateRangeStart",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/deeplinks/observability/locators/uptime.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/deeplinks-observability",
+            "id": "def-common.UptimeOverviewLocatorParams.dateRangeEnd",
+            "type": "string",
+            "tags": [],
+            "label": "dateRangeEnd",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/deeplinks/observability/locators/uptime.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/deeplinks-observability",
+            "id": "def-common.UptimeOverviewLocatorParams.search",
+            "type": "string",
+            "tags": [],
+            "label": "search",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/deeplinks/observability/locators/uptime.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "enums": [],
     "misc": [
+      {
+        "parentPluginId": "@kbn/deeplinks-observability",
+        "id": "def-common.AI_ASSISTANT_APP_ID",
+        "type": "string",
+        "tags": [],
+        "label": "AI_ASSISTANT_APP_ID",
+        "description": [],
+        "signature": [
+          "\"observabilityAIAssistant\""
+        ],
+        "path": "packages/deeplinks/observability/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/deeplinks-observability",
         "id": "def-common.ALL_DATASETS_LOCATOR_ID",
@@ -540,7 +857,7 @@
         "label": "AppId",
         "description": [],
         "signature": [
-          "\"metrics\" | \"synthetics\" | \"apm\" | \"logs\" | \"observability-overview\" | \"observability-logs-explorer\" | \"observabilityOnboarding\" | \"slo\""
+          "\"profiling\" | \"metrics\" | \"apm\" | \"synthetics\" | \"ux\" | \"logs\" | \"slo\" | \"observabilityAIAssistant\" | \"observability-overview\" | \"streams\" | \"observability-logs-explorer\" | \"last-used-logs-viewer\" | \"observabilityOnboarding\" | \"inventory\""
         ],
         "path": "packages/deeplinks/observability/deep_links.ts",
         "deprecated": false,
@@ -549,13 +866,28 @@
       },
       {
         "parentPluginId": "@kbn/deeplinks-observability",
-        "id": "def-common.DATASET_QUALITY_LOCATOR_ID",
+        "id": "def-common.DATA_QUALITY_DETAILS_LOCATOR_ID",
         "type": "string",
         "tags": [],
-        "label": "DATASET_QUALITY_LOCATOR_ID",
+        "label": "DATA_QUALITY_DETAILS_LOCATOR_ID",
         "description": [],
         "signature": [
-          "\"DATASET_QUALITY_LOCATOR\""
+          "\"DATA_QUALITY_DETAILS_LOCATOR\""
+        ],
+        "path": "packages/deeplinks/observability/locators/dataset_quality_details.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-observability",
+        "id": "def-common.DATA_QUALITY_LOCATOR_ID",
+        "type": "string",
+        "tags": [],
+        "label": "DATA_QUALITY_LOCATOR_ID",
+        "description": [],
+        "signature": [
+          "\"DATA_QUALITY_LOCATOR\""
         ],
         "path": "packages/deeplinks/observability/locators/dataset_quality.ts",
         "deprecated": false,
@@ -606,7 +938,7 @@
             "section": "def-common.AppId",
             "text": "AppId"
           },
-          " | \"logs:settings\" | \"logs:stream\" | \"logs:log-categories\" | \"logs:anomalies\" | \"observability-overview:cases\" | \"observability-overview:rules\" | \"observability-overview:alerts\" | \"observability-overview:cases_create\" | \"observability-overview:cases_configure\" | \"metrics:settings\" | \"metrics:hosts\" | \"metrics:inventory\" | \"metrics:metrics-explorer\" | \"metrics:assetDetails\" | \"apm:traces\" | \"apm:dependencies\" | \"apm:service-map\" | \"apm:settings\" | \"apm:services\" | \"apm:service-groups-list\" | \"apm:storage-explorer\" | \"synthetics:overview\" | \"synthetics:certificates\""
+          " | \"logs:settings\" | \"logs:stream\" | \"logs:log-categories\" | \"logs:anomalies\" | \"observability-overview:cases\" | \"observability-overview:alerts\" | \"observability-overview:rules\" | \"observability-overview:cases_create\" | \"observability-overview:cases_configure\" | \"metrics:settings\" | \"metrics:hosts\" | \"metrics:inventory\" | \"metrics:metrics-explorer\" | \"metrics:assetDetails\" | \"apm:services\" | \"apm:traces\" | \"apm:dependencies\" | \"apm:service-map\" | \"apm:settings\" | \"apm:service-groups-list\" | \"apm:storage-explorer\" | \"synthetics:overview\" | \"synthetics:certificates\" | \"profiling:functions\" | \"profiling:stacktraces\" | \"profiling:flamegraphs\" | \"inventory:datastreams\" | \"streams:overview\""
         ],
         "path": "packages/deeplinks/observability/deep_links.ts",
         "deprecated": false,
@@ -682,6 +1014,21 @@
       },
       {
         "parentPluginId": "@kbn/deeplinks-observability",
+        "id": "def-common.LAST_USED_LOGS_VIEWER_APP_ID",
+        "type": "string",
+        "tags": [],
+        "label": "LAST_USED_LOGS_VIEWER_APP_ID",
+        "description": [],
+        "signature": [
+          "\"last-used-logs-viewer\""
+        ],
+        "path": "packages/deeplinks/observability/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-observability",
         "id": "def-common.ListFilterControl",
         "type": "Type",
         "tags": [],
@@ -727,6 +1074,36 @@
       },
       {
         "parentPluginId": "@kbn/deeplinks-observability",
+        "id": "def-common.OBLT_PROFILING_APP_ID",
+        "type": "string",
+        "tags": [],
+        "label": "OBLT_PROFILING_APP_ID",
+        "description": [],
+        "signature": [
+          "\"profiling\""
+        ],
+        "path": "packages/deeplinks/observability/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-observability",
+        "id": "def-common.OBLT_UX_APP_ID",
+        "type": "string",
+        "tags": [],
+        "label": "OBLT_UX_APP_ID",
+        "description": [],
+        "signature": [
+          "\"ux\""
+        ],
+        "path": "packages/deeplinks/observability/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-observability",
         "id": "def-common.OBS_LOGS_EXPLORER_DATA_VIEW_LOCATOR_ID",
         "type": "string",
         "tags": [],
@@ -734,6 +1111,21 @@
         "description": [],
         "signature": [
           "\"OBS_LOGS_EXPLORER_DATA_VIEW_LOCATOR\""
+        ],
+        "path": "packages/deeplinks/observability/locators/observability_logs_explorer.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-observability",
+        "id": "def-common.OBS_LOGS_EXPLORER_LOGS_VIEWER_KEY",
+        "type": "string",
+        "tags": [],
+        "label": "OBS_LOGS_EXPLORER_LOGS_VIEWER_KEY",
+        "description": [],
+        "signature": [
+          "\"obs-logs-explorer:lastUsedViewer\""
         ],
         "path": "packages/deeplinks/observability/locators/observability_logs_explorer.ts",
         "deprecated": false,
@@ -838,9 +1230,24 @@
         "label": "SmartFieldGridColumnOptions",
         "description": [],
         "signature": [
-          "{ type: \"smart-field\"; smartField: \"resource\" | \"content\"; width?: number | undefined; }"
+          "{ type: \"smart-field\"; smartField: \"content\" | \"resource\"; width?: number | undefined; }"
         ],
         "path": "packages/deeplinks/observability/locators/logs_explorer.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-observability",
+        "id": "def-common.uptimeOverviewLocatorID",
+        "type": "string",
+        "tags": [],
+        "label": "uptimeOverviewLocatorID",
+        "description": [],
+        "signature": [
+          "\"UPTIME_OVERVIEW_LOCATOR\""
+        ],
+        "path": "packages/deeplinks/observability/locators/uptime.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

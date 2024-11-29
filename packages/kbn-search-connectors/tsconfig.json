@@ -5,7 +5,9 @@
     "types": [
       "jest",
       "node",
-      "react"
+      "react",
+      "@testing-library/jest-dom",
+      "@testing-library/react",
     ]
   },
   "include": [
@@ -22,5 +24,7 @@
     "@kbn/config-schema",
     "@kbn/i18n-react",
     "@kbn/test-jest-helpers",
+    "@kbn/std",
+    "@kbn/doc-links",
   ]
 }

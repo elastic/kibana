@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { fromKueryExpression } from '@kbn/es-query';
+import { KueryNode, fromKueryExpression, toKqlExpression } from '@kbn/es-query';
 import { KibanaRequest } from '@kbn/core/server';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import {
-  PluginStartContract as FeaturesStartContract,
+  FeaturesPluginStart as FeaturesStartContract,
   KibanaFeature,
 } from '@kbn/features-plugin/server';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
@@ -750,6 +750,49 @@ describe('AlertingAuthorization', () => {
         `"Unauthorized by \\"myOtherApp\\" to create \\"myType\\" alert"`
       );
     });
+
+    test('checks additional privileges correctly', async () => {
+      const { authorization } = mockSecurity();
+      const checkPrivileges: jest.MockedFunction<
+        ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
+      > = jest.fn();
+      authorization.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
+      const alertAuthorization = new AlertingAuthorization({
+        request,
+        authorization,
+        ruleTypeRegistry,
+        features,
+        getSpace,
+        getSpaceId,
+      });
+
+      checkPrivileges.mockResolvedValueOnce({
+        username: 'some-user',
+        hasAllRequested: true,
+        privileges: { kibana: [] },
+      });
+
+      await alertAuthorization.ensureAuthorized({
+        ruleTypeId: 'myType',
+        consumer: 'myApp',
+        operation: WriteOperations.Create,
+        entity: AlertingAuthorizationEntity.Rule,
+        additionalPrivileges: ['test/create'],
+      });
+
+      expect(ruleTypeRegistry.get).toHaveBeenCalledWith('myType');
+
+      expect(authorization.actions.alerting.get).toHaveBeenCalledTimes(1);
+      expect(authorization.actions.alerting.get).toHaveBeenCalledWith(
+        'myType',
+        'myApp',
+        'rule',
+        'create'
+      );
+      expect(checkPrivileges).toHaveBeenCalledWith({
+        kibana: [mockAuthorizationAction('myType', 'myApp', 'rule', 'create'), 'test/create'],
+      });
+    });
   });
 
   describe('getFindAuthorizationFilter', () => {
@@ -867,20 +910,19 @@ describe('AlertingAuthorization', () => {
         getSpaceId,
       });
       ruleTypeRegistry.list.mockReturnValue(setOfAlertTypes);
-      expect(
-        (
-          await alertAuthorization.getFindAuthorizationFilter(AlertingAuthorizationEntity.Rule, {
-            type: AlertingAuthorizationFilterType.KQL,
-            fieldNames: {
-              ruleTypeId: 'path.to.rule_type_id',
-              consumer: 'consumer-field',
-            },
-          })
-        ).filter
-      ).toEqual(
-        fromKueryExpression(
-          `((path.to.rule_type_id:myAppAlertType and consumer-field:(alerts or myApp or myOtherApp or myAppWithSubFeature)) or (path.to.rule_type_id:mySecondAppAlertType and consumer-field:(alerts or myApp or myOtherApp or myAppWithSubFeature)) or (path.to.rule_type_id:myOtherAppAlertType and consumer-field:(alerts or myApp or myOtherApp or myAppWithSubFeature)))`
-        )
+
+      const filter = (
+        await alertAuthorization.getFindAuthorizationFilter(AlertingAuthorizationEntity.Rule, {
+          type: AlertingAuthorizationFilterType.KQL,
+          fieldNames: {
+            ruleTypeId: 'path.to.rule_type_id',
+            consumer: 'consumer-field',
+          },
+        })
+      ).filter;
+
+      expect(toKqlExpression(filter as KueryNode)).toMatchInlineSnapshot(
+        `"((path.to.rule_type_id: myAppAlertType AND (consumer-field: alerts OR consumer-field: discover OR consumer-field: myApp OR consumer-field: myOtherApp OR consumer-field: myAppWithSubFeature)) OR (path.to.rule_type_id: mySecondAppAlertType AND (consumer-field: alerts OR consumer-field: discover OR consumer-field: myApp OR consumer-field: myOtherApp OR consumer-field: myAppWithSubFeature)) OR (path.to.rule_type_id: myOtherAppAlertType AND (consumer-field: alerts OR consumer-field: discover OR consumer-field: myApp OR consumer-field: myOtherApp OR consumer-field: myAppWithSubFeature)))"`
       );
     });
     test('throws if user has no privileges to any rule type', async () => {
@@ -1231,6 +1273,10 @@ describe('AlertingAuthorization', () => {
                 "all": true,
                 "read": true,
               },
+              "discover": Object {
+                "all": true,
+                "read": true,
+              },
               "myApp": Object {
                 "all": true,
                 "read": true,
@@ -1265,6 +1311,10 @@ describe('AlertingAuthorization', () => {
             "actionVariables": undefined,
             "authorizedConsumers": Object {
               "alerts": Object {
+                "all": true,
+                "read": true,
+              },
+              "discover": Object {
                 "all": true,
                 "read": true,
               },
@@ -2208,20 +2258,18 @@ describe('AlertingAuthorization', () => {
         });
       });
       test('creates a filter based on the privileged types', async () => {
-        expect(
-          (
-            await alertAuthorization.getFindAuthorizationFilter(AlertingAuthorizationEntity.Rule, {
-              type: AlertingAuthorizationFilterType.KQL,
-              fieldNames: {
-                ruleTypeId: 'path.to.rule_type_id',
-                consumer: 'consumer-field',
-              },
-            })
-          ).filter
-        ).toEqual(
-          fromKueryExpression(
-            `path.to.rule_type_id:.esQuery and consumer-field:(alerts or stackAlerts or discover)`
-          )
+        const filter = (
+          await alertAuthorization.getFindAuthorizationFilter(AlertingAuthorizationEntity.Rule, {
+            type: AlertingAuthorizationFilterType.KQL,
+            fieldNames: {
+              ruleTypeId: 'path.to.rule_type_id',
+              consumer: 'consumer-field',
+            },
+          })
+        ).filter;
+
+        expect(toKqlExpression(filter as KueryNode)).toMatchInlineSnapshot(
+          `"(path.to.rule_type_id: .esQuery AND (consumer-field: alerts OR consumer-field: discover OR consumer-field: stackAlerts))"`
         );
       });
     });
@@ -2514,21 +2562,20 @@ describe('AlertingAuthorization', () => {
           expect(ruleTypeRegistry.get).toHaveBeenCalledTimes(1);
         });
       });
+
       test('creates a filter based on the privileged types', async () => {
-        expect(
-          (
-            await alertAuthorization.getFindAuthorizationFilter(AlertingAuthorizationEntity.Rule, {
-              type: AlertingAuthorizationFilterType.KQL,
-              fieldNames: {
-                ruleTypeId: 'path.to.rule_type_id',
-                consumer: 'consumer-field',
-              },
-            })
-          ).filter
-        ).toEqual(
-          fromKueryExpression(
-            `(path.to.rule_type_id:.esQuery and consumer-field:(alerts or stackAlerts or logs or discover)) or (path.to.rule_type_id:.logs-threshold-o11y and consumer-field:(alerts or stackAlerts or logs or discover)) or (path.to.rule_type_id:.threshold-rule-o11y and consumer-field:(alerts or stackAlerts or logs or discover))`
-          )
+        const filter = (
+          await alertAuthorization.getFindAuthorizationFilter(AlertingAuthorizationEntity.Rule, {
+            type: AlertingAuthorizationFilterType.KQL,
+            fieldNames: {
+              ruleTypeId: 'path.to.rule_type_id',
+              consumer: 'consumer-field',
+            },
+          })
+        ).filter;
+
+        expect(toKqlExpression(filter as KueryNode)).toMatchInlineSnapshot(
+          `"((path.to.rule_type_id: .esQuery AND (consumer-field: alerts OR consumer-field: discover OR consumer-field: stackAlerts OR consumer-field: logs)) OR (path.to.rule_type_id: .logs-threshold-o11y AND (consumer-field: alerts OR consumer-field: discover OR consumer-field: stackAlerts OR consumer-field: logs)) OR (path.to.rule_type_id: .threshold-rule-o11y AND (consumer-field: alerts OR consumer-field: discover OR consumer-field: stackAlerts OR consumer-field: logs)))"`
         );
       });
     });

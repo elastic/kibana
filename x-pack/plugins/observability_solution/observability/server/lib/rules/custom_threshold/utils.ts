@@ -16,7 +16,8 @@ import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { set } from '@kbn/safer-lodash-set';
 import { ParsedExperimentalFields } from '@kbn/rule-registry-plugin/common/parse_experimental_fields';
 import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
-import type { Group } from '../../../../common/custom_threshold_rule/types';
+import { Alert } from '@kbn/alerts-as-data-utils';
+import type { Group } from '../../../../common/typings';
 import { ObservabilityConfig } from '../../..';
 import { AlertExecutionDetails } from './types';
 
@@ -51,10 +52,15 @@ export const validateKQLStringFilter = (value: string) => {
   }
 
   try {
-    kbnBuildEsQuery(undefined, [{ query: value, language: 'kuery' }], []);
+    kbnBuildEsQuery(undefined, [{ query: value, language: 'kuery' }], [], {
+      allowLeadingWildcards: true,
+      queryStringOptions: {},
+      ignoreFilterIfFieldNotInIndex: false,
+    });
   } catch (e) {
     return i18n.translate('xpack.observability.customThreshold.rule.schema.invalidFilterQuery', {
-      defaultMessage: 'filterQuery must be a valid KQL filter',
+      defaultMessage: 'filterQuery must be a valid KQL filter (error: {errorMessage})',
+      values: { errorMessage: e?.message },
     });
   }
 };
@@ -129,7 +135,7 @@ export const doFieldsExist = async (
   // Get all supported fields
   const respMapping = await esClient.fieldCaps({
     index,
-    fields: '*',
+    fields,
   });
 
   const fieldsExisted: Record<string, boolean> = {};
@@ -166,7 +172,7 @@ export const hasAdditionalContext = (
 ): boolean => {
   return groupBy
     ? Array.isArray(groupBy)
-      ? groupBy.every((group) => validGroups.includes(group))
+      ? groupBy.some((group) => validGroups.includes(group))
       : validGroups.includes(groupBy)
     : false;
 };
@@ -183,8 +189,10 @@ export const flattenAdditionalContext = (
   return additionalContext ? flattenObject(additionalContext) : {};
 };
 
-export const getContextForRecoveredAlerts = (
-  alertHitSource: Partial<ParsedTechnicalFields & ParsedExperimentalFields> | undefined | null
+export const getContextForRecoveredAlerts = <
+  T extends Alert | (ParsedTechnicalFields & ParsedExperimentalFields)
+>(
+  alertHitSource: Partial<T> | undefined | null
 ): AdditionalContext => {
   const alert = alertHitSource ? unflattenObject(alertHitSource) : undefined;
 

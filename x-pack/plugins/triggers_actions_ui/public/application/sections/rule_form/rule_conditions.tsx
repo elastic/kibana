@@ -54,7 +54,7 @@ export const RuleConditions = <ConditionProps extends any, ActionGroupIds extend
     includeBuiltInActionGroups
       ? actionGroups
       : actionGroups.filter(({ id }) => !BUILT_IN_ACTION_GROUPS.has(id)),
-    (actionGroup) => actionGroup.hasOwnProperty('conditions')
+    (actionGroup) => Object.hasOwn(actionGroup, 'conditions')
   );
 
   return (

@@ -11,10 +11,12 @@ import React from 'react';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { isUpgradeInProgress } from '../../services/upgrade_service';
+import { useUpgradeCheck } from '../../capabilities/check_capabilities';
 
 export const UpgradeWarning: FC = () => {
-  if (isUpgradeInProgress() === true) {
+  const isUpgradeInProgress = useUpgradeCheck();
+
+  if (isUpgradeInProgress === true) {
     return (
       <React.Fragment>
         <EuiCallOut

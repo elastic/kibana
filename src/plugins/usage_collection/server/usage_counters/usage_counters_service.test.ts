@@ -1,16 +1,29 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 /* eslint-disable dot-notation */
-import { UsageCountersService } from './usage_counters_service';
-import { loggingSystemMock, coreMock } from '@kbn/core/server/mocks';
-import * as rxOp from 'rxjs/operators';
+import * as rxOp from 'rxjs';
 import moment from 'moment';
+import { loggingSystemMock, coreMock } from '@kbn/core/server/mocks';
+import { UsageCountersService } from './usage_counters_service';
+
+jest.mock('./rollups', () => ({
+  ...jest.requireActual('./rollups'),
+  // used by `rollUsageCountersIndices` to determine if a counter is beyond the retention period
+  registerUsageCountersRollups: jest.fn(),
+}));
+
+import { registerUsageCountersRollups } from './rollups';
+
+const registerUsageCountersRollupsMock = registerUsageCountersRollups as jest.MockedFunction<
+  typeof registerUsageCountersRollups
+>;
 
 const tick = () => {
   jest.useRealTimers();
@@ -40,18 +53,34 @@ describe('UsageCountersService', () => {
     const usageCounter = createUsageCounter('test-counter');
 
     usageCounter.incrementCounter({ counterName: 'counterA' });
-    usageCounter.incrementCounter({ counterName: 'counterA' });
+    usageCounter.incrementCounter({ counterName: 'counterA', namespace: 'second', source: 'ui' });
 
-    const dataInSourcePromise = usageCountersService['source$'].pipe(rxOp.toArray()).toPromise();
+    const dataInSourcePromise = rxOp.firstValueFrom(
+      usageCountersService['source$'].pipe(rxOp.toArray())
+    );
     usageCountersService['flushCache$'].next();
     usageCountersService['source$'].complete();
     await expect(dataInSourcePromise).resolves.toHaveLength(2);
   });
 
-  it('registers savedObject type during setup', () => {
+  it('registers savedObject types during setup', () => {
     const usageCountersService = new UsageCountersService({ logger, retryCount, bufferDurationMs });
     usageCountersService.setup(coreSetup);
-    expect(coreSetup.savedObjects.registerType).toBeCalledTimes(1);
+    expect(coreSetup.savedObjects.registerType).toBeCalledTimes(2);
+  });
+
+  it('triggers regular cleanup of old counters on start', () => {
+    const usageCountersService = new UsageCountersService({ logger, retryCount, bufferDurationMs });
+    usageCountersService.start(coreStart);
+
+    expect(registerUsageCountersRollupsMock).toHaveBeenCalledTimes(1);
+    expect(registerUsageCountersRollupsMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        logger: expect.any(Object),
+        getRegisteredUsageCounters: expect.any(Function),
+        internalRepository: expect.any(Object),
+      })
+    );
   });
 
   it('flushes cached data on start', async () => {
@@ -67,28 +96,33 @@ describe('UsageCountersService', () => {
     const usageCounter = createUsageCounter('test-counter');
 
     usageCounter.incrementCounter({ counterName: 'counterA' });
-    usageCounter.incrementCounter({ counterName: 'counterA' });
+    usageCounter.incrementCounter({ counterName: 'counterA', namespace: 'second', source: 'ui' });
 
-    const dataInSourcePromise = usageCountersService['source$'].pipe(rxOp.toArray()).toPromise();
+    const dataInSourcePromise = rxOp.firstValueFrom(
+      usageCountersService['source$'].pipe(rxOp.toArray())
+    );
     usageCountersService.start(coreStart);
     usageCountersService['source$'].complete();
 
     await expect(dataInSourcePromise).resolves.toMatchInlineSnapshot(`
-                  Array [
-                    Object {
-                      "counterName": "counterA",
-                      "counterType": "count",
-                      "domainId": "test-counter",
-                      "incrementBy": 1,
-                    },
-                    Object {
-                      "counterName": "counterA",
-                      "counterType": "count",
-                      "domainId": "test-counter",
-                      "incrementBy": 1,
-                    },
-                  ]
-              `);
+      Array [
+        Object {
+          "counterName": "counterA",
+          "counterType": "count",
+          "domainId": "test-counter",
+          "incrementBy": 1,
+          "source": "server",
+        },
+        Object {
+          "counterName": "counterA",
+          "counterType": "count",
+          "domainId": "test-counter",
+          "incrementBy": 1,
+          "namespace": "second",
+          "source": "ui",
+        },
+      ]
+    `);
   });
 
   it('buffers data into savedObject', async () => {
@@ -114,8 +148,8 @@ describe('UsageCountersService', () => {
     expect(mockIncrementCounter.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
-          "usage-counters",
-          "test-counter:09042021:count:counterA",
+          "usage-counter",
+          "test-counter:counterA:count:server:20210409",
           Array [
             Object {
               "fieldName": "count",
@@ -123,16 +157,18 @@ describe('UsageCountersService', () => {
             },
           ],
           Object {
+            "refresh": false,
             "upsertAttributes": Object {
               "counterName": "counterA",
               "counterType": "count",
               "domainId": "test-counter",
+              "source": "server",
             },
           },
         ],
         Array [
-          "usage-counters",
-          "test-counter:09042021:count:counterB",
+          "usage-counter",
+          "test-counter:counterB:count:server:20210409",
           Array [
             Object {
               "fieldName": "count",
@@ -140,10 +176,12 @@ describe('UsageCountersService', () => {
             },
           ],
           Object {
+            "refresh": false,
             "upsertAttributes": Object {
               "counterName": "counterB",
               "counterType": "count",
               "domainId": "test-counter",
+              "source": "server",
             },
           },
         ],
@@ -162,9 +200,9 @@ describe('UsageCountersService', () => {
     const mockError = new Error('failed.');
     const mockIncrementCounter = jest.fn().mockImplementation((_, key) => {
       switch (key) {
-        case 'test-counter:09042021:count:counterA':
+        case 'test-counter:counterA:count:server:20210409':
           throw mockError;
-        case 'test-counter:09042021:count:counterB':
+        case 'test-counter:counterB:count:server:20210409':
           return 'pass';
         default:
           throw new Error(`unknown key ${key}`);
@@ -232,11 +270,11 @@ describe('UsageCountersService', () => {
       Array [
         Object {
           "incrementBy": 2,
-          "key": "test-counter:09042021:count:counterA",
+          "key": "test-counter:counterA:count:server:20210409",
         },
         Object {
           "incrementBy": 1,
-          "key": "test-counter:09042021:count:counterA",
+          "key": "test-counter:counterA:count:server:20210409",
         },
       ]
     `);

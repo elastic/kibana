@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { EuiFlexGroup } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { DatasetsQualityIndicators } from './datasets_quality_indicators';
 import { DatasetsActivity } from './datasets_activity';
 import { EstimatedData } from './estimated_data';
@@ -17,11 +17,15 @@ import { EstimatedData } from './estimated_data';
 export default function SummaryPanel() {
   return (
     <EuiFlexGroup gutterSize="m">
-      <DatasetsQualityIndicators />
-      <EuiFlexGroup gutterSize="m">
-        <DatasetsActivity />
-        <EstimatedData />
-      </EuiFlexGroup>
+      <EuiFlexItem>
+        <DatasetsQualityIndicators />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiFlexGroup gutterSize="m">
+          <DatasetsActivity />
+          <EstimatedData />
+        </EuiFlexGroup>
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 }

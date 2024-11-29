@@ -20,9 +20,9 @@ import {
 
 type NameAndDescription = Partial<Pick<Connector, 'name' | 'description'>>;
 
-type ConnectorNameAndDescriptionActions = Pick<
+export type ConnectorNameAndDescriptionActions = Pick<
   Actions<PutConnectorNameAndDescriptionArgs, PutConnectorNameAndDescriptionResponse>,
-  'makeRequest'
+  'makeRequest' | 'apiSuccess' | 'apiError'
 > & {
   saveNameAndDescription(nameAndDescription: NameAndDescription): NameAndDescription;
   setConnector(connector: Connector): Connector;
@@ -44,7 +44,7 @@ export const ConnectorNameAndDescriptionLogic = kea<
     setConnector: (connector) => connector,
   },
   connect: {
-    actions: [ConnectorNameAndDescriptionApiLogic, ['makeRequest']],
+    actions: [ConnectorNameAndDescriptionApiLogic, ['makeRequest', 'apiSuccess', 'apiError']],
     values: [ConnectorNameAndDescriptionApiLogic, ['status']],
   },
   listeners: ({ actions, values }) => ({
@@ -63,6 +63,7 @@ export const ConnectorNameAndDescriptionLogic = kea<
     connector: [
       null,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setConnector: (_, connector) => connector,
       },
     ],

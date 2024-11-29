@@ -35,11 +35,11 @@ export interface TestData {
 
 const esqlFarequoteData = {
   suiteTitle: 'ES|QL farequote',
-  query: 'from `ft_farequote`',
+  query: 'from ft_farequote',
   sourceIndexOrSavedSearch: 'ft_farequote',
   expected: {
     hasDocCountChart: true,
-    initialLimitSize: '10,000 (100%)',
+    initialLimitSize: '5,000 (100%)',
     totalDocCountFormatted: '86,274',
     metricFields: [
       {
@@ -48,7 +48,7 @@ const esqlFarequoteData = {
         existsInDocs: true,
         aggregatable: true,
         loading: false,
-        docCountFormatted: '86,274 (100%)',
+        docCountFormatted: '10,000 (100%)',
         statsMaxDecimalPlaces: 3,
         topValuesCount: 11,
         viewableInLens: false,
@@ -61,7 +61,7 @@ const esqlFarequoteData = {
         existsInDocs: true,
         aggregatable: true,
         loading: false,
-        docCountFormatted: '86,274 (100%)',
+        docCountFormatted: '10,000 (100%)',
         exampleCount: 2,
         viewableInLens: false,
       },
@@ -72,7 +72,7 @@ const esqlFarequoteData = {
         aggregatable: false,
         loading: false,
         exampleCount: 1,
-        docCountFormatted: '86,274 (100%)',
+        docCountFormatted: '10,000 (100%)',
         viewableInLens: false,
       },
       {
@@ -82,7 +82,7 @@ const esqlFarequoteData = {
         aggregatable: true,
         loading: false,
         exampleCount: 1,
-        docCountFormatted: '86,274 (100%)',
+        docCountFormatted: '10,000 (100%)',
         viewableInLens: false,
       },
       {
@@ -91,8 +91,8 @@ const esqlFarequoteData = {
         existsInDocs: true,
         aggregatable: true,
         loading: false,
-        exampleCount: 11,
-        docCountFormatted: '86,274 (100%)',
+        exampleCount: 10,
+        docCountFormatted: '10,000 (100%)',
         viewableInLens: false,
       },
       {
@@ -102,7 +102,7 @@ const esqlFarequoteData = {
         aggregatable: false,
         loading: false,
         exampleCount: 1,
-        docCountFormatted: '86,274 (100%)',
+        docCountFormatted: '10,000 (100%)',
         viewableInLens: false,
       },
       {
@@ -112,7 +112,7 @@ const esqlFarequoteData = {
         aggregatable: true,
         loading: false,
         exampleCount: 1,
-        docCountFormatted: '86,274 (100%)',
+        docCountFormatted: '10,000 (100%)',
         viewableInLens: false,
       },
     ],
@@ -132,7 +132,7 @@ const esqlSampleLogData: TestData = {
   sourceIndexOrSavedSearch: 'ft_module_sample_logs',
   expected: {
     hasDocCountChart: false,
-    totalDocCountFormatted: '149',
+    totalDocCountFormatted: '143',
     metricFields: [
       {
         fieldName: 'max_bytes_kb',
@@ -140,7 +140,7 @@ const esqlSampleLogData: TestData = {
         existsInDocs: true,
         aggregatable: true,
         loading: false,
-        docCountFormatted: '143 (95.97%)',
+        docCountFormatted: '143 (100%)',
         statsMaxDecimalPlaces: 3,
         topValuesCount: 12,
         viewableInLens: false,
@@ -151,7 +151,7 @@ const esqlSampleLogData: TestData = {
         existsInDocs: true,
         aggregatable: true,
         loading: false,
-        docCountFormatted: '143 (95.97%)',
+        docCountFormatted: '143 (100%)',
         statsMaxDecimalPlaces: 3,
         topValuesCount: 20,
         viewableInLens: false,
@@ -164,7 +164,7 @@ const esqlSampleLogData: TestData = {
         existsInDocs: true,
         aggregatable: true,
         loading: false,
-        docCountFormatted: '143 (95.97%)',
+        docCountFormatted: '143 (100%)',
         exampleCount: 10,
         viewableInLens: false,
       },
@@ -174,8 +174,8 @@ const esqlSampleLogData: TestData = {
         existsInDocs: true,
         aggregatable: true,
         loading: false,
-        docCountFormatted: '143 (95.97%)',
-        exampleCount: 11,
+        docCountFormatted: '143 (100%)',
+        exampleCount: 10,
         viewableInLens: false,
       },
     ],
@@ -253,7 +253,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
 
     it(`${testData.suiteTitle} updates data when limit size changes`, async () => {
       if (testData.expected.initialLimitSize !== undefined) {
-        await ml.testExecution.logTestStep('shows analysis for 10,000 rows by default');
+        await ml.testExecution.logTestStep('shows analysis for 5,000 rows by default');
         for (const fieldRow of testData.expected.metricFields as Array<
           Required<MetricFieldVisConfig>
         >) {
@@ -263,13 +263,13 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
             undefined,
             false,
             false,
-            true
+            false
           );
         }
       }
 
-      await ml.testExecution.logTestStep('sets limit size to Analyze all');
-      await ml.dataVisualizer.setLimitSize('none');
+      await ml.testExecution.logTestStep('sets limit size to 10,000 rows');
+      await ml.dataVisualizer.setLimitSize(10000);
 
       await ml.testExecution.logTestStep('updates table with newly set limit size');
       for (const fieldRow of testData.expected.metricFields as Array<
@@ -281,7 +281,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
           undefined,
           false,
           false,
-          true
+          false
         );
       }
 
@@ -299,7 +299,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
     });
   }
 
-  describe('esql', function () {
+  describe('esql data visualizer', function () {
     this.tags(['ml']);
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');

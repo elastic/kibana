@@ -16,7 +16,11 @@ export {
 } from './package_to_package_policy';
 export { fullAgentPolicyToYaml } from './full_agent_policy_to_yaml';
 export { isPackageLimited, doesAgentPolicyAlreadyIncludePackage } from './limited_package';
-export { isValidNamespace, INVALID_NAMESPACE_CHARACTERS } from './is_valid_namespace';
+export {
+  isValidDataset,
+  isValidNamespace,
+  INVALID_NAMESPACE_CHARACTERS,
+} from './is_valid_namespace';
 export { isDiffPathProtocol } from './is_diff_path_protocol';
 export { LicenseService } from './license';
 export * from './is_agent_upgradeable';
@@ -29,6 +33,7 @@ export {
   isIntegrationPolicyTemplate,
   getNormalizedInputs,
   getNormalizedDataStreams,
+  filterPolicyTemplatesTiles,
 } from './policy_template';
 export { doesPackageHaveIntegrations } from './packages_with_integrations';
 export type {
@@ -69,6 +74,7 @@ export {
   policyHasAPMIntegration,
   policyHasEndpointSecurity,
   policyHasSyntheticsIntegration,
+  getInheritedNamespace,
 } from './agent_policies_helpers';
 
 export {
@@ -85,3 +91,5 @@ export {
   getFleetServerVersionMessage,
   isAgentVersionLessThanFleetServer,
 } from './check_fleet_server_versions';
+
+export { removeSOAttributes, getSortConfig } from './agent_utils';

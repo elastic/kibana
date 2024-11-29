@@ -9,17 +9,18 @@ import { useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 
-import { useNotifyService, useWorkpadService } from '../../../services';
+import { useNotifyService } from '../../../services';
 
 import type { CanvasWorkpad } from '../../../../types';
+import { getCanvasWorkpadService } from '../../../services/canvas_workpad_service';
 
 export const useImportWorkpad = () => {
-  const workpadService = useWorkpadService();
   const notifyService = useNotifyService();
   const history = useHistory();
 
   return useCallback(
     async (workpad: CanvasWorkpad) => {
+      const workpadService = getCanvasWorkpadService();
       try {
         const importedWorkpad = await workpadService.import(workpad);
         history.push(`/workpad/${importedWorkpad.id}/page/1`);
@@ -30,7 +31,7 @@ export const useImportWorkpad = () => {
       }
       return;
     },
-    [notifyService, history, workpadService]
+    [notifyService, history]
   );
 };
 

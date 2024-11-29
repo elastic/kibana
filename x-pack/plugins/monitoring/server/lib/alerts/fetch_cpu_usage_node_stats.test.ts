@@ -82,7 +82,7 @@ describe('fetchCpuUsageNodeStats', () => {
         containerUsage: undefined,
         containerPeriods: undefined,
         containerQuota: undefined,
-        ccs: null,
+        ccs: undefined,
       },
     ]);
   });
@@ -149,7 +149,7 @@ describe('fetchCpuUsageNodeStats', () => {
         containerUsage: 10,
         containerPeriods: 5,
         containerQuota: 50,
-        ccs: null,
+        ccs: undefined,
       },
     ]);
   });

@@ -19,13 +19,10 @@ export function TechnicalPreviewBadge({ icon, size, style }: Props) {
       label={i18n.translate('xpack.apm.technicalPreviewBadgeLabel', {
         defaultMessage: 'Technical preview',
       })}
-      tooltipContent={i18n.translate(
-        'xpack.apm.technicalPreviewBadgeDescription',
-        {
-          defaultMessage:
-            'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
-        }
-      )}
+      tooltipContent={i18n.translate('xpack.apm.technicalPreviewBadgeDescription', {
+        defaultMessage:
+          'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
+      })}
       iconType={icon}
       size={size}
       style={style}

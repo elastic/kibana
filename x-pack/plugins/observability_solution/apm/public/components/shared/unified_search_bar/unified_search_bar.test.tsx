@@ -5,33 +5,26 @@
  * 2.0.
  */
 
+import { mount } from 'enzyme';
 import { createMemoryHistory, MemoryHistory } from 'history';
 import React from 'react';
 import { useLocation } from 'react-router-dom';
-import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
+import { UnifiedSearchBar } from '.';
+import { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
 import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_apm_plugin_context';
-import * as useFetcherHook from '../../../hooks/use_fetcher';
+import { UrlParams } from '../../../context/url_params_context/types';
 import * as useApmDataViewHook from '../../../hooks/use_adhoc_apm_data_view';
 import * as useApmParamsHook from '../../../hooks/use_apm_params';
+import * as useFetcherHook from '../../../hooks/use_fetcher';
 import * as useProcessorEventHook from '../../../hooks/use_processor_event';
 import { fromQuery } from '../links/url_helpers';
-import { CoreStart } from '@kbn/core/public';
-import { UnifiedSearchBar } from '.';
-import { UrlParams } from '../../../context/url_params_context/types';
-import { mount } from 'enzyme';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useLocation: jest.fn(),
 }));
 
-function setup({
-  urlParams,
-  history,
-}: {
-  urlParams: UrlParams;
-  history: MemoryHistory;
-}) {
+function setup({ urlParams, history }: { urlParams: UrlParams; history: MemoryHistory }) {
   history.replace({
     pathname: '/services',
     search: fromQuery(urlParams),
@@ -43,43 +36,44 @@ function setup({
   const setTimeSpy = jest.fn();
   const setRefreshIntervalSpy = jest.fn();
 
-  const KibanaReactContext = createKibanaReactContext({
-    usageCollection: {
-      reportUiCounter: () => {},
-    },
-    dataViews: {
-      get: async () => {},
-    },
-    data: {
-      query: {
-        queryString: {
-          setQuery: setQuerySpy,
-          getQuery: getQuerySpy,
-          clearQuery: clearQuerySpy,
-        },
-        timefilter: {
-          timefilter: {
-            setTime: setTimeSpy,
-            setRefreshInterval: setRefreshIntervalSpy,
-          },
-        },
-      },
-    },
-  } as Partial<CoreStart>);
-
   // mock transaction types
-  jest
-    .spyOn(useApmDataViewHook, 'useAdHocApmDataView')
-    .mockReturnValue({ dataView: undefined });
+  jest.spyOn(useApmDataViewHook, 'useAdHocApmDataView').mockReturnValue({ dataView: undefined });
 
   jest.spyOn(useFetcherHook, 'useFetcher').mockReturnValue({} as any);
 
   const wrapper = mount(
-    <KibanaReactContext.Provider>
-      <MockApmPluginContextWrapper history={history}>
-        <UnifiedSearchBar />
-      </MockApmPluginContextWrapper>
-    </KibanaReactContext.Provider>
+    <MockApmPluginContextWrapper
+      history={history}
+      value={
+        {
+          core: {
+            usageCollection: {
+              reportUiCounter: () => {},
+            },
+            dataViews: {
+              get: async () => {},
+            },
+            data: {
+              query: {
+                queryString: {
+                  setQuery: setQuerySpy,
+                  getQuery: getQuerySpy,
+                  clearQuery: clearQuerySpy,
+                },
+                timefilter: {
+                  timefilter: {
+                    setTime: setTimeSpy,
+                    setRefreshInterval: setRefreshIntervalSpy,
+                  },
+                },
+              },
+            },
+          },
+        } as unknown as ApmPluginContextValue
+      }
+    >
+      <UnifiedSearchBar />
+    </MockApmPluginContextWrapper>
   );
 
   return {
@@ -99,9 +93,12 @@ describe('when kuery is already present in the url, the search bar must reflect 
     jest.spyOn(history, 'push');
     jest.spyOn(history, 'replace');
   });
-  jest
-    .spyOn(useProcessorEventHook, 'useProcessorEvent')
-    .mockReturnValue(undefined);
+
+  afterAll(() => {
+    jest.clearAllMocks();
+  });
+
+  jest.spyOn(useProcessorEventHook, 'useProcessorEvent').mockReturnValue(undefined);
 
   const search = '?method=json';
   const pathname = '/services';
@@ -137,9 +134,7 @@ describe('when kuery is already present in the url, the search bar must reflect 
       refreshPaused: refreshInterval.pause,
       refreshInterval: refreshInterval.value,
     };
-    jest
-      .spyOn(useApmParamsHook, 'useApmParams')
-      .mockReturnValue({ query: urlParams, path: {} });
+    jest.spyOn(useApmParamsHook, 'useApmParams').mockReturnValue({ query: urlParams, path: {} });
 
     const { setQuerySpy, setTimeSpy, setRefreshIntervalSpy } = setup({
       history,

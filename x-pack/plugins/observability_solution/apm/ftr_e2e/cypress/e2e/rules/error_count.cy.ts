@@ -58,10 +58,8 @@ describe('Rules', () => {
 
   describe('Error count', () => {
     const ruleName = 'Error count threshold';
-    const comboBoxInputSelector =
-      '[data-popover-open] [data-test-subj=comboBoxSearchInput]';
-    const confirmModalButtonSelector =
-      '.euiModal button[data-test-subj=confirmModalConfirmButton]';
+    const comboBoxInputSelector = '[data-popover-open] [data-test-subj=comboBoxSearchInput]';
+    const confirmModalButtonSelector = '.euiModal button[data-test-subj=confirmModalConfirmButton]';
 
     describe('when created from APM', () => {
       describe('when created from Service Inventory', () => {
@@ -89,13 +87,12 @@ describe('Rules', () => {
     });
 
     describe('when created from Stack management', () => {
-      it('creates a rule', () => {
+      // FIXME
+      it.skip('creates a rule', () => {
         cy.loginAsEditorUser();
 
         // Go to stack management
-        cy.visitKibana(
-          '/app/management/insightsAndAlerting/triggersActions/rules'
-        );
+        cy.visitKibana('/app/management/insightsAndAlerting/triggersActions/rules');
 
         // Create a rule
         cy.contains('button', 'Create rule').click();

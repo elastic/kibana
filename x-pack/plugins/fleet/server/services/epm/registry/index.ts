@@ -13,6 +13,8 @@ import semverGte from 'semver/functions/gte';
 import type { Response } from 'node-fetch';
 import type { Logger } from '@kbn/logging';
 
+import type { ExtractedIntegrationFields } from '@kbn/fields-metadata-plugin/server';
+
 import { splitPkgKey as split } from '../../../../common/services';
 
 import { KibanaAssetType } from '../../../types';
@@ -48,9 +50,11 @@ import {
 
 import { getBundledPackageByName } from '../packages/bundled_packages';
 
-import { withPackageSpan } from '../packages/utils';
+import { resolveDataStreamFields, resolveDataStreamsMap, withPackageSpan } from '../packages/utils';
 
 import { verifyPackageArchiveSignature } from '../packages/package_verification';
+
+import type { ArchiveIterator } from '../../../../common/types';
 
 import { fetchUrl, getResponse, getResponseStream } from './requests';
 import { getRegistryUrl } from './registry_url';
@@ -307,11 +311,12 @@ async function getPackageInfoFromArchiveOrCache(
 export async function getPackage(
   name: string,
   version: string,
-  options?: { ignoreUnverified?: boolean }
+  options?: { ignoreUnverified?: boolean; useStreaming?: boolean }
 ): Promise<{
   paths: string[];
   packageInfo: ArchivePackage;
   assetsMap: AssetsMap;
+  archiveIterator: ArchiveIterator;
   verificationResult?: PackageVerificationResult;
 }> {
   const verifyPackage = appContextService.getExperimentalFeatures().packageVerification;
@@ -338,21 +343,64 @@ export async function getPackage(
     setVerificationResult({ name, version }, latestVerificationResult);
   }
 
-  const { assetsMap, paths } = await unpackBufferToAssetsMap({
-    name,
-    version,
+  const contentType = ensureContentType(archivePath);
+  const { paths, assetsMap, archiveIterator } = await unpackBufferToAssetsMap({
     archiveBuffer,
-    contentType: ensureContentType(archivePath),
+    contentType,
+    useStreaming: options?.useStreaming,
   });
 
   if (!packageInfo) {
     packageInfo = await getPackageInfoFromArchiveOrCache(name, version, archiveBuffer, archivePath);
   }
 
-  return { paths, packageInfo, assetsMap, verificationResult };
+  return { paths, packageInfo, assetsMap, archiveIterator, verificationResult };
 }
 
-function ensureContentType(archivePath: string) {
+export async function getPackageFieldsMetadata(
+  params: { packageName: string; datasetName?: string },
+  options: { excludedFieldsAssets?: string[] } = {}
+): Promise<ExtractedIntegrationFields> {
+  const { packageName, datasetName } = params;
+  const { excludedFieldsAssets = ['ecs.yml'] } = options;
+
+  // Attempt retrieving latest package name and version
+  const latestPackage = await fetchFindLatestPackageOrThrow(packageName);
+  const { name, version } = latestPackage;
+
+  // Attempt retrieving latest package
+  const resolvedPackage = await getPackage(name, version);
+
+  // We need to collect all the available data streams for the package.
+  // In case a dataset is specified from the parameter, it will load the fields only for that specific dataset.
+  // As a fallback case, we'll try to read the fields for all the data streams in the package.
+  const dataStreamsMap = resolveDataStreamsMap(resolvedPackage.packageInfo.data_streams);
+
+  const { assetsMap } = resolvedPackage;
+
+  const dataStream = datasetName ? dataStreamsMap.get(datasetName) : null;
+
+  if (dataStream) {
+    // Resolve a single data stream fields when the `datasetName` parameter is specified
+    return resolveDataStreamFields({ dataStream, assetsMap, excludedFieldsAssets });
+  } else {
+    // Resolve and merge all the integration data streams fields otherwise
+    return [...dataStreamsMap.values()].reduce(
+      (packageDataStreamsFields, currentDataStream) =>
+        Object.assign(
+          packageDataStreamsFields,
+          resolveDataStreamFields({
+            dataStream: currentDataStream,
+            assetsMap,
+            excludedFieldsAssets,
+          })
+        ),
+      {}
+    );
+  }
+}
+
+export function ensureContentType(archivePath: string) {
   const contentType = mime.lookup(archivePath);
 
   if (!contentType) {

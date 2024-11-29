@@ -6,11 +6,9 @@
  */
 
 import { EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React, { useCallback } from 'react';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
-import { InfraLoadingPanel } from '../../loading';
 import { ASSET_DETAILS_FLYOUT_COMPONENT_NAME } from '../constants';
 import { Content } from '../content/content';
 import { FlyoutHeader } from '../header/flyout_header';
@@ -49,28 +47,23 @@ export const Flyout = ({
   return (
     <EuiFlyout
       onClose={handleOnClose}
-      ownFocus={false}
       data-component-name={ASSET_DETAILS_FLYOUT_COMPONENT_NAME}
       data-asset-type={asset.type}
     >
-      {loading ? (
-        <InfraLoadingPanel
-          height="100%"
-          width="auto"
-          text={i18n.translate('xpack.infra.waffle.loadingDataText', {
-            defaultMessage: 'Loading data',
-          })}
-        />
-      ) : (
-        <>
-          <EuiFlyoutHeader hasBorder>
-            <FlyoutHeader title={asset.name} tabs={tabEntries} rightSideItems={rightSideItems} />
-          </EuiFlyoutHeader>
-          <EuiFlyoutBody>
-            <Content />
-          </EuiFlyoutBody>
-        </>
-      )}
+      <>
+        <EuiFlyoutHeader hasBorder>
+          <FlyoutHeader
+            title={asset.name}
+            tabs={tabEntries}
+            rightSideItems={rightSideItems}
+            assetType={asset.type}
+            loading={loading}
+          />
+        </EuiFlyoutHeader>
+        <EuiFlyoutBody>
+          <Content />
+        </EuiFlyoutBody>
+      </>
     </EuiFlyout>
   );
 };

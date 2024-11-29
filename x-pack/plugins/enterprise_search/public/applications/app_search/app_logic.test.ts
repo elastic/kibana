@@ -30,10 +30,12 @@ describe('AppLogic', () => {
     },
     account: {
       accountId: 'some-id-string',
+      kibanaUIsEnabled: true,
       onboardingComplete: true,
       role: DEFAULT_INITIAL_APP_DATA.appSearch.role,
     },
     myRole: {},
+    showGateForm: false,
   };
 
   it('sets values from props', () => {
@@ -48,6 +50,7 @@ describe('AppLogic', () => {
       },
       account: {
         accountId: 'some-id-string',
+        kibanaUIsEnabled: true,
         onboardingComplete: true,
         role: DEFAULT_INITIAL_APP_DATA.appSearch.role,
       },
@@ -60,6 +63,7 @@ describe('AppLogic', () => {
         canViewAccountCredentials: true,
         // Truncated for brevity - see utils/role/index.test.ts for full output
       }),
+      showGateForm: false,
     });
   });
 

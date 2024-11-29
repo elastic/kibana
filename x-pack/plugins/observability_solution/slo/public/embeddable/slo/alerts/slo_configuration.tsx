@@ -5,30 +5,30 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
 import {
-  EuiModal,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
-  EuiModalBody,
-  EuiModalFooter,
   EuiButton,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
   EuiSpacer,
   EuiSwitch,
+  EuiTitle,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { ALL_VALUE } from '@kbn/slo-schema';
-
+import React, { useState } from 'react';
 import { SloSelector } from './slo_selector';
-import type { EmbeddableSloProps, SloAlertsEmbeddableInput, SloItem } from './types';
+import type { EmbeddableSloProps, SloItem } from './types';
 
 interface SloConfigurationProps {
-  initialInput?: Partial<SloAlertsEmbeddableInput>;
-  onCreate: (props: EmbeddableSloProps) => void; // TODO check change point detection
+  initialInput?: EmbeddableSloProps;
+  onCreate: (props: EmbeddableSloProps) => void;
   onCancel: () => void;
 }
 
@@ -45,20 +45,22 @@ export function SloConfiguration({ initialInput, onCreate, onCancel }: SloConfig
   const hasGroupBy = selectedSlos?.some((slo) => slo.instanceId !== ALL_VALUE);
 
   return (
-    <EuiModal
+    <EuiFlyout
       onClose={onCancel}
-      css={`
+      css={css`
         min-width: 550px;
       `}
     >
-      <EuiModalHeader>
-        <EuiModalHeaderTitle>
-          {i18n.translate('xpack.slo.sloEmbeddable.config.sloSelector.headerTitle', {
-            defaultMessage: 'SLO configuration',
-          })}{' '}
-        </EuiModalHeaderTitle>
-      </EuiModalHeader>
-      <EuiModalBody>
+      <EuiFlyoutHeader>
+        <EuiTitle>
+          <h2>
+            {i18n.translate('xpack.slo.sloEmbeddable.config.sloSelector.headerTitle', {
+              defaultMessage: 'Alerts configuration',
+            })}
+          </h2>
+        </EuiTitle>
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody>
         <EuiFlexGroup>
           <EuiFlexItem grow>
             <SloSelector
@@ -95,27 +97,29 @@ export function SloConfiguration({ initialInput, onCreate, onCancel }: SloConfig
             />
           </>
         )}
-      </EuiModalBody>
-      <EuiModalFooter>
-        <EuiButtonEmpty onClick={onCancel} data-test-subj="sloCancelButton">
-          <FormattedMessage
-            id="xpack.slo.Embeddable.config.cancelButtonLabel"
-            defaultMessage="Cancel"
-          />
-        </EuiButtonEmpty>
+      </EuiFlyoutBody>
+      <EuiFlyoutFooter>
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiButtonEmpty onClick={onCancel} data-test-subj="sloCancelButton">
+            <FormattedMessage
+              id="xpack.slo.Embeddable.config.cancelButtonLabel"
+              defaultMessage="Cancel"
+            />
+          </EuiButtonEmpty>
 
-        <EuiButton
-          data-test-subj="sloConfirmButton"
-          isDisabled={!selectedSlos || selectedSlos.length === 0 || hasError}
-          onClick={onConfirmClick}
-          fill
-        >
-          <FormattedMessage
-            id="xpack.slo.embeddableSlo.config.confirmButtonLabel"
-            defaultMessage="Confirm configurations"
-          />
-        </EuiButton>
-      </EuiModalFooter>
-    </EuiModal>
+          <EuiButton
+            data-test-subj="sloConfirmButton"
+            isDisabled={!selectedSlos || selectedSlos.length === 0 || hasError}
+            onClick={onConfirmClick}
+            fill
+          >
+            <FormattedMessage
+              id="xpack.slo.embeddableSlo.config.confirmButtonLabel"
+              defaultMessage="Confirm configurations"
+            />
+          </EuiButton>
+        </EuiFlexGroup>
+      </EuiFlyoutFooter>
+    </EuiFlyout>
   );
 }

@@ -20,9 +20,7 @@ function wrapper({ children }: { children: ReactNode }) {
   return (
     <MemoryRouter>
       <MockApmPluginContextWrapper>
-        <CytoscapeContext.Provider value={cy}>
-          {children}
-        </CytoscapeContext.Provider>
+        <CytoscapeContext.Provider value={cy}>{children}</CytoscapeContext.Provider>
       </MockApmPluginContextWrapper>
     </MemoryRouter>
   );
@@ -34,9 +32,7 @@ describe('EmptyBanner', () => {
       function noCytoscapeWrapper({ children }: { children: ReactNode }) {
         return (
           <MockApmPluginContextWrapper>
-            <CytoscapeContext.Provider value={undefined}>
-              {children}
-            </CytoscapeContext.Provider>
+            <CytoscapeContext.Provider value={undefined}>{children}</CytoscapeContext.Provider>
           </MockApmPluginContextWrapper>
         );
       }
@@ -62,11 +58,12 @@ describe('EmptyBanner', () => {
     it('does not render null', async () => {
       const component = renderWithTheme(<EmptyBanner />, { wrapper });
 
-      await act(async () => {
+      act(() => {
         cy.add({ data: { id: 'test id' } });
-        await waitFor(() => {
-          expect(component.container.children.length).toBeGreaterThan(0);
-        });
+      });
+
+      await waitFor(() => {
+        expect(component.container.children.length).toBeGreaterThan(0);
       });
     });
   });

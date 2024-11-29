@@ -1,37 +1,33 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
-import type { LensEmbeddableOutput, Suggestion } from '@kbn/lens-plugin/public';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { PublishingSubject } from '@kbn/presentation-publishing';
 import { UnifiedHistogramFetchStatus } from '../..';
 import type { UnifiedHistogramServices, UnifiedHistogramChartLoadEvent } from '../../types';
 import {
-  getBreakdownField,
   getChartHidden,
   getTopPanelHeight,
-  setBreakdownField,
   setChartHidden,
   setTopPanelHeight,
 } from '../utils/local_storage_utils';
+import type { UnifiedHistogramSuggestionContext } from '../../types';
 
 /**
  * The current state of the container
  */
 export interface UnifiedHistogramState {
   /**
-   * The current field used for the breakdown
-   */
-  breakdownField: string | undefined;
-  /**
    * The current Lens suggestion
    */
-  currentSuggestion: Suggestion | undefined;
+  currentSuggestionContext: UnifiedHistogramSuggestionContext | undefined;
   /**
    * Whether or not the chart is hidden
    */
@@ -47,7 +43,7 @@ export interface UnifiedHistogramState {
   /**
    * Lens embeddable output observable
    */
-  lensEmbeddableOutput$?: Observable<LensEmbeddableOutput>;
+  dataLoading$?: PublishingSubject<boolean | undefined>;
   /**
    * The current time interval of the chart
    */
@@ -99,15 +95,13 @@ export interface UnifiedHistogramStateService {
   /**
    * Sets current Lens suggestion
    */
-  setCurrentSuggestion: (suggestion: Suggestion | undefined) => void;
+  setCurrentSuggestionContext: (
+    suggestionContext: UnifiedHistogramSuggestionContext | undefined
+  ) => void;
   /**
    * Sets the current top panel height
    */
   setTopPanelHeight: (topPanelHeight: number | undefined) => void;
-  /**
-   * Sets the current breakdown field
-   */
-  setBreakdownField: (breakdownField: string | undefined) => void;
   /**
    * Sets the current time interval
    */
@@ -120,9 +114,7 @@ export interface UnifiedHistogramStateService {
    * Sets the current Lens adapters
    */
   setLensAdapters: (lensAdapters: UnifiedHistogramChartLoadEvent['adapters'] | undefined) => void;
-  setLensEmbeddableOutput$: (
-    lensEmbeddableOutput$: Observable<LensEmbeddableOutput> | undefined
-  ) => void;
+  setLensDataLoading$: (dataLoading$: PublishingSubject<boolean | undefined> | undefined) => void;
   /**
    * Sets the current total hits status and result
    */
@@ -139,18 +131,15 @@ export const createStateService = (
 
   let initialChartHidden = false;
   let initialTopPanelHeight: number | undefined;
-  let initialBreakdownField: string | undefined;
 
   if (localStorageKeyPrefix) {
     initialChartHidden = getChartHidden(services.storage, localStorageKeyPrefix) ?? false;
     initialTopPanelHeight = getTopPanelHeight(services.storage, localStorageKeyPrefix);
-    initialBreakdownField = getBreakdownField(services.storage, localStorageKeyPrefix);
   }
 
   const state$ = new BehaviorSubject<UnifiedHistogramState>({
-    breakdownField: initialBreakdownField,
     chartHidden: initialChartHidden,
-    currentSuggestion: undefined,
+    currentSuggestionContext: undefined,
     lensRequestAdapter: undefined,
     timeInterval: 'auto',
     topPanelHeight: initialTopPanelHeight,
@@ -185,17 +174,12 @@ export const createStateService = (
       updateState({ topPanelHeight });
     },
 
-    setBreakdownField: (breakdownField: string | undefined) => {
-      if (localStorageKeyPrefix) {
-        setBreakdownField(services.storage, localStorageKeyPrefix, breakdownField);
-      }
-
-      updateState({ breakdownField });
+    setCurrentSuggestionContext: (
+      suggestionContext: UnifiedHistogramSuggestionContext | undefined
+    ) => {
+      updateState({ currentSuggestionContext: suggestionContext });
     },
 
-    setCurrentSuggestion: (suggestion: Suggestion | undefined) => {
-      updateState({ currentSuggestion: suggestion });
-    },
     setTimeInterval: (timeInterval: string) => {
       updateState({ timeInterval });
     },
@@ -207,10 +191,8 @@ export const createStateService = (
     setLensAdapters: (lensAdapters: UnifiedHistogramChartLoadEvent['adapters'] | undefined) => {
       updateState({ lensAdapters });
     },
-    setLensEmbeddableOutput$: (
-      lensEmbeddableOutput$: Observable<LensEmbeddableOutput> | undefined
-    ) => {
-      updateState({ lensEmbeddableOutput$ });
+    setLensDataLoading$: (dataLoading$: PublishingSubject<boolean | undefined> | undefined) => {
+      updateState({ dataLoading$ });
     },
 
     setTotalHits: (totalHits: {

@@ -10,7 +10,6 @@ import { TableId } from '@kbn/securitysolution-data-table';
 import React, { useMemo } from 'react';
 import type { CSSProperties } from 'styled-components';
 import styled from 'styled-components';
-import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { InspectButton } from '../inspect';
 import { UpdatedFlexGroup, UpdatedFlexItem } from './styles';
 import { SummaryViewSelector } from './summary_view_select';
@@ -47,10 +46,6 @@ export const RightTopMenu = ({
   const alignItems = tableView === 'gridView' ? 'baseline' : 'center';
   const justTitle = useMemo(() => <TitleText data-test-subj="title">{title}</TitleText>, [title]);
 
-  const tGridEventRenderedViewEnabled = useIsExperimentalFeatureEnabled(
-    'tGridEventRenderedViewEnabled'
-  );
-
   const menuOptions = useMemo(
     () =>
       additionalMenuOptions.length
@@ -82,12 +77,11 @@ export const RightTopMenu = ({
       <UpdatedFlexItem grow={false} $show={!loading}>
         {additionalFilters}
       </UpdatedFlexItem>
-      {tGridEventRenderedViewEnabled &&
-        [TableId.alertsOnRuleDetailsPage, TableId.alertsOnAlertsPage].includes(tableId) && (
-          <UpdatedFlexItem grow={false} $show={!loading} data-test-subj="summary-view-selector">
-            <SummaryViewSelector viewSelected={tableView} onViewChange={onViewChange} />
-          </UpdatedFlexItem>
-        )}
+      {[TableId.alertsOnRuleDetailsPage, TableId.alertsOnAlertsPage].includes(tableId) && (
+        <UpdatedFlexItem grow={false} $show={!loading} data-test-subj="summary-view-selector">
+          <SummaryViewSelector viewSelected={tableView} onViewChange={onViewChange} />
+        </UpdatedFlexItem>
+      )}
       {menuOptions}
     </UpdatedFlexGroup>
   );

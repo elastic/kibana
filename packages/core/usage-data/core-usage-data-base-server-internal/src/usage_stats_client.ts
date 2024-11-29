@@ -1,17 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { CoreUsageStats } from '@kbn/core-usage-data-server';
+import type { CoreUsageStats, CoreDeprecatedApiUsageStats } from '@kbn/core-usage-data-server';
 
 /** @internal */
 export interface BaseIncrementOptions {
   request: KibanaRequest;
+  types?: string[]; // we might not have info on the imported types for some operations, e.g. for import we're using a readStream
 }
 
 /** @internal */
@@ -29,13 +31,19 @@ export type IncrementSavedObjectsResolveImportErrorsOptions = BaseIncrementOptio
 
 /** @internal */
 export type IncrementSavedObjectsExportOptions = BaseIncrementOptions & {
-  types?: string[];
   supportedTypes: string[];
 };
 
 /** @internal */
 export interface ICoreUsageStatsClient {
   getUsageStats(): Promise<CoreUsageStats>;
+
+  getDeprecatedApiUsageStats(): Promise<CoreDeprecatedApiUsageStats[]>;
+
+  incrementDeprecatedApi(
+    counterName: string,
+    options: { resolved?: boolean; incrementBy?: number }
+  ): Promise<void>;
 
   incrementSavedObjectsBulkCreate(options: BaseIncrementOptions): Promise<void>;
 

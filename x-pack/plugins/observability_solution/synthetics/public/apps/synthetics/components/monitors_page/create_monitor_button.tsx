@@ -17,9 +17,7 @@ import { SyntheticsSettingsContext } from '../../contexts/synthetics_settings_co
 export const CreateMonitorButton: React.FC = () => {
   const { basePath } = useContext(SyntheticsSettingsContext);
 
-  const {
-    enablement: { isEnabled },
-  } = useEnablement();
+  const { isEnabled, isServiceAllowed } = useEnablement();
 
   const canEditSynthetics = useCanEditSynthetics();
 
@@ -31,7 +29,7 @@ export const CreateMonitorButton: React.FC = () => {
         iconSide="left"
         iconType="plusInCircleFilled"
         href={`${basePath}/app/synthetics${MONITOR_ADD_ROUTE}`}
-        isDisabled={!isEnabled || !canEditSynthetics}
+        isDisabled={!isEnabled || !canEditSynthetics || !isServiceAllowed}
         data-test-subj="syntheticsAddMonitorBtn"
       >
         <FormattedMessage

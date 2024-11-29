@@ -14,6 +14,8 @@ import {
   EuiText,
   EuiButtonIcon,
   EuiSpacer,
+  useEuiTheme,
+  euiScrollBarStyles,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -37,84 +39,156 @@ interface Props {
   barColor?: 'primary' | 'success' | 'danger' | 'subdued' | 'accent';
   compressed?: boolean;
   onAddFilter?: (field: DataViewField | string, value: string, type: '+' | '-') => void;
+  showSampledValues?: boolean;
 }
 
 function getPercentLabel(percent: number): string {
   if (percent >= 0.1) {
     return `${roundToDecimalPlace(percent, 1)}%`;
+  } else if (percent === 0) {
+    return '0%';
   } else {
     return '< 0.1%';
   }
 }
 
-export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed, onAddFilter }) => {
+export const TopValues: FC<Props> = ({
+  stats,
+  fieldFormat,
+  barColor,
+  compressed,
+  onAddFilter,
+  /** Top values by default show % of time a value exist in sampled records/rows (i.e. value A exists in 10% of sampled records)
+   * showSampledValues: true shows % of times a value exist in all arrays of values that have been flattened
+   * Example for 4 records: ["a", "a", "b"], ["b", "b", "c"], "d", "e"
+   * "a" exists in 1/4 records (50% - showSampledValues: false),
+   * "a" exists in 2/8 sampled values (25% - showSampledValues: true).
+   */
+  showSampledValues = false,
+}) => {
   const {
     services: {
       data: { fieldFormats },
     },
   } = useDataVisualizerKibana();
+  const euiTheme = useEuiTheme();
 
   if (stats === undefined || !stats.topValues) return null;
-  const { topValues: originalTopValues, fieldName, sampleCount } = stats;
+  const { fieldName, sampleCount, approximate } = stats;
 
+  const originalTopValues = (showSampledValues ? stats.sampledValues : stats.topValues) ?? [];
   if (originalTopValues?.length === 0) return null;
-  const totalDocuments = stats.totalDocuments ?? sampleCount ?? 0;
+  const totalDocuments = showSampledValues
+    ? stats.topValuesSampleSize ?? 0
+    : Math.min(sampleCount ?? Infinity, stats.totalDocuments ?? Infinity);
+
+  const getMessage = () => {
+    if (showSampledValues && stats.topValuesSampleSize !== undefined) {
+      return (
+        <FormattedMessage
+          id="xpack.dataVisualizer.dataGrid.field.topValues.calculatedFromSampleValuesLabel"
+          defaultMessage="Calculated from {sampledDocumentsFormatted} sample {sampledDocuments, plural, one {value} other {values}}."
+          values={{
+            sampledDocuments: stats.topValuesSampleSize,
+            sampledDocumentsFormatted: (
+              <strong>
+                {fieldFormats
+                  .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
+                  .convert(stats.topValuesSampleSize)}
+              </strong>
+            ),
+          }}
+        />
+      );
+    }
+    /**
+     * For ES|QL, where are randomly sampling a subset from source data, then query is excuted on top of that data
+     * So the terms we get might not get the initial count
+     */
+    const method = approximate ? (
+      <FormattedMessage
+        id="xpack.dataVisualizer.dataGrid.field.topValues.estimatedMsg"
+        defaultMessage="Estimated"
+      />
+    ) : (
+      <FormattedMessage
+        id="xpack.dataVisualizer.dataGrid.field.topValues.calculatedMsg"
+        defaultMessage="Calculated"
+      />
+    );
+
+    return totalDocuments > (sampleCount ?? 0) ? (
+      <FormattedMessage
+        id="xpack.dataVisualizer.dataGrid.field.topValues.calculatedFromSampleRecordsLabel"
+        defaultMessage="{method} from {sampledDocumentsFormatted} sample {sampledDocuments, plural, one {record} other {records}}."
+        values={{
+          method,
+          sampledDocuments: sampleCount,
+          sampledDocumentsFormatted: (
+            <strong>
+              {fieldFormats
+                .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
+                .convert(sampleCount)}
+            </strong>
+          ),
+        }}
+      />
+    ) : (
+      <FormattedMessage
+        id="xpack.dataVisualizer.dataGrid.field.topValues.calculatedFromTotalRecordsLabel"
+        defaultMessage="{method} from {totalDocumentsFormatted} {totalDocuments, plural, one {record} other {records}}."
+        values={{
+          method,
+          totalDocuments,
+          totalDocumentsFormatted: (
+            <strong>
+              {fieldFormats
+                .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
+                .convert(totalDocuments ?? 0)}
+            </strong>
+          ),
+        }}
+      />
+    );
+  };
+  const countsElement = (
+    <EuiText color="subdued" size="xs">
+      {getMessage()}
+    </EuiText>
+  );
 
   const topValues = originalTopValues.map((bucket) => ({
     ...bucket,
     percent:
       typeof bucket.percent === 'number' ? bucket.percent : bucket.doc_count / totalDocuments,
   }));
+
+  const shouldShowOtherCount = approximate !== true;
   const topValuesOtherCountPercent =
     1 - (topValues ? topValues.reduce((acc, bucket) => acc + bucket.percent, 0) : 0);
   const topValuesOtherCount = Math.floor(topValuesOtherCountPercent * (sampleCount ?? 0));
-
-  const countsElement = (
-    <EuiText color="subdued" size="xs">
-      {totalDocuments > (sampleCount ?? 0) ? (
-        <FormattedMessage
-          id="xpack.dataVisualizer.dataGrid.field.topValues.calculatedFromSampleRecordsLabel"
-          defaultMessage="Calculated from {sampledDocumentsFormatted} sample {sampledDocuments, plural, one {record} other {records}}."
-          values={{
-            sampledDocuments: sampleCount,
-            sampledDocumentsFormatted: (
-              <strong>
-                {fieldFormats
-                  .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
-                  .convert(sampleCount)}
-              </strong>
-            ),
-          }}
-        />
-      ) : (
-        <FormattedMessage
-          id="xpack.dataVisualizer.dataGrid.field.topValues.calculatedFromTotalRecordsLabel"
-          defaultMessage="Calculated from {totalDocumentsFormatted} {totalDocuments, plural, one {record} other {records}}."
-          values={{
-            totalDocuments,
-            totalDocumentsFormatted: (
-              <strong>
-                {fieldFormats
-                  .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
-                  .convert(totalDocuments ?? 0)}
-              </strong>
-            ),
-          }}
-        />
-      )}
-    </EuiText>
-  );
 
   return (
     <ExpandedRowPanel
       dataTestSubj={'dataVisualizerFieldDataTopValues'}
       className={classNames('dvPanel__wrapper', compressed ? 'dvPanel--compressed' : undefined)}
+      css={css`
+        overflow-x: auto;
+        ${euiScrollBarStyles(euiTheme)}
+      `}
     >
       <ExpandedRowFieldHeader>
-        <FormattedMessage
-          id="xpack.dataVisualizer.dataGrid.field.topValuesLabel"
-          defaultMessage="Top values"
-        />
+        {showSampledValues ? (
+          <FormattedMessage
+            id="xpack.dataVisualizer.dataGrid.field.topSampledValuesLabel"
+            defaultMessage="Top sampled values"
+          />
+        ) : (
+          <FormattedMessage
+            id="xpack.dataVisualizer.dataGrid.field.topValuesLabel"
+            defaultMessage="Top values"
+          />
+        )}
       </ExpandedRowFieldHeader>
 
       <div
@@ -124,7 +198,8 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed,
         {Array.isArray(topValues)
           ? topValues.map((value) => {
               const fieldValue = value.key_as_string ?? (value.key ? value.key.toString() : '');
-              const displayValue = fieldValue ?? EMPTY_EXAMPLE;
+              const displayValue = fieldValue === '' ? EMPTY_EXAMPLE : fieldValue;
+
               return (
                 <EuiFlexGroup gutterSize="xs" alignItems="center" key={displayValue}>
                   <EuiFlexItem data-test-subj="dataVisualizerFieldDataTopValueBar">
@@ -133,7 +208,7 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed,
                       max={1}
                       color={barColor}
                       size="xs"
-                      label={value.key ? kibanaFieldFormat(value.key, fieldFormat) : fieldValue}
+                      label={value.key ? kibanaFieldFormat(value.key, fieldFormat) : displayValue}
                       className={classNames('eui-textTruncate', 'topValuesValueLabelContainer')}
                       valueText={`${value.doc_count}${
                         totalDocuments !== undefined
@@ -147,6 +222,7 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed,
                   onAddFilter !== undefined ? (
                     <div
                       css={css`
+                        position: static;
                         width: 48px;
                       `}
                     >
@@ -198,7 +274,7 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed,
               );
             })
           : null}
-        {topValuesOtherCount > 0 ? (
+        {shouldShowOtherCount && topValuesOtherCount > 0 ? (
           <EuiFlexGroup gutterSize="xs" alignItems="center" key="other">
             <EuiFlexItem data-test-subj="dataVisualizerFieldDataTopValueBar">
               <EuiProgress

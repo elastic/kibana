@@ -3,12 +3,13 @@ info:
   title: Find Conversations API endpoint
   version: '2023-10-31'
 paths:
-  /api/elastic_assistant/conversations/_find:
+  /api/security_ai_assistant/current_user/conversations/_find:
     get:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
       operationId: FindConversations
-      x-codegen-enabled: true
-      description: Finds conversations that match the given query.
-      summary: Finds conversations that match the given query.
+      description: Get a list of all conversations for the current user.
+      summary: Get conversations
       tags:
         - Conversations API
       parameters:
@@ -36,95 +37,7 @@ paths:
           description: Sort order
           required: false
           schema:
-            $ref: '#/components/schemas/SortOrder'
-        - name: 'page'
-          in: query
-          description: Page number
-          required: false
-          schema:
-            type: integer
-            minimum: 1
-            default: 1
-        - name: 'per_page'
-          in: query
-          description: Conversations per page
-          required: false
-          schema:
-            type: integer
-            minimum: 0
-            default: 20
-
-      responses:
-        200:
-          description: Successful response
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  page:
-                    type: integer
-                  perPage:
-                    type: integer
-                  total:
-                    type: integer
-                  data:
-                    type: array
-                    items:
-                      $ref: './common_attributes.schema.yaml#/components/schemas/ConversationResponse'
-                required:
-                  - page
-                  - perPage
-                  - total
-                  - data
-        400:
-          description: Generic Error
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  statusCode:
-                    type: number
-                  error:
-                    type: string
-                  message:
-                    type: string
-
-  /api/elastic_assistant/conversations/current_user/_find:
-    get:
-      operationId: FindCurrentUserConversations
-      x-codegen-enabled: true
-      description: Finds current user conversations that match the given query.
-      summary: Finds current user conversations that match the given query.
-      tags:
-        - Conversations API
-      parameters:
-        - name: 'fields'
-          in: query
-          required: false
-          schema:
-            type: array
-            items:
-              type: string
-        - name: 'filter'
-          in: query
-          description: Search query
-          required: false
-          schema:
-            type: string
-        - name: 'sort_field'
-          in: query
-          description: Field to sort by
-          required: false
-          schema:
-            $ref: '#/components/schemas/FindConversationsSortField'
-        - name: 'sort_order'
-          in: query
-          description: Sort order
-          required: false
-          schema:
-            $ref: '#/components/schemas/SortOrder'
+            $ref: '../common_attributes.schema.yaml#/components/schemas/SortOrder'
         - name: 'page'
           in: query
           description: Page number
@@ -188,9 +101,3 @@ components:
         - 'is_default'
         - 'title'
         - 'updated_at'
-
-    SortOrder:
-      type: string
-      enum:
-        - 'asc'
-        - 'desc'

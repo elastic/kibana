@@ -1,0 +1,17 @@
+{% include "./description_readme.njk" %}
+{% for data_stream in fields %}
+### {{ data_stream.datastream }}
+
+Insert a description of the datastream here.
+
+**ECS Field Reference**
+
+Please refer to the following [document](https://www.elastic.co/guide/en/ecs/current/ecs-field-reference.html) for detailed information on ECS fields.
+
+**Exported fields**
+
+| Field | Description | Type |
+|---|---|---|
+{% for field in data_stream.fields %}| {{ field.name }} | {{ field.description | default('') | replace('\n', ' ') | trim }} | {{ field.type }} |
+{% endfor %}
+{% endfor %}

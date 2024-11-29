@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiBasicTable, EuiCodeBlock } from '@elastic/eui';
@@ -73,6 +73,6 @@ export const FieldExamples: FC<Props> = ({ fieldExamples }) => {
   );
 };
 
-const Token: FC = ({ children }) => (
+const Token: FC<PropsWithChildren<unknown>> = ({ children }) => (
   <span style={{ backgroundColor: TOKEN_HIGHLIGHT_COLOR }}>{children}</span>
 );

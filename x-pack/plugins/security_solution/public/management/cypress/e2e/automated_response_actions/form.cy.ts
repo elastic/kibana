@@ -12,6 +12,8 @@ import {
   tryAddingDisabledResponseAction,
   validateAvailableCommands,
   visitRuleActions,
+  selectIsolateAndSaveWithoutEnabling,
+  fillUpNewEsqlRule,
 } from '../../tasks/response_actions';
 import { cleanupRule, generateRandomStringName, loadRule } from '../../tasks/api_fixtures';
 import { ResponseActionTypesEnum } from '../../../../../common/api/detection_engine';
@@ -22,7 +24,7 @@ export const RESPONSE_ACTIONS_ERRORS = 'response-actions-error';
 describe(
   'Form',
   {
-    tags: ['@ess', '@serverless'],
+    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
     env: {
       ftrConfig: {
         kbnServerArgs: [
@@ -122,8 +124,13 @@ describe(
             'Custom field name selection is required when the process.pid toggle is disabled.'
           );
         });
-
+        // field name can be cleared out
         cy.getByTestSubj(`response-actions-list-item-1`).within(() => {
+          cy.getByTestSubj('config-custom-field-name').should('have.text', '');
+          cy.getByTestSubj('config-custom-field-name').type('process.entity_id{downArrow}{enter}');
+          cy.getByTestSubj('config-custom-field-name').should('contain', 'process.entity_id');
+          cy.getByTestSubj('comboBoxClearButton').click();
+          cy.getByTestSubj('config-custom-field-name').should('not.contain', 'process.entity_id');
           cy.getByTestSubj('config-custom-field-name').type('process.entity_id{downArrow}{enter}');
         });
 
@@ -197,6 +204,23 @@ describe(
       });
     });
 
+    describe('User should be able to add response action to ESQL rule', () => {
+      const [ruleName, ruleDescription] = generateRandomStringName(2);
+
+      beforeEach(() => {
+        login(ROLE.soc_manager);
+      });
+
+      it('create and save endpoint response action inside of a rule', () => {
+        const query = 'FROM * METADATA _index, _id';
+        fillUpNewEsqlRule(ruleName, ruleDescription, query);
+        addEndpointResponseAction();
+        focusAndOpenCommandDropdown();
+        validateAvailableCommands();
+        selectIsolateAndSaveWithoutEnabling(ruleName);
+      });
+    });
+
     describe('User should not see endpoint action when no rbac', () => {
       const [ruleName, ruleDescription] = generateRandomStringName(2);
 
@@ -239,7 +263,7 @@ describe(
           );
         });
         cy.getByTestSubj(`response-actions-list-item-0`).within(() => {
-          cy.getByTestSubj('commandTypeField').should('have.text', 'isolate').and('be.disabled');
+          cy.getByTestSubj('commandTypeField').should('have.text', 'isolate, ').and('be.disabled'); // Note: the trailing `, ` comes from screen-reader-only text
           cy.getByTestSubj('input').should('have.value', 'Isolate host').and('be.disabled');
           cy.getByTestSubj('remove-response-action').should('be.disabled');
           // Try removing action

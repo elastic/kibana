@@ -34,10 +34,7 @@ export const legacyBackends = {
   '/backends/inventory': {
     element: <RedirectBackends to="/dependencies/inventory" />,
     params: t.partial({
-      query: t.intersection([
-        t.type({ comparisonEnabled: toBooleanRt }),
-        offsetRt,
-      ]),
+      query: t.intersection([t.type({ comparisonEnabled: toBooleanRt }), offsetRt]),
     }),
   },
   '/backends/{dependencyName}/overview': {

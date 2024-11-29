@@ -8,7 +8,8 @@
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect } from 'react';
-import { toMountPoint, useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import {
   CasesDeepLinkId,
   generateCaseViewPath,
@@ -41,11 +42,10 @@ export function AddToCaseAction({
   const {
     cases,
     application: { getUrlForApp },
-    theme,
   } = kServices;
 
   const getToastText = useCallback(
-    (theCase) =>
+    (theCase: any) =>
       toMountPoint(
         <CaseToastText
           linkUrl={getUrlForApp(observabilityFeatureId, {
@@ -53,9 +53,9 @@ export function AddToCaseAction({
             path: generateCaseViewPath({ detailName: theCase.id }),
           })}
         />,
-        { theme$: theme?.theme$ }
+        kServices
       ),
-    [getUrlForApp, theme?.theme$]
+    [getUrlForApp, kServices]
   );
 
   const absoluteFromDate = parseRelativeDate(timeRange.from);

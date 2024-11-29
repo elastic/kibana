@@ -1,19 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  httpServiceMock,
-  notificationServiceMock,
-  themeServiceMock,
-  uiSettingsServiceMock,
-} from '@kbn/core/public/mocks';
+import { coreMock, httpServiceMock, uiSettingsServiceMock } from '@kbn/core/public/mocks';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
+import * as Rx from 'rxjs';
 import { ReportingPanelProps as Props, ReportingPanelContent } from '.';
 import { ReportingAPIClient } from '../../..';
 import { ErrorUnsavedWorkPanel } from './components';
@@ -22,8 +19,6 @@ import * as constants from './constants';
 jest.mock('./constants', () => ({
   getMaxUrlLength: jest.fn(() => 9999999),
 }));
-
-const theme = themeServiceMock.createSetupContract();
 
 describe('ReportingPanelContent', () => {
   const props: Partial<Props> = {
@@ -34,7 +29,6 @@ describe('ReportingPanelContent', () => {
     objectType: 'noice_object',
     title: 'ultimate_title',
   };
-  const toasts = notificationServiceMock.createSetupContract().toasts;
   const http = httpServiceMock.createSetupContract();
   const uiSettings = uiSettingsServiceMock.createSetupContract();
   let apiClient: ReportingAPIClient;
@@ -50,6 +44,7 @@ describe('ReportingPanelContent', () => {
     apiClient = new ReportingAPIClient(http, uiSettings, '7.15.0-test');
   });
 
+  const { getStartServices } = coreMock.createSetup();
   const mountComponent = (newProps: Partial<Props>) =>
     mountWithIntl(
       <ReportingPanelContent
@@ -60,9 +55,7 @@ describe('ReportingPanelContent', () => {
         layoutId={props.layoutId}
         getJobParams={() => jobParams}
         apiClient={apiClient}
-        toasts={toasts}
-        uiSettings={uiSettings}
-        theme={theme}
+        startServices$={Rx.from(getStartServices())}
         {...props}
         {...newProps}
       />

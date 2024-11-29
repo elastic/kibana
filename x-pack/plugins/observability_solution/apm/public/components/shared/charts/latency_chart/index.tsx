@@ -5,23 +5,17 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSelect, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { isTimeComparison } from '../../time_comparison/get_comparison_options';
-import {
-  getLatencyAggregationType,
-  LatencyAggregationType,
-} from '../../../../../common/latency_aggregation_types';
+import { getLatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
 import { useLicenseContext } from '../../../../context/license/use_license_context';
 import { useTransactionLatencyChartsFetcher } from '../../../../hooks/use_transaction_latency_chart_fetcher';
 import { TimeseriesChartWithContext } from '../timeseries_chart_with_context';
-import {
-  getMaxY,
-  getResponseTimeTickFormatter,
-} from '../transaction_charts/helper';
+import { getMaxY, getResponseTimeTickFormatter } from '../transaction_charts/helper';
 import { MLHeader } from '../transaction_charts/ml_header';
 import * as urlHelpers from '../../links/url_helpers';
 import { getComparisonChartTheme } from '../../time_comparison/get_comparison_chart_theme';
@@ -32,17 +26,11 @@ import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { getLatencyChartScreenContext } from './get_latency_chart_screen_context';
-
+import { LatencyAggregationTypeSelect } from './latency_aggregation_type_select';
 interface Props {
   height?: number;
   kuery: string;
 }
-
-const options: Array<{ value: LatencyAggregationType; text: string }> = [
-  { value: LatencyAggregationType.avg, text: 'Average' },
-  { value: LatencyAggregationType.p95, text: '95th percentile' },
-  { value: LatencyAggregationType.p99, text: '99th percentile' },
-];
 
 export function filterNil<T>(value: T | null | undefined): value is T {
   return value != null;
@@ -70,21 +58,15 @@ export function LatencyChart({ height, kuery }: Props) {
 
   const { transactionType, serviceName } = useApmServiceContext();
 
-  const transactionName =
-    'transactionName' in query ? query.transactionName : null;
+  const transactionName = 'transactionName' in query ? query.transactionName : null;
 
-  const {
-    latencyChartsData,
-    latencyChartsStatus,
-    bucketSizeInSeconds,
-    start,
-    end,
-  } = useTransactionLatencyChartsFetcher({
-    kuery,
-    environment,
-    transactionName,
-    latencyAggregationType: getLatencyAggregationType(latencyAggregationType),
-  });
+  const { latencyChartsData, latencyChartsStatus, bucketSizeInSeconds, start, end } =
+    useTransactionLatencyChartsFetcher({
+      kuery,
+      environment,
+      transactionName,
+      latencyAggregationType: getLatencyAggregationType(latencyAggregationType),
+    });
 
   const { currentPeriod, previousPeriod } = latencyChartsData;
 
@@ -101,19 +83,16 @@ export function LatencyChart({ height, kuery }: Props) {
   const latencyMaxY = getMaxY(timeseries);
   const latencyFormatter = getDurationFormatter(latencyMaxY);
 
-  const { setScreenContext } =
-    useApmPluginContext().observabilityAIAssistant.service;
+  const setScreenContext = useApmPluginContext().observabilityAIAssistant?.service.setScreenContext;
 
   useEffect(() => {
-    return setScreenContext(
+    return setScreenContext?.(
       getLatencyChartScreenContext({
         serviceName,
         transactionName: transactionName ?? undefined,
         transactionType,
         environment,
         bucketSizeInSeconds,
-        start,
-        end,
       })
     );
   }, [
@@ -136,29 +115,19 @@ export function LatencyChart({ height, kuery }: Props) {
               <EuiFlexItem grow={false}>
                 <EuiTitle size="xs">
                   <h2>
-                    {i18n.translate(
-                      'xpack.apm.serviceOverview.latencyChartTitle',
-                      {
-                        defaultMessage: 'Latency',
-                      }
-                    )}
+                    {i18n.translate('xpack.apm.serviceOverview.latencyChartTitle', {
+                      defaultMessage: 'Latency',
+                    })}
                   </h2>
                 </EuiTitle>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiSelect
-                  data-test-subj="apmLatencyChartSelect"
-                  compressed
-                  prepend={i18n.translate(
-                    'xpack.apm.serviceOverview.latencyChartTitle.prepend',
-                    { defaultMessage: 'Metric' }
-                  )}
-                  options={options}
-                  value={latencyAggregationType}
-                  onChange={(nextOption) => {
+                <LatencyAggregationTypeSelect
+                  latencyAggregationType={latencyAggregationType}
+                  onChange={(type) => {
                     urlHelpers.push(history, {
                       query: {
-                        latencyAggregationType: nextOption.target.value,
+                        latencyAggregationType: type,
                       },
                     });
                   }}

@@ -19,17 +19,20 @@ import type {
   BarStyleAccessor,
   RectAnnotationSpec,
 } from '@elastic/charts/dist/chart_types/xy_chart/utils/specs';
+
 import { getTimeZone } from '@kbn/visualization-utils';
 import { i18n } from '@kbn/i18n';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import {
-  getLogRateAnalysisType,
+  getLogRateAnalysisTypeForHistogram,
+  getSnappedTimestamps,
   getSnappedWindowParameters,
-  getWindowParameters,
-  type LogRateAnalysisType,
+  getWindowParametersForTrigger,
+  type DocumentCountStatsChangePoint,
   type LogRateHistogramItem,
   type WindowParameters,
-} from '@kbn/aiops-utils';
+} from '@kbn/aiops-log-rate-analysis';
+import { type BrushSelectionUpdatePayload } from '@kbn/aiops-log-rate-analysis/state';
 import { MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
@@ -72,16 +75,16 @@ export interface BrushSettings {
 }
 
 /**
- * Callback function which gets called when the brush selection has changed
- *
- * @param windowParameters Baseline and deviation time ranges.
- * @param force Force update
- * @param logRateAnalysisType `spike` or `dip` based on median log rate bucket size
+ * Callback to set the autoRunAnalysis flag
  */
-export type BrushSelectionUpdateHandler = (
-  windowParameters: WindowParameters,
-  force: boolean,
-  logRateAnalysisType: LogRateAnalysisType
+type SetAutoRunAnalysisFn = (isAutoRun: boolean) => void;
+
+/**
+ * Brush selection update handler
+ */
+type BrushSelectionUpdateHandler = (
+  /** Payload for the brush selection update */
+  d: BrushSelectionUpdatePayload
 ) => void;
 
 /**
@@ -115,9 +118,11 @@ export interface DocumentCountChartProps {
   chartPointsSplitLabel: string;
   /** Whether or not brush has been reset */
   isBrushCleared: boolean;
+  /** Callback to set the autoRunAnalysis flag */
+  setAutoRunAnalysisFn?: SetAutoRunAnalysisFn;
   /** Timestamp for start of initial analysis */
   autoAnalysisStart?: number | WindowParameters;
-  /** Optional style to override bar chart  */
+  /** Optional style to override bar chart */
   barStyleAccessor?: BarStyleAccessor;
   /** Optional color override for the default bar color for charts */
   barColorOverride?: string;
@@ -129,6 +134,8 @@ export interface DocumentCountChartProps {
   baselineBrush?: BrushSettings;
   /** Optional data-test-subject */
   dataTestSubj?: string;
+  /** Optional change point metadata */
+  changePoint?: DocumentCountStatsChangePoint;
 }
 
 const SPEC_ID = 'document_count';
@@ -163,6 +170,7 @@ function getBaselineBadgeOverflow(
  */
 export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
   const {
+    changePoint,
     dataTestSubj,
     dependencies,
     brushSelectionUpdateHandler,
@@ -175,6 +183,7 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
     interval,
     chartPointsSplitLabel,
     isBrushCleared,
+    setAutoRunAnalysisFn,
     autoAnalysisStart,
     barColorOverride,
     barStyleAccessor,
@@ -250,17 +259,10 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chartPointsSplit, timeRangeEarliest, timeRangeLatest, interval]);
 
-  const snapTimestamps = useMemo(() => {
-    const timestamps: number[] = [];
-    let n = timeRangeEarliest;
-
-    while (n <= timeRangeLatest + interval) {
-      timestamps.push(n);
-      n += interval;
-    }
-
-    return timestamps;
-  }, [timeRangeEarliest, timeRangeLatest, interval]);
+  const snapTimestamps = useMemo(
+    () => getSnappedTimestamps(timeRangeEarliest, timeRangeLatest, interval),
+    [timeRangeEarliest, timeRangeLatest, interval]
+  );
 
   const timefilterUpdateHandler = useCallback(
     (range: TimeFilterRange) => {
@@ -306,34 +308,46 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
           windowParameters === undefined &&
           adjustedChartPoints !== undefined
         ) {
-          const wp =
-            typeof startRange === 'number'
-              ? getWindowParameters(
-                  startRange + interval / 2,
-                  timeRangeEarliest,
-                  timeRangeLatest + interval
-                )
-              : startRange;
+          if (setAutoRunAnalysisFn) {
+            const autoRun =
+              typeof startRange !== 'number' ||
+              (typeof startRange === 'number' &&
+                changePoint !== undefined &&
+                startRange >= changePoint.startTs &&
+                startRange <= changePoint.endTs);
+
+            setAutoRunAnalysisFn(autoRun);
+          }
+
+          const wp = getWindowParametersForTrigger(
+            startRange,
+            interval,
+            timeRangeEarliest,
+            timeRangeLatest,
+            changePoint
+          );
           const wpSnap = getSnappedWindowParameters(wp, snapTimestamps);
           setOriginalWindowParameters(wpSnap);
           setWindowParameters(wpSnap);
 
           if (brushSelectionUpdateHandler !== undefined) {
-            brushSelectionUpdateHandler(
-              wpSnap,
-              true,
-              getLogRateAnalysisType(adjustedChartPoints, wpSnap)
-            );
+            brushSelectionUpdateHandler({
+              windowParameters: wpSnap,
+              force: true,
+              analysisType: getLogRateAnalysisTypeForHistogram(adjustedChartPoints, wpSnap),
+            });
           }
         }
       }
     },
     [
+      changePoint,
       interval,
       timeRangeEarliest,
       timeRangeLatest,
       snapTimestamps,
       originalWindowParameters,
+      setAutoRunAnalysisFn,
       setWindowParameters,
       brushSelectionUpdateHandler,
       adjustedChartPoints,
@@ -374,7 +388,11 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
     }
     setWindowParameters(wp);
     setWindowParametersAsPixels(wpPx);
-    brushSelectionUpdateHandler(wp, false, getLogRateAnalysisType(adjustedChartPoints, wp));
+    brushSelectionUpdateHandler({
+      windowParameters: wp,
+      force: false,
+      analysisType: getLogRateAnalysisTypeForHistogram(adjustedChartPoints, wp),
+    });
   }
 
   const [mlBrushWidth, setMlBrushWidth] = useState<number>();
@@ -408,7 +426,12 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
     <>
       {isBrushVisible && (
         <div className="aiopsHistogramBrushes" data-test-subj={'aiopsHistogramBrushes'}>
-          <div css={{ height: BADGE_HEIGHT }}>
+          {/**
+           * We need position:relative on this parent container of the BrushBadges,
+           * because of the absolute positioning of the BrushBadges. Without it, the
+           * BrushBadges would not be positioned correctly when used in embedded panels.
+           */}
+          <div css={{ height: BADGE_HEIGHT, position: 'relative' }}>
             <BrushBadge
               label={
                 baselineBrush.label ??
@@ -436,7 +459,7 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
           </div>
           <div
             css={{
-              'margin-bottom': '-4px',
+              marginBottom: '-4px',
             }}
           >
             <DualBrush
@@ -471,7 +494,6 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
             baseTheme={chartBaseTheme}
             debugState={window._echDebugStateFlag ?? false}
             showLegend={false}
-            showLegendExtra={false}
             locale={i18n.getLocale()}
           />
           <Axis id="aiops-histogram-left-axis" position={Position.Left} ticks={2} integersOnly />

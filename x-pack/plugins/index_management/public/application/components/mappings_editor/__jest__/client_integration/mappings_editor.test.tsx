@@ -11,6 +11,15 @@ import { componentHelpers, MappingsEditorTestBed } from './helpers';
 
 const { setup, getMappingsEditorDataFactory } = componentHelpers.mappingsEditor;
 
+jest.mock('../../../component_templates/component_templates_context', () => ({
+  useComponentTemplatesContext: jest.fn().mockReturnValue({
+    toasts: {
+      addError: jest.fn(),
+      addSuccess: jest.fn(),
+    },
+  }),
+}));
+
 describe('Mappings editor: core', () => {
   /**
    * Variable to store the mappings data forwarded to the consumer component
@@ -19,6 +28,11 @@ describe('Mappings editor: core', () => {
   let onChangeHandler: jest.Mock = jest.fn();
   let getMappingsEditorData = getMappingsEditorDataFactory(onChangeHandler);
   let testBed: MappingsEditorTestBed;
+  const appDependencies = {
+    plugins: {
+      ml: { mlApi: {} },
+    },
+  };
 
   beforeAll(() => {
     jest.useFakeTimers({ legacyFakeTimers: true });
@@ -46,7 +60,7 @@ describe('Mappings editor: core', () => {
     };
 
     await act(async () => {
-      testBed = setup({ value: defaultMappings, onChange: onChangeHandler });
+      testBed = setup({ value: defaultMappings, onChange: onChangeHandler }, appDependencies);
     });
 
     const { component } = testBed;
@@ -86,7 +100,7 @@ describe('Mappings editor: core', () => {
       };
 
       await act(async () => {
-        testBed = setup({ onChange: onChangeHandler, value });
+        testBed = setup({ onChange: onChangeHandler, value }, appDependencies);
       });
 
       const { component, exists } = testBed;
@@ -106,7 +120,7 @@ describe('Mappings editor: core', () => {
         },
       };
       await act(async () => {
-        testBed = setup({ onChange: onChangeHandler, value });
+        testBed = setup({ onChange: onChangeHandler, value }, appDependencies);
       });
 
       const { component, exists } = testBed;
@@ -124,9 +138,16 @@ describe('Mappings editor: core', () => {
       dynamic_templates: [{ before: 'foo' }],
     };
 
+    const ctx = {
+      config: {
+        enableMappingsSourceFieldSection: true,
+      },
+      ...appDependencies,
+    };
+
     beforeEach(async () => {
       await act(async () => {
-        testBed = setup({ value: defaultMappings, onChange: onChangeHandler });
+        testBed = setup({ value: defaultMappings, onChange: onChangeHandler }, ctx);
       });
       testBed.component.update();
     });
@@ -239,10 +260,13 @@ describe('Mappings editor: core', () => {
 
     test('should keep default dynamic templates value when switching tabs', async () => {
       await act(async () => {
-        testBed = setup({
-          value: { ...defaultMappings, dynamic_templates: [] }, // by default, the UI will provide an empty array for dynamic templates
-          onChange: onChangeHandler,
-        });
+        testBed = setup(
+          {
+            value: { ...defaultMappings, dynamic_templates: [] }, // by default, the UI will provide an empty array for dynamic templates
+            onChange: onChangeHandler,
+          },
+          ctx
+        );
       });
       testBed.component.update();
 
@@ -273,6 +297,14 @@ describe('Mappings editor: core', () => {
      */
     let defaultMappings: any;
 
+    const ctx = {
+      config: {
+        enableMappingsSourceFieldSection: true,
+      },
+      canUseSyntheticSource: true,
+      ...appDependencies,
+    };
+
     beforeEach(async () => {
       defaultMappings = {
         dynamic: true,
@@ -300,10 +332,11 @@ describe('Mappings editor: core', () => {
         _routing: {
           required: false,
         },
+        subobjects: true,
       };
 
       await act(async () => {
-        testBed = setup({ value: defaultMappings, onChange: onChangeHandler });
+        testBed = setup({ value: defaultMappings, onChange: onChangeHandler }, ctx);
       });
       testBed.component.update();
     });
@@ -428,12 +461,93 @@ describe('Mappings editor: core', () => {
       updatedMappings = {
         ...updatedMappings,
         dynamic: false,
+        // The "enabled": true is removed as this is the default in Es
+        _source: {
+          includes: defaultMappings._source.includes,
+          excludes: defaultMappings._source.excludes,
+        },
       };
       delete updatedMappings.date_detection;
       delete updatedMappings.dynamic_date_formats;
       delete updatedMappings.numeric_detection;
 
       expect(data).toEqual(updatedMappings);
+    });
+
+    describe('props.indexMode sets the correct default value of _source field', () => {
+      it("defaults to 'stored' with 'standard' index mode prop", async () => {
+        await act(async () => {
+          testBed = setup(
+            {
+              value: { ...defaultMappings, _source: undefined },
+              onChange: onChangeHandler,
+              indexMode: 'standard',
+            },
+            ctx
+          );
+        });
+        testBed.component.update();
+
+        const {
+          actions: { selectTab },
+          find,
+        } = testBed;
+
+        await selectTab('advanced');
+
+        // Check that the stored option is selected
+        expect(find('sourceValueField').prop('value')).toBe('stored');
+      });
+
+      ['logsdb', 'time_series'].forEach((indexMode) => {
+        it(`defaults to 'synthetic' with ${indexMode} index mode prop when 'canUseSyntheticSource' is set to true`, async () => {
+          await act(async () => {
+            testBed = setup(
+              {
+                value: { ...defaultMappings, _source: undefined },
+                onChange: onChangeHandler,
+                indexMode,
+              },
+              ctx
+            );
+          });
+          testBed.component.update();
+
+          const {
+            actions: { selectTab },
+            find,
+          } = testBed;
+
+          await selectTab('advanced');
+
+          // Check that the synthetic option is selected
+          expect(find('sourceValueField').prop('value')).toBe('synthetic');
+        });
+
+        it(`defaults to 'standard' with ${indexMode} index mode prop when 'canUseSyntheticSource' is set to true`, async () => {
+          await act(async () => {
+            testBed = setup(
+              {
+                value: { ...defaultMappings, _source: undefined },
+                onChange: onChangeHandler,
+                indexMode,
+              },
+              { ...ctx, canUseSyntheticSource: false }
+            );
+          });
+          testBed.component.update();
+
+          const {
+            actions: { selectTab },
+            find,
+          } = testBed;
+
+          await selectTab('advanced');
+
+          // Check that the stored option is selected
+          expect(find('sourceValueField').prop('value')).toBe('stored');
+        });
+      });
     });
   });
 
@@ -447,7 +561,7 @@ describe('Mappings editor: core', () => {
         },
       };
       await act(async () => {
-        testBed = setup({ onChange: onChangeHandler, value });
+        testBed = setup({ onChange: onChangeHandler, value }, appDependencies);
       });
 
       const { component, exists } = testBed;
@@ -469,7 +583,7 @@ describe('Mappings editor: core', () => {
         },
       };
       await act(async () => {
-        testBed = setup({ onChange: onChangeHandler, value });
+        testBed = setup({ onChange: onChangeHandler, value }, appDependencies);
       });
 
       const { component } = testBed;

@@ -51,12 +51,12 @@ exports[`DonutChart component passes correct props without errors for valid prop
                 },
               },
               "isolatedPoint": Object {
-                "fill": "white",
+                "enabled": true,
+                "fill": "__use__series__color__",
                 "opacity": 1,
-                "radius": 2,
                 "stroke": "__use__series__color__",
-                "strokeWidth": 1,
-                "visible": true,
+                "strokeWidth": 0,
+                "visible": "auto",
               },
               "line": Object {
                 "opacity": 1,
@@ -64,13 +64,14 @@ exports[`DonutChart component passes correct props without errors for valid prop
                 "visible": true,
               },
               "point": Object {
-                "fill": "#FFF",
+                "fill": "__use__series__color__",
                 "opacity": 1,
                 "radius": 3,
-                "stroke": "__use__series__color__",
-                "strokeWidth": 2,
-                "visible": false,
+                "stroke": "__use__empty__color__",
+                "strokeWidth": 0,
+                "visible": "never",
               },
+              "pointVisibilityMinDistance": 20,
             },
             "axes": Object {
               "axisLine": Object {
@@ -105,7 +106,7 @@ exports[`DonutChart component passes correct props without errors for valid prop
                     0,
                   ],
                   "opacity": 1,
-                  "stroke": "#eaedf3",
+                  "stroke": "#E9EDF3",
                   "strokeWidth": 1,
                   "visible": true,
                 },
@@ -129,11 +130,11 @@ exports[`DonutChart component passes correct props without errors for valid prop
                 ],
                 "vertical": Object {
                   "dash": Array [
-                    4,
-                    4,
+                    0,
+                    0,
                   ],
                   "opacity": 1,
-                  "stroke": "#eaedf3",
+                  "stroke": "#E9EDF3",
                   "strokeWidth": 1,
                   "visible": true,
                 },
@@ -197,11 +198,11 @@ exports[`DonutChart component passes correct props without errors for valid prop
             },
             "bubbleSeriesStyle": Object {
               "point": Object {
-                "fill": "white",
+                "fill": "__use__series__color__",
                 "opacity": 1,
                 "radius": 2,
-                "strokeWidth": 1,
-                "visible": true,
+                "strokeWidth": 0,
+                "visible": "always",
               },
             },
             "bulletGraph": Object {
@@ -404,11 +405,11 @@ exports[`DonutChart component passes correct props without errors for valid prop
             },
             "highlighter": Object {
               "point": Object {
-                "fill": "__use__empty__color__",
-                "opacity": 1,
-                "radius": 10,
-                "stroke": "__use__series__color__",
-                "strokeWidth": 4,
+                "fill": "__use__series__color__",
+                "opacity": 0.5,
+                "radius": 5,
+                "stroke": "__use__empty__color__",
+                "strokeWidth": 0,
               },
             },
             "legend": Object {
@@ -419,6 +420,13 @@ exports[`DonutChart component passes correct props without errors for valid prop
               "margin": 0,
               "spacingBuffer": 10,
               "verticalWidth": 200,
+            },
+            "lineAnnotation": Object {
+              "line": Object {
+                "opacity": 1,
+                "stroke": "#69707D",
+                "strokeWidth": 1,
+              },
             },
             "lineSeriesStyle": Object {
               "fit": Object {
@@ -433,12 +441,12 @@ exports[`DonutChart component passes correct props without errors for valid prop
                 },
               },
               "isolatedPoint": Object {
-                "fill": "white",
+                "enabled": true,
+                "fill": "__use__series__color__",
                 "opacity": 1,
-                "radius": 2,
                 "stroke": "__use__series__color__",
                 "strokeWidth": 1,
-                "visible": true,
+                "visible": "auto",
               },
               "line": Object {
                 "opacity": 1,
@@ -446,24 +454,28 @@ exports[`DonutChart component passes correct props without errors for valid prop
                 "visible": true,
               },
               "point": Object {
-                "fill": "#FFF",
+                "fill": "__use__series__color__",
                 "opacity": 1,
                 "radius": 3,
-                "stroke": "__use__series__color__",
-                "strokeWidth": 2,
-                "visible": true,
+                "stroke": "__use__empty__color__",
+                "strokeWidth": 0,
+                "visible": "auto",
               },
+              "pointVisibilityMinDistance": 40,
             },
             "metric": Object {
               "barBackground": "#EDF0F5",
               "border": "#EDF0F5",
               "emptyBackground": "transparent",
+              "iconAlign": "right",
               "minHeight": 64,
+              "minValueFontSize": 12,
               "nonFiniteText": "N/A",
-              "text": Object {
-                "darkColor": "#343741",
-                "lightColor": "#E0E5EE",
-              },
+              "textDarkColor": "#343741",
+              "textLightColor": "#E0E5EE",
+              "titlesTextAlign": "left",
+              "valueFontSize": "default",
+              "valuesTextAlign": "right",
             },
             "partition": Object {
               "circlePadding": 4,
@@ -517,6 +529,12 @@ exports[`DonutChart component passes correct props without errors for valid prop
               "radialPadding": 0.017453292519943295,
               "sectorLineStroke": "#FFF",
               "sectorLineWidth": 1.5,
+            },
+            "rectAnnotation": Object {
+              "fill": "#69707D",
+              "opacity": 0.25,
+              "stroke": "#69707D",
+              "strokeWidth": 0,
             },
             "scales": Object {
               "barsPadding": 0.25,

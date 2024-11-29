@@ -5,32 +5,29 @@
  * 2.0.
  */
 
-import type { VFC } from 'react';
-import React from 'react';
+import React, { memo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useExpandSection } from '../hooks/use_expand_section';
 import { ExpandableSection } from './expandable_section';
 import { HighlightedFields } from './highlighted_fields';
 import { INVESTIGATION_SECTION_TEST_ID } from './test_ids';
 import { InvestigationGuide } from './investigation_guide';
 import { getField } from '../../shared/utils';
 import { EventKind } from '../../shared/constants/event_kinds';
-import { useRightPanelContext } from '../context';
+import { useDocumentDetailsContext } from '../../shared/context';
 
-export interface DescriptionSectionProps {
-  /**
-   * Boolean to allow the component to be expanded or collapsed on first render
-   */
-  expanded?: boolean;
-}
+const KEY = 'investigation';
 
 /**
  * Second section of the overview tab in details flyout.
  * It contains investigation guide (alerts only) and highlighted fields
  */
-export const InvestigationSection: VFC<DescriptionSectionProps> = ({ expanded = true }) => {
-  const { getFieldsData } = useRightPanelContext();
+export const InvestigationSection = memo(() => {
+  const { getFieldsData } = useDocumentDetailsContext();
   const eventKind = getField(getFieldsData('event.kind'));
+
+  const expanded = useExpandSection({ title: KEY, defaultValue: true });
 
   return (
     <ExpandableSection
@@ -41,18 +38,19 @@ export const InvestigationSection: VFC<DescriptionSectionProps> = ({ expanded = 
           defaultMessage="Investigation"
         />
       }
+      localStorageKey={KEY}
+      gutterSize="none"
       data-test-subj={INVESTIGATION_SECTION_TEST_ID}
-      gutterSize="s"
     >
       {eventKind === EventKind.signal && (
         <>
           <InvestigationGuide />
-          <EuiSpacer size="s" />
+          <EuiSpacer size="m" />
         </>
       )}
       <HighlightedFields />
     </ExpandableSection>
   );
-};
+});
 
 InvestigationSection.displayName = 'InvestigationSection';

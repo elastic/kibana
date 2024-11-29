@@ -16,14 +16,7 @@ export const useFetchParams = () => {
   const { serviceName } = useApmServiceContext();
 
   const {
-    query: {
-      kuery,
-      environment,
-      rangeFrom,
-      rangeTo,
-      transactionName,
-      transactionType,
-    },
+    query: { kuery, environment, rangeFrom, rangeTo, transactionName, transactionType },
   } = useAnyOfApmParams(
     '/services/{serviceName}/transactions/view',
     '/mobile-services/{serviceName}/transactions/view'
@@ -41,14 +34,6 @@ export const useFetchParams = () => {
       start,
       end,
     }),
-    [
-      serviceName,
-      transactionName,
-      transactionType,
-      kuery,
-      environment,
-      start,
-      end,
-    ]
+    [serviceName, transactionName, transactionType, kuery, environment, start, end]
   );
 };

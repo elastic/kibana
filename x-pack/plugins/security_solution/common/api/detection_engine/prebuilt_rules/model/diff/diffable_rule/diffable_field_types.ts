@@ -4,25 +4,26 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { z } from '@kbn/zod';
 
-import * as t from 'io-ts';
-import { TimeDuration } from '@kbn/securitysolution-io-ts-types';
-// TODO https://github.com/elastic/security-team/issues/7491
-// eslint-disable-next-line no-restricted-imports
 import {
   BuildingBlockType,
   DataViewId,
+  EventCategoryOverride,
   IndexPatternArray,
   KqlQueryLanguage,
   RuleFilterArray,
-  RuleNameOverride as RuleNameOverrideFieldName,
+  RuleNameOverride,
   RuleQuery,
+  SavedQueryId,
+  TiebreakerField,
   TimelineTemplateId,
   TimelineTemplateTitle,
-  TimestampOverride as TimestampOverrideFieldName,
+  TimestampField,
+  TimestampOverride,
   TimestampOverrideFallbackDisabled,
-} from '../../../../model/rule_schema_legacy';
-import { saved_id } from '../../../../model/schemas';
+} from '../../../../model/rule_schema';
+import { TimeDuration } from '../../../../model/rule_schema/time_duration';
 
 // -------------------------------------------------------------------------------------------------
 // Rule data source
@@ -32,24 +33,23 @@ export enum DataSourceType {
   'data_view' = 'data_view',
 }
 
-export type DataSourceIndexPatterns = t.TypeOf<typeof DataSourceIndexPatterns>;
-export const DataSourceIndexPatterns = t.exact(
-  t.type({
-    type: t.literal(DataSourceType.index_patterns),
-    index_patterns: IndexPatternArray,
-  })
-);
+export type DataSourceIndexPatterns = z.infer<typeof DataSourceIndexPatterns>;
+export const DataSourceIndexPatterns = z.object({
+  type: z.literal(DataSourceType.index_patterns),
+  index_patterns: IndexPatternArray,
+});
 
-export type DataSourceDataView = t.TypeOf<typeof DataSourceDataView>;
-export const DataSourceDataView = t.exact(
-  t.type({
-    type: t.literal(DataSourceType.data_view),
-    data_view_id: DataViewId,
-  })
-);
+export type DataSourceDataView = z.infer<typeof DataSourceDataView>;
+export const DataSourceDataView = z.object({
+  type: z.literal(DataSourceType.data_view),
+  data_view_id: DataViewId,
+});
 
-export type RuleDataSource = t.TypeOf<typeof RuleDataSource>;
-export const RuleDataSource = t.union([DataSourceIndexPatterns, DataSourceDataView]);
+export type RuleDataSource = z.infer<typeof RuleDataSource>;
+export const RuleDataSource = z.discriminatedUnion('type', [
+  DataSourceIndexPatterns,
+  DataSourceDataView,
+]);
 
 // -------------------------------------------------------------------------------------------------
 // Rule data query
@@ -59,93 +59,78 @@ export enum KqlQueryType {
   'saved_query' = 'saved_query',
 }
 
-export type InlineKqlQuery = t.TypeOf<typeof InlineKqlQuery>;
-export const InlineKqlQuery = t.exact(
-  t.type({
-    type: t.literal(KqlQueryType.inline_query),
-    query: RuleQuery,
-    language: KqlQueryLanguage,
-    filters: RuleFilterArray,
-  })
-);
+export type InlineKqlQuery = z.infer<typeof InlineKqlQuery>;
+export const InlineKqlQuery = z.object({
+  type: z.literal(KqlQueryType.inline_query),
+  query: RuleQuery,
+  language: KqlQueryLanguage,
+  filters: RuleFilterArray,
+});
 
-export type SavedKqlQuery = t.TypeOf<typeof SavedKqlQuery>;
-export const SavedKqlQuery = t.exact(
-  t.type({
-    type: t.literal(KqlQueryType.saved_query),
-    saved_query_id: saved_id,
-  })
-);
+export type SavedKqlQuery = z.infer<typeof SavedKqlQuery>;
+export const SavedKqlQuery = z.object({
+  type: z.literal(KqlQueryType.saved_query),
+  saved_query_id: SavedQueryId,
+});
 
-export type RuleKqlQuery = t.TypeOf<typeof RuleKqlQuery>;
-export const RuleKqlQuery = t.union([InlineKqlQuery, SavedKqlQuery]);
+export type RuleKqlQuery = z.infer<typeof RuleKqlQuery>;
+export const RuleKqlQuery = z.discriminatedUnion('type', [InlineKqlQuery, SavedKqlQuery]);
 
-export type RuleEqlQuery = t.TypeOf<typeof RuleEqlQuery>;
-export const RuleEqlQuery = t.exact(
-  t.type({
-    query: RuleQuery,
-    language: t.literal('eql'),
-    filters: RuleFilterArray,
-  })
-);
+export type RuleEqlQuery = z.infer<typeof RuleEqlQuery>;
+export const RuleEqlQuery = z.object({
+  query: RuleQuery,
+  language: z.literal('eql'),
+  filters: RuleFilterArray,
+  event_category_override: EventCategoryOverride.optional(),
+  timestamp_field: TimestampField.optional(),
+  tiebreaker_field: TiebreakerField.optional(),
+});
 
-export type RuleEsqlQuery = t.TypeOf<typeof RuleEsqlQuery>;
-export const RuleEsqlQuery = t.exact(
-  t.type({
-    query: RuleQuery,
-    language: t.literal('esql'),
-  })
-);
+export type RuleEsqlQuery = z.infer<typeof RuleEsqlQuery>;
+export const RuleEsqlQuery = z.object({
+  query: RuleQuery,
+  language: z.literal('esql'),
+});
 
 // -------------------------------------------------------------------------------------------------
 // Rule schedule
 
-export type RuleSchedule = t.TypeOf<typeof RuleSchedule>;
-export const RuleSchedule = t.exact(
-  t.type({
-    interval: TimeDuration({ allowedUnits: ['s', 'm', 'h'] }),
-    lookback: TimeDuration({ allowedUnits: ['s', 'm', 'h'] }),
-  })
-);
+export type RuleSchedule = z.infer<typeof RuleSchedule>;
+export const RuleSchedule = z.object({
+  interval: TimeDuration({ allowedUnits: ['s', 'm', 'h'] }),
+  lookback: TimeDuration({ allowedUnits: ['s', 'm', 'h'] }),
+});
 
 // -------------------------------------------------------------------------------------------------
 // Rule name override
 
-export type RuleNameOverrideObject = t.TypeOf<typeof RuleNameOverrideObject>;
-export const RuleNameOverrideObject = t.exact(
-  t.type({
-    field_name: RuleNameOverrideFieldName,
-  })
-);
+export type RuleNameOverrideObject = z.infer<typeof RuleNameOverrideObject>;
+export const RuleNameOverrideObject = z.object({
+  field_name: RuleNameOverride,
+});
 
 // -------------------------------------------------------------------------------------------------
 // Timestamp override
 
-export type TimestampOverrideObject = t.TypeOf<typeof TimestampOverrideObject>;
-export const TimestampOverrideObject = t.exact(
-  t.type({
-    field_name: TimestampOverrideFieldName,
-    fallback_disabled: TimestampOverrideFallbackDisabled,
-  })
-);
+export type TimestampOverrideObject = z.infer<typeof TimestampOverrideObject>;
+export const TimestampOverrideObject = z.object({
+  field_name: TimestampOverride,
+  fallback_disabled: TimestampOverrideFallbackDisabled,
+});
 
 // -------------------------------------------------------------------------------------------------
 // Reference to a timeline template
 
-export type TimelineTemplateReference = t.TypeOf<typeof TimelineTemplateReference>;
-export const TimelineTemplateReference = t.exact(
-  t.type({
-    timeline_id: TimelineTemplateId,
-    timeline_title: TimelineTemplateTitle,
-  })
-);
+export type TimelineTemplateReference = z.infer<typeof TimelineTemplateReference>;
+export const TimelineTemplateReference = z.object({
+  timeline_id: TimelineTemplateId,
+  timeline_title: TimelineTemplateTitle,
+});
 
 // -------------------------------------------------------------------------------------------------
 // Building block
 
-export type BuildingBlockObject = t.TypeOf<typeof BuildingBlockObject>;
-export const BuildingBlockObject = t.exact(
-  t.type({
-    type: BuildingBlockType,
-  })
-);
+export type BuildingBlockObject = z.infer<typeof BuildingBlockObject>;
+export const BuildingBlockObject = z.object({
+  type: BuildingBlockType,
+});

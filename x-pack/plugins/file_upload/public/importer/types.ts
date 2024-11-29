@@ -43,7 +43,7 @@ export interface IImporter {
     index: string,
     settings: IndicesIndexSettings,
     mappings: MappingTypeMapping,
-    pipeline: IngestPipeline
+    pipeline: IngestPipeline | undefined
   ): Promise<ImportResponse>;
   import(
     id: string,

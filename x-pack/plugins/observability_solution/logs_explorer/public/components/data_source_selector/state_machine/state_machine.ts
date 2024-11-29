@@ -7,7 +7,6 @@
 
 import { actions, assign, createMachine, raise } from 'xstate';
 import {
-  AllDatasetSelection,
   DataViewSelection,
   isAllDatasetSelection,
   isDataViewSelection,
@@ -135,6 +134,9 @@ export const createPureDataSourceSelectorStateMachine = (
                     SEARCH_BY_NAME: {
                       actions: ['storeSearch', 'searchDataViews'],
                     },
+                    FILTER_BY_TYPE: {
+                      actions: ['storeDataViewFilter', 'filterDataViews'],
+                    },
                     SORT_BY_ORDER: {
                       actions: ['storeSearch', 'sortDataViews'],
                     },
@@ -223,8 +225,14 @@ export const createPureDataSourceSelectorStateMachine = (
           }
           return {};
         }),
+        storeDataViewFilter: assign((context, event) => {
+          if (event.type === 'FILTER_BY_TYPE') {
+            return { dataViewsFilter: event.filter };
+          }
+          return {};
+        }),
         storeAllSelection: assign((_context) => ({
-          selection: AllDatasetSelection.create(),
+          selection: _context.allSelection,
         })),
         storeSingleSelection: assign((_context, event) =>
           event.type === 'SELECT_DATASET'
@@ -280,6 +288,7 @@ export const createPureDataSourceSelectorStateMachine = (
 
 export const createDataSourceSelectorStateMachine = ({
   initialContext,
+  onDataViewsFilter,
   onDataViewsSearch,
   onDataViewsSort,
   onIntegrationsLoadMore,
@@ -315,6 +324,11 @@ export const createDataSourceSelectorStateMachine = ({
       searchDataViews: (context, event) => {
         if ('search' in event) {
           onDataViewsSearch(event.search);
+        }
+      },
+      filterDataViews: (context, event) => {
+        if ('filter' in event) {
+          onDataViewsFilter(event.filter);
         }
       },
       sortDataViews: (context, event) => {

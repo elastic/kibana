@@ -1,12 +1,19 @@
 {
   "type": "plugin",
   "id": "@kbn/ux-plugin",
-  "owner": "@elastic/obs-ux-infra_services-team",
+  "owner": [
+    "@elastic/obs-ux-infra_services-team"
+  ],
+  "group": "observability",
+  "visibility": "private",
   "plugin": {
     "id": "ux",
-    "server": true,
     "browser": true,
-    "configPath": ["xpack", "ux"],
+    "server": true,
+    "configPath": [
+      "xpack",
+      "ux"
+    ],
     "requiredPlugins": [
       "features",
       "data",
@@ -15,7 +22,6 @@
       "licensing",
       "triggersActionsUi",
       "observabilityShared",
-      "observabilityAIAssistant",
       "embeddable",
       "inspector",
       "apm"
@@ -29,7 +35,9 @@
       "observability",
       "security",
       "maps",
-      "lens"
+      "lens",
+      "observabilityAIAssistant",
+      "spaces"
     ],
     "requiredBundles": [
       "kibanaReact",

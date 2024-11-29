@@ -8,14 +8,16 @@
 import type { IKibanaResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
-  ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL,
   ConversationCreateProps,
   ConversationResponse,
+  API_VERSIONS,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
+
 import { ElasticAssistantPluginRouter } from '../../types';
 import { buildResponse } from '../utils';
+import { performChecks } from '../helpers';
 
 export const createConversationRoute = (router: ElasticAssistantPluginRouter): void => {
   router.versioned
@@ -29,7 +31,7 @@ export const createConversationRoute = (router: ElasticAssistantPluginRouter): v
     })
     .addVersion(
       {
-        version: ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
+        version: API_VERSIONS.public.v1,
         validate: {
           request: {
             body: buildRouteValidationWithZod(ConversationCreateProps),
@@ -39,32 +41,20 @@ export const createConversationRoute = (router: ElasticAssistantPluginRouter): v
       async (context, request, response): Promise<IKibanaResponse<ConversationResponse>> => {
         const assistantResponse = buildResponse(response);
         try {
-          const ctx = await context.resolve(['core', 'elasticAssistant']);
-
-          const dataClient = await ctx.elasticAssistant.getAIAssistantConversationsDataClient();
-          const authenticatedUser = ctx.elasticAssistant.getCurrentUser();
-          if (authenticatedUser == null) {
-            return assistantResponse.error({
-              body: `Authenticated user not found`,
-              statusCode: 401,
-            });
-          }
-
-          const result = await dataClient?.findDocuments({
-            perPage: 100,
-            page: 1,
-            filter: `users:{ id: "${authenticatedUser?.profile_uid}" } AND title:${request.body.title}`,
-            fields: ['title'],
+          const ctx = await context.resolve(['core', 'elasticAssistant', 'licensing']);
+          // Perform license and authenticated user checks
+          const checkResponse = performChecks({
+            context: ctx,
+            request,
+            response,
           });
-          if (result?.data != null && result.total > 0) {
-            return assistantResponse.error({
-              statusCode: 409,
-              body: `conversation title: "${request.body.title}" already exists`,
-            });
+          if (!checkResponse.isSuccess) {
+            return checkResponse.response;
           }
+          const dataClient = await ctx.elasticAssistant.getAIAssistantConversationsDataClient();
+
           const createdConversation = await dataClient?.createConversation({
             conversation: request.body,
-            authenticatedUser,
           });
 
           if (createdConversation == null) {

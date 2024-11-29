@@ -201,7 +201,7 @@ NOTE: Use a string of `<count>[ms\|s\|m\|h\|d\|w\|M\|Y]` (e.g. '20m', '24h', '7d
 
 [[xpack-session-lifespan]] xpack.security.session.lifespan {ess-icon}::
 Ensures that user sessions will expire after the defined time period. This behavior is also known as an "absolute timeout". If this is set to `0`, user sessions could stay active indefinitely. This and <<xpack-session-idleTimeout, `xpack.security.session.idleTimeout`>> are both highly
-recommended. You can also specify this setting for <<xpack-security-provider-session-lifespan, every provider separately>>. By default, this value is 30 days.
+recommended. You can also specify this setting for <<xpack-security-provider-session-lifespan, every provider separately>>. By default, this value is 30 days for on-prem installations, and 24 hours for Elastic Cloud installations.
 +
 TIP: Use a string of `<count>[ms\|s\|m\|h\|d\|w\|M\|Y]` (e.g. '20m', '24h', '7d', '1w').
 
@@ -367,9 +367,13 @@ xpack.security.audit.ignore_filters:
 - actions: [http_request] <1>
 - categories: [database]
   types: [creation, change, deletion] <2>
+- spaces: [default] <3>
+- users: [elastic, kibana_system] <4>
 ----------------------------------------
 <1> Filters out HTTP request events
 <2> Filters out any data write events
+<3> Filters out events from the `default` space
+<4> Filters out events from the `elastic` and `kibana_system` users
 
 xpack.security.audit.ignore_filters[].actions[] {ess-icon}::
 List of values matched against the `event.action` field of an audit event. Refer to <<xpack-security-audit-logging>> for a list of available events.
@@ -377,8 +381,14 @@ List of values matched against the `event.action` field of an audit event. Refer
 xpack.security.audit.ignore_filters[].categories[] {ess-icon}::
 List of values matched against the `event.category` field of an audit event. Refer to https://www.elastic.co/guide/en/ecs/1.5/ecs-allowed-values-event-category.html[ECS categorization field] for allowed values.
 
+xpack.security.audit.ignore_filters[].outcomes[] {ess-icon}::
+List of values matched against the `event.outcome` field of an audit event. Refer to https://www.elastic.co/guide/en/ecs/1.5/ecs-allowed-values-event-outcome.html[ECS outcome field] for allowed values.
+
+xpack.security.audit.ignore_filters[].spaces[] {ess-icon}::
+List of values matched against the `kibana.space_id` field of an audit event. This represents the space id in which the event took place.
+
 xpack.security.audit.ignore_filters[].types[] {ess-icon}::
 List of values matched against the `event.type` field of an audit event. Refer to https://www.elastic.co/guide/en/ecs/1.5/ecs-allowed-values-event-type.html[ECS type field] for allowed values.
 
-xpack.security.audit.ignore_filters[].outcomes[] {ess-icon}::
-List of values matched against the `event.outcome` field of an audit event. Refer to https://www.elastic.co/guide/en/ecs/1.5/ecs-allowed-values-event-outcome.html[ECS outcome field] for allowed values.
+xpack.security.audit.ignore_filters[].users[] {ess-icon}::
+List of values matched against the `user.name` field of an audit event. This represents the `username` associated with the audit event.

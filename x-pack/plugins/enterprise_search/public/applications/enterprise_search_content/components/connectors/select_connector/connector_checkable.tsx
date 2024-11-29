@@ -29,7 +29,14 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { BETA_LABEL, NATIVE_LABEL, CONNECTOR_CLIENT_LABEL } from '../../../../shared/constants';
+import { EXAMPLE_CONNECTOR_SERVICE_TYPES } from '../../../../../../common/constants';
+
+import {
+  BETA_LABEL,
+  NATIVE_LABEL,
+  CONNECTOR_CLIENT_LABEL,
+  EXAMPLE_CONNECTOR_LABEL,
+} from '../../../../shared/constants';
 
 import { PlatinumLicensePopover } from '../../shared/platinum_license_popover/platinum_license_popover';
 
@@ -84,6 +91,7 @@ export const ConnectorCheckable: React.FC<ConnectorCheckableProps> = ({
   const [isNativePopoverOpen, setIsNativePopoverOpen] = useState(false);
   return (
     <EuiPanel
+      element="div"
       onClick={() => {
         if (isDisabled && showNativeBadge) return;
         onConnectorSelect(showNativeBadge);
@@ -119,6 +127,8 @@ export const ConnectorCheckable: React.FC<ConnectorCheckableProps> = ({
                         <PlatinumLicensePopover
                           button={
                             <EuiButtonIcon
+                              data-test-subj="entSearchContent-connectors-selectConnector-licensePopoverButton"
+                              data-telemetry-id="entSearchContent-connectors-selectConnector-licensePopoverButton"
                               aria-label={i18n.translate(
                                 'xpack.enterpriseSearch.content.newIndex.selectConnector.openPopoverLabel',
                                 {
@@ -143,10 +153,13 @@ export const ConnectorCheckable: React.FC<ConnectorCheckableProps> = ({
                         <NativePopover
                           button={
                             <EuiButtonIcon
+                              data-test-subj="entSearchContent-connectors-selectConnector-nativeInfoPopoverButton"
+                              data-telemetry-id="entSearchContent-connectors-selectConnector-nativeInfoPopoverButton"
                               aria-label={i18n.translate(
                                 'xpack.enterpriseSearch.content.newIndex.selectConnector.openNativePopoverLabel',
                                 {
-                                  defaultMessage: 'Open native connector popover',
+                                  defaultMessage:
+                                    'Open popover with information about Elastic managed connectors',
                                 }
                               )}
                               iconType="questionInCircle"
@@ -169,6 +182,16 @@ export const ConnectorCheckable: React.FC<ConnectorCheckableProps> = ({
                     <EuiPopover
                       button={
                         <EuiButtonIcon
+                          aria-label={i18n.translate(
+                            'xpack.enterpriseSearch.content.newIndex.selectConnector.openCreateConnectorPopover',
+                            {
+                              defaultMessage:
+                                'Open menu to create a connector of type {connectorType}',
+                              values: { connectorType: name },
+                            }
+                          )}
+                          data-test-subj="entSearchContent-connectors-selectConnector-nativePopoverButton"
+                          data-telemetry-id="entSearchContent-connectors-selectConnector-nativePopoverButton"
                           display="base"
                           color="primary"
                           iconType="boxesHorizontal"
@@ -185,7 +208,7 @@ export const ConnectorCheckable: React.FC<ConnectorCheckableProps> = ({
                       }}
                     >
                       <EuiContextMenuPanel
-                        size="xs"
+                        size="s"
                         items={[
                           <EuiContextMenuItem
                             key="native"
@@ -197,11 +220,10 @@ export const ConnectorCheckable: React.FC<ConnectorCheckableProps> = ({
                           >
                             {i18n.translate(
                               'xpack.enterpriseSearch.connectorCheckable.setupANativeConnectorContextMenuItemLabel',
-                              { defaultMessage: 'Setup a Native Connector' }
+                              { defaultMessage: 'Set up an Elastic managed connector' }
                             )}
                           </EuiContextMenuItem>,
-                          <EuiSpacer size="s" />,
-
+                          <EuiSpacer key="spacer" size="s" />,
                           <EuiContextMenuItem
                             key="client"
                             onClick={(e) => {
@@ -211,7 +233,7 @@ export const ConnectorCheckable: React.FC<ConnectorCheckableProps> = ({
                           >
                             {i18n.translate(
                               'xpack.enterpriseSearch.connectorCheckable.setupAConnectorClientContextMenuItemLabel',
-                              { defaultMessage: 'Setup a Connector Client' }
+                              { defaultMessage: 'Set up a self-managed connector' }
                             )}
                           </EuiContextMenuItem>,
                         ]}
@@ -244,7 +266,14 @@ export const ConnectorCheckable: React.FC<ConnectorCheckableProps> = ({
                         </EuiBadge>
                       </EuiFlexItem>
                     )}
-                    {isTechPreview && (
+                    {EXAMPLE_CONNECTOR_SERVICE_TYPES.includes(serviceType) && (
+                      <EuiFlexItem grow={false}>
+                        <EuiBadge color="hollow" iconType="beaker">
+                          <EuiText size="xs">{EXAMPLE_CONNECTOR_LABEL}</EuiText>
+                        </EuiBadge>
+                      </EuiFlexItem>
+                    )}
+                    {isTechPreview && !EXAMPLE_CONNECTOR_SERVICE_TYPES.includes(serviceType) && (
                       <EuiFlexItem grow={false}>
                         <EuiBadge color="hollow" iconType="beaker">
                           <EuiText size="xs">
@@ -263,7 +292,12 @@ export const ConnectorCheckable: React.FC<ConnectorCheckableProps> = ({
                 {documentationUrl && (
                   <EuiFlexItem grow={false}>
                     <EuiText size="xs">
-                      <EuiLink target="_blank" href={documentationUrl}>
+                      <EuiLink
+                        data-test-subj="entSearchContent-connectors-selectConnector-documentationLink"
+                        data-telemetry-id="entSearchContent-connectors-selectConnector-documentationLink"
+                        target="_blank"
+                        href={documentationUrl}
+                      >
                         {i18n.translate(
                           'xpack.enterpriseSearch.content.indices.selectConnector.connectorCheckable.documentationLinkLabel',
                           {

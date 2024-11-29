@@ -5,11 +5,14 @@
  * 2.0.
  */
 
-import crypto from 'crypto';
+import crypto from 'node:crypto';
+import utils from 'node:util';
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { isEqual } from 'lodash';
-import { safeDump } from 'js-yaml';
+import { dump } from 'js-yaml';
+
+const pbkdf2Async = utils.promisify(crypto.pbkdf2);
 
 import type {
   PreconfiguredOutput,
@@ -71,7 +74,6 @@ export async function createOrUpdatePreconfiguredOutputs(
   }
 
   const existingOutputs = await outputService.bulkGet(
-    soClient,
     outputs.map(({ id }) => id),
     { ignoreNotFound: true }
   );
@@ -82,7 +84,7 @@ export async function createOrUpdatePreconfiguredOutputs(
 
       const { id, config, ...outputData } = output;
 
-      const configYaml = config ? safeDump(config) : undefined;
+      const configYaml = config ? dump(config) : undefined;
 
       const data: NewOutput = {
         ...outputData,
@@ -129,9 +131,9 @@ export async function createOrUpdatePreconfiguredOutputs(
           });
           // Bump revision of all policies using that output
           if (outputData.is_default || outputData.is_default_monitoring) {
-            await agentPolicyService.bumpAllAgentPolicies(soClient, esClient);
+            await agentPolicyService.bumpAllAgentPolicies(esClient);
           } else {
-            await agentPolicyService.bumpAllAgentPoliciesForOutput(soClient, esClient, id);
+            await agentPolicyService.bumpAllAgentPoliciesForOutput(esClient, id);
           }
         }
       }
@@ -142,32 +144,22 @@ export async function createOrUpdatePreconfiguredOutputs(
 // Values recommended by NodeJS documentation
 const keyLength = 64;
 const saltLength = 16;
-
-// N=2^14 (16 MiB), r=8 (1024 bytes), p=5
-const scryptParams = {
-  cost: 16384,
-  blockSize: 8,
-  parallelization: 5,
-};
+const maxIteration = 100000;
 
 export async function hashSecret(secret: string) {
-  return new Promise((resolve, reject) => {
-    const salt = crypto.randomBytes(saltLength).toString('hex');
-    crypto.scrypt(secret, salt, keyLength, scryptParams, (err, derivedKey) => {
-      if (err) reject(err);
-      resolve(`${salt}:${derivedKey.toString('hex')}`);
-    });
-  });
-}
+  const salt = crypto.randomBytes(saltLength).toString('hex');
+  const derivedKey = await pbkdf2Async(secret, salt, maxIteration, keyLength, 'sha512');
 
+  return `${salt}:${derivedKey.toString('hex')}`;
+}
 async function verifySecret(hash: string, secret: string) {
-  return new Promise((resolve, reject) => {
-    const [salt, key] = hash.split(':');
-    crypto.scrypt(secret, salt, keyLength, scryptParams, (err, derivedKey) => {
-      if (err) reject(err);
-      resolve(crypto.timingSafeEqual(Buffer.from(key, 'hex'), derivedKey));
-    });
-  });
+  const [salt, key] = hash.split(':');
+  const derivedKey = await pbkdf2Async(secret, salt, maxIteration, keyLength, 'sha512');
+  const keyBuffer = Buffer.from(key, 'hex');
+  if (keyBuffer.length !== derivedKey.length) {
+    return false;
+  }
+  return crypto.timingSafeEqual(Buffer.from(key, 'hex'), derivedKey);
 }
 
 async function hashSecrets(output: PreconfiguredOutput) {
@@ -325,7 +317,6 @@ async function isPreconfiguredOutputDifferentFromCurrent(
       isDifferent(existingOutput.round_robin, preconfiguredOutput.round_robin) ||
       isDifferent(existingOutput.hash, preconfiguredOutput.hash) ||
       isDifferent(existingOutput.topic, preconfiguredOutput.topic) ||
-      isDifferent(existingOutput.topics, preconfiguredOutput.topics) ||
       isDifferent(existingOutput.headers, preconfiguredOutput.headers) ||
       isDifferent(existingOutput.timeout, preconfiguredOutput.timeout) ||
       isDifferent(existingOutput.broker_timeout, preconfiguredOutput.broker_timeout) ||

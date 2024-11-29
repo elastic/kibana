@@ -6,7 +6,7 @@
  */
 
 import URL from 'url';
-import { ObservabilityOnboardingUsername } from '../../../server/test_helpers/create_observability_onboarding_users/authentication';
+import { ObservabilityOnboardingUsername } from '@kbn/observability-onboarding-plugin/server/test_helpers/create_observability_onboarding_users/authentication';
 
 export type InstallationStep =
   | 'ea-download'
@@ -23,6 +23,10 @@ export type InstallationStepStatus =
   | 'warning'
   | 'danger'
   | 'current';
+
+export interface ElasticAgentStepPayload {
+  agentId: string;
+}
 
 Cypress.Commands.add('loginAsViewerUser', () => {
   return cy.loginAs({
@@ -80,21 +84,18 @@ Cypress.Commands.add('getByTestSubj', (selector: string) => {
   return cy.get(`[data-test-subj="${selector}"]`);
 });
 
-Cypress.Commands.add(
-  'visitKibana',
-  (url: string, rangeFrom?: string, rangeTo?: string) => {
-    const urlPath = URL.format({
-      pathname: url,
-      query: { rangeFrom, rangeTo },
-    });
+Cypress.Commands.add('visitKibana', (url: string, rangeFrom?: string, rangeTo?: string) => {
+  const urlPath = URL.format({
+    pathname: url,
+    query: { rangeFrom, rangeTo },
+  });
 
-    cy.visit(urlPath);
-    cy.getByTestSubj('kbnLoadingMessage').should('exist');
-    cy.getByTestSubj('kbnLoadingMessage').should('not.exist', {
-      timeout: 50000,
-    });
-  }
-);
+  cy.visit(urlPath);
+  cy.getByTestSubj('kbnLoadingMessage').should('exist');
+  cy.getByTestSubj('kbnLoadingMessage').should('not.exist', {
+    timeout: 50000,
+  });
+});
 
 Cypress.Commands.add('installCustomIntegration', (integrationName: string) => {
   const kibanaUrl = Cypress.env('KIBANA_URL');
@@ -157,7 +158,8 @@ Cypress.Commands.add(
   (
     onboardingId: string,
     step: InstallationStep,
-    status: InstallationStepStatus
+    status: InstallationStepStatus,
+    payload: ElasticAgentStepPayload | undefined
   ) => {
     const kibanaUrl = Cypress.env('KIBANA_URL');
 
@@ -173,6 +175,7 @@ Cypress.Commands.add(
       auth: { user: 'editor', pass: 'changeme' },
       body: {
         status,
+        payload,
       },
     });
   }

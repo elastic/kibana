@@ -11,7 +11,7 @@
         "label": "DataViewIllustration",
         "description": [],
         "signature": [
-          "() => JSX.Element"
+          "() => React.JSX.Element"
         ],
         "path": "packages/shared-ux/prompt/no_data_views/impl/src/data_view_illustration.tsx",
         "deprecated": false,
@@ -30,9 +30,9 @@
           "\nA service-enabled component that provides Kibana-specific functionality to the `NoDataViewsPrompt`\ncomponent.\n\nUse of this component requires both the `EuiTheme` context as well as a `NoDataViewsPrompt` provider."
         ],
         "signature": [
-          "({ onDataViewCreated, onESQLNavigationComplete, allowAdHocDataView, }: ",
+          "({ onDataViewCreated, allowAdHocDataView, onTryESQL: onTryESQLProp, onESQLNavigationComplete, }: ",
           "NoDataViewsPromptProps",
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "packages/shared-ux/prompt/no_data_views/impl/src/no_data_views.tsx",
         "deprecated": false,
@@ -43,7 +43,7 @@
             "id": "def-public.NoDataViewsPrompt.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  onDataViewCreated,\n  onESQLNavigationComplete,\n  allowAdHocDataView = false,\n}",
+            "label": "{\n  onDataViewCreated,\n  allowAdHocDataView = false,\n  onTryESQL: onTryESQLProp,\n  onESQLNavigationComplete,\n}",
             "description": [],
             "signature": [
               "NoDataViewsPromptProps"
@@ -69,7 +69,7 @@
         "signature": [
           "({ onClickCreate, canCreateNewDataView, dataViewsDocLink, onTryESQL, esqlDocLink, emptyPromptColor, }: ",
           "NoDataViewsPromptComponentProps",
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "packages/shared-ux/prompt/no_data_views/impl/src/no_data_views.component.tsx",
         "deprecated": false,
@@ -106,7 +106,7 @@
         "signature": [
           "({ children, ...services }: React.PropsWithChildren<",
           "NoDataViewsPromptKibanaDependencies",
-          ">) => JSX.Element"
+          ">) => React.JSX.Element"
         ],
         "path": "packages/shared-ux/prompt/no_data_views/impl/src/services.tsx",
         "deprecated": false,
@@ -117,7 +117,7 @@
             "id": "def-public.NoDataViewsPromptKibanaProvider.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  children,\n  ...services\n}",
+            "label": "{ children, ...services }",
             "description": [],
             "signature": [
               "React.PropsWithChildren<",
@@ -145,7 +145,7 @@
         "signature": [
           "({ children, ...services }: React.PropsWithChildren<",
           "NoDataViewsPromptServices",
-          ">) => JSX.Element"
+          ">) => React.JSX.Element"
         ],
         "path": "packages/shared-ux/prompt/no_data_views/impl/src/services.tsx",
         "deprecated": false,
@@ -259,7 +259,7 @@
               "The background color of the prompt; defaults to `plain`."
             ],
             "signature": [
-              "\"warning\" | \"success\" | \"subdued\" | \"primary\" | \"accent\" | \"danger\" | \"plain\" | \"transparent\" | undefined"
+              "\"warning\" | \"success\" | \"plain\" | \"subdued\" | \"primary\" | \"accent\" | \"accentSecondary\" | \"danger\" | \"transparent\" | undefined"
             ],
             "path": "packages/shared-ux/prompt/no_data_views/types/index.d.ts",
             "deprecated": false,
@@ -290,7 +290,7 @@
             "tags": [],
             "label": "onTryESQL",
             "description": [
-              "Handler for someone wanting to try ES|QL."
+              "If the cluster has data, this handler allows the user to try ES|QL"
             ],
             "signature": [
               "(() => void) | undefined"
@@ -447,6 +447,24 @@
           },
           {
             "parentPluginId": "@kbn/shared-ux-prompt-no-data-views",
+            "id": "def-public.NoDataViewsPromptProps.onTryESQL",
+            "type": "Function",
+            "tags": [],
+            "label": "onTryESQL",
+            "description": [
+              "If the cluster has data, this handler allows the user to try ES|QL"
+            ],
+            "signature": [
+              "(() => void) | undefined"
+            ],
+            "path": "packages/shared-ux/prompt/no_data_views/types/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-prompt-no-data-views",
             "id": "def-public.NoDataViewsPromptProps.onESQLNavigationComplete",
             "type": "Function",
             "tags": [],
@@ -462,6 +480,22 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-prompt-no-data-views",
+            "id": "def-public.NoDataViewsPromptProps.emptyPromptColor",
+            "type": "Any",
+            "tags": [],
+            "label": "emptyPromptColor",
+            "description": [
+              "Empty prompt color"
+            ],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/shared-ux/prompt/no_data_views/types/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -548,7 +582,7 @@
             "tags": [],
             "label": "onTryESQL",
             "description": [
-              "Get a handler for trying ES|QL"
+              "If the cluster has data, this handler allows the user to try ES|QL"
             ],
             "signature": [
               "(() => void) | undefined"

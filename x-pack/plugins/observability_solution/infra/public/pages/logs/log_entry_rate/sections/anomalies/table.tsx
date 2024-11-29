@@ -6,42 +6,44 @@
  */
 
 import {
+  Criteria,
   EuiBasicTable,
   EuiBasicTableColumn,
-  EuiIcon,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonIcon,
+  EuiIcon,
   EuiSpacer,
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
-import moment from 'moment';
 import { i18n } from '@kbn/i18n';
+import moment from 'moment';
 import React, { useCallback, useMemo } from 'react';
 import useSet from 'react-use/lib/useSet';
-import { TimeRange } from '../../../../../../common/time/time_range';
 import {
+  anomaliesSortRT,
   AnomalyType,
-  getFriendlyNameForPartitionId,
   formatOneDecimalPlace,
+  getFriendlyNameForPartitionId,
   isCategoryAnomaly,
 } from '../../../../../../common/log_analysis';
+import { TimeRange } from '../../../../../../common/time/time_range';
 import { RowExpansionButton } from '../../../../../components/basic_table';
-import { AnomaliesTableExpandedRow } from './expanded_row';
+import { LoadingOverlayWrapper } from '../../../../../components/loading_overlay_wrapper';
 import { AnomalySeverityIndicator } from '../../../../../components/logging/log_analysis_results/anomaly_severity_indicator';
 import { RegularExpressionRepresentation } from '../../../../../components/logging/log_analysis_results/category_expression';
-import { useKibanaUiSetting } from '../../../../../utils/use_kibana_ui_setting';
+import { useKibanaUiSetting } from '../../../../../hooks/use_kibana_ui_setting';
 import {
-  Page,
+  ChangePaginationOptions,
+  ChangeSortOptions,
   FetchNextPage,
   FetchPreviousPage,
-  ChangeSortOptions,
-  ChangePaginationOptions,
-  SortOptions,
-  PaginationOptions,
   LogEntryAnomalies,
+  Page,
+  PaginationOptions,
+  SortOptions,
 } from '../../use_log_entry_anomalies_results';
-import { LoadingOverlayWrapper } from '../../../../../components/loading_overlay_wrapper';
+import { AnomaliesTableExpandedRow } from './expanded_row';
 
 interface TableItem {
   id: string;
@@ -146,8 +148,10 @@ export const AnomaliesTable: React.FunctionComponent<{
   );
 
   const handleTableChange = useCallback(
-    ({ sort = {} }) => {
-      changeSortOptions(sort);
+    ({ sort }: Criteria<TableItem>) => {
+      if (anomaliesSortRT.is(sort)) {
+        changeSortOptions(sort);
+      }
     },
     [changeSortOptions]
   );
@@ -207,8 +211,6 @@ export const AnomaliesTable: React.FunctionComponent<{
           items={tableItems}
           itemId="id"
           itemIdToExpandedRowMap={expandedIdsRowContents}
-          isExpandable={true}
-          hasActions={true}
           columns={columns}
           sorting={tableSortOptions}
           onChange={handleTableChange}
@@ -232,7 +234,7 @@ const AnomalyMessage = ({ anomaly }: { anomaly: TableItem }) => {
     'xpack.infra.logs.analysis.anomaliesTableMoreThanExpectedAnomalyMessage',
     {
       defaultMessage:
-        'more log messages in this {type, select, logRate {dataset} logCategory {category}} than expected',
+        'more log messages in this {type, select, logRate {dataset} logCategory {category} other{#}} than expected',
       values: { type },
     }
   );
@@ -241,7 +243,7 @@ const AnomalyMessage = ({ anomaly }: { anomaly: TableItem }) => {
     'xpack.infra.logs.analysis.anomaliesTableFewerThanExpectedAnomalyMessage',
     {
       defaultMessage:
-        'fewer log messages in this {type, select, logRate {dataset} logCategory {category}} than expected',
+        'fewer log messages in this {type, select, logRate {dataset} logCategory {category} other{#}} than expected',
       values: { type },
     }
   );

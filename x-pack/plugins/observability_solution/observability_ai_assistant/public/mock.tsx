@@ -7,9 +7,13 @@
 import { i18n } from '@kbn/i18n';
 import { noop } from 'lodash';
 import React from 'react';
-import { Observable, of } from 'rxjs';
-import type { StreamingChatResponseEventWithoutError } from '../common/conversation_complete';
-import { ScreenContextActionDefinition } from '../common/types';
+import { BehaviorSubject, Observable, of } from 'rxjs';
+import { AssistantScope } from '@kbn/ai-assistant-common';
+import type {
+  ChatCompletionChunkEvent,
+  StreamingChatResponseEventWithoutError,
+} from '../common/conversation_complete';
+import { MessageRole, ScreenContextActionDefinition } from '../common/types';
 import type { ObservabilityAIAssistantAPIClient } from './api';
 import type {
   ObservabilityAIAssistantChatService,
@@ -18,13 +22,14 @@ import type {
   ObservabilityAIAssistantService,
 } from './types';
 import { buildFunctionElasticsearch, buildFunctionServiceSummary } from './utils/builders';
+import { FunctionDefinition } from '../common';
 
 export const mockChatService: ObservabilityAIAssistantChatService = {
   sendAnalyticsEvent: noop,
-  chat: (options) => new Observable<StreamingChatResponseEventWithoutError>(),
+  chat: (options) => new Observable<ChatCompletionChunkEvent>(),
   complete: (options) => new Observable<StreamingChatResponseEventWithoutError>(),
-  getContexts: () => [],
   getFunctions: () => [buildFunctionElasticsearch(), buildFunctionServiceSummary()],
+  functions$: new BehaviorSubject<FunctionDefinition[]>([] as FunctionDefinition[]),
   renderFunction: (name) => (
     <div>
       {i18n.translate('xpack.observabilityAiAssistant.chatService.div.helloLabel', {
@@ -35,6 +40,14 @@ export const mockChatService: ObservabilityAIAssistantChatService = {
   ),
   hasFunction: () => true,
   hasRenderFunction: () => true,
+  getSystemMessage: () => ({
+    '@timestamp': new Date().toISOString(),
+    message: {
+      role: MessageRole.System,
+      content: 'System',
+    },
+  }),
+  getScopes: jest.fn(),
 };
 
 export const mockService: ObservabilityAIAssistantService = {
@@ -51,6 +64,9 @@ export const mockService: ObservabilityAIAssistantService = {
     predefinedConversation$: new Observable(),
   },
   navigate: async () => of(),
+  setScopes: jest.fn(),
+  getScopes: jest.fn(),
+  scope$: new BehaviorSubject<AssistantScope[]>(['all']),
 };
 
 function createSetupContract(): ObservabilityAIAssistantPublicSetup {
@@ -69,12 +85,6 @@ function createStartContract(): ObservabilityAIAssistantPublicStart {
       loading: false,
       selectConnector: () => {},
       reloadConnectors: () => {},
-    }),
-    useUserPreferredLanguage: () => ({
-      LANGUAGE_OPTIONS: [{ label: 'English' }],
-      selectedLanguage: 'English',
-      setSelectedLanguage: () => {},
-      getPreferredLanguage: () => 'English',
     }),
     getContextualInsightMessages: () => [],
     createScreenContextAction: () => ({} as ScreenContextActionDefinition<any>),

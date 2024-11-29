@@ -67,13 +67,12 @@ Array [
         <span
           class="emotion-EuiExternalLinkIcon"
           data-euiicon-type="popout"
-        >
-          External link
-        </span>
+          role="presentation"
+        />
         <span
           class="emotion-euiScreenReaderOnly"
         >
-          (opens in a new tab or window)
+          (external, opens in a new tab or window)
         </span>
       </a>
     </dd>
@@ -86,34 +85,30 @@ Array [
       class="euiPopover emotion-euiPopover-inline-block"
     >
       <div
-        class="euiFormRow"
+        class="euiFormRow emotion-euiFormRow"
         id="generated-id-row"
       >
         <div
           class="euiFormRow__fieldWrapper"
         >
           <div
-            class="euiSwitch euiSwitch--compressed emotion-euiSwitch"
+            class="euiSwitch emotion-euiSwitch"
           >
             <button
               aria-checked="false"
               aria-label="Enable status alerts"
-              class="euiSwitch__button"
+              class="euiSwitch__button emotion-euiSwitch__button-compressed"
               data-test-subj="uptimeDisplayDefineConnector"
               id="generated-id"
               role="switch"
               type="button"
             >
               <span
-                class="euiSwitch__body"
-              >
-                <span
-                  class="euiSwitch__thumb"
-                />
-                <span
-                  class="euiSwitch__track"
-                />
-              </span>
+                class="euiSwitch__body emotion-euiSwitch__body-off"
+              />
+              <span
+                class="euiSwitch__thumb emotion-euiSwitch__thumb-off"
+              />
             </button>
           </div>
         </div>

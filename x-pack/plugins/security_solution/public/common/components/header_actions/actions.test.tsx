@@ -19,8 +19,14 @@ import { SecurityStepId } from '../guided_onboarding_tour/tour_config';
 import { Actions } from './actions';
 import { initialUserPrivilegesState as mockInitialUserPrivilegesState } from '../user_privileges/user_privileges_context';
 import { useUserPrivileges } from '../user_privileges';
+import { useHiddenByFlyout } from '../guided_onboarding_tour/use_hidden_by_flyout';
 
+const useHiddenByFlyoutMock = useHiddenByFlyout as jest.Mock;
+jest.mock('../guided_onboarding_tour/use_hidden_by_flyout', () => ({
+  useHiddenByFlyout: jest.fn(),
+}));
 jest.mock('../guided_onboarding_tour');
+jest.mock('../user_privileges');
 jest.mock('../user_privileges');
 jest.mock('../../../detections/components/user_info', () => ({
   useUserData: jest.fn().mockReturnValue([{ canUserCRUD: true, hasIndexWrite: true }]),
@@ -39,6 +45,21 @@ jest.mock(
     }),
   })
 );
+
+const mockUseUiSetting = jest.fn().mockReturnValue([true]);
+jest.mock('@kbn/kibana-react-plugin/public', () => {
+  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
+  return {
+    ...original,
+    useUiSetting$: () => mockUseUiSetting(),
+  };
+});
+
+jest.mock('./add_note_icon_item', () => {
+  return {
+    AddEventNoteAction: jest.fn(() => <div data-test-subj="add-note-mock-action" />),
+  };
+});
 
 jest.mock('../../lib/kibana', () => {
   const originalKibanaLib = jest.requireActual('../../lib/kibana');
@@ -93,6 +114,7 @@ const defaultProps = {
   checked: false,
   columnId: '',
   columnValues: 'abc def',
+  disableExpandAction: false,
   data: mockTimelineData[0].data,
   ecsData: mockTimelineData[0].ecs,
   eventId: 'abc',
@@ -122,40 +144,10 @@ describe('Actions', () => {
     (useShallowEqualSelector as jest.Mock).mockReturnValue(mockTimelineModel);
   });
 
-  test('it renders a checkbox for selecting the event when `showCheckboxes` is `true`', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <Actions {...defaultProps} />
-      </TestProviders>
-    );
-
-    expect(wrapper.find('[data-test-subj="select-event"]').exists()).toEqual(true);
-  });
-
-  test('it does NOT render a checkbox for selecting the event when `showCheckboxes` is `false`', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <Actions {...defaultProps} showCheckboxes={false} />
-      </TestProviders>
-    );
-
-    expect(wrapper.find('[data-test-subj="select-event"]').exists()).toBe(false);
-  });
-
-  test('it does NOT render a checkbox for selecting the event when `tGridEnabled` is `true`', () => {
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
-    const wrapper = mount(
-      <TestProviders>
-        <Actions {...defaultProps} />
-      </TestProviders>
-    );
-
-    expect(wrapper.find('[data-test-subj="select-event"]').exists()).toBe(false);
-  });
-
   describe('Guided Onboarding Step', () => {
     const incrementStepMock = jest.fn();
     beforeEach(() => {
+      (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
       (useTourContext as jest.Mock).mockReturnValue({
         activeStep: 2,
         incrementStep: incrementStepMock,
@@ -200,6 +192,19 @@ describe('Actions', () => {
 
       expect(wrapper.find(GuidedOnboardingTourStep).exists()).toEqual(true);
       expect(wrapper.find(SecurityTourStep).exists()).toEqual(true);
+    });
+
+    test('if left expandable flyout is expanded, SecurityTourStep not active', () => {
+      useHiddenByFlyoutMock.mockReturnValue(true);
+
+      const wrapper = mount(
+        <TestProviders>
+          <Actions {...defaultProps} {...isTourAnchorConditions} />
+        </TestProviders>
+      );
+
+      expect(wrapper.find(GuidedOnboardingTourStep).exists()).toEqual(true);
+      expect(wrapper.find(SecurityTourStep).exists()).toEqual(false);
     });
 
     test('on expand event click and SecurityTourStep is active, incrementStep', () => {
@@ -254,6 +259,7 @@ describe('Actions', () => {
       expect(wrapper.find(GuidedOnboardingTourStep).exists()).toEqual(true);
       expect(wrapper.find(SecurityTourStep).exists()).toEqual(false);
     });
+
     describe.each(Object.keys(isTourAnchorConditions))('tour condition true: %s', (key: string) => {
       it('Single condition does not make tour step exist', () => {
         const wrapper = mount(
@@ -286,6 +292,7 @@ describe('Actions', () => {
         wrapper.find('[data-test-subj="timeline-context-menu-button"]').first().prop('isDisabled')
       ).toBe(true);
     });
+
     test('it enables for eventType=signal', () => {
       const ecsData = {
         ...mockTimelineData[0].ecs,
@@ -301,6 +308,7 @@ describe('Actions', () => {
         wrapper.find('[data-test-subj="timeline-context-menu-button"]').first().prop('isDisabled')
       ).toBe(false);
     });
+
     test('it disables for event.kind: undefined and agent.type: endpoint', () => {
       const ecsData = {
         ...mockTimelineData[0].ecs,
@@ -316,6 +324,7 @@ describe('Actions', () => {
         wrapper.find('[data-test-subj="timeline-context-menu-button"]').first().prop('isDisabled')
       ).toBe(true);
     });
+
     test('it enables for event.kind: event and agent.type: endpoint', () => {
       const ecsData = {
         ...mockTimelineData[0].ecs,
@@ -332,6 +341,7 @@ describe('Actions', () => {
         wrapper.find('[data-test-subj="timeline-context-menu-button"]').first().prop('isDisabled')
       ).toBe(false);
     });
+
     test('it disables for event.kind: alert and agent.type: endpoint', () => {
       const ecsData = {
         ...mockTimelineData[0].ecs,
@@ -348,6 +358,7 @@ describe('Actions', () => {
         wrapper.find('[data-test-subj="timeline-context-menu-button"]').first().prop('isDisabled')
       ).toBe(true);
     });
+
     test('it shows the analyze event button when the event is from an endpoint', () => {
       const ecsData = {
         ...mockTimelineData[0].ecs,
@@ -363,6 +374,7 @@ describe('Actions', () => {
 
       expect(wrapper.find('[data-test-subj="view-in-analyzer"]').exists()).toBe(true);
     });
+
     test('it does not render the analyze event button when the event is from an unsupported source', () => {
       const ecsData = {
         ...mockTimelineData[0].ecs,
@@ -376,6 +388,60 @@ describe('Actions', () => {
       );
 
       expect(wrapper.find('[data-test-subj="view-in-analyzer"]').exists()).toBe(false);
+    });
+
+    test('it does not render the analyze event button on the cases alerts table with advanced settings disabled', () => {
+      const ecsData = {
+        ...mockTimelineData[0].ecs,
+        event: { kind: ['alert'] },
+        agent: { type: ['endpoint'] },
+        process: { entity_id: ['1'] },
+      };
+      mockUseUiSetting.mockReturnValue([false]);
+
+      const wrapper = mount(
+        <TestProviders>
+          <Actions {...defaultProps} ecsData={ecsData} timelineId={TableId.alertsOnCasePage} />
+        </TestProviders>
+      );
+
+      expect(wrapper.find('[data-test-subj="view-in-analyzer"]').exists()).toBe(false);
+    });
+
+    test('it does render the analyze event button on the cases alerts table with advanced settings enabled', () => {
+      const ecsData = {
+        ...mockTimelineData[0].ecs,
+        event: { kind: ['alert'] },
+        agent: { type: ['endpoint'] },
+        process: { entity_id: ['1'] },
+      };
+      mockUseUiSetting.mockReturnValue([true]);
+
+      const wrapper = mount(
+        <TestProviders>
+          <Actions {...defaultProps} ecsData={ecsData} timelineId={TableId.alertsOnCasePage} />
+        </TestProviders>
+      );
+
+      expect(wrapper.find('[data-test-subj="view-in-analyzer"]').exists()).toBe(true);
+    });
+
+    test('it does render the analyze event button on the alerts page alerts table even with advanced settings disabled', () => {
+      const ecsData = {
+        ...mockTimelineData[0].ecs,
+        event: { kind: ['alert'] },
+        agent: { type: ['endpoint'] },
+        process: { entity_id: ['1'] },
+      };
+      mockUseUiSetting.mockReturnValue([false]);
+
+      const wrapper = mount(
+        <TestProviders>
+          <Actions {...defaultProps} ecsData={ecsData} timelineId={TableId.alertsOnAlertsPage} />
+        </TestProviders>
+      );
+
+      expect(wrapper.find('[data-test-subj="view-in-analyzer"]').exists()).toBe(true);
     });
 
     test('it should not show session view button on action tabs for basic users', () => {
@@ -438,6 +504,100 @@ describe('Actions', () => {
       );
 
       expect(wrapper.find('[data-test-subj="session-view-button"]').exists()).toEqual(true);
+    });
+
+    test('it does not render the session view button on the cases alerts table with advanced settings disabled', () => {
+      const ecsData = {
+        ...mockTimelineData[0].ecs,
+        event: { kind: ['alert'] },
+        agent: { type: ['endpoint'] },
+        process: { entry_leader: { entity_id: ['test_id'], start: ['2022-05-08T13:44:00.13Z'] } },
+        _index: '.ds-logs-endpoint.events.process-default',
+      };
+      mockUseUiSetting.mockReturnValue([false]);
+
+      const wrapper = mount(
+        <TestProviders>
+          <Actions {...defaultProps} ecsData={ecsData} timelineId={TableId.alertsOnCasePage} />
+        </TestProviders>
+      );
+
+      expect(wrapper.find('[data-test-subj="session-view-button"]').exists()).toBe(false);
+    });
+
+    test('it does render the session view button on the cases alerts table with advanced settings enabled', () => {
+      const ecsData = {
+        ...mockTimelineData[0].ecs,
+        event: { kind: ['alert'] },
+        agent: { type: ['endpoint'] },
+        process: { entry_leader: { entity_id: ['test_id'], start: ['2022-05-08T13:44:00.13Z'] } },
+        _index: '.ds-logs-endpoint.events.process-default',
+      };
+      mockUseUiSetting.mockReturnValue([true]);
+
+      const wrapper = mount(
+        <TestProviders>
+          <Actions {...defaultProps} ecsData={ecsData} timelineId={TableId.alertsOnCasePage} />
+        </TestProviders>
+      );
+
+      expect(wrapper.find('[data-test-subj="session-view-button"]').exists()).toBe(true);
+    });
+  });
+
+  describe('Show notes action', () => {
+    test('should show notes action if showNotes is true', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <Actions {...defaultProps} showNotes={true} />
+        </TestProviders>
+      );
+
+      expect(wrapper.find('[data-test-subj="add-note-mock-action"]').exists()).toBeTruthy();
+    });
+
+    test('should NOT show notes action if showNotes is false', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <Actions {...defaultProps} showNotes={false} />
+        </TestProviders>
+      );
+
+      expect(wrapper.find('[data-test-subj="add-note-mock-action"]').exists()).toBeFalsy();
+    });
+  });
+
+  describe('Expand action', () => {
+    test('should not be visible if disableExpandAction is true', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <Actions {...defaultProps} disableExpandAction />
+        </TestProviders>
+      );
+
+      expect(wrapper.find('[data-test-subj="expand-event"]').exists()).toBeFalsy();
+    });
+  });
+
+  describe('Pin action', () => {
+    test('should hide pin Action by default', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <Actions {...defaultProps} disableExpandAction />
+        </TestProviders>
+      );
+
+      expect(wrapper.find('[data-test-subj="pin-event"]').exists()).toBeFalsy();
+    });
+
+    test('should show pin Action by when disablePinAction = false', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <Actions {...defaultProps} disableExpandAction disablePinAction={false} />
+        </TestProviders>
+      );
+
+      expect(wrapper.find('[data-test-subj="pin-event"]').exists()).toBeTruthy();
     });
   });
 });

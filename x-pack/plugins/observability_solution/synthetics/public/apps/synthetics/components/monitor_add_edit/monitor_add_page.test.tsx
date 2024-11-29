@@ -11,7 +11,7 @@ import { MonitorAddPage } from './monitor_add_page';
 
 describe('MonitorAddPage', () => {
   it('renders correctly', async () => {
-    const { getByText } = render(<MonitorAddPage />, {
+    const { findByText } = render(<MonitorAddPage />, {
       state: {
         serviceLocations: {
           locations: [
@@ -31,7 +31,7 @@ describe('MonitorAddPage', () => {
     });
 
     // page is loaded
-    expect(getByText('Add a script')).toBeInTheDocument();
+    expect(await findByText('Add a script')).toBeInTheDocument();
   });
 
   it('renders when loading', async () => {

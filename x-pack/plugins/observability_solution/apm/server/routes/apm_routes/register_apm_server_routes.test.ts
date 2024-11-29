@@ -6,18 +6,12 @@
  */
 
 import { jsonRt } from '@kbn/io-ts-utils';
-import {
-  ServerRoute,
-  ServerRouteRepository,
-} from '@kbn/server-route-repository';
+import { ServerRoute, ServerRouteRepository } from '@kbn/server-route-repository';
 import * as t from 'io-ts';
 import { CoreSetup, Logger } from '@kbn/core/server';
 import { APMConfig } from '../..';
 import { APMRouteCreateOptions } from '../typings';
-import {
-  APMRouteHandlerResources,
-  registerRoutes,
-} from './register_apm_server_routes';
+import { APMRouteHandlerResources, registerRoutes } from './register_apm_server_routes';
 import { NEVER } from 'rxjs';
 
 type RegisterRouteDependencies = Parameters<typeof registerRoutes>[0];
@@ -75,13 +69,7 @@ const getRegisterRouteDependencies = () => {
 
 const initApi = (
   routes: Array<
-    ServerRoute<
-      any,
-      t.Any,
-      APMRouteHandlerResources,
-      any,
-      APMRouteCreateOptions
-    >
+    ServerRoute<any, t.Any | undefined, APMRouteHandlerResources, any, APMRouteCreateOptions>
   >
 ) => {
   const { mocks, dependencies } = getRegisterRouteDependencies();
@@ -171,11 +159,18 @@ describe('createApi', () => {
         },
         handler: async () => ({}),
       },
+      {
+        endpoint: 'GET /fez',
+        options: {
+          tags: ['access:apm', 'access:apm_settings_write'],
+        },
+        handler: async () => ({}),
+      },
     ]);
 
     expect(createRouter).toHaveBeenCalledTimes(1);
 
-    expect(get).toHaveBeenCalledTimes(2);
+    expect(get).toHaveBeenCalledTimes(3);
     expect(post).toHaveBeenCalledTimes(1);
     expect(put).toHaveBeenCalledTimes(1);
 
@@ -192,6 +187,14 @@ describe('createApi', () => {
         tags: ['access:apm', 'access:apm_write'],
       },
       path: '/qux',
+      validate: expect.anything(),
+    });
+
+    expect(get.mock.calls[2][0]).toEqual({
+      options: {
+        tags: ['access:apm', 'access:apm_settings_write'],
+      },
+      path: '/fez',
       validate: expect.anything(),
     });
 
@@ -270,8 +273,8 @@ describe('createApi', () => {
         expect(response.custom).toHaveBeenCalledWith({
           body: {
             attributes: { _inspect: [], data: null },
-            message:
-              'Invalid value 1 supplied to : Partial<{| query: Partial<{| _inspect: pipe(JSON, boolean) |}> |}>/query: Partial<{| _inspect: pipe(JSON, boolean) |}>/_inspect: pipe(JSON, boolean)',
+            message: `Failed to validate: 
+  in /query/_inspect: 1 does not match expected type pipe(JSON, boolean)`,
           },
           statusCode: 400,
         });
@@ -283,9 +286,7 @@ describe('createApi', () => {
         const {
           simulateRequest,
           mocks: { response },
-        } = initApi([
-          { endpoint: 'GET /foo', options: { tags: [] }, handler: handlerMock },
-        ]);
+        } = initApi([{ endpoint: 'GET /foo', options: { tags: [] }, handler: handlerMock }]);
         await simulateRequest({
           method: 'get',
           pathname: '/foo',

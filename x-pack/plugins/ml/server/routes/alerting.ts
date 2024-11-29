@@ -17,20 +17,18 @@ export function alertingRoutes(
 ) {
   /**
    * @apiGroup Alerting
-   *
-   * @api {post} /internal/ml/alerting/preview Preview alerting condition
-   * @apiName PreviewAlert
-   * @apiDescription Returns a preview of the alerting condition
-   *
-   * @apiSchema (body) mlAnomalyDetectionAlertPreviewRequest
    */
   router.versioned
     .post({
       access: 'internal',
       path: `${ML_INTERNAL_BASE_PATH}/alerting/preview`,
-      options: {
-        tags: ['access:ml:canGetJobs'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetJobs'],
+        },
       },
+      summary: 'Previews an alerting condition',
+      description: 'Returns a preview of the alerting condition',
     })
     .addVersion(
       {

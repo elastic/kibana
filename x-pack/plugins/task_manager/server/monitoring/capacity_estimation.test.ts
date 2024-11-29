@@ -12,7 +12,7 @@ import { mockLogger } from '../test_utils';
 describe('estimateCapacity', () => {
   const logger = mockLogger();
 
-  beforeAll(() => {
+  beforeEach(() => {
     jest.resetAllMocks();
   });
 
@@ -21,7 +21,7 @@ describe('estimateCapacity', () => {
       estimateCapacity(
         logger,
         mockStats(
-          { max_workers: 10, poll_interval: 3000 },
+          { capacity: { config: 10, as_cost: 20, as_workers: 10 }, poll_interval: 3000 },
           {
             owner_ids: 1,
             overdue_non_recurring: 0,
@@ -63,7 +63,8 @@ describe('estimateCapacity', () => {
               result_frequency_percent_as_number: {},
             },
           }
-        )
+        ),
+        1
       ).value.observed
     ).toMatchObject({
       observed_kibana_instances: 1,
@@ -77,7 +78,7 @@ describe('estimateCapacity', () => {
       estimateCapacity(
         logger,
         mockStats(
-          { max_workers: 10, poll_interval: 3000 },
+          { capacity: { config: 10, as_cost: 20, as_workers: 10 }, poll_interval: 3000 },
           {
             owner_ids: 1,
             overdue_non_recurring: 0,
@@ -119,7 +120,8 @@ describe('estimateCapacity', () => {
               result_frequency_percent_as_number: {},
             },
           }
-        )
+        ),
+        1
       ).value.observed
     ).toMatchObject({
       observed_kibana_instances: 1,
@@ -135,7 +137,7 @@ describe('estimateCapacity', () => {
       estimateCapacity(
         logger,
         mockStats(
-          { max_workers: 10, poll_interval: 3000 },
+          { capacity: { config: 10, as_cost: 20, as_workers: 10 }, poll_interval: 3000 },
           {
             owner_ids: 1,
             overdue_non_recurring: 0,
@@ -158,7 +160,8 @@ describe('estimateCapacity', () => {
               result_frequency_percent_as_number: {},
             },
           }
-        )
+        ),
+        1
       ).value.observed
     ).toMatchObject({
       observed_kibana_instances: 1,
@@ -172,7 +175,7 @@ describe('estimateCapacity', () => {
       estimateCapacity(
         logger,
         mockStats(
-          { max_workers: 10, poll_interval: 3000 },
+          { capacity: { config: 10, as_cost: 20, as_workers: 10 }, poll_interval: 3000 },
           {
             owner_ids: 1,
             overdue_non_recurring: 0,
@@ -214,7 +217,8 @@ describe('estimateCapacity', () => {
               result_frequency_percent_as_number: {},
             },
           }
-        )
+        ),
+        1
       ).value.observed
     ).toMatchObject({
       observed_kibana_instances: 1,
@@ -228,7 +232,7 @@ describe('estimateCapacity', () => {
       estimateCapacity(
         logger,
         mockStats(
-          { max_workers: 10, poll_interval: 3000 },
+          { capacity: { config: 10, as_cost: 20, as_workers: 10 }, poll_interval: 3000 },
           {
             // 0 active tasks at this moment in time, so no owners identifiable
             owner_ids: 0,
@@ -271,7 +275,8 @@ describe('estimateCapacity', () => {
               result_frequency_percent_as_number: {},
             },
           }
-        )
+        ),
+        1
       ).value.observed
     ).toMatchObject({
       observed_kibana_instances: 1,
@@ -285,7 +290,7 @@ describe('estimateCapacity', () => {
       estimateCapacity(
         logger,
         mockStats(
-          { max_workers: 10, poll_interval: 3000 },
+          { capacity: { config: 10, as_cost: 20, as_workers: 10 }, poll_interval: 3000 },
           {
             owner_ids: 3,
             overdue_non_recurring: 0,
@@ -327,7 +332,8 @@ describe('estimateCapacity', () => {
               result_frequency_percent_as_number: {},
             },
           }
-        )
+        ),
+        3
       ).value.observed
     ).toMatchObject({
       observed_kibana_instances: 3,
@@ -347,7 +353,7 @@ describe('estimateCapacity', () => {
       estimateCapacity(
         logger,
         mockStats(
-          { max_workers: 10, poll_interval: 3000 },
+          { capacity: { config: 10, as_cost: 20, as_workers: 10 }, poll_interval: 3000 },
           {
             owner_ids: provisionedKibanaInstances,
             overdue_non_recurring: 0,
@@ -396,7 +402,8 @@ describe('estimateCapacity', () => {
               result_frequency_percent_as_number: {},
             },
           }
-        )
+        ),
+        2
       ).value.observed
     ).toMatchObject({
       observed_kibana_instances: provisionedKibanaInstances,
@@ -428,7 +435,7 @@ describe('estimateCapacity', () => {
       estimateCapacity(
         logger,
         mockStats(
-          { max_workers: 10, poll_interval: 3000 },
+          { capacity: { config: 10, as_cost: 20, as_workers: 10 }, poll_interval: 3000 },
           {
             owner_ids: provisionedKibanaInstances,
             overdue_non_recurring: 0,
@@ -477,7 +484,8 @@ describe('estimateCapacity', () => {
               result_frequency_percent_as_number: {},
             },
           }
-        )
+        ),
+        2
       ).value
     ).toMatchObject({
       observed: {
@@ -510,7 +518,7 @@ describe('estimateCapacity', () => {
       estimateCapacity(
         logger,
         mockStats(
-          { max_workers: 10, poll_interval: 3000 },
+          { capacity: { config: 10, as_cost: 20, as_workers: 10 }, poll_interval: 3000 },
           {
             owner_ids: 1,
             overdue_non_recurring: 0,
@@ -561,13 +569,17 @@ describe('estimateCapacity', () => {
               result_frequency_percent_as_number: {},
             },
           }
-        )
+        ),
+        1
       )
     ).toMatchObject({
       status: 'OK',
       timestamp: expect.any(String),
       value: expect.any(Object),
     });
+    expect(logger.debug).toHaveBeenCalledWith(
+      'Task Manager is healthy, the assumedRequiredThroughputPerMinutePerKibana (190) < capacityPerMinutePerKibana (200)'
+    );
   });
 
   test('marks estimated capacity as Warning state when capacity is insufficient for recent spikes of non-recurring workload, but sufficient for the recurring workload', async () => {
@@ -575,7 +587,7 @@ describe('estimateCapacity', () => {
       estimateCapacity(
         logger,
         mockStats(
-          { max_workers: 10, poll_interval: 3000 },
+          { capacity: { config: 10, as_cost: 20, as_workers: 10 }, poll_interval: 3000 },
           {
             owner_ids: 1,
             overdue_non_recurring: 0,
@@ -623,13 +635,17 @@ describe('estimateCapacity', () => {
               result_frequency_percent_as_number: {},
             },
           }
-        )
+        ),
+        1
       )
     ).toMatchObject({
-      status: 'warn',
+      status: 'OK',
       timestamp: expect.any(String),
       value: expect.any(Object),
     });
+    expect(logger.warn).toHaveBeenCalledWith(
+      'Task Manager is unhealthy, the assumedRequiredThroughputPerMinutePerKibana (215) >= capacityPerMinutePerKibana (200)'
+    );
   });
 
   test('marks estimated capacity as Error state when workload and load suggest capacity is insufficient', async () => {
@@ -637,7 +653,7 @@ describe('estimateCapacity', () => {
       estimateCapacity(
         logger,
         mockStats(
-          { max_workers: 10, poll_interval: 3000 },
+          { capacity: { config: 10, as_cost: 20, as_workers: 10 }, poll_interval: 3000 },
           {
             owner_ids: 1,
             overdue_non_recurring: 0,
@@ -685,13 +701,17 @@ describe('estimateCapacity', () => {
               result_frequency_percent_as_number: {},
             },
           }
-        )
+        ),
+        1
       )
     ).toMatchObject({
-      status: 'error',
+      status: 'OK',
       timestamp: expect.any(String),
       value: expect.any(Object),
     });
+    expect(logger.warn).toHaveBeenCalledWith(
+      'Task Manager is unhealthy, the assumedAverageRecurringRequiredThroughputPerMinutePerKibana (210) > capacityPerMinutePerKibana (200)'
+    );
   });
 
   test('recommmends a 20% increase in kibana when a spike in non-recurring tasks forces recurring task capacity to zero', async () => {
@@ -699,7 +719,7 @@ describe('estimateCapacity', () => {
       estimateCapacity(
         logger,
         mockStats(
-          { max_workers: 10, poll_interval: 3000 },
+          { capacity: { config: 10, as_cost: 20, as_workers: 10 }, poll_interval: 3000 },
           {
             owner_ids: 1,
             overdue_non_recurring: 0,
@@ -746,10 +766,11 @@ describe('estimateCapacity', () => {
               result_frequency_percent_as_number: {},
             },
           }
-        )
+        ),
+        1
       )
     ).toMatchObject({
-      status: 'warn',
+      status: 'OK',
       timestamp: expect.any(String),
       value: {
         observed: {
@@ -775,7 +796,7 @@ describe('estimateCapacity', () => {
       estimateCapacity(
         logger,
         mockStats(
-          { max_workers: 10, poll_interval: 3000 },
+          { capacity: { config: 10, as_cost: 20, as_workers: 10 }, poll_interval: 3000 },
           {
             owner_ids: 1,
             overdue_non_recurring: 0,
@@ -822,10 +843,11 @@ describe('estimateCapacity', () => {
               result_frequency_percent_as_number: {},
             },
           }
-        )
+        ),
+        1
       )
     ).toMatchObject({
-      status: 'error',
+      status: 'OK',
       timestamp: expect.any(String),
       value: {
         observed: {
@@ -853,7 +875,7 @@ describe('estimateCapacity', () => {
       estimateCapacity(
         logger,
         mockStats(
-          { max_workers: 10, poll_interval: 3000 },
+          { capacity: { config: 10, as_cost: 20, as_workers: 10 }, poll_interval: 3000 },
           {
             overdue: undefined,
             owner_ids: 1,
@@ -896,7 +918,8 @@ describe('estimateCapacity', () => {
               result_frequency_percent_as_number: {},
             },
           }
-        )
+        ),
+        1
       ).value.observed
     ).toMatchObject({
       observed_kibana_instances: 1,
@@ -940,7 +963,8 @@ function mockStats(
       status: HealthStatus.OK,
       timestamp: new Date().toISOString(),
       value: {
-        max_workers: 0,
+        capacity: { config: 10, as_cost: 20, as_workers: 10 },
+        claim_strategy: 'update_by_query',
         poll_interval: 0,
         request_capacity: 1000,
         monitored_aggregated_stats_refresh_rate: 5000,
@@ -960,16 +984,19 @@ function mockStats(
       timestamp: new Date().toISOString(),
       value: {
         count: 4,
+        cost: 8,
         task_types: {
-          actions_telemetry: { count: 2, status: { idle: 2 } },
-          alerting_telemetry: { count: 1, status: { idle: 1 } },
-          session_cleanup: { count: 1, status: { idle: 1 } },
+          actions_telemetry: { count: 2, cost: 4, status: { idle: 2 } },
+          alerting_telemetry: { count: 1, cost: 2, status: { idle: 1 } },
+          session_cleanup: { count: 1, cost: 2, status: { idle: 1 } },
         },
         schedule: [],
         overdue: 0,
+        overdue_cost: 0,
         overdue_non_recurring: 0,
         estimated_schedule_density: [],
         non_recurring: 20,
+        non_recurring_cost: 40,
         owner_ids: 2,
         capacity_requirements: {
           per_minute: 150,

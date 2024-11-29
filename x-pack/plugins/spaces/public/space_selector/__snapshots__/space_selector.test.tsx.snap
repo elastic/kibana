@@ -4,11 +4,10 @@ exports[`it renders with custom logo 1`] = `
 <_KibanaPageTemplate
   className="spcSpaceSelector"
   data-test-subj="kibanaSpaceSelector"
-  panelled={true}
 >
   <EuiPortal>
     <div
-      className="spcSelectorBackground"
+      className="spcSelectorBackground spcSelectorBackground__nonMixinAttributes"
       role="presentation"
     />
   </EuiPortal>
@@ -38,17 +37,15 @@ exports[`it renders with custom logo 1`] = `
           className="eui spcSpaceSelector__pageHeader"
           tabIndex={0}
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Select your space"
             id="xpack.spaces.spaceSelector.selectSpacesTitle"
-            values={Object {}}
           />
         </h1>
         <p>
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="You can change your space at anytime."
             id="xpack.spaces.spaceSelector.changeSpaceAnytimeAvailabilityText"
-            values={Object {}}
           />
         </p>
       </EuiTextColor>
@@ -67,11 +64,10 @@ exports[`it renders without crashing 1`] = `
 <_KibanaPageTemplate
   className="spcSpaceSelector"
   data-test-subj="kibanaSpaceSelector"
-  panelled={true}
 >
   <EuiPortal>
     <div
-      className="spcSelectorBackground"
+      className="spcSelectorBackground spcSelectorBackground__nonMixinAttributes"
       role="presentation"
     />
   </EuiPortal>
@@ -100,17 +96,15 @@ exports[`it renders without crashing 1`] = `
           className="eui spcSpaceSelector__pageHeader"
           tabIndex={0}
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Select your space"
             id="xpack.spaces.spaceSelector.selectSpacesTitle"
-            values={Object {}}
           />
         </h1>
         <p>
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="You can change your space at anytime."
             id="xpack.spaces.spaceSelector.changeSpaceAnytimeAvailabilityText"
-            values={Object {}}
           />
         </p>
       </EuiTextColor>

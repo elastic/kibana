@@ -1,0 +1,129 @@
+- input: http_endpoint
+  template_path: http_endpoint.yml.hbs
+  title: |
+    {{ data_stream_title }}
+  description: |
+    {{ data_stream_description }}
+  vars:
+    - name: listen_address
+      type: text
+      title: Listen Address
+      description: |
+        Bind address for the HTTP listener. Use 0.0.0.0 to listen on all interfaces.
+      required: true
+      show_user: true
+      default: localhost
+    - name: listen_port
+      type: text
+      title: Listen port
+      description: |
+        Bind port for the listener.
+      required: true
+      show_user: true
+      default: 8080
+    - name: url
+      type: text
+      title: URL
+      description: This options specific which URL path to accept requests on. Defaults to /.
+      required: false
+      show_user: true
+    - name: data_stream.dataset
+      type: text
+      title: Dataset name
+      description: |
+        Dataset to write data to. Changing the dataset will send the data to a different index. You can't use `-` in the name of a dataset and only valid characters for [Elasticsearch index names](https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-index_.html).
+      default: http_endpoint.generic
+      required: true
+      show_user: true
+    - name: pipeline
+      type: text
+      title: Ingest Pipeline
+      description: |
+        The Ingest Node pipeline ID to be used by the integration.
+      required: false
+      show_user: true
+    - name: prefix
+      type: text
+      title: Prefix
+      description: This option specifies which prefix field the incoming request will be mapped to.
+      required: false
+      show_user: false
+    - name: basic_auth
+      type: bool
+      title: Basic Auth
+      description: Enables or disables HTTP basic auth for each incoming request. If enabled then username and password will also need to be configured.
+      required: false
+      show_user: false
+    - name: username
+      type: text
+      title: Username
+      description: If basic_auth is enabled, this is the username used for authentication against the HTTP listener. Requires password to also be set.
+      required: false
+      show_user: false
+    - name: password
+      type: password
+      title: Password
+      description: If basic_auth is enabled, this is the password used for authentication against the HTTP listener. Requires username to also be set.
+      required: false
+      show_user: false
+    - name: secret_header
+      type: text
+      title: Secret Header
+      description: The header to check for a specific value specified by secret.value. Certain webhooks provide the possibility to include a special header and secret to identify the source.
+      required: false
+      show_user: false
+    - name: secret_value
+      type: password
+      title: Secret Value
+      description: The secret stored in the header name specified by secret.header. Certain webhooks provide the possibility to include a special header and secret to identify the source.
+      required: false
+      show_user: false
+    - name: hmac_header
+      type: text
+      title: HMAC Header
+      description: The name of the header that contains the HMAC signature, for example X-Dropbox-Signature, X-Hub-Signature-256, etc.
+      required: false
+      show_user: false
+    - name: hmac_key
+      type: password
+      title: HMAC Key
+      description: The secret key used to calculate the HMAC signature. Typically, the webhook sender provides this value.
+      required: false
+      show_user: false
+    - name: hmac_type
+      type: text
+      title: HMAC Type
+      description: The hash algorithm to use for the HMAC comparison. At this time the only valid values are sha256 or sha1.
+      required: false
+      show_user: false
+    - name: hmac_prefix
+      type: text
+      title: HMAC Prefix
+      description: The prefix for the signature. Certain webhooks prefix the HMAC signature with a value, for example sha256=.
+      required: false
+      show_user: false
+    - name: content_type
+      type: text
+      title: Content Type
+      description: By default the input expects the incoming POST to include a Content-Type of application/json to try to enforce the incoming data to be valid JSON. In certain scenarios when the source of the request is not able to do that, it can be overwritten with another value or set to null.
+      required: false
+      show_user: false
+    - name: response_code
+      type: text
+      title: Response Code
+      description: The HTTP response code returned upon success. Should be in the 2XX range.
+      required: false
+      show_user: false
+    - name: response_body
+      type: text
+      title: Response Body
+      description: The response body returned upon success. Should be a single line JSON string.
+      required: false
+      show_user: false
+    - name: include_headers
+      type: text
+      title: Include Headers
+      description: This options specifies a list of HTTP headers that should be copied from the incoming request and included in the document. All configured headers will always be canonicalized to match the headers of the incoming request. For example, ["content-type"] will become ["Content-Type"] when the filebeat is running.
+      multi: true
+      required: false
+      show_user: false

@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import type { EuiSideNavItemType } from '@elastic/eui';
 import type { ReactNode } from 'react';
 import React, { useCallback, useMemo } from 'react';
-import { CHANGE_POINT_DETECTION_ENABLED } from '@kbn/aiops-plugin/common';
+import { CHANGE_POINT_DETECTION_ENABLED } from '@kbn/aiops-change-point-detection/constants';
 import { useUrlState } from '@kbn/ml-url-state';
 import { NotificationsIndicator } from './notifications_indicator';
 import type { MlLocatorParams } from '../../../../common/types/locator';
@@ -151,6 +151,18 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
             disabled: disableLinks,
             testSubj: 'mlMainTab settings',
             highlightNestedRoutes: true,
+          },
+          {
+            id: 'supplied_cofigurations',
+            name: i18n.translate(
+              'xpack.ml.navMenu.anomalyDetection.suppliedConfigurationsLinkText',
+              {
+                defaultMessage: 'Supplied Configurations',
+              }
+            ),
+            disabled: disableLinks,
+            pathId: ML_PAGES.SUPPLIED_CONFIGURATIONS,
+            testSubj: 'mlMainTab suppliedConfigurations',
           },
         ],
       },

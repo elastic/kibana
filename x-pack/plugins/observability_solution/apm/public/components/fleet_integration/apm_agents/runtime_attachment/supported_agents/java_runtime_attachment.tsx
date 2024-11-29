@@ -9,12 +9,7 @@ import yaml from 'js-yaml';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useState, useMemo } from 'react';
-import {
-  RuntimeAttachment,
-  RuntimeAttachmentSettings,
-  IDiscoveryRule,
-  validateVersion,
-} from '..';
+import { RuntimeAttachment, RuntimeAttachmentSettings, IDiscoveryRule, validateVersion } from '..';
 import type {
   NewPackagePolicy,
   PackagePolicy,
@@ -96,13 +91,10 @@ export function JavaRuntimeAttachment({ newPolicy, onChange }: Props) {
   const [isDirty, setIsDirty] = useState(false);
   const onChangePolicy = useCallback(
     (runtimeAttachmentSettings: RuntimeAttachmentSettings) => {
-      const apmInputIdx = newPolicy.inputs.findIndex(
-        ({ type }) => type === 'apm'
-      );
+      const apmInputIdx = newPolicy.inputs.findIndex(({ type }) => type === 'apm');
       onChange({
         isValid:
-          !runtimeAttachmentSettings.enabled ||
-          validateVersion(runtimeAttachmentSettings.version),
+          !runtimeAttachmentSettings.enabled || validateVersion(runtimeAttachmentSettings.version),
         updatedPolicy: {
           ...newPolicy,
           inputs: [
@@ -117,9 +109,7 @@ export function JavaRuntimeAttachment({ newPolicy, onChange }: Props) {
                 },
                 java_attacher_discovery_rules: {
                   type: 'yaml',
-                  value: encodeDiscoveryRulesYaml(
-                    runtimeAttachmentSettings.discoveryRules
-                  ),
+                  value: encodeDiscoveryRulesYaml(runtimeAttachmentSettings.discoveryRules),
                 },
                 java_attacher_agent_version: {
                   type: 'text',
@@ -148,20 +138,18 @@ export function JavaRuntimeAttachment({ newPolicy, onChange }: Props) {
         {
           operation: {
             value: 'include',
-            label: i18n.translate(
-              'xpack.apm.fleetIntegration.javaRuntime.operationType.include',
-              { defaultMessage: 'Include' }
-            ),
+            label: i18n.translate('xpack.apm.fleetIntegration.javaRuntime.operationType.include', {
+              defaultMessage: 'Include',
+            }),
           },
           types: includeOptions,
         },
         {
           operation: {
             value: 'exclude',
-            label: i18n.translate(
-              'xpack.apm.fleetIntegration.javaRuntime.operationType.exclude',
-              { defaultMessage: 'Exclude' }
-            ),
+            label: i18n.translate('xpack.apm.fleetIntegration.javaRuntime.operationType.exclude', {
+              defaultMessage: 'Exclude',
+            }),
           },
           types: excludeOptions,
         },
@@ -170,8 +158,7 @@ export function JavaRuntimeAttachment({ newPolicy, onChange }: Props) {
       toggleDescription={i18n.translate(
         'xpack.apm.fleetIntegration.javaRuntime.toggleDescription',
         {
-          defaultMessage:
-            'Attach the Java agent to running and starting Java applications.',
+          defaultMessage: 'Attach the Java agent to running and starting Java applications.',
         }
       )}
       discoveryRulesDescription={
@@ -199,9 +186,7 @@ export function JavaRuntimeAttachment({ newPolicy, onChange }: Props) {
         apmVars?.java_attacher_discovery_rules?.value ?? '[]\n',
         [initialDiscoveryRule]
       )}
-      version={
-        apmVars?.java_attacher_agent_version?.value || DEFAULT_AGENT_VERSION
-      }
+      version={apmVars?.java_attacher_agent_version?.value || DEFAULT_AGENT_VERSION}
       invalidatePackagePolicy={invalidatePackagePolicy}
     />
   );
@@ -220,8 +205,7 @@ function decodeDiscoveryRulesYaml(
   defaultDiscoveryRules: IDiscoveryRule[] = []
 ): IDiscoveryRule[] {
   try {
-    const parsedYaml: DiscoveryRulesParsedYaml =
-      yaml.load(discoveryRulesYaml) ?? [];
+    const parsedYaml = (yaml.load(discoveryRulesYaml) as DiscoveryRulesParsedYaml) ?? [];
 
     if (parsedYaml.length === 0) {
       return defaultDiscoveryRules;

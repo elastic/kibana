@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -11,10 +12,10 @@ import {
   hasSimpleExecutableName,
   OperatingSystem,
   ConditionEntryField,
-  hasWildcardAndInvalidOperator,
+  validateWildcardInput,
+  validateHasWildcardWithWrongOperator,
   validatePotentialWildcardInput,
   validateFilePathInput,
-  validateWildcardInput,
   WILDCARD_WARNING,
   FILEPATH_WARNING,
 } from '.';
@@ -131,16 +132,24 @@ describe('validateFilePathInput', () => {
 
 describe('Wildcard and invalid operator', () => {
   it('should return TRUE when operator is not "WILDCARD" and value contains a wildcard', () => {
-    expect(hasWildcardAndInvalidOperator({ operator: 'match', value: 'asdf*' })).toEqual(true);
+    expect(validateHasWildcardWithWrongOperator({ operator: 'match', value: 'asdf*' })).toEqual(
+      true
+    );
   });
   it('should return FALSE when operator is not "WILDCARD" and value does not contain a wildcard', () => {
-    expect(hasWildcardAndInvalidOperator({ operator: 'match', value: 'asdf' })).toEqual(false);
+    expect(validateHasWildcardWithWrongOperator({ operator: 'match', value: 'asdf' })).toEqual(
+      false
+    );
   });
   it('should return FALSE when operator is "WILDCARD" and value contains a wildcard', () => {
-    expect(hasWildcardAndInvalidOperator({ operator: 'wildcard', value: 'asdf*' })).toEqual(false);
+    expect(validateHasWildcardWithWrongOperator({ operator: 'wildcard', value: 'asdf*' })).toEqual(
+      false
+    );
   });
   it('should return FALSE when operator is "WILDCARD" and value does not contain a wildcard', () => {
-    expect(hasWildcardAndInvalidOperator({ operator: 'wildcard', value: 'asdf' })).toEqual(false);
+    expect(validateHasWildcardWithWrongOperator({ operator: 'wildcard', value: 'asdf' })).toEqual(
+      false
+    );
   });
 });
 

@@ -7,7 +7,7 @@
 
 import React from 'react';
 import type { PropsWithChildren } from 'react';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useUiSetting$ } from '../../../../../common/lib/kibana';
 import type { Rule, RulesSnoozeSettingsMap } from '../../../../rule_management/logic';
 import { useFindRules } from '../../../../rule_management/logic/use_find_rules';
@@ -191,8 +191,8 @@ describe('RulesTableContextProvider', () => {
             { id: '2', name: 'rule 2' },
           ] as Rule[],
           rulesSnoozeSettings: {
-            '1': { muteAll: true, snoozeSchedule: [] },
-            '2': { muteAll: false, snoozeSchedule: [] },
+            '1': { muteAll: true, snoozeSchedule: [], name: 'rule 1' },
+            '2': { muteAll: false, snoozeSchedule: [], name: 'rule 2' },
           },
         });
 
@@ -217,18 +217,20 @@ describe('RulesTableContextProvider', () => {
             { id: '2', name: 'rule 2' },
           ] as Rule[],
           rulesSnoozeSettings: {
-            '1': { muteAll: true, snoozeSchedule: [] },
-            '2': { muteAll: false, snoozeSchedule: [] },
+            '1': { muteAll: true, snoozeSchedule: [], name: 'rule 1' },
+            '2': { muteAll: false, snoozeSchedule: [], name: 'rule 2' },
           },
         });
 
         expect(state.rulesSnoozeSettings.data).toEqual({
           '1': {
             muteAll: true,
+            name: 'rule 1',
             snoozeSchedule: [],
           },
           '2': {
             muteAll: false,
+            name: 'rule 2',
             snoozeSchedule: [],
           },
         });

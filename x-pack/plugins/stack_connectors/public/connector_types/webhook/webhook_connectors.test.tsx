@@ -11,10 +11,10 @@ import WebhookActionConnectorFields from './webhook_connectors';
 import { ConnectorFormTestProvider, waitForComponentToUpdate } from '../lib/test_utils';
 import { act, render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { WebhookAuthType, SSLCertType } from '../../../common/webhook/constants';
+import { AuthType, SSLCertType } from '../../../common/auth/constants';
 
 describe('WebhookActionConnectorFields renders', () => {
-  test('all connector fields is rendered', async () => {
+  it('renders all connector fields', async () => {
     const actionConnector = {
       actionTypeId: '.webhook',
       name: 'webhook',
@@ -23,7 +23,7 @@ describe('WebhookActionConnectorFields renders', () => {
         url: 'https://test.com',
         headers: [{ key: 'content-type', value: 'text' }],
         hasAuth: true,
-        authType: WebhookAuthType.Basic,
+        authType: AuthType.Basic,
       },
       secrets: {
         user: 'user',
@@ -92,7 +92,7 @@ describe('WebhookActionConnectorFields renders', () => {
       );
 
       await act(async () => {
-        userEvent.click(getByTestId('form-test-provide-submit'));
+        await userEvent.click(getByTestId('form-test-provide-submit'));
       });
 
       expect(onSubmit).toBeCalledWith({
@@ -104,7 +104,7 @@ describe('WebhookActionConnectorFields renders', () => {
             url: 'https://test.com',
             headers: [{ key: 'content-type', value: 'text' }],
             hasAuth: true,
-            authType: WebhookAuthType.Basic,
+            authType: AuthType.Basic,
           },
           secrets: {
             user: 'user',
@@ -140,7 +140,7 @@ describe('WebhookActionConnectorFields renders', () => {
       );
 
       await act(async () => {
-        userEvent.click(getByTestId('form-test-provide-submit'));
+        await userEvent.click(getByTestId('form-test-provide-submit'));
       });
 
       expect(onSubmit).toBeCalledWith({
@@ -171,7 +171,7 @@ describe('WebhookActionConnectorFields renders', () => {
           method: 'PUT',
           url: 'https://test.com',
           hasAuth: true,
-          authType: WebhookAuthType.Basic,
+          authType: AuthType.Basic,
         },
       };
 
@@ -186,7 +186,7 @@ describe('WebhookActionConnectorFields renders', () => {
       );
 
       await act(async () => {
-        userEvent.click(getByTestId('form-test-provide-submit'));
+        await userEvent.click(getByTestId('form-test-provide-submit'));
       });
 
       expect(onSubmit).toBeCalledWith({
@@ -197,7 +197,7 @@ describe('WebhookActionConnectorFields renders', () => {
             method: 'PUT',
             url: 'https://test.com',
             hasAuth: true,
-            authType: WebhookAuthType.Basic,
+            authType: AuthType.Basic,
           },
           secrets: {
             user: 'user',
@@ -233,7 +233,7 @@ describe('WebhookActionConnectorFields renders', () => {
       );
 
       await act(async () => {
-        userEvent.click(res.getByTestId('form-test-provide-submit'));
+        await userEvent.click(res.getByTestId('form-test-provide-submit'));
       });
 
       expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });
@@ -258,15 +258,14 @@ describe('WebhookActionConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await act(async () => {
-        await userEvent.type(res.getByTestId(field), `{selectall}{backspace}${value}`, {
+      await userEvent.clear(res.getByTestId(field));
+      if (value !== '') {
+        await userEvent.type(res.getByTestId(field), value, {
           delay: 10,
         });
-      });
+      }
 
-      await act(async () => {
-        userEvent.click(res.getByTestId('form-test-provide-submit'));
-      });
+      await userEvent.click(res.getByTestId('form-test-provide-submit'));
 
       expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });
     });
@@ -292,7 +291,7 @@ describe('WebhookActionConnectorFields renders', () => {
       );
 
       await act(async () => {
-        userEvent.click(res.getByTestId('form-test-provide-submit'));
+        await userEvent.click(res.getByTestId('form-test-provide-submit'));
       });
 
       expect(onSubmit).toHaveBeenCalledWith({
@@ -303,7 +302,7 @@ describe('WebhookActionConnectorFields renders', () => {
             method: 'PUT',
             url: 'https://test.com',
             hasAuth: true,
-            authType: WebhookAuthType.Basic,
+            authType: AuthType.Basic,
             ca: Buffer.from('some binary string').toString('base64'),
             verificationMode: 'full',
             headers: [{ key: 'content-type', value: 'text' }],
@@ -327,7 +326,7 @@ describe('WebhookActionConnectorFields renders', () => {
         ...actionConnector,
         config: {
           ...actionConnector.config,
-          authType: WebhookAuthType.SSL,
+          authType: AuthType.SSL,
           certType: SSLCertType.CRT,
         },
         secrets: {
@@ -347,7 +346,7 @@ describe('WebhookActionConnectorFields renders', () => {
       );
 
       await act(async () => {
-        userEvent.click(res.getByTestId('form-test-provide-submit'));
+        await userEvent.click(res.getByTestId('form-test-provide-submit'));
       });
 
       expect(onSubmit).toHaveBeenCalledWith({
@@ -358,7 +357,7 @@ describe('WebhookActionConnectorFields renders', () => {
             method: 'PUT',
             url: 'https://test.com',
             hasAuth: true,
-            authType: WebhookAuthType.SSL,
+            authType: AuthType.SSL,
             certType: SSLCertType.CRT,
             headers: [{ key: 'content-type', value: 'text' }],
           },
@@ -381,7 +380,7 @@ describe('WebhookActionConnectorFields renders', () => {
         ...actionConnector,
         config: {
           ...actionConnector.config,
-          authType: WebhookAuthType.SSL,
+          authType: AuthType.SSL,
           certType: SSLCertType.PFX,
         },
         secrets: {
@@ -400,7 +399,7 @@ describe('WebhookActionConnectorFields renders', () => {
       );
 
       await act(async () => {
-        userEvent.click(res.getByTestId('form-test-provide-submit'));
+        await userEvent.click(res.getByTestId('form-test-provide-submit'));
       });
 
       expect(onSubmit).toHaveBeenCalledWith({
@@ -411,7 +410,7 @@ describe('WebhookActionConnectorFields renders', () => {
             method: 'PUT',
             url: 'https://test.com',
             hasAuth: true,
-            authType: WebhookAuthType.SSL,
+            authType: AuthType.SSL,
             certType: SSLCertType.PFX,
             headers: [{ key: 'content-type', value: 'text' }],
           },
@@ -433,7 +432,7 @@ describe('WebhookActionConnectorFields renders', () => {
         ...actionConnector,
         config: {
           ...actionConnector.config,
-          authType: WebhookAuthType.SSL,
+          authType: AuthType.SSL,
           certType: SSLCertType.CRT,
         },
         secrets: {
@@ -452,7 +451,7 @@ describe('WebhookActionConnectorFields renders', () => {
       );
 
       await act(async () => {
-        userEvent.click(res.getByTestId('form-test-provide-submit'));
+        await userEvent.click(res.getByTestId('form-test-provide-submit'));
       });
 
       expect(onSubmit).toHaveBeenCalledWith({

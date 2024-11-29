@@ -9,16 +9,12 @@ import { journey, step, before, after, expect } from '@elastic/synthetics';
 import { byTestId } from '@kbn/ux-plugin/e2e/journeys/utils';
 import { RetryService } from '@kbn/ftr-common-functional-services';
 import { v4 as uuidv4 } from 'uuid';
-import { getReasonMessage } from '../../../../server/alert_rules/status_rule/message_utils';
-import { recordVideo } from '../../../helpers/record_video';
+import { getReasonMessage } from '@kbn/synthetics-plugin/server/alert_rules/status_rule/message_utils';
 import { syntheticsAppPageProvider } from '../../page_objects/synthetics_app';
 import { SyntheticsServices } from '../services/synthetics_services';
 
 journey(`DefaultStatusAlert`, async ({ page, params }) => {
-  recordVideo(page);
-
-  page.setDefaultTimeout(60 * 1000);
-  const syntheticsApp = syntheticsAppPageProvider({ page, kibanaUrl: params.kibanaUrl });
+  const syntheticsApp = syntheticsAppPageProvider({ page, kibanaUrl: params.kibanaUrl, params });
 
   const services = new SyntheticsServices(params);
 
@@ -33,20 +29,27 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
 
   before(async () => {
     await services.cleaUp();
-    await services.enableMonitorManagedViaApi();
-    configId = await services.addTestMonitor('Test Monitor', {
-      type: 'http',
-      urls: 'https://www.google.com',
-      custom_heartbeat_id: 'b9d9e146-746f-427f-bbf5-6e786b5b4e73',
-      locations: [
-        { id: 'us_central', label: 'North America - US Central', isServiceManaged: true },
-      ],
-    });
-    await services.addTestSummaryDocument({ timestamp: firstCheckTime, configId });
   });
 
   after(async () => {
     await services.cleaUp();
+  });
+
+  step('setup monitor', async () => {
+    const connectorId = await services.setupTestConnector();
+    await services.setupSettings(connectorId.id);
+
+    configId = await services.addTestMonitor('Test Monitor', {
+      type: 'http',
+      urls: 'https://www.google.com',
+      locations: [
+        { id: 'us_central', label: 'North America - US Central', isServiceManaged: true },
+      ],
+    });
+    await services.addTestSummaryDocument({
+      timestamp: firstCheckTime,
+      configId,
+    });
   });
 
   step('Go to monitors page', async () => {
@@ -54,21 +57,22 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
   });
 
   step('should create default status alert', async () => {
-    await page.click(byTestId('xpack.synthetics.alertsPopover.toggleButton'));
-    await page.isDisabled(byTestId('xpack.synthetics.toggleAlertFlyout'));
-    await page.click(byTestId('xpack.synthetics.toggleAlertFlyout'));
+    await page.getByTestId('syntheticsAlertsRulesButton').click();
+    await page.getByTestId('manageStatusRuleName').click();
+    await page.isDisabled(byTestId('editDefaultStatusRule'));
+    await page.getByTestId('editDefaultStatusRule').click();
+
     await page.waitForSelector('text=Monitor status rule');
-    expect(await page.locator(`[data-test-subj="intervalFormRow"]`).count()).toEqual(0);
+    await page.getByTestId('intervalInputUnit').selectOption('second');
+    await page.getByTestId('intervalInput').fill('20');
     await page.click(byTestId('saveEditedRuleButton'));
     await page.waitForSelector("text=Updated 'Synthetics status internal rule'");
   });
 
   step('Monitor is as up in overview page', async () => {
     await retry.tryForTime(90 * 1000, async () => {
-      const totalDown = await page.textContent(
-        byTestId('xpack.uptime.synthetics.overview.status.up')
-      );
-      expect(totalDown).toBe('1Up');
+      const totalUp = await page.textContent(byTestId('syntheticsOverviewUp'));
+      expect(totalUp).toBe('1Up');
     });
 
     await page.hover('text=Test Monitor');
@@ -78,6 +82,8 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
   step('Disable default alert for monitor', async () => {
     await page.click('text=Disable status alert');
     await page.waitForSelector(`text=Alerts are now disabled for the monitor "Test Monitor".`);
+    await page.getByTestId('Test Monitor-us_central-metric-item').hover();
+    await page.click('[aria-label="Open actions menu"]');
     await page.click('text=Enable status alert');
   });
 
@@ -95,9 +101,7 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
 
     await page.waitForTimeout(5 * 1000);
 
-    const totalDown = await page.textContent(
-      byTestId('xpack.uptime.synthetics.overview.status.down')
-    );
+    const totalDown = await page.textContent(byTestId('syntheticsOverviewDown'));
     expect(totalDown).toBe('1Down');
   });
 
@@ -107,14 +111,17 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
     const reasonMessage = getReasonMessage({
       name: 'Test Monitor',
       location: 'North America - US Central',
-      timestamp: downCheckTime,
       status: 'down',
+      checks: {
+        downWithinXChecks: 1,
+        down: 1,
+      },
     });
 
     await retry.tryForTime(3 * 60 * 1000, async () => {
       await page.click(byTestId('querySubmitButton'));
 
-      const alerts = await page.waitForSelector(`text=1 Alert`, { timeout: 20 * 1000 });
+      const alerts = await page.waitForSelector(`text=1 Alert`, { timeout: 5 * 1000 });
       expect(await alerts.isVisible()).toBe(true);
 
       const text = await page.textContent(`${byTestId('dataGridRowCell')} .euiLink`);
@@ -168,8 +175,11 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
     const reasonMessage = getReasonMessage({
       name,
       location: 'North America - US Central',
-      timestamp: downCheckTime,
       status: 'down',
+      checks: {
+        downWithinXChecks: 1,
+        down: 1,
+      },
     });
 
     await retry.tryForTime(3 * 60 * 1000, async () => {
@@ -198,6 +208,5 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
     await page.waitForTimeout(10 * 1000);
 
     await page.click('[aria-label="View in app"]');
-    await page.click(byTestId('breadcrumb /app/synthetics/monitors'));
   });
 });

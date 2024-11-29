@@ -11,9 +11,10 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
+import useObservable from 'react-use/lib/useObservable';
 import { useKibana } from '../../../lib/kibana';
 import { useBreadcrumbsNav } from '../breadcrumbs';
 import { SecuritySideNav } from '../security_side_nav';
@@ -22,13 +23,20 @@ const translatedNavTitle = i18n.translate('xpack.securitySolution.navigation.mai
   defaultMessage: 'Security',
 });
 
-export const useSecuritySolutionNavigation = (): KibanaPageTemplateProps['solutionNav'] => {
-  const { sideNavEnabled } = useKibana().services.configSettings;
+export const useSecuritySolutionNavigation = (): KibanaPageTemplateProps['solutionNav'] | null => {
+  const { chrome } = useKibana().services;
+  const chromeStyle$ = useMemo(() => chrome.getChromeStyle$(), [chrome]);
+  const chromeStyle = useObservable(chromeStyle$, undefined);
 
   useBreadcrumbsNav();
 
-  if (!sideNavEnabled) {
-    return undefined;
+  if (chromeStyle === undefined) {
+    return undefined; // wait for chromeStyle to be initialized
+  }
+
+  if (chromeStyle === 'project') {
+    // new shared-ux 'project' navigation enabled, return null to disable the 'classic' navigation
+    return null;
   }
 
   return {

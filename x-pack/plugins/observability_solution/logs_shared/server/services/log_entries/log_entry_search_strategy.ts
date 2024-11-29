@@ -7,12 +7,12 @@
 
 import * as rt from 'io-ts';
 import { concat, defer, of } from 'rxjs';
-import { concatMap, filter, map, shareReplay, take } from 'rxjs/operators';
+import { concatMap, filter, map, shareReplay, take } from 'rxjs';
 import type {
-  IEsSearchRequest,
-  IKibanaSearchRequest,
   IKibanaSearchResponse,
-} from '@kbn/data-plugin/common';
+  IKibanaSearchRequest,
+  IEsSearchRequest,
+} from '@kbn/search-types';
 import type { ISearchStrategy, PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import { getLogEntryCursorFromHit } from '../../../common/log_entry';
 import { decodeOrThrow } from '../../../common/runtime_types';
@@ -82,7 +82,16 @@ export const logEntrySearchStrategyProvider = ({
 
         return concat(recoveredRequest$, initialRequest$).pipe(
           take(1),
-          concatMap((esRequest) => esSearchStrategy.search(esRequest, options, dependencies)),
+          concatMap((esRequest) =>
+            esSearchStrategy.search(
+              esRequest,
+              {
+                ...options,
+                retrieveResults: true, // without it response will not contain progress information
+              },
+              dependencies
+            )
+          ),
           map((esResponse) => ({
             ...esResponse,
             rawResponse: decodeOrThrow(getLogEntryResponseRT)(esResponse.rawResponse),

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -33,6 +34,18 @@ const createPackageInfo = (parts: Partial<PackageInfo> = {}): PackageInfo => ({
   ...parts,
 });
 
+const getClientGetMockImplementation =
+  ({ darkMode, name }: { darkMode?: boolean; name?: string } = {}) =>
+  (key: string) => {
+    switch (key) {
+      case 'theme:darkMode':
+        return Promise.resolve(darkMode ?? false);
+      case 'theme:name':
+        return Promise.resolve(name ?? 'amsterdam');
+    }
+    return Promise.resolve();
+  };
+
 const createUiPlugins = (): UiPlugins => ({
   public: new Map(),
   internal: new Map(),
@@ -58,6 +71,7 @@ describe('bootstrapRenderer', () => {
     getPluginsBundlePathsMock.mockReturnValue(new Map());
     renderTemplateMock.mockReturnValue('__rendered__');
     getJsDependencyPathsMock.mockReturnValue([]);
+    uiSettingsClient.get.mockImplementation(getClientGetMockImplementation());
 
     renderer = bootstrapRendererFactory({
       auth,
@@ -90,13 +104,17 @@ describe('bootstrapRenderer', () => {
         uiSettingsClient,
       });
 
-      expect(uiSettingsClient.get).toHaveBeenCalledTimes(1);
+      expect(uiSettingsClient.get).toHaveBeenCalledTimes(2);
       expect(uiSettingsClient.get).toHaveBeenCalledWith('theme:darkMode');
+      expect(uiSettingsClient.get).toHaveBeenCalledWith('theme:name');
     });
 
     it('calls getThemeTag with the values from the UiSettingsClient (true/dark) when the UserSettingsService is not provided', async () => {
-      uiSettingsClient.get.mockResolvedValue(true);
-
+      uiSettingsClient.get.mockImplementation(
+        getClientGetMockImplementation({
+          darkMode: true,
+        })
+      );
       const request = httpServerMock.createKibanaRequest();
 
       await renderer({
@@ -106,13 +124,13 @@ describe('bootstrapRenderer', () => {
 
       expect(getThemeTagMock).toHaveBeenCalledTimes(1);
       expect(getThemeTagMock).toHaveBeenCalledWith({
-        themeVersion: 'v8',
+        name: 'v8',
         darkMode: true,
       });
     });
 
     it('calls getThemeTag with the values from the UiSettingsClient (false/light) when the UserSettingsService is not provided', async () => {
-      uiSettingsClient.get.mockResolvedValue(false);
+      uiSettingsClient.get.mockImplementation(getClientGetMockImplementation({}));
 
       const request = httpServerMock.createKibanaRequest();
 
@@ -123,13 +141,13 @@ describe('bootstrapRenderer', () => {
 
       expect(getThemeTagMock).toHaveBeenCalledTimes(1);
       expect(getThemeTagMock).toHaveBeenCalledWith({
-        themeVersion: 'v8',
+        name: 'v8',
         darkMode: false,
       });
     });
 
     it('calls getThemeTag with values (true/dark) from the UserSettingsService when provided', async () => {
-      userSettingsService.getUserSettingDarkMode.mockReturnValueOnce(true);
+      userSettingsService.getUserSettingDarkMode.mockResolvedValueOnce(true);
 
       renderer = bootstrapRendererFactory({
         auth,
@@ -149,13 +167,13 @@ describe('bootstrapRenderer', () => {
 
       expect(getThemeTagMock).toHaveBeenCalledTimes(1);
       expect(getThemeTagMock).toHaveBeenCalledWith({
-        themeVersion: 'v8',
+        name: 'v8',
         darkMode: true,
       });
     });
 
     it('calls getThemeTag with values (false/light) from the UserSettingsService when provided', async () => {
-      userSettingsService.getUserSettingDarkMode.mockReturnValueOnce(false);
+      userSettingsService.getUserSettingDarkMode.mockResolvedValueOnce(false);
 
       renderer = bootstrapRendererFactory({
         auth,
@@ -165,7 +183,6 @@ describe('bootstrapRenderer', () => {
         userSettingsService,
       });
 
-      uiSettingsClient.get.mockResolvedValue(true);
       const request = httpServerMock.createKibanaRequest();
 
       await renderer({
@@ -175,13 +192,13 @@ describe('bootstrapRenderer', () => {
 
       expect(getThemeTagMock).toHaveBeenCalledTimes(1);
       expect(getThemeTagMock).toHaveBeenCalledWith({
-        themeVersion: 'v8',
+        name: 'v8',
         darkMode: false,
       });
     });
 
     it('calls getThemeTag with values from the UiSettingsClient when values (false/light) from UserSettingsService are `undefined`', async () => {
-      userSettingsService.getUserSettingDarkMode.mockReturnValueOnce(undefined);
+      userSettingsService.getUserSettingDarkMode.mockResolvedValueOnce(undefined);
 
       renderer = bootstrapRendererFactory({
         auth,
@@ -191,7 +208,6 @@ describe('bootstrapRenderer', () => {
         userSettingsService,
       });
 
-      uiSettingsClient.get.mockResolvedValue(false);
       const request = httpServerMock.createKibanaRequest();
 
       await renderer({
@@ -201,13 +217,13 @@ describe('bootstrapRenderer', () => {
 
       expect(getThemeTagMock).toHaveBeenCalledTimes(1);
       expect(getThemeTagMock).toHaveBeenCalledWith({
-        themeVersion: 'v8',
+        name: 'v8',
         darkMode: false,
       });
     });
 
     it('calls getThemeTag with values from the UiSettingsClient when values (true/dark) from UserSettingsService are `undefined`', async () => {
-      userSettingsService.getUserSettingDarkMode.mockReturnValueOnce(undefined);
+      userSettingsService.getUserSettingDarkMode.mockResolvedValueOnce(undefined);
 
       renderer = bootstrapRendererFactory({
         auth,
@@ -217,7 +233,11 @@ describe('bootstrapRenderer', () => {
         userSettingsService,
       });
 
-      uiSettingsClient.get.mockResolvedValue(true);
+      uiSettingsClient.get.mockImplementation(
+        getClientGetMockImplementation({
+          darkMode: true,
+        })
+      );
       const request = httpServerMock.createKibanaRequest();
 
       await renderer({
@@ -227,7 +247,7 @@ describe('bootstrapRenderer', () => {
 
       expect(getThemeTagMock).toHaveBeenCalledTimes(1);
       expect(getThemeTagMock).toHaveBeenCalledWith({
-        themeVersion: 'v8',
+        name: 'v8',
         darkMode: true,
       });
     });
@@ -249,12 +269,17 @@ describe('bootstrapRenderer', () => {
         uiSettingsClient,
       });
 
-      expect(uiSettingsClient.get).toHaveBeenCalledTimes(1);
+      expect(uiSettingsClient.get).toHaveBeenCalledTimes(2);
       expect(uiSettingsClient.get).toHaveBeenCalledWith('theme:darkMode');
+      expect(uiSettingsClient.get).toHaveBeenCalledWith('theme:name');
     });
 
     it('calls getThemeTag with the correct parameters', async () => {
-      uiSettingsClient.get.mockResolvedValue(true);
+      uiSettingsClient.get.mockImplementation(
+        getClientGetMockImplementation({
+          darkMode: true,
+        })
+      );
 
       const request = httpServerMock.createKibanaRequest();
 
@@ -265,7 +290,7 @@ describe('bootstrapRenderer', () => {
 
       expect(getThemeTagMock).toHaveBeenCalledTimes(1);
       expect(getThemeTagMock).toHaveBeenCalledWith({
-        themeVersion: 'v8',
+        name: 'v8',
         darkMode: true,
       });
     });
@@ -282,7 +307,7 @@ describe('bootstrapRenderer', () => {
 
       expect(getThemeTagMock).toHaveBeenCalledTimes(1);
       expect(getThemeTagMock).toHaveBeenCalledWith({
-        themeVersion: 'v8',
+        name: 'system',
         darkMode: false,
       });
     });
@@ -317,7 +342,7 @@ describe('bootstrapRenderer', () => {
 
       expect(getThemeTagMock).toHaveBeenCalledTimes(1);
       expect(getThemeTagMock).toHaveBeenCalledWith({
-        themeVersion: 'v8',
+        name: 'v8',
         darkMode: false,
       });
     });

@@ -11,8 +11,8 @@ import type { GetSLOResponse } from '@kbn/slo-schema';
 import React, { useCallback, useMemo } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { InPortal } from 'react-reverse-portal';
-import { useCreateRule } from '@kbn/observability-plugin/public';
-import { useKibana } from '../../../utils/kibana_react';
+import { useCreateRule } from '../../../hooks/use_create_burn_rate_rule';
+import { useKibana } from '../../../hooks/use_kibana';
 import { sloEditFormFooterPortal } from '../shared_flyout/slo_add_form_flyout';
 import { paths } from '../../../../common/locators/paths';
 import { useCreateSlo } from '../../../hooks/use_create_slo';
@@ -25,14 +25,12 @@ import {
 } from '../helpers/process_slo_form_values';
 import { CreateSLOForm } from '../types';
 import { EquivalentApiRequest } from './common/equivalent_api_request';
-import { SLOInspectWrapper } from './common/slo_inspect';
+import { SLOInspectWrapper } from './common/slo_inspect/slo_inspect';
 
 export interface Props {
   slo?: GetSLOResponse;
   onSave?: () => void;
 }
-
-export const maxWidth = 775;
 
 export function SloEditFormFooter({ slo, onSave }: Props) {
   const {
@@ -45,7 +43,7 @@ export function SloEditFormFooter({ slo, onSave }: Props) {
 
   const { mutateAsync: createSlo, isLoading: isCreateSloLoading } = useCreateSlo();
   const { mutateAsync: updateSlo, isLoading: isUpdateSloLoading } = useUpdateSlo();
-  const { mutateAsync: createBurnRateRule, isLoading: isCreateBurnRateRuleLoading } =
+  const { mutate: createBurnRateRule, isLoading: isCreateBurnRateRuleLoading } =
     useCreateRule<BurnRateRuleParams>();
 
   const navigate = useCallback(
@@ -70,7 +68,7 @@ export function SloEditFormFooter({ slo, onSave }: Props) {
     } else {
       const processedValues = transformCreateSLOFormToCreateSLOInput(values);
       const resp = await createSlo({ slo: processedValues });
-      await createBurnRateRule({
+      createBurnRateRule({
         rule: createBurnRateRuleRequestBody({ ...processedValues, id: resp.id }),
       });
       if (onSave) {

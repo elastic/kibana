@@ -40,7 +40,7 @@ export const validateTimeout = ({
 }: {
   scheduleNumber: string;
   scheduleUnit: ScheduleUnit;
-  timeout: string;
+  timeout: string | number;
 }): boolean => {
   let schedule: number;
   switch (scheduleUnit) {
@@ -54,7 +54,7 @@ export const validateTimeout = ({
       schedule = parseFloat(scheduleNumber);
   }
 
-  return parseFloat(timeout) > schedule;
+  return parseFloat(String(timeout)) > schedule;
 };
 
 export const validJSONFormat = (value: string) => {
@@ -93,7 +93,7 @@ const validateCommon: ValidationLibrary = {
 
     return (
       !timeout ||
-      parseFloat(timeout) < 0 ||
+      parseFloat(String(timeout)) < 0 ||
       validateTimeout({
         timeout,
         scheduleNumber: number,
@@ -117,8 +117,7 @@ const validateHTTP: ValidationLibrary = {
     return validateHeaders(headers);
   },
   [ConfigKey.MAX_REDIRECTS]: ({ [ConfigKey.MAX_REDIRECTS]: value }) =>
-    (!!value && !`${value}`.match(DIGITS_ONLY)) ||
-    parseFloat(value as MonitorFields[ConfigKey.MAX_REDIRECTS]) < 0,
+    (!!value && !`${value}`.match(DIGITS_ONLY)) || parseFloat(value as string) < 0,
   [ConfigKey.URLS]: ({ [ConfigKey.URLS]: value }) => !value,
   ...validateCommon,
 };

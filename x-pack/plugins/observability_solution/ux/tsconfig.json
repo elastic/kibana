@@ -42,7 +42,15 @@
     "@kbn/shared-ux-router",
     "@kbn/observability-ai-assistant-plugin",
     "@kbn/config-schema",
-    "@kbn/shared-ux-link-redirect-app"
+    "@kbn/shared-ux-link-redirect-app",
+    "@kbn/apm-data-view",
+    "@kbn/spaces-plugin",
+    "@kbn/deeplinks-observability",
+    "@kbn/react-kibana-context-render",
+    "@kbn/react-kibana-context-theme",
+    "@kbn/search-types",
+    "@kbn/server-route-repository-utils",
+    "@kbn/core-chrome-browser"
   ],
   "exclude": ["target/**/*"]
 }

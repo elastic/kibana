@@ -1,14 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import React from 'react';
 
-jest.mock('@kbn/kibana-react-plugin/public', () => {
-  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
+jest.mock('@kbn/react-kibana-mount', () => {
+  const original = jest.requireActual('@kbn/react-kibana-mount');
 
   return {
     ...original,
@@ -43,7 +45,7 @@ describe('DataViewEditorPlugin', () => {
   });
 
   test('should expose a handler to open the data view field editor', async () => {
-    const startApi = await plugin.start(coreStart, pluginStart);
+    const startApi = plugin.start(coreStart, pluginStart);
     expect(startApi.openEditor).toBeDefined();
   });
 
@@ -58,13 +60,13 @@ describe('DataViewEditorPlugin', () => {
         openFlyout,
       },
     };
-    const { openEditor } = await plugin.start(coreStartMocked, pluginStart);
+    const { openEditor } = plugin.start(coreStartMocked, pluginStart);
 
     openEditor({ onSave: onSaveSpy });
 
     expect(openFlyout).toHaveBeenCalled();
 
-    const [[{ __reactMount__ }]] = openFlyout.mock.calls;
+    const [[__reactMount__]] = openFlyout.mock.calls;
     expect(__reactMount__.props.children.type).toBe(DataViewEditorLazy);
 
     // We force call the "onSave" prop from the <RuntimeFieldEditorFlyoutContent /> component
@@ -77,7 +79,7 @@ describe('DataViewEditorPlugin', () => {
   });
 
   test('should return a handler to close the flyout', async () => {
-    const { openEditor } = await plugin.start(coreStart, pluginStart);
+    const { openEditor } = plugin.start(coreStart, pluginStart);
 
     const closeEditorHandler = openEditor({ onSave: noop });
     expect(typeof closeEditorHandler).toBe('function');

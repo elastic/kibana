@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { EuiErrorBoundary } from '@elastic/eui';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -13,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { AppMountParameters, APP_WRAPPER_CLASS, CoreStart } from '@kbn/core/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
@@ -66,7 +66,6 @@ export const renderApp = ({
   isServerless?: boolean;
 }) => {
   const { element, history, theme$ } = appMountParameters;
-  const i18nCore = core.i18n;
   const isDarkMode = core.theme.getTheme().darkMode;
 
   core.chrome.setHelpExtension({
@@ -84,55 +83,47 @@ export const renderApp = ({
   const ApplicationUsageTrackingProvider =
     usageCollection?.components.ApplicationUsageTrackingProvider ?? React.Fragment;
   const CloudProvider = plugins.cloud?.CloudContextProvider ?? React.Fragment;
-  const PresentationContextProvider = plugins.presentationUtil?.ContextProvider ?? React.Fragment;
 
   ReactDOM.render(
-    <PresentationContextProvider>
-      <EuiErrorBoundary>
-        <ApplicationUsageTrackingProvider>
-          <KibanaThemeProvider {...{ theme: { theme$ } }}>
-            <CloudProvider>
-              <KibanaContextProvider
-                services={{
-                  ...core,
-                  ...plugins,
-                  storage: new Storage(localStorage),
+    <KibanaRenderContextProvider {...core}>
+      <ApplicationUsageTrackingProvider>
+        <KibanaThemeProvider {...{ theme: { theme$ } }}>
+          <CloudProvider>
+            <KibanaContextProvider
+              services={{
+                ...core,
+                ...plugins,
+                storage: new Storage(localStorage),
+                isDev,
+                kibanaVersion,
+                isServerless,
+              }}
+            >
+              <PluginContext.Provider
+                value={{
                   isDev,
-                  kibanaVersion,
-                  isServerless,
+                  config,
+                  appMountParameters,
+                  observabilityRuleTypeRegistry,
+                  ObservabilityPageTemplate,
                 }}
               >
-                <PluginContext.Provider
-                  value={{
-                    isDev,
-                    config,
-                    appMountParameters,
-                    observabilityRuleTypeRegistry,
-                    ObservabilityPageTemplate,
-                  }}
-                >
-                  <Router history={history}>
-                    <EuiThemeProvider darkMode={isDarkMode}>
-                      <i18nCore.Context>
-                        <RedirectAppLinks
-                          coreStart={core}
-                          data-test-subj="observabilityMainContainer"
-                        >
-                          <QueryClientProvider client={queryClient}>
-                            <App />
-                            <HideableReactQueryDevTools />
-                          </QueryClientProvider>
-                        </RedirectAppLinks>
-                      </i18nCore.Context>
-                    </EuiThemeProvider>
-                  </Router>
-                </PluginContext.Provider>
-              </KibanaContextProvider>
-            </CloudProvider>
-          </KibanaThemeProvider>
-        </ApplicationUsageTrackingProvider>
-      </EuiErrorBoundary>
-    </PresentationContextProvider>,
+                <Router history={history}>
+                  <EuiThemeProvider darkMode={isDarkMode}>
+                    <RedirectAppLinks coreStart={core} data-test-subj="observabilityMainContainer">
+                      <QueryClientProvider client={queryClient}>
+                        <App />
+                        <HideableReactQueryDevTools />
+                      </QueryClientProvider>
+                    </RedirectAppLinks>
+                  </EuiThemeProvider>
+                </Router>
+              </PluginContext.Provider>
+            </KibanaContextProvider>
+          </CloudProvider>
+        </KibanaThemeProvider>
+      </ApplicationUsageTrackingProvider>
+    </KibanaRenderContextProvider>,
     element
   );
   return () => {

@@ -30,4 +30,4 @@ export const SOURCERER = {
 };
 
 export const HOSTS_STAT =
-  '[data-test-subj="stat-hosts"] [data-test-subj="stat-title"] [data-test-subj="metric_value"]';
+  '[data-test-embeddable-id="hostsKpiHostsQuery-hosts-metric-embeddable"] [data-test-subj="metric_value"]';

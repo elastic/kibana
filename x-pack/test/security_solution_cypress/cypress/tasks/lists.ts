@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
 import {
   VALUE_LISTS_MODAL_ACTIVATOR,
   VALUE_LIST_CLOSE_BUTTON,
@@ -13,7 +14,19 @@ import {
   VALUE_LIST_FILE_PICKER,
   VALUE_LIST_FILE_UPLOAD_BUTTON,
   VALUE_LIST_TYPE_SELECTOR,
+  VALUE_LIST_ITEMS_MODAL_SEARCH_BAR_INPUT,
+  VALUE_LIST_ITEMS_MODAL_TABLE,
+  VALUE_LIST_ITEMS_MODAL_INFO,
+  VALUE_LIST_ITEMS_ADD_BUTTON_SHOW_POPOVER,
+  VALUE_LIST_ITEMS_ADD_INPUT,
+  VALUE_LIST_ITEMS_ADD_BUTTON_SUBMIT,
+  VALUE_LIST_ITEMS_FILE_PICKER,
+  VALUE_LIST_ITEMS_UPLOAD,
+  getValueListUpdateItemButton,
+  getValueListDeleteItemButton,
 } from '../screens/lists';
+import { EUI_INLINE_SAVE_BUTTON } from '../screens/common/controls';
+import { rootRequest } from './api_calls/common';
 
 export const KNOWN_VALUE_LIST_FILES = {
   TEXT: 'value_list.txt',
@@ -22,18 +35,16 @@ export const KNOWN_VALUE_LIST_FILES = {
 };
 
 export const createListsIndex = () => {
-  cy.request({
+  rootRequest({
     method: 'POST',
     url: '/api/lists/index',
-    headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
     failOnStatusCode: false,
   });
 };
 
 export const waitForListsIndex = () => {
-  cy.request({
+  rootRequest({
     url: '/api/lists/index',
-    headers: { 'x-elastic-internal-origin': 'security-solution' },
     retryOnStatusCodeFailure: true,
   }).then((response) => {
     if (response.status !== 200) {
@@ -94,10 +105,9 @@ export const deleteValueLists = (
  * Ref: https://www.elastic.co/guide/en/security/current/lists-api-delete-container.html
  */
 const deleteValueList = (list: string): Cypress.Chainable<Cypress.Response<unknown>> => {
-  return cy.request({
+  return rootRequest({
     method: 'DELETE',
     url: `api/lists?id=${list}`,
-    headers: { 'kbn-xsrf': 'delete-lists', 'x-elastic-internal-origin': 'security-solution' },
     failOnStatusCode: false,
   });
 };
@@ -123,13 +133,11 @@ const uploadListItemData = (
     .filter((line) => line.trim() !== '')
     .join('\n');
 
-  return cy.request({
+  return rootRequest({
     method: 'POST',
-    url: `api/lists/items/_import?type=${type}`,
+    url: `api/lists/items/_import?type=${type}&refresh=true`,
     encoding: 'binary',
     headers: {
-      'kbn-xsrf': 'upload-value-lists',
-      'x-elastic-internal-origin': 'security-solution',
       'Content-Type': 'multipart/form-data; boundary=----WebKitFormBoundaryJLrRH89J8QVArZyv',
     },
     body: `------WebKitFormBoundaryJLrRH89J8QVArZyv\nContent-Disposition: form-data; name="file"; filename="${file}"\n\n${removedEmptyLines}`,
@@ -159,4 +167,96 @@ export const importValueList = (
   testSuggestions: string[] | undefined = undefined
 ) => {
   return cy.fixture<string>(file).then((data) => uploadListItemData(file, type, data));
+};
+
+export const openValueListItemsModal = (listId: string) => {
+  return cy.get(`[data-test-subj="show-value-list-modal-${listId}"]`).click();
+};
+
+export const searchValueListItemsModal = (search: string) => {
+  cy.get(VALUE_LIST_ITEMS_MODAL_SEARCH_BAR_INPUT).clear();
+  cy.get(VALUE_LIST_ITEMS_MODAL_SEARCH_BAR_INPUT).type(search);
+  return cy.get(VALUE_LIST_ITEMS_MODAL_SEARCH_BAR_INPUT).trigger('search');
+};
+
+export const clearSearchValueListItemsModal = (search: string) => {
+  cy.get(VALUE_LIST_ITEMS_MODAL_SEARCH_BAR_INPUT).clear();
+  return cy.get(VALUE_LIST_ITEMS_MODAL_SEARCH_BAR_INPUT).trigger('search');
+};
+
+export const getValueListItemsTableRow = () =>
+  cy.get(VALUE_LIST_ITEMS_MODAL_TABLE).find('tbody tr');
+
+export const checkTotalItems = (totalItems: number) => {
+  cy.get(VALUE_LIST_ITEMS_MODAL_INFO).contains(`Total items: ${totalItems}`);
+};
+
+export const deleteListItem = (value: string) => {
+  return cy.get(getValueListDeleteItemButton(value)).click();
+};
+
+export const sortValueListItemsTableByValue = () => {
+  cy.get(VALUE_LIST_ITEMS_MODAL_TABLE).find('thead tr th').eq(0).click();
+};
+
+export const updateListItem = (oldValue: string, newValue: string) => {
+  const inlineEdit = getValueListUpdateItemButton(oldValue);
+  cy.get(inlineEdit).click();
+  cy.get(inlineEdit).find('input').clear();
+  cy.get(inlineEdit).find('input').type(newValue);
+  return cy.get(inlineEdit).find(EUI_INLINE_SAVE_BUTTON).click();
+};
+
+export const addListItem = (value: string) => {
+  cy.get(VALUE_LIST_ITEMS_ADD_BUTTON_SHOW_POPOVER).click();
+  cy.get(VALUE_LIST_ITEMS_ADD_INPUT).type(value);
+  return cy.get(VALUE_LIST_ITEMS_ADD_BUTTON_SUBMIT).click();
+};
+
+export const selectValueListsItemsFile = (file: string) => {
+  return cy.get(VALUE_LIST_ITEMS_FILE_PICKER).attachFile(file).trigger('change');
+};
+
+export const uploadValueListsItemsFile = () => {
+  return cy.get(VALUE_LIST_ITEMS_UPLOAD).click();
+};
+
+export const mockFetchListItemsError = () => {
+  cy.intercept('GET', `${LIST_ITEM_URL}/_find*`, {
+    statusCode: 400,
+    body: {
+      message: 'search_phase_execution_exception: all shards failed',
+      status_code: 400,
+    },
+  });
+};
+
+export const mockCreateListItemError = () => {
+  cy.intercept('POST', `${LIST_ITEM_URL}`, {
+    statusCode: 400,
+    body: {
+      message: 'error to create list item',
+      status_code: 400,
+    },
+  });
+};
+
+export const mockUpdateListItemError = () => {
+  cy.intercept('PATCH', `${LIST_ITEM_URL}`, {
+    statusCode: 400,
+    body: {
+      message: 'error to update list item',
+      status_code: 400,
+    },
+  });
+};
+
+export const mockDeleteListItemError = () => {
+  cy.intercept('DELETE', `${LIST_ITEM_URL}*`, {
+    statusCode: 400,
+    body: {
+      message: 'error to delete list item',
+      status_code: 400,
+    },
+  });
 };

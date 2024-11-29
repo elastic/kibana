@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`ResetSLO resets all associated resources 1`] = `
+exports[`ResetSLO happy path resets all associated resources 1`] = `
 [MockFunction] {
   "calls": Array [
     Array [
@@ -16,7 +16,7 @@ exports[`ResetSLO resets all associated resources 1`] = `
 }
 `;
 
-exports[`ResetSLO resets all associated resources 2`] = `
+exports[`ResetSLO happy path resets all associated resources 2`] = `
 [MockFunction] {
   "calls": Array [
     Array [
@@ -32,7 +32,7 @@ exports[`ResetSLO resets all associated resources 2`] = `
 }
 `;
 
-exports[`ResetSLO resets all associated resources 3`] = `
+exports[`ResetSLO happy path resets all associated resources 3`] = `
 [MockFunction] {
   "calls": Array [
     Array [
@@ -48,7 +48,7 @@ exports[`ResetSLO resets all associated resources 3`] = `
 }
 `;
 
-exports[`ResetSLO resets all associated resources 4`] = `
+exports[`ResetSLO happy path resets all associated resources 4`] = `
 [MockFunction] {
   "calls": Array [
     Array [
@@ -64,7 +64,7 @@ exports[`ResetSLO resets all associated resources 4`] = `
 }
 `;
 
-exports[`ResetSLO resets all associated resources 5`] = `
+exports[`ResetSLO happy path resets all associated resources 5`] = `
 [MockFunction] {
   "calls": Array [
     Array [
@@ -115,7 +115,7 @@ exports[`ResetSLO resets all associated resources 5`] = `
 }
 `;
 
-exports[`ResetSLO resets all associated resources 6`] = `
+exports[`ResetSLO happy path resets all associated resources 6`] = `
 [MockFunction] {
   "calls": Array [
     Array [
@@ -147,6 +147,7 @@ exports[`ResetSLO resets all associated resources 6`] = `
             "unit": "m",
             "value": 1,
           },
+          "preventInitialBackfill": false,
           "syncDelay": Duration {
             "unit": "m",
             "value": 1,
@@ -177,7 +178,7 @@ exports[`ResetSLO resets all associated resources 6`] = `
 }
 `;
 
-exports[`ResetSLO resets all associated resources 7`] = `
+exports[`ResetSLO happy path resets all associated resources 7`] = `
 [MockFunction] {
   "calls": Array [
     Array [
@@ -193,16 +194,88 @@ exports[`ResetSLO resets all associated resources 7`] = `
 }
 `;
 
-exports[`ResetSLO resets all associated resources 8`] = `
+exports[`ResetSLO happy path resets all associated resources 8`] = `
 [MockFunction] {
   "calls": Array [
+    Array [
+      Object {
+        "_meta": Object {
+          "description": "Ingest pipeline for SLO rollup data",
+          "managed": true,
+          "managed_by": "observability",
+          "version": 3.3,
+        },
+        "description": "Ingest pipeline for SLO rollup data [id: irrelevant, revision: 1]",
+        "id": ".slo-observability.sli.pipeline-irrelevant-1",
+        "processors": Array [
+          Object {
+            "set": Object {
+              "field": "_id",
+              "value": "{{{_id}}}-irrelevant-1",
+            },
+          },
+          Object {
+            "set": Object {
+              "field": "event.ingested",
+              "value": "{{{_ingest.timestamp}}}",
+            },
+          },
+          Object {
+            "set": Object {
+              "field": "slo.id",
+              "value": "irrelevant",
+            },
+          },
+          Object {
+            "set": Object {
+              "field": "slo.revision",
+              "value": 1,
+            },
+          },
+          Object {
+            "date_index_name": Object {
+              "date_formats": Array [
+                "UNIX_MS",
+                "ISO8601",
+                "yyyy-MM-dd'T'HH:mm:ss.SSSXX",
+              ],
+              "date_rounding": "M",
+              "field": "@timestamp",
+              "index_name_prefix": ".slo-observability.sli-v3.3.",
+            },
+          },
+          Object {
+            "dot_expander": Object {
+              "field": "*",
+              "if": "ctx.slo.groupings != null",
+              "ignore_failure": true,
+              "path": "slo.groupings",
+            },
+          },
+          Object {
+            "set": Object {
+              "description": "Generated the instanceId field based on the groupings field",
+              "field": "slo.instanceId",
+              "value": "*",
+            },
+          },
+          Object {
+            "pipeline": Object {
+              "ignore_failure": true,
+              "ignore_missing_pipeline": true,
+              "name": "slo-irrelevant@custom",
+            },
+          },
+        ],
+      },
+    ],
     Array [
       Object {
         "_meta": Object {
           "description": "Ingest pipeline for SLO summary data [id: irrelevant, revision: 1]",
           "managed": true,
           "managed_by": "observability",
-          "version": 3,
+          "version": 3.3,
         },
         "description": "Ingest pipeline for SLO summary data [id: irrelevant, revision: 1]",
         "id": ".slo-observability.summary.pipeline-irrelevant-1",
@@ -333,6 +406,7 @@ exports[`ResetSLO resets all associated resources 8`] = `
           },
           Object {
             "set": Object {
+              "description": "Store the indicator params",
               "field": "slo.indicator.params",
               "ignore_failure": true,
               "value": Object {
@@ -364,6 +438,93 @@ exports[`ResetSLO resets all associated resources 8`] = `
               "value": "http://myhost.com/mock-server-basepath",
             },
           },
+          Object {
+            "script": Object {
+              "description": "Computes the last five minute burn rate value",
+              "lang": "painless",
+              "params": Object {
+                "isTimeslice": false,
+                "totalSlicesInRange": 0,
+              },
+              "source": "def totalEvents = ctx[\\"fiveMinuteBurnRate\\"][\\"totalEvents\\"];
+  def goodEvents = ctx[\\"fiveMinuteBurnRate\\"][\\"goodEvents\\"];
+  def errorBudgetInitial = ctx[\\"errorBudgetInitial\\"];
+
+  if (totalEvents == null || totalEvents == 0) {
+    ctx[\\"fiveMinuteBurnRate\\"][\\"value\\"] = 0.0;
+    return;
+  }
+
+  def totalSlicesInRange = params[\\"totalSlicesInRange\\"];
+  def isTimeslice = params[\\"isTimeslice\\"];
+  if (isTimeslice && totalSlicesInRange > 0) {
+    def badEvents = (double)totalEvents - (double)goodEvents;
+    def sliValue = 1.0 - (badEvents / (double)totalSlicesInRange);
+    ctx[\\"fiveMinuteBurnRate\\"][\\"value\\"] = (1.0 - sliValue) / errorBudgetInitial;
+  } else {
+    def sliValue = (double)goodEvents / (double)totalEvents;
+    ctx[\\"fiveMinuteBurnRate\\"][\\"value\\"] = (1.0 - sliValue) / errorBudgetInitial;
+  }",
+            },
+          },
+          Object {
+            "script": Object {
+              "description": "Computes the last hour burn rate value",
+              "lang": "painless",
+              "params": Object {
+                "isTimeslice": false,
+                "totalSlicesInRange": 0,
+              },
+              "source": "def totalEvents = ctx[\\"oneHourBurnRate\\"][\\"totalEvents\\"];
+  def goodEvents = ctx[\\"oneHourBurnRate\\"][\\"goodEvents\\"];
+  def errorBudgetInitial = ctx[\\"errorBudgetInitial\\"];
+
+  if (totalEvents == null || totalEvents == 0) {
+    ctx[\\"oneHourBurnRate\\"][\\"value\\"] = 0.0;
+    return;
+  }
+
+  def totalSlicesInRange = params[\\"totalSlicesInRange\\"];
+  def isTimeslice = params[\\"isTimeslice\\"];
+  if (isTimeslice && totalSlicesInRange > 0) {
+    def badEvents = (double)totalEvents - (double)goodEvents;
+    def sliValue = 1.0 - (badEvents / (double)totalSlicesInRange);
+    ctx[\\"oneHourBurnRate\\"][\\"value\\"] = (1.0 - sliValue) / errorBudgetInitial;
+  } else {
+    def sliValue = (double)goodEvents / (double)totalEvents;
+    ctx[\\"oneHourBurnRate\\"][\\"value\\"] = (1.0 - sliValue) / errorBudgetInitial;
+  }",
+            },
+          },
+          Object {
+            "script": Object {
+              "description": "Computes the last day burn rate value",
+              "lang": "painless",
+              "params": Object {
+                "isTimeslice": false,
+                "totalSlicesInRange": 0,
+              },
+              "source": "def totalEvents = ctx[\\"oneDayBurnRate\\"][\\"totalEvents\\"];
+  def goodEvents = ctx[\\"oneDayBurnRate\\"][\\"goodEvents\\"];
+  def errorBudgetInitial = ctx[\\"errorBudgetInitial\\"];
+
+  if (totalEvents == null || totalEvents == 0) {
+    ctx[\\"oneDayBurnRate\\"][\\"value\\"] = 0.0;
+    return;
+  }
+
+  def totalSlicesInRange = params[\\"totalSlicesInRange\\"];
+  def isTimeslice = params[\\"isTimeslice\\"];
+  if (isTimeslice && totalSlicesInRange > 0) {
+    def badEvents = (double)totalEvents - (double)goodEvents;
+    def sliValue = 1.0 - (badEvents / (double)totalSlicesInRange);
+    ctx[\\"oneDayBurnRate\\"][\\"value\\"] = (1.0 - sliValue) / errorBudgetInitial;
+  } else {
+    def sliValue = (double)goodEvents / (double)totalEvents;
+    ctx[\\"oneDayBurnRate\\"][\\"value\\"] = (1.0 - sliValue) / errorBudgetInitial;
+  }",
+            },
+          },
         ],
       },
     ],
@@ -373,11 +534,15 @@ exports[`ResetSLO resets all associated resources 8`] = `
       "type": "return",
       "value": Promise {},
     },
+    Object {
+      "type": "return",
+      "value": Promise {},
+    },
   ],
 }
 `;
 
-exports[`ResetSLO resets all associated resources 9`] = `
+exports[`ResetSLO happy path resets all associated resources 9`] = `
 [MockFunction] {
   "calls": Array [
     Array [
@@ -409,6 +574,7 @@ exports[`ResetSLO resets all associated resources 9`] = `
             "unit": "m",
             "value": 1,
           },
+          "preventInitialBackfill": false,
           "syncDelay": Duration {
             "unit": "m",
             "value": 1,
@@ -439,7 +605,7 @@ exports[`ResetSLO resets all associated resources 9`] = `
 }
 `;
 
-exports[`ResetSLO resets all associated resources 10`] = `
+exports[`ResetSLO happy path resets all associated resources 10`] = `
 [MockFunction] {
   "calls": Array [
     Array [
@@ -455,7 +621,7 @@ exports[`ResetSLO resets all associated resources 10`] = `
 }
 `;
 
-exports[`ResetSLO resets all associated resources 11`] = `
+exports[`ResetSLO happy path resets all associated resources 11`] = `
 [MockFunction] {
   "calls": Array [
     Array [
@@ -465,8 +631,35 @@ exports[`ResetSLO resets all associated resources 11`] = `
           "errorBudgetEstimated": false,
           "errorBudgetInitial": 0.0010000000000000009,
           "errorBudgetRemaining": 1,
+          "fiveMinuteBurnRate": Object {
+            "goodEvents": 0,
+            "totalEvents": 0,
+            "value": 0,
+          },
           "goodEvents": 0,
           "isTempDoc": true,
+          "kibanaUrl": "http://myhost.com/mock-server-basepath",
+          "latestSliTimestamp": null,
+          "monitor": Object {
+            "config_id": null,
+            "name": null,
+          },
+          "observer": Object {
+            "geo": Object {
+              "name": null,
+            },
+            "name": null,
+          },
+          "oneDayBurnRate": Object {
+            "goodEvents": 0,
+            "totalEvents": 0,
+            "value": 0,
+          },
+          "oneHourBurnRate": Object {
+            "goodEvents": 0,
+            "totalEvents": 0,
+            "value": 0,
+          },
           "service": Object {
             "environment": "irrelevant",
             "name": "irrelevant",
@@ -474,18 +667,28 @@ exports[`ResetSLO resets all associated resources 11`] = `
           "sliValue": -1,
           "slo": Object {
             "budgetingMethod": "occurrences",
+            "createdAt": "2023-01-01T00:00:00.000Z",
             "description": "irrelevant",
             "groupBy": "*",
+            "groupings": Object {},
             "id": "irrelevant",
             "indicator": Object {
+              "params": Object {
+                "environment": "irrelevant",
+                "index": "metrics-apm*",
+                "service": "irrelevant",
+                "threshold": 500,
+                "transactionName": "irrelevant",
+                "transactionType": "irrelevant",
+              },
               "type": "sli.apm.transactionDuration",
             },
             "instanceId": "*",
             "name": "irrelevant",
             "objective": Object {
               "target": 0.999,
-              "timesliceTarget": null,
-              "timesliceWindow": null,
+              "timesliceTarget": undefined,
+              "timesliceWindow": undefined,
             },
             "revision": 1,
             "tags": Array [
@@ -496,10 +699,12 @@ exports[`ResetSLO resets all associated resources 11`] = `
               "duration": "7d",
               "type": "rolling",
             },
+            "updatedAt": "2023-01-01T00:00:00.000Z",
           },
           "spaceId": "some-space",
           "status": "NO_DATA",
           "statusCode": 0,
+          "summaryUpdatedAt": null,
           "totalEvents": 0,
           "transaction": Object {
             "name": "irrelevant",
@@ -507,7 +712,7 @@ exports[`ResetSLO resets all associated resources 11`] = `
           },
         },
         "id": "slo-irrelevant",
-        "index": ".slo-observability.summary-v3.temp",
+        "index": ".slo-observability.summary-v3.3.temp",
         "refresh": true,
       },
     ],

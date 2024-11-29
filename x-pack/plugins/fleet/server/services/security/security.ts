@@ -45,7 +45,7 @@ export function checkSuperuser(req: KibanaRequest) {
     return false;
   }
 
-  const security = appContextService.getSecurity();
+  const security = appContextService.getSecurityCore();
   const user = security.authc.getCurrentUser(req);
 
   if (!user) {
@@ -168,8 +168,8 @@ export async function getAuthzFromRequest(req: KibanaRequest): Promise<FleetAuth
             all: fleetAgentsAllAuth,
           },
           agentPolicies: {
-            read: fleetAgentPoliciesAllAuth,
-            all: fleetAgentPoliciesReadAuth,
+            read: fleetAgentPoliciesReadAuth,
+            all: fleetAgentPoliciesAllAuth,
           },
           settings: {
             read: fleetSettingsReadAuth,

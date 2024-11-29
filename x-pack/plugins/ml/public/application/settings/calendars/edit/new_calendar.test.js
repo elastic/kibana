@@ -5,20 +5,17 @@
  * 2.0.
  */
 
+import React from 'react';
+import { render, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+
 jest.mock('../../../contexts/kibana/use_create_url', () => ({
   useCreateAndNavigateToMlLink: jest.fn(),
 }));
 
 jest.mock('../../../components/help_menu', () => ({
   HelpMenu: () => <div id="mockHelpMenu" />,
-}));
-
-jest.mock('../../../util/dependency_cache', () => ({
-  getDocLinks: () => ({
-    links: {
-      ml: { calendars: jest.fn() },
-    },
-  }),
 }));
 
 jest.mock('../../../capabilities/check_capabilities', () => ({
@@ -34,44 +31,11 @@ jest.mock('../../../capabilities/get_capabilities', () => ({
 jest.mock('../../../ml_nodes_check/check_ml_nodes', () => ({
   mlNodesAvailable: () => true,
 }));
-jest.mock('../../../services/ml_api_service', () => ({
-  ml: {
-    calendars: () => {
-      return Promise.resolve([]);
-    },
-    jobs: {
-      jobsSummary: () => {
-        return Promise.resolve([]);
-      },
-      groups: () => {
-        return Promise.resolve([]);
-      },
-    },
-  },
-}));
-jest.mock('./utils', () => ({
-  getCalendarSettingsData: jest.fn().mockImplementation(
-    () =>
-      new Promise((resolve) => {
-        resolve({
-          jobIds: ['test-job-one', 'test-job-2'],
-          groupIds: ['test-group-one', 'test-group-two'],
-          calendars: [],
-        });
-      })
-  ),
-}));
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  withKibana: (comp) => {
-    return comp;
-  },
+jest.mock('../../../capabilities/check_capabilities', () => ({
+  usePermissionCheck: () => [true, true],
 }));
 
-import { shallowWithIntl, mountWithIntl } from '@kbn/test-jest-helpers';
-import React from 'react';
-import { NewCalendar } from './new_calendar';
-
-const calendars = [
+const calendarsMock = [
   {
     calendar_id: 'farequote-calendar',
     job_ids: ['farequote'],
@@ -102,78 +66,123 @@ const calendars = [
   },
 ];
 
-const props = {
-  canCreateCalendar: true,
-  canDeleteCalendar: true,
-  kibana: {
-    services: {
-      data: {
-        query: {
-          timefilter: {
-            timefilter: {
-              disableTimeRangeSelector: jest.fn(),
-              disableAutoRefreshSelector: jest.fn(),
-            },
-          },
+jest.mock('./utils', () => ({
+  ...jest.requireActual('./utils'),
+  getCalendarSettingsData: jest.fn().mockImplementation(
+    () =>
+      new Promise((resolve) => {
+        resolve({
+          jobIds: ['test-job-one', 'test-job-2'],
+          groupIds: ['test-group-one', 'test-group-two'],
+          calendars: calendarsMock,
+        });
+      })
+  ),
+}));
+
+const mockAddDanger = jest.fn();
+const mockKibanaContext = {
+  services: {
+    docLinks: { links: { ml: { calendars: 'test' } } },
+    notifications: { toasts: { addDanger: mockAddDanger, addError: jest.fn() } },
+    mlServices: {
+      mlApi: {
+        calendars: () => {
+          return Promise.resolve([]);
         },
-      },
-      notifications: {
-        toasts: {
-          addDanger: () => {},
+        jobs: {
+          jobsSummary: () => {
+            return Promise.resolve([]);
+          },
+          groups: () => {
+            return Promise.resolve([]);
+          },
         },
       },
     },
   },
 };
 
+const mockReact = React;
+jest.mock('@kbn/kibana-react-plugin/public', () => ({
+  withKibana: (type) => {
+    const EnhancedType = (props) => {
+      return mockReact.createElement(type, {
+        ...props,
+        kibana: mockKibanaContext,
+      });
+    };
+    return EnhancedType;
+  },
+}));
+
+import { NewCalendar } from './new_calendar';
+
 describe('NewCalendar', () => {
   test('Renders new calendar form', () => {
-    const wrapper = shallowWithIntl(<NewCalendar {...props} />);
+    const { getByTestId } = render(
+      <IntlProvider locale="en">
+        <NewCalendar isDst={false} />
+      </IntlProvider>
+    );
 
-    expect(wrapper).toMatchSnapshot();
+    expect(getByTestId('mlPageCalendarEdit')).toBeInTheDocument();
   });
 
   test('Import modal button is disabled', () => {
-    const wrapper = mountWithIntl(<NewCalendar {...props} />);
+    const { getByTestId } = render(
+      <IntlProvider locale="en">
+        <NewCalendar isDst={false} />
+      </IntlProvider>
+    );
 
-    const importButton = wrapper.find('[data-test-subj="mlCalendarImportEventsButton"]');
-    const button = importButton.find('EuiButton');
-    expect(button.prop('isDisabled')).toBe(true);
+    const importEventsButton = getByTestId('mlCalendarImportEventsButton');
+    expect(importEventsButton).toBeInTheDocument();
+    expect(importEventsButton).toBeDisabled();
   });
 
-  test('New event modal button is disabled', () => {
-    const wrapper = mountWithIntl(<NewCalendar {...props} />);
+  test('New event modal button is disabled', async () => {
+    const { getByTestId } = render(
+      <IntlProvider locale="en">
+        <NewCalendar isDst={false} />
+      </IntlProvider>
+    );
 
-    const importButton = wrapper.find('[data-test-subj="mlCalendarNewEventButton"]');
-    const button = importButton.find('EuiButton button');
-    button.simulate('click');
-
-    expect(button.prop('disabled')).toBe(true);
+    const newEventButton = getByTestId('mlCalendarNewEventButton');
+    expect(newEventButton).toBeInTheDocument();
+    expect(newEventButton).toBeDisabled();
   });
 
-  test('isDuplicateId returns true if form calendar id already exists in calendars', () => {
-    const wrapper = mountWithIntl(<NewCalendar {...props} />);
+  test('isDuplicateId returns true if form calendar id already exists in calendars', async () => {
+    const { getByTestId, queryByTestId, getByText } = render(
+      <IntlProvider locale="en">
+        <NewCalendar isDst={false} />
+      </IntlProvider>
+    );
 
-    const instance = wrapper.instance();
-    instance.setState({
-      calendars,
-      formCalendarId: calendars[0].calendar_id,
+    const mlCalendarIdFormRow = getByText('Calendar ID');
+    expect(mlCalendarIdFormRow).toBeInTheDocument();
+    const mlCalendarIdInput = queryByTestId('mlCalendarIdInput');
+    expect(mlCalendarIdInput).toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(mlCalendarIdInput).toBeEnabled();
     });
-    wrapper.update();
-    expect(instance.isDuplicateId()).toBe(true);
-  });
 
-  test('Save button is disabled if canCreateCalendar is false', () => {
-    const noCreateProps = {
-      ...props,
-      canCreateCalendar: false,
-    };
+    await userEvent.type(mlCalendarIdInput, 'this-is-a-new-calendar');
 
-    const wrapper = mountWithIntl(<NewCalendar {...noCreateProps} />);
+    await waitFor(() => {
+      expect(mlCalendarIdInput).toHaveValue('this-is-a-new-calendar');
+    });
 
-    const buttons = wrapper.find('[data-test-subj="mlSaveCalendarButton"]');
-    const saveButton = buttons.find('EuiButton');
+    const mlSaveCalendarButton = getByTestId('mlSaveCalendarButton');
+    expect(mlSaveCalendarButton).toBeInTheDocument();
+    expect(mlSaveCalendarButton).toBeEnabled();
 
-    expect(saveButton.prop('isDisabled')).toBe(true);
+    await userEvent.click(mlSaveCalendarButton);
+
+    expect(mockAddDanger).toHaveBeenCalledWith(
+      'Cannot create calendar with id [this-is-a-new-calendar] as it already exists.'
+    );
   });
 });

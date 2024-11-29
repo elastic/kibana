@@ -6,11 +6,15 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { castArray } from 'lodash';
 import { useBreadcrumb } from '../context/breadcrumbs/use_breadcrumb';
 import { useAnyOfApmParams } from './use_apm_params';
 import { useApmRouter } from './use_apm_router';
+import { Breadcrumb } from '../context/breadcrumbs/context';
 
-export function useDependencyDetailOperationsBreadcrumb() {
+export function useDependencyDetailOperationsBreadcrumb(
+  extraBreadCrumbs: Breadcrumb | Breadcrumb[] = []
+) {
   const {
     query: {
       dependencyName,
@@ -29,10 +33,9 @@ export function useDependencyDetailOperationsBreadcrumb() {
   useBreadcrumb(
     () => [
       {
-        title: i18n.translate(
-          'xpack.apm.dependencyDetailOperations.breadcrumbTitle',
-          { defaultMessage: 'Operations' }
-        ),
+        title: i18n.translate('xpack.apm.dependencyDetailOperations.breadcrumbTitle', {
+          defaultMessage: 'Operations',
+        }),
         href: apmRouter.link('/dependencies/operations', {
           query: {
             dependencyName,
@@ -46,12 +49,14 @@ export function useDependencyDetailOperationsBreadcrumb() {
           },
         }),
       },
+      ...castArray(extraBreadCrumbs),
     ],
     [
       apmRouter,
       comparisonEnabled,
       dependencyName,
       environment,
+      extraBreadCrumbs,
       kuery,
       rangeFrom,
       rangeTo,

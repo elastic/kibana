@@ -131,6 +131,7 @@ const UnstyledProcessEventDot = React.memo(
     nodeID,
     projectionMatrix,
     timeAtRender,
+    onClick,
   }: {
     /**
      * Id that identify the scope of analyzer
@@ -161,6 +162,11 @@ const UnstyledProcessEventDot = React.memo(
      * The time (unix epoch) at render.
      */
     timeAtRender: number;
+
+    /**
+     * Optional onClick to be called when clicking on a node
+     */
+    onClick?: () => void | undefined;
   }) => {
     const resolverComponentInstanceID = id;
     // This should be unique to each instance of Resolver
@@ -317,7 +323,7 @@ const UnstyledProcessEventDot = React.memo(
     }, [dispatch, nodeID, timestamp, id]);
 
     const handleClick = useCallback(
-      (clickEvent) => {
+      (clickEvent: React.MouseEvent) => {
         if (animationTarget.current?.beginElement) {
           animationTarget.current.beginElement();
         }
@@ -334,8 +340,12 @@ const UnstyledProcessEventDot = React.memo(
           );
           processDetailNavProps.onClick(clickEvent);
         }
+
+        if (onClick) {
+          onClick();
+        }
       },
-      [animationTarget, dispatch, nodeID, processDetailNavProps, nodeState, timestamp, id]
+      [animationTarget, dispatch, nodeID, processDetailNavProps, nodeState, timestamp, id, onClick]
     );
 
     const grandTotal: number | null = useSelector((state: State) =>
@@ -464,7 +474,7 @@ const UnstyledProcessEventDot = React.memo(
           >
             <FormattedMessage
               id="xpack.securitySolution.endpoint.resolver.processDescription"
-              defaultMessage="{isEventBeingAnalyzed, select, true {Analyzed Event · {descriptionText}} false {{descriptionText}}}"
+              defaultMessage="{isEventBeingAnalyzed, select, true {Analyzed Event · {descriptionText}} other {{descriptionText}}}"
               values={{
                 isEventBeingAnalyzed: isOrigin,
                 descriptionText,
@@ -533,6 +543,7 @@ const UnstyledProcessEventDot = React.memo(
                   buttonFill={colorMap.resolverBackground}
                   nodeStats={nodeStats}
                   nodeID={nodeID}
+                  onClick={onClick}
                 />
               )}
             </EuiFlexItem>
@@ -584,7 +595,7 @@ export const ProcessEventDot = styled(UnstyledProcessEventDot)`
     width: fit-content;
   }
 
-  & .euiSelectableList-bordered {
+  & .euiSelectableList {
     border-top-right-radius: 0px;
     border-top-left-radius: 0px;
   }

@@ -7,10 +7,7 @@
 
 import d3 from 'd3';
 
-export const getEmptySeries = (
-  start = Date.now() - 3600000,
-  end = Date.now()
-) => {
+export const getEmptySeries = (start = Date.now() - 3600000, end = Date.now()) => {
   const dates = d3.time
     .scale()
     .domain([new Date(start), new Date(end)])

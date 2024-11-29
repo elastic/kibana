@@ -5,22 +5,28 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, IRouter, KibanaRequest, Logger } from '@kbn/core/server';
-import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
-import { BaseMessage } from 'langchain/schema';
-
+import { IRouter, KibanaRequest } from '@kbn/core/server';
+import { NEVER } from 'rxjs';
 import { mockActionResponse } from '../__mocks__/action_result_data';
 import { postActionsConnectorExecuteRoute } from './post_actions_connector_execute';
 import { ElasticAssistantRequestHandlerContext } from '../types';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { coreMock } from '@kbn/core/server/mocks';
-import {
-  INVOKE_ASSISTANT_ERROR_EVENT,
-  INVOKE_ASSISTANT_SUCCESS_EVENT,
-} from '../lib/telemetry/event_based_telemetry';
+import { INVOKE_ASSISTANT_ERROR_EVENT } from '../lib/telemetry/event_based_telemetry';
+import { PassThrough } from 'stream';
 import { getConversationResponseMock } from '../ai_assistant_data_clients/conversations/update_conversation.test';
+import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
+import { getFindAnonymizationFieldsResultWithSingleHit } from '../__mocks__/response';
+import {
+  defaultAssistantFeatures,
+  ExecuteConnectorRequestBody,
+} from '@kbn/elastic-assistant-common';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
+import { appendAssistantMessageToConversation, langChainExecute } from './helpers';
 
+const license = licensingMock.createLicenseMock();
+const actionsClient = actionsClientMock.create();
 jest.mock('../lib/build_response', () => ({
   buildResponse: jest.fn().mockImplementation((x) => x),
 }));
@@ -37,92 +43,90 @@ jest.mock('../lib/executor', () => ({
     }
   }),
 }));
+const mockStream = jest.fn().mockImplementation(() => new PassThrough());
+const mockLangChainExecute = langChainExecute as jest.Mock;
+const mockAppendAssistantMessageToConversation = appendAssistantMessageToConversation as jest.Mock;
+jest.mock('./helpers', () => {
+  const original = jest.requireActual('./helpers');
 
-jest.mock('../lib/langchain/execute_custom_llm_chain', () => ({
-  callAgentExecutor: jest.fn().mockImplementation(
-    async ({
-      connectorId,
-    }: {
-      actions: ActionsPluginStart;
-      connectorId: string;
-      esClient: ElasticsearchClient;
-      langChainMessages: BaseMessage[];
-      logger: Logger;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      request: KibanaRequest<unknown, unknown, any, any>;
-    }) => {
-      if (connectorId === 'mock-connector-id') {
-        return {
-          connector_id: 'mock-connector-id',
-          data: mockActionResponse,
-          status: 'ok',
-        };
-      } else {
-        throw new Error('simulated error');
-      }
-    }
-  ),
-}));
+  return {
+    ...original,
+    getIsKnowledgeBaseInstalled: jest.fn(),
+    appendAssistantMessageToConversation: jest.fn(),
+    langChainExecute: jest.fn(),
+    getPluginNameFromRequest: jest.fn(),
+    getSystemPromptFromUserConversation: jest.fn(),
+  };
+});
 const existingConversation = getConversationResponseMock();
 const reportEvent = jest.fn();
+const appendConversationMessages = jest.fn();
 const mockContext = {
-  elasticAssistant: {
-    actions: jest.fn(),
-    getRegisteredTools: jest.fn(() => []),
-    logger: loggingSystemMock.createLogger(),
-    telemetry: { ...coreMock.createSetup().analytics, reportEvent },
-    getCurrentUser: () => ({
-      username: 'user',
-      email: 'email',
-      fullName: 'full name',
-      roles: ['user-role'],
-      enabled: true,
-      authentication_realm: { name: 'native1', type: 'native' },
-      lookup_realm: { name: 'native1', type: 'native' },
-      authentication_provider: { type: 'basic', name: 'basic1' },
-      authentication_type: 'realm',
-      elastic_cloud_user: false,
-      metadata: { _reserved: false },
-    }),
-    getAIAssistantConversationsDataClient: jest.fn().mockResolvedValue({
-      getConversation: jest.fn().mockResolvedValue(existingConversation),
-      updateConversation: jest.fn().mockResolvedValue(existingConversation),
-      appendConversationMessages: jest.fn().mockResolvedValue(existingConversation),
-    }),
-  },
-  core: {
-    elasticsearch: {
-      client: elasticsearchServiceMock.createScopedClusterClient(),
+  resolve: jest.fn().mockResolvedValue({
+    elasticAssistant: {
+      actions: {
+        getActionsClientWithRequest: jest.fn().mockResolvedValue(actionsClient),
+      },
+      getRegisteredTools: jest.fn(() => []),
+      getRegisteredFeatures: jest.fn(() => defaultAssistantFeatures),
+      logger: loggingSystemMock.createLogger(),
+      telemetry: { ...coreMock.createSetup().analytics, reportEvent },
+      getCurrentUser: () => ({
+        username: 'user',
+        email: 'email',
+        fullName: 'full name',
+        roles: ['user-role'],
+        enabled: true,
+        authentication_realm: { name: 'native1', type: 'native' },
+        lookup_realm: { name: 'native1', type: 'native' },
+        authentication_provider: { type: 'basic', name: 'basic1' },
+        authentication_type: 'realm',
+        elastic_cloud_user: false,
+        metadata: { _reserved: false },
+      }),
+      getAIAssistantConversationsDataClient: jest.fn().mockResolvedValue({
+        getConversation: jest.fn().mockResolvedValue(existingConversation),
+        updateConversation: jest.fn().mockResolvedValue(existingConversation),
+        appendConversationMessages:
+          appendConversationMessages.mockResolvedValue(existingConversation),
+      }),
+      getAIAssistantPromptsDataClient: jest.fn().mockResolvedValue({
+        findDocuments: jest.fn(),
+      }),
+      getAIAssistantAnonymizationFieldsDataClient: jest.fn().mockResolvedValue({
+        findDocuments: jest.fn().mockResolvedValue(getFindAnonymizationFieldsResultWithSingleHit()),
+      }),
+      getAIAssistantKnowledgeBaseDataClient: jest.fn().mockResolvedValue({
+        getKnowledgeBaseDocuments: jest.fn().mockResolvedValue([]),
+        indexTemplateAndPattern: {
+          alias: 'knowledge-base-alias',
+        },
+      }),
     },
-    savedObjects: coreMock.createRequestHandlerContext().savedObjects,
-  },
+    core: {
+      elasticsearch: {
+        client: elasticsearchServiceMock.createScopedClusterClient(),
+      },
+      savedObjects: coreMock.createRequestHandlerContext().savedObjects,
+    },
+    licensing: {
+      ...licensingMock.createRequestHandlerContext({ license }),
+      license,
+    },
+  }),
 };
 
 const mockRequest = {
   params: { connectorId: 'mock-connector-id' },
   body: {
-    params: {
-      subActionParams: {
-        messages: [
-          { role: 'user', content: '\\n\\n\\n\\nWhat is my name?' },
-          {
-            role: 'assistant',
-            content:
-              "I'm sorry, but I don't have the information about your name. You can tell me your name if you'd like, and we can continue our conversation from there.",
-          },
-          { role: 'user', content: '\\n\\nMy name is Andrew' },
-          {
-            role: 'assistant',
-            content:
-              "Hello, Andrew! It's nice to meet you. What would you like to talk about today?",
-          },
-          { role: 'user', content: '\\n\\nDo you know my name?' },
-        ],
-      },
-      subAction: 'invokeAI',
-    },
-    isEnabledKnowledgeBase: true,
-    isEnabledRAGAlerts: false,
+    subAction: 'invokeAI',
+    message: 'Do you know my name?',
+    actionTypeId: '.gen-ai',
+    replacements: {},
+    model: 'gpt-4',
+  },
+  events: {
+    aborted$: NEVER,
   },
 };
 
@@ -136,46 +140,60 @@ describe('postActionsConnectorExecuteRoute', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-  });
-
-  it('returns the expected response when isEnabledKnowledgeBase=false', async () => {
-    const mockRouter = {
-      versioned: {
-        post: jest.fn().mockImplementation(() => {
+    license.hasAtLeast.mockReturnValue(true);
+    mockAppendAssistantMessageToConversation.mockResolvedValue(true);
+    mockLangChainExecute.mockImplementation(
+      async ({
+        connectorId,
+        request,
+      }: {
+        connectorId: string;
+        request: KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
+      }) => {
+        if (request.body.subAction === 'invokeAI' && connectorId === 'mock-connector-id') {
           return {
-            addVersion: jest.fn().mockImplementation(async (_, handler) => {
-              const result = await handler(
-                mockContext,
-                {
-                  ...mockRequest,
-                  body: {
-                    ...mockRequest.body,
-                    isEnabledKnowledgeBase: false,
-                  },
-                },
-                mockResponse
-              );
-
-              expect(result).toEqual({
-                body: {
-                  connector_id: 'mock-connector-id',
-                  data: mockActionResponse,
-                  status: 'ok',
-                },
-              });
-            }),
+            body: {
+              connector_id: 'mock-connector-id',
+              data: mockActionResponse,
+              status: 'ok',
+            },
+            headers: { 'content-type': 'application/json' },
           };
-        }),
-      },
-    };
-
-    await postActionsConnectorExecuteRoute(
-      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
-      mockGetElser
+        } else if (request.body.subAction !== 'invokeAI' && connectorId === 'mock-connector-id') {
+          return {
+            body: mockStream,
+            headers: {
+              'Cache-Control': 'no-cache',
+              Connection: 'keep-alive',
+              'Transfer-Encoding': 'chunked',
+              'X-Accel-Buffering': 'no',
+              'X-Content-Type-Options': 'nosniff',
+            },
+          };
+        } else {
+          throw new Error('simulated error');
+        }
+      }
     );
+    actionsClient.getBulk.mockResolvedValue([
+      {
+        id: '1',
+        isPreconfigured: false,
+        isSystemAction: false,
+        isDeprecated: false,
+        name: 'my name',
+        actionTypeId: '.gen-ai',
+        isMissingSecrets: false,
+        config: {
+          a: true,
+          b: true,
+          c: true,
+        },
+      },
+    ]);
   });
 
-  it('returns the expected response when isEnabledKnowledgeBase=true', async () => {
+  it('returns the expected response', async () => {
     const mockRouter = {
       versioned: {
         post: jest.fn().mockImplementation(() => {
@@ -189,6 +207,7 @@ describe('postActionsConnectorExecuteRoute', () => {
                   data: mockActionResponse,
                   status: 'ok',
                 },
+                headers: { 'content-type': 'application/json' },
               });
             }),
           };
@@ -231,170 +250,17 @@ describe('postActionsConnectorExecuteRoute', () => {
     );
   });
 
-  it('reports success events to telemetry - kb on, RAG alerts off', async () => {
-    const mockRouter = {
-      versioned: {
-        post: jest.fn().mockImplementation(() => {
-          return {
-            addVersion: jest.fn().mockImplementation(async (_, handler) => {
-              await handler(mockContext, mockRequest, mockResponse);
-
-              expect(reportEvent).toHaveBeenCalledWith(INVOKE_ASSISTANT_SUCCESS_EVENT.eventType, {
-                isEnabledKnowledgeBase: true,
-                isEnabledRAGAlerts: false,
-              });
-            }),
-          };
-        }),
-      },
-    };
-
-    await postActionsConnectorExecuteRoute(
-      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
-      mockGetElser
-    );
-  });
-
-  it('reports success events to telemetry - kb on, RAG alerts on', async () => {
-    const ragRequest = {
-      ...mockRequest,
-      body: {
-        ...mockRequest.body,
-        allow: ['@timestamp'],
-        allowReplacement: ['host.name'],
-        replacements: [],
-        isEnabledRAGAlerts: true,
-      },
-    };
-
-    const mockRouter = {
-      versioned: {
-        post: jest.fn().mockImplementation(() => {
-          return {
-            addVersion: jest.fn().mockImplementation(async (_, handler) => {
-              await handler(mockContext, ragRequest, mockResponse);
-
-              expect(reportEvent).toHaveBeenCalledWith(INVOKE_ASSISTANT_SUCCESS_EVENT.eventType, {
-                isEnabledKnowledgeBase: true,
-                isEnabledRAGAlerts: true,
-              });
-            }),
-          };
-        }),
-      },
-    };
-
-    await postActionsConnectorExecuteRoute(
-      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
-      mockGetElser
-    );
-  });
-
-  it('reports success events to telemetry - kb off, RAG alerts on', async () => {
-    const req = {
-      ...mockRequest,
-      body: {
-        ...mockRequest.body,
-        isEnabledKnowledgeBase: false,
-        allow: ['@timestamp'],
-        allowReplacement: ['host.name'],
-        replacements: [],
-        isEnabledRAGAlerts: true,
-      },
-    };
-
-    const mockRouter = {
-      versioned: {
-        post: jest.fn().mockImplementation(() => {
-          return {
-            addVersion: jest.fn().mockImplementation(async (_, handler) => {
-              await handler(mockContext, req, mockResponse);
-
-              expect(reportEvent).toHaveBeenCalledWith(INVOKE_ASSISTANT_SUCCESS_EVENT.eventType, {
-                isEnabledKnowledgeBase: false,
-                isEnabledRAGAlerts: true,
-              });
-            }),
-          };
-        }),
-      },
-    };
-
-    await postActionsConnectorExecuteRoute(
-      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
-      mockGetElser
-    );
-  });
-
-  it('reports success events to telemetry - kb off, RAG alerts off', async () => {
-    const req = {
-      ...mockRequest,
-      body: {
-        ...mockRequest.body,
-        isEnabledKnowledgeBase: false,
-      },
-    };
-
-    const mockRouter = {
-      versioned: {
-        post: jest.fn().mockImplementation(() => {
-          return {
-            addVersion: jest.fn().mockImplementation(async (_, handler) => {
-              await handler(mockContext, req, mockResponse);
-
-              expect(reportEvent).toHaveBeenCalledWith(INVOKE_ASSISTANT_SUCCESS_EVENT.eventType, {
-                isEnabledKnowledgeBase: false,
-                isEnabledRAGAlerts: false,
-              });
-            }),
-          };
-        }),
-      },
-    };
-
-    await postActionsConnectorExecuteRoute(
-      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
-      mockGetElser
-    );
-  });
-
-  it('reports error events to telemetry - kb on, RAG alerts off', async () => {
-    const requestWithBadConnectorId = {
-      ...mockRequest,
-      params: { connectorId: 'bad-connector-id' },
-    };
-
-    const mockRouter = {
-      versioned: {
-        post: jest.fn().mockImplementation(() => {
-          return {
-            addVersion: jest.fn().mockImplementation(async (_, handler) => {
-              await handler(mockContext, requestWithBadConnectorId, mockResponse);
-
-              expect(reportEvent).toHaveBeenCalledWith(INVOKE_ASSISTANT_ERROR_EVENT.eventType, {
-                errorMessage: 'simulated error',
-                isEnabledKnowledgeBase: true,
-                isEnabledRAGAlerts: false,
-              });
-            }),
-          };
-        }),
-      },
-    };
-
-    await postActionsConnectorExecuteRoute(
-      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
-      mockGetElser
-    );
-  });
-
-  it('reports error events to telemetry - kb on, RAG alerts on', async () => {
+  it('reports error events to telemetry', async () => {
     const badRequest = {
       ...mockRequest,
       params: { connectorId: 'bad-connector-id' },
       body: {
         ...mockRequest.body,
-        isEnabledRAGAlerts: true,
+        anonymizationFields: [
+          { id: '@timestamp', field: '@timestamp', allowed: true, anonymized: false },
+          { id: 'host.name', field: 'host.name', allowed: true, anonymized: true },
+        ],
+        replacements: [],
       },
     };
 
@@ -407,8 +273,9 @@ describe('postActionsConnectorExecuteRoute', () => {
 
               expect(reportEvent).toHaveBeenCalledWith(INVOKE_ASSISTANT_ERROR_EVENT.eventType, {
                 errorMessage: 'simulated error',
-                isEnabledKnowledgeBase: true,
-                isEnabledRAGAlerts: true,
+                actionTypeId: '.gen-ai',
+                model: 'gpt-4',
+                assistantStreamingEnabled: false,
               });
             }),
           };
@@ -422,17 +289,13 @@ describe('postActionsConnectorExecuteRoute', () => {
     );
   });
 
-  it('reports error events to telemetry - kb off, RAG alerts on', async () => {
+  it('Adds error to conversation history', async () => {
     const badRequest = {
       ...mockRequest,
       params: { connectorId: 'bad-connector-id' },
       body: {
         ...mockRequest.body,
-        isEnabledKnowledgeBase: false,
-        allow: ['@timestamp'],
-        allowReplacement: ['host.name'],
-        replacements: [],
-        isEnabledRAGAlerts: true,
+        conversationId: '99999',
       },
     };
 
@@ -442,11 +305,52 @@ describe('postActionsConnectorExecuteRoute', () => {
           return {
             addVersion: jest.fn().mockImplementation(async (_, handler) => {
               await handler(mockContext, badRequest, mockResponse);
+              expect(mockAppendAssistantMessageToConversation).toHaveBeenCalledWith(
+                expect.objectContaining({
+                  messageContent: 'simulated error',
+                  isError: true,
+                })
+              );
+            }),
+          };
+        }),
+      },
+    };
 
-              expect(reportEvent).toHaveBeenCalledWith(INVOKE_ASSISTANT_ERROR_EVENT.eventType, {
-                errorMessage: 'simulated error',
-                isEnabledKnowledgeBase: false,
-                isEnabledRAGAlerts: true,
+    await postActionsConnectorExecuteRoute(
+      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
+      mockGetElser
+    );
+  });
+
+  it('returns the expected response when subAction=invokeStream and actionTypeId=.gen-ai', async () => {
+    const mockRouter = {
+      versioned: {
+        post: jest.fn().mockImplementation(() => {
+          return {
+            addVersion: jest.fn().mockImplementation(async (_, handler) => {
+              const result = await handler(
+                mockContext,
+                {
+                  ...mockRequest,
+                  body: {
+                    ...mockRequest.body,
+                    subAction: 'invokeStream',
+                    actionTypeId: '.gen-ai',
+                  },
+                },
+                mockResponse
+              );
+
+              expect(result).toEqual({
+                body: mockStream,
+                headers: {
+                  'Cache-Control': 'no-cache',
+                  Connection: 'keep-alive',
+                  'Transfer-Encoding': 'chunked',
+                  'X-Accel-Buffering': 'no',
+                  'X-Content-Type-Options': 'nosniff',
+                },
               });
             }),
           };
@@ -460,27 +364,70 @@ describe('postActionsConnectorExecuteRoute', () => {
     );
   });
 
-  it('reports error events to telemetry - kb off, RAG alerts off', async () => {
-    const badRequest = {
-      ...mockRequest,
-      params: { connectorId: 'bad-connector-id' },
-      body: {
-        ...mockRequest.body,
-        isEnabledKnowledgeBase: false,
-      },
-    };
-
+  it('returns the expected response when subAction=invokeStream and actionTypeId=.bedrock', async () => {
     const mockRouter = {
       versioned: {
         post: jest.fn().mockImplementation(() => {
           return {
             addVersion: jest.fn().mockImplementation(async (_, handler) => {
-              await handler(mockContext, badRequest, mockResponse);
+              const result = await handler(
+                mockContext,
+                {
+                  ...mockRequest,
+                  body: {
+                    ...mockRequest.body,
+                    subAction: 'invokeStream',
+                    actionTypeId: '.bedrock',
+                  },
+                },
+                mockResponse
+              );
 
-              expect(reportEvent).toHaveBeenCalledWith(INVOKE_ASSISTANT_ERROR_EVENT.eventType, {
-                errorMessage: 'simulated error',
-                isEnabledKnowledgeBase: false,
-                isEnabledRAGAlerts: false,
+              expect(result).toEqual({
+                body: mockStream,
+                headers: {
+                  'Cache-Control': 'no-cache',
+                  Connection: 'keep-alive',
+                  'Transfer-Encoding': 'chunked',
+                  'X-Accel-Buffering': 'no',
+                  'X-Content-Type-Options': 'nosniff',
+                },
+              });
+            }),
+          };
+        }),
+      },
+    };
+    await postActionsConnectorExecuteRoute(
+      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
+      mockGetElser
+    );
+  });
+
+  it('returns the expected response when subAction=invokeAI and actionTypeId=.gen-ai', async () => {
+    const mockRouter = {
+      versioned: {
+        post: jest.fn().mockImplementation(() => {
+          return {
+            addVersion: jest.fn().mockImplementation(async (_, handler) => {
+              const result = await handler(
+                mockContext,
+                {
+                  ...mockRequest,
+                  body: {
+                    ...mockRequest.body,
+                    subAction: 'invokeAI',
+                    actionTypeId: '.gen-ai',
+                  },
+                },
+                mockResponse
+              );
+
+              expect(result).toEqual({
+                body: { connector_id: 'mock-connector-id', data: mockActionResponse, status: 'ok' },
+                headers: {
+                  'content-type': 'application/json',
+                },
               });
             }),
           };
@@ -488,6 +435,42 @@ describe('postActionsConnectorExecuteRoute', () => {
       },
     };
 
+    await postActionsConnectorExecuteRoute(
+      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
+      mockGetElser
+    );
+  });
+
+  it('returns the expected response when subAction=invokeAI and actionTypeId=.bedrock', async () => {
+    const mockRouter = {
+      versioned: {
+        post: jest.fn().mockImplementation(() => {
+          return {
+            addVersion: jest.fn().mockImplementation(async (_, handler) => {
+              const result = await handler(
+                mockContext,
+                {
+                  ...mockRequest,
+                  body: {
+                    ...mockRequest.body,
+                    subAction: 'invokeAI',
+                    actionTypeId: '.bedrock',
+                  },
+                },
+                mockResponse
+              );
+
+              expect(result).toEqual({
+                body: { connector_id: 'mock-connector-id', data: mockActionResponse, status: 'ok' },
+                headers: {
+                  'content-type': 'application/json',
+                },
+              });
+            }),
+          };
+        }),
+      },
+    };
     await postActionsConnectorExecuteRoute(
       mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
       mockGetElser

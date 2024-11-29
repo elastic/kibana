@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import deepmerge from 'deepmerge';
@@ -20,7 +21,15 @@ export type CspDirectiveName =
   | 'frame-src'
   | 'img-src'
   | 'report-uri'
-  | 'report-to';
+  | 'report-to'
+  | 'form-action';
+
+/**
+ * The default report only directives rules
+ */
+export const defaultReportOnlyRules: Partial<Record<CspDirectiveName, string[]>> = {
+  'form-action': [`'report-sample'`, `'self'`],
+};
 
 /**
  * The default directives rules that are always applied
@@ -44,22 +53,42 @@ export const additionalRules: Partial<Record<CspDirectiveName, string[]>> = {
   'frame-src': [`'self'`],
 };
 
+interface CspConfigDirectives {
+  enforceDirectives: Map<CspDirectiveName, string[]>;
+  reportOnlyDirectives: Map<CspDirectiveName, string[]>;
+}
+
 export class CspDirectives {
   private readonly directives = new Map<CspDirectiveName, Set<string>>();
+  private readonly reportOnlyDirectives = new Map<CspDirectiveName, Set<string>>();
 
-  addDirectiveValue(directiveName: CspDirectiveName, directiveValue: string) {
-    if (!this.directives.has(directiveName)) {
-      this.directives.set(directiveName, new Set());
+  addDirectiveValue(directiveName: CspDirectiveName, directiveValue: string, enforce = true) {
+    const directivesMap = enforce ? this.directives : this.reportOnlyDirectives;
+
+    if (!directivesMap.has(directiveName)) {
+      directivesMap.set(directiveName, new Set());
     }
-    this.directives.get(directiveName)!.add(normalizeDirectiveValue(directiveValue));
+    directivesMap.get(directiveName)!.add(normalizeDirectiveValue(directiveValue));
   }
 
   clearDirectiveValues(directiveName: CspDirectiveName) {
     this.directives.delete(directiveName);
+    this.reportOnlyDirectives.delete(directiveName);
+  }
+
+  getCspHeadersByDisposition() {
+    return {
+      enforceHeader: this.headerFromDirectives(this.directives),
+      reportOnlyHeader: this.headerFromDirectives(this.reportOnlyDirectives),
+    };
   }
 
   getCspHeader() {
-    return [...this.directives.entries()]
+    return this.headerFromDirectives(this.directives);
+  }
+
+  private headerFromDirectives(directives: Map<CspDirectiveName, Set<string>>): string {
+    return [...directives.entries()]
       .map(([name, values]) => {
         return [name, ...values].join(' ');
       })
@@ -83,60 +112,87 @@ export class CspDirectives {
       });
     });
 
+    // combining `default` report only directive configurations
+    Object.entries(defaultReportOnlyRules).forEach(([key, values]) => {
+      values?.forEach((value) => {
+        cspDirectives.addDirectiveValue(key as CspDirectiveName, value, false);
+      });
+    });
+
     // adding per-directive configuration
-    const additiveConfig = parseConfigDirectives(config);
-    [...additiveConfig.entries()].forEach(([directiveName, directiveValues]) => {
+    const { enforceDirectives, reportOnlyDirectives } = parseConfigDirectives(config);
+
+    for (const [directiveName, directiveValues] of enforceDirectives.entries()) {
       const additionalValues = additionalRules[directiveName] ?? [];
       [...additionalValues, ...directiveValues].forEach((value) => {
         cspDirectives.addDirectiveValue(directiveName, value);
       });
-    });
+    }
+
+    for (const [directiveName, directiveValues] of reportOnlyDirectives.entries()) {
+      directiveValues.forEach((value) => {
+        cspDirectives.addDirectiveValue(directiveName, value, false);
+      });
+    }
 
     return cspDirectives;
   }
 }
 
-const parseConfigDirectives = (cspConfig: CspConfigType): Map<CspDirectiveName, string[]> => {
-  const map = new Map<CspDirectiveName, string[]>();
+const parseConfigDirectives = (cspConfig: CspConfigType): CspConfigDirectives => {
+  const enforceDirectives = new Map<CspDirectiveName, string[]>();
+  const reportOnlyDirectives = new Map<CspDirectiveName, string[]>();
 
   if (cspConfig.script_src?.length) {
-    map.set('script-src', cspConfig.script_src);
+    enforceDirectives.set('script-src', cspConfig.script_src);
   }
   if (cspConfig.disableUnsafeEval !== true) {
-    map.set('script-src', ["'unsafe-eval'", ...(map.get('script-src') ?? [])]);
+    enforceDirectives.set('script-src', [
+      "'unsafe-eval'",
+      ...(enforceDirectives.get('script-src') ?? []),
+    ]);
   }
   if (cspConfig.worker_src?.length) {
-    map.set('worker-src', cspConfig.worker_src);
+    enforceDirectives.set('worker-src', cspConfig.worker_src);
   }
   if (cspConfig.style_src?.length) {
-    map.set('style-src', cspConfig.style_src);
+    enforceDirectives.set('style-src', cspConfig.style_src);
   }
   if (cspConfig.connect_src?.length) {
-    map.set('connect-src', cspConfig.connect_src);
+    enforceDirectives.set('connect-src', cspConfig.connect_src);
   }
   if (cspConfig.default_src?.length) {
-    map.set('default-src', cspConfig.default_src);
+    enforceDirectives.set('default-src', cspConfig.default_src);
   }
   if (cspConfig.font_src?.length) {
-    map.set('font-src', cspConfig.font_src);
+    enforceDirectives.set('font-src', cspConfig.font_src);
   }
   if (cspConfig.frame_src?.length) {
-    map.set('frame-src', cspConfig.frame_src);
+    enforceDirectives.set('frame-src', cspConfig.frame_src);
   }
   if (cspConfig.img_src?.length) {
-    map.set('img-src', cspConfig.img_src);
+    enforceDirectives.set('img-src', cspConfig.img_src);
   }
   if (cspConfig.frame_ancestors?.length) {
-    map.set('frame-ancestors', cspConfig.frame_ancestors);
+    enforceDirectives.set('frame-ancestors', cspConfig.frame_ancestors);
   }
   if (cspConfig.report_uri?.length) {
-    map.set('report-uri', cspConfig.report_uri);
+    enforceDirectives.set('report-uri', cspConfig.report_uri);
+    reportOnlyDirectives.set('report-uri', cspConfig.report_uri);
   }
   if (cspConfig.report_to?.length) {
-    map.set('report-to', cspConfig.report_to);
+    enforceDirectives.set('report-to', cspConfig.report_to);
+    reportOnlyDirectives.set('report-to', cspConfig.report_to);
   }
 
-  return map;
+  if (cspConfig.report_only?.form_action?.length) {
+    reportOnlyDirectives.set('form-action', cspConfig.report_only?.form_action);
+  }
+
+  return {
+    enforceDirectives,
+    reportOnlyDirectives,
+  };
 };
 
 const keywordTokens = [

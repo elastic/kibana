@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { EuiSpacer, useEuiTheme, useIsWithinBreakpoints } from '@elastic/eui';
-import React, { PropsWithChildren, ReactElement, useMemo, useState } from 'react';
-import { Observable } from 'rxjs';
+import React, { PropsWithChildren, ReactElement, useEffect, useMemo, useState } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import { css } from '@emotion/css';
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
@@ -18,28 +19,30 @@ import type {
   LensEmbeddableInput,
   LensEmbeddableOutput,
   LensSuggestionsApi,
-  Suggestion,
 } from '@kbn/lens-plugin/public';
-import { AggregateQuery, Filter, isOfAggregateQueryType, Query, TimeRange } from '@kbn/es-query';
+import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import {
   ResizableLayout,
-  ResizableLayoutMode,
   ResizableLayoutDirection,
+  ResizableLayoutMode,
 } from '@kbn/resizable-layout';
-import { TextBasedPersistedState } from '@kbn/lens-plugin/public/datasources/text_based/types';
 import { Chart, checkChartAvailability } from '../chart';
-import type {
-  UnifiedHistogramChartContext,
-  UnifiedHistogramServices,
-  UnifiedHistogramHitsContext,
+import {
+  UnifiedHistogramVisContext,
   UnifiedHistogramBreakdownContext,
-  UnifiedHistogramFetchStatus,
-  UnifiedHistogramRequestContext,
+  UnifiedHistogramChartContext,
   UnifiedHistogramChartLoadEvent,
+  UnifiedHistogramFetchStatus,
+  UnifiedHistogramHitsContext,
   UnifiedHistogramInput$,
+  UnifiedHistogramRequestContext,
+  UnifiedHistogramServices,
+  UnifiedHistogramSuggestionContext,
+  UnifiedHistogramExternalVisContextStatus,
 } from '../types';
-import { useLensSuggestions } from './hooks/use_lens_suggestions';
-import { shouldDisplayHistogram } from './helpers';
+import { UnifiedHistogramSuggestionType } from '../types';
+import { LensVisService } from '../services/lens_vis_service';
+import { useRequestParams } from '../hooks/use_request_params';
 
 const ChartMemoized = React.memo(Chart);
 
@@ -67,9 +70,9 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
    */
   filters?: Filter[];
   /**
-   * The current Lens suggestion
+   * The external custom Lens vis
    */
-  currentSuggestion?: Suggestion;
+  externalVisContext?: UnifiedHistogramVisContext;
   /**
    * Flag that indicates that a text based language is used
    */
@@ -95,7 +98,7 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
    */
   hits?: UnifiedHistogramHitsContext;
   lensAdapters?: UnifiedHistogramChartLoadEvent['adapters'];
-  lensEmbeddableOutput$?: Observable<LensEmbeddableOutput>;
+  dataLoading$?: LensEmbeddableOutput['dataLoading'];
   /**
    * Context object for the chart -- leave undefined to hide the chart
    */
@@ -159,7 +162,16 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
   /**
    * Callback to update the suggested chart
    */
-  onSuggestionChange?: (suggestion: Suggestion | undefined) => void;
+  onSuggestionContextChange: (
+    suggestionContext: UnifiedHistogramSuggestionContext | undefined
+  ) => void;
+  /**
+   * Callback to notify about the change in Lens attributes
+   */
+  onVisContextChanged?: (
+    visContext: UnifiedHistogramVisContext | undefined,
+    externalVisContextStatus: UnifiedHistogramExternalVisContextStatus
+  ) => void;
   /**
    * Callback to update the total hits -- should set {@link UnifiedHistogramHitsContext.status} to status
    * and {@link UnifiedHistogramHitsContext.total} to result
@@ -190,18 +202,18 @@ export const UnifiedHistogramLayout = ({
   className,
   services,
   dataView,
-  query,
-  filters,
-  currentSuggestion: originalSuggestion,
+  query: originalQuery,
+  filters: originalFilters,
+  externalVisContext,
   isChartLoading,
   isPlainRecord,
-  timeRange,
+  timeRange: originalTimeRange,
   relativeTimeRange,
   columns,
   request,
   hits,
   lensAdapters,
-  lensEmbeddableOutput$,
+  dataLoading$,
   chart: originalChart,
   breakdown,
   container,
@@ -217,7 +229,8 @@ export const UnifiedHistogramLayout = ({
   onChartHiddenChange,
   onTimeIntervalChange,
   onBreakdownFieldChange,
-  onSuggestionChange,
+  onSuggestionContextChange,
+  onVisContextChanged,
   onTotalHitsChange,
   onChartLoad,
   onFilter,
@@ -226,55 +239,75 @@ export const UnifiedHistogramLayout = ({
   withDefaultActions,
   abortController,
 }: UnifiedHistogramLayoutProps) => {
-  const {
-    allSuggestions,
-    currentSuggestion,
-    suggestionUnsupported,
-    isOnHistogramMode,
-    histogramQuery,
-  } = useLensSuggestions({
-    dataView,
-    query,
-    originalSuggestion,
-    isPlainRecord,
-    columns,
-    timeRange,
-    data: services.data,
-    lensSuggestionsApi,
-    onSuggestionChange,
+  const columnsMap = useMemo(() => {
+    if (!columns?.length) {
+      return undefined;
+    }
+
+    return columns.reduce((acc, column) => {
+      acc[column.id] = column;
+      return acc;
+    }, {} as Record<string, DatatableColumn>);
+  }, [columns]);
+
+  const requestParams = useRequestParams({
+    services,
+    query: originalQuery,
+    filters: originalFilters,
+    timeRange: originalTimeRange,
   });
 
-  // apply table to current suggestion
-  const usedSuggestion = useMemo(() => {
-    if (
-      currentSuggestion &&
-      table &&
-      query &&
-      isOfAggregateQueryType(query) &&
-      !shouldDisplayHistogram(query)
-    ) {
-      const { layers } = currentSuggestion.datasourceState as TextBasedPersistedState;
+  const [lensVisService] = useState(() => new LensVisService({ services, lensSuggestionsApi }));
+  const lensVisServiceCurrentSuggestionContext = useObservable(
+    lensVisService.currentSuggestionContext$
+  );
 
-      const newState = {
-        ...currentSuggestion,
-        datasourceState: {
-          ...(currentSuggestion.datasourceState as TextBasedPersistedState),
-          layers: {} as Record<string, unknown>,
-        },
-      };
-
-      for (const key of Object.keys(layers)) {
-        const newLayer = { ...layers[key], table };
-        newState.datasourceState.layers[key] = newLayer;
-      }
-
-      return newState;
-    } else {
-      return currentSuggestion;
+  const originalChartTimeInterval = originalChart?.timeInterval;
+  useEffect(() => {
+    if (isChartLoading) {
+      return;
     }
-  }, [currentSuggestion, query, table]);
 
-  const chart = suggestionUnsupported ? undefined : originalChart;
+    lensVisService.update({
+      externalVisContext,
+      queryParams: {
+        dataView,
+        query: requestParams.query,
+        filters: requestParams.filters,
+        timeRange: originalTimeRange,
+        isPlainRecord,
+        columns,
+        columnsMap,
+      },
+      timeInterval: originalChartTimeInterval,
+      breakdownField: breakdown?.field,
+      table,
+      onSuggestionContextChange,
+      onVisContextChanged: isPlainRecord ? onVisContextChanged : undefined,
+    });
+  }, [
+    lensVisService,
+    dataView,
+    requestParams.query,
+    requestParams.filters,
+    originalTimeRange,
+    originalChartTimeInterval,
+    isPlainRecord,
+    columns,
+    columnsMap,
+    breakdown,
+    externalVisContext,
+    onSuggestionContextChange,
+    onVisContextChanged,
+    isChartLoading,
+    table,
+  ]);
+
+  const chart =
+    !lensVisServiceCurrentSuggestionContext?.type ||
+    lensVisServiceCurrentSuggestionContext.type === UnifiedHistogramSuggestionType.unsupported
+      ? undefined
+      : originalChart;
   const isChartAvailable = checkChartAvailability({ chart, dataView, isPlainRecord });
 
   const [topPanelNode] = useState(() =>
@@ -315,15 +348,12 @@ export const UnifiedHistogramLayout = ({
           className={chartClassName}
           services={services}
           dataView={dataView}
-          query={query}
-          filters={filters}
-          timeRange={timeRange}
+          requestParams={requestParams}
           relativeTimeRange={relativeTimeRange}
           request={request}
           hits={hits}
-          currentSuggestion={usedSuggestion}
+          lensVisService={lensVisService}
           isChartLoading={isChartLoading}
-          allSuggestions={allSuggestions}
           isPlainRecord={isPlainRecord}
           chart={chart}
           breakdown={breakdown}
@@ -336,16 +366,14 @@ export const UnifiedHistogramLayout = ({
           onChartHiddenChange={onChartHiddenChange}
           onTimeIntervalChange={onTimeIntervalChange}
           onBreakdownFieldChange={onBreakdownFieldChange}
-          onSuggestionChange={onSuggestionChange}
           onTotalHitsChange={onTotalHitsChange}
           onChartLoad={onChartLoad}
           onFilter={onFilter}
           onBrushEnd={onBrushEnd}
           lensAdapters={lensAdapters}
-          lensEmbeddableOutput$={lensEmbeddableOutput$}
-          isOnHistogramMode={isOnHistogramMode}
-          histogramQuery={histogramQuery}
+          dataLoading$={dataLoading$}
           withDefaultActions={withDefaultActions}
+          columns={columns}
         />
       </InPortal>
       <InPortal node={mainPanelNode}>

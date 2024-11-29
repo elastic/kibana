@@ -60,9 +60,9 @@ describe('find_all_exception_list_item_types', () => {
 
       expect(findExceptionList).toHaveBeenCalledWith({
         filter: 'exception-list-agnostic.attributes.list_id:(1)',
-        namespaceType: ['agnostic'],
+        namespaceType: ['single', 'agnostic'],
         page: undefined,
-        perPage: 100,
+        perPage: 1000,
         savedObjectsClient,
         sortField: undefined,
         sortOrder: undefined,
@@ -74,9 +74,9 @@ describe('find_all_exception_list_item_types', () => {
 
       expect(findExceptionList).toHaveBeenCalledWith({
         filter: 'exception-list.attributes.list_id:(1)',
-        namespaceType: ['single'],
+        namespaceType: ['single', 'agnostic'],
         page: undefined,
-        perPage: 100,
+        perPage: 1000,
         savedObjectsClient,
         sortField: undefined,
         sortOrder: undefined,
@@ -95,7 +95,7 @@ describe('find_all_exception_list_item_types', () => {
           'exception-list-agnostic.attributes.list_id:(1) OR exception-list.attributes.list_id:(2)',
         namespaceType: ['single', 'agnostic'],
         page: undefined,
-        perPage: 100,
+        perPage: 1000,
         savedObjectsClient,
         sortField: undefined,
         sortOrder: undefined,

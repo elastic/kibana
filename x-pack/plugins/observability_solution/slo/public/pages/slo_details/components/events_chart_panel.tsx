@@ -4,19 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  AnnotationDomainType,
-  AreaSeries,
-  Axis,
-  Chart,
-  LineAnnotation,
-  Position,
-  RectAnnotation,
-  ScaleType,
-  Settings,
-  Tooltip,
-  TooltipType,
-} from '@elastic/charts';
+
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -26,48 +14,40 @@ import {
   EuiPanel,
   EuiText,
   EuiTitle,
-  useEuiTheme,
 } from '@elastic/eui';
-import numeral from '@elastic/numeral';
-import { useActiveCursor } from '@kbn/charts-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { max, min } from 'lodash';
-import moment from 'moment';
-import React, { useRef } from 'react';
+import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { TimesliceAnnotation } from './timeslice_annotation';
+import { EventsAreaChart } from './events_area_chart';
+import { TimeBounds } from '../types';
+import { SloTabId } from './slo_details';
 import { useGetPreviewData } from '../../../hooks/use_get_preview_data';
-import { useKibana } from '../../../utils/kibana_react';
-import { COMPARATOR_MAPPING } from '../../slo_edit/constants';
-import { GoodBadEventsChart } from '../../slos/components/common/good_bad_events_chart';
+import { useKibana } from '../../../hooks/use_kibana';
+import { GoodBadEventsChart } from '../../../components/good_bad_events_chart/good_bad_events_chart';
 import { getDiscoverLink } from '../../../utils/slo/get_discover_link';
 
 export interface Props {
   slo: SLOWithSummaryResponse;
-  range: {
-    start: number;
-    end: number;
-  };
+  range: { from: Date; to: Date };
+  selectedTabId: SloTabId;
+  onBrushed?: (timeBounds: TimeBounds) => void;
 }
 
-export function EventsChartPanel({ slo, range }: Props) {
-  const { charts, uiSettings, discover } = useKibana().services;
-  const { euiTheme } = useEuiTheme();
-  const baseTheme = charts.theme.useChartsBaseTheme();
-  const chartRef = useRef(null);
-  const handleCursorUpdate = useActiveCursor(charts.activeCursor, chartRef, {
-    isDateHistogram: true,
-  });
+export function EventsChartPanel({ slo, range, selectedTabId, onBrushed }: Props) {
+  const { discover, uiSettings } = useKibana().services;
 
   const { isLoading, data } = useGetPreviewData({
     range,
     isValid: true,
+    groupBy: slo.groupBy,
     indicator: slo.indicator,
     groupings: slo.groupings,
     instanceId: slo.instanceId,
+    remoteName: slo.remote?.remoteName,
   });
-
-  const dateFormat = uiSettings.get('dateFormat');
 
   const title =
     slo.indicator.type !== 'sli.metric.timeslice' ? (
@@ -87,11 +67,6 @@ export function EventsChartPanel({ slo, range }: Props) {
         </h2>
       </EuiTitle>
     );
-  const threshold =
-    slo.indicator.type === 'sli.metric.timeslice'
-      ? slo.indicator.params.metric.threshold
-      : undefined;
-  const yAxisNumberFormat = slo.indicator.type === 'sli.metric.timeslice' ? '0,0[.00]' : '0,0';
 
   const values = (data || []).map((row) => {
     if (slo.indicator.type === 'sli.metric.timeslice') {
@@ -102,48 +77,8 @@ export function EventsChartPanel({ slo, range }: Props) {
   });
   const maxValue = max(values);
   const minValue = min(values);
-  const domain = {
-    fit: true,
-    min:
-      threshold != null && minValue != null && threshold < minValue ? threshold : minValue || NaN,
-    max:
-      threshold != null && maxValue != null && threshold > maxValue ? threshold : maxValue || NaN,
-  };
 
-  const annotation =
-    slo.indicator.type === 'sli.metric.timeslice' && threshold ? (
-      <>
-        <LineAnnotation
-          id="thresholdAnnotation"
-          domainType={AnnotationDomainType.YDomain}
-          dataValues={[{ dataValue: threshold }]}
-          style={{
-            line: {
-              strokeWidth: 2,
-              stroke: euiTheme.colors.warning || '#000',
-              opacity: 1,
-            },
-          }}
-          marker={<span>{threshold}</span>}
-          markerPosition="right"
-        />
-        <RectAnnotation
-          dataValues={[
-            {
-              coordinates: ['GT', 'GTE'].includes(slo.indicator.params.metric.comparator)
-                ? {
-                    y0: threshold,
-                    y1: maxValue,
-                  }
-                : { y0: minValue, y1: threshold },
-              details: `${COMPARATOR_MAPPING[slo.indicator.params.metric.comparator]} ${threshold}`,
-            },
-          ]}
-          id="thresholdShade"
-          style={{ fill: euiTheme.colors.warning || '#000', opacity: 0.1 }}
-        />
-      </>
-    ) : null;
+  const annotation = <TimesliceAnnotation slo={slo} minValue={minValue} maxValue={maxValue} />;
 
   const showViewEventsLink = ![
     'sli.apm.transactionErrorRate',
@@ -156,22 +91,29 @@ export function EventsChartPanel({ slo, range }: Props) {
         <EuiFlexGroup>
           <EuiFlexGroup direction="column" gutterSize="none">
             <EuiFlexItem grow={1}> {title}</EuiFlexItem>
-            <EuiFlexItem>
-              <EuiText color="subdued" size="s">
-                {i18n.translate('xpack.slo.sloDetails.eventsChartPanel.duration', {
-                  defaultMessage: 'Last 24h',
-                })}
-              </EuiText>
-            </EuiFlexItem>
+            {selectedTabId !== 'history' && (
+              <EuiFlexItem>
+                <EuiText color="subdued" size="s">
+                  {i18n.translate('xpack.slo.sloDetails.eventsChartPanel.duration', {
+                    defaultMessage: 'Last 24h',
+                  })}
+                </EuiText>
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
           {showViewEventsLink && (
             <EuiFlexItem grow={0}>
               <EuiLink
                 color="text"
-                href={getDiscoverLink(discover, slo, {
-                  from: 'now-24h',
-                  to: 'now',
-                  mode: 'relative',
+                href={getDiscoverLink({
+                  slo,
+                  timeRange: {
+                    from: 'now-24h',
+                    to: 'now',
+                    mode: 'relative',
+                  },
+                  discover,
+                  uiSettings,
                 })}
                 data-test-subj="sloDetailDiscoverLink"
               >
@@ -192,6 +134,7 @@ export function EventsChartPanel({ slo, range }: Props) {
               data={data || []}
               annotation={annotation}
               slo={slo}
+              onBrushed={onBrushed}
             />
           ) : (
             <>
@@ -200,50 +143,13 @@ export function EventsChartPanel({ slo, range }: Props) {
               )}
 
               {!isLoading && (
-                <Chart size={{ height: 150, width: '100%' }} ref={chartRef}>
-                  <Tooltip type={TooltipType.VerticalCursor} />
-                  <Settings
-                    baseTheme={baseTheme}
-                    showLegend={slo.indicator.type !== 'sli.metric.timeslice'}
-                    showLegendExtra={false}
-                    legendPosition={Position.Left}
-                    noResults={
-                      <EuiIcon type="visualizeApp" size="l" color="subdued" title="no results" />
-                    }
-                    onPointerUpdate={handleCursorUpdate}
-                    externalPointerEvents={{
-                      tooltip: { visible: true },
-                    }}
-                    pointerUpdateDebounce={0}
-                    pointerUpdateTrigger={'x'}
-                    locale={i18n.getLocale()}
-                  />
-                  {annotation}
-
-                  <Axis
-                    id="bottom"
-                    position={Position.Bottom}
-                    showOverlappingTicks
-                    tickFormat={(d) => moment(d).format(dateFormat)}
-                  />
-                  <Axis
-                    id="left"
-                    position={Position.Left}
-                    tickFormat={(d) => numeral(d).format(yAxisNumberFormat)}
-                    domain={domain}
-                  />
-                  <AreaSeries
-                    id="Metric"
-                    xScaleType={ScaleType.Time}
-                    yScaleType={ScaleType.Linear}
-                    xAccessor="date"
-                    yAccessors={['value']}
-                    data={(data ?? []).map((datum) => ({
-                      date: new Date(datum.date).getTime(),
-                      value: datum.sliValue >= 0 ? datum.sliValue : null,
-                    }))}
-                  />
-                </Chart>
+                <EventsAreaChart
+                  slo={slo}
+                  annotation={annotation}
+                  minValue={minValue}
+                  maxValue={maxValue}
+                  onBrushed={onBrushed}
+                />
               )}
             </>
           )}

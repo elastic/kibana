@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import { render } from '@testing-library/react';
 
@@ -17,6 +18,7 @@ import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { actionTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/action_type_registry.mock';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BASE_SECURITY_CONVERSATIONS } from '../../../../assistant/content/conversations';
+import type { UserProfileService } from '@kbn/core-user-profile-browser';
 
 jest.mock('../../../../common/lib/kibana');
 
@@ -27,10 +29,13 @@ const MESSAGE = 'This rule is attempting to query data but...';
 const actionTypeRegistry = actionTypeRegistryMock.create();
 const mockGetComments = jest.fn(() => []);
 const mockHttp = httpServiceMock.createStartContract({ basePath: '/test' });
+const mockNavigationToApp = jest.fn();
 const mockAssistantAvailability: AssistantAvailability = {
   hasAssistantPrivilege: false,
   hasConnectorsAllPrivilege: true,
   hasConnectorsReadPrivilege: true,
+  hasUpdateAIAssistantAnonymization: true,
+  hasManageGlobalKnowledgeBase: true,
   isAssistantEnabled: true,
 };
 const queryClient = new QueryClient({
@@ -46,26 +51,23 @@ const queryClient = new QueryClient({
   },
 });
 
-const ContextWrapper: React.FC = ({ children }) => (
+const ContextWrapper: FC<PropsWithChildren<unknown>> = ({ children }) => (
   <QueryClientProvider client={queryClient}>
     <AssistantProvider
       actionTypeRegistry={actionTypeRegistry}
       assistantAvailability={mockAssistantAvailability}
       augmentMessageCodeBlocks={jest.fn()}
-      baseAllow={[]}
-      baseAllowReplacement={[]}
       basePath={'https://localhost:5601/kbn'}
-      defaultAllow={[]}
-      defaultAllowReplacement={[]}
       docLinks={{
         ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
         DOC_LINK_VERSION: 'current',
       }}
       getComments={mockGetComments}
       http={mockHttp}
+      navigateToApp={mockNavigationToApp}
       baseConversations={BASE_SECURITY_CONVERSATIONS}
-      setDefaultAllow={jest.fn()}
-      setDefaultAllowReplacement={jest.fn()}
+      currentAppId={'security'}
+      userProfileService={jest.fn() as unknown as UserProfileService}
     >
       {children}
     </AssistantProvider>

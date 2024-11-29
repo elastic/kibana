@@ -13,6 +13,12 @@ import { responseActionsClientMock } from '../../services/actions/clients/mocks'
 import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
 import { ENDPOINT_ACTION_RESPONSES_INDEX } from '../../../../common/endpoint/constants';
 import { waitFor } from '@testing-library/react';
+import { ResponseActionsConnectorNotConfiguredError } from '../../services/actions/clients/errors';
+import {
+  COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_TYPE,
+  COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_VERSION,
+} from './complete_external_actions_task';
+import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 
 describe('CompleteExternalTaskRunner class', () => {
   let endpointContextServicesMock: ReturnType<typeof createMockEndpointAppContextService>;
@@ -24,7 +30,9 @@ describe('CompleteExternalTaskRunner class', () => {
     esClientMock = elasticsearchServiceMock.createElasticsearchClient();
     runnerInstance = new CompleteExternalActionsTaskRunner(
       endpointContextServicesMock,
-      esClientMock
+      esClientMock,
+      '60s',
+      `${COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_TYPE}-${COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_VERSION}`
     );
     const actionGenerator = new EndpointActionGenerator('seed');
 
@@ -52,6 +60,37 @@ describe('CompleteExternalTaskRunner class', () => {
     );
   });
 
+  it('should do nothing if task instance id is outdated', async () => {
+    runnerInstance = new CompleteExternalActionsTaskRunner(
+      endpointContextServicesMock,
+      esClientMock,
+      '60s',
+      'old-id'
+    );
+    const result = await runnerInstance.run();
+
+    expect(result).toEqual(getDeleteTaskRunResult());
+
+    expect(endpointContextServicesMock.createLogger().info).toHaveBeenCalledWith(
+      `Outdated task version. Got [old-id] from task instance. Current version is [endpoint:complete-external-response-actions-1.0.0]`
+    );
+  });
+
+  it('should NOT log an error if agentType is not configured with a connector', async () => {
+    (endpointContextServicesMock.getInternalResponseActionsClient as jest.Mock).mockImplementation(
+      () => {
+        const clientMock = responseActionsClientMock.create();
+        (clientMock.processPendingActions as jest.Mock).mockImplementation(async () => {
+          throw new ResponseActionsConnectorNotConfiguredError('foo');
+        });
+        return clientMock;
+      }
+    );
+    await runnerInstance.run();
+
+    expect(endpointContextServicesMock.createLogger().error).not.toHaveBeenCalled();
+  });
+
   it('should call `processPendingAction` for each external agent type', async () => {
     await runnerInstance.run();
     const getInternalResponseActionsClientMock = (
@@ -77,6 +116,12 @@ describe('CompleteExternalTaskRunner class', () => {
     expect(esClientMock.bulk).toHaveBeenCalledWith({
       index: ENDPOINT_ACTION_RESPONSES_INDEX,
       operations: [
+        { create: { _index: ENDPOINT_ACTION_RESPONSES_INDEX } },
+        expect.objectContaining({
+          '@timestamp': expect.any(String),
+          EndpointActions: expect.any(Object),
+          agent: expect.any(Object),
+        }),
         { create: { _index: ENDPOINT_ACTION_RESPONSES_INDEX } },
         expect.objectContaining({
           '@timestamp': expect.any(String),
@@ -118,13 +163,13 @@ describe('CompleteExternalTaskRunner class', () => {
         return clientMock;
       }
     );
-    runnerInstance.run();
+    void runnerInstance.run();
 
     await waitFor(() => {
       expect(endpointContextServicesMock.getInternalResponseActionsClient).toHaveBeenCalled();
     });
 
-    runnerInstance.cancel();
+    await runnerInstance.cancel();
 
     expect(processPendingActionsAbortSignal!.aborted).toBe(true);
   });

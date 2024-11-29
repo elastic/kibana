@@ -16,6 +16,14 @@ Object {
         "error": [Function],
         "presence": "optional",
       },
+      "metas": Array [
+        Object {
+          "x-oas-min-length": 1,
+        },
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "rules": Array [
         Object {
           "args": Object {
@@ -87,6 +95,11 @@ Object {
             "flags": Object {
               "error": [Function],
             },
+            "metas": Array [
+              Object {
+                "x-oas-min-length": 1,
+              },
+            ],
             "rules": Array [
               Object {
                 "args": Object {
@@ -148,6 +161,11 @@ Object {
                 "flags": Object {
                   "error": [Function],
                 },
+                "metas": Array [
+                  Object {
+                    "x-oas-min-length": 1,
+                  },
+                ],
                 "rules": Array [
                   Object {
                     "args": Object {
@@ -163,11 +181,6 @@ Object {
                   },
                 ],
                 "type": "string",
-              },
-            },
-            "preferences": Object {
-              "stripUnknown": Object {
-                "objects": false,
               },
             },
             "type": "object",
@@ -244,6 +257,11 @@ Object {
                   "error": [Function],
                   "presence": "optional",
                 },
+                "metas": Array [
+                  Object {
+                    "x-oas-min-length": 1,
+                  },
+                ],
                 "rules": Array [
                   Object {
                     "args": Object {
@@ -434,12 +452,12 @@ Object {
               "type": "string",
             },
           },
-          "preferences": Object {
-            "stripUnknown": Object {
-              "objects": false,
-            },
-          },
           "type": "object",
+        },
+      ],
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
         },
       ],
       "rules": Array [
@@ -464,6 +482,11 @@ Object {
             "flags": Object {
               "error": [Function],
             },
+            "metas": Array [
+              Object {
+                "x-oas-min-length": 1,
+              },
+            ],
             "rules": Array [
               Object {
                 "args": Object {
@@ -521,6 +544,11 @@ Object {
           },
         },
       ],
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "type": "alternatives",
     },
     "termSize": Object {
@@ -529,6 +557,11 @@ Object {
         "error": [Function],
         "presence": "optional",
       },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "rules": Array [
         Object {
           "args": Object {
@@ -679,6 +712,14 @@ Object {
               "error": [Function],
               "presence": "optional",
             },
+            "metas": Array [
+              Object {
+                "x-oas-min-length": 1,
+              },
+              Object {
+                "x-oas-optional": true,
+              },
+            ],
             "rules": Array [
               Object {
                 "args": Object {
@@ -704,6 +745,11 @@ Object {
             "flags": Object {
               "error": [Function],
             },
+            "metas": Array [
+              Object {
+                "x-oas-min-length": 1,
+              },
+            ],
             "rules": Array [
               Object {
                 "args": Object {
@@ -758,11 +804,6 @@ Object {
       "type": "string",
     },
   },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
-    },
-  },
   "rules": Array [
     Object {
       "args": Object {
@@ -789,6 +830,11 @@ Object {
       "flags": Object {
         "error": [Function],
       },
+      "metas": Array [
+        Object {
+          "x-oas-min-length": 1,
+        },
+      ],
       "rules": Array [
         Object {
           "args": Object {
@@ -809,6 +855,11 @@ Object {
       "flags": Object {
         "error": [Function],
       },
+      "metas": Array [
+        Object {
+          "x-oas-min-length": 1,
+        },
+      ],
       "rules": Array [
         Object {
           "args": Object {
@@ -831,12 +882,25 @@ Object {
         "error": [Function],
         "presence": "optional",
       },
+      "metas": Array [
+        Object {
+          "x-oas-any-type": true,
+        },
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "type": "any",
     },
     "boundaryIndexTitle": Object {
       "flags": Object {
         "error": [Function],
       },
+      "metas": Array [
+        Object {
+          "x-oas-min-length": 1,
+        },
+      ],
       "rules": Array [
         Object {
           "args": Object {
@@ -859,6 +923,14 @@ Object {
         "error": [Function],
         "presence": "optional",
       },
+      "metas": Array [
+        Object {
+          "x-oas-min-length": 1,
+        },
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "rules": Array [
         Object {
           "args": Object {
@@ -879,6 +951,11 @@ Object {
       "flags": Object {
         "error": [Function],
       },
+      "metas": Array [
+        Object {
+          "x-oas-min-length": 1,
+        },
+      ],
       "rules": Array [
         Object {
           "args": Object {
@@ -899,6 +976,11 @@ Object {
       "flags": Object {
         "error": [Function],
       },
+      "metas": Array [
+        Object {
+          "x-oas-min-length": 1,
+        },
+      ],
       "rules": Array [
         Object {
           "args": Object {
@@ -919,6 +1001,11 @@ Object {
       "flags": Object {
         "error": [Function],
       },
+      "metas": Array [
+        Object {
+          "x-oas-min-length": 1,
+        },
+      ],
       "rules": Array [
         Object {
           "args": Object {
@@ -939,6 +1026,11 @@ Object {
       "flags": Object {
         "error": [Function],
       },
+      "metas": Array [
+        Object {
+          "x-oas-min-length": 1,
+        },
+      ],
       "rules": Array [
         Object {
           "args": Object {
@@ -959,6 +1051,11 @@ Object {
       "flags": Object {
         "error": [Function],
       },
+      "metas": Array [
+        Object {
+          "x-oas-min-length": 1,
+        },
+      ],
       "rules": Array [
         Object {
           "args": Object {
@@ -979,6 +1076,11 @@ Object {
       "flags": Object {
         "error": [Function],
       },
+      "metas": Array [
+        Object {
+          "x-oas-min-length": 1,
+        },
+      ],
       "rules": Array [
         Object {
           "args": Object {
@@ -1001,12 +1103,15 @@ Object {
         "error": [Function],
         "presence": "optional",
       },
+      "metas": Array [
+        Object {
+          "x-oas-any-type": true,
+        },
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "type": "any",
-    },
-  },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
     },
   },
   "type": "object",
@@ -1029,6 +1134,14 @@ Object {
         "error": [Function],
         "presence": "optional",
       },
+      "metas": Array [
+        Object {
+          "x-oas-min-length": 1,
+        },
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "rules": Array [
         Object {
           "args": Object {
@@ -1073,6 +1186,11 @@ Object {
         "error": [Function],
         "presence": "optional",
       },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "rules": Array [
         Object {
           "args": Object {
@@ -1121,6 +1239,11 @@ Object {
             "flags": Object {
               "error": [Function],
             },
+            "metas": Array [
+              Object {
+                "x-oas-min-length": 1,
+              },
+            ],
             "rules": Array [
               Object {
                 "args": Object {
@@ -1149,6 +1272,11 @@ Object {
                   "error": [Function],
                   "presence": "optional",
                 },
+                "metas": Array [
+                  Object {
+                    "x-oas-min-length": 1,
+                  },
+                ],
                 "rules": Array [
                   Object {
                     "args": Object {
@@ -1186,6 +1314,14 @@ Object {
         "error": [Function],
         "presence": "optional",
       },
+      "metas": Array [
+        Object {
+          "x-oas-min-length": 1,
+        },
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "rules": Array [
         Object {
           "args": Object {
@@ -1208,6 +1344,11 @@ Object {
         "error": [Function],
         "presence": "optional",
       },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "rules": Array [
         Object {
           "args": Object {
@@ -1339,6 +1480,11 @@ Object {
       "flags": Object {
         "error": [Function],
       },
+      "metas": Array [
+        Object {
+          "x-oas-min-length": 1,
+        },
+      ],
       "rules": Array [
         Object {
           "args": Object {
@@ -1390,11 +1536,6 @@ Object {
       "type": "string",
     },
   },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
-    },
-  },
   "rules": Array [
     Object {
       "args": Object {
@@ -1419,7 +1560,9 @@ Object {
   "keys": Object {
     "anomalyDetectorTypes": Object {
       "flags": Object {
+        "default": [Function],
         "error": [Function],
+        "presence": "optional",
       },
       "items": Array [
         Object {
@@ -1466,6 +1609,11 @@ Object {
             },
           ],
           "type": "alternatives",
+        },
+      ],
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
         },
       ],
       "rules": Array [
@@ -1554,6 +1702,11 @@ Object {
         "error": [Function],
         "presence": "optional",
       },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "rules": Array [
         Object {
           "args": Object {
@@ -1570,6 +1723,11 @@ Object {
         "error": [Function],
         "presence": "optional",
       },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "rules": Array [
         Object {
           "args": Object {
@@ -1599,11 +1757,6 @@ Object {
         },
       ],
       "type": "string",
-    },
-  },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
     },
   },
   "type": "object",
@@ -1640,6 +1793,11 @@ Object {
         "error": [Function],
         "presence": "optional",
       },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "rules": Array [
         Object {
           "args": Object {
@@ -1671,6 +1829,11 @@ Object {
             },
           ],
           "type": "string",
+        },
+      ],
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
         },
       ],
       "type": "array",
@@ -1731,6 +1894,11 @@ Object {
                     "flags": Object {
                       "error": [Function],
                     },
+                    "metas": Array [
+                      Object {
+                        "x-oas-get-additional-properties": [Function],
+                      },
+                    ],
                     "rules": Array [
                       Object {
                         "args": Object {
@@ -1752,6 +1920,11 @@ Object {
                             "flags": Object {
                               "error": [Function],
                             },
+                            "metas": Array [
+                              Object {
+                                "x-oas-any-type": true,
+                              },
+                            ],
                             "type": "any",
                           },
                         },
@@ -1765,19 +1938,14 @@ Object {
               "type": "alternatives",
             },
           },
-          "preferences": Object {
-            "stripUnknown": Object {
-              "objects": false,
-            },
-          },
           "type": "object",
         },
       },
-      "preferences": Object {
-        "stripUnknown": Object {
-          "objects": false,
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
         },
-      },
+      ],
       "type": "object",
     },
     "serviceName": Object {
@@ -1786,6 +1954,11 @@ Object {
         "error": [Function],
         "presence": "optional",
       },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "rules": Array [
         Object {
           "args": Object {
@@ -1808,6 +1981,11 @@ Object {
         "error": [Function],
         "presence": "optional",
       },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "type": "boolean",
     },
     "windowSize": Object {
@@ -1829,11 +2007,6 @@ Object {
         },
       ],
       "type": "string",
-    },
-  },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
     },
   },
   "type": "object",
@@ -1931,6 +2104,11 @@ Object {
           "type": "string",
         },
       ],
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "type": "array",
     },
     "searchConfiguration": Object {
@@ -1989,6 +2167,11 @@ Object {
                     "flags": Object {
                       "error": [Function],
                     },
+                    "metas": Array [
+                      Object {
+                        "x-oas-get-additional-properties": [Function],
+                      },
+                    ],
                     "rules": Array [
                       Object {
                         "args": Object {
@@ -2010,6 +2193,11 @@ Object {
                             "flags": Object {
                               "error": [Function],
                             },
+                            "metas": Array [
+                              Object {
+                                "x-oas-any-type": true,
+                              },
+                            ],
                             "type": "any",
                           },
                         },
@@ -2023,19 +2211,14 @@ Object {
               "type": "alternatives",
             },
           },
-          "preferences": Object {
-            "stripUnknown": Object {
-              "objects": false,
-            },
-          },
           "type": "object",
         },
       },
-      "preferences": Object {
-        "stripUnknown": Object {
-          "objects": false,
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
         },
-      },
+      ],
       "type": "object",
     },
     "serviceName": Object {
@@ -2044,6 +2227,11 @@ Object {
         "error": [Function],
         "presence": "optional",
       },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "rules": Array [
         Object {
           "args": Object {
@@ -2066,6 +2254,11 @@ Object {
         "error": [Function],
         "presence": "optional",
       },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "rules": Array [
         Object {
           "args": Object {
@@ -2082,6 +2275,11 @@ Object {
         "error": [Function],
         "presence": "optional",
       },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "rules": Array [
         Object {
           "args": Object {
@@ -2098,6 +2296,11 @@ Object {
         "error": [Function],
         "presence": "optional",
       },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "type": "boolean",
     },
     "windowSize": Object {
@@ -2119,11 +2322,6 @@ Object {
         },
       ],
       "type": "string",
-    },
-  },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
     },
   },
   "type": "object",
@@ -2177,6 +2375,11 @@ Object {
           "type": "string",
         },
       ],
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "type": "array",
     },
     "searchConfiguration": Object {
@@ -2235,6 +2438,11 @@ Object {
                     "flags": Object {
                       "error": [Function],
                     },
+                    "metas": Array [
+                      Object {
+                        "x-oas-get-additional-properties": [Function],
+                      },
+                    ],
                     "rules": Array [
                       Object {
                         "args": Object {
@@ -2256,6 +2464,11 @@ Object {
                             "flags": Object {
                               "error": [Function],
                             },
+                            "metas": Array [
+                              Object {
+                                "x-oas-any-type": true,
+                              },
+                            ],
                             "type": "any",
                           },
                         },
@@ -2269,19 +2482,14 @@ Object {
               "type": "alternatives",
             },
           },
-          "preferences": Object {
-            "stripUnknown": Object {
-              "objects": false,
-            },
-          },
           "type": "object",
         },
       },
-      "preferences": Object {
-        "stripUnknown": Object {
-          "objects": false,
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
         },
-      },
+      ],
       "type": "object",
     },
     "serviceName": Object {
@@ -2290,6 +2498,11 @@ Object {
         "error": [Function],
         "presence": "optional",
       },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "rules": Array [
         Object {
           "args": Object {
@@ -2312,6 +2525,11 @@ Object {
         "error": [Function],
         "presence": "optional",
       },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "rules": Array [
         Object {
           "args": Object {
@@ -2328,6 +2546,11 @@ Object {
         "error": [Function],
         "presence": "optional",
       },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "rules": Array [
         Object {
           "args": Object {
@@ -2344,6 +2567,11 @@ Object {
         "error": [Function],
         "presence": "optional",
       },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "type": "boolean",
     },
     "windowSize": Object {
@@ -2367,11 +2595,6 @@ Object {
       "type": "string",
     },
   },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
-    },
-  },
   "type": "object",
 }
 `;
@@ -2393,6 +2616,11 @@ Object {
         "error": [Function],
         "presence": "optional",
       },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "type": "boolean",
     },
     "criteria": Object {
@@ -2490,6 +2718,11 @@ Object {
                     "error": [Function],
                     "presence": "optional",
                   },
+                  "metas": Array [
+                    Object {
+                      "x-oas-optional": true,
+                    },
+                  ],
                   "rules": Array [
                     Object {
                       "args": Object {
@@ -2511,11 +2744,11 @@ Object {
                   "type": "any",
                 },
               },
-              "preferences": Object {
-                "stripUnknown": Object {
-                  "objects": false,
+              "metas": Array [
+                Object {
+                  "x-oas-optional": true,
                 },
-              },
+              ],
               "type": "object",
             },
             "metric": Object {
@@ -2579,6 +2812,11 @@ Object {
                 "error": [Function],
                 "presence": "optional",
               },
+              "metas": Array [
+                Object {
+                  "x-oas-optional": true,
+                },
+              ],
               "rules": Array [
                 Object {
                   "args": Object {
@@ -2610,12 +2848,12 @@ Object {
                   "type": "number",
                 },
               ],
+              "metas": Array [
+                Object {
+                  "x-oas-optional": true,
+                },
+              ],
               "type": "array",
-            },
-          },
-          "preferences": Object {
-            "stripUnknown": Object {
-              "objects": false,
             },
           },
           "type": "object",
@@ -2629,6 +2867,11 @@ Object {
         "error": [Function],
         "presence": "optional",
       },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "rules": Array [
         Object {
           "args": Object {
@@ -2700,6 +2943,11 @@ Object {
         "error": [Function],
         "presence": "optional",
       },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "type": "boolean",
     },
     "alertOnNoData": Object {
@@ -2708,6 +2956,11 @@ Object {
         "error": [Function],
         "presence": "optional",
       },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "type": "boolean",
     },
     "criteria": Object {
@@ -2734,6 +2987,11 @@ Object {
                 "only": true,
                 "presence": "optional",
               },
+              "metas": Array [
+                Object {
+                  "x-oas-optional": true,
+                },
+              ],
               "type": "any",
             },
             "comparator": Object {
@@ -2762,6 +3020,11 @@ Object {
                 "error": [Function],
                 "presence": "optional",
               },
+              "metas": Array [
+                Object {
+                  "x-oas-optional": true,
+                },
+              ],
               "rules": Array [
                 Object {
                   "args": Object {
@@ -2778,6 +3041,11 @@ Object {
                 "error": [Function],
                 "presence": "optional",
               },
+              "metas": Array [
+                Object {
+                  "x-oas-optional": true,
+                },
+              ],
               "rules": Array [
                 Object {
                   "args": Object {
@@ -2872,11 +3140,6 @@ Object {
                             "type": "string",
                           },
                         },
-                        "preferences": Object {
-                          "stripUnknown": Object {
-                            "objects": false,
-                          },
-                        },
                         "type": "object",
                       },
                     },
@@ -2913,6 +3176,11 @@ Object {
                               "error": [Function],
                               "presence": "optional",
                             },
+                            "metas": Array [
+                              Object {
+                                "x-oas-optional": true,
+                              },
+                            ],
                             "rules": Array [
                               Object {
                                 "args": Object {
@@ -2942,11 +3210,6 @@ Object {
                               },
                             ],
                             "type": "string",
-                          },
-                        },
-                        "preferences": Object {
-                          "stripUnknown": Object {
-                            "objects": false,
                           },
                         },
                         "type": "object",
@@ -2992,11 +3255,6 @@ Object {
                 },
               ],
               "type": "string",
-            },
-          },
-          "preferences": Object {
-            "stripUnknown": Object {
-              "objects": false,
             },
           },
           "type": "object",
@@ -3053,6 +3311,11 @@ Object {
           },
         },
       ],
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
       "type": "alternatives",
     },
     "searchConfiguration": Object {
@@ -3084,6 +3347,11 @@ Object {
                   "flags": Object {
                     "error": [Function],
                   },
+                  "metas": Array [
+                    Object {
+                      "x-oas-get-additional-properties": [Function],
+                    },
+                  ],
                   "rules": Array [
                     Object {
                       "args": Object {
@@ -3105,6 +3373,11 @@ Object {
                           "flags": Object {
                             "error": [Function],
                           },
+                          "metas": Array [
+                            Object {
+                              "x-oas-any-type": true,
+                            },
+                          ],
                           "type": "any",
                         },
                       },
@@ -3119,6 +3392,14 @@ Object {
                     "error": [Function],
                     "presence": "optional",
                   },
+                  "metas": Array [
+                    Object {
+                      "x-oas-get-additional-properties": [Function],
+                    },
+                    Object {
+                      "x-oas-optional": true,
+                    },
+                  ],
                   "rules": Array [
                     Object {
                       "args": Object {
@@ -3140,6 +3421,11 @@ Object {
                           "flags": Object {
                             "error": [Function],
                           },
+                          "metas": Array [
+                            Object {
+                              "x-oas-any-type": true,
+                            },
+                          ],
                           "type": "any",
                         },
                       },
@@ -3149,12 +3435,12 @@ Object {
                   "type": "record",
                 },
               },
-              "preferences": Object {
-                "stripUnknown": Object {
-                  "objects": false,
-                },
-              },
               "type": "object",
+            },
+          ],
+          "metas": Array [
+            Object {
+              "x-oas-optional": true,
             },
           ],
           "type": "array",
@@ -3196,6 +3482,11 @@ Object {
                       "error": [Function],
                       "presence": "optional",
                     },
+                    "metas": Array [
+                      Object {
+                        "x-oas-optional": true,
+                      },
+                    ],
                     "type": "boolean",
                   },
                   "allowNoIndex": Object {
@@ -3204,6 +3495,11 @@ Object {
                       "error": [Function],
                       "presence": "optional",
                     },
+                    "metas": Array [
+                      Object {
+                        "x-oas-optional": true,
+                      },
+                    ],
                     "type": "boolean",
                   },
                   "fieldAttrs": Object {
@@ -3212,6 +3508,14 @@ Object {
                       "error": [Function],
                       "presence": "optional",
                     },
+                    "metas": Array [
+                      Object {
+                        "x-oas-get-additional-properties": [Function],
+                      },
+                      Object {
+                        "x-oas-optional": true,
+                      },
+                    ],
                     "rules": Array [
                       Object {
                         "args": Object {
@@ -3244,6 +3548,11 @@ Object {
                                   "error": [Function],
                                   "presence": "optional",
                                 },
+                                "metas": Array [
+                                  Object {
+                                    "x-oas-optional": true,
+                                  },
+                                ],
                                 "type": "number",
                               },
                               "customDescription": Object {
@@ -3252,6 +3561,14 @@ Object {
                                   "error": [Function],
                                   "presence": "optional",
                                 },
+                                "metas": Array [
+                                  Object {
+                                    "x-oas-max-length": 300,
+                                  },
+                                  Object {
+                                    "x-oas-optional": true,
+                                  },
+                                ],
                                 "rules": Array [
                                   Object {
                                     "args": Object {
@@ -3274,6 +3591,11 @@ Object {
                                   "error": [Function],
                                   "presence": "optional",
                                 },
+                                "metas": Array [
+                                  Object {
+                                    "x-oas-optional": true,
+                                  },
+                                ],
                                 "rules": Array [
                                   Object {
                                     "args": Object {
@@ -3283,11 +3605,6 @@ Object {
                                   },
                                 ],
                                 "type": "string",
-                              },
-                            },
-                            "preferences": Object {
-                              "stripUnknown": Object {
-                                "objects": false,
                               },
                             },
                             "type": "object",
@@ -3304,6 +3621,14 @@ Object {
                       "error": [Function],
                       "presence": "optional",
                     },
+                    "metas": Array [
+                      Object {
+                        "x-oas-get-additional-properties": [Function],
+                      },
+                      Object {
+                        "x-oas-optional": true,
+                      },
+                    ],
                     "rules": Array [
                       Object {
                         "args": Object {
@@ -3336,6 +3661,11 @@ Object {
                                   "error": [Function],
                                   "presence": "optional",
                                 },
+                                "metas": Array [
+                                  Object {
+                                    "x-oas-optional": true,
+                                  },
+                                ],
                                 "rules": Array [
                                   Object {
                                     "args": Object {
@@ -3352,12 +3682,15 @@ Object {
                                   "error": [Function],
                                   "presence": "optional",
                                 },
+                                "metas": Array [
+                                  Object {
+                                    "x-oas-any-type": true,
+                                  },
+                                  Object {
+                                    "x-oas-optional": true,
+                                  },
+                                ],
                                 "type": "any",
-                              },
-                            },
-                            "preferences": Object {
-                              "stripUnknown": Object {
-                                "objects": false,
                               },
                             },
                             "type": "object",
@@ -3374,6 +3707,14 @@ Object {
                       "error": [Function],
                       "presence": "optional",
                     },
+                    "metas": Array [
+                      Object {
+                        "x-oas-get-additional-properties": [Function],
+                      },
+                      Object {
+                        "x-oas-optional": true,
+                      },
+                    ],
                     "rules": Array [
                       Object {
                         "args": Object {
@@ -3406,6 +3747,11 @@ Object {
                                   "error": [Function],
                                   "presence": "optional",
                                 },
+                                "metas": Array [
+                                  Object {
+                                    "x-oas-optional": true,
+                                  },
+                                ],
                                 "type": "boolean",
                               },
                               "count": Object {
@@ -3414,6 +3760,11 @@ Object {
                                   "error": [Function],
                                   "presence": "optional",
                                 },
+                                "metas": Array [
+                                  Object {
+                                    "x-oas-optional": true,
+                                  },
+                                ],
                                 "rules": Array [
                                   Object {
                                     "args": Object {
@@ -3430,6 +3781,14 @@ Object {
                                   "error": [Function],
                                   "presence": "optional",
                                 },
+                                "metas": Array [
+                                  Object {
+                                    "x-oas-max-length": 300,
+                                  },
+                                  Object {
+                                    "x-oas-optional": true,
+                                  },
+                                ],
                                 "rules": Array [
                                   Object {
                                     "args": Object {
@@ -3452,6 +3811,11 @@ Object {
                                   "error": [Function],
                                   "presence": "optional",
                                 },
+                                "metas": Array [
+                                  Object {
+                                    "x-oas-optional": true,
+                                  },
+                                ],
                                 "rules": Array [
                                   Object {
                                     "args": Object {
@@ -3485,6 +3849,11 @@ Object {
                                     "type": "string",
                                   },
                                 ],
+                                "metas": Array [
+                                  Object {
+                                    "x-oas-optional": true,
+                                  },
+                                ],
                                 "type": "array",
                               },
                               "format": Object {
@@ -3500,6 +3869,11 @@ Object {
                                       "error": [Function],
                                       "presence": "optional",
                                     },
+                                    "metas": Array [
+                                      Object {
+                                        "x-oas-optional": true,
+                                      },
+                                    ],
                                     "rules": Array [
                                       Object {
                                         "args": Object {
@@ -3516,20 +3890,33 @@ Object {
                                       "error": [Function],
                                       "presence": "optional",
                                     },
+                                    "metas": Array [
+                                      Object {
+                                        "x-oas-any-type": true,
+                                      },
+                                      Object {
+                                        "x-oas-optional": true,
+                                      },
+                                    ],
                                     "type": "any",
                                   },
                                 },
-                                "preferences": Object {
-                                  "stripUnknown": Object {
-                                    "objects": false,
+                                "metas": Array [
+                                  Object {
+                                    "x-oas-optional": true,
                                   },
-                                },
+                                ],
                                 "type": "object",
                               },
                               "name": Object {
                                 "flags": Object {
                                   "error": [Function],
                                 },
+                                "metas": Array [
+                                  Object {
+                                    "x-oas-max-length": 1000,
+                                  },
+                                ],
                                 "rules": Array [
                                   Object {
                                     "args": Object {
@@ -3552,6 +3939,11 @@ Object {
                                   "error": [Function],
                                   "presence": "optional",
                                 },
+                                "metas": Array [
+                                  Object {
+                                    "x-oas-optional": true,
+                                  },
+                                ],
                                 "type": "boolean",
                               },
                               "runtimeField": Object {
@@ -3577,6 +3969,14 @@ Object {
                                             "error": [Function],
                                             "presence": "optional",
                                           },
+                                          "metas": Array [
+                                            Object {
+                                              "x-oas-max-length": 300,
+                                            },
+                                            Object {
+                                              "x-oas-optional": true,
+                                            },
+                                          ],
                                           "rules": Array [
                                             Object {
                                               "args": Object {
@@ -3599,6 +3999,11 @@ Object {
                                             "error": [Function],
                                             "presence": "optional",
                                           },
+                                          "metas": Array [
+                                            Object {
+                                              "x-oas-optional": true,
+                                            },
+                                          ],
                                           "rules": Array [
                                             Object {
                                               "args": Object {
@@ -3622,6 +4027,11 @@ Object {
                                                 "error": [Function],
                                                 "presence": "optional",
                                               },
+                                              "metas": Array [
+                                                Object {
+                                                  "x-oas-optional": true,
+                                                },
+                                              ],
                                               "rules": Array [
                                                 Object {
                                                   "args": Object {
@@ -3638,14 +4048,22 @@ Object {
                                                 "error": [Function],
                                                 "presence": "optional",
                                               },
+                                              "metas": Array [
+                                                Object {
+                                                  "x-oas-any-type": true,
+                                                },
+                                                Object {
+                                                  "x-oas-optional": true,
+                                                },
+                                              ],
                                               "type": "any",
                                             },
                                           },
-                                          "preferences": Object {
-                                            "stripUnknown": Object {
-                                              "objects": false,
+                                          "metas": Array [
+                                            Object {
+                                              "x-oas-optional": true,
                                             },
-                                          },
+                                          ],
                                           "type": "object",
                                         },
                                         "popularity": Object {
@@ -3654,6 +4072,11 @@ Object {
                                             "error": [Function],
                                             "presence": "optional",
                                           },
+                                          "metas": Array [
+                                            Object {
+                                              "x-oas-optional": true,
+                                            },
+                                          ],
                                           "rules": Array [
                                             Object {
                                               "args": Object {
@@ -3686,11 +4109,11 @@ Object {
                                               "type": "string",
                                             },
                                           },
-                                          "preferences": Object {
-                                            "stripUnknown": Object {
-                                              "objects": false,
+                                          "metas": Array [
+                                            Object {
+                                              "x-oas-optional": true,
                                             },
-                                          },
+                                          ],
                                           "type": "object",
                                         },
                                         "type": Object {
@@ -3786,11 +4209,6 @@ Object {
                                           "type": "alternatives",
                                         },
                                       },
-                                      "preferences": Object {
-                                        "stripUnknown": Object {
-                                          "objects": false,
-                                        },
-                                      },
                                       "type": "object",
                                     },
                                   },
@@ -3810,6 +4228,14 @@ Object {
                                             "error": [Function],
                                             "presence": "optional",
                                           },
+                                          "metas": Array [
+                                            Object {
+                                              "x-oas-get-additional-properties": [Function],
+                                            },
+                                            Object {
+                                              "x-oas-optional": true,
+                                            },
+                                          ],
                                           "rules": Array [
                                             Object {
                                               "args": Object {
@@ -3842,6 +4268,14 @@ Object {
                                                         "error": [Function],
                                                         "presence": "optional",
                                                       },
+                                                      "metas": Array [
+                                                        Object {
+                                                          "x-oas-max-length": 300,
+                                                        },
+                                                        Object {
+                                                          "x-oas-optional": true,
+                                                        },
+                                                      ],
                                                       "rules": Array [
                                                         Object {
                                                           "args": Object {
@@ -3864,6 +4298,11 @@ Object {
                                                         "error": [Function],
                                                         "presence": "optional",
                                                       },
+                                                      "metas": Array [
+                                                        Object {
+                                                          "x-oas-optional": true,
+                                                        },
+                                                      ],
                                                       "rules": Array [
                                                         Object {
                                                           "args": Object {
@@ -3887,6 +4326,11 @@ Object {
                                                             "error": [Function],
                                                             "presence": "optional",
                                                           },
+                                                          "metas": Array [
+                                                            Object {
+                                                              "x-oas-optional": true,
+                                                            },
+                                                          ],
                                                           "rules": Array [
                                                             Object {
                                                               "args": Object {
@@ -3903,14 +4347,22 @@ Object {
                                                             "error": [Function],
                                                             "presence": "optional",
                                                           },
+                                                          "metas": Array [
+                                                            Object {
+                                                              "x-oas-any-type": true,
+                                                            },
+                                                            Object {
+                                                              "x-oas-optional": true,
+                                                            },
+                                                          ],
                                                           "type": "any",
                                                         },
                                                       },
-                                                      "preferences": Object {
-                                                        "stripUnknown": Object {
-                                                          "objects": false,
+                                                      "metas": Array [
+                                                        Object {
+                                                          "x-oas-optional": true,
                                                         },
-                                                      },
+                                                      ],
                                                       "type": "object",
                                                     },
                                                     "popularity": Object {
@@ -3919,6 +4371,11 @@ Object {
                                                         "error": [Function],
                                                         "presence": "optional",
                                                       },
+                                                      "metas": Array [
+                                                        Object {
+                                                          "x-oas-optional": true,
+                                                        },
+                                                      ],
                                                       "rules": Array [
                                                         Object {
                                                           "args": Object {
@@ -4022,11 +4479,6 @@ Object {
                                                       "type": "alternatives",
                                                     },
                                                   },
-                                                  "preferences": Object {
-                                                    "stripUnknown": Object {
-                                                      "objects": false,
-                                                    },
-                                                  },
                                                   "type": "object",
                                                 },
                                               },
@@ -4057,11 +4509,11 @@ Object {
                                               "type": "string",
                                             },
                                           },
-                                          "preferences": Object {
-                                            "stripUnknown": Object {
-                                              "objects": false,
+                                          "metas": Array [
+                                            Object {
+                                              "x-oas-optional": true,
                                             },
-                                          },
+                                          ],
                                           "type": "object",
                                         },
                                         "type": Object {
@@ -4075,13 +4527,13 @@ Object {
                                           "type": "any",
                                         },
                                       },
-                                      "preferences": Object {
-                                        "stripUnknown": Object {
-                                          "objects": false,
-                                        },
-                                      },
                                       "type": "object",
                                     },
+                                  },
+                                ],
+                                "metas": Array [
+                                  Object {
+                                    "x-oas-optional": true,
                                   },
                                 ],
                                 "type": "alternatives",
@@ -4092,6 +4544,14 @@ Object {
                                   "error": [Function],
                                   "presence": "optional",
                                 },
+                                "metas": Array [
+                                  Object {
+                                    "x-oas-max-length": 1000000,
+                                  },
+                                  Object {
+                                    "x-oas-optional": true,
+                                  },
+                                ],
                                 "rules": Array [
                                   Object {
                                     "args": Object {
@@ -4114,6 +4574,11 @@ Object {
                                   "error": [Function],
                                   "presence": "optional",
                                 },
+                                "metas": Array [
+                                  Object {
+                                    "x-oas-optional": true,
+                                  },
+                                ],
                                 "type": "boolean",
                               },
                               "searchable": Object {
@@ -4122,6 +4587,11 @@ Object {
                                   "error": [Function],
                                   "presence": "optional",
                                 },
+                                "metas": Array [
+                                  Object {
+                                    "x-oas-optional": true,
+                                  },
+                                ],
                                 "type": "boolean",
                               },
                               "shortDotsEnable": Object {
@@ -4130,6 +4600,11 @@ Object {
                                   "error": [Function],
                                   "presence": "optional",
                                 },
+                                "metas": Array [
+                                  Object {
+                                    "x-oas-optional": true,
+                                  },
+                                ],
                                 "type": "boolean",
                               },
                               "subType": Object {
@@ -4161,11 +4636,11 @@ Object {
                                         "type": "string",
                                       },
                                     },
-                                    "preferences": Object {
-                                      "stripUnknown": Object {
-                                        "objects": false,
+                                    "metas": Array [
+                                      Object {
+                                        "x-oas-optional": true,
                                       },
-                                    },
+                                    ],
                                     "type": "object",
                                   },
                                   "nested": Object {
@@ -4190,19 +4665,19 @@ Object {
                                         "type": "string",
                                       },
                                     },
-                                    "preferences": Object {
-                                      "stripUnknown": Object {
-                                        "objects": false,
+                                    "metas": Array [
+                                      Object {
+                                        "x-oas-optional": true,
                                       },
-                                    },
+                                    ],
                                     "type": "object",
                                   },
                                 },
-                                "preferences": Object {
-                                  "stripUnknown": Object {
-                                    "objects": false,
+                                "metas": Array [
+                                  Object {
+                                    "x-oas-optional": true,
                                   },
-                                },
+                                ],
                                 "type": "object",
                               },
                               "type": Object {
@@ -4211,6 +4686,11 @@ Object {
                                   "error": [Function],
                                   "presence": "optional",
                                 },
+                                "metas": Array [
+                                  Object {
+                                    "x-oas-max-length": 1000,
+                                  },
+                                ],
                                 "rules": Array [
                                   Object {
                                     "args": Object {
@@ -4247,6 +4727,11 @@ Object {
                       "error": [Function],
                       "presence": "optional",
                     },
+                    "metas": Array [
+                      Object {
+                        "x-oas-optional": true,
+                      },
+                    ],
                     "rules": Array [
                       Object {
                         "args": Object {
@@ -4263,6 +4748,11 @@ Object {
                       "error": [Function],
                       "presence": "optional",
                     },
+                    "metas": Array [
+                      Object {
+                        "x-oas-optional": true,
+                      },
+                    ],
                     "rules": Array [
                       Object {
                         "args": Object {
@@ -4296,6 +4786,11 @@ Object {
                         "type": "string",
                       },
                     ],
+                    "metas": Array [
+                      Object {
+                        "x-oas-optional": true,
+                      },
+                    ],
                     "type": "array",
                   },
                   "runtimeFieldMap": Object {
@@ -4304,6 +4799,14 @@ Object {
                       "error": [Function],
                       "presence": "optional",
                     },
+                    "metas": Array [
+                      Object {
+                        "x-oas-get-additional-properties": [Function],
+                      },
+                      Object {
+                        "x-oas-optional": true,
+                      },
+                    ],
                     "rules": Array [
                       Object {
                         "args": Object {
@@ -4342,6 +4845,14 @@ Object {
                                         "error": [Function],
                                         "presence": "optional",
                                       },
+                                      "metas": Array [
+                                        Object {
+                                          "x-oas-max-length": 300,
+                                        },
+                                        Object {
+                                          "x-oas-optional": true,
+                                        },
+                                      ],
                                       "rules": Array [
                                         Object {
                                           "args": Object {
@@ -4364,6 +4875,11 @@ Object {
                                         "error": [Function],
                                         "presence": "optional",
                                       },
+                                      "metas": Array [
+                                        Object {
+                                          "x-oas-optional": true,
+                                        },
+                                      ],
                                       "rules": Array [
                                         Object {
                                           "args": Object {
@@ -4387,6 +4903,11 @@ Object {
                                             "error": [Function],
                                             "presence": "optional",
                                           },
+                                          "metas": Array [
+                                            Object {
+                                              "x-oas-optional": true,
+                                            },
+                                          ],
                                           "rules": Array [
                                             Object {
                                               "args": Object {
@@ -4403,14 +4924,22 @@ Object {
                                             "error": [Function],
                                             "presence": "optional",
                                           },
+                                          "metas": Array [
+                                            Object {
+                                              "x-oas-any-type": true,
+                                            },
+                                            Object {
+                                              "x-oas-optional": true,
+                                            },
+                                          ],
                                           "type": "any",
                                         },
                                       },
-                                      "preferences": Object {
-                                        "stripUnknown": Object {
-                                          "objects": false,
+                                      "metas": Array [
+                                        Object {
+                                          "x-oas-optional": true,
                                         },
-                                      },
+                                      ],
                                       "type": "object",
                                     },
                                     "popularity": Object {
@@ -4419,6 +4948,11 @@ Object {
                                         "error": [Function],
                                         "presence": "optional",
                                       },
+                                      "metas": Array [
+                                        Object {
+                                          "x-oas-optional": true,
+                                        },
+                                      ],
                                       "rules": Array [
                                         Object {
                                           "args": Object {
@@ -4451,11 +4985,11 @@ Object {
                                           "type": "string",
                                         },
                                       },
-                                      "preferences": Object {
-                                        "stripUnknown": Object {
-                                          "objects": false,
+                                      "metas": Array [
+                                        Object {
+                                          "x-oas-optional": true,
                                         },
-                                      },
+                                      ],
                                       "type": "object",
                                     },
                                     "type": Object {
@@ -4551,11 +5085,6 @@ Object {
                                       "type": "alternatives",
                                     },
                                   },
-                                  "preferences": Object {
-                                    "stripUnknown": Object {
-                                      "objects": false,
-                                    },
-                                  },
                                   "type": "object",
                                 },
                               },
@@ -4575,6 +5104,14 @@ Object {
                                         "error": [Function],
                                         "presence": "optional",
                                       },
+                                      "metas": Array [
+                                        Object {
+                                          "x-oas-get-additional-properties": [Function],
+                                        },
+                                        Object {
+                                          "x-oas-optional": true,
+                                        },
+                                      ],
                                       "rules": Array [
                                         Object {
                                           "args": Object {
@@ -4607,6 +5144,14 @@ Object {
                                                     "error": [Function],
                                                     "presence": "optional",
                                                   },
+                                                  "metas": Array [
+                                                    Object {
+                                                      "x-oas-max-length": 300,
+                                                    },
+                                                    Object {
+                                                      "x-oas-optional": true,
+                                                    },
+                                                  ],
                                                   "rules": Array [
                                                     Object {
                                                       "args": Object {
@@ -4629,6 +5174,11 @@ Object {
                                                     "error": [Function],
                                                     "presence": "optional",
                                                   },
+                                                  "metas": Array [
+                                                    Object {
+                                                      "x-oas-optional": true,
+                                                    },
+                                                  ],
                                                   "rules": Array [
                                                     Object {
                                                       "args": Object {
@@ -4652,6 +5202,11 @@ Object {
                                                         "error": [Function],
                                                         "presence": "optional",
                                                       },
+                                                      "metas": Array [
+                                                        Object {
+                                                          "x-oas-optional": true,
+                                                        },
+                                                      ],
                                                       "rules": Array [
                                                         Object {
                                                           "args": Object {
@@ -4668,14 +5223,22 @@ Object {
                                                         "error": [Function],
                                                         "presence": "optional",
                                                       },
+                                                      "metas": Array [
+                                                        Object {
+                                                          "x-oas-any-type": true,
+                                                        },
+                                                        Object {
+                                                          "x-oas-optional": true,
+                                                        },
+                                                      ],
                                                       "type": "any",
                                                     },
                                                   },
-                                                  "preferences": Object {
-                                                    "stripUnknown": Object {
-                                                      "objects": false,
+                                                  "metas": Array [
+                                                    Object {
+                                                      "x-oas-optional": true,
                                                     },
-                                                  },
+                                                  ],
                                                   "type": "object",
                                                 },
                                                 "popularity": Object {
@@ -4684,6 +5247,11 @@ Object {
                                                     "error": [Function],
                                                     "presence": "optional",
                                                   },
+                                                  "metas": Array [
+                                                    Object {
+                                                      "x-oas-optional": true,
+                                                    },
+                                                  ],
                                                   "rules": Array [
                                                     Object {
                                                       "args": Object {
@@ -4787,11 +5355,6 @@ Object {
                                                   "type": "alternatives",
                                                 },
                                               },
-                                              "preferences": Object {
-                                                "stripUnknown": Object {
-                                                  "objects": false,
-                                                },
-                                              },
                                               "type": "object",
                                             },
                                           },
@@ -4822,11 +5385,11 @@ Object {
                                           "type": "string",
                                         },
                                       },
-                                      "preferences": Object {
-                                        "stripUnknown": Object {
-                                          "objects": false,
+                                      "metas": Array [
+                                        Object {
+                                          "x-oas-optional": true,
                                         },
-                                      },
+                                      ],
                                       "type": "object",
                                     },
                                     "type": Object {
@@ -4838,11 +5401,6 @@ Object {
                                         "only": true,
                                       },
                                       "type": "any",
-                                    },
-                                  },
-                                  "preferences": Object {
-                                    "stripUnknown": Object {
-                                      "objects": false,
                                     },
                                   },
                                   "type": "object",
@@ -4905,6 +5463,11 @@ Object {
                                 },
                               },
                             ],
+                            "metas": Array [
+                              Object {
+                                "x-oas-optional": true,
+                              },
+                            ],
                             "type": "alternatives",
                           },
                           "value": Object {
@@ -4922,12 +5485,12 @@ Object {
                             "type": "string",
                           },
                         },
-                        "preferences": Object {
-                          "stripUnknown": Object {
-                            "objects": false,
-                          },
-                        },
                         "type": "object",
+                      },
+                    ],
+                    "metas": Array [
+                      Object {
+                        "x-oas-optional": true,
                       },
                     ],
                     "type": "array",
@@ -4938,6 +5501,11 @@ Object {
                       "error": [Function],
                       "presence": "optional",
                     },
+                    "metas": Array [
+                      Object {
+                        "x-oas-optional": true,
+                      },
+                    ],
                     "rules": Array [
                       Object {
                         "args": Object {
@@ -4968,6 +5536,11 @@ Object {
                       "error": [Function],
                       "presence": "optional",
                     },
+                    "metas": Array [
+                      Object {
+                        "x-oas-optional": true,
+                      },
+                    ],
                     "rules": Array [
                       Object {
                         "args": Object {
@@ -4986,6 +5559,11 @@ Object {
                       "unknown": true,
                     },
                     "keys": Object {},
+                    "metas": Array [
+                      Object {
+                        "x-oas-optional": true,
+                      },
+                    ],
                     "preferences": Object {
                       "stripUnknown": Object {
                         "objects": false,
@@ -4999,6 +5577,11 @@ Object {
                       "error": [Function],
                       "presence": "optional",
                     },
+                    "metas": Array [
+                      Object {
+                        "x-oas-optional": true,
+                      },
+                    ],
                     "rules": Array [
                       Object {
                         "args": Object {
@@ -5008,11 +5591,6 @@ Object {
                       },
                     ],
                     "type": "string",
-                  },
-                },
-                "preferences": Object {
-                  "stripUnknown": Object {
-                    "objects": false,
                   },
                 },
                 "type": "object",
@@ -5041,12 +5619,6 @@ Object {
                   },
                   "name": "custom",
                 },
-                Object {
-                  "args": Object {
-                    "method": [Function],
-                  },
-                  "name": "custom",
-                },
               ],
               "type": "string",
             },
@@ -5061,21 +5633,17 @@ Object {
                   },
                   "name": "custom",
                 },
+                Object {
+                  "args": Object {
+                    "method": [Function],
+                  },
+                  "name": "custom",
+                },
               ],
               "type": "string",
             },
           },
-          "preferences": Object {
-            "stripUnknown": Object {
-              "objects": false,
-            },
-          },
           "type": "object",
-        },
-      },
-      "preferences": Object {
-        "stripUnknown": Object {
-          "objects": false,
         },
       },
       "type": "object",
@@ -5261,6 +5829,175 @@ Object {
           },
           "type": "array",
         },
+        "responseActions": Object {
+          "items": Object {
+            "anyOf": Array [
+              Object {
+                "additionalProperties": false,
+                "properties": Object {
+                  "actionTypeId": Object {
+                    "const": ".osquery",
+                    "type": "string",
+                  },
+                  "params": Object {
+                    "additionalProperties": false,
+                    "properties": Object {
+                      "ecsMapping": Object {
+                        "additionalProperties": Object {
+                          "additionalProperties": false,
+                          "properties": Object {
+                            "field": Object {
+                              "type": "string",
+                            },
+                            "value": Object {
+                              "anyOf": Array [
+                                Object {
+                                  "type": "string",
+                                },
+                                Object {
+                                  "items": Object {
+                                    "type": "string",
+                                  },
+                                  "type": "array",
+                                },
+                              ],
+                            },
+                          },
+                          "type": "object",
+                        },
+                        "properties": Object {},
+                        "type": "object",
+                      },
+                      "packId": Object {
+                        "type": "string",
+                      },
+                      "queries": Object {
+                        "items": Object {
+                          "additionalProperties": false,
+                          "properties": Object {
+                            "ecs_mapping": Object {
+                              "$ref": "#/allOf/0/properties/responseActions/items/anyOf/0/properties/params/properties/ecsMapping",
+                            },
+                            "id": Object {
+                              "type": "string",
+                            },
+                            "platform": Object {
+                              "type": "string",
+                            },
+                            "query": Object {
+                              "type": "string",
+                            },
+                            "removed": Object {
+                              "type": "boolean",
+                            },
+                            "snapshot": Object {
+                              "type": "boolean",
+                            },
+                            "version": Object {
+                              "type": "string",
+                            },
+                          },
+                          "required": Array [
+                            "id",
+                            "query",
+                          ],
+                          "type": "object",
+                        },
+                        "type": "array",
+                      },
+                      "query": Object {
+                        "type": "string",
+                      },
+                      "savedQueryId": Object {
+                        "type": "string",
+                      },
+                      "timeout": Object {
+                        "type": "number",
+                      },
+                    },
+                    "type": "object",
+                  },
+                },
+                "required": Array [
+                  "actionTypeId",
+                  "params",
+                ],
+                "type": "object",
+              },
+              Object {
+                "additionalProperties": false,
+                "properties": Object {
+                  "actionTypeId": Object {
+                    "const": ".endpoint",
+                    "type": "string",
+                  },
+                  "params": Object {
+                    "anyOf": Array [
+                      Object {
+                        "additionalProperties": false,
+                        "properties": Object {
+                          "command": Object {
+                            "const": "isolate",
+                            "type": "string",
+                          },
+                          "comment": Object {
+                            "type": "string",
+                          },
+                        },
+                        "required": Array [
+                          "command",
+                        ],
+                        "type": "object",
+                      },
+                      Object {
+                        "additionalProperties": false,
+                        "properties": Object {
+                          "command": Object {
+                            "enum": Array [
+                              "kill-process",
+                              "suspend-process",
+                            ],
+                            "type": "string",
+                          },
+                          "comment": Object {
+                            "type": "string",
+                          },
+                          "config": Object {
+                            "additionalProperties": false,
+                            "properties": Object {
+                              "field": Object {
+                                "type": "string",
+                              },
+                              "overwrite": Object {
+                                "default": true,
+                                "type": "boolean",
+                              },
+                            },
+                            "required": Array [
+                              "field",
+                            ],
+                            "type": "object",
+                          },
+                        },
+                        "required": Array [
+                          "command",
+                          "config",
+                        ],
+                        "type": "object",
+                      },
+                    ],
+                  },
+                },
+                "required": Array [
+                  "actionTypeId",
+                  "params",
+                ],
+                "type": "object",
+              },
+            ],
+          },
+          "type": "array",
+        },
         "riskScore": Object {
           "maximum": 100,
           "minimum": 0,
@@ -5298,6 +6035,40 @@ Object {
         },
         "ruleNameOverride": Object {
           "type": "string",
+        },
+        "ruleSource": Object {
+          "anyOf": Array [
+            Object {
+              "additionalProperties": false,
+              "properties": Object {
+                "isCustomized": Object {
+                  "type": "boolean",
+                },
+                "type": Object {
+                  "const": "external",
+                  "type": "string",
+                },
+              },
+              "required": Array [
+                "type",
+                "isCustomized",
+              ],
+              "type": "object",
+            },
+            Object {
+              "additionalProperties": false,
+              "properties": Object {
+                "type": Object {
+                  "const": "internal",
+                  "type": "string",
+                },
+              },
+              "required": Array [
+                "type",
+              ],
+              "type": "object",
+            },
+          ],
         },
         "setup": Object {
           "type": "string",
@@ -5464,6 +6235,52 @@ Object {
     },
     Object {
       "properties": Object {
+        "alertSuppression": Object {
+          "additionalProperties": false,
+          "properties": Object {
+            "duration": Object {
+              "additionalProperties": false,
+              "properties": Object {
+                "unit": Object {
+                  "enum": Array [
+                    "s",
+                    "m",
+                    "h",
+                  ],
+                  "type": "string",
+                },
+                "value": Object {
+                  "minimum": 1,
+                  "type": "integer",
+                },
+              },
+              "required": Array [
+                "value",
+                "unit",
+              ],
+              "type": "object",
+            },
+            "groupBy": Object {
+              "items": Object {
+                "type": "string",
+              },
+              "maxItems": 3,
+              "minItems": 1,
+              "type": "array",
+            },
+            "missingFieldsStrategy": Object {
+              "enum": Array [
+                "doNotSuppress",
+                "suppress",
+              ],
+              "type": "string",
+            },
+          },
+          "required": Array [
+            "groupBy",
+          ],
+          "type": "object",
+        },
         "dataViewId": Object {
           "type": "string",
         },
@@ -5680,6 +6497,175 @@ Object {
           },
           "type": "array",
         },
+        "responseActions": Object {
+          "items": Object {
+            "anyOf": Array [
+              Object {
+                "additionalProperties": false,
+                "properties": Object {
+                  "actionTypeId": Object {
+                    "const": ".osquery",
+                    "type": "string",
+                  },
+                  "params": Object {
+                    "additionalProperties": false,
+                    "properties": Object {
+                      "ecsMapping": Object {
+                        "additionalProperties": Object {
+                          "additionalProperties": false,
+                          "properties": Object {
+                            "field": Object {
+                              "type": "string",
+                            },
+                            "value": Object {
+                              "anyOf": Array [
+                                Object {
+                                  "type": "string",
+                                },
+                                Object {
+                                  "items": Object {
+                                    "type": "string",
+                                  },
+                                  "type": "array",
+                                },
+                              ],
+                            },
+                          },
+                          "type": "object",
+                        },
+                        "properties": Object {},
+                        "type": "object",
+                      },
+                      "packId": Object {
+                        "type": "string",
+                      },
+                      "queries": Object {
+                        "items": Object {
+                          "additionalProperties": false,
+                          "properties": Object {
+                            "ecs_mapping": Object {
+                              "$ref": "#/allOf/0/properties/responseActions/items/anyOf/0/properties/params/properties/ecsMapping",
+                            },
+                            "id": Object {
+                              "type": "string",
+                            },
+                            "platform": Object {
+                              "type": "string",
+                            },
+                            "query": Object {
+                              "type": "string",
+                            },
+                            "removed": Object {
+                              "type": "boolean",
+                            },
+                            "snapshot": Object {
+                              "type": "boolean",
+                            },
+                            "version": Object {
+                              "type": "string",
+                            },
+                          },
+                          "required": Array [
+                            "id",
+                            "query",
+                          ],
+                          "type": "object",
+                        },
+                        "type": "array",
+                      },
+                      "query": Object {
+                        "type": "string",
+                      },
+                      "savedQueryId": Object {
+                        "type": "string",
+                      },
+                      "timeout": Object {
+                        "type": "number",
+                      },
+                    },
+                    "type": "object",
+                  },
+                },
+                "required": Array [
+                  "actionTypeId",
+                  "params",
+                ],
+                "type": "object",
+              },
+              Object {
+                "additionalProperties": false,
+                "properties": Object {
+                  "actionTypeId": Object {
+                    "const": ".endpoint",
+                    "type": "string",
+                  },
+                  "params": Object {
+                    "anyOf": Array [
+                      Object {
+                        "additionalProperties": false,
+                        "properties": Object {
+                          "command": Object {
+                            "const": "isolate",
+                            "type": "string",
+                          },
+                          "comment": Object {
+                            "type": "string",
+                          },
+                        },
+                        "required": Array [
+                          "command",
+                        ],
+                        "type": "object",
+                      },
+                      Object {
+                        "additionalProperties": false,
+                        "properties": Object {
+                          "command": Object {
+                            "enum": Array [
+                              "kill-process",
+                              "suspend-process",
+                            ],
+                            "type": "string",
+                          },
+                          "comment": Object {
+                            "type": "string",
+                          },
+                          "config": Object {
+                            "additionalProperties": false,
+                            "properties": Object {
+                              "field": Object {
+                                "type": "string",
+                              },
+                              "overwrite": Object {
+                                "default": true,
+                                "type": "boolean",
+                              },
+                            },
+                            "required": Array [
+                              "field",
+                            ],
+                            "type": "object",
+                          },
+                        },
+                        "required": Array [
+                          "command",
+                          "config",
+                        ],
+                        "type": "object",
+                      },
+                    ],
+                  },
+                },
+                "required": Array [
+                  "actionTypeId",
+                  "params",
+                ],
+                "type": "object",
+              },
+            ],
+          },
+          "type": "array",
+        },
         "riskScore": Object {
           "maximum": 100,
           "minimum": 0,
@@ -5717,6 +6703,40 @@ Object {
         },
         "ruleNameOverride": Object {
           "type": "string",
+        },
+        "ruleSource": Object {
+          "anyOf": Array [
+            Object {
+              "additionalProperties": false,
+              "properties": Object {
+                "isCustomized": Object {
+                  "type": "boolean",
+                },
+                "type": Object {
+                  "const": "external",
+                  "type": "string",
+                },
+              },
+              "required": Array [
+                "type",
+                "isCustomized",
+              ],
+              "type": "object",
+            },
+            Object {
+              "additionalProperties": false,
+              "properties": Object {
+                "type": Object {
+                  "const": "internal",
+                  "type": "string",
+                },
+              },
+              "required": Array [
+                "type",
+              ],
+              "type": "object",
+            },
+          ],
         },
         "setup": Object {
           "type": "string",
@@ -6208,6 +7228,175 @@ Object {
           },
           "type": "array",
         },
+        "responseActions": Object {
+          "items": Object {
+            "anyOf": Array [
+              Object {
+                "additionalProperties": false,
+                "properties": Object {
+                  "actionTypeId": Object {
+                    "const": ".osquery",
+                    "type": "string",
+                  },
+                  "params": Object {
+                    "additionalProperties": false,
+                    "properties": Object {
+                      "ecsMapping": Object {
+                        "additionalProperties": Object {
+                          "additionalProperties": false,
+                          "properties": Object {
+                            "field": Object {
+                              "type": "string",
+                            },
+                            "value": Object {
+                              "anyOf": Array [
+                                Object {
+                                  "type": "string",
+                                },
+                                Object {
+                                  "items": Object {
+                                    "type": "string",
+                                  },
+                                  "type": "array",
+                                },
+                              ],
+                            },
+                          },
+                          "type": "object",
+                        },
+                        "properties": Object {},
+                        "type": "object",
+                      },
+                      "packId": Object {
+                        "type": "string",
+                      },
+                      "queries": Object {
+                        "items": Object {
+                          "additionalProperties": false,
+                          "properties": Object {
+                            "ecs_mapping": Object {
+                              "$ref": "#/allOf/0/properties/responseActions/items/anyOf/0/properties/params/properties/ecsMapping",
+                            },
+                            "id": Object {
+                              "type": "string",
+                            },
+                            "platform": Object {
+                              "type": "string",
+                            },
+                            "query": Object {
+                              "type": "string",
+                            },
+                            "removed": Object {
+                              "type": "boolean",
+                            },
+                            "snapshot": Object {
+                              "type": "boolean",
+                            },
+                            "version": Object {
+                              "type": "string",
+                            },
+                          },
+                          "required": Array [
+                            "id",
+                            "query",
+                          ],
+                          "type": "object",
+                        },
+                        "type": "array",
+                      },
+                      "query": Object {
+                        "type": "string",
+                      },
+                      "savedQueryId": Object {
+                        "type": "string",
+                      },
+                      "timeout": Object {
+                        "type": "number",
+                      },
+                    },
+                    "type": "object",
+                  },
+                },
+                "required": Array [
+                  "actionTypeId",
+                  "params",
+                ],
+                "type": "object",
+              },
+              Object {
+                "additionalProperties": false,
+                "properties": Object {
+                  "actionTypeId": Object {
+                    "const": ".endpoint",
+                    "type": "string",
+                  },
+                  "params": Object {
+                    "anyOf": Array [
+                      Object {
+                        "additionalProperties": false,
+                        "properties": Object {
+                          "command": Object {
+                            "const": "isolate",
+                            "type": "string",
+                          },
+                          "comment": Object {
+                            "type": "string",
+                          },
+                        },
+                        "required": Array [
+                          "command",
+                        ],
+                        "type": "object",
+                      },
+                      Object {
+                        "additionalProperties": false,
+                        "properties": Object {
+                          "command": Object {
+                            "enum": Array [
+                              "kill-process",
+                              "suspend-process",
+                            ],
+                            "type": "string",
+                          },
+                          "comment": Object {
+                            "type": "string",
+                          },
+                          "config": Object {
+                            "additionalProperties": false,
+                            "properties": Object {
+                              "field": Object {
+                                "type": "string",
+                              },
+                              "overwrite": Object {
+                                "default": true,
+                                "type": "boolean",
+                              },
+                            },
+                            "required": Array [
+                              "field",
+                            ],
+                            "type": "object",
+                          },
+                        },
+                        "required": Array [
+                          "command",
+                          "config",
+                        ],
+                        "type": "object",
+                      },
+                    ],
+                  },
+                },
+                "required": Array [
+                  "actionTypeId",
+                  "params",
+                ],
+                "type": "object",
+              },
+            ],
+          },
+          "type": "array",
+        },
         "riskScore": Object {
           "maximum": 100,
           "minimum": 0,
@@ -6245,6 +7434,40 @@ Object {
         },
         "ruleNameOverride": Object {
           "type": "string",
+        },
+        "ruleSource": Object {
+          "anyOf": Array [
+            Object {
+              "additionalProperties": false,
+              "properties": Object {
+                "isCustomized": Object {
+                  "type": "boolean",
+                },
+                "type": Object {
+                  "const": "external",
+                  "type": "string",
+                },
+              },
+              "required": Array [
+                "type",
+                "isCustomized",
+              ],
+              "type": "object",
+            },
+            Object {
+              "additionalProperties": false,
+              "properties": Object {
+                "type": Object {
+                  "const": "internal",
+                  "type": "string",
+                },
+              },
+              "required": Array [
+                "type",
+              ],
+              "type": "object",
+            },
+          ],
         },
         "setup": Object {
           "type": "string",
@@ -6411,6 +7634,52 @@ Object {
     },
     Object {
       "properties": Object {
+        "alertSuppression": Object {
+          "additionalProperties": false,
+          "properties": Object {
+            "duration": Object {
+              "additionalProperties": false,
+              "properties": Object {
+                "unit": Object {
+                  "enum": Array [
+                    "s",
+                    "m",
+                    "h",
+                  ],
+                  "type": "string",
+                },
+                "value": Object {
+                  "minimum": 1,
+                  "type": "integer",
+                },
+              },
+              "required": Array [
+                "value",
+                "unit",
+              ],
+              "type": "object",
+            },
+            "groupBy": Object {
+              "items": Object {
+                "type": "string",
+              },
+              "maxItems": 3,
+              "minItems": 1,
+              "type": "array",
+            },
+            "missingFieldsStrategy": Object {
+              "enum": Array [
+                "doNotSuppress",
+                "suppress",
+              ],
+              "type": "string",
+            },
+          },
+          "required": Array [
+            "groupBy",
+          ],
+          "type": "object",
+        },
         "anomalyThreshold": Object {
           "minimum": 0,
           "type": "integer",
@@ -6608,6 +7877,175 @@ Object {
           },
           "type": "array",
         },
+        "responseActions": Object {
+          "items": Object {
+            "anyOf": Array [
+              Object {
+                "additionalProperties": false,
+                "properties": Object {
+                  "actionTypeId": Object {
+                    "const": ".osquery",
+                    "type": "string",
+                  },
+                  "params": Object {
+                    "additionalProperties": false,
+                    "properties": Object {
+                      "ecsMapping": Object {
+                        "additionalProperties": Object {
+                          "additionalProperties": false,
+                          "properties": Object {
+                            "field": Object {
+                              "type": "string",
+                            },
+                            "value": Object {
+                              "anyOf": Array [
+                                Object {
+                                  "type": "string",
+                                },
+                                Object {
+                                  "items": Object {
+                                    "type": "string",
+                                  },
+                                  "type": "array",
+                                },
+                              ],
+                            },
+                          },
+                          "type": "object",
+                        },
+                        "properties": Object {},
+                        "type": "object",
+                      },
+                      "packId": Object {
+                        "type": "string",
+                      },
+                      "queries": Object {
+                        "items": Object {
+                          "additionalProperties": false,
+                          "properties": Object {
+                            "ecs_mapping": Object {
+                              "$ref": "#/allOf/0/properties/responseActions/items/anyOf/0/properties/params/properties/ecsMapping",
+                            },
+                            "id": Object {
+                              "type": "string",
+                            },
+                            "platform": Object {
+                              "type": "string",
+                            },
+                            "query": Object {
+                              "type": "string",
+                            },
+                            "removed": Object {
+                              "type": "boolean",
+                            },
+                            "snapshot": Object {
+                              "type": "boolean",
+                            },
+                            "version": Object {
+                              "type": "string",
+                            },
+                          },
+                          "required": Array [
+                            "id",
+                            "query",
+                          ],
+                          "type": "object",
+                        },
+                        "type": "array",
+                      },
+                      "query": Object {
+                        "type": "string",
+                      },
+                      "savedQueryId": Object {
+                        "type": "string",
+                      },
+                      "timeout": Object {
+                        "type": "number",
+                      },
+                    },
+                    "type": "object",
+                  },
+                },
+                "required": Array [
+                  "actionTypeId",
+                  "params",
+                ],
+                "type": "object",
+              },
+              Object {
+                "additionalProperties": false,
+                "properties": Object {
+                  "actionTypeId": Object {
+                    "const": ".endpoint",
+                    "type": "string",
+                  },
+                  "params": Object {
+                    "anyOf": Array [
+                      Object {
+                        "additionalProperties": false,
+                        "properties": Object {
+                          "command": Object {
+                            "const": "isolate",
+                            "type": "string",
+                          },
+                          "comment": Object {
+                            "type": "string",
+                          },
+                        },
+                        "required": Array [
+                          "command",
+                        ],
+                        "type": "object",
+                      },
+                      Object {
+                        "additionalProperties": false,
+                        "properties": Object {
+                          "command": Object {
+                            "enum": Array [
+                              "kill-process",
+                              "suspend-process",
+                            ],
+                            "type": "string",
+                          },
+                          "comment": Object {
+                            "type": "string",
+                          },
+                          "config": Object {
+                            "additionalProperties": false,
+                            "properties": Object {
+                              "field": Object {
+                                "type": "string",
+                              },
+                              "overwrite": Object {
+                                "default": true,
+                                "type": "boolean",
+                              },
+                            },
+                            "required": Array [
+                              "field",
+                            ],
+                            "type": "object",
+                          },
+                        },
+                        "required": Array [
+                          "command",
+                          "config",
+                        ],
+                        "type": "object",
+                      },
+                    ],
+                  },
+                },
+                "required": Array [
+                  "actionTypeId",
+                  "params",
+                ],
+                "type": "object",
+              },
+            ],
+          },
+          "type": "array",
+        },
         "riskScore": Object {
           "maximum": 100,
           "minimum": 0,
@@ -6645,6 +8083,40 @@ Object {
         },
         "ruleNameOverride": Object {
           "type": "string",
+        },
+        "ruleSource": Object {
+          "anyOf": Array [
+            Object {
+              "additionalProperties": false,
+              "properties": Object {
+                "isCustomized": Object {
+                  "type": "boolean",
+                },
+                "type": Object {
+                  "const": "external",
+                  "type": "string",
+                },
+              },
+              "required": Array [
+                "type",
+                "isCustomized",
+              ],
+              "type": "object",
+            },
+            Object {
+              "additionalProperties": false,
+              "properties": Object {
+                "type": Object {
+                  "const": "internal",
+                  "type": "string",
+                },
+              },
+              "required": Array [
+                "type",
+              ],
+              "type": "object",
+            },
+          ],
         },
         "setup": Object {
           "type": "string",
@@ -6811,6 +8283,52 @@ Object {
     },
     Object {
       "properties": Object {
+        "alertSuppression": Object {
+          "additionalProperties": false,
+          "properties": Object {
+            "duration": Object {
+              "additionalProperties": false,
+              "properties": Object {
+                "unit": Object {
+                  "enum": Array [
+                    "s",
+                    "m",
+                    "h",
+                  ],
+                  "type": "string",
+                },
+                "value": Object {
+                  "minimum": 1,
+                  "type": "integer",
+                },
+              },
+              "required": Array [
+                "value",
+                "unit",
+              ],
+              "type": "object",
+            },
+            "groupBy": Object {
+              "items": Object {
+                "type": "string",
+              },
+              "maxItems": 3,
+              "minItems": 1,
+              "type": "array",
+            },
+            "missingFieldsStrategy": Object {
+              "enum": Array [
+                "doNotSuppress",
+                "suppress",
+              ],
+              "type": "string",
+            },
+          },
+          "required": Array [
+            "groupBy",
+          ],
+          "type": "object",
+        },
         "dataViewId": Object {
           "type": "string",
         },
@@ -6886,11 +8404,6 @@ Object {
         },
       ],
       "type": "string",
-    },
-  },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
     },
   },
   "type": "object",
@@ -7068,6 +8581,175 @@ Object {
           },
           "type": "array",
         },
+        "responseActions": Object {
+          "items": Object {
+            "anyOf": Array [
+              Object {
+                "additionalProperties": false,
+                "properties": Object {
+                  "actionTypeId": Object {
+                    "const": ".osquery",
+                    "type": "string",
+                  },
+                  "params": Object {
+                    "additionalProperties": false,
+                    "properties": Object {
+                      "ecsMapping": Object {
+                        "additionalProperties": Object {
+                          "additionalProperties": false,
+                          "properties": Object {
+                            "field": Object {
+                              "type": "string",
+                            },
+                            "value": Object {
+                              "anyOf": Array [
+                                Object {
+                                  "type": "string",
+                                },
+                                Object {
+                                  "items": Object {
+                                    "type": "string",
+                                  },
+                                  "type": "array",
+                                },
+                              ],
+                            },
+                          },
+                          "type": "object",
+                        },
+                        "properties": Object {},
+                        "type": "object",
+                      },
+                      "packId": Object {
+                        "type": "string",
+                      },
+                      "queries": Object {
+                        "items": Object {
+                          "additionalProperties": false,
+                          "properties": Object {
+                            "ecs_mapping": Object {
+                              "$ref": "#/allOf/0/properties/responseActions/items/anyOf/0/properties/params/properties/ecsMapping",
+                            },
+                            "id": Object {
+                              "type": "string",
+                            },
+                            "platform": Object {
+                              "type": "string",
+                            },
+                            "query": Object {
+                              "type": "string",
+                            },
+                            "removed": Object {
+                              "type": "boolean",
+                            },
+                            "snapshot": Object {
+                              "type": "boolean",
+                            },
+                            "version": Object {
+                              "type": "string",
+                            },
+                          },
+                          "required": Array [
+                            "id",
+                            "query",
+                          ],
+                          "type": "object",
+                        },
+                        "type": "array",
+                      },
+                      "query": Object {
+                        "type": "string",
+                      },
+                      "savedQueryId": Object {
+                        "type": "string",
+                      },
+                      "timeout": Object {
+                        "type": "number",
+                      },
+                    },
+                    "type": "object",
+                  },
+                },
+                "required": Array [
+                  "actionTypeId",
+                  "params",
+                ],
+                "type": "object",
+              },
+              Object {
+                "additionalProperties": false,
+                "properties": Object {
+                  "actionTypeId": Object {
+                    "const": ".endpoint",
+                    "type": "string",
+                  },
+                  "params": Object {
+                    "anyOf": Array [
+                      Object {
+                        "additionalProperties": false,
+                        "properties": Object {
+                          "command": Object {
+                            "const": "isolate",
+                            "type": "string",
+                          },
+                          "comment": Object {
+                            "type": "string",
+                          },
+                        },
+                        "required": Array [
+                          "command",
+                        ],
+                        "type": "object",
+                      },
+                      Object {
+                        "additionalProperties": false,
+                        "properties": Object {
+                          "command": Object {
+                            "enum": Array [
+                              "kill-process",
+                              "suspend-process",
+                            ],
+                            "type": "string",
+                          },
+                          "comment": Object {
+                            "type": "string",
+                          },
+                          "config": Object {
+                            "additionalProperties": false,
+                            "properties": Object {
+                              "field": Object {
+                                "type": "string",
+                              },
+                              "overwrite": Object {
+                                "default": true,
+                                "type": "boolean",
+                              },
+                            },
+                            "required": Array [
+                              "field",
+                            ],
+                            "type": "object",
+                          },
+                        },
+                        "required": Array [
+                          "command",
+                          "config",
+                        ],
+                        "type": "object",
+                      },
+                    ],
+                  },
+                },
+                "required": Array [
+                  "actionTypeId",
+                  "params",
+                ],
+                "type": "object",
+              },
+            ],
+          },
+          "type": "array",
+        },
         "riskScore": Object {
           "maximum": 100,
           "minimum": 0,
@@ -7105,6 +8787,40 @@ Object {
         },
         "ruleNameOverride": Object {
           "type": "string",
+        },
+        "ruleSource": Object {
+          "anyOf": Array [
+            Object {
+              "additionalProperties": false,
+              "properties": Object {
+                "isCustomized": Object {
+                  "type": "boolean",
+                },
+                "type": Object {
+                  "const": "external",
+                  "type": "string",
+                },
+              },
+              "required": Array [
+                "type",
+                "isCustomized",
+              ],
+              "type": "object",
+            },
+            Object {
+              "additionalProperties": false,
+              "properties": Object {
+                "type": Object {
+                  "const": "internal",
+                  "type": "string",
+                },
+              },
+              "required": Array [
+                "type",
+              ],
+              "type": "object",
+            },
+          ],
         },
         "setup": Object {
           "type": "string",
@@ -7343,175 +9059,6 @@ Object {
             "query": Object {
               "type": "string",
             },
-            "responseActions": Object {
-              "items": Object {
-                "anyOf": Array [
-                  Object {
-                    "additionalProperties": false,
-                    "properties": Object {
-                      "actionTypeId": Object {
-                        "const": ".osquery",
-                        "type": "string",
-                      },
-                      "params": Object {
-                        "additionalProperties": false,
-                        "properties": Object {
-                          "ecsMapping": Object {
-                            "additionalProperties": Object {
-                              "additionalProperties": false,
-                              "properties": Object {
-                                "field": Object {
-                                  "type": "string",
-                                },
-                                "value": Object {
-                                  "anyOf": Array [
-                                    Object {
-                                      "type": "string",
-                                    },
-                                    Object {
-                                      "items": Object {
-                                        "type": "string",
-                                      },
-                                      "type": "array",
-                                    },
-                                  ],
-                                },
-                              },
-                              "type": "object",
-                            },
-                            "properties": Object {},
-                            "type": "object",
-                          },
-                          "packId": Object {
-                            "type": "string",
-                          },
-                          "queries": Object {
-                            "items": Object {
-                              "additionalProperties": false,
-                              "properties": Object {
-                                "ecs_mapping": Object {
-                                  "$ref": "#/allOf/1/anyOf/0/properties/responseActions/items/anyOf/0/properties/params/properties/ecsMapping",
-                                },
-                                "id": Object {
-                                  "type": "string",
-                                },
-                                "platform": Object {
-                                  "type": "string",
-                                },
-                                "query": Object {
-                                  "type": "string",
-                                },
-                                "removed": Object {
-                                  "type": "boolean",
-                                },
-                                "snapshot": Object {
-                                  "type": "boolean",
-                                },
-                                "version": Object {
-                                  "type": "string",
-                                },
-                              },
-                              "required": Array [
-                                "id",
-                                "query",
-                              ],
-                              "type": "object",
-                            },
-                            "type": "array",
-                          },
-                          "query": Object {
-                            "type": "string",
-                          },
-                          "savedQueryId": Object {
-                            "type": "string",
-                          },
-                          "timeout": Object {
-                            "type": "number",
-                          },
-                        },
-                        "type": "object",
-                      },
-                    },
-                    "required": Array [
-                      "actionTypeId",
-                      "params",
-                    ],
-                    "type": "object",
-                  },
-                  Object {
-                    "additionalProperties": false,
-                    "properties": Object {
-                      "actionTypeId": Object {
-                        "const": ".endpoint",
-                        "type": "string",
-                      },
-                      "params": Object {
-                        "anyOf": Array [
-                          Object {
-                            "additionalProperties": false,
-                            "properties": Object {
-                              "command": Object {
-                                "const": "isolate",
-                                "type": "string",
-                              },
-                              "comment": Object {
-                                "type": "string",
-                              },
-                            },
-                            "required": Array [
-                              "command",
-                            ],
-                            "type": "object",
-                          },
-                          Object {
-                            "additionalProperties": false,
-                            "properties": Object {
-                              "command": Object {
-                                "enum": Array [
-                                  "kill-process",
-                                  "suspend-process",
-                                ],
-                                "type": "string",
-                              },
-                              "comment": Object {
-                                "type": "string",
-                              },
-                              "config": Object {
-                                "additionalProperties": false,
-                                "properties": Object {
-                                  "field": Object {
-                                    "type": "string",
-                                  },
-                                  "overwrite": Object {
-                                    "default": true,
-                                    "type": "boolean",
-                                  },
-                                },
-                                "required": Array [
-                                  "field",
-                                ],
-                                "type": "object",
-                              },
-                            },
-                            "required": Array [
-                              "command",
-                              "config",
-                            ],
-                            "type": "object",
-                          },
-                        ],
-                      },
-                    },
-                    "required": Array [
-                      "actionTypeId",
-                      "params",
-                    ],
-                    "type": "object",
-                  },
-                ],
-              },
-              "type": "array",
-            },
             "savedId": Object {
               "type": "string",
             },
@@ -7547,12 +9094,6 @@ Object {
             },
             "query": Object {
               "$ref": "#/allOf/1/anyOf/0/properties/query",
-            },
-            "responseActions": Object {
-              "items": Object {
-                "$ref": "#/allOf/1/anyOf/0/properties/responseActions/items",
-              },
-              "type": "array",
             },
             "savedId": Object {
               "$ref": "#/allOf/1/anyOf/0/properties/savedId",
@@ -7746,6 +9287,175 @@ Object {
           },
           "type": "array",
         },
+        "responseActions": Object {
+          "items": Object {
+            "anyOf": Array [
+              Object {
+                "additionalProperties": false,
+                "properties": Object {
+                  "actionTypeId": Object {
+                    "const": ".osquery",
+                    "type": "string",
+                  },
+                  "params": Object {
+                    "additionalProperties": false,
+                    "properties": Object {
+                      "ecsMapping": Object {
+                        "additionalProperties": Object {
+                          "additionalProperties": false,
+                          "properties": Object {
+                            "field": Object {
+                              "type": "string",
+                            },
+                            "value": Object {
+                              "anyOf": Array [
+                                Object {
+                                  "type": "string",
+                                },
+                                Object {
+                                  "items": Object {
+                                    "type": "string",
+                                  },
+                                  "type": "array",
+                                },
+                              ],
+                            },
+                          },
+                          "type": "object",
+                        },
+                        "properties": Object {},
+                        "type": "object",
+                      },
+                      "packId": Object {
+                        "type": "string",
+                      },
+                      "queries": Object {
+                        "items": Object {
+                          "additionalProperties": false,
+                          "properties": Object {
+                            "ecs_mapping": Object {
+                              "$ref": "#/allOf/0/properties/responseActions/items/anyOf/0/properties/params/properties/ecsMapping",
+                            },
+                            "id": Object {
+                              "type": "string",
+                            },
+                            "platform": Object {
+                              "type": "string",
+                            },
+                            "query": Object {
+                              "type": "string",
+                            },
+                            "removed": Object {
+                              "type": "boolean",
+                            },
+                            "snapshot": Object {
+                              "type": "boolean",
+                            },
+                            "version": Object {
+                              "type": "string",
+                            },
+                          },
+                          "required": Array [
+                            "id",
+                            "query",
+                          ],
+                          "type": "object",
+                        },
+                        "type": "array",
+                      },
+                      "query": Object {
+                        "type": "string",
+                      },
+                      "savedQueryId": Object {
+                        "type": "string",
+                      },
+                      "timeout": Object {
+                        "type": "number",
+                      },
+                    },
+                    "type": "object",
+                  },
+                },
+                "required": Array [
+                  "actionTypeId",
+                  "params",
+                ],
+                "type": "object",
+              },
+              Object {
+                "additionalProperties": false,
+                "properties": Object {
+                  "actionTypeId": Object {
+                    "const": ".endpoint",
+                    "type": "string",
+                  },
+                  "params": Object {
+                    "anyOf": Array [
+                      Object {
+                        "additionalProperties": false,
+                        "properties": Object {
+                          "command": Object {
+                            "const": "isolate",
+                            "type": "string",
+                          },
+                          "comment": Object {
+                            "type": "string",
+                          },
+                        },
+                        "required": Array [
+                          "command",
+                        ],
+                        "type": "object",
+                      },
+                      Object {
+                        "additionalProperties": false,
+                        "properties": Object {
+                          "command": Object {
+                            "enum": Array [
+                              "kill-process",
+                              "suspend-process",
+                            ],
+                            "type": "string",
+                          },
+                          "comment": Object {
+                            "type": "string",
+                          },
+                          "config": Object {
+                            "additionalProperties": false,
+                            "properties": Object {
+                              "field": Object {
+                                "type": "string",
+                              },
+                              "overwrite": Object {
+                                "default": true,
+                                "type": "boolean",
+                              },
+                            },
+                            "required": Array [
+                              "field",
+                            ],
+                            "type": "object",
+                          },
+                        },
+                        "required": Array [
+                          "command",
+                          "config",
+                        ],
+                        "type": "object",
+                      },
+                    ],
+                  },
+                },
+                "required": Array [
+                  "actionTypeId",
+                  "params",
+                ],
+                "type": "object",
+              },
+            ],
+          },
+          "type": "array",
+        },
         "riskScore": Object {
           "maximum": 100,
           "minimum": 0,
@@ -7783,6 +9493,40 @@ Object {
         },
         "ruleNameOverride": Object {
           "type": "string",
+        },
+        "ruleSource": Object {
+          "anyOf": Array [
+            Object {
+              "additionalProperties": false,
+              "properties": Object {
+                "isCustomized": Object {
+                  "type": "boolean",
+                },
+                "type": Object {
+                  "const": "external",
+                  "type": "string",
+                },
+              },
+              "required": Array [
+                "type",
+                "isCustomized",
+              ],
+              "type": "object",
+            },
+            Object {
+              "additionalProperties": false,
+              "properties": Object {
+                "type": Object {
+                  "const": "internal",
+                  "type": "string",
+                },
+              },
+              "required": Array [
+                "type",
+              ],
+              "type": "object",
+            },
+          ],
         },
         "setup": Object {
           "type": "string",
@@ -8021,175 +9765,6 @@ Object {
             "query": Object {
               "type": "string",
             },
-            "responseActions": Object {
-              "items": Object {
-                "anyOf": Array [
-                  Object {
-                    "additionalProperties": false,
-                    "properties": Object {
-                      "actionTypeId": Object {
-                        "const": ".osquery",
-                        "type": "string",
-                      },
-                      "params": Object {
-                        "additionalProperties": false,
-                        "properties": Object {
-                          "ecsMapping": Object {
-                            "additionalProperties": Object {
-                              "additionalProperties": false,
-                              "properties": Object {
-                                "field": Object {
-                                  "type": "string",
-                                },
-                                "value": Object {
-                                  "anyOf": Array [
-                                    Object {
-                                      "type": "string",
-                                    },
-                                    Object {
-                                      "items": Object {
-                                        "type": "string",
-                                      },
-                                      "type": "array",
-                                    },
-                                  ],
-                                },
-                              },
-                              "type": "object",
-                            },
-                            "properties": Object {},
-                            "type": "object",
-                          },
-                          "packId": Object {
-                            "type": "string",
-                          },
-                          "queries": Object {
-                            "items": Object {
-                              "additionalProperties": false,
-                              "properties": Object {
-                                "ecs_mapping": Object {
-                                  "$ref": "#/allOf/1/anyOf/0/properties/responseActions/items/anyOf/0/properties/params/properties/ecsMapping",
-                                },
-                                "id": Object {
-                                  "type": "string",
-                                },
-                                "platform": Object {
-                                  "type": "string",
-                                },
-                                "query": Object {
-                                  "type": "string",
-                                },
-                                "removed": Object {
-                                  "type": "boolean",
-                                },
-                                "snapshot": Object {
-                                  "type": "boolean",
-                                },
-                                "version": Object {
-                                  "type": "string",
-                                },
-                              },
-                              "required": Array [
-                                "id",
-                                "query",
-                              ],
-                              "type": "object",
-                            },
-                            "type": "array",
-                          },
-                          "query": Object {
-                            "type": "string",
-                          },
-                          "savedQueryId": Object {
-                            "type": "string",
-                          },
-                          "timeout": Object {
-                            "type": "number",
-                          },
-                        },
-                        "type": "object",
-                      },
-                    },
-                    "required": Array [
-                      "actionTypeId",
-                      "params",
-                    ],
-                    "type": "object",
-                  },
-                  Object {
-                    "additionalProperties": false,
-                    "properties": Object {
-                      "actionTypeId": Object {
-                        "const": ".endpoint",
-                        "type": "string",
-                      },
-                      "params": Object {
-                        "anyOf": Array [
-                          Object {
-                            "additionalProperties": false,
-                            "properties": Object {
-                              "command": Object {
-                                "const": "isolate",
-                                "type": "string",
-                              },
-                              "comment": Object {
-                                "type": "string",
-                              },
-                            },
-                            "required": Array [
-                              "command",
-                            ],
-                            "type": "object",
-                          },
-                          Object {
-                            "additionalProperties": false,
-                            "properties": Object {
-                              "command": Object {
-                                "enum": Array [
-                                  "kill-process",
-                                  "suspend-process",
-                                ],
-                                "type": "string",
-                              },
-                              "comment": Object {
-                                "type": "string",
-                              },
-                              "config": Object {
-                                "additionalProperties": false,
-                                "properties": Object {
-                                  "field": Object {
-                                    "type": "string",
-                                  },
-                                  "overwrite": Object {
-                                    "default": true,
-                                    "type": "boolean",
-                                  },
-                                },
-                                "required": Array [
-                                  "field",
-                                ],
-                                "type": "object",
-                              },
-                            },
-                            "required": Array [
-                              "command",
-                              "config",
-                            ],
-                            "type": "object",
-                          },
-                        ],
-                      },
-                    },
-                    "required": Array [
-                      "actionTypeId",
-                      "params",
-                    ],
-                    "type": "object",
-                  },
-                ],
-              },
-              "type": "array",
-            },
             "savedId": Object {
               "type": "string",
             },
@@ -8225,12 +9800,6 @@ Object {
             },
             "query": Object {
               "$ref": "#/allOf/1/anyOf/0/properties/query",
-            },
-            "responseActions": Object {
-              "items": Object {
-                "$ref": "#/allOf/1/anyOf/0/properties/responseActions/items",
-              },
-              "type": "array",
             },
             "savedId": Object {
               "$ref": "#/allOf/1/anyOf/0/properties/savedId",
@@ -8424,6 +9993,175 @@ Object {
           },
           "type": "array",
         },
+        "responseActions": Object {
+          "items": Object {
+            "anyOf": Array [
+              Object {
+                "additionalProperties": false,
+                "properties": Object {
+                  "actionTypeId": Object {
+                    "const": ".osquery",
+                    "type": "string",
+                  },
+                  "params": Object {
+                    "additionalProperties": false,
+                    "properties": Object {
+                      "ecsMapping": Object {
+                        "additionalProperties": Object {
+                          "additionalProperties": false,
+                          "properties": Object {
+                            "field": Object {
+                              "type": "string",
+                            },
+                            "value": Object {
+                              "anyOf": Array [
+                                Object {
+                                  "type": "string",
+                                },
+                                Object {
+                                  "items": Object {
+                                    "type": "string",
+                                  },
+                                  "type": "array",
+                                },
+                              ],
+                            },
+                          },
+                          "type": "object",
+                        },
+                        "properties": Object {},
+                        "type": "object",
+                      },
+                      "packId": Object {
+                        "type": "string",
+                      },
+                      "queries": Object {
+                        "items": Object {
+                          "additionalProperties": false,
+                          "properties": Object {
+                            "ecs_mapping": Object {
+                              "$ref": "#/allOf/0/properties/responseActions/items/anyOf/0/properties/params/properties/ecsMapping",
+                            },
+                            "id": Object {
+                              "type": "string",
+                            },
+                            "platform": Object {
+                              "type": "string",
+                            },
+                            "query": Object {
+                              "type": "string",
+                            },
+                            "removed": Object {
+                              "type": "boolean",
+                            },
+                            "snapshot": Object {
+                              "type": "boolean",
+                            },
+                            "version": Object {
+                              "type": "string",
+                            },
+                          },
+                          "required": Array [
+                            "id",
+                            "query",
+                          ],
+                          "type": "object",
+                        },
+                        "type": "array",
+                      },
+                      "query": Object {
+                        "type": "string",
+                      },
+                      "savedQueryId": Object {
+                        "type": "string",
+                      },
+                      "timeout": Object {
+                        "type": "number",
+                      },
+                    },
+                    "type": "object",
+                  },
+                },
+                "required": Array [
+                  "actionTypeId",
+                  "params",
+                ],
+                "type": "object",
+              },
+              Object {
+                "additionalProperties": false,
+                "properties": Object {
+                  "actionTypeId": Object {
+                    "const": ".endpoint",
+                    "type": "string",
+                  },
+                  "params": Object {
+                    "anyOf": Array [
+                      Object {
+                        "additionalProperties": false,
+                        "properties": Object {
+                          "command": Object {
+                            "const": "isolate",
+                            "type": "string",
+                          },
+                          "comment": Object {
+                            "type": "string",
+                          },
+                        },
+                        "required": Array [
+                          "command",
+                        ],
+                        "type": "object",
+                      },
+                      Object {
+                        "additionalProperties": false,
+                        "properties": Object {
+                          "command": Object {
+                            "enum": Array [
+                              "kill-process",
+                              "suspend-process",
+                            ],
+                            "type": "string",
+                          },
+                          "comment": Object {
+                            "type": "string",
+                          },
+                          "config": Object {
+                            "additionalProperties": false,
+                            "properties": Object {
+                              "field": Object {
+                                "type": "string",
+                              },
+                              "overwrite": Object {
+                                "default": true,
+                                "type": "boolean",
+                              },
+                            },
+                            "required": Array [
+                              "field",
+                            ],
+                            "type": "object",
+                          },
+                        },
+                        "required": Array [
+                          "command",
+                          "config",
+                        ],
+                        "type": "object",
+                      },
+                    ],
+                  },
+                },
+                "required": Array [
+                  "actionTypeId",
+                  "params",
+                ],
+                "type": "object",
+              },
+            ],
+          },
+          "type": "array",
+        },
         "riskScore": Object {
           "maximum": 100,
           "minimum": 0,
@@ -8461,6 +10199,40 @@ Object {
         },
         "ruleNameOverride": Object {
           "type": "string",
+        },
+        "ruleSource": Object {
+          "anyOf": Array [
+            Object {
+              "additionalProperties": false,
+              "properties": Object {
+                "isCustomized": Object {
+                  "type": "boolean",
+                },
+                "type": Object {
+                  "const": "external",
+                  "type": "string",
+                },
+              },
+              "required": Array [
+                "type",
+                "isCustomized",
+              ],
+              "type": "object",
+            },
+            Object {
+              "additionalProperties": false,
+              "properties": Object {
+                "type": Object {
+                  "const": "internal",
+                  "type": "string",
+                },
+              },
+              "required": Array [
+                "type",
+              ],
+              "type": "object",
+            },
+          ],
         },
         "setup": Object {
           "type": "string",
@@ -8751,6 +10523,70 @@ Object {
     "presence": "optional",
   },
   "keys": Object {
+    "dependencies": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "items": Array [
+        Object {
+          "flags": Object {
+            "default": Object {
+              "special": "deep",
+            },
+            "error": [Function],
+            "presence": "optional",
+          },
+          "keys": Object {
+            "actionGroupsToSuppressOn": Object {
+              "flags": Object {
+                "error": [Function],
+              },
+              "items": Array [
+                Object {
+                  "flags": Object {
+                    "error": [Function],
+                    "presence": "optional",
+                  },
+                  "rules": Array [
+                    Object {
+                      "args": Object {
+                        "method": [Function],
+                      },
+                      "name": "custom",
+                    },
+                  ],
+                  "type": "string",
+                },
+              ],
+              "type": "array",
+            },
+            "ruleId": Object {
+              "flags": Object {
+                "error": [Function],
+              },
+              "rules": Array [
+                Object {
+                  "args": Object {
+                    "method": [Function],
+                  },
+                  "name": "custom",
+                },
+              ],
+              "type": "string",
+            },
+          },
+          "type": "object",
+        },
+      ],
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
+      "type": "array",
+    },
     "sloId": Object {
       "flags": Object {
         "error": [Function],
@@ -8843,11 +10679,6 @@ Object {
                   "type": "number",
                 },
               },
-              "preferences": Object {
-                "stripUnknown": Object {
-                  "objects": false,
-                },
-              },
               "type": "object",
             },
             "maxBurnRateThreshold": Object {
@@ -8910,28 +10741,13 @@ Object {
                   "type": "number",
                 },
               },
-              "preferences": Object {
-                "stripUnknown": Object {
-                  "objects": false,
-                },
-              },
               "type": "object",
-            },
-          },
-          "preferences": Object {
-            "stripUnknown": Object {
-              "objects": false,
             },
           },
           "type": "object",
         },
       ],
       "type": "array",
-    },
-  },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
     },
   },
   "type": "object",
@@ -9063,11 +10879,6 @@ Object {
                           "type": "boolean",
                         },
                       },
-                      "preferences": Object {
-                        "stripUnknown": Object {
-                          "objects": false,
-                        },
-                      },
                       "type": "object",
                     },
                   },
@@ -9110,11 +10921,6 @@ Object {
                             "presence": "optional",
                           },
                           "type": "boolean",
-                        },
-                      },
-                      "preferences": Object {
-                        "stripUnknown": Object {
-                          "objects": false,
                         },
                       },
                       "type": "object",
@@ -9161,11 +10967,6 @@ Object {
                           "type": "boolean",
                         },
                       },
-                      "preferences": Object {
-                        "stripUnknown": Object {
-                          "objects": false,
-                        },
-                      },
                       "type": "object",
                     },
                   },
@@ -9185,11 +10986,6 @@ Object {
                 "type": "alternatives",
               },
             },
-            "preferences": Object {
-              "stripUnknown": Object {
-                "objects": false,
-              },
-            },
             "type": "object",
           },
         },
@@ -9207,11 +11003,6 @@ Object {
         },
       ],
       "type": "alternatives",
-    },
-  },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
     },
   },
   "type": "object",
@@ -9294,11 +11085,6 @@ Object {
             },
           ],
           "type": "array",
-        },
-      },
-      "preferences": Object {
-        "stripUnknown": Object {
-          "objects": false,
         },
       },
       "rules": Array [
@@ -9452,11 +11238,6 @@ Object {
       "type": "alternatives",
     },
   },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
-    },
-  },
   "type": "object",
 }
 `;
@@ -9537,11 +11318,6 @@ Object {
                   },
                 ],
                 "type": "array",
-              },
-            },
-            "preferences": Object {
-              "stripUnknown": Object {
-                "objects": false,
               },
             },
             "rules": Array [
@@ -9628,11 +11404,6 @@ Object {
             },
           ],
           "type": "array",
-        },
-      },
-      "preferences": Object {
-        "stripUnknown": Object {
-          "objects": false,
         },
       },
       "rules": Array [
@@ -9726,11 +11497,6 @@ Object {
                           "type": "alternatives",
                         },
                       },
-                      "preferences": Object {
-                        "stripUnknown": Object {
-                          "objects": false,
-                        },
-                      },
                       "type": "object",
                     },
                   },
@@ -9773,11 +11539,6 @@ Object {
                             "presence": "optional",
                           },
                           "type": "boolean",
-                        },
-                      },
-                      "preferences": Object {
-                        "stripUnknown": Object {
-                          "objects": false,
                         },
                       },
                       "type": "object",
@@ -9900,11 +11661,6 @@ Object {
                           "type": "alternatives",
                         },
                       },
-                      "preferences": Object {
-                        "stripUnknown": Object {
-                          "objects": false,
-                        },
-                      },
                       "type": "object",
                     },
                   },
@@ -9947,11 +11703,6 @@ Object {
                             "presence": "optional",
                           },
                           "type": "boolean",
-                        },
-                      },
-                      "preferences": Object {
-                        "stripUnknown": Object {
-                          "objects": false,
                         },
                       },
                       "type": "object",
@@ -9998,11 +11749,6 @@ Object {
                           "type": "boolean",
                         },
                       },
-                      "preferences": Object {
-                        "stripUnknown": Object {
-                          "objects": false,
-                        },
-                      },
                       "type": "object",
                     },
                   },
@@ -10022,11 +11768,6 @@ Object {
                 "type": "alternatives",
               },
             },
-            "preferences": Object {
-              "stripUnknown": Object {
-                "objects": false,
-              },
-            },
             "type": "object",
           },
         },
@@ -10044,11 +11785,6 @@ Object {
         },
       ],
       "type": "alternatives",
-    },
-  },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
     },
   },
   "type": "object",

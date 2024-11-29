@@ -13,21 +13,20 @@ exports[`OpenSearchPanel render 1`] = `
       size="m"
     >
       <h2>
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Open search"
           id="discover.topNav.openSearchPanel.openSearchTitle"
-          values={Object {}}
         />
       </h2>
     </EuiTitle>
   </EuiFlyoutHeader>
   <EuiFlyoutBody>
     <SavedObjectFinder
+      id="discoverOpenSearch"
       noItemsMessage={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="No matching searches found."
           id="discover.topNav.openSearchPanel.noSearchesFoundDescription"
-          values={Object {}}
         />
       }
       onChoose={[Function]}
@@ -63,10 +62,9 @@ exports[`OpenSearchPanel render 1`] = `
           href="/app/management/kibana/objects?initialQuery=type:(search)"
           onClick={[MockFunction]}
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Manage searches"
             id="discover.topNav.openSearchPanel.manageSearchesButtonLabel"
-            values={Object {}}
           />
         </EuiButton>
       </EuiFlexItem>

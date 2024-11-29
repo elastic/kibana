@@ -133,6 +133,9 @@ export const hasFilterKeyError = (
   indexMapping: IndexMapping,
   skipNormalization?: boolean
 ): string | null => {
+  if (key === null) {
+    return null;
+  }
   if (!key) {
     return `Invalid key`;
   }

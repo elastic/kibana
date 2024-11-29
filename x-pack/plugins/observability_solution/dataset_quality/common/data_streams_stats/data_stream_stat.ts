@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { DEFAULT_DEGRADED_DOCS } from '../constants';
-import { DataStreamType } from '../types';
-import { indexNameToDataStreamParts } from '../utils';
+import { DataStreamDocsStat } from '../api_types';
+import { DEFAULT_DATASET_QUALITY, DEFAULT_DEGRADED_DOCS } from '../constants';
+import { DataStreamType, QualityIndicators } from '../types';
+import { indexNameToDataStreamParts, mapPercentageToQuality } from '../utils';
 import { Integration } from './integration';
 import { DataStreamStatType } from './types';
 
@@ -16,11 +17,15 @@ export class DataStreamStat {
   type: DataStreamType;
   name: DataStreamStatType['name'];
   namespace: string;
-  title: string;
-  size?: DataStreamStatType['size'];
-  sizeBytes?: DataStreamStatType['sizeBytes'];
+  title?: string;
+  size?: DataStreamStatType['size']; // total datastream size
+  sizeBytes?: DataStreamStatType['sizeBytes']; // total datastream size
   lastActivity?: DataStreamStatType['lastActivity'];
+  userPrivileges?: DataStreamStatType['userPrivileges'];
+  totalDocs?: DataStreamStatType['totalDocs']; // total datastream docs count
   integration?: Integration;
+  quality: QualityIndicators;
+  docsInTimeRange?: number;
   degradedDocs: {
     percentage: number;
     count: number;
@@ -35,11 +40,12 @@ export class DataStreamStat {
     this.size = dataStreamStat.size;
     this.sizeBytes = dataStreamStat.sizeBytes;
     this.lastActivity = dataStreamStat.lastActivity;
+    this.userPrivileges = dataStreamStat.userPrivileges;
+    this.totalDocs = dataStreamStat.totalDocs;
     this.integration = dataStreamStat.integration;
-    this.degradedDocs = {
-      percentage: dataStreamStat.degradedDocs.percentage,
-      count: dataStreamStat.degradedDocs.count,
-    };
+    this.quality = dataStreamStat.quality;
+    this.docsInTimeRange = dataStreamStat.docsInTimeRange;
+    this.degradedDocs = dataStreamStat.degradedDocs;
   }
 
   public static create(dataStreamStat: DataStreamStatType) {
@@ -49,17 +55,55 @@ export class DataStreamStat {
       rawName: dataStreamStat.name,
       type,
       name: dataset,
-      title: dataStreamStat.integration?.datasets?.[dataset] ?? dataset,
+      title: dataset,
       namespace,
       size: dataStreamStat.size,
       sizeBytes: dataStreamStat.sizeBytes,
       lastActivity: dataStreamStat.lastActivity,
-      integration: dataStreamStat.integration
-        ? Integration.create(dataStreamStat.integration)
-        : undefined,
+      userPrivileges: dataStreamStat.userPrivileges,
+      totalDocs: dataStreamStat.totalDocs,
+      quality: DEFAULT_DATASET_QUALITY,
       degradedDocs: DEFAULT_DEGRADED_DOCS,
     };
 
     return new DataStreamStat(dataStreamStatProps);
+  }
+
+  public static fromDegradedDocStat({
+    degradedDocStat,
+    datasetIntegrationMap,
+    totalDocs,
+  }: {
+    degradedDocStat: DataStreamDocsStat & { percentage: number };
+    datasetIntegrationMap: Record<string, { integration: Integration; title: string }>;
+    totalDocs: number;
+  }) {
+    const { type, dataset, namespace } = indexNameToDataStreamParts(degradedDocStat.dataset);
+
+    const dataStreamStatProps = {
+      rawName: degradedDocStat.dataset,
+      type,
+      name: dataset,
+      title: datasetIntegrationMap[dataset]?.title || dataset,
+      namespace,
+      integration: datasetIntegrationMap[dataset]?.integration,
+      quality: mapPercentageToQuality(degradedDocStat.percentage),
+      docsInTimeRange: totalDocs,
+      degradedDocs: {
+        percentage: degradedDocStat.percentage,
+        count: degradedDocStat.count,
+      },
+    };
+
+    return new DataStreamStat(dataStreamStatProps);
+  }
+
+  public static calculateFilteredSize({ sizeBytes, totalDocs, docsInTimeRange }: DataStreamStat) {
+    const avgDocSize = sizeBytes && totalDocs ? sizeBytes / totalDocs : 0;
+    return avgDocSize * (docsInTimeRange ?? 0);
+  }
+
+  public static calculatePercentage({ totalDocs, count }: { totalDocs?: number; count?: number }) {
+    return totalDocs && count ? (count / totalDocs) * 100 : 0;
   }
 }

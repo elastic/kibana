@@ -21,11 +21,9 @@ import { ScopedHistory } from '@kbn/core/public';
 import {
   getNavigateToApp,
   getMapsCapabilities,
-  getIsAllowByValueEmbeddables,
   getInspector,
   getCoreOverlays,
   getSavedObjectsTagging,
-  getPresentationUtilContext,
 } from '../../kibana_services';
 import { MAP_EMBEDDABLE_NAME } from '../../../common/constants';
 import { SavedMap } from './saved_map';
@@ -151,15 +149,15 @@ export function getTopNavConfig({
         }
       },
       run: () => {
-        let selectedTags = savedMap.getTags();
-        function onTagsSelected(newTags: string[]) {
-          selectedTags = newTags;
+        let tags = savedMap.getTags();
+        function onTagsSelected(nextTags: string[]) {
+          tags = nextTags;
         }
 
         const savedObjectsTagging = getSavedObjectsTagging();
         const tagSelector = savedObjectsTagging ? (
           <savedObjectsTagging.ui.components.SavedObjectSaveModalTagSelector
-            initialSelection={selectedTags}
+            initialSelection={tags}
             onTagsSelected={onTagsSelected}
             markOptional
           />
@@ -194,7 +192,7 @@ export function getTopNavConfig({
 
             await savedMap.save({
               ...props,
-              newTags: selectedTags,
+              tags,
               saveByReference: props.addToLibrary,
               history,
             });
@@ -211,11 +209,10 @@ export function getTopNavConfig({
             defaultMessage: 'map',
           }),
         };
-        const PresentationUtilContext = getPresentationUtilContext();
 
         let saveModal;
 
-        if (savedMap.hasOriginatingApp() || !getIsAllowByValueEmbeddables()) {
+        if (savedMap.hasOriginatingApp()) {
           saveModal = (
             <SavedObjectSaveModalOrigin
               {...saveModalProps}
@@ -252,7 +249,7 @@ export function getTopNavConfig({
           );
         }
 
-        showSaveModal(saveModal, PresentationUtilContext);
+        showSaveModal(saveModal);
       },
     });
 

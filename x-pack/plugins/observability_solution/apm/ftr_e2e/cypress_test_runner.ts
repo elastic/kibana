@@ -5,15 +5,11 @@
  * 2.0.
  */
 
-import {
-  ApmSynthtraceKibanaClient,
-  createLogger,
-  LogLevel,
-} from '@kbn/apm-synthtrace';
+import { ApmSynthtraceKibanaClient, createLogger, LogLevel } from '@kbn/apm-synthtrace';
 import cypress from 'cypress';
 import path from 'path';
 import Url from 'url';
-import { createApmUsers } from '../server/test_helpers/create_apm_users/create_apm_users';
+import { createApmUsers } from '@kbn/apm-plugin/server/test_helpers/create_apm_users/create_apm_users';
 import { FtrProviderContext } from './ftr_provider_context';
 
 export async function cypressTestRunner({ getService }: FtrProviderContext) {
@@ -87,13 +83,13 @@ function getCypressCliArgs(): Record<string, unknown> {
     return {};
   }
 
-  const { $0, _, ...cypressCliArgs } = JSON.parse(
-    process.env.CYPRESS_CLI_ARGS
-  ) as Record<string, unknown>;
+  const { $0, _, ...cypressCliArgs } = JSON.parse(process.env.CYPRESS_CLI_ARGS) as Record<
+    string,
+    unknown
+  >;
 
   const spec =
-    typeof cypressCliArgs.spec === 'string' &&
-    !cypressCliArgs.spec.includes('**')
+    typeof cypressCliArgs.spec === 'string' && !cypressCliArgs.spec.includes('**')
       ? `**/${cypressCliArgs.spec}*`
       : cypressCliArgs.spec;
 

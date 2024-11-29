@@ -18,14 +18,13 @@ import {
 } from '@kbn/data-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
-import { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import {
   DataViewsPublicPluginSetup,
   DataViewsPublicPluginStart,
 } from '@kbn/data-views-plugin/public';
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
-import { Document } from '../persistence/saved_object_store';
+import { LensDocument } from '../persistence/saved_object_store';
 import {
   Datasource,
   Visualization,
@@ -47,7 +46,6 @@ export interface EditorFrameStartPlugins {
   uiActions: UiActionsStart;
   data: DataPublicPluginStart;
   embeddable?: EmbeddableStart;
-  dashboard?: DashboardStart;
   expressions: ExpressionsStart;
   charts: ChartsPluginSetup;
   dataViews: DataViewsPublicPluginStart;
@@ -95,7 +93,7 @@ export class EditorFrameService {
    * This is an asynchronous process.
    * @param doc parsed Lens saved object
    */
-  public documentToExpression = async (doc: Document, services: EditorFramePlugins) => {
+  public documentToExpression = async (doc: LensDocument, services: EditorFramePlugins) => {
     const [resolvedDatasources, resolvedVisualizations] = await Promise.all([
       this.loadDatasources(),
       this.loadVisualizations(),

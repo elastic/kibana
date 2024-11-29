@@ -13,14 +13,10 @@ describe('getServerlessFunctionNameFromId', () => {
 
   it('returns correct serverless function name', () => {
     expect(
-      getServerlessFunctionNameFromId(
-        'arn:aws:lambda:us-west-2:123456789012:function:my-function'
-      )
+      getServerlessFunctionNameFromId('arn:aws:lambda:us-west-2:123456789012:function:my-function')
     ).toEqual('my-function');
     expect(
-      getServerlessFunctionNameFromId(
-        'arn:aws:lambda:us-west-2:123456789012:function:my:function'
-      )
+      getServerlessFunctionNameFromId('arn:aws:lambda:us-west-2:123456789012:function:my:function')
     ).toEqual('my:function');
   });
 });

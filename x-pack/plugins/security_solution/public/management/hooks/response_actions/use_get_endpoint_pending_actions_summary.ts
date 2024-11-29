@@ -9,7 +9,7 @@ import type { QueryObserverResult, UseQueryOptions } from '@tanstack/react-query
 import { useQuery } from '@tanstack/react-query';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { PendingActionsResponse } from '../../../../common/endpoint/types';
-import { fetchPendingActionsByAgentId } from '../../../common/lib/endpoint_pending_actions';
+import { fetchPendingActionsByAgentId } from '../../../common/lib/endpoint/endpoint_pending_actions';
 
 /**
  * Retrieves the pending actions against the given Endpoint `agent.id`'s

@@ -11,6 +11,7 @@ import type {
   ResponseActionsClientUpdateCasesOptions,
   ResponseActionsClientWriteActionRequestToEndpointIndexOptions,
   ResponseActionsClientWriteActionResponseToEndpointIndexOptions,
+  ResponseActionsClientPendingAction,
 } from './base_response_actions_client';
 import { HOST_NOT_ENROLLED, ResponseActionsClientImpl } from './base_response_actions_client';
 import type {
@@ -35,13 +36,17 @@ import {
   ENDPOINT_ACTIONS_INDEX,
 } from '../../../../../../common/endpoint/constants';
 import type { DeepMutable } from '../../../../../../common/endpoint/types/utility_types';
-import { set } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
 import { responseActionsClientMock } from '../mocks';
 import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
 import { getResponseActionFeatureKey } from '../../../feature_usage/feature_keys';
 import { isActionSupportedByAgentType as _isActionSupportedByAgentType } from '../../../../../../common/endpoint/service/response_actions/is_response_action_supported';
 import { EndpointActionGenerator } from '../../../../../../common/endpoint/data_generators/endpoint_action_generator';
 import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
+import {
+  ENDPOINT_RESPONSE_ACTION_SENT_ERROR_EVENT,
+  ENDPOINT_RESPONSE_ACTION_SENT_EVENT,
+} from '../../../../../lib/telemetry/event_based/events';
 
 jest.mock('../../action_details_by_id', () => {
   const original = jest.requireActual('../../action_details_by_id');
@@ -116,6 +121,17 @@ describe('ResponseActionsClientImpl base class', () => {
       await expect(responsePromise).rejects.toBeInstanceOf(ResponseActionsNotSupportedError);
       await expect(responsePromise).rejects.toHaveProperty('statusCode', 405);
     });
+
+    it.each(['getFileDownload', 'getFileInfo'])(
+      'should throw not implemented error for %s()',
+      async (method) => {
+        // @ts-expect-error ignoring input type to method since they all should throw
+        const responsePromise = baseClassMock[method]({});
+
+        await expect(responsePromise).rejects.toThrow(`Method ${method}() not implemented`);
+        await expect(responsePromise).rejects.toHaveProperty('statusCode', 501);
+      }
+    );
   });
 
   describe('#updateCases()', () => {
@@ -460,6 +476,30 @@ describe('ResponseActionsClientImpl base class', () => {
       });
 
       describe('#riteActionRequestToEndpointIndex()', () => {
+        it('should write doc with all expected data', async () => {
+          indexDocOptions.meta = { one: 1 };
+
+          await expect(
+            baseClassMock.writeActionRequestToEndpointIndex(indexDocOptions)
+          ).resolves.toEqual({
+            '@timestamp': expect.any(String),
+            EndpointActions: {
+              action_id: expect.any(String),
+              data: {
+                command: 'isolate',
+                comment: 'test comment',
+                parameters: undefined,
+              },
+              expiration: expect.any(String),
+              input_type: 'endpoint',
+              type: 'INPUT_ACTION',
+            },
+            agent: { id: ['one'] },
+            meta: { one: 1 },
+            user: { id: 'foo' },
+          });
+        });
+
         it('should write doc with error when license is not Enterprise', async () => {
           (
             constructorOptions.endpointService.getLicenseService().isEnterprise as jest.Mock
@@ -499,6 +539,100 @@ describe('ResponseActionsClientImpl base class', () => {
         });
       });
     });
+
+    describe('Telemetry', () => {
+      beforeEach(() => {
+        // @ts-expect-error
+        endpointAppContextService.experimentalFeatures.responseActionsTelemetryEnabled = true;
+      });
+
+      it('should send action creation success telemetry for manual actions', async () => {
+        await baseClassMock.writeActionRequestToEndpointIndex(indexDocOptions);
+
+        expect(endpointAppContextService.getTelemetryService().reportEvent).toHaveBeenCalledWith(
+          ENDPOINT_RESPONSE_ACTION_SENT_EVENT.eventType,
+          {
+            responseActions: {
+              actionId: expect.any(String),
+              agentType: indexDocOptions.agent_type,
+              command: indexDocOptions.command,
+              isAutomated: false,
+            },
+          }
+        );
+      });
+
+      it('should send action creation success telemetry for automated actions', async () => {
+        constructorOptions.isAutomated = true;
+        baseClassMock = new MockClassWithExposedProtectedMembers(constructorOptions);
+
+        await baseClassMock.writeActionRequestToEndpointIndex(indexDocOptions);
+
+        expect(endpointAppContextService.getTelemetryService().reportEvent).toHaveBeenCalledWith(
+          ENDPOINT_RESPONSE_ACTION_SENT_EVENT.eventType,
+          {
+            responseActions: {
+              actionId: expect.any(String),
+              agentType: indexDocOptions.agent_type,
+              command: indexDocOptions.command,
+              isAutomated: true,
+            },
+          }
+        );
+      });
+
+      it('should send error telemetry if action creation fails', async () => {
+        esClient.index.mockImplementation(async () => {
+          throw new Error('test error');
+        });
+        const responsePromise = baseClassMock.writeActionRequestToEndpointIndex(indexDocOptions);
+        await expect(responsePromise).rejects.toBeInstanceOf(ResponseActionsClientError);
+
+        expect(endpointAppContextService.getTelemetryService().reportEvent).toHaveBeenCalledWith(
+          ENDPOINT_RESPONSE_ACTION_SENT_ERROR_EVENT.eventType,
+          {
+            responseActions: {
+              agentType: indexDocOptions.agent_type,
+              command: indexDocOptions.command,
+              error: 'test error',
+            },
+          }
+        );
+      });
+    });
+
+    describe('Telemetry (with feature disabled)', () => {
+      // although this is redundant, it is here to make sure that it works as expected wit the feature disabled
+      beforeEach(() => {
+        // @ts-expect-error
+        endpointAppContextService.experimentalFeatures.responseActionsTelemetryEnabled = false;
+      });
+
+      it('should not send action creation success telemetry for manual actions', async () => {
+        await baseClassMock.writeActionRequestToEndpointIndex(indexDocOptions);
+
+        expect(endpointAppContextService.getTelemetryService().reportEvent).not.toHaveBeenCalled();
+      });
+
+      it('should not send action creation success telemetry for automated actions', async () => {
+        constructorOptions.isAutomated = true;
+        baseClassMock = new MockClassWithExposedProtectedMembers(constructorOptions);
+
+        await baseClassMock.writeActionRequestToEndpointIndex(indexDocOptions);
+
+        expect(endpointAppContextService.getTelemetryService().reportEvent).not.toHaveBeenCalled();
+      });
+
+      it('should not send error telemetry if action creation fails', async () => {
+        esClient.index.mockImplementation(async () => {
+          throw new Error('test error');
+        });
+        const responsePromise = baseClassMock.writeActionRequestToEndpointIndex(indexDocOptions);
+        await expect(responsePromise).rejects.toBeInstanceOf(ResponseActionsClientError);
+
+        expect(endpointAppContextService.getTelemetryService().reportEvent).not.toHaveBeenCalled();
+      });
+    });
   });
 
   describe('#writeActionResponseToEndpointIndex()', () => {
@@ -514,6 +648,7 @@ describe('ResponseActionsClientImpl base class', () => {
           comment: 'some comment',
           output: undefined,
         },
+        meta: { one: 1 },
       };
     });
 
@@ -539,6 +674,7 @@ describe('ResponseActionsClientImpl base class', () => {
         error: {
           message: 'test error',
         },
+        meta: { one: 1 },
       } as LogsEndpointActionResponse);
     });
 
@@ -640,11 +776,7 @@ describe('ResponseActionsClientImpl base class', () => {
     });
 
     it('should provide an array of pending actions', async () => {
-      const iterationData: Array<
-        Array<
-          LogsEndpointAction<EndpointActionDataParameterTypes, EndpointActionResponseDataOutput, {}>
-        >
-      > = [];
+      const iterationData: ResponseActionsClientPendingAction[][] = [];
 
       for await (const pendingActions of baseClassMock.fetchAllPendingActions()) {
         iterationData.push(pendingActions);
@@ -653,12 +785,15 @@ describe('ResponseActionsClientImpl base class', () => {
       expect(iterationData.length).toBe(2);
       expect(iterationData[0]).toEqual([]); // First page of results should be empty due to how the mock was setup
       expect(iterationData[1]).toEqual([
-        expect.objectContaining({
-          EndpointActions: expect.objectContaining({
-            action_id: 'action-id-2',
+        {
+          action: expect.objectContaining({
+            EndpointActions: expect.objectContaining({
+              action_id: 'action-id-2',
+            }),
+            agent: { id: 'agent-b' },
           }),
-          agent: { id: 'agent-b' },
-        }),
+          pendingAgentIds: ['agent-b'],
+        },
       ]);
     });
   });
@@ -677,10 +812,20 @@ class MockClassWithExposedProtectedMembers extends ResponseActionsClientImpl {
     return super.fetchActionDetails(actionId);
   }
 
-  public async writeActionRequestToEndpointIndex(
-    actionRequest: ResponseActionsClientWriteActionRequestToEndpointIndexOptions
-  ): Promise<LogsEndpointAction> {
-    return super.writeActionRequestToEndpointIndex(actionRequest);
+  public async writeActionRequestToEndpointIndex<
+    TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
+    TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
+    TMeta extends {} = {}
+  >(
+    actionRequest: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
+      TParameters,
+      TOutputContent,
+      TMeta
+    >
+  ): Promise<LogsEndpointAction<TParameters, TOutputContent, TMeta>> {
+    return super.writeActionRequestToEndpointIndex<TParameters, TOutputContent, TMeta>(
+      actionRequest
+    );
   }
 
   public async writeActionResponseToEndpointIndex<
@@ -691,7 +836,7 @@ class MockClassWithExposedProtectedMembers extends ResponseActionsClientImpl {
     return super.writeActionResponseToEndpointIndex<TOutputContent>(options);
   }
 
-  public fetchAllPendingActions(): AsyncIterable<LogsEndpointAction[]> {
+  public fetchAllPendingActions(): AsyncIterable<ResponseActionsClientPendingAction[]> {
     return super.fetchAllPendingActions();
   }
 }
