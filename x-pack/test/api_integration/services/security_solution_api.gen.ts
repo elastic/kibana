@@ -80,7 +80,7 @@ import {
   GetEndpointSuggestionsRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/api/endpoint/suggestions/get_suggestions.gen';
 import { GetEntityEngineRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/engine/get.gen';
-import { GetEntityEngineStatsRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/engine/stats.gen';
+import { GetEntityStoreStatusRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/status.gen';
 import { GetNotesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/timeline/get_notes/get_notes_route.gen';
 import { GetPolicyResponseRequestQueryInput } from '@kbn/security-solution-plugin/common/api/endpoint/policy/policy_response.gen';
 import { GetProtectionUpdatesNoteRequestParamsInput } from '@kbn/security-solution-plugin/common/api/endpoint/protection_updates_note/protection_updates_note.gen';
@@ -106,7 +106,7 @@ import {
   InitEntityEngineRequestParamsInput,
   InitEntityEngineRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/engine/init.gen';
-import { InitEntityStoreRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/enablement.gen';
+import { InitEntityStoreRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/enable.gen';
 import { InstallPrepackedTimelinesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/install_prepackaged_timelines/install_prepackaged_timelines_route.gen';
 import { ListEntitiesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/entities/list_entities.gen';
 import { PatchRuleRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/patch_rule/patch_rule_route.gen';
@@ -832,24 +832,13 @@ finalize it.
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
-    getEntityEngineStats(props: GetEntityEngineStatsProps, kibanaSpace: string = 'default') {
-      return supertest
-        .post(
-          routeWithNamespace(
-            replaceParams('/api/entity_store/engines/{entityType}/stats', props.params),
-            kibanaSpace
-          )
-        )
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
-    },
-    getEntityStoreStatus(kibanaSpace: string = 'default') {
+    getEntityStoreStatus(props: GetEntityStoreStatusProps, kibanaSpace: string = 'default') {
       return supertest
         .get(routeWithNamespace('/api/entity_store/status', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .query(props.query);
     },
     /**
      * Get all notes for a given document.
@@ -1615,8 +1604,8 @@ export interface GetEndpointSuggestionsProps {
 export interface GetEntityEngineProps {
   params: GetEntityEngineRequestParamsInput;
 }
-export interface GetEntityEngineStatsProps {
-  params: GetEntityEngineStatsRequestParamsInput;
+export interface GetEntityStoreStatusProps {
+  query: GetEntityStoreStatusRequestQueryInput;
 }
 export interface GetNotesProps {
   query: GetNotesRequestQueryInput;
