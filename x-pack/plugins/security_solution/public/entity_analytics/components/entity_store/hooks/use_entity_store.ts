@@ -73,8 +73,12 @@ export const useInitEntityEngineMutation = (options?: UseMutationOptions<{}>) =>
 
   const { initEntityEngine } = useEntityStoreRoutes();
   return useMutation<InitEntityEngineResponse[]>(
-    () => Promise.all([initEntityEngine('user'), initEntityEngine('host')]),
-
+    () =>
+      Promise.all([
+        initEntityEngine('user'),
+        initEntityEngine('host'),
+        initEntityEngine('service'),
+      ]),
     {
       mutationKey: INIT_ENTITY_ENGINE_STATUS_KEY,
       onSuccess: () => queryClient.refetchQueries({ queryKey: ENTITY_STORE_STATUS }),
@@ -95,7 +99,11 @@ export const useStopEntityEngineMutation = (options?: UseMutationOptions<{}>) =>
         timestamp: new Date().toISOString(),
         action: 'stop',
       });
-      return Promise.all([stopEntityEngine('user'), stopEntityEngine('host')]);
+      return Promise.all([
+        stopEntityEngine('user'),
+        stopEntityEngine('host'),
+        stopEntityEngine('service'),
+      ]);
     },
     {
       mutationKey: STOP_ENTITY_ENGINE_STATUS_KEY,
@@ -111,7 +119,12 @@ export const useDeleteEntityEngineMutation = ({ onSuccess }: { onSuccess?: () =>
   const { deleteEntityEngine } = useEntityStoreRoutes();
 
   return useMutation<DeleteEntityEngineResponse[]>(
-    () => Promise.all([deleteEntityEngine('user', true), deleteEntityEngine('host', true)]),
+    () =>
+      Promise.all([
+        deleteEntityEngine('user', true),
+        deleteEntityEngine('host', true),
+        deleteEntityEngine('service', true),
+      ]),
     {
       mutationKey: DELETE_ENTITY_ENGINE_STATUS_KEY,
       onSuccess: () => {
