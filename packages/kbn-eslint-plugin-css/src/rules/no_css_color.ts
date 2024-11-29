@@ -29,6 +29,14 @@ const htmlElementColorDeclarationRegex = RegExp(
   String.raw`(${propertiesSupportingCssColor.join('|')})\:\s?(\'|\")?${cssColorRegex.source}`
 );
 
+const resolveMemberExpressionRoot = (node: TSESTree.MemberExpression): TSESTree.Identifier => {
+  if (node.object.type === 'MemberExpression') {
+    return resolveMemberExpressionRoot(node.object);
+  }
+
+  return node.object as TSESTree.Identifier;
+};
+
 const raiseReportIfPropertyHasInvalidCssColor = (
   context: Rule.RuleContext,
   propertyNode: TSESTree.Property,
@@ -70,11 +78,46 @@ const raiseReportIfPropertyHasInvalidCssColor = (
     }
 
     return;
-  } else if ((didReport = Boolean(propertyNode.value.type === 'MemberExpression'))) {
-    // TODO: handle member expression ie. style.color.red
-  }
+  } else if (propertyNode.value.type === 'MemberExpression') {
+    // @ts-expect-error we ignore the case where this node could be a private identifier
+    const MemberExpressionLeafName = propertyNode.value.property.name;
+    const memberExpressionRootName = resolveMemberExpressionRoot(propertyNode.value).name;
 
-  return didReport;
+    const expressionRootDeclaration = context.sourceCode
+      // @ts-expect-error
+      .getScope(propertyNode)
+      .variables.find((variable) => variable.name === memberExpressionRootName);
+
+    const expressionRootDeclarationInit = expressionRootDeclaration?.defs[0].node.init;
+
+    if (expressionRootDeclarationInit?.type === 'ObjectExpression') {
+      (expressionRootDeclarationInit as TSESTree.ObjectExpression).properties.forEach(
+        (property) => {
+          // This is a naive approach expecting the value to be at depth 1, we should actually be traversing the object to the same depth as the expression
+          if (
+            property.type === 'Property' &&
+            property.key.type === 'Identifier' &&
+            property.key?.name === MemberExpressionLeafName
+          ) {
+            raiseReportIfPropertyHasInvalidCssColor(context, property, {
+              loc: propertyNode.value.loc,
+              messageId: 'noCSSColorSpecificDeclaredVariable',
+              data: {
+                // @ts-expect-error the key name is always present else this code will not execute
+                property: String(propertyNode.key.name),
+                line: String(propertyNode.value.loc.start.line),
+                variableName: memberExpressionRootName,
+              },
+            });
+          }
+        }
+      );
+    } else if (expressionRootDeclarationInit?.type === 'CallExpression') {
+      // TODO: if this object was returned from invoking a function the best we can do ids probably validate that the method invoked is one that returns an euitheme object
+    }
+
+    return didReport;
+  }
 };
 
 /**
