@@ -32,7 +32,7 @@ export const GridPanel = forwardRef<
     renderPanelContents: (panelId: string) => React.ReactNode;
     interactionStart: (
       type: PanelInteractionEvent['type'] | 'drop',
-      e: React.MouseEvent<HTMLDivElement, MouseEvent>
+      e: React.MouseEvent<HTMLButtonElement, MouseEvent>
     ) => void;
     gridLayoutStateManager: GridLayoutStateManager;
   }
@@ -190,7 +190,7 @@ export const GridPanel = forwardRef<
 
     return (
       <>
-        <div ref={panelRef} css={initialStyles}>
+        <div ref={panelRef} css={initialStyles} className="kbnGridPanel">
           <EuiPanel
             hasShadow={false}
             hasBorder={true}
@@ -201,7 +201,7 @@ export const GridPanel = forwardRef<
             `}
           >
             {/* drag handle */}
-            <div
+            <button
               className="kbnGridPanel__dragHandle"
               css={css`
                 opacity: 0;
@@ -216,18 +216,21 @@ export const GridPanel = forwardRef<
                 z-index: ${euiThemeVars.euiZLevel3};
                 margin-left: ${euiThemeVars.euiSizeS};
                 border: 1px solid ${euiTheme.border.color};
+                border-bottom: none;
                 background-color: ${euiTheme.colors.emptyShade};
                 border-radius: ${euiThemeVars.euiBorderRadius} ${euiThemeVars.euiBorderRadius} 0 0;
-                &:hover {
-                  cursor: grab;
+                cursor: grab;
+                transition: ${euiThemeVars.euiAnimSpeedSlow} opacity;
+                .kbnGridPanel:hover &,
+                .kbnGridPanel:focus-within &,
+                &:active,
+                &:focus {
                   opacity: 1 !important;
                 }
                 &:active {
                   cursor: grabbing;
-                  opacity: 1 !important;
                 }
                 .kbnGrid--static & {
-                  opacity: 0 !important;
                   display: none;
                 }
               `}
@@ -235,9 +238,19 @@ export const GridPanel = forwardRef<
               onMouseUp={(e) => interactionStart('drop', e)}
             >
               <EuiIcon type="grabOmnidirectional" />
+            </button>
+
+            <div
+              css={css`
+                ${euiFullHeight()}
+                ${useEuiOverflowScroll('y', false)}
+            ${useEuiOverflowScroll('x', false)}
+              `}
+            >
+              {panelContents}
             </div>
             {/* Resize handle */}
-            <div
+            <button
               className="kbnGridPanel__resizeHandle"
               onMouseDown={(e) => interactionStart('resize', e)}
               onMouseUp={(e) => interactionStart('drop', e)}
@@ -253,7 +266,9 @@ export const GridPanel = forwardRef<
                 border-radius: 7px 0 7px 0;
                 border-bottom: 2px solid ${euiThemeVars.euiColorSuccess};
                 border-right: 2px solid ${euiThemeVars.euiColorSuccess};
-                :hover {
+                &:hover,
+                &:focus {
+                  outline-style: none !important;
                   opacity: 1;
                   background-color: ${transparentize(euiThemeVars.euiColorSuccess, 0.05)};
                   cursor: se-resize;
@@ -262,17 +277,14 @@ export const GridPanel = forwardRef<
                   opacity: 0 !important;
                   display: none;
                 }
+                .kbnGridPanel__dragHandle:has(~ &:hover) {
+                  opacity: 0 !important;
+                }
+                .kbnGridPanel__dragHandle:has(~ &:focus) {
+                  opacity: 0 !important;
+                }
               `}
             />
-            <div
-              css={css`
-                ${euiFullHeight()}
-                ${useEuiOverflowScroll('y', false)}
-            ${useEuiOverflowScroll('x', false)}
-              `}
-            >
-              {panelContents}
-            </div>
           </EuiPanel>
         </div>
       </>
