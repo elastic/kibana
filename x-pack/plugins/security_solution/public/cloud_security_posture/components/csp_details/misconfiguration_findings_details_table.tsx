@@ -10,7 +10,11 @@ import type { Criteria, EuiBasicTableColumn } from '@elastic/eui';
 import { EuiSpacer, EuiPanel, EuiText, EuiBasicTable, EuiIcon } from '@elastic/eui';
 import { useMisconfigurationFindings } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_findings';
 import { i18n } from '@kbn/i18n';
-import type { CspFinding, CspFindingResult } from '@kbn/cloud-security-posture-common';
+import {
+  MISCONFIGURATION_STATUS,
+  type CspFinding,
+  type CspFindingResult,
+} from '@kbn/cloud-security-posture-common';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
 import type { CspBenchmarkRuleMetadata } from '@kbn/cloud-security-posture-common/schema/rules/latest';
@@ -48,9 +52,9 @@ const getFindingsStats = (
       count: passedFindingsStats,
       color: euiThemeVars.euiColorSuccess,
       filter: () => {
-        filterFunction('passed');
+        filterFunction(MISCONFIGURATION_STATUS.PASSED);
       },
-      isCurrentFilter: currentFilter === 'passed',
+      isCurrentFilter: currentFilter === MISCONFIGURATION_STATUS.PASSED,
       reset: (event: React.MouseEvent<SVGElement, MouseEvent>) => {
         filterFunction('');
         event?.stopPropagation();
@@ -66,9 +70,9 @@ const getFindingsStats = (
       count: failedFindingsStats,
       color: euiThemeVars.euiColorVis9,
       filter: () => {
-        filterFunction('failed');
+        filterFunction(MISCONFIGURATION_STATUS.FAILED);
       },
-      isCurrentFilter: currentFilter === 'failed',
+      isCurrentFilter: currentFilter === MISCONFIGURATION_STATUS.FAILED,
       reset: (event: React.MouseEvent<SVGElement, MouseEvent>) => {
         filterFunction('');
         event?.stopPropagation();
