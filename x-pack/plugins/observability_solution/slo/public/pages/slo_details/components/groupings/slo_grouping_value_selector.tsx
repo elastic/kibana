@@ -6,13 +6,14 @@
  */
 
 import { EuiButtonIcon, EuiComboBox, EuiComboBoxOptionOption, EuiCopy } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React, { useEffect, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import useDebounce from 'react-use/lib/useDebounce';
+import { SLOS_BASE_PATH } from '../../../../../common/locators/paths';
 import { useFetchSloInstances } from '../../hooks/use_fetch_slo_instances';
-import { css } from '@emotion/react';
 
 interface Props {
   slo: SLOWithSummaryResponse;
@@ -26,6 +27,7 @@ interface Field {
 }
 
 export function SLOGroupingValueSelector({ slo, groupingKey, value }: Props) {
+  const isAvailable = window.location.pathname.includes(SLOS_BASE_PATH);
   const { search: searchParams } = useLocation();
   const history = useHistory();
 
@@ -105,7 +107,7 @@ export function SLOGroupingValueSelector({ slo, groupingKey, value }: Props) {
       singleSelection={{ asPlainText: true }}
       options={options}
       isLoading={isLoading}
-      isDisabled={isError}
+      isDisabled={isError || !isAvailable}
       placeholder={i18n.translate('xpack.slo.sLOGroupingValueSelector.placeholder', {
         defaultMessage: 'Select a group value',
       })}
