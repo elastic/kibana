@@ -30,7 +30,7 @@ import { v4 as uuidv4 } from 'uuid';
 import {
   RESPONSE_ACTION_AGENT_TYPE,
   RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP,
-  RESPONSE_ACTION_API_COMMANDS_NAMES,
+  TESTING_RESPONSE_ACTION_API_COMMANDS_NAMES,
   RESPONSE_ACTION_TYPE,
 } from '../../../../../common/endpoint/service/response_actions/constants';
 import { useUserPrivileges as _useUserPrivileges } from '../../../../common/components/user_privileges';
@@ -1013,7 +1013,7 @@ describe('Response actions history', () => {
       return getAllByTestId(`${testPrefix}-details-tray-output`);
     };
 
-    it.each(RESPONSE_ACTION_API_COMMANDS_NAMES)(
+    it.each(TESTING_RESPONSE_ACTION_API_COMMANDS_NAMES)(
       'shows completed status badge for successfully completed %s actions',
       async (command) => {
         useGetEndpointActionListMock.mockReturnValue({
@@ -1086,7 +1086,7 @@ describe('Response actions history', () => {
       }
     );
 
-    it.each(RESPONSE_ACTION_API_COMMANDS_NAMES)(
+    it.each(TESTING_RESPONSE_ACTION_API_COMMANDS_NAMES)(
       'shows Failed status badge for failed %s action',
       async (command) => {
         useGetEndpointActionListMock.mockReturnValue({
@@ -1128,7 +1128,7 @@ describe('Response actions history', () => {
       }
     );
 
-    it.each(RESPONSE_ACTION_API_COMMANDS_NAMES)(
+    it.each(TESTING_RESPONSE_ACTION_API_COMMANDS_NAMES)(
       'shows Failed status badge for expired %s action',
       async (command) => {
         useGetEndpointActionListMock.mockReturnValue({
@@ -1226,7 +1226,7 @@ describe('Response actions history', () => {
       });
 
       describe('with `outputs` and `errors`', () => {
-        it.each(RESPONSE_ACTION_API_COMMANDS_NAMES)(
+        it.each(TESTING_RESPONSE_ACTION_API_COMMANDS_NAMES)(
           'shows failed outputs and errors for %s action',
           async (command) => {
             const data = await getActionListMock({
@@ -1288,7 +1288,7 @@ describe('Response actions history', () => {
       });
 
       describe('with `errors`', () => {
-        it.each(RESPONSE_ACTION_API_COMMANDS_NAMES)(
+        it.each(TESTING_RESPONSE_ACTION_API_COMMANDS_NAMES)(
           'shows failed errors for %s action when no outputs',
           async (command) => {
             useGetEndpointActionListMock.mockReturnValue({
@@ -1378,7 +1378,7 @@ describe('Response actions history', () => {
       });
 
       describe('with `outputs` and `errors`', () => {
-        it.each(RESPONSE_ACTION_API_COMMANDS_NAMES)(
+        it.each(TESTING_RESPONSE_ACTION_API_COMMANDS_NAMES)(
           'shows failed outputs and errors for %s action on multiple agents',
           async (command) => {
             const data = await getActionListMock({
@@ -1457,7 +1457,7 @@ describe('Response actions history', () => {
       });
 
       describe('with `errors`', () => {
-        it.each(RESPONSE_ACTION_API_COMMANDS_NAMES)(
+        it.each(TESTING_RESPONSE_ACTION_API_COMMANDS_NAMES)(
           'shows failed errors for %s action on multiple agents',
           async (command) => {
             const data = await getActionListMock({
@@ -1545,7 +1545,7 @@ describe('Response actions history', () => {
       const filterList = getByTestId(`${testPrefix}-${filterPrefix}-popoverList`);
       expect(filterList).toBeTruthy();
       expect(getAllByTestId(`${filterPrefix}-option`).length).toEqual(
-        RESPONSE_ACTION_API_COMMANDS_NAMES.length
+        TESTING_RESPONSE_ACTION_API_COMMANDS_NAMES.length
       );
       expect(getAllByTestId(`${filterPrefix}-option`).map((option) => option.textContent)).toEqual([
         'isolate. To check this option, press Enter.',

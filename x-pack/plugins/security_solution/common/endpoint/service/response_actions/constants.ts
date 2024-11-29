@@ -82,6 +82,10 @@ export const CONSOLE_RESPONSE_ACTION_COMMANDS = [
   'runscript',
 ] as const;
 
+export const TESTING_CONSOLE_RESPONSE_ACTION_COMMANDS = CONSOLE_RESPONSE_ACTION_COMMANDS.filter(
+  (command) => command !== 'runscript'
+);
+
 export type ConsoleResponseActionCommands = (typeof CONSOLE_RESPONSE_ACTION_COMMANDS)[number];
 
 export type ResponseConsoleRbacControls =

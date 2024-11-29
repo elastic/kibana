@@ -7,7 +7,7 @@
 
 import { ensureResponseActionAuthzAccess } from '../../../tasks/response_actions';
 import { login, ROLE } from '../../../tasks/login';
-import { RESPONSE_ACTION_API_COMMANDS_NAMES } from '../../../../../../common/endpoint/service/response_actions/constants';
+import { TESTING_RESPONSE_ACTION_API_COMMANDS_NAMES } from '../../../../../../common/endpoint/service/response_actions/constants';
 import { getNoPrivilegesPage } from '../../../screens/common';
 import { getEndpointManagementPageList } from '../../../screens';
 
@@ -62,7 +62,7 @@ describe(
       }
 
       // No access to response actions (except `unisolate`)
-      for (const actionName of RESPONSE_ACTION_API_COMMANDS_NAMES.filter(
+      for (const actionName of TESTING_RESPONSE_ACTION_API_COMMANDS_NAMES.filter(
         (apiName) => apiName !== 'unisolate'
       )) {
         it(`should not allow access to Response Action: ${actionName}`, () => {
@@ -87,7 +87,7 @@ describe(
       });
 
       // No access to response actions (except `unisolate`)
-      for (const actionName of RESPONSE_ACTION_API_COMMANDS_NAMES.filter(
+      for (const actionName of TESTING_RESPONSE_ACTION_API_COMMANDS_NAMES.filter(
         (apiName) => apiName !== 'unisolate'
       )) {
         it(`should not allow access to Response Action: ${actionName}`, () => {
