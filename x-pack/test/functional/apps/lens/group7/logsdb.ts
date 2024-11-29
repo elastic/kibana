@@ -14,7 +14,7 @@ import {
   getDocsGenerator,
   setupScenarioRunner,
   TIME_PICKER_FORMAT,
-} from './tsdb_logsdb_helpers';
+} from '../tsdb_logsdb_helpers';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const { common, lens, discover, header, timePicker } = getPageObjects([

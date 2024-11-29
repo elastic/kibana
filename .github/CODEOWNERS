@@ -329,6 +329,7 @@ packages/kbn-data-service @elastic/kibana-visualizations @elastic/kibana-data-di
 packages/kbn-data-stream-adapter @elastic/security-threat-hunting
 packages/kbn-data-view-utils @elastic/kibana-data-discovery
 packages/kbn-datemath @elastic/kibana-data-discovery
+packages/kbn-dependency-ownership @elastic/kibana-security
 packages/kbn-dependency-usage @elastic/kibana-security
 packages/kbn-dev-cli-errors @elastic/kibana-operations
 packages/kbn-dev-cli-runner @elastic/kibana-operations
@@ -620,7 +621,7 @@ packages/shared-ux/storybook/mock @elastic/appex-sharedux
 packages/shared-ux/table_persist @elastic/appex-sharedux
 src/core @elastic/kibana-core
 src/plugins/advanced_settings @elastic/appex-sharedux @elastic/kibana-management
-src/plugins/ai_assistant_management/selection @elastic/obs-knowledge-team
+src/plugins/ai_assistant_management/selection @elastic/obs-ai-assistant
 src/plugins/bfetch @elastic/appex-sharedux
 src/plugins/chart_expressions/common @elastic/kibana-visualizations
 src/plugins/chart_expressions/expression_gauge @elastic/kibana-visualizations
@@ -918,7 +919,7 @@ x-pack/plugins/monitoring @elastic/stack-monitoring
 x-pack/plugins/monitoring_collection @elastic/stack-monitoring
 x-pack/plugins/notifications @elastic/appex-sharedux
 x-pack/plugins/observability_solution/apm @elastic/obs-ux-infra_services-team
-x-pack/plugins/observability_solution/apm_data_access @elastic/obs-knowledge-team @elastic/obs-ux-infra_services-team
+x-pack/plugins/observability_solution/apm_data_access @elastic/obs-ux-infra_services-team
 x-pack/plugins/observability_solution/apm/ftr_e2e @elastic/obs-ux-infra_services-team
 x-pack/plugins/observability_solution/dataset_quality @elastic/obs-ux-logs-team
 x-pack/plugins/observability_solution/entities_data_access @elastic/obs-entities
@@ -929,10 +930,10 @@ x-pack/plugins/observability_solution/inventory @elastic/obs-ux-infra_services-t
 x-pack/plugins/observability_solution/inventory/e2e @elastic/obs-ux-infra_services-team
 x-pack/plugins/observability_solution/investigate @elastic/obs-ux-management-team
 x-pack/plugins/observability_solution/investigate_app @elastic/obs-ux-management-team
-x-pack/plugins/observability_solution/logs_data_access @elastic/obs-knowledge-team @elastic/obs-ux-logs-team
+x-pack/plugins/observability_solution/logs_data_access @elastic/obs-ux-logs-team
 x-pack/plugins/observability_solution/logs_explorer @elastic/obs-ux-logs-team
 x-pack/plugins/observability_solution/logs_shared @elastic/obs-ux-logs-team
-x-pack/plugins/observability_solution/metrics_data_access @elastic/obs-knowledge-team @elastic/obs-ux-infra_services-team
+x-pack/plugins/observability_solution/metrics_data_access @elastic/obs-ux-infra_services-team
 x-pack/plugins/observability_solution/observability @elastic/obs-ux-management-team
 x-pack/plugins/observability_solution/observability_ai_assistant @elastic/obs-ai-assistant
 x-pack/plugins/observability_solution/observability_ai_assistant_app @elastic/obs-ai-assistant

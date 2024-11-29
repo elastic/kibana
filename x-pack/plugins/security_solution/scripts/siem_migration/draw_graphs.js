@@ -5,7 +5,5 @@
  * 2.0.
  */
 
-import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
-
-export const DEFAULT_TRANSLATION_RISK_SCORE = 21;
-export const DEFAULT_TRANSLATION_SEVERITY: Severity = 'low';
+require('../../../../../src/setup_node_env');
+require('./draw_graphs_script').draw();

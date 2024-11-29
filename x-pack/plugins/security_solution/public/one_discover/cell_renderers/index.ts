@@ -5,11 +5,4 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-
-export const COLUMN_STATUS = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.columns.statusTitle',
-  {
-    defaultMessage: 'Status',
-  }
-);
+export { getCellRendererForGivenRecord } from './cell_renderers';

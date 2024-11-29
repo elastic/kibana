@@ -41,24 +41,3 @@ paths:
                     type: array
                     items:
                       $ref: './common.schema.yaml#/components/schemas/EngineDescriptor'
-  
-  /api/entity_store/status:
-    get:
-      x-labels: [ess, serverless]
-      x-codegen-enabled: true
-      operationId: GetEntityStoreStatus
-      summary: Get the status of the Entity Store
-      responses:
-        '200':
-          description: Successful response
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  status: 
-                    $ref: './common.schema.yaml#/components/schemas/StoreStatus'
-                  engines:
-                    type: array
-                    items:
-                      $ref: './common.schema.yaml#/components/schemas/EngineDescriptor'
