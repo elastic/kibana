@@ -1004,7 +1004,7 @@ describe('MetricVisComponent', function () {
   });
 
   it('should convert null values to NaN', () => {
-    const metricId = faker.random.word();
+    const metricId = faker.lorem.word();
 
     const tableWNull: Datatable = {
       type: 'datatable',
