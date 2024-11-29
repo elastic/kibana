@@ -254,42 +254,33 @@ export function loadEmbeddableData(
   }
 
   // Build a custom operator to be resused for various observables
-  function waitUntilChanged() {
-    return pipe(distinctUntilChanged(fastIsEqual), skip(1));
+  function waitForChangeWithReason(reason: ReloadReason) {
+    return pipe(
+      distinctUntilChanged(fastIsEqual),
+      skip(1),
+      map(() => reason)
+    );
   }
 
   const mergedSubscriptions = merge(
     // This is an indirect observable, populated by the fetch$
-    unifiedSearch$.pipe(
-      waitUntilChanged(),
-      map(() => 'searchContext' as ReloadReason)
-    ),
+    unifiedSearch$.pipe(waitForChangeWithReason('searchContext')),
     // On state change, reload
     // this is used to refresh the chart on inline editing
     // just make sure to avoid to rerender if there's no substantial change
     // make sure to debounce one tick to make the refresh work
     internalApi.attributes$.pipe(
-      waitUntilChanged(),
+      waitForChangeWithReason('attributes'),
       tap(() => {
         // the ES|QL query may have changed, so recompute the args for view underlying data
         if (api.isTextBasedLanguage()) {
           api.loadViewUnderlyingData();
         }
-      }),
-      map(() => 'attributes' as ReloadReason)
+      })
     ),
-    api.savedObjectId.pipe(
-      waitUntilChanged(),
-      map(() => 'savedObjectId' as ReloadReason)
-    ),
-    internalApi.overrides$.pipe(
-      waitUntilChanged(),
-      map(() => 'overrides' as ReloadReason)
-    ),
-    internalApi.disableTriggers$.pipe(
-      waitUntilChanged(),
-      map(() => 'disableTriggers' as ReloadReason)
-    )
+    api.savedObjectId.pipe(waitForChangeWithReason('savedObjectId')),
+    internalApi.overrides$.pipe(waitForChangeWithReason('overrides')),
+    internalApi.disableTriggers$.pipe(waitForChangeWithReason('disableTriggers'))
   );
 
   const subscriptions: Subscription[] = [
