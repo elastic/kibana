@@ -13,33 +13,45 @@ import { resolveGridRow } from './utils/resolve_grid_row';
 import { GridPanelData, GridLayoutStateManager } from './types';
 import { isGridDataEqual } from './utils/equality_checks';
 
-const MAX_SPEED = 150 as const;
+const MIN_SPEED = 50;
+const MAX_SPEED = 150;
 
 const scrollOnInterval = (direction: 'up' | 'down') => {
   let count = 0;
+  let slowDown = false;
+  let maxSpeed = MIN_SPEED;
+  let speed = MIN_SPEED;
+  let turnAroundPoint = -1;
+
   // let scrollInProgress = false;
   // const element = document.getElementsByClassName('react-draggable-dragging')[0] as HTMLElement;
   const interval = setInterval(() => {
+    const nearTop = direction === 'up' && scrollY < window.innerHeight;
+    const nearBottom =
+      direction === 'down' &&
+      window.innerHeight + window.scrollY > document.body.scrollHeight - window.innerHeight;
+    if (!slowDown && (nearTop || nearBottom)) {
+      slowDown = true;
+      maxSpeed = speed;
+      turnAroundPoint = count;
+    }
+
     // calculate the speed based on how long the interval has been going to create an ease effect
     // via the parabola formula `y = a(x - h)^2 + k`
     // - the starting speed is k = 50
     // - the rate at which the speed increases is controlled by a = 0.1
-    const speed = Math.min(0.1 * count ** 2 + 50, MAX_SPEED);
+    speed = slowDown
+      ? Math.max(-3 * (count - turnAroundPoint) ** 2 + maxSpeed, MIN_SPEED)
+      : Math.min(0.1 * count ** 2 + MIN_SPEED, MAX_SPEED);
+
     window.scrollBy({
       top: direction === 'down' ? speed : -speed,
     });
 
     // if near the top or bottom of the screen, start slowing down by decrementing count; otherwise,
     // if we're not at max speed yet, increment count
-    const nearTop = direction === 'up' && scrollY < window.innerHeight;
-    const nearBottom =
-      direction === 'down' &&
-      window.innerHeight + window.scrollY > document.body.scrollHeight - window.innerHeight;
-    if (nearBottom || nearTop) {
-      count = Math.max(0, count - 2);
-    } else if (speed < MAX_SPEED) {
-      count++;
-    }
+
+    count++;
   }, 60);
   return interval;
 };
