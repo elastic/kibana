@@ -1513,7 +1513,7 @@
     "@octokit/rest": "^17.11.2",
     "@parcel/watcher": "^2.1.0",
     "@playwright/test": "=1.46.0",
-    "@redocly/cli": "^1.25.12",
+    "@redocly/cli": "^1.25.13",
     "@statoscope/webpack-plugin": "^5.28.2",
     "@storybook/addon-a11y": "^6.5.16",
     "@storybook/addon-actions": "^6.5.16",
