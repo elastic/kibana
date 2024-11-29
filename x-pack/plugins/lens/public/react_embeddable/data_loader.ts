@@ -261,6 +261,8 @@ export function loadEmbeddableData(
   const mergedSubscriptions = merge(
     // on data change from the parentApi, reload
     fetch$(api).pipe(
+      // some integrations may send different objects
+      distinctUntilChanged(fastIsEqual),
       tap((data) => {
         const searchSessionId = apiPublishesSearchSession(parentApi) ? data.searchSessionId : '';
         unifiedSearch$.next({
