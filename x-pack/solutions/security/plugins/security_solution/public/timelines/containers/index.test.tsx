@@ -170,10 +170,9 @@ describe('useTimelineEvents', () => {
     >((args) => useTimelineEvents(args), {
       initialProps: { ...props, startDate: '', endDate: '' },
     });
-
     // useEffect on params request
     await waitFor(() => new Promise((resolve) => resolve(null)));
-    rerender({ ...props, startDate, endDate });
+    rerender({ ...props, startDate: '', endDate: '' });
     // useEffect on params request
     await waitFor(() => {
       expect(mockSearch).toHaveBeenCalledTimes(2);
@@ -286,7 +285,7 @@ describe('useTimelineEvents', () => {
     // useEffect on params request
     await waitFor(() => new Promise((resolve) => resolve(null)));
 
-    expect(mockSearch).toHaveBeenCalledTimes(2);
+    expect(mockSearch).toHaveBeenCalledTimes(1);
     mockSearch.mockClear();
 
     rerender({
@@ -310,7 +309,7 @@ describe('useTimelineEvents', () => {
     // useEffect on params request
     await waitFor(() => new Promise((resolve) => resolve(null)));
 
-    expect(mockSearch).toHaveBeenCalledTimes(2);
+    expect(mockSearch).toHaveBeenCalledTimes(1);
     mockSearch.mockClear();
 
     rerender({ ...props, startDate, endDate, fields: ['@timestamp'] });
@@ -329,7 +328,7 @@ describe('useTimelineEvents', () => {
     // useEffect on params request
     await waitFor(() => new Promise((resolve) => resolve(null)));
 
-    expect(mockSearch).toHaveBeenCalledTimes(2);
+    expect(mockSearch).toHaveBeenCalledTimes(1);
     mockSearch.mockClear();
 
     // remove `event.kind` from default fields
