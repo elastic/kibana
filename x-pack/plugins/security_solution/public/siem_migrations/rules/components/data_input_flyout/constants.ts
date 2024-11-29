@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { RuleMigrationStats } from '../../../../../../siem_migrations/rules/types';
-
-export interface StartMigrationCardMetadata {
-  migrationsStats: RuleMigrationStats[];
+export enum DataInputStep {
+  rules = 'rules',
+  macros = 'macros',
+  lookups = 'lookups',
 }

@@ -8,14 +8,14 @@
 import { css } from '@emotion/css';
 import { useEuiTheme } from '@elastic/eui';
 
-export const useStyles = () => {
+export const useStyles = (compressed: boolean) => {
   const { euiTheme } = useEuiTheme();
-
+  const logoSize = compressed ? '32px' : '88px';
   return css`
     .siemMigrationsIcon {
-      width: 88px;
-      block-size: 88px;
-      inline-size: 88px;
+      width: ${logoSize};
+      block-size: ${logoSize};
+      inline-size: ${logoSize};
     }
     .siemMigrationsUploadTitle {
       font-weight: ${euiTheme.font.weight.semiBold};

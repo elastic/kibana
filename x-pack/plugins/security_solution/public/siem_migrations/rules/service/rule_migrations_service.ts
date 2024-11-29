@@ -7,18 +7,26 @@
 
 import { BehaviorSubject, type Observable } from 'rxjs';
 import type { CoreStart } from '@kbn/core/public';
-import { i18n } from '@kbn/i18n';
+import type {
+  CreateRuleMigrationRequestBody,
+  CreateRuleMigrationResponse,
+  GetAllStatsRuleMigrationResponse,
+  StartRuleMigrationRequestBody,
+} from '../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import { SiemMigrationTaskStatus } from '../../../../common/siem_migrations/constants';
 import type { StartPluginsDependencies } from '../../../types';
 import { ExperimentalFeaturesService } from '../../../common/experimental_features_service';
 import { licenseService } from '../../../common/hooks/use_license';
-import { getRuleMigrationsStatsAll, startRuleMigration } from '../api/api';
+import type { GetRuleMigrationsStatsAllParams } from '../api/api';
+import { createRuleMigration, getRuleMigrationsStatsAll, startRuleMigration } from '../api/api';
 import type { RuleMigrationStats } from '../types';
 import { getSuccessToast } from './success_notification';
 import { RuleMigrationsStorage } from './storage';
+import * as i18n from './translations';
+
+const REQUEST_POLLING_INTERVAL_MS = 5000 as const;
 
 export class SiemRulesMigrationsService {
-  private readonly pollingInterval = 5000;
   private readonly latestStats$: BehaviorSubject<RuleMigrationStats[]>;
   private isPolling = false;
   public connectorIdStorage = new RuleMigrationsStorage('connectorId');
@@ -47,27 +55,59 @@ export class SiemRulesMigrationsService {
     if (this.isPolling || !this.isAvailable()) {
       return;
     }
-
     this.isPolling = true;
-    this.startStatsPolling()
+    this.startTaskStatsPolling()
       .catch((e) => {
-        this.core.notifications.toasts.addError(e, {
-          title: i18n.translate(
-            'xpack.securitySolution.siemMigrations.rulesService.polling.errorTitle',
-            { defaultMessage: 'Error fetching rule migrations' }
-          ),
-        });
+        this.core.notifications.toasts.addError(e, { title: i18n.POLLING_ERROR });
       })
       .finally(() => {
         this.isPolling = false;
       });
   }
 
-  private async startStatsPolling(): Promise<void> {
+  public async getRuleMigrationTasksStats(
+    params: GetRuleMigrationsStatsAllParams = {}
+  ): Promise<RuleMigrationStats[]> {
+    const allStats = await getRuleMigrationsStatsAll(params);
+    const results = allStats.map(
+      (stats, index) =>
+        ({
+          ...stats,
+          number: index + 1, // the array order (by creation) is guaranteed by the API
+        } as RuleMigrationStats) // needs cast because of the `status` enum override
+    );
+    this.latestStats$.next(results); // Always update the latest stats
+    return results;
+  }
+
+  public async createRuleMigration(
+    body: CreateRuleMigrationRequestBody
+  ): Promise<CreateRuleMigrationResponse> {
+    const connectorId = this.connectorIdStorage.get();
+    if (!connectorId) {
+      throw new Error(i18n.MISSING_CONNECTOR_ERROR);
+    }
+    return createRuleMigration({ body });
+  }
+
+  public async startRuleMigration(
+    migrationId: string,
+    options: Pick<StartRuleMigrationRequestBody, 'langsmith_options'> = {}
+  ): Promise<GetAllStatsRuleMigrationResponse> {
+    const connectorId = this.connectorIdStorage.get();
+    if (!connectorId) {
+      throw new Error(i18n.MISSING_CONNECTOR_ERROR);
+    }
+    const body = { ...options, connector_id: connectorId };
+    const result = await startRuleMigration({ migrationId, body });
+    this.startPolling();
+    return result;
+  }
+
+  private async startTaskStatsPolling(): Promise<void> {
     let pendingMigrationIds: string[] = [];
     do {
-      const results = await this.fetchRuleMigrationTasksStats();
-      this.latestStats$.next(results);
+      const results = await this.getRuleMigrationTasksStats();
 
       if (pendingMigrationIds.length > 0) {
         // send notifications for finished migrations
@@ -99,12 +139,7 @@ export class SiemRulesMigrationsService {
         }
       }
 
-      await new Promise((resolve) => setTimeout(resolve, this.pollingInterval));
+      await new Promise((resolve) => setTimeout(resolve, REQUEST_POLLING_INTERVAL_MS));
     } while (pendingMigrationIds.length > 0);
-  }
-
-  private async fetchRuleMigrationTasksStats(): Promise<RuleMigrationStats[]> {
-    const stats = await getRuleMigrationsStatsAll();
-    return stats.map((stat, index) => ({ ...stat, number: index + 1 })); // the array order (by creation) is guaranteed by the API
   }
 }

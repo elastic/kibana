@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { getRuleMigrationsStatsAll } from '../../../../../../siem_migrations/rules/api/api';
 import type { OnboardingCardCheckComplete } from '../../../../../types';
 import type { StartMigrationCardMetadata } from './types';
 
 export const checkStartMigrationCardComplete: OnboardingCardCheckComplete<
   StartMigrationCardMetadata
-> = async () => {
-  const migrationsStats = await getRuleMigrationsStatsAll();
+> = async ({ siemMigrations }) => {
+  const migrationsStats = await siemMigrations.rules.getRuleMigrationTasksStats();
   const isComplete = migrationsStats.length > 0;
   return { isComplete, metadata: { migrationsStats } };
 };

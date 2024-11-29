@@ -5,8 +5,4 @@
  * 2.0.
  */
 
-import type { RuleMigrationStats } from '../../../../../../siem_migrations/rules/types';
-
-export interface StartMigrationCardMetadata {
-  migrationsStats: RuleMigrationStats[];
-}
+export { MigrationDataInputFlyout, type MigrationDataInputFlyoutProps } from './data_input_flyout';

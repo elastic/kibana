@@ -9,16 +9,12 @@ import { i18n } from '@kbn/i18n';
 
 export const START_MIGRATION_CARD_TITLE = i18n.translate(
   'xpack.securitySolution.onboarding.startMigration.title',
-  {
-    defaultMessage: 'Translate your existing SIEM Rules to Elastic',
-  }
+  { defaultMessage: 'Translate your existing SIEM Rules to Elastic' }
 );
 
 export const START_MIGRATION_CARD_UPLOAD_TITLE = i18n.translate(
   'xpack.securitySolution.onboarding.startMigration.upload.title',
-  {
-    defaultMessage: 'Export your Splunk® SIEM rules to start translation.',
-  }
+  { defaultMessage: 'Export your Splunk® SIEM rules to start translation.' }
 );
 
 export const START_MIGRATION_CARD_UPLOAD_DESCRIPTION = i18n.translate(
@@ -31,21 +27,24 @@ export const START_MIGRATION_CARD_UPLOAD_DESCRIPTION = i18n.translate(
 
 export const START_MIGRATION_CARD_UPLOAD_BUTTON = i18n.translate(
   'xpack.securitySolution.onboarding.startMigration.upload.button',
-  {
-    defaultMessage: 'Upload Rules',
-  }
+  { defaultMessage: 'Upload rules' }
+);
+
+export const START_MIGRATION_CARD_UPLOAD_MORE_TITLE = i18n.translate(
+  'xpack.securitySolution.onboarding.startMigration.uploadMore.title',
+  { defaultMessage: 'Need to migrate more rules?' }
+);
+export const START_MIGRATION_CARD_UPLOAD_MORE_BUTTON = i18n.translate(
+  'xpack.securitySolution.onboarding.startMigration.uploadMore.button',
+  { defaultMessage: 'Upload more rules' }
 );
 
 export const START_MIGRATION_CARD_UPLOAD_READ_MORE = i18n.translate(
   'xpack.securitySolution.onboarding.startMigration.upload.readMore',
-  {
-    defaultMessage: 'Read more about our AI powered translations and other features.',
-  }
+  { defaultMessage: 'Read more about our AI powered translations and other features.' }
 );
 
 export const START_MIGRATION_CARD_UPLOAD_READ_DOCS = i18n.translate(
   'xpack.securitySolution.onboarding.startMigration.upload.readAiDocsLink',
-  {
-    defaultMessage: 'Read AI docs',
-  }
+  { defaultMessage: 'Read AI docs' }
 );
