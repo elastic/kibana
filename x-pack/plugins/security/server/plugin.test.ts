@@ -113,6 +113,8 @@ describe('Security Plugin', () => {
             "checkPrivilegesDynamicallyWithRequest": [Function],
             "checkPrivilegesWithRequest": [Function],
             "checkSavedObjectsPrivilegesWithRequest": [Function],
+            "getClusterClient": [Function],
+            "getCurrentUser": [Function],
             "mode": Object {
               "useRbacForRequest": [Function],
             },
@@ -210,6 +212,8 @@ describe('Security Plugin', () => {
             "checkPrivilegesDynamicallyWithRequest": [Function],
             "checkPrivilegesWithRequest": [Function],
             "checkSavedObjectsPrivilegesWithRequest": [Function],
+            "getClusterClient": [Function],
+            "getCurrentUser": [Function],
             "mode": Object {
               "useRbacForRequest": [Function],
             },
