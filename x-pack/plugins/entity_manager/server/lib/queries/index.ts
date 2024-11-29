@@ -17,7 +17,10 @@ export const entitySourceSchema = z.object({
   display_name: z.optional(z.string()),
 });
 
-export type SortBy = { field: string; direction: 'ASC' | 'DESC' };
+export interface SortBy {
+  field: string;
+  direction: 'ASC' | 'DESC';
+}
 
 export type EntitySource = z.infer<typeof entitySourceSchema>;
 
