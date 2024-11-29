@@ -8,11 +8,11 @@
 import { EuiButtonIcon, EuiComboBox, EuiComboBoxOptionOption, EuiCopy } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
-import { get } from 'lodash';
 import React, { useEffect, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import useDebounce from 'react-use/lib/useDebounce';
 import { useFetchSloInstances } from '../../hooks/use_fetch_slo_instances';
+import { css } from '@emotion/react';
 
 interface Props {
   slo: SLOWithSummaryResponse;
@@ -26,10 +26,10 @@ interface Field {
 }
 
 export function SLOGroupingValueSelector({ slo, groupingKey, value }: Props) {
-  const { search: searchParams, pathname } = useLocation();
+  const { search: searchParams } = useLocation();
   const history = useHistory();
 
-  const [currSelected, setSelected] = useState<string | undefined>(value);
+  const [currentValue, setCurrentValue] = useState<string | undefined>(value);
   const [options, setOptions] = useState<Field[]>([]);
   const [search, setSearch] = useState<string | undefined>(undefined);
   const [debouncedSearch, setDebouncedSearch] = useState<string | undefined>(undefined);
@@ -55,17 +55,12 @@ export function SLOGroupingValueSelector({ slo, groupingKey, value }: Props) {
   const onChange = (selected: Array<EuiComboBoxOptionOption<string>>) => {
     const newValue = selected[0].value;
     if (!newValue) return;
-    setSelected(newValue);
-
-    const groups = [slo.groupBy].flat();
-    const newInstanceValues = groups.map((group) => {
-      return group === groupingKey ? newValue : get(slo.groupings, group);
-    });
+    setCurrentValue(newValue);
 
     const urlSearchParams = new URLSearchParams(searchParams);
-    urlSearchParams.set('instanceId', newInstanceValues.join(','));
+    const newGroupings = { ...slo.groupings, [groupingKey]: newValue };
+    urlSearchParams.set('instanceId', toInstanceId(newGroupings, slo.groupBy));
     history.replace({
-      pathname,
       search: urlSearchParams.toString(),
     });
   };
@@ -73,12 +68,15 @@ export function SLOGroupingValueSelector({ slo, groupingKey, value }: Props) {
   return (
     <EuiComboBox<string>
       fullWidth={false}
+      css={css`
+        max-width: fit-content;
+      `}
       isClearable={false}
       compressed
       prepend={groupingKey}
       append={
-        currSelected ? (
-          <EuiCopy textToCopy={currSelected}>
+        currentValue ? (
+          <EuiCopy textToCopy={currentValue}>
             {(copy) => (
               <EuiButtonIcon
                 data-test-subj="sloSLOGroupingValueSelectorButton"
@@ -111,7 +109,7 @@ export function SLOGroupingValueSelector({ slo, groupingKey, value }: Props) {
       placeholder={i18n.translate('xpack.slo.sLOGroupingValueSelector.placeholder', {
         defaultMessage: 'Select a group value',
       })}
-      selectedOptions={currSelected ? [toField(currSelected)] : []}
+      selectedOptions={currentValue ? [toField(currentValue)] : []}
       onChange={onChange}
       truncationProps={{
         truncation: 'end',
@@ -125,4 +123,12 @@ export function SLOGroupingValueSelector({ slo, groupingKey, value }: Props) {
 
 function toField(value: string): Field {
   return { label: value, value };
+}
+
+function toInstanceId(
+  groupings: Record<string, string | number>,
+  groupBy: string | string[]
+): string {
+  const groups = [groupBy].flat();
+  return groups.map((group) => groupings[group]).join(',');
 }
