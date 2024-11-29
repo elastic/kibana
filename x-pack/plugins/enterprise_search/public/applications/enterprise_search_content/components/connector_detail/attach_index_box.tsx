@@ -103,6 +103,8 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
   const [selectedIndex, setSelectedIndex] = useState<
     { label: string; shouldCreate?: boolean } | undefined
   >(
+    // For managed connectors, the index name should be displayed without prefix
+    // As `content-` is fixed UI element
     connector.index_name
       ? {
           label: removePrefixConnectorIndex(connector.index_name),
@@ -112,6 +114,7 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
 
   const onSave = () => {
     if (!selectedIndex) return;
+    // Always attach and/or create prefixed index for managed connectors
     const prefixedIndex = prefixConnectorIndex(selectedIndex.label);
     if (selectedIndex.shouldCreate) {
       createIndex({
@@ -126,6 +129,8 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
     }
   };
 
+  // For managed connectors ensure that only prefixed indices are displayed in the dropdown
+  // This takes care of the initial component state where all indices could be displayed briefly
   const options: Array<EuiComboBoxOptionOption<string>> = isLoading
     ? []
     : data?.indexNames
@@ -187,6 +192,7 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
   }, [query]);
 
   useEffect(() => {
+    // Suggested name for managed connector should include the content- prefix
     setSanitizedName(prefixConnectorIndex(formatApiName(connector.name)));
   }, [connector.name]);
 
@@ -285,9 +291,11 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
                 }
               }}
               onSearchChange={(searchValue) => {
+                // Match by option value to ensure accurate comparison with non-prefixed
+                // user input for managed connectors
                 setQuery({
                   isFullMatch: options.some(
-                    (option) => option.label === prefixConnectorIndex(searchValue)
+                    (option) => option.value === prefixConnectorIndex(searchValue)
                   ),
                   searchValue: prefixConnectorIndex(searchValue),
                 });
@@ -299,7 +307,7 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
                       label: removePrefixConnectorIndex(currentSelection.label),
                       shouldCreate:
                         shouldPrependUserInputAsOption &&
-                        currentSelection.label === query?.searchValue,
+                        currentSelection.value === query?.searchValue,
                     }
                   : undefined;
                 setSelectedIndex(selectedIndexOption);

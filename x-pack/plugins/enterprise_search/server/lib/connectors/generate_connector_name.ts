@@ -40,7 +40,6 @@ export const generateConnectorName = async (
     const resultSameName = await indexOrAliasExists(client, indexName);
     // index with same name doesn't exist
     if (!resultSameName) {
-      console.log('1', indexName, isManagedConnector);
       return {
         apiKeyName: userConnectorName,
         connectorName: userConnectorName,
@@ -55,7 +54,6 @@ export const generateConnectorName = async (
 
       const result = await indexOrAliasExists(client, indexName);
       if (!result) {
-        console.log('2', indexName, isManagedConnector);
         return {
           apiKeyName: addConnectorPrefix(randomizedConnectorName),
           connectorName: userConnectorName,
@@ -71,7 +69,6 @@ export const generateConnectorName = async (
       const result = await indexOrAliasExists(client, indexName);
 
       if (!result) {
-        console.log('3', indexName);
         return {
           apiKeyName: addConnectorPrefix(randomizedConnectorName),
           connectorName: randomizedConnectorName,
