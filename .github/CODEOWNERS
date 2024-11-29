@@ -329,6 +329,7 @@ packages/kbn-data-service @elastic/kibana-visualizations @elastic/kibana-data-di
 packages/kbn-data-stream-adapter @elastic/security-threat-hunting
 packages/kbn-data-view-utils @elastic/kibana-data-discovery
 packages/kbn-datemath @elastic/kibana-data-discovery
+packages/kbn-dependency-ownership @elastic/kibana-security
 packages/kbn-dependency-usage @elastic/kibana-security
 packages/kbn-dev-cli-errors @elastic/kibana-operations
 packages/kbn-dev-cli-runner @elastic/kibana-operations
