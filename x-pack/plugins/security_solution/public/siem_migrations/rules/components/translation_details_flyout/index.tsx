@@ -25,6 +25,10 @@ import {
 } from '@elastic/eui';
 import type { EuiTabbedContentTab, EuiTabbedContentProps, EuiFlyoutProps } from '@elastic/eui';
 
+import {
+  DEFAULT_TRANSLATION_RISK_SCORE,
+  DEFAULT_TRANSLATION_SEVERITY,
+} from '../../../../../common/siem_migrations/constants';
 import type { RuleMigration } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import {
   RuleOverviewTab,
@@ -41,10 +45,6 @@ import {
   LARGE_DESCRIPTION_LIST_COLUMN_WIDTHS,
 } from './constants';
 import { TranslationTab } from './translation_tab';
-import {
-  DEFAULT_TRANSLATION_RISK_SCORE,
-  DEFAULT_TRANSLATION_SEVERITY,
-} from '../../utils/constants';
 
 const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
   .euiFlyoutBody__overflow {

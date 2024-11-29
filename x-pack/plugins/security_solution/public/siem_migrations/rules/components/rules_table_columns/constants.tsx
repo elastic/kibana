@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import type { RuleMigration } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 
-export const DEFAULT_TRANSLATION_RISK_SCORE = 21;
-export const DEFAULT_TRANSLATION_SEVERITY: Severity = 'low';
+export type TableColumn = EuiBasicTableColumn<RuleMigration>;
