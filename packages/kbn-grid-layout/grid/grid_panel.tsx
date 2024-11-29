@@ -15,6 +15,7 @@ import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 
 import { GridLayoutStateManager, PanelInteractionEvent } from './types';
+import { getKeysInOrder } from './utils/resolve_grid_row';
 
 export const GridPanel = forwardRef<
   HTMLDivElement,
@@ -120,13 +121,21 @@ export const GridPanel = forwardRef<
         grid-column-end: ${initialPanel.column + 1 + initialPanel.width};
         grid-row-start: ${initialPanel.row + 1};
         grid-row-end: ${initialPanel.row + 1 + initialPanel.height};
+        &.kbnGridPanel--isExpanded {
+          transform: translate(9999px, 9999px);
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+        }
       `;
     }, [gridLayoutStateManager, rowIndex, panelId]);
 
     useEffect(
       () => {
         /** Update the styles of the panel via a subscription to prevent re-renders */
-        const styleSubscription = combineLatest([
+        const activePanelStyleSubscription = combineLatest([
           gridLayoutStateManager.activePanel$,
           gridLayoutStateManager.gridLayout$,
           gridLayoutStateManager.runtimeSettings$,
@@ -139,6 +148,7 @@ export const GridPanel = forwardRef<
             if (!ref || !panel) return;
 
             const currentInteractionEvent = gridLayoutStateManager.interactionEvent$.getValue();
+
             if (panelId === activePanel?.id) {
               // if the current panel is active, give it fixed positioning depending on the interaction event
               const { position: draggingPosition } = activePanel;
@@ -201,8 +211,50 @@ export const GridPanel = forwardRef<
             }
           });
 
+        const expandedPanelStyleSubscription = gridLayoutStateManager.expandedPanelId$
+          .pipe(skip(1)) // skip the first emit because the `initialStyles` will take care of it
+          .subscribe((expandedPanelId) => {
+            const ref = gridLayoutStateManager.panelRefs.current[rowIndex][panelId];
+            const gridLayout = gridLayoutStateManager.gridLayout$.getValue();
+            const panel = gridLayout[rowIndex].panels[panelId];
+            if (!ref || !panel) return;
+
+            if (expandedPanelId && expandedPanelId === panelId) {
+              ref.classList.add('kbnGridPanel--isExpanded');
+            } else {
+              ref.classList.remove('kbnGridPanel--isExpanded');
+            }
+          });
+
+        const mobileViewStyleSubscription = gridLayoutStateManager.isMobileView$
+          .pipe(skip(1))
+          .subscribe((isMobileView) => {
+            if (!isMobileView) {
+              return;
+            }
+            const ref = gridLayoutStateManager.panelRefs.current[rowIndex][panelId];
+            const gridLayout = gridLayoutStateManager.gridLayout$.getValue();
+            const allPanels = gridLayout[rowIndex].panels;
+            const panel = allPanels[panelId];
+            if (!ref || !panel) return;
+
+            const sortedKeys = getKeysInOrder(gridLayout[rowIndex]);
+            const currentPanelPosition = sortedKeys.indexOf(panelId);
+            const sortedKeysBefore = sortedKeys.slice(0, currentPanelPosition);
+            const responsiveGridRowStart = sortedKeysBefore.reduce(
+              (acc, key) => acc + allPanels[key].height,
+              1
+            );
+            ref.style.gridColumnStart = `1`;
+            ref.style.gridColumnEnd = `-1`;
+            ref.style.gridRowStart = `${responsiveGridRowStart}`;
+            ref.style.gridRowEnd = `${responsiveGridRowStart + panel.height}`;
+          });
+
         return () => {
-          styleSubscription.unsubscribe();
+          expandedPanelStyleSubscription.unsubscribe();
+          mobileViewStyleSubscription.unsubscribe();
+          activePanelStyleSubscription.unsubscribe();
         };
       },
       // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -229,7 +281,7 @@ export const GridPanel = forwardRef<
             {/* drag handle */}
             {!dragHandleCount && (
               <div
-                className="dragHandle"
+                className="kbnGridPanel__dragHandle"
                 css={css`
                   opacity: 0;
                   display: flex;
@@ -253,6 +305,10 @@ export const GridPanel = forwardRef<
                     cursor: grabbing;
                     opacity: 1 !important;
                   }
+                  .kbnGrid--static & {
+                    opacity: 0 !important;
+                    display: none;
+                  }
                 `}
                 onMouseDown={(e) => interactionStart(panelId, 'drag', e)}
                 onMouseUp={(e) => interactionStart(panelId, 'drop', e)}
@@ -262,7 +318,7 @@ export const GridPanel = forwardRef<
             )}
             {/* Resize handle */}
             <div
-              className="resizeHandle"
+              className="kbnGridPanel__resizeHandle"
               onMouseDown={(e) => interactionStart(panelId, 'resize', e)}
               onMouseUp={(e) => interactionStart(panelId, 'drop', e)}
               css={css`
@@ -282,6 +338,10 @@ export const GridPanel = forwardRef<
                   opacity: 1;
                   background-color: ${transparentize(euiThemeVars.euiColorSuccess, 0.05)};
                   cursor: se-resize;
+                }
+                .kbnGrid--static & {
+                  opacity: 0 !important;
+                  display: none;
                 }
               `}
             />
