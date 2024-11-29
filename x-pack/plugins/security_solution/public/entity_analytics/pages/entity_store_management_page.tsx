@@ -29,7 +29,7 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import type { ReactNode } from 'react';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { SecurityAppError } from '@kbn/securitysolution-t-grid';
@@ -99,6 +99,15 @@ export const EntityStoreManagementPage = () => {
   }, [entityStoreStatus.data?.status, stopEntityEngineMutation, enableStoreMutation]);
 
   const { data: privileges } = useEntityEnginePrivileges();
+
+  const shouldDisplayEngineStatusTab =
+    isEntityStoreInstalled(entityStoreStatus.data?.status) && privileges?.has_all_required;
+
+  useEffect(() => {
+    if (selectedTabId === TabId.Status && !shouldDisplayEngineStatusTab) {
+      setSelectedTabId(TabId.Import);
+    }
+  }, [shouldDisplayEngineStatusTab, selectedTabId]);
 
   if (assetCriticalityIsLoading) {
     // Wait for permission before rendering content to avoid flickering
@@ -202,7 +211,7 @@ export const EntityStoreManagementPage = () => {
           />
         </EuiTab>
 
-        {isEntityStoreInstalled(entityStoreStatus.data?.status) && privileges?.has_all_required && (
+        {shouldDisplayEngineStatusTab && (
           <EuiTab
             key={TabId.Status}
             isSelected={selectedTabId === TabId.Status}
