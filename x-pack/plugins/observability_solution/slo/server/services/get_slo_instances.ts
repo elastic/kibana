@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { AggregationsCompositeAggregate } from '@elastic/elasticsearch/lib/api/types';
+import {
+  AggregationsCompositeAggregate,
+  AggregationsCompositeAggregation,
+} from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { ALL_VALUE, GetSLOInstancesParams, GetSLOInstancesResponse } from '@kbn/slo-schema';
 import { SLO_SUMMARY_DESTINATION_INDEX_NAME } from '../../common/constants';
@@ -111,7 +114,10 @@ function generateQuery(
   return query;
 }
 
-function generateAggs(groupingKeys: string[], params: GetSLOInstancesParams) {
+function generateAggs(
+  groupingKeys: string[],
+  params: GetSLOInstancesParams
+): Record<string, { composite: AggregationsCompositeAggregation }> {
   // when no groupingKey specified, use every grouping keys as composite agg
   if (!params?.groupingKey) {
     return groupingKeys.reduce((aggs, groupingKey) => {
@@ -130,7 +136,7 @@ function generateAggs(groupingKeys: string[], params: GetSLOInstancesParams) {
         },
       };
       return aggs;
-    }, {});
+    }, {} as Record<string, { composite: AggregationsCompositeAggregation }>);
   }
 
   // otherwise return only the composite aggs for the selected groupingKey
