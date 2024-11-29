@@ -16,7 +16,7 @@ import type { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plu
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { isDefined } from '@kbn/ml-is-defined';
 import type { MlAnomalyDetectionJobsHealthRuleParams } from '../../../common/types/alerts';
-import { JobSelectorControl } from '../job_selector';
+import { JobSelectorControl, type JobSelection } from '../job_selector';
 import { jobsApiProvider } from '../../application/services/ml_api_service/jobs';
 import { HttpService } from '../../application/services/http_service';
 import { useMlKibana } from '../../application/contexts/kibana';
@@ -129,7 +129,7 @@ const AnomalyDetectionJobsHealthRuleTrigger: FC<MlAnomalyAlertTriggerProps> = ({
       <JobSelectorControl
         jobsAndGroupIds={excludeJobsAndGroupIds}
         adJobsApiService={adJobsApiService}
-        onChange={useCallback((update: any) => {
+        onChange={useCallback((update: JobSelection) => {
           const callback = onAlertParamChange('excludeJobs');
           if (isPopulatedObject(update)) {
             callback(update);
