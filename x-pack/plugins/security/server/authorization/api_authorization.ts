@@ -151,17 +151,13 @@ export function initAPIAuthorization(
         }
       }
 
-      const hasSuperuserPrivileges = async () => {
-        const checkSuperuserPrivilegesResponse = await checkPrivilegesWithRequest(request).globally(
-          SUPERUSER_PRIVILEGES
-        );
-
-        return checkSuperuserPrivilegesResponse.hasAllRequested;
-      };
-
       for (const reservedPrivilege of requestedReservedPrivileges) {
         if (reservedPrivilege === ReservedPrivilegesSet.superuser) {
-          kibanaPrivileges[ReservedPrivilegesSet.superuser] = await hasSuperuserPrivileges();
+          const checkSuperuserPrivilegesResponse = await checkPrivilegesWithRequest(
+            request
+          ).globally(SUPERUSER_PRIVILEGES);
+          kibanaPrivileges[ReservedPrivilegesSet.superuser] =
+            checkSuperuserPrivilegesResponse.hasAllRequested;
         }
 
         if (reservedPrivilege === ReservedPrivilegesSet.operator) {
