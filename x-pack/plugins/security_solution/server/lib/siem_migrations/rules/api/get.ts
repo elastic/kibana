@@ -38,7 +38,7 @@ export const registerSiemRuleMigrationsGetRoute = (
           const ctx = await context.resolve(['securitySolution']);
           const ruleMigrationsClient = ctx.securitySolution.getSiemRuleMigrationsClient();
 
-          const migrationRules = await ruleMigrationsClient.data.rules.get(migrationId);
+          const migrationRules = await ruleMigrationsClient.data.rules.get({ migrationId });
 
           return res.ok({ body: migrationRules });
         } catch (err) {

@@ -34,3 +34,32 @@ export const GO_BACK_TO_RULES_TABLE_BUTTON = i18n.translate(
     defaultMessage: 'Go back to SIEM Migrations',
   }
 );
+
+export const INSTALL_SELECTED_RULES = (numberOfSelectedRules: number) => {
+  return i18n.translate('xpack.securitySolution.siemMigrations.rules.table.installSelectedRules', {
+    defaultMessage: 'Install selected ({numberOfSelectedRules})',
+    values: { numberOfSelectedRules },
+  });
+};
+
+export const INSTALL_ALL_RULES = (numberOfAllRules: number) => {
+  return i18n.translate('xpack.securitySolution.siemMigrations.rules.table.installAllRules', {
+    defaultMessage:
+      'Install translated {numberOfAllRules, plural, one {rule} other {rules}} ({numberOfAllRules})',
+    values: { numberOfAllRules },
+  });
+};
+
+export const INSTALL_SELECTED_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.table.installSelectedButtonAriaLabel',
+  {
+    defaultMessage: 'Install selected translated rules',
+  }
+);
+
+export const INSTALL_ALL_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.table.installAllButtonAriaLabel',
+  {
+    defaultMessage: 'Install all translated rules',
+  }
+);
