@@ -160,6 +160,22 @@
           },
           {
             "parentPluginId": "maps",
+            "id": "def-public.DataRequest.getError",
+            "type": "Function",
+            "tags": [],
+            "label": "getError",
+            "description": [],
+            "signature": [
+              "() => Error | undefined"
+            ],
+            "path": "x-pack/plugins/maps/public/classes/util/data_request.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "maps",
             "id": "def-public.DataRequest.renderError",
             "type": "Function",
             "tags": [],
@@ -2286,6 +2302,60 @@
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "maps",
+            "id": "def-public.IVectorSource.hasLegendDetails",
+            "type": "Function",
+            "tags": [],
+            "label": "hasLegendDetails",
+            "description": [
+              "\nspecifies if a source provides its own legend details or if the default vector_style is used if the source has this method it must also implement renderLegendDetails"
+            ],
+            "signature": [
+              "(() => Promise<boolean>) | undefined"
+            ],
+            "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "maps",
+            "id": "def-public.IVectorSource.renderLegendDetails",
+            "type": "Function",
+            "tags": [],
+            "label": "renderLegendDetails",
+            "description": [
+              "\nspecifies if a source provides its own legend details or if the default vector_style is used"
+            ],
+            "signature": [
+              "((vectorStyle: ",
+              "IVectorStyle",
+              ") => React.ReactElement<any, string | React.JSXElementConstructor<any>> | null) | undefined"
+            ],
+            "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "maps",
+                "id": "def-public.IVectorSource.renderLegendDetails.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "vectorStyle",
+                "description": [],
+                "signature": [
+                  "IVectorStyle"
+                ],
+                "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
             "returnComment": []
           }
         ],
