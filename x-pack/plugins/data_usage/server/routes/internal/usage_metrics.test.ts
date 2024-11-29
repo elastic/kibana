@@ -19,7 +19,16 @@ import { DATA_USAGE_METRICS_API_ROUTE } from '../../../common';
 import { createMockedDataUsageContext } from '../../mocks';
 import { CustomHttpRequestError } from '../../utils';
 import { AutoOpsError } from '../../services/errors';
-import { timeXMinutesAgo } from '../../../common/test_utils';
+import { transformToUTCtime } from '../../../common/utils';
+
+const timeRange = {
+  start: 'now-15m',
+  end: 'now',
+};
+const utcTimeRange = transformToUTCtime({
+  ...timeRange,
+  isISOString: true,
+});
 
 describe('registerUsageMetricsRoute', () => {
   let mockCore: MockedKeys<CoreSetup<{}, DataUsageServerStart>>;
@@ -56,8 +65,8 @@ describe('registerUsageMetricsRoute', () => {
 
     const mockRequest = httpServerMock.createKibanaRequest({
       body: {
-        from: timeXMinutesAgo(15),
-        to: timeXMinutesAgo(0),
+        from: utcTimeRange.start,
+        to: utcTimeRange.end,
         metricTypes: ['ingest_rate'],
         dataStreams: [],
       },
@@ -123,8 +132,8 @@ describe('registerUsageMetricsRoute', () => {
 
     const mockRequest = httpServerMock.createKibanaRequest({
       body: {
-        from: timeXMinutesAgo(15),
-        to: timeXMinutesAgo(0),
+        from: utcTimeRange.start,
+        to: utcTimeRange.end,
         metricTypes: ['ingest_rate', 'storage_retained'],
         dataStreams: ['.ds-1', '.ds-2'],
       },
@@ -191,8 +200,8 @@ describe('registerUsageMetricsRoute', () => {
 
     const mockRequest = httpServerMock.createKibanaRequest({
       body: {
-        from: timeXMinutesAgo(15),
-        to: timeXMinutesAgo(0),
+        from: utcTimeRange.start,
+        to: utcTimeRange.end,
         metricTypes: ['ingest_rate'],
         dataStreams: ['.ds-1', '.ds-2'],
       },
