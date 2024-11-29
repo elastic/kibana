@@ -12,7 +12,7 @@ packages/kbn-actions-types @elastic/response-ops
 src/plugins/advanced_settings @elastic/appex-sharedux @elastic/kibana-management
 x-pack/packages/kbn-ai-assistant @elastic/search-kibana
 x-pack/packages/kbn-ai-assistant-common @elastic/search-kibana
-src/plugins/ai_assistant_management/selection @elastic/obs-knowledge-team
+src/plugins/ai_assistant_management/selection @elastic/obs-ai-assistant
 x-pack/packages/ml/aiops_change_point_detection @elastic/ml-ui
 x-pack/packages/ml/aiops_common @elastic/ml-ui
 x-pack/packages/ml/aiops_components @elastic/ml-ui
@@ -41,7 +41,7 @@ packages/analytics/utils/analytics_collection_utils @elastic/kibana-core
 test/analytics/plugins/analytics_ftr_helpers @elastic/kibana-core
 test/analytics/plugins/analytics_plugin_a @elastic/kibana-core
 packages/kbn-apm-config-loader @elastic/kibana-core @vigneshshanmugam
-x-pack/plugins/observability_solution/apm_data_access @elastic/obs-knowledge-team @elastic/obs-ux-infra_services-team
+x-pack/plugins/observability_solution/apm_data_access @elastic/obs-ux-infra_services-team
 packages/kbn-apm-data-view @elastic/obs-ux-infra_services-team
 x-pack/plugins/observability_solution/apm/ftr_e2e @elastic/obs-ux-infra_services-team
 x-pack/plugins/observability_solution/apm @elastic/obs-ux-infra_services-team
@@ -584,7 +584,7 @@ examples/locator_examples @elastic/appex-sharedux
 examples/locator_explorer @elastic/appex-sharedux
 packages/kbn-logging @elastic/kibana-core
 packages/kbn-logging-mocks @elastic/kibana-core
-x-pack/plugins/observability_solution/logs_data_access @elastic/obs-knowledge-team @elastic/obs-ux-logs-team
+x-pack/plugins/observability_solution/logs_data_access @elastic/obs-ux-logs-team
 x-pack/plugins/observability_solution/logs_explorer @elastic/obs-ux-logs-team
 x-pack/plugins/observability_solution/logs_shared @elastic/obs-ux-logs-team
 x-pack/plugins/logstash @elastic/logstash
@@ -611,7 +611,7 @@ x-pack/examples/third_party_maps_source_example @elastic/kibana-gis
 src/plugins/maps_ems @elastic/kibana-presentation
 x-pack/plugins/maps @elastic/kibana-presentation
 x-pack/packages/maps/vector_tile_utils @elastic/kibana-gis
-x-pack/plugins/observability_solution/metrics_data_access @elastic/obs-knowledge-team @elastic/obs-ux-infra_services-team
+x-pack/plugins/observability_solution/metrics_data_access @elastic/obs-ux-infra_services-team
 x-pack/packages/ml/agg_utils @elastic/ml-ui
 x-pack/packages/ml/anomaly_utils @elastic/ml-ui
 x-pack/packages/ml/cancellable_search @elastic/ml-ui
