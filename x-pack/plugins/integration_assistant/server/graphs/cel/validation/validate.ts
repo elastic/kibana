@@ -24,7 +24,6 @@ export async function validate(logger: Logger, input: string): Promise<string> {
   const goWasm = new Go();
   let value;
   try {
-    const usage = process.memoryUsage();
     logger.info(`Before loading WASM ${JSON.stringify(process.memoryUsage())}`);
     const result = await WebAssembly.instantiate(file, goWasm.importObject);
     wasm = result.instance;

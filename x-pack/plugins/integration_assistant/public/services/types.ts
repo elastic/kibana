@@ -6,7 +6,7 @@
  */
 import type { CoreStart } from '@kbn/core/public';
 import type { Observable } from 'rxjs';
-import type { IntegrationAssistantPluginStartDependencies } from '../types';
+import type { IntegrationAssistantPluginStartDependencies } from '../../server/types';
 import type { TelemetryService } from './telemetry/service';
 
 export type RenderUpselling = React.ReactNode;

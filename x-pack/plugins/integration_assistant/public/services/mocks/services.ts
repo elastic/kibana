@@ -8,7 +8,8 @@
 import { of } from 'rxjs';
 import { coreMock } from '@kbn/core/public/mocks';
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
-import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { telemetryServiceMock } from '../telemetry/mocks/service';
 
 export const mockServices = {
@@ -17,4 +18,5 @@ export const mockServices = {
   licensing: licensingMock.createStart(),
   telemetry: telemetryServiceMock.createStart(),
   renderUpselling$: of(undefined),
+  taskManager: taskManagerMock.createStart(),
 };

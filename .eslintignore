@@ -29,6 +29,9 @@ snapshots.js
 /x-pack/plugins/reporting/server/export_types/printable_pdf_v2/server/lib/pdf/assets/**
 /x-pack/plugins/cloud_integrations/cloud_full_story/server/assets/**
 
+# WASM module overrides
+/x-pack/plugins/integrationAssistant/server/graphs/cel/validation/wasm/wasm_exec.js
+
 # package overrides
 /packages/kbn-eslint-config
 /packages/kbn-plugin-generator/template

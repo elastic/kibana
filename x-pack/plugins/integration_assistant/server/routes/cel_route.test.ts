@@ -10,6 +10,7 @@ import { requestMock } from '../__mocks__/request';
 import { requestContextMock } from '../__mocks__/request_context';
 import { CEL_INPUT_GRAPH_PATH } from '../../common';
 import { registerCelInputRoutes } from './cel_routes';
+import { validateCelTaskMock } from '../../__jest__/fixtures/cel';
 
 const mockResult = jest.fn().mockResolvedValue({
   results: {
@@ -47,7 +48,7 @@ describe('registerCelInputRoute', () => {
     jest.clearAllMocks();
     server = serverMock.create();
     ({ context } = requestContextMock.createTools());
-    registerCelInputRoutes(server.router);
+    registerCelInputRoutes(server.router, validateCelTaskMock);
   });
 
   it('Runs route and gets CelInputResponse', async () => {

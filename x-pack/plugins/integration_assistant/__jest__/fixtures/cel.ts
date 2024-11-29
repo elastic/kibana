@@ -5,6 +5,34 @@
  * 2.0.
  */
 
+import { LogMeta, LogMessageSource, LogRecord, LogLevelId, Logger } from '@kbn/logging';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import { ValidateCelTask } from '../../server/graphs/cel/validation/validate_task';
+
+export const validateCelTaskMock = new ValidateCelTask({
+  logger: {
+    debug: (message: string, meta?: LogMeta) => {},
+    info: (message: string, meta?: LogMeta) => {},
+    warn: (message: string, meta?: LogMeta) => {},
+    error: (message: string, meta?: LogMeta) => {},
+    fatal: (message: string, meta?: LogMeta) => {},
+    log: (record: LogRecord) => {},
+    trace<Meta extends LogMeta = LogMeta>(
+      message: LogMessageSource,
+      meta?: Meta | undefined
+    ): void {
+      throw new Error('Function not implemented.');
+    },
+    isLevelEnabled(level: LogLevelId): boolean {
+      throw new Error('Function not implemented.');
+    },
+    get(...childContextPaths: string[]): Logger {
+      throw new Error('Function not implemented.');
+    },
+  },
+  taskManager: taskManagerMock.createSetup(),
+});
+
 export const celTestState = {
   dataStreamName: 'testDataStream',
   apiDefinition: 'apiDefinition',
@@ -17,6 +45,7 @@ export const celTestState = {
   stateSettings: { test: 'testDetails' },
   redactVars: ['testRedact'],
   results: { test: 'testResults' },
+  validateCelTask: validateCelTaskMock,
 };
 
 export const celQuerySummaryMockedResponse = `To cover all events in a chronological manner for the device_tasks endpoint, you should use the /v1/device_tasks GET route with pagination parameters. Specifically, use the pageSize and pageToken query parameters. Start with a large pageSize and use the nextPageToken from each response to fetch subsequent pages until all events are retrieved.

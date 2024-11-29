@@ -10,7 +10,8 @@
     "common/**/*.ts",
     "scripts/**/*.ts",
     "__jest__/**/*",
-    "../../typings/**/*"
+    "../../typings/**/*",
+    "server/graphs/cel/validation/wasm/wasm_exec.js"
   ],
   "exclude": ["target/**/*"],
   "kbn_references": [
