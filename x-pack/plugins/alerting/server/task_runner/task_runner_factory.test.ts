@@ -129,6 +129,7 @@ describe('Task Runner Factory', () => {
     supportsEphemeralTasks: true,
     uiSettings: uiSettingsService,
     usageCounter: mockUsageCounter,
+    isServerless: false,
   };
 
   beforeEach(() => {
