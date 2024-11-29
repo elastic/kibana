@@ -22,6 +22,7 @@ const sortFieldToESParams = {
   durationInMillis: 'duration',
   'shards.total': 'shard_count',
   'shards.failed': 'failed_shard_count',
+  state: 'name',
 };
 
 const isSearchingForNonExistentRepository = (

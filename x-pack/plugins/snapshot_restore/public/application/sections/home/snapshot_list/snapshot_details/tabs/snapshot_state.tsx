@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
+import React from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiIconTip, EuiToolTip } from '@elastic/eui';
+import { EuiFlexGroup, EuiHealth, EuiIcon, EuiToolTip } from '@elastic/eui';
 
 import { SNAPSHOT_STATE } from '../../../../../constants';
 import { useServices } from '../../../../../app_context';
@@ -22,25 +22,25 @@ export const SnapshotState: React.FC<Props> = ({ state, tooltipIcon }) => {
 
   const stateMap: any = {
     [SNAPSHOT_STATE.IN_PROGRESS]: {
-      icon: <EuiIcon color="primary" type="dot" />,
+      color: 'primary',
       label: i18n.translate('xpack.snapshotRestore.snapshotState.inProgressLabel', {
         defaultMessage: 'In Progress',
       }),
     },
     [SNAPSHOT_STATE.SUCCESS]: {
-      icon: <EuiIcon color="success" type="dot" />,
+      color: 'success',
       label: i18n.translate('xpack.snapshotRestore.snapshotState.completeLabel', {
         defaultMessage: 'Complete',
       }),
     },
     [SNAPSHOT_STATE.FAILED]: {
-      icon: <EuiIcon color="danger" type="dot" />,
+      color: 'danger',
       label: i18n.translate('xpack.snapshotRestore.snapshotState.failedLabel', {
         defaultMessage: 'Failed',
       }),
     },
     [SNAPSHOT_STATE.PARTIAL]: {
-      icon: <EuiIcon color="warning" type="dot" />,
+      color: 'warning',
       label: i18n.translate('xpack.snapshotRestore.snapshotState.partialLabel', {
         defaultMessage: 'Partial',
       }),
@@ -55,34 +55,16 @@ export const SnapshotState: React.FC<Props> = ({ state, tooltipIcon }) => {
     return state;
   }
 
-  const { icon, label, tip } = stateMap[state];
+  const { color, label, tip } = stateMap[state];
 
-  const iconTip = tip && tooltipIcon && (
-    <Fragment>
-      {' '}
-      <EuiIconTip content={tip} />
-    </Fragment>
-  );
+  const iconTip = tooltipIcon && tip && <EuiIcon type="questionInCircle" />;
 
-  const snapshotInfo = (
-    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-      <EuiFlexItem grow={false}>{icon}</EuiFlexItem>
-
-      <EuiFlexItem grow={false}>
-        {/* Escape flex layout created by EuiFlexItem. */}
-        <div>
-          {label}
-          {iconTip}
-        </div>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-
-  return tip && tooltipIcon ? (
-    snapshotInfo
-  ) : (
+  return (
     <EuiToolTip position="top" content={tip}>
-      {snapshotInfo}
+      <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+        <EuiHealth color={color}>{label}</EuiHealth>
+        {iconTip}
+      </EuiFlexGroup>
     </EuiToolTip>
   );
 };

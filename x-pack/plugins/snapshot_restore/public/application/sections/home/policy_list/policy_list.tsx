@@ -12,6 +12,7 @@ import { EuiButton, EuiCallOut, EuiSpacer, EuiPageTemplate, EuiLink } from '@ela
 
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 
+import { i18n } from '@kbn/i18n';
 import {
   PageLoading,
   PageError,
@@ -176,13 +177,17 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
               iconType="warning"
             >
               <p>
-                Policies are not executed. You must restart SLM{' '}
+                {i18n.translate('xpack.snapshotRestore.slmWarning', {
+                  defaultMessage: 'Policies are not executed. You must restart SLM',
+                })}{' '}
                 <EuiLink
                   href={docLinks.links.snapshotRestore.slmStart}
                   external={true}
                   target="_blank"
                 >
-                  by using the API.
+                  {i18n.translate('xpack.snapshotRestore.slmDocLink', {
+                    defaultMessage: 'by using the API.',
+                  })}
                 </EuiLink>
               </p>
             </EuiCallOut>
