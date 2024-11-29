@@ -193,32 +193,18 @@ For more information on scripted fields and additional examples, refer to
 https://www.elastic.co/blog/using-painless-kibana-scripted-fields[Using Painless in {kib} scripted fields]
 
 [float]
-[[create-scripted-field]]
-==== Create scripted fields
-
-Create and add scripted fields to your data views.
-
-. Go to the *Data Views* management page using the navigation menu or the <<kibana-navigation-search,global search field>>.
-
-. Select the data view you want to add a scripted field to.
-
-. Select the *Scripted fields* tab, then click *Add scripted field*.
-
-. Enter a *Name* for the scripted field, then enter the *Script* you want to use to compute a value on the fly from your index data.
-
-. Click *Create field*.
-
-For more information about scripted fields in {es}, refer to {ref}/modules-scripting.html[Scripting].
-
-[float]
 [[update-scripted-field]]
 ==== Manage scripted fields
+
+WARNING: The ability to create new scripted fields has been removed from the *Data Views* management page in 9.0. Existing scripted fields can still be edited or deleted, and the creation UI can be accessed by navigating directly to the `/app/management/kibana/dataViews/dataView/{dataViewId}/create-field` path, but it is recommended to migrate to runtime fields or the Elasticsearch Query Language (ES|QL) to prepare for removal.
 
 . Go to the *Data Views* management page using the navigation menu or the <<kibana-navigation-search,global search field>>.
 
 . Select the data view that contains the scripted field you want to manage.
 
 . Select the *Scripted fields* tab, then open the scripted field edit options or delete the scripted field.
+
+For more information about scripted fields in {es}, refer to {ref}/modules-scripting.html[Scripting].
 
 WARNING: Built-in validation is unsupported for scripted fields. When your scripts contain errors, you receive
 exceptions when you view the dynamically generated data.
