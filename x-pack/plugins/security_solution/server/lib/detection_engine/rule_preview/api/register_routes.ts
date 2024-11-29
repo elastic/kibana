@@ -24,7 +24,8 @@ export const registerRulePreviewRoutes = (
   securityRuleTypeOptions: CreateSecurityRuleTypeWrapperProps,
   previewRuleDataClient: IRuleDataClient,
   getStartServices: StartServicesAccessor<StartPlugins>,
-  logger: Logger
+  logger: Logger,
+  isServerless: boolean
 ) => {
   previewRulesRoute(
     router,
@@ -35,6 +36,7 @@ export const registerRulePreviewRoutes = (
     securityRuleTypeOptions,
     previewRuleDataClient,
     getStartServices,
-    logger
+    logger,
+    isServerless
   );
 };

@@ -167,16 +167,7 @@ export type UpsertRuleMigrationResourcesRequestParamsInput = z.input<
 export type UpsertRuleMigrationResourcesRequestBody = z.infer<
   typeof UpsertRuleMigrationResourcesRequestBody
 >;
-export const UpsertRuleMigrationResourcesRequestBody = z.array(
-  RuleMigrationResourceData.merge(
-    z.object({
-      /**
-       * The rule resource migration id
-       */
-      id: NonEmptyString,
-    })
-  )
-);
+export const UpsertRuleMigrationResourcesRequestBody = z.array(RuleMigrationResourceData);
 export type UpsertRuleMigrationResourcesRequestBodyInput = z.input<
   typeof UpsertRuleMigrationResourcesRequestBody
 >;
