@@ -21,7 +21,7 @@ export class AssetInventoryPlugin
 {
   private readonly logger: Logger;
 
-  #isInitialized: boolean = false;
+  private isInitialized: boolean = false;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
@@ -55,6 +55,6 @@ export class AssetInventoryPlugin
     this.logger.debug('initialize');
     const esClient = core.elasticsearch.client.asInternalUser;
     await initializeTransforms(esClient, this.logger);
-    this.#isInitialized = true;
+    this.isInitialized = true;
   }
 }
