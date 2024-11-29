@@ -12,7 +12,7 @@ import { createObservabilityEsClient } from '@kbn/observability-utils-server/es/
 import * as t from 'io-ts';
 import { orderBy } from 'lodash';
 import { InventoryEntity, entityColumnIdsRt } from '../../../common/entities';
-import { createAlertsClient } from '../../lib/create_alerts_client.ts/create_alerts_client';
+import { createAlertsClient } from '../../lib/create_alerts_client/create_alerts_client';
 import { createInventoryServerRoute } from '../create_inventory_server_route';
 import { getEntityGroupsBy } from './get_entity_groups';
 import { getEntityTypes } from './get_entity_types';
