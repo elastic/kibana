@@ -125,6 +125,7 @@ export function fetchAll(
 
     // Handle results of the individual queries and forward the results to the corresponding dataSubjects
     response
+      // .then((params) => new Promise((resolve) => setTimeout(() => resolve(params), 5000)))
       .then(({ records, esqlQueryColumns, interceptedWarnings, esqlHeaderWarning }) => {
         if (services.analytics) {
           const duration = window.performance.now() - startTime;

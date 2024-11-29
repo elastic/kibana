@@ -34,6 +34,7 @@ import { sendResetMsg } from '../hooks/use_saved_search_messages';
 import { getFetch$ } from '../data_fetching/get_fetch_observable';
 import type { DiscoverInternalStateContainer } from './discover_internal_state_container';
 import { getDefaultProfileState } from './utils/get_default_profile_state';
+import { addLog } from '../../../utils/add_log';
 
 export interface SavedSearchData {
   main$: DataMain$;
@@ -293,6 +294,15 @@ export function getDataStateContainer({
               ...commonFetchDeps,
             },
             async () => {
+              // await new Promise((resolve) => setTimeout(resolve, 5000));
+
+              const { resetDefaultProfileState: currentResetDefaultProfileState } =
+                internalStateContainer.getState();
+
+              if (currentResetDefaultProfileState.resetId !== resetDefaultProfileState.resetId) {
+                return;
+              }
+
               const { esqlQueryColumns } = dataSubjects.documents$.getValue();
               const defaultColumns = uiSettings.get<string[]>(DEFAULT_COLUMNS_SETTING, []);
               const postFetchStateUpdate = defaultProfileState?.getPostFetchState({
@@ -304,6 +314,10 @@ export function getDataStateContainer({
                 await appStateContainer.replaceUrlState(postFetchStateUpdate);
               }
 
+              addLog('PROFILE STATE CLEARED', {
+                resetDefaultProfileState,
+                dataView: dataView?.toMinimalSpec(),
+              });
               // Clear the default profile state flags after the data fetching
               // is done so refetches don't reset the state again
               internalStateContainer.transitions.setResetDefaultProfileState({

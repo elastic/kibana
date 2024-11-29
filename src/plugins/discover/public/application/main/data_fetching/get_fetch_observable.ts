@@ -56,5 +56,6 @@ export function getFetch$({
       })
     ),
     searchSessionManager.newSearchSessionIdFromURL$.pipe(filter((sessionId) => !!sessionId))
+    // ).pipe(debounceTime(5000));
   ).pipe(debounceTime(100));
 }

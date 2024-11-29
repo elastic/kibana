@@ -267,6 +267,7 @@ export const getDiscoverAppStateContainer = ({
     if (!currentSavedSearch.id) {
       const { breakdownField, columns, rowHeight } = getCurrentUrlState(stateStorage, services);
 
+      addLog('PROFILE STATE RESET FROM INIT', { breakdownField, columns, rowHeight });
       // Only set default state which is not already set in the URL
       internalStateContainer.transitions.setResetDefaultProfileState({
         columns: columns === undefined,

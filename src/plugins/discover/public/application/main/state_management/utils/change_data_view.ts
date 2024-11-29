@@ -51,6 +51,10 @@ export async function changeDataView(
   }
 
   if (nextDataView && dataView) {
+    addLog('PROFILE STATE RESET FROM DATA VIEW', {
+      dataView: dataView.toMinimalSpec(),
+      nextDataView: nextDataView.toMinimalSpec(),
+    });
     // Reset the default profile state if we are switching to a different data view
     internalState.transitions.setResetDefaultProfileState({
       columns: true,
