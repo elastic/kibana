@@ -14,6 +14,7 @@ import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 import { savedSearchPluginMock } from '@kbn/saved-search-plugin/public/mocks';
 import {
+  analyticsServiceMock,
   chromeServiceMock,
   coreMock,
   docLinksServiceMock,
@@ -150,6 +151,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
   corePluginMock.chrome.getActiveSolutionNavId$.mockReturnValue(new BehaviorSubject(null));
 
   return {
+    analytics: analyticsServiceMock.createAnalyticsServiceStart(),
     application: corePluginMock.application,
     core: corePluginMock,
     charts: chartPluginMock.createSetupContract(),
