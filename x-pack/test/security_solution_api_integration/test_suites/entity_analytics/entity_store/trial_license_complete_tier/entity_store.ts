@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 import { EntityStoreUtils } from '../../utils';
 import { dataViewRouteHelpersFactory } from '../../utils/data_view';
@@ -14,8 +14,7 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
 
   const utils = EntityStoreUtils(getService);
-  // Failing: See https://github.com/elastic/kibana/issues/200758
-  describe.skip('@ess @skipInServerlessMKI Entity Store APIs', () => {
+  describe('@ess @skipInServerlessMKI Entity Store APIs', () => {
     const dataView = dataViewRouteHelpersFactory(supertest);
 
     before(async () => {
@@ -85,7 +84,7 @@ export default ({ getService }: FtrProviderContext) => {
             })
             .expect(200);
 
-          expect(getResponse.body).to.eql({
+          expect(getResponse.body).toEqual({
             status: 'started',
             type: 'host',
             indexPattern: '',
@@ -101,7 +100,7 @@ export default ({ getService }: FtrProviderContext) => {
             })
             .expect(200);
 
-          expect(getResponse.body).to.eql({
+          expect(getResponse.body).toEqual({
             status: 'started',
             type: 'user',
             indexPattern: '',
@@ -118,7 +117,7 @@ export default ({ getService }: FtrProviderContext) => {
           // @ts-expect-error body is any
           const sortedEngines = body.engines.sort((a, b) => a.type.localeCompare(b.type));
 
-          expect(sortedEngines).to.eql([
+          expect(sortedEngines).toEqual([
             {
               status: 'started',
               type: 'host',
@@ -160,7 +159,7 @@ export default ({ getService }: FtrProviderContext) => {
           })
           .expect(200);
 
-        expect(body.status).to.eql('stopped');
+        expect(body.status).toEqual('stopped');
       });
 
       it('should start the entity engine', async () => {
@@ -176,7 +175,7 @@ export default ({ getService }: FtrProviderContext) => {
           })
           .expect(200);
 
-        expect(body.status).to.eql('started');
+        expect(body.status).toEqual('started');
       });
     });
 
@@ -213,10 +212,11 @@ export default ({ getService }: FtrProviderContext) => {
       afterEach(async () => {
         await utils.cleanEngines();
       });
-      it('should return "not_installed" when no engines have been initialized', async () => {
-        const { body } = await api.getEntityStoreStatus().expect(200);
 
-        expect(body).to.eql({
+      it('should return "not_installed" when no engines have been initialized', async () => {
+        const { body } = await api.getEntityStoreStatus({ query: {} }).expect(200);
+
+        expect(body).toEqual({
           engines: [],
           status: 'not_installed',
         });
@@ -225,23 +225,56 @@ export default ({ getService }: FtrProviderContext) => {
       it('should return "installing" when at least one engine is being initialized', async () => {
         await utils.enableEntityStore();
 
-        const { body } = await api.getEntityStoreStatus().expect(200);
+        const { body } = await api.getEntityStoreStatus({ query: {} }).expect(200);
 
-        expect(body.status).to.eql('installing');
-        expect(body.engines.length).to.eql(2);
-        expect(body.engines[0].status).to.eql('installing');
-        expect(body.engines[1].status).to.eql('installing');
+        expect(body.status).toEqual('installing');
+        expect(body.engines.length).toEqual(2);
+        expect(body.engines[0].status).toEqual('installing');
+        expect(body.engines[1].status).toEqual('installing');
       });
 
       it('should return "started" when all engines are started', async () => {
         await utils.initEntityEngineForEntityTypesAndWait(['host', 'user']);
 
-        const { body } = await api.getEntityStoreStatus().expect(200);
+        const { body } = await api.getEntityStoreStatus({ query: {} }).expect(200);
 
-        expect(body.status).to.eql('running');
-        expect(body.engines.length).to.eql(2);
-        expect(body.engines[0].status).to.eql('started');
-        expect(body.engines[1].status).to.eql('started');
+        expect(body.status).toEqual('running');
+        expect(body.engines.length).toEqual(2);
+        expect(body.engines[0].status).toEqual('started');
+        expect(body.engines[1].status).toEqual('started');
+      });
+
+      describe('status with components', () => {
+        it('should return empty list when when no engines have been initialized', async () => {
+          const { body } = await api
+            .getEntityStoreStatus({ query: { include_components: true } })
+            .expect(200);
+
+          expect(body).toEqual({
+            engines: [],
+            status: 'not_installed',
+          });
+        });
+
+        it('should return components status when engines are installed', async () => {
+          await utils.initEntityEngineForEntityTypesAndWait(['host']);
+
+          const { body } = await api
+            .getEntityStoreStatus({ query: { include_components: true } })
+            .expect(200);
+
+          expect(body.engines[0].components).toEqual([
+            expect.objectContaining({ resource: 'entity_definition' }),
+            expect.objectContaining({ resource: 'transform' }),
+            expect.objectContaining({ resource: 'ingest_pipeline' }),
+            expect.objectContaining({ resource: 'index_template' }),
+            expect.objectContaining({ resource: 'task' }),
+            expect.objectContaining({ resource: 'ingest_pipeline' }),
+            expect.objectContaining({ resource: 'enrich_policy' }),
+            expect.objectContaining({ resource: 'index' }),
+            expect.objectContaining({ resource: 'component_template' }),
+          ]);
+        });
       });
     });
 
@@ -262,14 +295,14 @@ export default ({ getService }: FtrProviderContext) => {
       it("should not update the index patten when it didn't change", async () => {
         const response = await api.applyEntityEngineDataviewIndices();
 
-        expect(response.body).to.eql({ success: true, result: [{ type: 'host', changes: {} }] });
+        expect(response.body).toEqual({ success: true, result: [{ type: 'host', changes: {} }] });
       });
 
       it('should update the index pattern when the data view changes', async () => {
         await dataView.updateIndexPattern('security-solution', 'test-*');
         const response = await api.applyEntityEngineDataviewIndices();
 
-        expect(response.body).to.eql({
+        expect(response.body).toEqual({
           success: true,
           result: [
             {

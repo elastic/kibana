@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type { UseMutationOptions, UseQueryOptions } from '@tanstack/react-query';
+import type { UseMutationOptions } from '@tanstack/react-query';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-import type {
-  GetEntityStoreStatusResponse,
-  InitEntityStoreResponse,
-} from '../../../../../common/api/entity_analytics/entity_store/enablement.gen';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
+import type { GetEntityStoreStatusResponse } from '../../../../../common/api/entity_analytics/entity_store/status.gen';
+import type { InitEntityStoreResponse } from '../../../../../common/api/entity_analytics/entity_store/enable.gen';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import type {
   DeleteEntityEngineResponse,
@@ -26,19 +25,24 @@ const ENTITY_STORE_STATUS = ['GET', 'ENTITY_STORE_STATUS'];
 interface ResponseError {
   body: { message: string };
 }
-export const useEntityStoreStatus = (options: UseQueryOptions<GetEntityStoreStatusResponse>) => {
+
+interface Options {
+  withComponents?: boolean;
+}
+
+export const useEntityStoreStatus = (opts: Options = {}) => {
   const { getEntityStoreStatus } = useEntityStoreRoutes();
 
-  const query = useQuery<GetEntityStoreStatusResponse>(ENTITY_STORE_STATUS, getEntityStoreStatus, {
+  return useQuery<GetEntityStoreStatusResponse, IHttpFetchError>({
+    queryKey: [...ENTITY_STORE_STATUS, opts.withComponents],
+    queryFn: () => getEntityStoreStatus(opts.withComponents),
     refetchInterval: (data) => {
       if (data?.status === 'installing') {
         return 5000;
       }
       return false;
     },
-    ...options,
   });
-  return query;
 };
 
 export const ENABLE_STORE_STATUS_KEY = ['POST', 'ENABLE_ENTITY_STORE'];
@@ -102,15 +106,18 @@ export const useStopEntityEngineMutation = (options?: UseMutationOptions<{}>) =>
 };
 
 export const DELETE_ENTITY_ENGINE_STATUS_KEY = ['POST', 'STOP_ENTITY_ENGINE'];
-export const useDeleteEntityEngineMutation = (options?: UseMutationOptions<{}>) => {
+export const useDeleteEntityEngineMutation = ({ onSuccess }: { onSuccess?: () => void }) => {
   const queryClient = useQueryClient();
   const { deleteEntityEngine } = useEntityStoreRoutes();
+
   return useMutation<DeleteEntityEngineResponse[]>(
     () => Promise.all([deleteEntityEngine('user', true), deleteEntityEngine('host', true)]),
     {
       mutationKey: DELETE_ENTITY_ENGINE_STATUS_KEY,
-      onSuccess: () => queryClient.refetchQueries({ queryKey: ENTITY_STORE_STATUS }),
-      ...options,
+      onSuccess: () => {
+        queryClient.refetchQueries({ queryKey: ENTITY_STORE_STATUS });
+        onSuccess?.();
+      },
     }
   );
 };
