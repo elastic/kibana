@@ -232,10 +232,9 @@ import type {
   UploadAssetCriticalityRecordsResponse,
 } from './entity_analytics/asset_criticality/upload_asset_criticality_csv.gen';
 import type {
-  GetEntityStoreStatusResponse,
   InitEntityStoreRequestBodyInput,
   InitEntityStoreResponse,
-} from './entity_analytics/entity_store/enablement.gen';
+} from './entity_analytics/entity_store/enable.gen';
 import type { ApplyEntityEngineDataviewIndicesResponse } from './entity_analytics/entity_store/engine/apply_dataview_indices.gen';
 import type {
   DeleteEntityEngineRequestQueryInput,
@@ -258,10 +257,6 @@ import type {
   StartEntityEngineResponse,
 } from './entity_analytics/entity_store/engine/start.gen';
 import type {
-  GetEntityEngineStatsRequestParamsInput,
-  GetEntityEngineStatsResponse,
-} from './entity_analytics/entity_store/engine/stats.gen';
-import type {
   StopEntityEngineRequestParamsInput,
   StopEntityEngineResponse,
 } from './entity_analytics/entity_store/engine/stop.gen';
@@ -269,6 +264,10 @@ import type {
   ListEntitiesRequestQueryInput,
   ListEntitiesResponse,
 } from './entity_analytics/entity_store/entities/list_entities.gen';
+import type {
+  GetEntityStoreStatusRequestQueryInput,
+  GetEntityStoreStatusResponse,
+} from './entity_analytics/entity_store/status.gen';
 import type { CleanUpRiskEngineResponse } from './entity_analytics/risk_engine/engine_cleanup_route.gen';
 import type { DisableRiskEngineResponse } from './entity_analytics/risk_engine/engine_disable_route.gen';
 import type { EnableRiskEngineResponse } from './entity_analytics/risk_engine/engine_enable_route.gen';
@@ -1295,19 +1294,7 @@ finalize it.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
-  async getEntityEngineStats(props: GetEntityEngineStatsProps) {
-    this.log.info(`${new Date().toISOString()} Calling API GetEntityEngineStats`);
-    return this.kbnClient
-      .request<GetEntityEngineStatsResponse>({
-        path: replaceParams('/api/entity_store/engines/{entityType}/stats', props.params),
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-        },
-        method: 'POST',
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
-  async getEntityStoreStatus() {
+  async getEntityStoreStatus(props: GetEntityStoreStatusProps) {
     this.log.info(`${new Date().toISOString()} Calling API GetEntityStoreStatus`);
     return this.kbnClient
       .request<GetEntityStoreStatusResponse>({
@@ -1316,6 +1303,8 @@ finalize it.
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
         method: 'GET',
+
+        query: props.query,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -2324,8 +2313,8 @@ export interface GetEndpointSuggestionsProps {
 export interface GetEntityEngineProps {
   params: GetEntityEngineRequestParamsInput;
 }
-export interface GetEntityEngineStatsProps {
-  params: GetEntityEngineStatsRequestParamsInput;
+export interface GetEntityStoreStatusProps {
+  query: GetEntityStoreStatusRequestQueryInput;
 }
 export interface GetNotesProps {
   query: GetNotesRequestQueryInput;
