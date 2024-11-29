@@ -6,7 +6,7 @@
  */
 
 import stringify from 'json-stable-stringify';
-import { Version } from '../versions_picker/constants';
+import { Version } from './versions_picker/constants';
 import type { ThreeWayDiff } from '../../../../../../../common/api/detection_engine';
 
 /**

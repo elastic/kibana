@@ -11,7 +11,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { fieldToDisplayNameMap } from '../../diff_components/translations';
 import type { FieldUpgradeState } from '../../../../model/prebuilt_rule_upgrade';
 import { ModifiedBadge } from '../badges/modified_badge';
-import { FieldUpgradeStateInfo } from '../field_upgrade_state_info';
+import { FieldUpgradeStateInfo } from './field_upgrade_state_info';
 
 interface FieldUpgradeHeaderProps {
   fieldName: string;
