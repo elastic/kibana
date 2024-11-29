@@ -37,7 +37,6 @@ export const create = async (
     user,
     logger,
     authorization: auth,
-    bidirectionalSyncClient,
   } = clientArgs;
 
   try {
@@ -116,12 +115,6 @@ export const create = async (
       await notificationService.notifyAssignees({
         assignees: assigneesWithoutCurrentUser,
         theCase: newCase,
-      });
-    }
-
-    if (newCase.attributes.connector.type === '.jira') {
-      bidirectionalSyncClient.registerSynching({
-        caseId: newCase.id,
       });
     }
 

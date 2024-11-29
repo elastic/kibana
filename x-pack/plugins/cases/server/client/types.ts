@@ -29,7 +29,6 @@ import type { ExternalReferenceAttachmentTypeRegistry } from '../attachment_fram
 import type { LicensingService } from '../services/licensing';
 import type { NotificationService } from '../services/notifications/types';
 import type { User } from '../common/types/user';
-import type { BidirectionalSyncClient } from '../connectors/bidirectional_sync/client';
 
 export interface CasesServices {
   alertsService: AlertService;
@@ -60,7 +59,6 @@ export interface CasesClientArgs {
   readonly savedObjectsSerializer: ISavedObjectsSerializer;
   readonly publicBaseUrl?: IBasePath['publicBaseUrl'];
   readonly fileService: FileServiceStart;
-  readonly bidirectionalSyncClient: BidirectionalSyncClient;
 }
 
 export type CasesSearchParams = Partial<

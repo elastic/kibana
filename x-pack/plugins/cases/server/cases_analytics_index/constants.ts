@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-// Should we have one per connector type?
-export const TASK_NAME = 'cases-connectors-bidi-sync';
+export const TASK_NAME = 'cases-analytics-index';

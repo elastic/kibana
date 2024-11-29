@@ -55,7 +55,6 @@ import type { ExternalReferenceAttachmentTypeRegistry } from '../attachment_fram
 import type { CasesServices } from './types';
 import { LicensingService } from '../services/licensing';
 import { EmailNotificationService } from '../services/notifications/email_notification_service';
-import { BidirectionalSyncClient } from '../connectors/bidirectional_sync/client';
 
 interface CasesClientFactoryArgs {
   securityPluginSetup: SecurityPluginSetup;
@@ -167,9 +166,6 @@ export class CasesClientFactory {
         this.options.spacesPluginStart?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID,
       savedObjectsSerializer,
       fileService,
-      bidirectionalSyncClient: new BidirectionalSyncClient({
-        taskManager: this.options.taskManager,
-      }),
     });
   }
 
