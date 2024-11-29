@@ -5,11 +5,6 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-
-export const ARIA_LABEL = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.esqlInfoAriaLabel',
-  {
-    defaultMessage: `Open help popover`,
-  }
-);
+export * from './types';
+export * from './default_queries';
+export * from './query_field';
