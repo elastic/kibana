@@ -5,21 +5,19 @@
  * 2.0.
  */
 
-import { debounce } from 'lodash';
-import { useCallback, useEffect, useState } from 'react';
+import useDebounce from 'react-use/lib/useDebounce';
+import { useState } from 'react';
 
 export function useDebounced<T>(value: T, debounceDelay: number = 300) {
   const [debouncedValue, setValue] = useState(value);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const setValueDebounced = useCallback(debounce(setValue, debounceDelay), [
-    setValue,
+  useDebounce(
+    () => {
+      setValue(value);
+    },
     debounceDelay,
-  ]);
-
-  useEffect(() => {
-    setValueDebounced(value);
-  }, [value, setValueDebounced]);
+    [value, setValue]
+  );
 
   return debouncedValue;
 }
