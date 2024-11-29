@@ -9,9 +9,9 @@ import { css } from '@emotion/css';
 import { EuiPopover, EuiLink, EuiText } from '@elastic/eui';
 import { ConnectorSetup } from './connector_setup';
 import * as i18n from './translations';
-import { MissingPrivilegesTooltip } from './missing_privileges_tooltip';
+import { MissingPrivilegesTooltip } from './missing_privileges';
 
-interface CreateConnectorPopoverProps {
+export interface CreateConnectorPopoverProps {
   onConnectorSaved: () => void;
   canCreateConnectors?: boolean;
 }

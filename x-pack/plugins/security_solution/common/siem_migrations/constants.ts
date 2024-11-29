@@ -17,6 +17,13 @@ export const SIEM_RULE_MIGRATION_STOP_PATH = `${SIEM_RULE_MIGRATION_PATH}/stop` 
 
 export const SIEM_RULE_MIGRATION_RESOURCES_PATH = `${SIEM_RULE_MIGRATION_PATH}/resources` as const;
 
+export enum SiemMigrationTaskStatus {
+  READY = 'ready',
+  RUNNING = 'running',
+  STOPPED = 'stopped',
+  FINISHED = 'finished',
+}
+
 export enum SiemMigrationStatus {
   PENDING = 'pending',
   PROCESSING = 'processing',

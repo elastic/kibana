@@ -5,4 +5,6 @@
  * 2.0.
  */
 
-export const AllowedActionTypeIds = ['.bedrock', '.gen-ai', '.gemini'];
+import { useKibana } from '../../../common/lib/kibana/kibana_react';
+
+export const useOnboardingService = () => useKibana().services.onboarding;
