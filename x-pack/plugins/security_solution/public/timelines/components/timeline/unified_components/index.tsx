@@ -12,7 +12,7 @@ import { useDispatch } from 'react-redux';
 import { generateFilters } from '@kbn/data-plugin/public';
 import type { DataView, DataViewField } from '@kbn/data-plugin/common';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
-import type { DataLoadingState } from '@kbn/unified-data-table';
+import type { DataLoadingState, UnifiedDataTableProps } from '@kbn/unified-data-table';
 import { useColumns } from '@kbn/unified-data-table';
 import { popularizeField } from '@kbn/unified-data-table/src/utils/popularize_field';
 import type { DropType } from '@kbn/dom-drag-drop';
@@ -34,7 +34,7 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { defaultHeaders } from '../body/column_headers/default_headers';
 import type {
   ColumnHeaderOptions,
-  OnChangePage,
+  OnFetchMoreRecords,
   RowRenderer,
   SortColumnTimeline,
   TimelineTabs,
@@ -107,7 +107,7 @@ interface Props {
   events: TimelineItem[];
   refetch: inputsModel.Refetch;
   totalCount: number;
-  onChangePage: OnChangePage;
+  onFetchMoreRecords: OnFetchMoreRecords;
   activeTab: TimelineTabs;
   dataLoadingState: DataLoadingState;
   updatedAt: number;
@@ -115,6 +115,7 @@ interface Props {
   dataView: DataView;
   trailingControlColumns?: EuiDataGridProps['trailingControlColumns'];
   leadingControlColumns?: EuiDataGridProps['leadingControlColumns'];
+  onUpdatePageIndex?: UnifiedDataTableProps['onUpdatePageIndex'];
 }
 
 const UnifiedTimelineComponent: React.FC<Props> = ({
@@ -130,12 +131,13 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
   refetch,
   dataLoadingState,
   totalCount,
-  onChangePage,
+  onFetchMoreRecords,
   updatedAt,
   isTextBasedQuery,
   dataView,
   trailingControlColumns,
   leadingControlColumns,
+  onUpdatePageIndex,
 }) => {
   const dispatch = useDispatch();
   const unifiedFieldListContainerRef = useRef<UnifiedFieldListSidebarContainerApi>(null);
@@ -436,13 +438,14 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
                       onFieldEdited={onFieldEdited}
                       dataLoadingState={dataLoadingState}
                       totalCount={totalCount}
-                      onChangePage={onChangePage}
+                      onFetchMoreRecords={onFetchMoreRecords}
                       activeTab={activeTab}
                       updatedAt={updatedAt}
                       isTextBasedQuery={isTextBasedQuery}
                       onFilter={onAddFilter as DocViewFilterFn}
                       trailingControlColumns={trailingControlColumns}
                       leadingControlColumns={leadingControlColumns}
+                      onUpdatePageIndex={onUpdatePageIndex}
                     />
                   </EventDetailsWidthProvider>
                 </DropOverlayWrapper>
