@@ -6,11 +6,15 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+
 import { DataStreamSpacesAdapter } from '@kbn/data-stream-adapter';
+import { DefendInsightType } from '@kbn/elastic-assistant-common';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { kibanaPackageJson } from '@kbn/repo-info';
 
-import { createDatastream, createPipeline } from './helpers';
+import type { SearchParams } from '../../../../common/endpoint/types/workflow_insights';
+
+import { buildEsQueryParams, createDatastream, createPipeline } from './helpers';
 import {
   DATA_STREAM_PREFIX,
   COMPONENT_TEMPLATE_NAME,
@@ -19,6 +23,12 @@ import {
   TOTAL_FIELDS_LIMIT,
 } from './constants';
 import { securityWorkflowInsightsFieldMap } from './field_map_configurations';
+import {
+  ActionType,
+  Category,
+  SourceType,
+  TargetType,
+} from '../../../../common/endpoint/types/workflow_insights';
 
 jest.mock('@kbn/data-stream-adapter', () => ({
   DataStreamSpacesAdapter: jest.fn().mockImplementation(() => ({
@@ -75,6 +85,66 @@ describe('helpers', () => {
           managed: true,
         },
       });
+    });
+  });
+
+  describe('buildEsQueryParams', () => {
+    it('should build es query correct', () => {
+      const searchParams: SearchParams = {
+        size: 50,
+        from: 50,
+        ids: ['id1', 'id2'],
+        categories: [Category.Endpoint],
+        types: [DefendInsightType.Enum.incompatible_antivirus],
+        sourceTypes: [SourceType.LlmConnector],
+        sourceIds: ['source-id1', 'source-id2'],
+        targetTypes: [TargetType.Endpoint],
+        targetIds: ['target-id1', 'target-id2'],
+        actionTypes: [ActionType.Refreshed, ActionType.Remediated],
+      };
+      const result = buildEsQueryParams(searchParams);
+      expect(result).toEqual([
+        {
+          terms: {
+            _id: ['id1', 'id2'],
+          },
+        },
+        {
+          terms: {
+            categories: ['endpoint'],
+          },
+        },
+        {
+          terms: {
+            types: ['incompatible_antivirus'],
+          },
+        },
+        {
+          terms: {
+            'source.type': ['llm-connector'],
+          },
+        },
+        {
+          terms: {
+            'source.id': ['source-id1', 'source-id2'],
+          },
+        },
+        {
+          terms: {
+            'target.type': ['endpoint'],
+          },
+        },
+        {
+          terms: {
+            'target.id': ['target-id1', 'target-id2'],
+          },
+        },
+        {
+          terms: {
+            'action.type': ['refreshed', 'remediated'],
+          },
+        },
+      ]);
     });
   });
 });
