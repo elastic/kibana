@@ -17,7 +17,7 @@ import { GridLayoutData, GridSettings } from './types';
 import { useGridLayoutEvents } from './use_grid_layout_events';
 import { useGridLayoutState } from './use_grid_layout_state';
 import { isLayoutEqual } from './utils/equality_checks';
-import { compactGridRow } from './utils/resolve_grid_row';
+import { resolveGridRow } from './utils/resolve_grid_row';
 
 interface GridLayoutProps {
   layout: GridLayoutData;
@@ -49,15 +49,15 @@ export const GridLayout = ({
    * Update the `gridLayout$` behaviour subject in response to the `layout` prop changing
    */
   useEffect(() => {
-    if (!isLayoutEqual(layout, gridLayoutStateManager.gridLayout$.getValue())) {
-      const newLayout = cloneDeep(layout);
-      /**
-       * the layout sent in as a prop is not guaranteed to be valid (i.e it may have floating panels) -
-       * so, we need to loop through each row and ensure it is compacted
-       */
-      newLayout.forEach((row, rowIndex) => {
-        newLayout[rowIndex] = compactGridRow(row);
-      });
+    /**
+     * the layout sent in as a prop is not guaranteed to be valid (i.e it may have floating panels) -
+     * so, we need to loop through each row and ensure it is compacted
+     */
+    const newLayout = cloneDeep(layout);
+    newLayout.forEach((row, rowIndex) => {
+      newLayout[rowIndex] = resolveGridRow(row);
+    });
+    if (!isLayoutEqual(newLayout, gridLayoutStateManager.gridLayout$.getValue())) {
       gridLayoutStateManager.gridLayout$.next(newLayout);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

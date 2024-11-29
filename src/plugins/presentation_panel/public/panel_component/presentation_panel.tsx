@@ -18,8 +18,8 @@ import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { untilPluginStartServicesReady } from '../kibana_services';
 import { PresentationPanelError } from './presentation_panel_error';
-import { getErrorLoadingPanel } from './presentation_panel_strings';
 import { DefaultPresentationPanelApi, PresentationPanelProps } from './types';
+import { getErrorLoadingPanel } from './presentation_panel_strings';
 
 export const PresentationPanel = <
   ApiType extends DefaultPresentationPanelApi = DefaultPresentationPanelApi,
@@ -81,19 +81,15 @@ export const PresentationPanel = <
     );
   }
 
-  return (
-    <>
-      {shouldHavePanel && Panel ? (
-        <Panel<ApiType, PropsType> Component={UnwrappedComponent} {...passThroughProps} />
-      ) : (
-        <EuiErrorBoundary>
-          <UnwrappedComponent
-            {...((passThroughProps.componentProps ?? {}) as React.ComponentProps<
-              typeof UnwrappedComponent
-            >)}
-          />
-        </EuiErrorBoundary>
-      )}
-    </>
+  return shouldHavePanel && Panel ? (
+    <Panel<ApiType, PropsType> Component={UnwrappedComponent} {...passThroughProps} />
+  ) : (
+    <EuiErrorBoundary>
+      <UnwrappedComponent
+        {...((passThroughProps.componentProps ?? {}) as React.ComponentProps<
+          typeof UnwrappedComponent
+        >)}
+      />
+    </EuiErrorBoundary>
   );
 };

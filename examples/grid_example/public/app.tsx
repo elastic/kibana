@@ -33,6 +33,7 @@ import {
 import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { GridLayout, GridLayoutData } from '@kbn/grid-layout';
 import { i18n } from '@kbn/i18n';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 
 import { getPanelId } from './get_panel_id';
 import {
@@ -43,7 +44,6 @@ import {
 import { MockSerializedDashboardState } from './types';
 import { useMockDashboardApi } from './use_mock_dashboard_api';
 import { dashboardInputToGridLayout, gridLayoutToDashboardPanelMap } from './utils';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 
 const DASHBOARD_MARGIN_SIZE = 8;
 const DASHBOARD_GRID_HEIGHT = 20;
@@ -63,7 +63,13 @@ export const GridExample = ({ coreStart }: { coreStart: CoreStart }) => {
       .pipe(debounceTime(0)) // debounce to avoid subscribe being called twice when both panels$ and rows$ publish
       .subscribe(([panels, rows]) => {
         const hasChanges = !(
-          deepEqual(panels, savedState.current.panels) && deepEqual(rows, savedState.current.rows)
+          deepEqual(
+            Object.values(panels).map(({ gridData }) => ({ row: 0, ...gridData })),
+            Object.values(savedState.current.panels).map(({ gridData }) => ({
+              row: 0, // if row is undefined, then default to 0
+              ...gridData,
+            }))
+          ) && deepEqual(rows, savedState.current.rows)
         );
         setHasUnsavedChanges(hasChanges);
         setCurrentLayout(dashboardInputToGridLayout({ panels, rows }));

@@ -116,7 +116,6 @@ export const DashboardGrid = ({
         },
         {} as { [key: string]: DashboardPanelState }
       );
-      console.log(updatedPanels);
       if (!getPanelLayoutsAreEqual(panels, updatedPanels)) {
         dashboardApi.setPanels(updatedPanels);
       }

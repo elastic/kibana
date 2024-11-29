@@ -15,7 +15,6 @@ import { i18n } from '@kbn/i18n';
 import {
   fetch$,
   initializeTimeRange,
-  initializeTitles,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import { euiThemeVars } from '@kbn/ui-theme';
@@ -30,15 +29,12 @@ export const getSearchEmbeddableFactory = (services: Services) => {
     type: SEARCH_EMBEDDABLE_ID,
     deserializeState: (state) => state.rawState,
     buildEmbeddable: async (state, buildApi, uuid, parentApi) => {
-      console.log('buildEmbeddable');
       const timeRange = initializeTimeRange(state);
       const defaultDataView = await services.dataViews.getDefaultDataView();
       const dataViews$ = new BehaviorSubject<DataView[] | undefined>(
         defaultDataView ? [defaultDataView] : undefined
       );
-      const { titlesApi, titleComparators, serializeTitles } = initializeTitles(state);
-
-      const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
+      const dataLoading$ = new BehaviorSubject<boolean | undefined>(false);
       const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
 
       if (!defaultDataView) {
@@ -53,7 +49,6 @@ export const getSearchEmbeddableFactory = (services: Services) => {
 
       const api = buildApi(
         {
-          ...titlesApi,
           ...timeRange.api,
           blockingError: blockingError$,
           dataViews: dataViews$,
@@ -61,7 +56,6 @@ export const getSearchEmbeddableFactory = (services: Services) => {
           serializeState: () => {
             return {
               rawState: {
-                ...serializeTitles(),
                 ...timeRange.serialize(),
               },
               references: [],
@@ -69,7 +63,6 @@ export const getSearchEmbeddableFactory = (services: Services) => {
           },
         },
         {
-          ...titleComparators,
           ...timeRange.comparators,
         }
       );
