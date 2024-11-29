@@ -5,7 +5,11 @@
  * 2.0.
  */
 import { entityDefinitionSchema, type EntityDefinition } from '@kbn/entities-schema';
-import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  IngestProcessorContainer,
+  MappingProperty,
+  MappingTypeMapping,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { EntityType } from '../../../../../common/api/entity_analytics/entity_store/common.gen';
 import { DEFAULT_LOOKBACK_PERIOD } from '../constants';
 import { buildEntityDefinitionId, getIdentityFieldForEntityType } from '../utils';
@@ -13,7 +17,11 @@ import type {
   FieldRetentionDefinition,
   FieldRetentionOperator,
 } from '../field_retention_definition';
-import type { MappingProperties, UnitedDefinitionField } from './types';
+import type {
+  EntityDefinitionMetadataElement,
+  MappingProperties,
+  UnitedDefinitionField,
+} from './types';
 import { BASE_ENTITY_INDEX_MAPPING } from './constants';
 
 export class UnitedEntityDefinition {
@@ -124,3 +132,90 @@ export class UnitedEntityDefinition {
     };
   }
 }
+
+interface EntityEngineInstallationDescriptor {
+  version: string;
+  entityType: EntityType;
+  indexPatterns: string[];
+  identityFields: string[];
+  fields: Array<
+    EntityDefinitionMetadataElement & {
+      mapping: MappingProperty;
+      retention_operator: FieldRetentionOperator;
+    }
+  >;
+  indexMappings: MappingTypeMapping;
+  settings: {
+    syncDelay: string;
+    frequency: string;
+    lookbackPeriod: string;
+    timestampField: string;
+  };
+  /**
+   * The ingest pipeline to apply to the entity data.
+   * This can be an array of processors which get appended to the default pipeline,
+   * or a function that takes the default processors and returns an array of processors.
+   **/
+  pipeline:
+    | IngestProcessorContainer[]
+    | ((defaultProcessors: IngestProcessorContainer) => IngestProcessorContainer[]);
+}
+
+const uni: EntityEngineInstallationDescriptor = {
+  version: '1.0.0',
+  entityType: 'universal',
+  indexPatterns: ['logs-store'],
+  identityFields: ['related.entity'],
+  fields: [
+    {
+      source: 'entities.keyword',
+      destination: 'related.entity',
+      aggregation: {
+        type: 'terms',
+        limit: 10,
+      },
+      retention_operator: { operation: 'collect_values', field: 'related.entity', maxLength: 10 },
+      mapping: { type: 'keyword' },
+    },
+  ],
+  settings: {
+    syncDelay: '1m',
+    frequency: '1m',
+    lookbackPeriod: '1d',
+    timestampField: '@timestamp',
+  },
+  pipeline: [entityMetadataExtractorProcessor],
+
+  indexMappings: {},
+};
+
+const entityMetadataExtractorProcessor = {
+  script: {
+    tag: 'entity_metadata_extractor',
+    on_failure: [
+      {
+        set: {
+          field: 'error.message',
+          value:
+            'Processor {{ _ingest.on_failure_processor_type }} with tag {{ _ingest.on_failure_processor_tag }} in pipeline {{ _ingest.on_failure_pipeline }} failed with message {{ _ingest.on_failure_message }}',
+        },
+      },
+    ],
+    lang: 'painless',
+    source: `
+Map merged = ctx;
+def id = ctx.entity.id;
+for (meta in ctx.collected.metadata) {
+    Object json = Processors.json(meta);
+    
+    for (entry in ((Map)json)[id].entrySet()) {
+      String key = entry.getKey();
+      Object value = entry.getValue();
+      merged.put(key, value);
+    }
+}
+merged.entity.id = id;
+ctx = merged;
+`,
+  },
+};

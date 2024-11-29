@@ -17,6 +17,6 @@ export const getUniversalUnitedDefinition: UnitedDefinitionBuilder = (
   return {
     entityType: 'universal',
     version: UNIVERSAL_DEFINITION_VERSION,
-    fields: [collect({ field: 'entities.keyword' })],
+    fields: [collect({ field: 'collected.metadata', sourceField: 'entities.keyword' })],
   };
 };

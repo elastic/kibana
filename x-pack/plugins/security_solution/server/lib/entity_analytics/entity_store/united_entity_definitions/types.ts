@@ -12,7 +12,7 @@ import type { FieldRetentionOperator } from '../field_retention_definition';
 
 export type MappingProperties = NonNullable<MappingTypeMapping['properties']>;
 
-type EntityDefinitionMetadataElement = NonNullable<EntityDefinition['metadata']>[number];
+export type EntityDefinitionMetadataElement = NonNullable<EntityDefinition['metadata']>[number];
 
 export interface UnitedDefinitionField {
   field: string;
