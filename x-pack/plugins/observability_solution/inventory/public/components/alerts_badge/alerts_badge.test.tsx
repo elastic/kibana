@@ -55,7 +55,7 @@ describe('AlertsBadge', () => {
 
     render(<AlertsBadge entity={entity} />);
     expect(screen.queryByTestId('inventoryAlertsBadgeLink')?.getAttribute('href')).toEqual(
-      "/app/observability/alerts?_a=(kuery:'entity1',status:active)"
+      `/app/observability/alerts?_a=(kuery:\"entity1\",status:active)`
     );
     expect(screen.queryByTestId('inventoryAlertsBadgeLink')?.textContent).toEqual('1');
   });
@@ -81,7 +81,7 @@ describe('AlertsBadge', () => {
 
     render(<AlertsBadge entity={entity} />);
     expect(screen.queryByTestId('inventoryAlertsBadgeLink')?.getAttribute('href')).toEqual(
-      "/app/observability/alerts?_a=(kuery:'entity1',status:active)"
+      `/app/observability/alerts?_a=(kuery:\"entity1\",status:active)`
     );
     expect(screen.queryByTestId('inventoryAlertsBadgeLink')?.textContent).toEqual('5');
   });
