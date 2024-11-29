@@ -5,22 +5,92 @@
  * 2.0.
  */
 
+import { merge } from 'lodash';
+import moment from 'moment';
 import { ReplaySubject } from 'rxjs';
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
-import { DataStreamSpacesAdapter } from '@kbn/data-stream-adapter';
-import { loggerMock } from '@kbn/logging-mocks';
-import { kibanaPackageJson } from '@kbn/repo-info';
 
+import { DataStreamSpacesAdapter } from '@kbn/data-stream-adapter';
+import { DefendInsightType } from '@kbn/elastic-assistant-common';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { kibanaPackageJson } from '@kbn/repo-info';
+import { loggerMock } from '@kbn/logging-mocks';
+
+import type {
+  SearchParams,
+  SecurityWorkflowInsight,
+} from '../../../../common/endpoint/types/workflow_insights';
+
+import {
+  Category,
+  SourceType,
+  TargetType,
+  ActionType,
+} from '../../../../common/endpoint/types/workflow_insights';
 import { createDatastream, createPipeline } from './helpers';
 import { securityWorkflowInsightsService } from '.';
 import { DATA_STREAM_NAME } from './constants';
 
-jest.mock('./helpers', () => ({
-  createDatastream: jest.fn(),
-  createPipeline: jest.fn(),
-}));
+jest.mock('./helpers', () => {
+  const original = jest.requireActual('./helpers');
+  return {
+    ...original,
+    createDatastream: jest.fn(),
+    createPipeline: jest.fn(),
+  };
+});
+
+function getDefaultInsight(overrides?: Partial<SecurityWorkflowInsight>): SecurityWorkflowInsight {
+  const defaultInsight = {
+    '@timestamp': moment(),
+    message: 'This is a test message',
+    category: Category.Endpoint,
+    type: DefendInsightType.Enum.incompatible_antivirus,
+    source: {
+      type: SourceType.LlmConnector,
+      id: 'openai-connector-id',
+      data_range_start: moment(),
+      data_range_end: moment(),
+    },
+    target: {
+      type: TargetType.Endpoint,
+      ids: ['endpoint-1', 'endpoint-2'],
+    },
+    action: {
+      type: ActionType.Refreshed,
+      timestamp: moment(),
+    },
+    value: 'unique-key',
+    remediation: {
+      exception_list_items: [
+        {
+          list_id: 'example-list-id',
+          name: 'Example List Name',
+          description: 'Example description',
+          entries: [
+            {
+              field: 'example-field',
+              operator: 'included',
+              type: 'match',
+              value: 'example-value',
+            },
+          ],
+          tags: ['example-tag'],
+          os_types: ['windows', 'linux'],
+        },
+      ],
+    },
+    metadata: {
+      notes: {
+        key1: 'value1',
+        key2: 'value2',
+      },
+      message_variables: ['variable1', 'variable2'],
+    },
+  };
+  return merge(defaultInsight, overrides);
+}
 
 describe('SecurityWorkflowInsightsService', () => {
   let logger: Logger;
@@ -126,38 +196,127 @@ describe('SecurityWorkflowInsightsService', () => {
   });
 
   describe('create', () => {
-    it('should wait for initialization', async () => {
+    it('should index the doc correctly', async () => {
       const isInitializedSpy = jest
         .spyOn(securityWorkflowInsightsService, 'isInitialized', 'get')
         .mockResolvedValueOnce([undefined, undefined]);
 
-      await securityWorkflowInsightsService.create();
+      await securityWorkflowInsightsService.start({ esClient });
+      const insight = getDefaultInsight();
+      await securityWorkflowInsightsService.create(insight);
 
+      // ensure it waits for initialization first
       expect(isInitializedSpy).toHaveBeenCalledTimes(1);
+      // indexes the doc
+      expect(esClient.index).toHaveBeenCalledTimes(1);
+      expect(esClient.index).toHaveBeenCalledWith({
+        index: DATA_STREAM_NAME,
+        body: insight,
+      });
     });
   });
 
   describe('update', () => {
-    it('should wait for initialization', async () => {
+    it('should update the doc correctly', async () => {
       const isInitializedSpy = jest
         .spyOn(securityWorkflowInsightsService, 'isInitialized', 'get')
         .mockResolvedValueOnce([undefined, undefined]);
 
-      await securityWorkflowInsightsService.update();
+      await securityWorkflowInsightsService.start({ esClient });
+      const insightId = 'some-insight-id';
+      const insight = getDefaultInsight();
+      await securityWorkflowInsightsService.update(insightId, insight);
 
+      // ensure it waits for initialization first
       expect(isInitializedSpy).toHaveBeenCalledTimes(1);
+      // updates the doc
+      expect(esClient.update).toHaveBeenCalledTimes(1);
+      expect(esClient.update).toHaveBeenCalledWith({
+        index: DATA_STREAM_NAME,
+        id: insightId,
+        body: { doc: insight },
+      });
     });
   });
 
   describe('fetch', () => {
-    it('should wait for initialization', async () => {
+    it('should fetch the docs with the correct params', async () => {
       const isInitializedSpy = jest
         .spyOn(securityWorkflowInsightsService, 'isInitialized', 'get')
         .mockResolvedValueOnce([undefined, undefined]);
 
-      await securityWorkflowInsightsService.fetch();
+      await securityWorkflowInsightsService.start({ esClient });
+      const searchParams: SearchParams = {
+        size: 50,
+        from: 50,
+        ids: ['id1', 'id2'],
+        categories: [Category.Endpoint],
+        types: [DefendInsightType.Enum.incompatible_antivirus],
+        sourceTypes: [SourceType.LlmConnector],
+        sourceIds: ['source-id1', 'source-id2'],
+        targetTypes: [TargetType.Endpoint],
+        targetIds: ['target-id1', 'target-id2'],
+        actionTypes: [ActionType.Refreshed, ActionType.Remediated],
+      };
+      await securityWorkflowInsightsService.fetch(searchParams);
 
+      // ensure it waits for initialization first
       expect(isInitializedSpy).toHaveBeenCalledTimes(1);
+      // fetches the doc
+      expect(esClient.search).toHaveBeenCalledTimes(1);
+      expect(esClient.search).toHaveBeenCalledWith({
+        index: DATA_STREAM_NAME,
+        body: {
+          query: {
+            bool: {
+              must: [
+                {
+                  terms: {
+                    _id: ['id1', 'id2'],
+                  },
+                },
+                {
+                  terms: {
+                    categories: ['endpoint'],
+                  },
+                },
+                {
+                  terms: {
+                    types: ['incompatible_antivirus'],
+                  },
+                },
+                {
+                  terms: {
+                    'source.type': ['llm-connector'],
+                  },
+                },
+                {
+                  terms: {
+                    'source.id': ['source-id1', 'source-id2'],
+                  },
+                },
+                {
+                  terms: {
+                    'target.type': ['endpoint'],
+                  },
+                },
+                {
+                  terms: {
+                    'target.id': ['target-id1', 'target-id2'],
+                  },
+                },
+                {
+                  terms: {
+                    'action.type': ['refreshed', 'remediated'],
+                  },
+                },
+              ],
+            },
+          },
+          size: searchParams.size,
+          from: searchParams.from,
+        },
+      });
     });
   });
 });
