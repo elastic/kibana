@@ -158,7 +158,7 @@ export const GridPanel = forwardRef<
             const panel = allPanels[panelId];
             if (!ref || !panel) return;
 
-            const sortedKeys = getKeysInOrder(gridLayout[rowIndex]);
+            const sortedKeys = getKeysInOrder(gridLayout[rowIndex].panels);
             const currentPanelPosition = sortedKeys.indexOf(panelId);
             const sortedKeysBefore = sortedKeys.slice(0, currentPanelPosition);
             const responsiveGridRowStart = sortedKeysBefore.reduce(

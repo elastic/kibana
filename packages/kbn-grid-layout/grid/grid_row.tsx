@@ -18,6 +18,7 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import { DragPreview } from './drag_preview';
 import { GridPanel } from './grid_panel';
 import { GridLayoutStateManager, GridRowData, PanelInteractionEvent } from './types';
+import { getKeysInOrder } from './utils/resolve_grid_row';
 
 export const GridRow = forwardRef<
   HTMLDivElement,
@@ -40,7 +41,9 @@ export const GridRow = forwardRef<
     gridRef
   ) => {
     const currentRow = gridLayoutStateManager.gridLayout$.value[rowIndex];
-    const [panelIds, setPanelIds] = useState<string[]>(Object.keys(currentRow.panels));
+    const [panelIds, setPanelIds] = useState<string[]>(
+      Object.keys(getKeysInOrder(currentRow.panels))
+    );
     const [rowTitle, setRowTitle] = useState<string>(currentRow.title);
     const [isCollapsed, setIsCollapsed] = useState<boolean>(currentRow.isCollapsed);
 
@@ -157,7 +160,7 @@ export const GridRow = forwardRef<
               return {
                 title: gridLayout[rowIndex].title,
                 isCollapsed: gridLayout[rowIndex].isCollapsed,
-                panelIds: Object.keys(gridLayout[rowIndex].panels),
+                panelIds: Object.keys(getKeysInOrder(gridLayout[rowIndex].panels)),
               };
             }),
             pairwise()
