@@ -45,7 +45,6 @@
     "@kbn/core-http-browser",
     "@kbn/core-notifications-browser",
     "@kbn/rison",
-    "@kbn/core-http-router-server-internal",
     "@kbn/licensing-plugin",
     "@kbn/rule-registry-plugin",
     "@kbn/encrypted-saved-objects-plugin",
@@ -105,7 +104,9 @@
     "@kbn/ebt-tools",
     "@kbn/alerting-types",
     "@kbn/core-chrome-browser",
-    "@kbn/index-lifecycle-management-common-shared"
+    "@kbn/core-rendering-browser",
+    "@kbn/index-lifecycle-management-common-shared",
+    "@kbn/core-http-server-utils"
   ],
   "exclude": ["target/**/*"]
 }

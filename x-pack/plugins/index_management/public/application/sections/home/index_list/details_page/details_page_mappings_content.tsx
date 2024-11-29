@@ -63,6 +63,8 @@ import { SemanticTextBanner } from './semantic_text_banner';
 import { TrainedModelsDeploymentModal } from './trained_models_deployment_modal';
 import { parseMappings } from '../../../../shared/parse_mappings';
 
+const isInferencePreconfigured = (inferenceId: string) => inferenceId.startsWith('.');
+
 export const DetailsPageMappingsContent: FunctionComponent<{
   index: Index;
   data: string;
@@ -235,7 +237,8 @@ export const DetailsPageMappingsContent: FunctionComponent<{
               .filter(
                 (inferenceId: string) =>
                   inferenceToModelIdMap?.[inferenceId].trainedModelId && // third-party inference models don't have trainedModelId
-                  !inferenceToModelIdMap?.[inferenceId].isDeployed
+                  !inferenceToModelIdMap?.[inferenceId].isDeployed &&
+                  !isInferencePreconfigured(inferenceId)
               );
         setHasSavedFields(true);
         if (inferenceIdsInPendingList.length === 0) {

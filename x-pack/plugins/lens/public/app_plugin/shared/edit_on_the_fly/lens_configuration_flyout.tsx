@@ -30,6 +30,7 @@ import {
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { ESQLLangEditor } from '@kbn/esql/public';
 import { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
+import type { TypedLensSerializedState } from '../../../react_embeddable/types';
 import { buildExpression } from '../../../editor_frame_service/editor_frame/expression_helpers';
 import { MAX_NUM_OF_COLUMNS } from '../../../datasources/text_based/utils';
 import {
@@ -38,7 +39,6 @@ import {
   onActiveDataChange,
   useLensDispatch,
 } from '../../../state_management';
-import type { TypedLensByValueInput } from '../../../embeddable/embeddable_component';
 import {
   EXPRESSION_BUILD_ERROR_ID,
   extractReferencesFromState,
@@ -67,20 +67,19 @@ export function LensEditConfigurationFlyout({
   saveByRef,
   savedObjectId,
   updateByRefInput,
-  output$,
+  dataLoading$,
   lensAdapters,
   navigateToLensEditor,
   displayFlyoutHeader,
   canEditTextBasedQuery,
   isNewPanel,
-  deletePanel,
   hidesSuggestions,
-  onApplyCb,
-  onCancelCb,
+  onApply: onApplyCallback,
+  onCancel: onCancelCallback,
   hideTimeFilterInfo,
 }: EditConfigPanelProps) {
   const euiTheme = useEuiTheme();
-  const previousAttributes = useRef<TypedLensByValueInput['attributes']>(attributes);
+  const previousAttributes = useRef<TypedLensSerializedState['attributes']>(attributes);
   const previousAdapters = useRef<Partial<DefaultInspectorAdapters> | undefined>(lensAdapters);
   const prevQuery = useRef<AggregateQuery | Query>(attributes.state.query);
   const [query, setQuery] = useState<AggregateQuery | Query>(attributes.state.query);
@@ -117,7 +116,11 @@ export function LensEditConfigurationFlyout({
 
   const dispatch = useLensDispatch();
   useEffect(() => {
-    const s = output$?.subscribe(() => {
+    const s = dataLoading$?.subscribe((isDataLoading) => {
+      // go thru only when the loading is complete
+      if (isDataLoading) {
+        return;
+      }
       const activeData: Record<string, Datatable> = {};
       const adaptersTables = previousAdapters.current?.tables?.tables;
       const [table] = Object.values(adaptersTables || {});
@@ -134,7 +137,7 @@ export function LensEditConfigurationFlyout({
       }
     });
     return () => s?.unsubscribe();
-  }, [dispatch, output$, layers]);
+  }, [dispatch, dataLoading$, layers]);
 
   useEffect(() => {
     const abortController = new AbortController();
@@ -217,16 +220,10 @@ export function LensEditConfigurationFlyout({
         updateByRefInput?.(savedObjectId);
       }
     }
-    // for a newly created chart, I want cancelling to also remove the panel
-    if (isNewPanel && deletePanel) {
-      deletePanel();
-    }
-    onCancelCb?.();
+    onCancelCallback?.();
     closeFlyout?.();
   }, [
     attributesChanged,
-    isNewPanel,
-    deletePanel,
     closeFlyout,
     visualization.activeId,
     savedObjectId,
@@ -235,7 +232,7 @@ export function LensEditConfigurationFlyout({
     updatePanelState,
     updateSuggestion,
     updateByRefInput,
-    onCancelCb,
+    onCancelCallback,
   ]);
 
   const textBasedMode = useMemo(
@@ -244,6 +241,9 @@ export function LensEditConfigurationFlyout({
   );
 
   const onApply = useCallback(() => {
+    if (visualization.activeId == null) {
+      return;
+    }
     const dsStates = Object.fromEntries(
       Object.entries(datasourceStates).map(([id, ds]) => {
         const dsState = ds.state;
@@ -265,7 +265,7 @@ export function LensEditConfigurationFlyout({
           activeVisualization,
         })
       : [];
-    const attrs = {
+    const attrs: TypedLensSerializedState['attributes'] = {
       ...attributes,
       state: {
         ...attributes.state,
@@ -293,18 +293,18 @@ export function LensEditConfigurationFlyout({
       trackSaveUiCounterEvents(telemetryEvents);
     }
 
-    onApplyCb?.(attrs as TypedLensByValueInput['attributes']);
+    onApplyCallback?.(attrs);
     closeFlyout?.();
   }, [
+    visualization.activeId,
+    savedObjectId,
+    closeFlyout,
+    onApplyCallback,
     datasourceStates,
     textBasedMode,
     visualization.state,
-    visualization.activeId,
     activeVisualization,
     attributes,
-    savedObjectId,
-    onApplyCb,
-    closeFlyout,
     datasourceMap,
     saveByRef,
     updateByRefInput,

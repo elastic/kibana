@@ -110,6 +110,18 @@ describe('Home page', () => {
         cy.url().should('include', '/app/apm/services/synth-node-trace-logs/overview');
       });
 
+      it('Navigates to apm when clicking on a logs only service', () => {
+        cy.intercept('GET', '/internal/entities/managed/enablement', {
+          fixture: 'eem_enabled.json',
+        }).as('getEEMStatus');
+        cy.visitKibana('/app/inventory');
+        cy.wait('@getEEMStatus');
+        cy.contains('service').click();
+        cy.contains('service-logs-only').click();
+        cy.url().should('include', '/app/apm/services/service-logs-only/overview');
+        cy.contains('Detect and resolve issues faster with deep visibility into your application');
+      });
+
       it('Navigates to hosts when clicking on a host type entity', () => {
         cy.intercept('GET', '/internal/entities/managed/enablement', {
           fixture: 'eem_enabled.json',
@@ -205,16 +217,16 @@ describe('Home page', () => {
         cy.intercept('GET', '/internal/entities/managed/enablement', {
           fixture: 'eem_enabled.json',
         }).as('getEEMStatus');
+        cy.intercept('GET', '/internal/inventory/entities?**').as('getEntities');
         cy.visitKibana('/app/inventory');
         cy.wait('@getEEMStatus');
         cy.contains('container');
         cy.getByTestSubj('inventoryGroupTitle_entity.type_container').click();
+        cy.wait('@getEntities');
+        // cy.getByTestSubj('inventoryEntityActionsButton').click();
         cy.getByTestSubj('inventoryEntityActionsButton-foo').click();
-        cy.getByTestSubj('inventoryEntityActionOpenInDiscover').click();
-        cy.url().should(
-          'include',
-          "query:'container.id:%20foo%20AND%20entity.definition_id%20:%20builtin*"
-        );
+        cy.getByTestSubj('inventoryEntityActionExploreInDiscover').click();
+        cy.url().should('include', "query:'container.id:%20%22foo%22");
       });
     });
   });

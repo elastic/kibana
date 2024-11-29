@@ -156,6 +156,7 @@ describe('Task Runner Cancel', () => {
     spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
     uiSettings: uiSettingsService,
     usageCounter: mockUsageCounter,
+    isServerless: false,
   };
 
   beforeEach(() => {

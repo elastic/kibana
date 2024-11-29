@@ -223,6 +223,7 @@ describe('Task Runner', () => {
       spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
       uiSettings: uiSettingsService,
       usageCounter: mockUsageCounter,
+      isServerless: false,
     };
 
     describe(`using ${label} for alert indices`, () => {
@@ -410,6 +411,7 @@ describe('Task Runner', () => {
           elasticsearchClientPromise: Promise.resolve(clusterClient),
           dataStreamAdapter: getDataStreamAdapter({ useDataStreamForAlerts }),
           elasticsearchAndSOAvailability$,
+          isServerless: false,
         });
         elasticsearchAndSOAvailability$.next(true);
 
@@ -542,6 +544,7 @@ describe('Task Runner', () => {
           elasticsearchClientPromise: Promise.resolve(clusterClient),
           dataStreamAdapter: getDataStreamAdapter({ useDataStreamForAlerts }),
           elasticsearchAndSOAvailability$,
+          isServerless: false,
         });
         elasticsearchAndSOAvailability$.next(true);
 
@@ -588,7 +591,7 @@ describe('Task Runner', () => {
 
         expect(clusterClient.bulk).toHaveBeenCalledWith({
           index: '.alerts-test.alerts-default',
-          refresh: true,
+          refresh: 'wait_for',
           require_alias: !useDataStreamForAlerts,
           body: [
             {
