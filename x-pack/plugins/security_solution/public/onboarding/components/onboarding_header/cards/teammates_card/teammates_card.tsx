@@ -7,8 +7,8 @@
 
 import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { OnboardingHeaderCardId } from '../../../constants';
-import { useOnboardingService } from '../../../../hooks/use_onboarding_service';
+import { OnboardingHeaderCardId } from '../../constants';
+import { useOnboardingService } from '../../../hooks/use_onboarding_service';
 import { LinkCard } from '../common/link_card';
 import teammatesImage from './images/teammates_card.png';
 import darkTeammatesImage from './images/teammates_card_dark.png';
