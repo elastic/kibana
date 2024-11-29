@@ -43,14 +43,12 @@ export const buildMutedRulesFilter = (
   return mutedRulesFilterQuery;
 };
 
-export const buildEntityFlyoutPreviewQuery = (
+export const buildGenericEntityFlyoutPreviewQuery = (
   field: string,
   queryValue?: string,
   status?: string,
-  queryType?: 'Misconfiguration' | 'Vulnerability'
+  queryField?: string
 ) => {
-  const queryField =
-    queryType === 'Misconfiguration' ? 'result.evaluation' : 'vulnerability.severity';
   return {
     bool: {
       filter: [
@@ -66,7 +64,7 @@ export const buildEntityFlyoutPreviewQuery = (
             minimum_should_match: 1,
           },
         },
-        status && queryType
+        status && queryField
           ? {
               bool: {
                 should: [
@@ -83,6 +81,26 @@ export const buildEntityFlyoutPreviewQuery = (
       ].filter(Boolean),
     },
   };
+};
+
+// Higher-order function for Misconfiguration
+export const buildMisconfigurationEntityFlyoutPreviewQuery = (
+  field: string,
+  queryValue?: string,
+  status?: string
+) => {
+  const queryField = 'result.evaluation';
+  return buildGenericEntityFlyoutPreviewQuery(field, queryValue, status, queryField);
+};
+
+// Higher-order function for Vulnerability
+export const buildVulnerabilityEntityFlyoutPreviewQuery = (
+  field: string,
+  queryValue?: string,
+  status?: string
+) => {
+  const queryField = 'vulnerability.severity';
+  return buildGenericEntityFlyoutPreviewQuery(field, queryValue, status, queryField);
 };
 
 export const buildEntityAlertsQuery = (

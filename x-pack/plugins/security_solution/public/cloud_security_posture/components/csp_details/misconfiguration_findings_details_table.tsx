@@ -14,6 +14,7 @@ import {
   MISCONFIGURATION_STATUS,
   type CspFinding,
   type CspFindingResult,
+  buildMisconfigurationEntityFlyoutPreviewQuery,
 } from '@kbn/cloud-security-posture-common';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
@@ -29,7 +30,6 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import { useGetNavigationUrlParams } from '@kbn/cloud-security-posture/src/hooks/use_get_navigation_url_params';
 import { SecurityPageName } from '@kbn/deeplinks-security';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
-import { buildEntityFlyoutPreviewQuery } from '@kbn/cloud-security-posture-common/utils/helpers';
 import { SecuritySolutionLinkAnchor } from '../../../common/components/links';
 
 type MisconfigurationFindingDetailFields = Pick<CspFinding, 'result' | 'rule' | 'resource'>;
@@ -96,7 +96,7 @@ export const MisconfigurationFindingsDetailsTable = memo(
     const [currentFilter, setCurrentFilter] = useState<string>('');
 
     const { data } = useMisconfigurationFindings({
-      query: buildEntityFlyoutPreviewQuery(field, value, currentFilter, 'Misconfiguration'),
+      query: buildMisconfigurationEntityFlyoutPreviewQuery(field, value, currentFilter),
       sort: [],
       enabled: true,
       pageSize: 1,

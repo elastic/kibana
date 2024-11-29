@@ -10,7 +10,7 @@ import type { Criteria, EuiBasicTableColumn } from '@elastic/eui';
 import { EuiSpacer, EuiPanel, EuiText, EuiBasicTable, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
-  buildEntityFlyoutPreviewQuery,
+  buildVulnerabilityEntityFlyoutPreviewQuery,
   type VulnSeverity,
 } from '@kbn/cloud-security-posture-common';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
@@ -58,7 +58,7 @@ export const VulnerabilitiesFindingsDetailsTable = memo(({ value }: { value: str
   const [currentFilter, setCurrentFilter] = useState<string>('');
 
   const { data } = useVulnerabilitiesFindings({
-    query: buildEntityFlyoutPreviewQuery('host.name', value, currentFilter, 'Vulnerability'),
+    query: buildVulnerabilityEntityFlyoutPreviewQuery('host.name', value, currentFilter),
     sort: [],
     enabled: true,
     pageSize: 1,
