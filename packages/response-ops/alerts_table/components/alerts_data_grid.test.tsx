@@ -14,14 +14,13 @@ import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { AlertsDataGrid } from './alerts_data_grid';
 import { AlertsDataGridProps, BulkActionsState } from '../types';
 import { AdditionalContext, RenderContext } from '../types';
-import { EuiButtonIcon, EuiDataGridColumnCellAction, EuiFlexItem } from '@elastic/eui';
+import { EuiButton, EuiButtonIcon, EuiDataGridColumnCellAction, EuiFlexItem } from '@elastic/eui';
 import { bulkActionsReducer } from '../reducers/bulk_actions_reducer';
 import { getJsDomPerformanceFix } from '../utils/test';
 import { useCaseViewNavigation } from '../hooks/use_case_view_navigation';
 import { act } from 'react-dom/test-utils';
 import { AlertsTableContextProvider } from '../contexts/alerts_table_context';
 import {
-  mockDataGridProps,
   mockRenderContext,
   mockColumns,
   mockAlerts,
@@ -59,6 +58,41 @@ export type TestAlertsDataGridProps = Partial<Omit<BaseAlertsDataGridProps, 'ren
 };
 
 const queryClient = new QueryClient(testQueryClientConfig);
+
+export const mockDataGridProps: Partial<BaseAlertsDataGridProps> = {
+  pageSizeOptions: [1, 10, 20, 50, 100],
+  leadingControlColumns: [],
+  trailingControlColumns: [],
+  visibleColumns: mockColumns.map((c) => c.id),
+  'data-test-subj': 'testTable',
+  onToggleColumn: jest.fn(),
+  onResetColumns: jest.fn(),
+  onChangeVisibleColumns: jest.fn(),
+  query: {},
+  sort: [],
+  alertsQuerySnapshot: { request: [], response: [] },
+  onSortChange: jest.fn(),
+  onChangePageIndex: jest.fn(),
+  onChangePageSize: jest.fn(),
+  getBulkActions: () => [
+    {
+      id: 0,
+      items: [
+        {
+          label: 'Fake Bulk Action',
+          key: 'fakeBulkAction',
+          'data-test-subj': 'fake-bulk-action',
+          disableOnQuery: false,
+          onClick: () => {},
+        },
+      ],
+    },
+  ],
+  fieldsBrowserOptions: {
+    createFieldButton: () => <EuiButton data-test-subj={FIELD_BROWSER_CUSTOM_CREATE_BTN_TEST_ID} />,
+  },
+  casesConfiguration: { featureId: 'test-feature-id', owner: ['cases'] },
+};
 
 describe('AlertsDataGrid', () => {
   const useCaseViewNavigationMock = useCaseViewNavigation as jest.Mock;
