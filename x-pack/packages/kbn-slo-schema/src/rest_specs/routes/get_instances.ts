@@ -17,6 +17,7 @@ const getSLOInstancesParamsSchema = t.type({
       afterKey: t.string,
       size: t.string,
       excludeStale: toBooleanRt,
+      remoteName: t.string,
     }),
   ]),
 });

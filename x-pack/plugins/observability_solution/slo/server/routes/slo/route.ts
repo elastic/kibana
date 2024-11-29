@@ -607,14 +607,17 @@ const getSLOInstancesRoute = createSloServerRoute({
     },
   },
   params: getSLOInstancesParamsSchema,
-  handler: async ({ context, params, logger, plugins }) => {
+  handler: async ({ context, params, request, logger, plugins }) => {
     await assertPlatinumLicense(plugins);
+    const spaceId = await getSpaceId(plugins, request);
 
     const soClient = (await context.core).savedObjects.client;
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
     const settings = await getSloSettings(soClient);
     const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
-    const getSLOInstances = new GetSLOInstances(repository, esClient, settings);
+    const definitionClient = new SloDefinitionClient(repository, esClient, logger);
+
+    const getSLOInstances = new GetSLOInstances(definitionClient, esClient, settings, spaceId);
 
     return await executeWithErrorHandler(() =>
       getSLOInstances.execute(params.path.id, params.query ?? {})

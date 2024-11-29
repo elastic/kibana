@@ -73,6 +73,7 @@ export const sloKeys = {
     search?: string;
     afterKey?: string;
     excludeStale?: boolean;
+    remoteName?: string;
   }) => [...sloKeys.all, 'fetch_slo_instances', params] as const,
 };
 

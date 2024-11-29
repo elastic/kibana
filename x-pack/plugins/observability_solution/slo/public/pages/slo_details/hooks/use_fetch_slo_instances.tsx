@@ -15,6 +15,7 @@ interface Params {
   groupingKey?: string;
   afterKey?: string;
   search?: string;
+  remoteName?: string;
 }
 
 interface UseFetchSloInstancesResponse {
@@ -28,17 +29,18 @@ export function useFetchSloInstances({
   groupingKey,
   afterKey,
   search,
+  remoteName,
 }: Params): UseFetchSloInstancesResponse {
   const { sloClient } = usePluginContext();
 
   const { isLoading, isError, data } = useQuery({
-    queryKey: sloKeys.instances({ sloId, groupingKey, afterKey, search }),
+    queryKey: sloKeys.instances({ sloId, groupingKey, afterKey, search, remoteName }),
     queryFn: async ({ signal }) => {
       try {
         return await sloClient.fetch(`GET /internal/observability/slos/{id}/_instances`, {
           params: {
             path: { id: sloId },
-            query: { search, groupingKey, afterKey, excludeStale: true },
+            query: { search, groupingKey, afterKey, excludeStale: true, remoteName },
           },
           signal,
         });

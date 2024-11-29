@@ -10,22 +10,23 @@ import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { ALL_VALUE, GetSLOInstancesParams, GetSLOInstancesResponse } from '@kbn/slo-schema';
 import { SLO_SUMMARY_DESTINATION_INDEX_NAME } from '../../common/constants';
 import { SLODefinition, SLOSettings } from '../domain/models';
-import { SLORepository } from './slo_repository';
+import { SloDefinitionClient } from './slo_definition_client';
 
 const DEFAULT_SIZE = 100;
 
 export class GetSLOInstances {
   constructor(
-    private repository: SLORepository,
+    private definitionClient: SloDefinitionClient,
     private esClient: ElasticsearchClient,
-    private sloSettings: SLOSettings
+    private sloSettings: SLOSettings,
+    private spaceId: string
   ) {}
 
   public async execute(
     sloId: string,
     params: GetSLOInstancesParams
   ): Promise<GetSLOInstancesResponse> {
-    const slo = await this.repository.findById(sloId);
+    const { slo } = await this.definitionClient.execute(sloId, this.spaceId, params?.remoteName);
 
     const groupingKeys = [slo.groupBy].flat();
     if (groupingKeys.includes(ALL_VALUE)) {
@@ -40,7 +41,9 @@ export class GetSLOInstances {
       unknown,
       Record<string, AggregationsCompositeAggregate>
     >({
-      index: SLO_SUMMARY_DESTINATION_INDEX_NAME,
+      index: params?.remoteName
+        ? `${params.remoteName}:${SLO_SUMMARY_DESTINATION_INDEX_NAME}`
+        : SLO_SUMMARY_DESTINATION_INDEX_NAME,
       ...generateQuery(slo, params, groupingKeys, this.sloSettings),
     });
 
