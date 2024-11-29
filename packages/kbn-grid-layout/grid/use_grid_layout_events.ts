@@ -18,40 +18,36 @@ const MAX_SPEED = 150;
 
 const scrollOnInterval = (direction: 'up' | 'down') => {
   let count = 0;
-  let slowDown = false;
+  let currentSpeed = MIN_SPEED;
   let maxSpeed = MIN_SPEED;
-  let speed = MIN_SPEED;
-  let turnAroundPoint = -1;
+  let turnAroundPoint: number | undefined;
 
-  // let scrollInProgress = false;
-  // const element = document.getElementsByClassName('react-draggable-dragging')[0] as HTMLElement;
   const interval = setInterval(() => {
+    /**
+     * Since "smooth" scrolling on an interval is jittery on Chrome, we are manually creating
+     * an "ease" effect via the parabola formula `y = a(x - h)^2 + k`
+     *
+     * Scrolling slowly speeds up as the user drags, and it slows down again as they approach the
+     * top and/or bottom of the screen.
+     */
     const nearTop = direction === 'up' && scrollY < window.innerHeight;
     const nearBottom =
       direction === 'down' &&
       window.innerHeight + window.scrollY > document.body.scrollHeight - window.innerHeight;
-    if (!slowDown && (nearTop || nearBottom)) {
-      slowDown = true;
-      maxSpeed = speed;
+    if (!turnAroundPoint && (nearTop || nearBottom)) {
+      // reverse the direction of the parabola
+      maxSpeed = currentSpeed;
       turnAroundPoint = count;
     }
 
-    // calculate the speed based on how long the interval has been going to create an ease effect
-    // via the parabola formula `y = a(x - h)^2 + k`
-    // - the starting speed is k = 50
-    // - the rate at which the speed increases is controlled by a = 0.1
-    speed = slowDown
-      ? Math.max(-3 * (count - turnAroundPoint) ** 2 + maxSpeed, MIN_SPEED)
-      : Math.min(0.1 * count ** 2 + MIN_SPEED, MAX_SPEED);
-
+    currentSpeed = turnAroundPoint
+      ? Math.max(-3 * (count - turnAroundPoint) ** 2 + maxSpeed, MIN_SPEED) // slow down fast
+      : Math.min(0.1 * count ** 2 + MIN_SPEED, MAX_SPEED); // speed up slowly
     window.scrollBy({
-      top: direction === 'down' ? speed : -speed,
+      top: direction === 'down' ? currentSpeed : -currentSpeed,
     });
 
-    // if near the top or bottom of the screen, start slowing down by decrementing count; otherwise,
-    // if we're not at max speed yet, increment count
-
-    count++;
+    count++; // increase the counter to increase the time interval used in the parabola formula
   }, 60);
   return interval;
 };
