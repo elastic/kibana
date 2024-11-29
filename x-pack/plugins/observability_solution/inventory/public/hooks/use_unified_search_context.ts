@@ -13,13 +13,14 @@ import useEffectOnce from 'react-use/lib/useEffectOnce';
 import deepEqual from 'fast-deep-equal';
 import { i18n } from '@kbn/i18n';
 import { useKibanaQuerySettings } from '@kbn/observability-shared-plugin/public';
-import { useAdHocInventoryDataView } from './use_adhoc_inventory_data_view';
+import { ENTITIES_LATEST_ALIAS } from '../../common/entities';
+import { useAdHocDataView } from './use_adhoc_data_view';
 import { useUnifiedSearchUrl } from './use_unified_search_url';
 import { useKibana } from './use_kibana';
 
 function useUnifiedSearch() {
   const [isControlPanelsInitiated, setIsControlPanelsInitiated] = useState(false);
-  const { dataView } = useAdHocInventoryDataView();
+  const { dataView } = useAdHocDataView(ENTITIES_LATEST_ALIAS);
   const [refreshSubject$] = useState<Subject<void>>(new Subject());
   const { searchState, setSearchState } = useUnifiedSearchUrl();
   const kibanaQuerySettings = useKibanaQuerySettings();
