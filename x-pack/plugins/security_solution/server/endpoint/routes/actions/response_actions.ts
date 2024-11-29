@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { responseActionRequestHandler } from './response_actions_utils';
+import { responseActionRequestHandler } from './response_actions_handler';
 import {
   EndpointActionGetFileSchema,
   ExecuteActionRequestSchema,

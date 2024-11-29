@@ -28,7 +28,9 @@ import type {
 export type ISOLATION_ACTIONS = 'isolate' | 'unisolate';
 
 /** The output provided by some of the Endpoint responses */
-export interface ActionResponseOutput<TOutputContent = AgentTypeMapping['endpoint']['output']> {
+export interface ActionResponseOutput<
+  TOutputContent = ActionDetailsAgentTypeMapping['endpoint']['output']
+> {
   type: 'json' | 'text';
   content: TOutputContent;
 }
@@ -400,7 +402,7 @@ export interface ActionDetailsAgentState {
   completedAt: string | undefined;
 }
 
-export interface AgentTypeMapping {
+export interface ActionDetailsAgentTypeMapping {
   endpoint: {
     output: EndpointActionResponseDataOutput;
     parameters: EndpointActionDataParameterTypes;
@@ -409,27 +411,15 @@ export interface AgentTypeMapping {
     output: CrowdStrikeActionResponseDataOutput;
     parameters: CrowdStrikeActionDataParameterTypes;
   };
-  default: {
-    output: EndpointActionResponseDataOutput;
-    parameters: EndpointActionDataParameterTypes;
-  };
+  // sentinelone: {
+  //   output: SentinelOneActionResponseDataOutput;
+  //   parameters: SentinelOneActionDataParameterTypes;
+  // };
 }
 
-// type OutputContentByAgent<TAgentType> = TAgentType extends 'endpoint'
-//   ? EndpointActionResponseDataOutput
-//   : TAgentType extends 'crowdstrike'
-//   ? CrowdStrikeActionResponseDataOutput
-//   : EndpointActionResponseDataOutput;
-//
-// type ParametersByAgent<TAgentType> = TAgentType extends 'endpoint'
-//   ? EndpointActionDataParameterTypes
-//   : TAgentType extends 'crowdstrike'
-//   ? CrowdStrikeActionDataParameterTypes
-//   : EndpointActionDataParameterTypes;
-
 export interface ActionDetails<
-  TOutputContent = AgentTypeMapping['endpoint']['output'],
-  TParameters = AgentTypeMapping['endpoint']['parameters']
+  TOutputContent = ActionDetailsAgentTypeMapping['endpoint']['output'],
+  TParameters = ActionDetailsAgentTypeMapping['endpoint']['parameters']
 > {
   /**
    * The action ID. This is a legacy property action and should no longer be used. Only here for

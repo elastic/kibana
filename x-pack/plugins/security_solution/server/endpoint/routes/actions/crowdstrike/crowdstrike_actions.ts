@@ -6,7 +6,6 @@
  */
 
 import { RunScriptActionRequestSchema } from '../../../../../common/api/endpoint/actions/response_actions/crowdstrike/run_script';
-import type { CrowdStrikeActionsRunScriptParameters } from '../../../../../common/endpoint/types/crowdstrike';
 import { CROWDSTRIKE_RUN_SCRIPT_ROUTE } from '../../../../../common/endpoint/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import type { EndpointAppContext } from '../../../types';
@@ -40,10 +39,7 @@ export function registerCrowdstrikeActionRoutes(
       withEndpointAuthz(
         { all: ['canWriteExecuteOperations'] },
         logger,
-        crowdStrikeActionRequestHandler<CrowdStrikeActionsRunScriptParameters>(
-          endpointContext,
-          'runscript'
-        )
+        crowdStrikeActionRequestHandler(endpointContext, 'runscript')
       )
     );
 }

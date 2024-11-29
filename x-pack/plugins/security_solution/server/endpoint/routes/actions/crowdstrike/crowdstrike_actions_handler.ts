@@ -6,6 +6,7 @@
  */
 
 import type { RequestHandler } from '@kbn/core/server';
+import type { CrowdstrikeActionsRequestBody } from '../../../../../common/api/endpoint/actions/response_actions/crowdstrike';
 import type { RunScriptActionRequestBody } from '../../../../../common/api/endpoint/actions/response_actions/crowdstrike/run_script';
 import { CustomHttpRequestError } from '../../../../utils/custom_http_request_error';
 import type { SecuritySolutionRequestHandlerContext } from '../../../../types';
@@ -19,18 +20,22 @@ import { createBaseActionRequestHandler } from '../base_response_actions_handler
 import type { ResponseActionsRequestBody } from '../../../../../common/api/endpoint';
 import type { ResponseActionsClient } from '../../../services';
 import type {
+  EDRActionsApiCommandNames,
   ResponseActionAgentType,
   ResponseActionsApiCommandNames,
 } from '../../../../../common/endpoint/service/response_actions/constants';
-import type { ActionDetails, AgentTypeMapping } from '../../../../../common/endpoint/types';
+import type {
+  ActionDetails,
+  ActionDetailsAgentTypeMapping,
+} from '../../../../../common/endpoint/types';
 
 export function crowdStrikeActionRequestHandler<T extends CrowdStrikeActionDataParameterTypes>(
   endpointContext: EndpointAppContext,
-  command: ResponseActionsApiCommandNames
+  command: EDRActionsApiCommandNames<'crowdstrike'>
 ): RequestHandler<
   unknown,
   unknown,
-  ResponseActionsRequestBody,
+  CrowdstrikeActionsRequestBody,
   SecuritySolutionRequestHandlerContext
 > {
   const isCrowdstrikeFeatureEnabled = (
@@ -43,7 +48,7 @@ export function crowdStrikeActionRequestHandler<T extends CrowdStrikeActionDataP
     );
   };
 
-  return createBaseActionRequestHandler(
+  return createBaseActionRequestHandler<'crowdstrike'>(
     endpointContext,
     command,
     isCrowdstrikeFeatureEnabled, // Custom validation
@@ -57,8 +62,8 @@ const handleCrowdstrikeActionCreation = async (
   responseActionsClient: ResponseActionsClient
 ): Promise<
   ActionDetails<
-    AgentTypeMapping['crowdstrike']['output'],
-    AgentTypeMapping['crowdstrike']['parameters']
+    ActionDetailsAgentTypeMapping['crowdstrike']['output'],
+    ActionDetailsAgentTypeMapping['crowdstrike']['parameters']
   >
 > => {
   // For now, use a simplified logic or extend later

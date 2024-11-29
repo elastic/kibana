@@ -9,7 +9,6 @@ import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 
 import { ScanActionRequestSchema } from '../..';
-import { RunScriptActionRequestSchema } from '../response_actions/crowdstrike/run_script';
 import { ExecuteActionRequestSchema } from '../response_actions/execute';
 import { EndpointActionGetFileSchema } from '../response_actions/get_file';
 import { IsolateRouteRequestSchema } from '../response_actions/isolate';
@@ -29,7 +28,6 @@ export const ResponseActionBodySchema = schema.oneOf([
   ExecuteActionRequestSchema.body,
   UploadActionRequestSchema.body,
   ScanActionRequestSchema.body,
-  RunScriptActionRequestSchema.body,
 ]);
 
 export type ResponseActionsRequestBody = TypeOf<typeof ResponseActionBodySchema>;

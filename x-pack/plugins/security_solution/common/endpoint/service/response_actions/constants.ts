@@ -33,6 +33,25 @@ export const RESPONSE_ACTION_API_COMMANDS_NAMES = [
 
 export type ResponseActionsApiCommandNames = (typeof RESPONSE_ACTION_API_COMMANDS_NAMES)[number];
 
+export const EDR_COMMANDS_MAPPING = {
+  endpoint: [
+    'isolate',
+    'unisolate',
+    'kill-process',
+    'suspend-process',
+    'running-processes',
+    'get-file',
+    'execute',
+    'upload',
+    'scan',
+  ] as const,
+  crowdstrike: ['isolate', 'runscript'] as const,
+  sentinel_one: [] as const,
+} as const;
+
+export type EDRActionsApiCommandNames<TAgentType extends keyof typeof EDR_COMMANDS_MAPPING> =
+  (typeof EDR_COMMANDS_MAPPING)[TAgentType][number];
+
 export const ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS: ResponseActionsApiCommandNames[] = [
   'isolate',
   // TODO: TC- Uncomment these when we go GA with automated process actions

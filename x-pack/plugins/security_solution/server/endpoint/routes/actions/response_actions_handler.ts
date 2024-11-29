@@ -13,6 +13,7 @@ import type {
 } from '../../../../common/endpoint/types';
 import type { EndpointAppContext } from '../../types';
 import type {
+  EDRActionsApiCommandNames,
   ResponseActionAgentType,
   ResponseActionsApiCommandNames,
 } from '../../../../common/endpoint/service/response_actions/constants';
@@ -31,14 +32,14 @@ import type { ResponseActionsClient } from '../../services';
 
 export function responseActionRequestHandler<T extends EndpointActionDataParameterTypes>(
   endpointContext: EndpointAppContext,
-  command: ResponseActionsApiCommandNames
+  command: EDRActionsApiCommandNames<'endpoint'>
 ): RequestHandler<
   unknown,
   unknown,
   ResponseActionsRequestBody,
   SecuritySolutionRequestHandlerContext
 > {
-  return createBaseActionRequestHandler(
+  return createBaseActionRequestHandler<'endpoint'>(
     endpointContext,
     command,
     isThirdPartyFeatureDisabled, // Feature validation

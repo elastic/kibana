@@ -6,16 +6,22 @@
  */
 
 import type { RequestHandler } from '@kbn/core/server';
+import type {
+  CrowdStrikeActionDataParameterTypes,
+  CrowdStrikeActionResponseDataOutput,
+} from '../../../../common/endpoint/types/crowdstrike';
 import type { ResponseActionsClient } from '../../services';
 import type {
   ActionDetails,
   EndpointActionDataParameterTypes,
+  EndpointActionResponseDataOutput,
 } from '../../../../common/endpoint/types';
 import type { EndpointAppContext } from '../../types';
 import type {
+  EDRActionsApiCommandNames,
   ResponseActionAgentType,
-  ResponseActionsApiCommandNames,
 } from '../../../../common/endpoint/service/response_actions/constants';
+import {} from '../../../../common/endpoint/service/response_actions/constants';
 import type { ResponseActionsRequestBody } from '../../../../common/api/endpoint';
 import { getResponseActionsClient, NormalizedExternalConnectorClient } from '../../services';
 import type { SecuritySolutionRequestHandlerContext } from '../../../types';
@@ -23,23 +29,31 @@ import { stringify } from '../../utils/stringify';
 import { errorHandler } from '../error_handler';
 import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
 import { responseActionsWithLegacyActionProperty } from '../../services/actions/constants';
+import type { CrowdstrikeActionsRequestBody } from '../../../../common/api/endpoint/actions/response_actions/crowdstrike';
 
-export function createBaseActionRequestHandler<T extends EndpointActionDataParameterTypes>(
+type SupportedActionsDetails =
+  | ActionDetails<unknown, unknown>
+  | ActionDetails<EndpointActionResponseDataOutput, EndpointActionDataParameterTypes>
+  | ActionDetails<CrowdStrikeActionResponseDataOutput, CrowdStrikeActionDataParameterTypes>;
+
+export function createBaseActionRequestHandler<
+  TAgentType extends 'endpoint' | 'sentinel_one' | 'crowdstrike'
+>(
   endpointContext: EndpointAppContext,
-  command: ResponseActionsApiCommandNames,
+  command: EDRActionsApiCommandNames<TAgentType>,
   featureValidationFn: (
     agentType: ResponseActionAgentType | undefined,
     experimentalFeatures: EndpointAppContext['experimentalFeatures']
   ) => boolean,
   actionCreationFn: (
-    command: ResponseActionsApiCommandNames,
-    body: ResponseActionsRequestBody,
+    command: EDRActionsApiCommandNames<TAgentType>,
+    body: ResponseActionsRequestBody | CrowdstrikeActionsRequestBody,
     responseActionsClient: ResponseActionsClient
-  ) => Promise<ActionDetails>
+  ) => Promise<ActionDetails<unknown, unknown>>
 ): RequestHandler<
   unknown,
   unknown,
-  ResponseActionsRequestBody,
+  ResponseActionsRequestBody | CrowdstrikeActionsRequestBody,
   SecuritySolutionRequestHandlerContext
 > {
   const logger = endpointContext.logFactory.get('responseActionsHandler');
@@ -75,7 +89,7 @@ export function createBaseActionRequestHandler<T extends EndpointActionDataParam
     );
 
     try {
-      const action: ActionDetails = await actionCreationFn(
+      const action: SupportedActionsDetails = await actionCreationFn(
         command,
         req.body,
         responseActionsClient

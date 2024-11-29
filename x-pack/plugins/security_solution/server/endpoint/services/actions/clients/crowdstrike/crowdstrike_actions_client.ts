@@ -28,7 +28,6 @@ import { stringify } from '../../../../utils/stringify';
 import { ResponseActionsClientError } from '../errors';
 import type {
   ActionDetails,
-  AgentTypeMapping,
   EndpointActionDataParameterTypes,
   EndpointActionResponseDataOutput,
   LogsEndpointAction,
@@ -305,14 +304,13 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
   public async runscript<
     TRequest = RunScriptActionRequestBody,
     TOutput = CrowdStrikeActionRunScriptOutputContent,
-    TParameters = CrowdStrikeActionsRunScriptParameters,
-    TAgentType extends keyof AgentTypeMapping = 'crowdstrike'
+    TParameters = CrowdStrikeActionsRunScriptParameters
   >(
     actionRequest: TRequest,
     options?: CommonResponseActionMethodOptions
   ): Promise<ActionDetails<TOutput, TParameters>> {
     // TODO: just a placeholder for now
-    return Promise.resolve({ output: 'runscript' }) as any as ActionDetails<TOutput, TParameters>;
+    return Promise.resolve({ output: 'runscript' }) as never as ActionDetails<TOutput, TParameters>;
   }
 
   private async completeCrowdstrikeAction(
