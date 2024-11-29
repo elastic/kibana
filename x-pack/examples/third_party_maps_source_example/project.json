@@ -1,0 +1,34 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/maps-custom-raster-source-plugin",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/public/**/*.ts",
+      "{projectRoot}/public/**/*.tsx",
+      "{projectRoot}/common/**/*.ts",
+      "{workspaceRoot}/typings/**/*",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "application",
+  "sourceRoot": "x-pack/examples/third_party_maps_source_example",
+  "implicitDependencies": [
+    "@kbn/core",
+    "@kbn/maps-plugin",
+    "@kbn/developer-examples-plugin",
+    "@kbn/data-plugin"
+  ]
+}

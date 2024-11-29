@@ -1,0 +1,30 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/content-management-content-insights-server",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/**/*.ts",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "library",
+  "sourceRoot": "packages/content-management/content_insights/content_insights_server",
+  "implicitDependencies": [
+    "@kbn/usage-collection-plugin",
+    "@kbn/core",
+    "@kbn/config-schema"
+  ]
+}

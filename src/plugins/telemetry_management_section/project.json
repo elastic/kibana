@@ -1,0 +1,42 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/telemetry-management-section-plugin",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/common/**/*",
+      "{projectRoot}/public/**/*",
+      "{workspaceRoot}/typings/**/*",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "application",
+  "sourceRoot": "src/plugins/telemetry_management_section",
+  "implicitDependencies": [
+    "@kbn/core",
+    "@kbn/usage-collection-plugin",
+    "@kbn/telemetry-plugin",
+    "@kbn/advanced-settings-plugin",
+    "@kbn/test-jest-helpers",
+    "@kbn/i18n-react",
+    "@kbn/i18n",
+    "@kbn/management-settings-section-registry",
+    "@kbn/shared-ux-utility",
+    "@kbn/management-settings-field-definition",
+    "@kbn/management-settings-types",
+    "@kbn/management-settings-components-field-row",
+    "@kbn/core-ui-settings-browser"
+  ]
+}

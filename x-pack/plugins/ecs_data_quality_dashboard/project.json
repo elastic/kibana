@@ -1,0 +1,46 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/ecs-data-quality-dashboard-plugin",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/common/**/*",
+      "{projectRoot}/server/lib/**/*",
+      "{projectRoot}/server/**/*",
+      "{projectRoot}/server/**/*.json",
+      "{workspaceRoot}/typings/**/*",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "application",
+  "sourceRoot": "x-pack/plugins/ecs_data_quality_dashboard",
+  "implicitDependencies": [
+    "@kbn/core",
+    "@kbn/core-http-server",
+    "@kbn/licensing-plugin",
+    "@kbn/core-http-request-handler-context-server",
+    "@kbn/securitysolution-io-ts-utils",
+    "@kbn/securitysolution-io-ts-types",
+    "@kbn/i18n",
+    "@kbn/core-http-router-server-mocks",
+    "@kbn/logging-mocks",
+    "@kbn/data-stream-adapter",
+    "@kbn/spaces-plugin",
+    "@kbn/core-elasticsearch-server-mocks",
+    "@kbn/core-elasticsearch-server",
+    "@kbn/core-security-common",
+    "@kbn/datemath"
+  ]
+}

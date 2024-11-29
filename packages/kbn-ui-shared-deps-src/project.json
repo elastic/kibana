@@ -1,31 +1,31 @@
 {
   "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
   "name": "@kbn/ui-shared-deps-src",
-  "implicitDependencies": [
-    "@kbn/ui-shared-deps-npm"
-  ],
   "namedInputs": {
     "src": [
-      "{projectRoot}/src/**",
-      "{projectRoot}/index.ts",
-      "{projectRoot}/webpack.config.js"
+      "{projectRoot}/**/*.ts",
+      "{projectRoot}/**/*.js",
+      "!{projectRoot}/src/entry.js",
+      "!{projectRoot}/**/*.config.js",
+      "!{projectRoot}/target/**/*"
     ]
   },
   "targets": {
     "typecheck": {
       "inputs": [
         "src",
-        "global:tsConfigs"
-      ]
-    },
-    "build": {
-      "inputs": [
-        "src"
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
       ],
       "outputs": [
-        "{workspaceRoot}/bazel-bin/packages/kbn-ui-shared-deps-src",
         "{projectRoot}/target"
       ]
     }
-  }
+  },
+  "projectType": "library",
+  "sourceRoot": "packages/kbn-ui-shared-deps-src",
+  "implicitDependencies": [
+    "@kbn/repo-info"
+  ]
 }

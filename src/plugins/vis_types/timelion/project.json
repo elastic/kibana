@@ -1,0 +1,54 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/vis-type-timelion-plugin",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/common/**/*",
+      "{projectRoot}/public/**/*",
+      "{projectRoot}/server/**/*",
+      "{projectRoot}/server/timelion.json",
+      "{projectRoot}/*.ts",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "application",
+  "sourceRoot": "src/plugins/vis_types/timelion",
+  "implicitDependencies": [
+    "@kbn/core",
+    "@kbn/visualizations-plugin",
+    "@kbn/data-plugin",
+    "@kbn/field-formats-plugin",
+    "@kbn/data-views-plugin",
+    "@kbn/expressions-plugin",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/kibana-react-plugin",
+    "@kbn/vis-default-editor-plugin",
+    "@kbn/charts-plugin",
+    "@kbn/usage-collection-plugin",
+    "@kbn/i18n",
+    "@kbn/es-query",
+    "@kbn/analytics",
+    "@kbn/i18n-react",
+    "@kbn/monaco",
+    "@kbn/config-schema",
+    "@kbn/expect",
+    "@kbn/std",
+    "@kbn/timelion-grammar",
+    "@kbn/visualization-utils",
+    "@kbn/code-editor",
+    "@kbn/react-kibana-context-render"
+  ]
+}

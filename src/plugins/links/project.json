@@ -1,0 +1,62 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/links-plugin",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/*.ts",
+      "{projectRoot}/public/**/*",
+      "{projectRoot}/common/**/*",
+      "{projectRoot}/server/**/*",
+      "{projectRoot}/public/**/*.json",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "application",
+  "sourceRoot": "src/plugins/links",
+  "implicitDependencies": [
+    "@kbn/core",
+    "@kbn/i18n",
+    "@kbn/dashboard-plugin",
+    "@kbn/embeddable-plugin",
+    "@kbn/presentation-util-plugin",
+    "@kbn/object-versioning",
+    "@kbn/config-schema",
+    "@kbn/content-management-utils",
+    "@kbn/content-management-plugin",
+    "@kbn/shared-ux-utility",
+    "@kbn/core-saved-objects-api-server",
+    "@kbn/saved-objects-plugin",
+    "@kbn/core-saved-objects-server",
+    "@kbn/saved-objects-plugin",
+    "@kbn/ui-actions-plugin",
+    "@kbn/ui-actions-enhanced-plugin",
+    "@kbn/ui-actions-plugin",
+    "@kbn/logging",
+    "@kbn/core-plugins-server",
+    "@kbn/react-kibana-mount",
+    "@kbn/analytics",
+    "@kbn/usage-collection-plugin",
+    "@kbn/visualizations-plugin",
+    "@kbn/core-mount-utils-browser",
+    "@kbn/presentation-containers",
+    "@kbn/presentation-publishing",
+    "@kbn/react-kibana-context-render",
+    "@kbn/presentation-panel-plugin",
+    "@kbn/embeddable-enhanced-plugin",
+    "@kbn/share-plugin",
+    "@kbn/es-query"
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/securitysolution-utils",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/**/*.ts",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "library",
+  "sourceRoot": "packages/kbn-securitysolution-utils",
+  "implicitDependencies": [
+    "@kbn/i18n",
+    "@kbn/esql-utils",
+    "@kbn/esql-ast"
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/security-test-endpoints-plugin",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/**/*.ts",
+      "{projectRoot}/**/*.tsx",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "application",
+  "sourceRoot": "x-pack/test/security_functional/plugins/test_endpoints",
+  "implicitDependencies": [
+    "@kbn/core",
+    "@kbn/security-plugin",
+    "@kbn/task-manager-plugin",
+    "@kbn/config-schema",
+    "@kbn/security-plugin-types-server"
+  ]
+}

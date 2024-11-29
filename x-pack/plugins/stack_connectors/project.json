@@ -1,0 +1,63 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/stack-connectors-plugin",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/__mocks__/**/*",
+      "{projectRoot}/server/**/*",
+      "{projectRoot}/server/**/*.json",
+      "{projectRoot}/common/**/*",
+      "{projectRoot}/public/**/*",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "application",
+  "sourceRoot": "x-pack/plugins/stack_connectors",
+  "implicitDependencies": [
+    "@kbn/core",
+    "@kbn/actions-plugin",
+    "@kbn/triggers-actions-ui-plugin",
+    "@kbn/config-schema",
+    "@kbn/i18n",
+    "@kbn/logging-mocks",
+    "@kbn/logging",
+    "@kbn/core-logging-server-mocks",
+    "@kbn/core-elasticsearch-client-server-mocks",
+    "@kbn/alerting-plugin",
+    "@kbn/i18n-react",
+    "@kbn/es-ui-shared-plugin",
+    "@kbn/kibana-react-plugin",
+    "@kbn/test-jest-helpers",
+    "@kbn/securitysolution-io-ts-utils",
+    "@kbn/safer-lodash-set",
+    "@kbn/dashboard-plugin",
+    "@kbn/core-http-browser",
+    "@kbn/core-saved-objects-api-server",
+    "@kbn/core-saved-objects-common",
+    "@kbn/core-http-browser-mocks",
+    "@kbn/core-saved-objects-api-server-mocks",
+    "@kbn/alerting-plugin",
+    "@kbn/securitysolution-ecs",
+    "@kbn/ui-theme",
+    "@kbn/cases-components",
+    "@kbn/code-editor-mock",
+    "@kbn/utility-types",
+    "@kbn/task-manager-plugin",
+    "@kbn/alerting-types",
+    "@kbn/alerts-ui-shared",
+    "@kbn/core-notifications-browser"
+  ]
+}

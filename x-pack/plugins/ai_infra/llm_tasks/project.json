@@ -1,0 +1,43 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/llm-tasks-plugin",
+  "namedInputs": {
+    "src": [
+      "{workspaceRoot}/typings/**/*",
+      "{projectRoot}/common/**/*",
+      "{projectRoot}/public/**/*",
+      "{workspaceRoot}/typings/**/*",
+      "{projectRoot}/public/**/*.json",
+      "{projectRoot}/server/**/*",
+      "{projectRoot}/scripts/**/*",
+      "{projectRoot}/.storybook/**/*",
+      "!{projectRoot}/target/**/*",
+      "!{projectRoot}/.storybook/**/*.js"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "application",
+  "sourceRoot": "x-pack/plugins/ai_infra/llm_tasks",
+  "implicitDependencies": [
+    "@kbn/core",
+    "@kbn/logging",
+    "@kbn/config-schema",
+    "@kbn/product-doc-common",
+    "@kbn/inference-plugin",
+    "@kbn/product-doc-base-plugin",
+    "@kbn/logging-mocks",
+    "@kbn/inference-common"
+  ]
+}

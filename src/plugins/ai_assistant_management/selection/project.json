@@ -1,0 +1,43 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/ai-assistant-management-plugin",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/common/**/*",
+      "{projectRoot}/public/**/*",
+      "{projectRoot}/server/**/*",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "application",
+  "sourceRoot": "src/plugins/ai_assistant_management/selection",
+  "implicitDependencies": [
+    "@kbn/core",
+    "@kbn/home-plugin",
+    "@kbn/kibana-react-plugin",
+    "@kbn/management-plugin",
+    "@kbn/i18n",
+    "@kbn/i18n-react",
+    "@kbn/core-chrome-browser",
+    "@kbn/typed-react-router-config",
+    "@kbn/serverless",
+    "@kbn/config-schema",
+    "@kbn/core-plugins-server",
+    "@kbn/features-plugin",
+    "@kbn/config",
+    "@kbn/doc-links"
+  ]
+}

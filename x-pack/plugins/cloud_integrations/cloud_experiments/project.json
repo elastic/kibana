@@ -1,0 +1,43 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/cloud-experiments-plugin",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/.storybook/**/*",
+      "{projectRoot}/common/**/*",
+      "{projectRoot}/public/**/*",
+      "{projectRoot}/server/**/*",
+      "{workspaceRoot}/typings/**/*",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "application",
+  "sourceRoot": "x-pack/plugins/cloud_integrations/cloud_experiments",
+  "implicitDependencies": [
+    "@kbn/core",
+    "@kbn/data-views-plugin",
+    "@kbn/usage-collection-plugin",
+    "@kbn/cloud-plugin",
+    "@kbn/config-schema",
+    "@kbn/logging",
+    "@kbn/logging-mocks",
+    "@kbn/core-plugins-browser",
+    "@kbn/core-plugins-server",
+    "@kbn/core-feature-flags-browser",
+    "@kbn/core-feature-flags-server",
+    "@kbn/config"
+  ]
+}

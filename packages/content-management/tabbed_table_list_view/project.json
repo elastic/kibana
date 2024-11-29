@@ -1,0 +1,33 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/content-management-tabbed-table-list-view",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/**/*.ts",
+      "{projectRoot}/**/*.tsx",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "library",
+  "sourceRoot": "packages/content-management/tabbed_table_list_view",
+  "implicitDependencies": [
+    "@kbn/content-management-table-list-view",
+    "@kbn/shared-ux-page-kibana-template",
+    "@kbn/content-management-table-list-view-table",
+    "@kbn/content-management-table-list-view",
+    "@kbn/content-management-table-list-view-common"
+  ]
+}

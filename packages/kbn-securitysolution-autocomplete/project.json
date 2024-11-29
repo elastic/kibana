@@ -1,0 +1,36 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/securitysolution-autocomplete",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/**/*.ts",
+      "{projectRoot}/**/*.tsx",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "library",
+  "sourceRoot": "packages/kbn-securitysolution-autocomplete",
+  "implicitDependencies": [
+    "@kbn/datemath",
+    "@kbn/es-query",
+    "@kbn/i18n",
+    "@kbn/securitysolution-io-ts-list-types",
+    "@kbn/securitysolution-list-hooks",
+    "@kbn/securitysolution-list-utils",
+    "@kbn/doc-links",
+    "@kbn/securitysolution-utils"
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/try-in-console",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/index.ts",
+      "{projectRoot}/**/*.ts",
+      "{projectRoot}/**/*.tsx",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "library",
+  "sourceRoot": "packages/kbn-try-in-console",
+  "implicitDependencies": [
+    "@kbn/core-application-browser",
+    "@kbn/i18n",
+    "@kbn/share-plugin",
+    "@kbn/console-plugin"
+  ]
+}

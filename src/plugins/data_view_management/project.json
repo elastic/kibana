@@ -1,0 +1,67 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/data-view-management-plugin",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/public/**/*",
+      "{projectRoot}/server/**/*",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "application",
+  "sourceRoot": "src/plugins/data_view_management",
+  "implicitDependencies": [
+    "@kbn/core",
+    "@kbn/data-plugin",
+    "@kbn/management-plugin",
+    "@kbn/url-forwarding-plugin",
+    "@kbn/kibana-react-plugin",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/data-view-field-editor-plugin",
+    "@kbn/data-view-editor-plugin",
+    "@kbn/unified-search-plugin",
+    "@kbn/saved-objects-management-plugin",
+    "@kbn/spaces-plugin",
+    "@kbn/i18n",
+    "@kbn/field-formats-plugin",
+    "@kbn/data-views-plugin",
+    "@kbn/i18n-react",
+    "@kbn/monaco",
+    "@kbn/field-types",
+    "@kbn/es-query",
+    "@kbn/std",
+    "@kbn/test-jest-helpers",
+    "@kbn/shared-ux-prompt-no-data-views",
+    "@kbn/shared-ux-link-redirect-app",
+    "@kbn/utility-types-jest",
+    "@kbn/config-schema",
+    "@kbn/shared-ux-router",
+    "@kbn/core-ui-settings-browser",
+    "@kbn/react-kibana-context-render",
+    "@kbn/field-utils",
+    "@kbn/no-data-page-plugin",
+    "@kbn/core-application-browser",
+    "@kbn/core-doc-links-browser",
+    "@kbn/shared-ux-utility",
+    "@kbn/shared-ux-page-analytics-no-data",
+    "@kbn/core-http-browser",
+    "@kbn/code-editor",
+    "@kbn/react-kibana-mount",
+    "@kbn/rollup",
+    "@kbn/share-plugin",
+    "@kbn/shared-ux-table-persist"
+  ]
+}

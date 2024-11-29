@@ -1,0 +1,36 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/shared-ux-file-upload",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/**/*.ts",
+      "{projectRoot}/**/*.tsx",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "library",
+  "sourceRoot": "packages/shared-ux/file/file_upload/impl",
+  "implicitDependencies": [
+    "@kbn/i18n",
+    "@kbn/ui-theme",
+    "@kbn/shared-ux-file-context",
+    "@kbn/shared-ux-file-util",
+    "@kbn/shared-ux-file-types",
+    "@kbn/utility-types-jest",
+    "@kbn/shared-ux-file-mocks",
+    "@kbn/test-jest-helpers"
+  ]
+}

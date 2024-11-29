@@ -1,0 +1,48 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/kibana-overview-plugin",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/public/**/*",
+      "{projectRoot}/common/**/*",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "application",
+  "sourceRoot": "src/plugins/kibana_overview",
+  "implicitDependencies": [
+    "@kbn/core",
+    "@kbn/navigation-plugin",
+    "@kbn/home-plugin",
+    "@kbn/newsfeed-plugin",
+    "@kbn/usage-collection-plugin",
+    "@kbn/kibana-react-plugin",
+    "@kbn/data-view-editor-plugin",
+    "@kbn/i18n",
+    "@kbn/i18n-react",
+    "@kbn/data-views-plugin",
+    "@kbn/share-plugin",
+    "@kbn/analytics",
+    "@kbn/test-jest-helpers",
+    "@kbn/shared-ux-page-kibana-template",
+    "@kbn/shared-ux-page-analytics-no-data",
+    "@kbn/shared-ux-link-redirect-app",
+    "@kbn/shared-ux-router",
+    "@kbn/shared-ux-avatar-solution",
+    "@kbn/shared-ux-utility",
+    "@kbn/react-kibana-context-render"
+  ]
+}

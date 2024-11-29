@@ -1,0 +1,45 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/visualization-ui-components",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/**/*",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "library",
+  "sourceRoot": "packages/kbn-visualization-ui-components",
+  "implicitDependencies": [
+    "@kbn/i18n",
+    "@kbn/unified-search-plugin",
+    "@kbn/utility-types",
+    "@kbn/es-query",
+    "@kbn/core-http-browser",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/data-views-plugin",
+    "@kbn/data-plugin",
+    "@kbn/core-ui-settings-browser",
+    "@kbn/core-notifications-browser",
+    "@kbn/core-doc-links-browser",
+    "@kbn/ui-theme",
+    "@kbn/coloring",
+    "@kbn/field-formats-plugin",
+    "@kbn/field-utils",
+    "@kbn/calculate-width-from-char-count",
+    "@kbn/visualization-utils",
+    "@kbn/shared-ux-button-toolbar"
+  ]
+}

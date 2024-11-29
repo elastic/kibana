@@ -1,0 +1,41 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/state-containers-examples-plugin",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/index.ts",
+      "{projectRoot}/public/**/*.ts",
+      "{projectRoot}/public/**/*.tsx",
+      "{projectRoot}/server/**/*.ts",
+      "{projectRoot}/common/**/*.ts",
+      "{workspaceRoot}/typings/**/*",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "application",
+  "sourceRoot": "examples/state_containers_examples",
+  "implicitDependencies": [
+    "@kbn/core",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/navigation-plugin",
+    "@kbn/data-plugin",
+    "@kbn/data-views-plugin",
+    "@kbn/developer-examples-plugin",
+    "@kbn/es-query",
+    "@kbn/shared-ux-router",
+    "@kbn/react-kibana-context-render"
+  ]
+}

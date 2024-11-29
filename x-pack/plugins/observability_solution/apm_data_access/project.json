@@ -1,0 +1,44 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/apm-data-access-plugin",
+  "namedInputs": {
+    "src": [
+      "{workspaceRoot}/typings/**/*",
+      "{projectRoot}/common/**/*",
+      "{projectRoot}/server/**/*",
+      "{projectRoot}/jest.config.js",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "application",
+  "sourceRoot": "x-pack/plugins/observability_solution/apm_data_access",
+  "implicitDependencies": [
+    "@kbn/config-schema",
+    "@kbn/core",
+    "@kbn/i18n",
+    "@kbn/data-plugin",
+    "@kbn/inspector-plugin",
+    "@kbn/observability-plugin",
+    "@kbn/observability-shared-plugin",
+    "@kbn/es-types",
+    "@kbn/apm-types",
+    "@kbn/core-http-server-mocks",
+    "@kbn/apm-utils",
+    "@kbn/utility-types",
+    "@kbn/elastic-agent-utils",
+    "@kbn/observability-utils-common"
+  ]
+}

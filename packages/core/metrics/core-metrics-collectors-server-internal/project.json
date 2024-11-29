@@ -1,0 +1,32 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/core-metrics-collectors-server-internal",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/**/*.ts",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "library",
+  "sourceRoot": "packages/core/metrics/core-metrics-collectors-server-internal",
+  "implicitDependencies": [
+    "@kbn/logging",
+    "@kbn/core-metrics-server",
+    "@kbn/core-elasticsearch-client-server-internal",
+    "@kbn/logging-mocks",
+    "@kbn/core-elasticsearch-client-server-mocks"
+  ]
+}

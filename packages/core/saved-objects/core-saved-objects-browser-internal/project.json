@@ -1,0 +1,36 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/core-saved-objects-browser-internal",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/**/*.ts",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "library",
+  "sourceRoot": "packages/core/saved-objects/core-saved-objects-browser-internal",
+  "implicitDependencies": [
+    "@kbn/safer-lodash-set",
+    "@kbn/core-base-browser-internal",
+    "@kbn/core-http-browser",
+    "@kbn/core-saved-objects-common",
+    "@kbn/core-saved-objects-browser",
+    "@kbn/core-saved-objects-api-server",
+    "@kbn/core-saved-objects-api-browser",
+    "@kbn/core-http-browser-mocks",
+    "@kbn/core-http-browser-internal"
+  ]
+}

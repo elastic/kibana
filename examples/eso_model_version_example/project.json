@@ -1,0 +1,41 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/eso-model-version-example",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/index.ts",
+      "{projectRoot}/common/**/*.ts",
+      "{projectRoot}/public/**/*.ts",
+      "{projectRoot}/public/**/*.tsx",
+      "{projectRoot}/server/**/*.ts",
+      "{workspaceRoot}/typings/**/*",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "application",
+  "sourceRoot": "examples/eso_model_version_example",
+  "implicitDependencies": [
+    "@kbn/core",
+    "@kbn/kibana-react-plugin",
+    "@kbn/developer-examples-plugin",
+    "@kbn/security-plugin",
+    "@kbn/shared-ux-page-kibana-template",
+    "@kbn/features-plugin",
+    "@kbn/encrypted-saved-objects-plugin",
+    "@kbn/config-schema",
+    "@kbn/spaces-plugin"
+  ]
+}

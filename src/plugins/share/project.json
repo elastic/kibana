@@ -1,0 +1,49 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/share-plugin",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/common/**/*",
+      "{projectRoot}/public/**/*",
+      "{projectRoot}/server/**/*",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "application",
+  "sourceRoot": "src/plugins/share",
+  "implicitDependencies": [
+    "@kbn/core",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/utility-types",
+    "@kbn/i18n",
+    "@kbn/i18n-react",
+    "@kbn/config-schema",
+    "@kbn/core-custom-branding-browser",
+    "@kbn/core-saved-objects-utils-server",
+    "@kbn/react-kibana-context-theme",
+    "@kbn/core-analytics-browser",
+    "@kbn/shared-ux-error-boundary",
+    "@kbn/core-chrome-browser",
+    "@kbn/shared-ux-prompt-not-found",
+    "@kbn/react-kibana-mount",
+    "@kbn/shared-ux-tabbed-modal",
+    "@kbn/core-theme-browser",
+    "@kbn/test-jest-helpers",
+    "@kbn/core-theme-browser-mocks",
+    "@kbn/core-i18n-browser-mocks",
+    "@kbn/core-notifications-browser-mocks"
+  ]
+}

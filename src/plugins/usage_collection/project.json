@@ -1,0 +1,46 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/usage-collection-plugin",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/public/**/*",
+      "{projectRoot}/server/**/*",
+      "{projectRoot}/common/**/*",
+      "{workspaceRoot}/typings/**/*",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "application",
+  "sourceRoot": "src/plugins/usage_collection",
+  "implicitDependencies": [
+    "@kbn/core",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/analytics",
+    "@kbn/config-schema",
+    "@kbn/screenshot-mode-plugin",
+    "@kbn/std",
+    "@kbn/utility-types",
+    "@kbn/i18n",
+    "@kbn/core-http-server-mocks",
+    "@kbn/analytics-collection-utils",
+    "@kbn/logging",
+    "@kbn/core-saved-objects-server",
+    "@kbn/core-test-helpers-kbn-server",
+    "@kbn/es-query",
+    "@kbn/core-saved-objects-utils-server",
+    "@kbn/core-saved-objects-api-server"
+  ]
+}

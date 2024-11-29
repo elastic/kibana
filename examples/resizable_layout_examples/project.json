@@ -1,0 +1,35 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/resizable-layout-examples-plugin",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/common/**/*",
+      "{projectRoot}/public/**/*",
+      "{projectRoot}/server/**/*",
+      "{workspaceRoot}/typings/**/*",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "application",
+  "sourceRoot": "examples/resizable_layout_examples",
+  "implicitDependencies": [
+    "@kbn/resizable-layout",
+    "@kbn/core",
+    "@kbn/i18n-react",
+    "@kbn/developer-examples-plugin",
+    "@kbn/react-kibana-context-theme"
+  ]
+}

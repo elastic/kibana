@@ -3,27 +3,41 @@
   "name": "@kbn/monaco",
   "namedInputs": {
     "src": [
-      "{projectRoot}/src/**",
-      "{projectRoot}/scripts/**",
-      "{projectRoot}/index.ts",
-      "{projectRoot}/server.ts"
+      "{projectRoot}/src/**/*",
+      "{projectRoot}/**/*.ts",
+      "{projectRoot}/src/painless/autocomplete_definitions/boolean_script_field_script_field.json",
+      "{projectRoot}/src/painless/autocomplete_definitions/common.json",
+      "{projectRoot}/src/painless/autocomplete_definitions/date_script_field.json",
+      "{projectRoot}/src/painless/autocomplete_definitions/double_script_field_script_field.json",
+      "{projectRoot}/src/painless/autocomplete_definitions/filter.json",
+      "{projectRoot}/src/painless/autocomplete_definitions/ip_script_field_script_field.json",
+      "{projectRoot}/src/painless/autocomplete_definitions/long_script_field_script_field.json",
+      "{projectRoot}/src/painless/autocomplete_definitions/processor_conditional.json",
+      "{projectRoot}/src/painless/autocomplete_definitions/score.json",
+      "{projectRoot}/src/painless/autocomplete_definitions/string_script_field_script_field.json",
+      "!{projectRoot}/target/**/*"
     ]
   },
-  "implicitDependencies": [
-    "@kbn/i18n"
-  ],
   "targets": {
-    "build": {
+    "typecheck": {
       "inputs": [
         "src",
-        "{projectRoot}/webpack.config.js"
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
       ],
       "outputs": [
-        "{workspaceRoot}/bazel-bin/packages/kbn-monaco",
         "{projectRoot}/target"
       ]
-    },
-    "typecheck": {
     }
-  }
+  },
+  "projectType": "library",
+  "sourceRoot": "packages/kbn-monaco",
+  "implicitDependencies": [
+    "@kbn/i18n",
+    "@kbn/repo-info",
+    "@kbn/ui-theme",
+    "@kbn/esql-ast",
+    "@kbn/esql-validation-autocomplete"
+  ]
 }

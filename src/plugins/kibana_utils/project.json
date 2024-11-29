@@ -1,0 +1,43 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/kibana-utils-plugin",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/common/**/*",
+      "{projectRoot}/demos/**/*",
+      "{projectRoot}/public/**/*",
+      "{projectRoot}/server/**/*",
+      "{projectRoot}/index.ts",
+      "{workspaceRoot}/typings/**/*",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "application",
+  "sourceRoot": "src/plugins/kibana_utils",
+  "implicitDependencies": [
+    "@kbn/core",
+    "@kbn/expect",
+    "@kbn/utility-types",
+    "@kbn/i18n",
+    "@kbn/utility-types-jest",
+    "@kbn/test-jest-helpers",
+    "@kbn/rison",
+    "@kbn/crypto-browser",
+    "@kbn/core-notifications-browser-mocks",
+    "@kbn/react-kibana-context-theme",
+    "@kbn/core-theme-browser"
+  ]
+}

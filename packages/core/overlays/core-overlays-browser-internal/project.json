@@ -1,0 +1,42 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/core-overlays-browser-internal",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/**/*.ts",
+      "{projectRoot}/**/*.tsx",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "library",
+  "sourceRoot": "packages/core/overlays/core-overlays-browser-internal",
+  "implicitDependencies": [
+    "@kbn/i18n-react",
+    "@kbn/core-theme-browser",
+    "@kbn/core-mount-utils-browser-internal",
+    "@kbn/core-i18n-browser",
+    "@kbn/core-ui-settings-browser",
+    "@kbn/core-overlays-browser",
+    "@kbn/core-i18n-browser-mocks",
+    "@kbn/core-ui-settings-browser-mocks",
+    "@kbn/core-mount-utils-browser",
+    "@kbn/core-theme-browser-mocks",
+    "@kbn/i18n",
+    "@kbn/react-kibana-context-render",
+    "@kbn/core-analytics-browser-mocks",
+    "@kbn/core-analytics-browser"
+  ]
+}

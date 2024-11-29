@@ -1,0 +1,58 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/vis-type-vislib-plugin",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/common/**/*",
+      "{projectRoot}/public/**/*",
+      "{projectRoot}/server/**/*",
+      "{projectRoot}/*.ts",
+      "{projectRoot}/public/fixtures/dispatch_heatmap_d3.json",
+      "{projectRoot}/public/fixtures/dispatch_heatmap_config.json",
+      "{projectRoot}/public/fixtures/dispatch_heatmap_data_point.json",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "application",
+  "sourceRoot": "src/plugins/vis_types/vislib",
+  "implicitDependencies": [
+    "@kbn/core",
+    "@kbn/charts-plugin",
+    "@kbn/data-plugin",
+    "@kbn/expressions-plugin",
+    "@kbn/visualizations-plugin",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/vis-type-gauge-plugin",
+    "@kbn/vis-type-xy-plugin",
+    "@kbn/vis-type-heatmap-plugin",
+    "@kbn/vis-default-editor-plugin",
+    "@kbn/field-formats-plugin",
+    "@kbn/usage-collection-plugin",
+    "@kbn/utility-types",
+    "@kbn/i18n",
+    "@kbn/core-execution-context-common",
+    "@kbn/analytics",
+    "@kbn/test-jest-helpers",
+    "@kbn/safer-lodash-set",
+    "@kbn/datemath",
+    "@kbn/i18n-react",
+    "@kbn/std",
+    "@kbn/ui-theme",
+    "@kbn/config-schema",
+    "@kbn/react-kibana-mount",
+    "@kbn/react-kibana-context-render"
+  ]
+}

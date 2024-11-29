@@ -1,0 +1,52 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/remote-clusters-plugin",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/__jest__/**/*",
+      "{projectRoot}/common/**/*",
+      "{projectRoot}/fixtures/**/*",
+      "{projectRoot}/public/**/*",
+      "{projectRoot}/server/**/*",
+      "{workspaceRoot}/typings/**/*",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "application",
+  "sourceRoot": "x-pack/plugins/remote_clusters",
+  "implicitDependencies": [
+    "@kbn/core",
+    "@kbn/licensing-plugin",
+    "@kbn/management-plugin",
+    "@kbn/features-plugin",
+    "@kbn/usage-collection-plugin",
+    "@kbn/cloud-plugin",
+    "@kbn/kibana-react-plugin",
+    "@kbn/es-ui-shared-plugin",
+    "@kbn/test-jest-helpers",
+    "@kbn/core-execution-context-browser-mocks",
+    "@kbn/i18n",
+    "@kbn/utility-types",
+    "@kbn/share-plugin",
+    "@kbn/core-http-browser",
+    "@kbn/analytics",
+    "@kbn/i18n-react",
+    "@kbn/config-schema",
+    "@kbn/expect",
+    "@kbn/shared-ux-router",
+    "@kbn/react-kibana-context-render"
+  ]
+}

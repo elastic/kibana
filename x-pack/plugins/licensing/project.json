@@ -1,0 +1,37 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/licensing-plugin",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/public/**/*",
+      "{projectRoot}/server/**/*",
+      "{projectRoot}/common/**/*",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "application",
+  "sourceRoot": "x-pack/plugins/licensing",
+  "implicitDependencies": [
+    "@kbn/core",
+    "@kbn/i18n-react",
+    "@kbn/utility-types",
+    "@kbn/config-schema",
+    "@kbn/std",
+    "@kbn/i18n",
+    "@kbn/logging-mocks",
+    "@kbn/react-kibana-mount"
+  ]
+}

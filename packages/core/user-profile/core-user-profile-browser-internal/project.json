@@ -1,0 +1,34 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/core-user-profile-browser-internal",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/**/*.ts",
+      "{projectRoot}/**/*.tsx",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "library",
+  "sourceRoot": "packages/core/user-profile/core-user-profile-browser-internal",
+  "implicitDependencies": [
+    "@kbn/core-user-profile-browser",
+    "@kbn/logging-mocks",
+    "@kbn/core-base-server-mocks",
+    "@kbn/logging",
+    "@kbn/core-base-browser-internal",
+    "@kbn/core-user-profile-common"
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/expression-metric-vis-plugin",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/common/**/*",
+      "{projectRoot}/public/**/*",
+      "{projectRoot}/server/**/*",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "application",
+  "sourceRoot": "src/plugins/chart_expressions/expression_metric",
+  "implicitDependencies": [
+    "@kbn/core",
+    "@kbn/expressions-plugin",
+    "@kbn/usage-collection-plugin",
+    "@kbn/field-formats-plugin",
+    "@kbn/charts-plugin",
+    "@kbn/visualizations-plugin",
+    "@kbn/inspector-plugin",
+    "@kbn/utility-types",
+    "@kbn/i18n",
+    "@kbn/coloring",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/ui-theme",
+    "@kbn/analytics",
+    "@kbn/chart-expressions-common",
+    "@kbn/react-kibana-context-render"
+  ]
+}

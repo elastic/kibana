@@ -1,0 +1,46 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/management-settings-application",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/**/*.ts",
+      "{projectRoot}/**/*.tsx",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "library",
+  "sourceRoot": "packages/kbn-management/settings/application",
+  "implicitDependencies": [
+    "@kbn/core-ui-settings-browser",
+    "@kbn/management-settings-types",
+    "@kbn/management-settings-field-definition",
+    "@kbn/management-settings-utilities",
+    "@kbn/management-settings-components-form",
+    "@kbn/i18n",
+    "@kbn/test-jest-helpers",
+    "@kbn/core-application-browser",
+    "@kbn/i18n-react",
+    "@kbn/management-settings-components-field-category",
+    "@kbn/react-kibana-context-root",
+    "@kbn/core-theme-browser-mocks",
+    "@kbn/core-i18n-browser",
+    "@kbn/core-analytics-browser-mocks",
+    "@kbn/core-ui-settings-common",
+    "@kbn/management-settings-section-registry",
+    "@kbn/core-notifications-browser",
+    "@kbn/core-chrome-browser"
+  ]
+}

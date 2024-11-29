@@ -1,0 +1,32 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/core-i18n-browser-mocks",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/**/*.ts",
+      "{projectRoot}/**/*.tsx",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "library",
+  "sourceRoot": "packages/core/i18n/core-i18n-browser-mocks",
+  "implicitDependencies": [
+    "@kbn/utility-types",
+    "@kbn/core-i18n-browser",
+    "@kbn/core-i18n-browser-internal",
+    "@kbn/i18n-react"
+  ]
+}

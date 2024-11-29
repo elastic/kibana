@@ -1,0 +1,35 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/reporting-export-types-png",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/**/*.ts",
+      "{projectRoot}/**/*.tsx",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "library",
+  "sourceRoot": "packages/kbn-reporting/export_types/png",
+  "implicitDependencies": [
+    "@kbn/reporting-common",
+    "@kbn/licensing-plugin",
+    "@kbn/screenshotting-plugin",
+    "@kbn/reporting-server",
+    "@kbn/reporting-export-types-png-common",
+    "@kbn/core",
+    "@kbn/reporting-mocks-server"
+  ]
+}

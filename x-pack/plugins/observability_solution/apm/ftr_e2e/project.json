@@ -1,0 +1,37 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/apm-ftr-e2e",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/**/*",
+      "!{projectRoot}/tmp",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "library",
+  "sourceRoot": "x-pack/plugins/observability_solution/apm/ftr_e2e",
+  "implicitDependencies": [
+    "@kbn/test",
+    "@kbn/apm-synthtrace",
+    "@kbn/apm-synthtrace-client",
+    "@kbn/dev-utils",
+    "@kbn/axe-config",
+    "@kbn/cypress-config",
+    "@kbn/apm-plugin",
+    "@kbn/ftr-common-functional-services",
+    "@kbn/ftr-common-functional-ui-services"
+  ]
+}

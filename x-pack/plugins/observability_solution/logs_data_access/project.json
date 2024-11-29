@@ -1,0 +1,49 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/logs-data-access-plugin",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/common/**/*",
+      "{projectRoot}/server/**/*",
+      "{projectRoot}/public/**/*",
+      "{projectRoot}/jest.config.js",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "application",
+  "sourceRoot": "x-pack/plugins/observability_solution/logs_data_access",
+  "implicitDependencies": [
+    "@kbn/core",
+    "@kbn/data-plugin",
+    "@kbn/data-views-plugin",
+    "@kbn/calculate-auto",
+    "@kbn/es-types",
+    "@kbn/core-http-server",
+    "@kbn/management-settings-ids",
+    "@kbn/config-schema",
+    "@kbn/core-ui-settings-common",
+    "@kbn/i18n",
+    "@kbn/core-saved-objects-server",
+    "@kbn/core-ui-settings-server",
+    "@kbn/core-ui-settings-browser",
+    "@kbn/logging",
+    "@kbn/core-saved-objects-api-server",
+    "@kbn/es-query",
+    "@kbn/use-tracked-promise",
+    "@kbn/core-application-browser",
+    "@kbn/i18n-react"
+  ]
+}

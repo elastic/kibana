@@ -1,0 +1,43 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/expressions-plugin",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/common/**/*",
+      "{projectRoot}/public/**/*",
+      "{projectRoot}/server/**/*",
+      "{projectRoot}/./index.ts",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "application",
+  "sourceRoot": "src/plugins/expressions",
+  "implicitDependencies": [
+    "@kbn/core",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/inspector-plugin",
+    "@kbn/field-formats-plugin",
+    "@kbn/logging",
+    "@kbn/utility-types",
+    "@kbn/interpreter",
+    "@kbn/i18n",
+    "@kbn/std",
+    "@kbn/core-execution-context-common",
+    "@kbn/tinymath",
+    "@kbn/panel-loader",
+    "@kbn/es-query"
+  ]
+}

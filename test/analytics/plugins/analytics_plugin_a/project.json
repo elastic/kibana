@@ -1,0 +1,32 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/analytics-plugin-a-plugin",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/index.ts",
+      "{projectRoot}/public/**/*.ts",
+      "{projectRoot}/server/**/*.ts",
+      "{workspaceRoot}/typings/**/*",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "application",
+  "sourceRoot": "test/analytics/plugins/analytics_plugin_a",
+  "implicitDependencies": [
+    "@kbn/core",
+    "@kbn/config-schema"
+  ]
+}

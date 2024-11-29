@@ -1,0 +1,33 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/eso-plugin",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/**/*.ts",
+      "{projectRoot}/**/*.tsx",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "application",
+  "sourceRoot": "x-pack/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin",
+  "implicitDependencies": [
+    "@kbn/core",
+    "@kbn/config-schema",
+    "@kbn/std",
+    "@kbn/encrypted-saved-objects-plugin",
+    "@kbn/spaces-plugin"
+  ]
+}

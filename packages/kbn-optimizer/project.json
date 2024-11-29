@@ -1,0 +1,43 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/optimizer",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/**/*.ts",
+      "{workspaceRoot}/typings/**/*",
+      "!{projectRoot}/**/__fixtures__/**/*",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "library",
+  "sourceRoot": "packages/kbn-optimizer",
+  "implicitDependencies": [
+    "@kbn/config-schema",
+    "@kbn/dev-utils",
+    "@kbn/core-ui-settings-common",
+    "@kbn/optimizer-webpack-helpers",
+    "@kbn/std",
+    "@kbn/ui-shared-deps-npm",
+    "@kbn/ui-shared-deps-src",
+    "@kbn/tooling-log",
+    "@kbn/ci-stats-reporter",
+    "@kbn/dev-cli-errors",
+    "@kbn/repo-info",
+    "@kbn/dev-cli-runner",
+    "@kbn/jest-serializers",
+    "@kbn/repo-packages"
+  ]
+}

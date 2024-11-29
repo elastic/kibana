@@ -1,0 +1,41 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/ftr-common-functional-services",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/**/*.ts",
+      "{workspaceRoot}/typings/**/*",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "library",
+  "sourceRoot": "packages/kbn-ftr-common-functional-services",
+  "implicitDependencies": [
+    "@kbn/core-saved-objects-server",
+    "@kbn/tooling-log",
+    "@kbn/es-archiver",
+    "@kbn/test",
+    "@kbn/expect",
+    "@kbn/search-types",
+    "@kbn/core-http-common",
+    "@kbn/data-plugin",
+    "@kbn/dev-cli-runner",
+    "@kbn/dev-cli-errors",
+    "@kbn/repo-info",
+    "@kbn/es",
+    "@kbn/data-views-plugin"
+  ]
+}

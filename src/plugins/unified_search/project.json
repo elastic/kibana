@@ -1,0 +1,69 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/unified-search-plugin",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/public/**/*",
+      "{projectRoot}/public/**/*.json",
+      "{projectRoot}/server/**/*",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "application",
+  "sourceRoot": "src/plugins/unified_search",
+  "implicitDependencies": [
+    "@kbn/core",
+    "@kbn/data-plugin",
+    "@kbn/data-views-plugin",
+    "@kbn/data-view-editor-plugin",
+    "@kbn/usage-collection-plugin",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/kibana-react-plugin",
+    "@kbn/field-formats-plugin",
+    "@kbn/es-query",
+    "@kbn/i18n-react",
+    "@kbn/screenshot-mode-plugin",
+    "@kbn/ui-actions-plugin",
+    "@kbn/i18n",
+    "@kbn/test-jest-helpers",
+    "@kbn/shared-ux-utility",
+    "@kbn/utility-types",
+    "@kbn/analytics",
+    "@kbn/datemath",
+    "@kbn/monaco",
+    "@kbn/field-types",
+    "@kbn/config",
+    "@kbn/config-schema",
+    "@kbn/utility-types-jest",
+    "@kbn/react-field",
+    "@kbn/ui-theme",
+    "@kbn/saved-objects-management-plugin",
+    "@kbn/esql",
+    "@kbn/esql-editor",
+    "@kbn/core-doc-links-browser",
+    "@kbn/core-lifecycle-browser",
+    "@kbn/ml-string-hash",
+    "@kbn/code-editor",
+    "@kbn/calculate-width-from-char-count",
+    "@kbn/react-kibana-context-render",
+    "@kbn/data-view-utils",
+    "@kbn/esql-utils",
+    "@kbn/esql-validation-autocomplete",
+    "@kbn/react-kibana-mount",
+    "@kbn/field-utils",
+    "@kbn/language-documentation"
+  ]
+}

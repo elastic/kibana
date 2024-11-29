@@ -1,0 +1,60 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/metrics-data-access-plugin",
+  "namedInputs": {
+    "src": [
+      "{workspaceRoot}/typings/**/*",
+      "{projectRoot}/server/**/*",
+      "{projectRoot}/common/**/*",
+      "{projectRoot}/public/**/*",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "application",
+  "sourceRoot": "x-pack/plugins/observability_solution/metrics_data_access",
+  "implicitDependencies": [
+    "@kbn/core",
+    "@kbn/core-saved-objects-api-server",
+    "@kbn/io-ts-utils",
+    "@kbn/i18n",
+    "@kbn/share-plugin",
+    "@kbn/usage-collection-plugin",
+    "@kbn/utility-types",
+    "@kbn/data-plugin",
+    "@kbn/data-views-plugin",
+    "@kbn/home-plugin",
+    "@kbn/features-plugin",
+    "@kbn/spaces-plugin",
+    "@kbn/alerting-plugin",
+    "@kbn/ml-plugin",
+    "@kbn/rule-registry-plugin",
+    "@kbn/observability-plugin",
+    "@kbn/core-http-server",
+    "@kbn/datemath",
+    "@kbn/es-types",
+    "@kbn/es-query",
+    "@kbn/kibana-react-plugin",
+    "@kbn/shared-ux-page-kibana-template",
+    "@kbn/observability-shared-plugin",
+    "@kbn/i18n-react",
+    "@kbn/logging",
+    "@kbn/core-http-request-handler-context-server",
+    "@kbn/lens-embeddable-utils",
+    "@kbn/react-kibana-context-render",
+    "@kbn/react-kibana-context-theme",
+    "@kbn/router-utils"
+  ]
+}

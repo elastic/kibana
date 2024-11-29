@@ -1,0 +1,32 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/repo-source-classifier-cli",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/**/*.ts",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "library",
+  "sourceRoot": "packages/kbn-repo-source-classifier-cli",
+  "implicitDependencies": [
+    "@kbn/dev-cli-runner",
+    "@kbn/import-resolver",
+    "@kbn/repo-source-classifier",
+    "@kbn/get-repo-files",
+    "@kbn/repo-info"
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/securitysolution-exceptions-common",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/**/*.ts",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "library",
+  "sourceRoot": "packages/kbn-securitysolution-exceptions-common",
+  "implicitDependencies": [
+    "@kbn/openapi-common",
+    "@kbn/zod-helpers",
+    "@kbn/securitysolution-lists-common",
+    "@kbn/test",
+    "@kbn/tooling-log",
+    "@kbn/core-http-common",
+    "@kbn/securitysolution-utils",
+    "@kbn/zod"
+  ]
+}

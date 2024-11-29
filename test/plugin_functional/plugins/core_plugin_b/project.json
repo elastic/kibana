@@ -1,0 +1,36 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/core-plugin-b-plugin",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/index.ts",
+      "{projectRoot}/public/**/*.ts",
+      "{projectRoot}/public/**/*.tsx",
+      "{projectRoot}/server/**/*.ts",
+      "{workspaceRoot}/typings/**/*",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "application",
+  "sourceRoot": "test/plugin_functional/plugins/core_plugin_b",
+  "implicitDependencies": [
+    "@kbn/core",
+    "@kbn/core-plugin-a-plugin",
+    "@kbn/config-schema",
+    "@kbn/shared-ux-router",
+    "@kbn/react-kibana-context-render"
+  ]
+}

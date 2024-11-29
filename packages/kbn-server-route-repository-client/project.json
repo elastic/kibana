@@ -1,0 +1,31 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/server-route-repository-client",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/**/*.ts",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "library",
+  "sourceRoot": "packages/kbn-server-route-repository-client",
+  "implicitDependencies": [
+    "@kbn/server-route-repository-utils",
+    "@kbn/core-lifecycle-browser",
+    "@kbn/core-http-browser",
+    "@kbn/sse-utils-client"
+  ]
+}

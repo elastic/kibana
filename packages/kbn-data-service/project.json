@@ -1,0 +1,33 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/data-service",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/*.ts",
+      "{projectRoot}/src/**/*",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "library",
+  "sourceRoot": "packages/kbn-data-service",
+  "implicitDependencies": [
+    "@kbn/core",
+    "@kbn/es-query",
+    "@kbn/data-views-plugin",
+    "@kbn/field-formats-plugin",
+    "@kbn/expressions-plugin"
+  ]
+}

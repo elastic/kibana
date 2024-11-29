@@ -1,0 +1,49 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/vis-default-editor-plugin",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/public/**/*",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "application",
+  "sourceRoot": "src/plugins/vis_default_editor",
+  "implicitDependencies": [
+    "@kbn/core",
+    "@kbn/data-plugin",
+    "@kbn/visualizations-plugin",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/kibana-react-plugin",
+    "@kbn/field-formats-plugin",
+    "@kbn/unified-search-plugin",
+    "@kbn/data-views-plugin",
+    "@kbn/i18n",
+    "@kbn/es-query",
+    "@kbn/i18n-react",
+    "@kbn/usage-collection-plugin",
+    "@kbn/test-jest-helpers",
+    "@kbn/datemath",
+    "@kbn/charts-plugin",
+    "@kbn/coloring",
+    "@kbn/monaco",
+    "@kbn/es-ui-shared-plugin",
+    "@kbn/utility-types",
+    "@kbn/saved-search-plugin",
+    "@kbn/code-editor",
+    "@kbn/react-kibana-context-render"
+  ]
+}

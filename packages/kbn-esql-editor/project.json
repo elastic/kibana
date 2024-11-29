@@ -1,0 +1,48 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/esql-editor",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/**/*.ts",
+      "{projectRoot}/**/*.tsx",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "library",
+  "sourceRoot": "packages/kbn-esql-editor",
+  "implicitDependencies": [
+    "@kbn/i18n",
+    "@kbn/monaco",
+    "@kbn/es-query",
+    "@kbn/core",
+    "@kbn/kibana-react-plugin",
+    "@kbn/language-documentation",
+    "@kbn/test-jest-helpers",
+    "@kbn/data-plugin",
+    "@kbn/expressions-plugin",
+    "@kbn/data-views-plugin",
+    "@kbn/index-management-shared-types",
+    "@kbn/code-editor",
+    "@kbn/fields-metadata-plugin",
+    "@kbn/esql-validation-autocomplete",
+    "@kbn/esql-utils",
+    "@kbn/content-management-favorites-public",
+    "@kbn/usage-collection-plugin",
+    "@kbn/content-management-favorites-common",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/shared-ux-table-persist"
+  ]
+}

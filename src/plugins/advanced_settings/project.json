@@ -1,0 +1,39 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/advanced-settings-plugin",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/public/**/*",
+      "{projectRoot}/server/**/*",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "application",
+  "sourceRoot": "src/plugins/advanced_settings",
+  "implicitDependencies": [
+    "@kbn/core",
+    "@kbn/management-plugin",
+    "@kbn/home-plugin",
+    "@kbn/usage-collection-plugin",
+    "@kbn/i18n",
+    "@kbn/config-schema",
+    "@kbn/core-plugins-server",
+    "@kbn/management-settings-section-registry",
+    "@kbn/react-kibana-context-render",
+    "@kbn/shared-ux-utility",
+    "@kbn/management-settings-application"
+  ]
+}

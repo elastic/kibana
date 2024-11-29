@@ -1,0 +1,43 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/securitysolution-data-table",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/**/*.ts",
+      "{projectRoot}/**/*.tsx",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "library",
+  "sourceRoot": "x-pack/packages/security-solution/data_table",
+  "implicitDependencies": [
+    "@kbn/cell-actions",
+    "@kbn/timelines-plugin",
+    "@kbn/es-query",
+    "@kbn/triggers-actions-ui-plugin",
+    "@kbn/securitysolution-ecs",
+    "@kbn/safer-lodash-set",
+    "@kbn/i18n",
+    "@kbn/ui-theme",
+    "@kbn/kibana-react-plugin",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/i18n-react",
+    "@kbn/ui-actions-plugin",
+    "@kbn/data-views-plugin",
+    "@kbn/field-formats-plugin",
+    "@kbn/data-plugin"
+  ]
+}

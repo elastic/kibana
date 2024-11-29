@@ -1,0 +1,62 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/upgrade-assistant-plugin",
+  "namedInputs": {
+    "src": [
+      "{workspaceRoot}/typings/**/*",
+      "{projectRoot}/__jest__/**/*",
+      "{projectRoot}/common/**/*",
+      "{projectRoot}/public/**/*",
+      "{projectRoot}/server/**/*",
+      "{projectRoot}/public/**/*.json",
+      "{projectRoot}/server/**/*.json",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "application",
+  "sourceRoot": "x-pack/plugins/upgrade_assistant",
+  "implicitDependencies": [
+    "@kbn/core",
+    "@kbn/management-plugin",
+    "@kbn/usage-collection-plugin",
+    "@kbn/features-plugin",
+    "@kbn/licensing-plugin",
+    "@kbn/es-ui-shared-plugin",
+    "@kbn/cloud-plugin",
+    "@kbn/test-jest-helpers",
+    "@kbn/share-plugin",
+    "@kbn/data-plugin",
+    "@kbn/i18n",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/kibana-react-plugin",
+    "@kbn/i18n-react",
+    "@kbn/analytics",
+    "@kbn/es-query",
+    "@kbn/config-schema",
+    "@kbn/security-plugin",
+    "@kbn/core-elasticsearch-client-server-mocks",
+    "@kbn/utility-types",
+    "@kbn/shared-ux-router",
+    "@kbn/logs-shared-plugin",
+    "@kbn/shared-ux-link-redirect-app",
+    "@kbn/react-kibana-context-render",
+    "@kbn/data-views-plugin",
+    "@kbn/deeplinks-observability",
+    "@kbn/core-logging-server-mocks",
+    "@kbn/core-http-server-mocks",
+    "@kbn/core-http-server-utils"
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/task-manager-fixture-plugin",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/public/**/**/*",
+      "{projectRoot}/server/**/**/*",
+      "{projectRoot}/common/**/*",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "application",
+  "sourceRoot": "x-pack/test/alerting_api_integration/common/plugins/task_manager_fixture",
+  "implicitDependencies": [
+    "@kbn/core",
+    "@kbn/config-schema",
+    "@kbn/task-manager-plugin"
+  ]
+}

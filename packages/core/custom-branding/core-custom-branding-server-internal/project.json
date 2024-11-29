@@ -1,0 +1,33 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/core-custom-branding-server-internal",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/**/*.ts",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "library",
+  "sourceRoot": "packages/core/custom-branding/core-custom-branding-server-internal",
+  "implicitDependencies": [
+    "@kbn/core-custom-branding-common",
+    "@kbn/core-custom-branding-server",
+    "@kbn/core-base-server-mocks",
+    "@kbn/core-http-server",
+    "@kbn/core-base-server-internal",
+    "@kbn/logging"
+  ]
+}

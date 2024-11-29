@@ -3,30 +3,26 @@
   "name": "@kbn/i18n",
   "namedInputs": {
     "src": [
-      "{projectRoot}/src/**",
-      "{projectRoot}/index.ts"
+      "{projectRoot}/**/*.js",
+      "{projectRoot}/**/*.ts",
+      "{projectRoot}/**/*.tsx",
+      "!{projectRoot}/**/__fixtures__/**/*",
+      "!{projectRoot}/target/**/*"
     ]
   },
   "targets": {
-    "build": {
-      "inputs": [
-        "{projectRoot}/src/**",
-        "{projectRoot}/index.ts"
-      ],
-      "outputs": [
-        "{workspaceRoot}/bazel-bin/packages/kbn-monaco",
-        "{projectRoot}/target"
-      ]
-    },
     "typecheck": {
       "inputs": [
         "src",
-        "global:tsConfigs"
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
       ],
       "outputs": [
-        "{projectRoot}/target",
-        "{projectRoot}/tsconfig.type_check.json"
+        "{projectRoot}/target"
       ]
     }
-  }
+  },
+  "projectType": "library",
+  "sourceRoot": "packages/kbn-i18n"
 }

@@ -1,0 +1,50 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/core-saved-objects-migration-server-internal",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/**/*.ts",
+      "{projectRoot}/src/hash_to_version_map.json",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "library",
+  "sourceRoot": "packages/core/saved-objects/core-saved-objects-migration-server-internal",
+  "implicitDependencies": [
+    "@kbn/logging",
+    "@kbn/std",
+    "@kbn/core-doc-links-server",
+    "@kbn/core-elasticsearch-server",
+    "@kbn/core-elasticsearch-client-server-internal",
+    "@kbn/core-saved-objects-common",
+    "@kbn/core-saved-objects-server",
+    "@kbn/core-saved-objects-utils-server",
+    "@kbn/core-saved-objects-base-server-internal",
+    "@kbn/core-logging-server-mocks",
+    "@kbn/core-elasticsearch-client-server-mocks",
+    "@kbn/config-schema",
+    "@kbn/core-doc-links-server-mocks",
+    "@kbn/core-logging-server-internal",
+    "@kbn/core-saved-objects-base-server-mocks",
+    "@kbn/doc-links",
+    "@kbn/safer-lodash-set",
+    "@kbn/logging-mocks",
+    "@kbn/core-saved-objects-base-server-mocks",
+    "@kbn/core-elasticsearch-server-internal",
+    "@kbn/core-node-server",
+    "@kbn/core-elasticsearch-server-mocks"
+  ]
+}

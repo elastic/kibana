@@ -1,0 +1,34 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/core-ui-settings-browser-internal",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/**/*.ts",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "library",
+  "sourceRoot": "packages/core/ui-settings/core-ui-settings-browser-internal",
+  "implicitDependencies": [
+    "@kbn/core-test-helpers-http-setup-browser",
+    "@kbn/core-ui-settings-browser",
+    "@kbn/core-ui-settings-common",
+    "@kbn/core-http-browser-mocks",
+    "@kbn/core-injected-metadata-browser-mocks",
+    "@kbn/core-injected-metadata-browser-internal",
+    "@kbn/core-http-browser-internal"
+  ]
+}

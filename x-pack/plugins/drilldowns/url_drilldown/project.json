@@ -1,0 +1,43 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/url-drilldown-plugin",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/public/**/*",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "application",
+  "sourceRoot": "x-pack/plugins/drilldowns/url_drilldown",
+  "implicitDependencies": [
+    "@kbn/core",
+    "@kbn/ui-actions-enhanced-plugin",
+    "@kbn/embeddable-plugin",
+    "@kbn/expressions-plugin",
+    "@kbn/kibana-react-plugin",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/ui-actions-plugin",
+    "@kbn/i18n",
+    "@kbn/es-query",
+    "@kbn/monaco",
+    "@kbn/std",
+    "@kbn/image-embeddable-plugin",
+    "@kbn/core-ui-settings-browser-mocks",
+    "@kbn/core-ui-settings-browser",
+    "@kbn/core-theme-browser-mocks",
+    "@kbn/presentation-publishing"
+  ]
+}

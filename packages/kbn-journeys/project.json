@@ -1,0 +1,37 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/journeys",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/**/*.ts",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "library",
+  "sourceRoot": "packages/kbn-journeys",
+  "implicitDependencies": [
+    "@kbn/ftr-common-functional-services",
+    "@kbn/ftr-screenshot-filename",
+    "@kbn/test",
+    "@kbn/tooling-log",
+    "@kbn/repo-info",
+    "@kbn/std",
+    "@kbn/test-subj-selector",
+    "@kbn/core-http-common",
+    "@kbn/apm-synthtrace-client",
+    "@kbn/apm-synthtrace"
+  ]
+}

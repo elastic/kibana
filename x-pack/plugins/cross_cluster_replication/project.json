@@ -1,0 +1,47 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/cross-cluster-replication-plugin",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/common/**/*",
+      "{projectRoot}/public/**/*",
+      "{projectRoot}/server/**/*",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "application",
+  "sourceRoot": "x-pack/plugins/cross_cluster_replication",
+  "implicitDependencies": [
+    "@kbn/core",
+    "@kbn/licensing-plugin",
+    "@kbn/management-plugin",
+    "@kbn/remote-clusters-plugin",
+    "@kbn/index-management-plugin",
+    "@kbn/features-plugin",
+    "@kbn/usage-collection-plugin",
+    "@kbn/kibana-react-plugin",
+    "@kbn/es-ui-shared-plugin",
+    "@kbn/data-plugin",
+    "@kbn/license-api-guard-plugin",
+    "@kbn/i18n",
+    "@kbn/i18n-react",
+    "@kbn/analytics",
+    "@kbn/test-jest-helpers",
+    "@kbn/config-schema",
+    "@kbn/shared-ux-router",
+    "@kbn/react-kibana-context-render"
+  ]
+}

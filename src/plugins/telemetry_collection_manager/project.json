@@ -1,0 +1,30 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/telemetry-collection-manager-plugin",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/server/**/*",
+      "{projectRoot}/common/*",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "application",
+  "sourceRoot": "src/plugins/telemetry_collection_manager",
+  "implicitDependencies": [
+    "@kbn/core",
+    "@kbn/usage-collection-plugin"
+  ]
+}

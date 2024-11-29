@@ -1,0 +1,37 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/maps-ems-plugin",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/common/**/*",
+      "{projectRoot}/public/**/*",
+      "{projectRoot}/server/**/*",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "application",
+  "sourceRoot": "src/plugins/maps_ems",
+  "implicitDependencies": [
+    "@kbn/core",
+    "@kbn/licensing-plugin",
+    "@kbn/i18n",
+    "@kbn/config-schema",
+    "@kbn/config",
+    "@kbn/core-http-common",
+    "@kbn/core-plugins-server",
+    "@kbn/core-lifecycle-server"
+  ]
+}
