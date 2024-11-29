@@ -17,10 +17,11 @@ import { AlertsDataGrid } from '../components/alerts_data_grid';
 import { AlertsField, BulkActionsConfig, BulkActionsState } from '../types';
 import { RenderContext, AdditionalContext } from '../types';
 import { bulkActionsReducer } from './bulk_actions_reducer';
-import { mockBulkActionsState, mockDataGridProps, mockRenderContext } from '../mocks/context.mock';
+import { mockBulkActionsState, mockRenderContext } from '../mocks/context.mock';
 import {
   TestAlertsDataGridProps,
   BaseAlertsDataGridProps,
+  mockDataGridProps,
 } from '../components/alerts_data_grid.test';
 import { AlertsTableContextProvider } from '../contexts/alerts_table_context';
 import { getJsDomPerformanceFix, testQueryClientConfig } from '../utils/test';
