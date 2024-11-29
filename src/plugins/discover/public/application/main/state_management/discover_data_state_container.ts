@@ -293,8 +293,6 @@ export function getDataStateContainer({
               ...commonFetchDeps,
             },
             async () => {
-              // await new Promise((resolve) => setTimeout(resolve, 5000));
-
               const { resetDefaultProfileState: currentResetDefaultProfileState } =
                 internalStateContainer.getState();
 
