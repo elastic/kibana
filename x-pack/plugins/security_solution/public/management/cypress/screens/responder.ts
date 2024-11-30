@@ -17,7 +17,7 @@ const TEST_SUBJ = Object.freeze({
 });
 
 export const getConsoleHelpPanelResponseActionTestSubj = (): Record<
-  ConsoleResponseActionCommands,
+  Exclude<ConsoleResponseActionCommands, 'runscript'>,
   string
 > => {
   return {
