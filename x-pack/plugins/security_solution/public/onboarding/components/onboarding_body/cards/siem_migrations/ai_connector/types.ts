@@ -5,6 +5,10 @@
  * 2.0.
  */
 
-import { useKibana } from '../../common/lib/kibana/kibana_react';
+import type { ActionConnector } from '@kbn/alerts-ui-shared';
 
-export const useOnboardingService = () => useKibana().services.onboarding;
+export interface AIConnectorCardMetadata {
+  connectors: ActionConnector[];
+  canExecuteConnectors: boolean;
+  canCreateConnectors: boolean;
+}

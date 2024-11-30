@@ -8,7 +8,10 @@
 import type { AuthenticatedUser, Logger } from '@kbn/core/server';
 import { AbortError, abortSignalToPromise } from '@kbn/kibana-utils-plugin/server';
 import type { RunnableConfig } from '@langchain/core/runnables';
-import { SiemMigrationStatus } from '../../../../../common/siem_migrations/constants';
+import {
+  SiemMigrationTaskStatus,
+  SiemMigrationStatus,
+} from '../../../../../common/siem_migrations/constants';
 import type { RuleMigrationTaskStats } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { RuleMigrationsDataClient } from '../data/rule_migrations_data_client';
 import type { RuleMigrationDataStats } from '../data/rule_migrations_data_rules_client';
@@ -234,17 +237,17 @@ export class RuleMigrationsTaskClient {
   private getTaskStatus(
     migrationId: string,
     dataStats: RuleMigrationDataStats['rules']
-  ): RuleMigrationTaskStats['status'] {
+  ): SiemMigrationTaskStatus {
     if (this.migrationsRunning.has(migrationId)) {
-      return 'running';
+      return SiemMigrationTaskStatus.RUNNING;
     }
     if (dataStats.pending === dataStats.total) {
-      return 'ready';
+      return SiemMigrationTaskStatus.READY;
     }
     if (dataStats.completed + dataStats.failed === dataStats.total) {
-      return 'finished';
+      return SiemMigrationTaskStatus.FINISHED;
     }
-    return 'stopped';
+    return SiemMigrationTaskStatus.STOPPED;
   }
 
   /** Stops one running migration */

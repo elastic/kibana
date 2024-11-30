@@ -109,7 +109,7 @@ export type RuleMigrationTranslationResultEnum = typeof RuleMigrationTranslation
 export const RuleMigrationTranslationResultEnum = RuleMigrationTranslationResult.enum;
 
 /**
- * The status of the rule migration process.
+ * The status of each rule migration.
  */
 export type RuleMigrationStatus = z.infer<typeof RuleMigrationStatus>;
 export const RuleMigrationStatus = z.enum(['pending', 'processing', 'completed', 'failed']);
@@ -183,6 +183,14 @@ export const RuleMigration = z
   .merge(RuleMigrationData);
 
 /**
+ * The status of the migration task.
+ */
+export type RuleMigrationTaskStatus = z.infer<typeof RuleMigrationTaskStatus>;
+export const RuleMigrationTaskStatus = z.enum(['ready', 'running', 'stopped', 'finished']);
+export type RuleMigrationTaskStatusEnum = typeof RuleMigrationTaskStatus.enum;
+export const RuleMigrationTaskStatusEnum = RuleMigrationTaskStatus.enum;
+
+/**
  * The rule migration task stats object.
  */
 export type RuleMigrationTaskStats = z.infer<typeof RuleMigrationTaskStats>;
@@ -194,7 +202,7 @@ export const RuleMigrationTaskStats = z.object({
   /**
    * Indicates if the migration task status.
    */
-  status: z.enum(['ready', 'running', 'stopped', 'finished']),
+  status: RuleMigrationTaskStatus,
   /**
    * The rules migration stats.
    */
