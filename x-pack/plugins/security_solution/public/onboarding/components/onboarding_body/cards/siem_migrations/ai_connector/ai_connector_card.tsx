@@ -6,19 +6,14 @@
  */
 
 import React, { useCallback } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-  useEuiTheme,
-  COLOR_MODES_STANDARD,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useKibana } from '../../../../../../common/lib/kibana/kibana_react';
 import { useDefinedLocalStorage } from '../../../../hooks/use_stored_state';
 import type { OnboardingCardComponent } from '../../../../../types';
 import * as i18n from './translations';
 import { OnboardingCardContentPanel } from '../../common/card_content_panel';
 import { ConnectorCards } from '../../common/connectors/connector_cards';
+import { CardSubduedText } from '../../common/card_subdued_text';
 import type { AIConnectorCardMetadata } from './types';
 import { MissingPrivilegesCallOut } from '../../common/connectors/missing_privileges';
 
@@ -28,9 +23,6 @@ export const AIConnectorCard: OnboardingCardComponent<AIConnectorCardMetadata> =
   setComplete,
 }) => {
   const { siemMigrations } = useKibana().services;
-  const { colorMode } = useEuiTheme();
-  const isDarkMode = colorMode === COLOR_MODES_STANDARD.dark;
-
   const [storedConnectorId, setStoredConnectorId] = useDefinedLocalStorage<string | null>(
     siemMigrations.rules.connectorIdStorage.key,
     null
@@ -52,9 +44,7 @@ export const AIConnectorCard: OnboardingCardComponent<AIConnectorCardMetadata> =
       {canExecuteConnectors ? (
         <EuiFlexGroup direction="column">
           <EuiFlexItem grow={false}>
-            <EuiText size="s" color={isDarkMode ? 'text' : 'subdued'}>
-              {i18n.AI_CONNECTOR_CARD_DESCRIPTION}
-            </EuiText>
+            <CardSubduedText size="s">{i18n.AI_CONNECTOR_CARD_DESCRIPTION}</CardSubduedText>
           </EuiFlexItem>
           <EuiFlexItem>
             <ConnectorCards

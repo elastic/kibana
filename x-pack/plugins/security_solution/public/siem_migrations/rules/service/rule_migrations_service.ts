@@ -90,16 +90,13 @@ export class SiemRulesMigrationsService {
     return createRuleMigration({ body });
   }
 
-  public async startRuleMigration(
-    migrationId: string,
-    options: Pick<StartRuleMigrationRequestBody, 'langsmith_options'> = {}
-  ): Promise<GetAllStatsRuleMigrationResponse> {
+  public async startRuleMigration(migrationId: string): Promise<GetAllStatsRuleMigrationResponse> {
     const connectorId = this.connectorIdStorage.get();
     if (!connectorId) {
       throw new Error(i18n.MISSING_CONNECTOR_ERROR);
     }
-    const body = { ...options, connector_id: connectorId };
-    const result = await startRuleMigration({ migrationId, body });
+    // TODO: add langsmith options from local storage
+    const result = await startRuleMigration({ migrationId, connectorId });
     this.startPolling();
     return result;
   }
@@ -130,10 +127,7 @@ export class SiemRulesMigrationsService {
           const connectorId = this.connectorIdStorage.get();
           if (connectorId) {
             // automatically resume stopped migrations when connector is available
-            await startRuleMigration({
-              migrationId: result.id,
-              body: { connector_id: connectorId },
-            });
+            await startRuleMigration({ migrationId: result.id, connectorId });
             pendingMigrationIds.push(result.id);
           }
         }

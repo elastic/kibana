@@ -11,7 +11,6 @@ import {
   EuiFlyoutHeader,
   EuiTitle,
   EuiFlyoutBody,
-  EuiText,
   EuiFlyoutFooter,
   EuiFlexGroup,
   EuiFlexItem,
@@ -20,14 +19,19 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import { DataInputStep } from './constants';
+import { RulesDataInput } from './rules_data_input';
 
 export interface MigrationDataInputFlyoutProps {
   onClose: () => void;
   migrationId?: string;
+  dataInputStep?: DataInputStep;
 }
-
 export const MigrationDataInputFlyout = React.memo<MigrationDataInputFlyoutProps>(
-  ({ onClose, migrationId: initialMigrationId }) => {
+  ({
+    onClose,
+    migrationId: initialMigrationId,
+    dataInputStep: initialDataInputStep = DataInputStep.rules,
+  }) => {
     const { siemMigrations } = useKibana().services;
     const [migrationId, setMigrationId] = useState<string | undefined>(initialMigrationId);
 
@@ -38,9 +42,12 @@ export const MigrationDataInputFlyout = React.memo<MigrationDataInputFlyoutProps
       }
     }, [migrationId, siemMigrations.rules, onClose]);
 
-    const [step, setStep] = useState<DataInputStep>(
-      initialMigrationId ? DataInputStep.macros : DataInputStep.rules
-    );
+    const [dataInputStep, setDataInputStep] = useState<DataInputStep>(() => {
+      if (initialMigrationId && initialDataInputStep === DataInputStep.rules) {
+        return DataInputStep.macros; // if initialMigrationId is defined the rules step is not available anymore.
+      }
+      return initialDataInputStep;
+    });
 
     return (
       <EuiFlyoutResizable
@@ -61,14 +68,7 @@ export const MigrationDataInputFlyout = React.memo<MigrationDataInputFlyoutProps
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
-          <EuiText>
-            <p>
-              <FormattedMessage
-                id="xpack.securitySolution.siemMigrations.rules.dataInputFlyout.description"
-                defaultMessage="To start using the SIEM app, you need to upload your Splunk rules."
-              />
-            </p>
-          </EuiText>
+          <RulesDataInput />
         </EuiFlyoutBody>
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="spaceBetween">
