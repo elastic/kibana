@@ -97,6 +97,7 @@ import { MachineLearningJobIdEdit } from '../../../rule_creation/components/mach
 import { ThresholdEdit } from '../../../rule_creation/components/threshold_edit';
 import { usePersistentThresholdState } from './use_persistent_threshold_state';
 import { AnomalyThresholdEdit } from '../../../rule_creation/components/anomaly_threshold_edit';
+import { CreateCustomMlJobButton } from '../../../rule_creation/components/create_ml_job_button/create_ml_job_button';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -785,7 +786,14 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
           )}
           <RuleTypeEuiFormRow $isVisible={isMlRule(ruleType)} fullWidth>
             <>
-              <MachineLearningJobIdEdit path="machineLearningJobId" />
+              <EuiFlexGroup>
+                <EuiFlexItem>
+                  <MachineLearningJobIdEdit path="machineLearningJobId" />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <CreateCustomMlJobButton />
+                </EuiFlexItem>
+              </EuiFlexGroup>
               <AnomalyThresholdEdit path="anomalyThreshold" />
             </>
           </RuleTypeEuiFormRow>

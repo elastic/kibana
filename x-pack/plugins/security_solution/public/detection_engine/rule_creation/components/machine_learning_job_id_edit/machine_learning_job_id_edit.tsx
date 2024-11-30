@@ -5,18 +5,30 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { UseField } from '../../../../shared_imports';
 import { MlJobSelect } from '../ml_job_select';
-
-const componentProps = {
-  describedByIds: ['machineLearningJobId'],
-};
+import { useSecurityJobs } from '../../../../common/components/ml_popover/hooks/use_security_jobs';
 
 interface MachineLearningJobIdEditProps {
   path: string;
+  shouldShowHelpText?: boolean;
 }
 
-export function MachineLearningJobIdEdit({ path }: MachineLearningJobIdEditProps): JSX.Element {
+export function MachineLearningJobIdEdit({
+  path,
+  shouldShowHelpText,
+}: MachineLearningJobIdEditProps): JSX.Element {
+  const { loading, jobs } = useSecurityJobs();
+
+  const componentProps = useMemo(
+    () => ({
+      jobs,
+      loading,
+      shouldShowHelpText,
+    }),
+    [jobs, loading, shouldShowHelpText]
+  );
+
   return <UseField path={path} component={MlJobSelect} componentProps={componentProps} />;
 }

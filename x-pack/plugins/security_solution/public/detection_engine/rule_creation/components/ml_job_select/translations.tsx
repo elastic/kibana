@@ -7,13 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const CREATE_CUSTOM_JOB_BUTTON_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.mlSelectJob.createCustomJobButtonTitle',
-  {
-    defaultMessage: 'Create custom job',
-  }
-);
-
 export const ML_JOB_SELECT_PLACEHOLDER_TEXT = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.mlJobSelectPlaceholderText',
   {

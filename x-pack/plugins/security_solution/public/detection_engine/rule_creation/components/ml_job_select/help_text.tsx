@@ -5,63 +5,81 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { memo, useMemo } from 'react';
 import { EuiLink, EuiText } from '@elastic/eui';
-import styled from 'styled-components';
+import { css } from '@emotion/css';
 
 import { FormattedMessage } from '@kbn/i18n-react';
+import { isJobStarted } from '../../../../../common/machine_learning/helpers';
+import type { SecurityJob } from '../../../../common/components/ml_popover/types';
+import { useKibana } from '../../../../common/lib/kibana';
+interface HelpTextProps {
+  jobs: SecurityJob[];
+  jobIds: string[];
+}
 
-const HelpTextWarningContainer = styled.div`
+export const HelpText = memo(function HelpText({ jobs, jobIds }: HelpTextProps): JSX.Element {
+  const { getUrlForApp } = useKibana().services.application;
+  const mlUrl = getUrlForApp('ml');
+
+  const notRunningJobIds = useMemo<string[]>(() => {
+    const selectedJobs = jobs.filter(({ id }) => jobIds.includes(id));
+    return selectedJobs.reduce((acc, job) => {
+      if (!isJobStarted(job.jobState, job.datafeedState)) {
+        acc.push(job.id);
+      }
+      return acc;
+    }, [] as string[]);
+  }, [jobs, jobIds]);
+
+  return (
+    <>
+      <FormattedMessage
+        id="xpack.securitySolution.detectionEngine.createRule.stepDefineRule.machineLearningJobIdHelpText"
+        defaultMessage="We've provided a few common jobs to get you started. To add your own custom jobs, assign a group of 'security' to those jobs in the {machineLearning} application to make them appear here."
+        values={{
+          machineLearning: (
+            <EuiLink href={mlUrl} target="_blank">
+              <FormattedMessage
+                id="xpack.securitySolution.components.mlJobSelect.machineLearningLink"
+                defaultMessage="Machine Learning"
+              />
+            </EuiLink>
+          ),
+        }}
+      />
+      {notRunningJobIds.length > 0 && (
+        <div className={warningContainerClassName} data-test-subj="ml-warning-not-running-jobs">
+          <EuiText size="xs">
+            <span>
+              {notRunningJobIds.length === 1 ? (
+                <FormattedMessage
+                  id="xpack.securitySolution.detectionEngine.createRule.stepDefineRule.mlEnableJobSingle"
+                  defaultMessage="The selected ML job, {jobName}, is not currently running. We will start {jobName} when you enable this rule."
+                  values={{
+                    jobName: notRunningJobIds[0],
+                  }}
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.securitySolution.detectionEngine.createRule.stepDefineRule.mlEnableJobMulti"
+                  defaultMessage="The selected ML jobs, {jobNames}, are not currently running. We will start all of these jobs when you enable this rule."
+                  values={{
+                    jobNames: notRunningJobIds.reduce(
+                      (acc, value, i, array) =>
+                        acc + (i < array.length - 1 ? ', ' : ', and ') + value
+                    ),
+                  }}
+                />
+              )}
+            </span>
+          </EuiText>
+        </div>
+      )}
+    </>
+  );
+});
+
+const warningContainerClassName = css`
   margin-top: 10px;
 `;
-
-const HelpTextComponent: React.FC<{ href: string; notRunningJobIds: string[] }> = ({
-  href,
-  notRunningJobIds,
-}) => (
-  <>
-    <FormattedMessage
-      id="xpack.securitySolution.detectionEngine.createRule.stepDefineRule.machineLearningJobIdHelpText"
-      defaultMessage="We've provided a few common jobs to get you started. To add your own custom jobs, assign a group of 'security' to those jobs in the {machineLearning} application to make them appear here."
-      values={{
-        machineLearning: (
-          <EuiLink href={href} target="_blank">
-            <FormattedMessage
-              id="xpack.securitySolution.components.mlJobSelect.machineLearningLink"
-              defaultMessage="Machine Learning"
-            />
-          </EuiLink>
-        ),
-      }}
-    />
-    {notRunningJobIds.length > 0 && (
-      <HelpTextWarningContainer data-test-subj="ml-warning-not-running-jobs">
-        <EuiText size="xs">
-          <span>
-            {notRunningJobIds.length === 1 ? (
-              <FormattedMessage
-                id="xpack.securitySolution.detectionEngine.createRule.stepDefineRule.mlEnableJobSingle"
-                defaultMessage="The selected ML job, {jobName}, is not currently running. We will start {jobName} when you enable this rule."
-                values={{
-                  jobName: notRunningJobIds[0],
-                }}
-              />
-            ) : (
-              <FormattedMessage
-                id="xpack.securitySolution.detectionEngine.createRule.stepDefineRule.mlEnableJobMulti"
-                defaultMessage="The selected ML jobs, {jobNames}, are not currently running. We will start all of these jobs when you enable this rule."
-                values={{
-                  jobNames: notRunningJobIds.reduce(
-                    (acc, value, i, array) => acc + (i < array.length - 1 ? ', ' : ', and ') + value
-                  ),
-                }}
-              />
-            )}
-          </span>
-        </EuiText>
-      </HelpTextWarningContainer>
-    )}
-  </>
-);
-
-export const HelpText = React.memo(HelpTextComponent);
