@@ -156,7 +156,7 @@ export class AutoOpsAPIService {
         } else {
           // Something happened in setting up the request that triggered an Error
           this.logger.error(
-            `${AUTO_OPS_AGENT_CREATION_PREFIX} to be created ${errorLogCodeCause} ${requestConfigDebugStatus}`,
+            `${AUTO_OPS_AGENT_CREATION_PREFIX} to be created ${errorLogCodeCause} ${requestConfigDebugStatus} ${error.toJSON()}`,
             errorMetadataWithRequestConfig
           );
           throw new AutoOpsError(
