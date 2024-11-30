@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 
 import { EuiSkeletonLoading, EuiSkeletonText, EuiSkeletonTitle } from '@elastic/eui';
 import type { RouteComponentProps } from 'react-router-dom';
 import { useNavigation } from '../../../common/lib/kibana';
-import type { RuleMigration } from '../../../../common/siem_migrations/model/rule_migration.gen';
 import { HeaderPage } from '../../../common/components/header_page';
 import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
 import { SecurityPageName } from '../../../app/types';
@@ -20,7 +19,6 @@ import { RulesTable } from '../components/rules_table';
 import { NeedAdminForUpdateRulesCallOut } from '../../../detections/components/callouts/need_admin_for_update_callout';
 import { MissingPrivilegesCallOut } from '../../../detections/components/callouts/missing_privileges_callout';
 import { HeaderButtons } from '../components/header_buttons';
-import { useRulePreviewFlyout } from '../hooks/use_rule_preview_flyout';
 import { UnknownMigration } from '../components/unknown_migration';
 import { useLatestStats } from '../hooks/use_latest_stats';
 
@@ -66,24 +64,12 @@ export const RulesPage: React.FC<RulesMigrationPageProps> = React.memo(
       navigateTo({ deepLinkId: SecurityPageName.siemMigrationsRules, path: selectedId });
     };
 
-    const ruleActionsFactory = useCallback(
-      (ruleMigration: RuleMigration, closeRulePreview: () => void) => {
-        // TODO: Add flyout action buttons
-        return null;
-      },
-      []
-    );
-
-    const { rulePreviewFlyout, openRulePreview } = useRulePreviewFlyout({
-      ruleActionsFactory,
-    });
-
     const content = useMemo(() => {
       if (!migrationId || !migrationsIds.includes(migrationId)) {
         return <UnknownMigration />;
       }
-      return <RulesTable migrationId={migrationId} openRulePreview={openRulePreview} />;
-    }, [migrationId, migrationsIds, openRulePreview]);
+      return <RulesTable migrationId={migrationId} />;
+    }, [migrationId, migrationsIds]);
 
     return (
       <>
@@ -108,7 +94,6 @@ export const RulesPage: React.FC<RulesMigrationPageProps> = React.memo(
             }
             loadedContent={content}
           />
-          {rulePreviewFlyout}
         </SecuritySolutionPageWrapper>
       </>
     );
