@@ -100,7 +100,7 @@ export const AssetCriticalityValidationStep: React.FC<AssetCriticalityValidation
               language="CSV"
               isVirtualized
               css={css`
-                border: 1px solid ${euiTheme.colors.success};
+                border: 1px solid ${euiTheme.colors.accentSecondary};
               `}
             >
               {validLines.text}
