@@ -22,12 +22,9 @@ export const TLSRuleComponent: React.FC<{
   const { settings } = useSelector(selectDynamicSettings);
 
   useEffect(() => {
-    const dispatchDynamicSettings = async () => {
-      if (typeof settings === 'undefined') {
-        dispatch(getDynamicSettingsAction.get());
-      }
-    };
-    dispatchDynamicSettings();
+    if (typeof settings === 'undefined') {
+      dispatch(getDynamicSettingsAction.get());
+    }
   }, [dispatch, settings]);
 
   return (
