@@ -117,7 +117,6 @@ export interface StepDefineRuleProps extends RuleStepProps {
   shouldLoadQueryDynamically: boolean;
   queryBarTitle: string | undefined;
   queryBarSavedId: string | null | undefined;
-  thresholdFields: string[] | undefined;
 }
 
 interface StepDefineRuleReadOnlyProps {
@@ -167,11 +166,10 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   shouldLoadQueryDynamically,
   threatIndex,
   threatIndicesConfig,
-  thresholdFields,
 }) => {
-  const [{ ruleType, queryBar, machineLearningJobId }] = useFormData<DefineStepRule>({
+  const [{ ruleType, queryBar, machineLearningJobId, threshold }] = useFormData<DefineStepRule>({
     form,
-    watch: ['ruleType', 'queryBar', 'machineLearningJobId'],
+    watch: ['ruleType', 'queryBar', 'machineLearningJobId', 'threshold'],
   });
 
   const { isSuppressionEnabled: isAlertSuppressionEnabled } = useAlertSuppression(ruleType);
@@ -726,7 +724,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
           <RuleTypeEuiFormRow $isVisible={isAlertSuppressionEnabled} fullWidth>
             {isThresholdRule ? (
               <ThresholdAlertSuppressionEdit
-                suppressionFieldNames={thresholdFields}
+                suppressionFieldNames={threshold?.field}
                 disabled={!isAlertSuppressionLicenseValid}
                 disabledText={alertSuppressionUpsellingMessage}
               />
