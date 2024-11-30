@@ -106,20 +106,27 @@ export const GridExample = ({ coreStart }: { coreStart: CoreStart }) => {
 
   return (
     <KibanaRenderContextProvider {...coreStart}>
-      <EuiPageTemplate grow={false} offset={0} restrictWidth={false}>
-        <EuiPageTemplate.Header
+      <EuiPageTemplate
+        grow={false}
+        offset={0}
+        restrictWidth={false}
+        css={css`
+          min-block-size: 0px !important;
+        `}
+      >
+        {/* <EuiPageTemplate.Header
           iconType={'dashboardApp'}
           pageTitle={i18n.translate('examples.gridExample.pageTitle', {
             defaultMessage: 'Grid Layout Example',
           })}
-        />
+        /> */}
         <EuiPageTemplate.Section
           color="subdued"
           contentProps={{
-            css: { height: '100%' },
+            css: { flexGrow: 1 },
           }}
         >
-          <EuiCallOut
+          {/* <EuiCallOut
             title={i18n.translate('examples.gridExample.sessionStorageCallout', {
               defaultMessage:
                 'This example uses session storage to persist saved state and unsaved changes',
@@ -137,9 +144,9 @@ export const GridExample = ({ coreStart }: { coreStart: CoreStart }) => {
                 defaultMessage: 'Reset example',
               })}
             </EuiButton>
-          </EuiCallOut>
-          <EuiSpacer size="m" />
-          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+          </EuiCallOut> */}
+          {/* <EuiSpacer size="m" /> */}
+          {/* <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
             <EuiFlexItem grow={false}>
               <EuiButton
                 onClick={async () => {
@@ -228,7 +235,7 @@ export const GridExample = ({ coreStart }: { coreStart: CoreStart }) => {
               </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
-          <EuiSpacer size="m" />
+          <EuiSpacer size="m" /> */}
           <GridLayout
             accessMode={accessMode}
             expandedPanelId={expandedPanelId}
