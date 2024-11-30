@@ -311,7 +311,13 @@
             "description": [],
             "signature": [
               "Pick<Required<Partial<",
-              "DiscoverServices",
+              {
+                "pluginId": "discover",
+                "scope": "public",
+                "docId": "kibDiscoverPluginApi",
+                "section": "def-public.DiscoverServices",
+                "text": "DiscoverServices"
+              },
               ">>, \"data\" | \"history\" | \"uiSettings\" | \"timefilter\" | \"filterManager\"> & { urlStateStorage: ",
               {
                 "pluginId": "kibanaUtils",

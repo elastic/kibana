@@ -7476,6 +7476,10 @@
                 "path": "x-pack/plugins/serverless_search/server/routes/connectors_routes.ts"
               },
               {
+                "plugin": "serverlessSearch",
+                "path": "x-pack/plugins/serverless_search/server/routes/connectors_routes.ts"
+              },
+              {
                 "plugin": "snapshotRestore",
                 "path": "x-pack/plugins/snapshot_restore/server/routes/api/repositories.ts"
               },
@@ -17661,6 +17665,14 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/siem_migrations/rules/api/rules/install.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/siem_migrations/rules/api/rules/install_translated.ts"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/response_actions.ts"
               },
               {
@@ -17750,10 +17762,6 @@
               {
                 "plugin": "dataUsage",
                 "path": "x-pack/plugins/data_usage/server/routes/internal/usage_metrics.test.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/entity_store/routes/stats.ts"
               },
               {
                 "plugin": "securitySolution",
