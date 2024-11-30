@@ -10,7 +10,7 @@ import React, { useEffect } from 'react';
 import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { AlertTlsComponent } from './alert_tls';
 import { getDynamicSettings } from '../../state/settings/api';
-import { selectDynamicSettings } from '../../state/settings';
+import { selectDynamicSettings, setDynamicSettingsAction } from '../../state/settings';
 import { TLSParams } from '../../../../../common/runtime_types/alerts/tls';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../../common/constants';
 
@@ -23,9 +23,12 @@ export const TLSRuleComponent: React.FC<{
   const { settings } = useSelector(selectDynamicSettings);
 
   useEffect(() => {
-    if (typeof settings === 'undefined') {
-      dispatch(getDynamicSettings());
-    }
+    const dispatchDynamicSettings = async () => {
+      if (typeof settings === 'undefined') {
+        dispatch(setDynamicSettingsAction.get(await getDynamicSettings()));
+      }
+    };
+    dispatchDynamicSettings();
   }, [dispatch, settings]);
 
   return (
