@@ -10,7 +10,6 @@
 import { css } from '@emotion/react';
 import React, { PropsWithChildren, useEffect, useRef } from 'react';
 import { combineLatest, distinctUntilChanged, map } from 'rxjs';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { GridLayoutStateManager } from './types';
 
 export const GridHeightSmoother = ({
