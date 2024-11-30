@@ -11,12 +11,17 @@ import { KibanaServices } from '../../../common/lib/kibana';
 
 import {
   SIEM_RULE_MIGRATIONS_ALL_STATS_PATH,
+  SIEM_RULE_MIGRATION_INSTALL_TRANSLATED_PATH,
+  SIEM_RULE_MIGRATION_INSTALL_PATH,
   SIEM_RULE_MIGRATION_PATH,
 } from '../../../../common/siem_migrations/constants';
 import type {
   GetAllStatsRuleMigrationResponse,
   GetRuleMigrationResponse,
+  InstallTranslatedMigrationRulesResponse,
+  InstallMigrationRulesResponse,
 } from '../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
+import type { InstallTranslatedRulesProps, InstallRulesProps } from '../types';
 
 /**
  * Retrieves the stats for all the existing migrations, aggregated by `migration_id`.
@@ -59,6 +64,36 @@ export const getRuleMigrations = async ({
     replaceParams(SIEM_RULE_MIGRATION_PATH, { migration_id: migrationId }),
     {
       method: 'GET',
+      version: '1',
+      signal,
+    }
+  );
+};
+
+export const installMigrationRules = async ({
+  migrationId,
+  ids,
+  signal,
+}: InstallRulesProps): Promise<InstallMigrationRulesResponse> => {
+  return KibanaServices.get().http.fetch<InstallMigrationRulesResponse>(
+    replaceParams(SIEM_RULE_MIGRATION_INSTALL_PATH, { migration_id: migrationId }),
+    {
+      method: 'POST',
+      version: '1',
+      body: JSON.stringify(ids),
+      signal,
+    }
+  );
+};
+
+export const installTranslatedMigrationRules = async ({
+  migrationId,
+  signal,
+}: InstallTranslatedRulesProps): Promise<InstallTranslatedMigrationRulesResponse> => {
+  return KibanaServices.get().http.fetch<InstallTranslatedMigrationRulesResponse>(
+    replaceParams(SIEM_RULE_MIGRATION_INSTALL_TRANSLATED_PATH, { migration_id: migrationId }),
+    {
+      method: 'POST',
       version: '1',
       signal,
     }
