@@ -38,12 +38,12 @@ export const MlJobSelect: React.FC<MlJobSelectProps> = ({
 }) => {
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
 
-  const jobIds = field.value;
+  const selectedJobIds = field.value;
 
   const handleJobSelect = (selectedJobOptions: MlJobOption[]): void => {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const selectedJobIds = selectedJobOptions.map((option) => option.value!.id);
-    field.setValue(selectedJobIds);
+    const newlySelectedJobIds = selectedJobOptions.map((option) => option.value!.id);
+    field.setValue(newlySelectedJobIds);
   };
 
   const jobOptions = jobs.map((job) => ({
@@ -58,7 +58,7 @@ export const MlJobSelect: React.FC<MlJobSelectProps> = ({
   }));
 
   const selectedJobOptions = jobOptions
-    .filter((option) => jobIds.includes(option.value.id))
+    .filter((option) => selectedJobIds.includes(option.value.id))
     // 'label' defines what is rendered inside the selected ComboBoxPill
     .map((options) => ({ ...options, label: options.value.name ?? options.value.id }));
 
@@ -67,7 +67,7 @@ export const MlJobSelect: React.FC<MlJobSelectProps> = ({
       <EuiFlexItem grow={false}>
         <EuiFormRow
           label={field.label}
-          helpText={shouldShowHelpText && <HelpText jobs={jobs} jobIds={field.value} />}
+          helpText={shouldShowHelpText && <HelpText jobs={jobs} selectedJobIds={selectedJobIds} />}
           isInvalid={isInvalid}
           error={errorMessage}
           data-test-subj="mlJobSelect"

@@ -15,22 +15,25 @@ import type { SecurityJob } from '../../../../common/components/ml_popover/types
 import { useKibana } from '../../../../common/lib/kibana';
 interface HelpTextProps {
   jobs: SecurityJob[];
-  jobIds: string[];
+  selectedJobIds: string[];
 }
 
-export const HelpText = memo(function HelpText({ jobs, jobIds }: HelpTextProps): JSX.Element {
+export const HelpText = memo(function HelpText({
+  jobs,
+  selectedJobIds,
+}: HelpTextProps): JSX.Element {
   const { getUrlForApp } = useKibana().services.application;
   const mlUrl = getUrlForApp('ml');
 
   const notRunningJobIds = useMemo<string[]>(() => {
-    const selectedJobs = jobs.filter(({ id }) => jobIds.includes(id));
+    const selectedJobs = jobs.filter(({ id }) => selectedJobIds.includes(id));
     return selectedJobs.reduce((acc, job) => {
       if (!isJobStarted(job.jobState, job.datafeedState)) {
         acc.push(job.id);
       }
       return acc;
     }, [] as string[]);
-  }, [jobs, jobIds]);
+  }, [jobs, selectedJobIds]);
 
   return (
     <>
