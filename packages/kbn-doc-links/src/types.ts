@@ -63,6 +63,9 @@ export interface DocLinks {
     readonly urlDrilldownTemplateSyntax: string;
     readonly urlDrilldownVariables: string;
   };
+  readonly dataViews: {
+    readonly manage: string;
+  };
   readonly discover: Record<string, string>;
   readonly filebeat: {
     readonly base: string;

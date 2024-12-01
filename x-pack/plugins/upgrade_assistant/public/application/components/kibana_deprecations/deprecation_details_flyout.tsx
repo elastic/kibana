@@ -22,6 +22,9 @@ import {
   EuiText,
   EuiCallOut,
   EuiSpacer,
+  EuiMarkdownFormat,
+  getDefaultEuiMarkdownPlugins,
+  useEuiFontSize,
 } from '@elastic/eui';
 
 import { uiMetricService, UIM_KIBANA_QUICK_RESOLVE_CLICK } from '../../lib/ui_metric';
@@ -103,6 +106,12 @@ const i18nTexts = {
   ),
 };
 
+const { processingPlugins } = getDefaultEuiMarkdownPlugins({
+  processingConfig: {
+    linkProps: { target: '_blank' },
+  },
+});
+
 interface AvailableCorrectiveActions {
   api: boolean;
   manual: boolean;
@@ -158,6 +167,8 @@ export const DeprecationDetailsFlyout = ({
     resolveDeprecation(deprecation);
   }, [deprecation, resolveDeprecation]);
 
+  const { lineHeight: lineHeightMedium } = useEuiFontSize('m');
+
   return (
     <>
       <EuiFlyoutHeader hasBorder>
@@ -185,11 +196,30 @@ export const DeprecationDetailsFlyout = ({
         )}
 
         <EuiText>
-          {messages.map((m, i) => (
-            <p key={i} className="eui-textBreakWord">
-              {m}
-            </p>
-          ))}
+          {messages.map((currentMessage, i) => {
+            if (typeof currentMessage === 'object' && currentMessage.type === 'markdown') {
+              return (
+                <EuiMarkdownFormat
+                  key={i}
+                  className="eui-textBreakWord"
+                  textSize="relative"
+                  processingPluginList={processingPlugins}
+                  css={{ marginBlockEnd: lineHeightMedium }}
+                >
+                  {currentMessage.content}
+                </EuiMarkdownFormat>
+              );
+            }
+
+            const textContent =
+              typeof currentMessage === 'string' ? currentMessage : currentMessage.content;
+
+            return (
+              <p key={i} className="eui-textBreakWord">
+                {textContent}
+              </p>
+            );
+          })}
           {documentationUrl && (
             <p>
               <DeprecationFlyoutLearnMoreLink documentationUrl={documentationUrl} />
