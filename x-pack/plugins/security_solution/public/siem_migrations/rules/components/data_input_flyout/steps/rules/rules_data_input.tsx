@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { EuiStepProps, EuiStepStatus } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -13,20 +14,40 @@ import {
   EuiSteps,
   EuiTitle,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo, useState } from 'react';
+import { SubStepWrapper } from '../common/sub_step_wrapper';
+import * as i18n from './translations';
+import { CopyExportQuery } from './sub_steps/copy_export_query';
+import { RulesFileUpload } from './sub_steps/rules_file_upload';
+
+type Step = 1 | 2 | 3;
+const getStatus = (step: Step, currentStep: Step): EuiStepStatus => {
+  if (step === currentStep) {
+    return 'current';
+  }
+  if (step < currentStep) {
+    return 'complete';
+  }
+  return 'incomplete';
+};
 
 export const RulesDataInput = React.memo(() => {
-  const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [step, setStep] = useState<Step>(1);
 
-  const steps = useMemo(
+  const steps = useMemo<EuiStepProps[]>(
     () => [
       {
         title: 'Copy rule query',
-        children: <CopyQueryStep onComplete={() => setStep(2)} />,
+        status: getStatus(1, step),
+        children: <CopyExportQuery onComplete={() => setStep(2)} />,
+      },
+      {
+        title: 'Update your rule export',
+        status: getStatus(2, step),
+        children: <RulesFileUpload onComplete={() => setStep(3)} />,
       },
     ],
-    [setStep]
+    [setStep, step]
   );
 
   return (
@@ -39,29 +60,18 @@ export const RulesDataInput = React.memo(() => {
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiTitle size="xs">
-                <b>
-                  <FormattedMessage
-                    id="xpack.securitySolution.siemMigrations.rules.dataInputFlyout.rules.title"
-                    defaultMessage="Upload rule export and check for macros and lookups"
-                  />
-                </b>
+                <b>{i18n.RULES_DATA_INPUT_TITLE}</b>
               </EuiTitle>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiSteps titleSize="xxs" steps={steps} />
+          <SubStepWrapper>
+            <EuiSteps titleSize="xxs" steps={steps} />
+          </SubStepWrapper>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>
   );
 });
 RulesDataInput.displayName = 'RulesDataInput';
-
-interface StepProps {
-  onComplete: () => void;
-}
-const CopyQueryStep = React.memo<StepProps>(({ onComplete }) => {
-  return <p>{'Do this first'}</p>;
-});
-CopyQueryStep.displayName = 'CopyQueryStep';

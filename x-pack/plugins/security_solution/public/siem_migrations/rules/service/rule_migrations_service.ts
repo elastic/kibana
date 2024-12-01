@@ -11,7 +11,6 @@ import type {
   CreateRuleMigrationRequestBody,
   CreateRuleMigrationResponse,
   GetAllStatsRuleMigrationResponse,
-  StartRuleMigrationRequestBody,
 } from '../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import { SiemMigrationTaskStatus } from '../../../../common/siem_migrations/constants';
 import type { StartPluginsDependencies } from '../../../types';

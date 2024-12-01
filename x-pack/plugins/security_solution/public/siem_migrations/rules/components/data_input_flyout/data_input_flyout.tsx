@@ -19,7 +19,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import { DataInputStep } from './constants';
-import { RulesDataInput } from './rules_data_input';
+import { RulesDataInput } from './steps/rules/rules_data_input';
 
 export interface MigrationDataInputFlyoutProps {
   onClose: () => void;

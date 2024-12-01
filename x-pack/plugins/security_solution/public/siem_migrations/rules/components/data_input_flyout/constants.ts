@@ -10,3 +10,17 @@ export enum DataInputStep {
   macros = 'macros',
   lookups = 'lookups',
 }
+
+export const SPL_RULES_COLUMNS = [
+  'id',
+  'title',
+  'search',
+  'description',
+  'action.escu.eli5',
+  'action.correlationsearch.annotations',
+] as const;
+
+export const RULES_SPL_QUERY = `| rest /servicesNS/-/Splunk_Security_Essentials/saved/searches
+| union [ rest /servicesNS/-/SplunkEnterpriseSecuritySuite/saved/searches ]
+| search is_scheduled=1 disabled=0
+| table ${SPL_RULES_COLUMNS.join(', ')}`;
