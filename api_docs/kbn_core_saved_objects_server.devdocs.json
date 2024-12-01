@@ -6324,6 +6324,14 @@
             "path": "x-pack/plugins/canvas/server/routes/workpad/find.ts"
           },
           {
+            "plugin": "canvas",
+            "path": "x-pack/plugins/canvas/server/routes/workpad/has_workpads.ts"
+          },
+          {
+            "plugin": "canvas",
+            "path": "x-pack/plugins/canvas/server/routes/workpad/has_workpads.ts"
+          },
+          {
             "plugin": "enterpriseSearch",
             "path": "x-pack/plugins/enterprise_search/server/collectors/lib/telemetry.ts"
           },
@@ -10531,7 +10539,7 @@
             ],
             "label": "migrations",
             "description": [
-              "\nAn optional map of {@link SavedObjectMigrationFn | migrations} or a function returning a map of {@link SavedObjectMigrationFn | migrations} to be used to migrate the type."
+              "\nAn optional map of {@link SavedObjectMigrationFn | migrations} or a function returning a map of\n{@link SavedObjectMigrationFn | migrations} to be used to migrate the type.\n"
             ],
             "signature": [
               {
@@ -10738,10 +10746,6 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/server/saved_objects/saved_objects.ts"
-              },
-              {
-                "plugin": "logsShared",
-                "path": "x-pack/plugins/observability_solution/logs_shared/server/saved_objects/log_view/log_view_saved_object.ts"
               },
               {
                 "plugin": "graph",
@@ -11441,7 +11445,7 @@
             ],
             "label": "convertToMultiNamespaceTypeVersion",
             "description": [
-              "\nIf defined, objects of this type will be converted to a 'multiple' or 'multiple-isolated' namespace type when migrating to this\nversion.\n\nRequirements:\n\n 1. This string value must be a valid semver version\n 2. This type must have previously specified {@link SavedObjectsNamespaceType | `namespaceType: 'single'`}\n 3. This type must also specify {@link SavedObjectsNamespaceType | `namespaceType: 'multiple'`} *or*\n    {@link SavedObjectsNamespaceType | `namespaceType: 'multiple-isolated'`}\n\nExample of a single-namespace type in 7.12:\n\n```ts\n{\n  name: 'foo',\n  hidden: false,\n  namespaceType: 'single',\n  mappings: {...}\n}\n```\n\nExample after converting to a multi-namespace (isolated) type in 8.0:\n\n```ts\n{\n  name: 'foo',\n  hidden: false,\n  namespaceType: 'multiple-isolated',\n  mappings: {...},\n  convertToMultiNamespaceTypeVersion: '8.0.0'\n}\n```\n\nExample after converting to a multi-namespace (shareable) type in 8.1:\n\n```ts\n{\n  name: 'foo',\n  hidden: false,\n  namespaceType: 'multiple',\n  mappings: {...},\n  convertToMultiNamespaceTypeVersion: '8.0.0'\n}\n```\n\nNote: migration function(s) can be optionally specified for any of these versions and will not interfere with the conversion process."
+              "\nIf defined, objects of this type will be converted to a 'multiple' or 'multiple-isolated' namespace type when migrating to\nthis version.\n\nRequirements:\n\n 1. This string value must be a valid semver version\n 2. This type must have previously specified {@link SavedObjectsNamespaceType | `namespaceType: 'single'`}\n 3. This type must also specify {@link SavedObjectsNamespaceType | `namespaceType: 'multiple'`} *or*\n    {@link SavedObjectsNamespaceType | `namespaceType: 'multiple-isolated'`}\n\nExample of a single-namespace type in 7.12:\n\n```ts\n{\n  name: 'foo',\n  hidden: false,\n  namespaceType: 'single',\n  mappings: {...}\n}\n```\n\nExample after converting to a multi-namespace (isolated) type in 8.0:\n\n```ts\n{\n  name: 'foo',\n  hidden: false,\n  namespaceType: 'multiple-isolated',\n  mappings: {...},\n  convertToMultiNamespaceTypeVersion: '8.0.0'\n}\n```\n\nExample after converting to a multi-namespace (shareable) type in 8.1:\n\n```ts\n{\n  name: 'foo',\n  hidden: false,\n  namespaceType: 'multiple',\n  mappings: {...},\n  convertToMultiNamespaceTypeVersion: '8.0.0'\n}\n```\n\nNote: migration function(s) can be optionally specified for any of these versions and will not interfere with the conversion process."
             ],
             "signature": [
               "string | undefined"

@@ -13,12 +13,13 @@ import {
   EuiTabbedContent,
   EuiTabbedContentProps,
   useEuiOverflowScroll,
+  EuiBasicTableColumn,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { memo, useCallback, useMemo, useState } from 'react';
+import React, { memo, useMemo } from 'react';
 import { Alert } from '@kbn/alerting-types';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
+import { useEuiTablePersist } from '@kbn/shared-ux-table-persist';
 
 export const search = {
   box: {
@@ -66,28 +67,6 @@ export const ScrollableFlyoutTabbedContent = (props: EuiTabbedContentProps) => (
 
 const COUNT_PER_PAGE_OPTIONS = [25, 50, 100];
 
-const useFieldBrowserPagination = () => {
-  const [pagination, setPagination] = useState<{ pageIndex: number }>({
-    pageIndex: 0,
-  });
-
-  const onTableChange = useCallback(({ page: { index } }: { page: { index: number } }) => {
-    setPagination({ pageIndex: index });
-  }, []);
-  const paginationTableProp = useMemo(
-    () => ({
-      ...pagination,
-      pageSizeOptions: COUNT_PER_PAGE_OPTIONS,
-    }),
-    [pagination]
-  );
-
-  return {
-    onTableChange,
-    paginationTableProp,
-  };
-};
-
 type AlertField = Exclude<
   {
     [K in keyof Alert]: { key: K; value: Alert[K] };
@@ -111,7 +90,11 @@ export interface AlertFieldsTableProps {
  * A paginated, filterable table to show alert object fields
  */
 export const AlertFieldsTable = memo(({ alert, fields }: AlertFieldsTableProps) => {
-  const { onTableChange, paginationTableProp } = useFieldBrowserPagination();
+  const { pageSize, sorting, onTableChange } = useEuiTablePersist<AlertField>({
+    tableId: 'obltAlertFields',
+    initialPageSize: 25,
+  });
+
   const items = useMemo(() => {
     let _items = Object.entries(alert).map(
       ([key, value]) =>
@@ -131,7 +114,11 @@ export const AlertFieldsTable = memo(({ alert, fields }: AlertFieldsTableProps) 
       itemId="key"
       columns={columns}
       onTableChange={onTableChange}
-      pagination={paginationTableProp}
+      pagination={{
+        pageSize,
+        pageSizeOptions: COUNT_PER_PAGE_OPTIONS,
+      }}
+      sorting={sorting}
       search={search}
       css={css`
         & .euiTableRow {

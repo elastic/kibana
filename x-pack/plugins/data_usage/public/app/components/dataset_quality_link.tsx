@@ -6,13 +6,14 @@
  */
 
 import React from 'react';
-import { EuiListGroupItem } from '@elastic/eui';
 import {
   DataQualityDetailsLocatorParams,
   DATA_QUALITY_DETAILS_LOCATOR_ID,
 } from '@kbn/deeplinks-observability';
 import { useKibanaContextForPlugin } from '../../utils/use_kibana';
 import { useDateRangePicker } from '../hooks/use_date_picker';
+import { LegendActionItem } from './legend_action_item';
+import { UX_LABELS } from '../../translations';
 
 interface DatasetQualityLinkProps {
   dataStreamName: string;
@@ -39,6 +40,8 @@ export const DatasetQualityLink: React.FC<DatasetQualityLinkProps> = React.memo(
         await locator.navigate(locatorParams);
       }
     };
-    return <EuiListGroupItem label="View data quality" onClick={onClickDataQuality} />;
+    return (
+      <LegendActionItem label={UX_LABELS.dataQualityPopup.view} onClick={onClickDataQuality} />
+    );
   }
 );

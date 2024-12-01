@@ -2,9 +2,10 @@
   "type": "plugin",
   "id": "@kbn/search-playground",
   "owner": "@elastic/search-kibana",
-  // @kbn/enterprise-search-plugin (platform) and @kbn/serverless-search (search) depend on it
-  "group": "platform",
-  "visibility": "shared",
+  // TODO @kbn/enterprise-search-plugin (platform) and @kbn/serverless-search (search) depend on it
+  // cc sphilipse
+  "group": "search",
+  "visibility": "private",
   "plugin": {
     "id": "searchPlayground",
     "server": true,
@@ -17,6 +18,7 @@
       "actions",
       "data",
       "encryptedSavedObjects",
+      "ml",
       "navigation",
       "share",
       "security",

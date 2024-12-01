@@ -13,6 +13,7 @@ import {
   type ESQLCommand,
   type ESQLSingleAstItem,
   type ESQLFunction,
+  ESQLAst,
 } from '@kbn/esql-ast';
 import { logicalOperators } from '../../../definitions/builtin';
 import { isParameterType, type SupportedDataType } from '../../../definitions/types';
@@ -27,6 +28,10 @@ import {
 import { getOverlapRange, getSuggestionsToRightOfOperatorExpression } from '../../helper';
 import { getPosition } from './util';
 import { pipeCompleteItem } from '../../complete_items';
+import {
+  UNSUPPORTED_COMMANDS_BEFORE_MATCH,
+  UNSUPPORTED_COMMANDS_BEFORE_QSTR,
+} from '../../../shared/constants';
 
 export async function suggest(
   innerText: string,
@@ -35,7 +40,8 @@ export async function suggest(
   _columnExists: (column: string) => boolean,
   _getSuggestedVariableName: () => string,
   getExpressionType: (expression: ESQLAstItem | undefined) => SupportedDataType | 'unknown',
-  _getPreferences?: () => Promise<{ histogramBarTarget: number } | undefined>
+  _getPreferences?: () => Promise<{ histogramBarTarget: number } | undefined>,
+  fullTextAst?: ESQLAst
 ): Promise<SuggestionRawDefinition[]> {
   const suggestions: SuggestionRawDefinition[] = [];
 
@@ -154,11 +160,25 @@ export async function suggest(
       break;
 
     case 'empty_expression':
+      // Don't suggest MATCH or QSTR after unsupported commands
+      const priorCommands = fullTextAst?.map((a) => a.name) ?? [];
+      const ignored = [];
+      if (priorCommands.some((c) => UNSUPPORTED_COMMANDS_BEFORE_MATCH.has(c))) {
+        ignored.push('match');
+      }
+      if (priorCommands.some((c) => UNSUPPORTED_COMMANDS_BEFORE_QSTR.has(c))) {
+        ignored.push('qstr');
+      }
+
       const columnSuggestions = await getColumnsByType('any', [], {
         advanceCursor: true,
         openSuggestions: true,
       });
-      suggestions.push(...columnSuggestions, ...getFunctionSuggestions({ command: 'where' }));
+
+      suggestions.push(
+        ...columnSuggestions,
+        ...getFunctionSuggestions({ command: 'where', ignored })
+      );
 
       break;
   }

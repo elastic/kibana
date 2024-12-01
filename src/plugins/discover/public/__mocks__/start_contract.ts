@@ -32,6 +32,7 @@ export const createStartContractMock = (): jest.Mocked<ApplicationStart> => {
     capabilities,
     navigateToApp: jest.fn(),
     navigateToUrl: jest.fn(),
+    isAppRegistered: jest.fn(),
     getUrlForApp: jest.fn(),
   };
 };

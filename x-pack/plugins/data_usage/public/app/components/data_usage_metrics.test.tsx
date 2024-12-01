@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import React from 'react';
-
-import { render, waitFor } from '@testing-library/react';
+import { TestProvider } from '../../../common/test_utils';
+import { render, waitFor, within, type RenderResult } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
 import { DataUsageMetrics } from './data_usage_metrics';
 import { useGetDataUsageMetrics } from '../../hooks/use_get_usage_metrics';
@@ -104,21 +103,6 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
                     to: 'now',
                     display: 'Last 7 days',
                   },
-                  {
-                    from: 'now-30d',
-                    to: 'now',
-                    display: 'Last 30 days',
-                  },
-                  {
-                    from: 'now-90d',
-                    to: 'now',
-                    display: 'Last 90 days',
-                  },
-                  {
-                    from: 'now-1y',
-                    to: 'now',
-                    display: 'Last 1 year',
-                  },
                 ],
               };
               return x[k];
@@ -147,10 +131,18 @@ const getBaseMockedDataUsageMetrics = () => ({
   refetch: jest.fn(),
 });
 
+const generateDataStreams = (count: number) => {
+  return Array.from({ length: count }, (_, i) => ({
+    name: `.ds-${i}`,
+    storageSizeBytes: 1024 ** 2 * (22 / 7),
+  }));
+};
+
 describe('DataUsageMetrics', () => {
   let user: UserEvent;
   const testId = 'test';
   const testIdFilter = `${testId}-filter`;
+  let renderComponent: () => RenderResult;
 
   beforeAll(() => {
     jest.useFakeTimers();
@@ -162,20 +154,27 @@ describe('DataUsageMetrics', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    renderComponent = () =>
+      render(
+        <TestProvider>
+          <DataUsageMetrics data-test-subj={testId} />
+        </TestProvider>
+      );
     user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime, pointerEventsCheck: 0 });
     mockUseGetDataUsageMetrics.mockReturnValue(getBaseMockedDataUsageMetrics);
     mockUseGetDataUsageDataStreams.mockReturnValue(getBaseMockedDataStreams);
   });
 
   it('renders', () => {
-    const { getByTestId } = render(<DataUsageMetrics data-test-subj={testId} />);
+    const { getByTestId } = renderComponent();
     expect(getByTestId(`${testId}`)).toBeTruthy();
   });
 
   it('should show date filter', () => {
-    const { getByTestId } = render(<DataUsageMetrics data-test-subj={testId} />);
-    expect(getByTestId(`${testIdFilter}-date-range`)).toBeTruthy();
-    expect(getByTestId(`${testIdFilter}-date-range`).textContent).toContain('Last 24 hours');
+    const { getByTestId } = renderComponent();
+    const dateFilter = getByTestId(`${testIdFilter}-date-range`);
+    expect(dateFilter).toBeTruthy();
+    expect(dateFilter.textContent).toContain('to');
     expect(getByTestId(`${testIdFilter}-super-refresh-button`)).toBeTruthy();
   });
 
@@ -184,87 +183,102 @@ describe('DataUsageMetrics', () => {
       ...getBaseMockedDataStreams,
       isFetching: true,
     });
-    const { queryByTestId } = render(<DataUsageMetrics data-test-subj={testId} />);
+    const { queryByTestId } = renderComponent();
     expect(queryByTestId(`${testIdFilter}-dataStreams-popoverButton`)).not.toBeTruthy();
   });
 
   it('should show data streams filter', () => {
-    const { getByTestId } = render(<DataUsageMetrics data-test-subj={testId} />);
+    const { getByTestId } = renderComponent();
     expect(getByTestId(`${testIdFilter}-dataStreams-popoverButton`)).toBeTruthy();
   });
 
   it('should show selected data streams on the filter', () => {
     mockUseGetDataUsageDataStreams.mockReturnValue({
       error: undefined,
-      data: [
-        {
-          name: '.ds-1',
-          storageSizeBytes: 10000,
-        },
-        {
-          name: '.ds-2',
-          storageSizeBytes: 20000,
-        },
-        {
-          name: '.ds-3',
-          storageSizeBytes: 10300,
-        },
-        {
-          name: '.ds-4',
-          storageSizeBytes: 23000,
-        },
-        {
-          name: '.ds-5',
-          storageSizeBytes: 23200,
-        },
-      ],
+      data: generateDataStreams(5),
       isFetching: false,
     });
-    const { getByTestId } = render(<DataUsageMetrics data-test-subj={testId} />);
+    const { getByTestId } = renderComponent();
     expect(getByTestId(`${testIdFilter}-dataStreams-popoverButton`)).toHaveTextContent(
       'Data streams5'
     );
   });
 
-  it('should allow de-selecting all but one data stream option', async () => {
+  it('should show at most 50 selected data streams on the filter', async () => {
     mockUseGetDataUsageDataStreams.mockReturnValue({
       error: undefined,
-      data: [
-        {
-          name: '.ds-1',
-          storageSizeBytes: 10000,
-        },
-        {
-          name: '.ds-2',
-          storageSizeBytes: 20000,
-        },
-        {
-          name: '.ds-3',
-          storageSizeBytes: 10300,
-        },
-        {
-          name: '.ds-4',
-          storageSizeBytes: 23000,
-        },
-        {
-          name: '.ds-5',
-          storageSizeBytes: 23200,
-        },
-      ],
+      data: generateDataStreams(100),
       isFetching: false,
     });
-    const { getByTestId, getAllByTestId } = render(<DataUsageMetrics data-test-subj={testId} />);
-    expect(getByTestId(`${testIdFilter}-dataStreams-popoverButton`)).toHaveTextContent(
-      'Data streams5'
-    );
-    await user.click(getByTestId(`${testIdFilter}-dataStreams-popoverButton`));
+    const { getByTestId } = renderComponent();
+    const toggleFilterButton = getByTestId(`${testIdFilter}-dataStreams-popoverButton`);
+
+    expect(toggleFilterButton).toHaveTextContent('Data streams50');
+  });
+
+  it('should allow de-selecting data stream options', async () => {
+    mockUseGetDataUsageDataStreams.mockReturnValue({
+      error: undefined,
+      data: generateDataStreams(10),
+      isFetching: false,
+    });
+    const { getByTestId, getAllByTestId } = renderComponent();
+    const toggleFilterButton = getByTestId(`${testIdFilter}-dataStreams-popoverButton`);
+
+    expect(toggleFilterButton).toHaveTextContent('Data streams10');
+    await user.click(toggleFilterButton);
     const allFilterOptions = getAllByTestId('dataStreams-filter-option');
-    for (let i = 0; i < allFilterOptions.length - 1; i++) {
+    // deselect 9 options
+    for (let i = 0; i < allFilterOptions.length; i++) {
       await user.click(allFilterOptions[i]);
     }
 
-    expect(getByTestId(`${testIdFilter}-dataStreams-popoverButton`)).toHaveTextContent(
-      'Data streams1'
+    expect(toggleFilterButton).toHaveTextContent('Data streams1');
+    expect(within(toggleFilterButton).getByRole('marquee').getAttribute('aria-label')).toEqual(
+      '1 active filters'
+    );
+  });
+
+  it('should allow selecting/deselecting all data stream options using `select all` and `clear all`', async () => {
+    mockUseGetDataUsageDataStreams.mockReturnValue({
+      error: undefined,
+      data: generateDataStreams(10),
+      isFetching: false,
+    });
+    const { getByTestId } = renderComponent();
+    const toggleFilterButton = getByTestId(`${testIdFilter}-dataStreams-popoverButton`);
+
+    expect(toggleFilterButton).toHaveTextContent('Data streams10');
+    await user.click(toggleFilterButton);
+
+    // all options are selected on load
+    expect(within(toggleFilterButton).getByRole('marquee').getAttribute('aria-label')).toEqual(
+      '10 active filters'
+    );
+
+    const selectAllButton = getByTestId(`${testIdFilter}-dataStreams-selectAllButton`);
+    const clearAllButton = getByTestId(`${testIdFilter}-dataStreams-clearAllButton`);
+
+    // select all is disabled
+    expect(selectAllButton).toBeTruthy();
+    expect(selectAllButton.getAttribute('disabled')).not.toBeNull();
+
+    // clear all is enabled
+    expect(clearAllButton).toBeTruthy();
+    expect(clearAllButton.getAttribute('disabled')).toBeNull();
+    // click clear all and expect all options to be deselected
+    await user.click(clearAllButton);
+    expect(within(toggleFilterButton).getByRole('marquee').getAttribute('aria-label')).toEqual(
+      '10 available filters'
+    );
+    // select all is enabled again
+    expect(await selectAllButton.getAttribute('disabled')).toBeNull();
+    // click select all
+    await user.click(selectAllButton);
+
+    // all options are selected and clear all is disabled
+    expect(within(toggleFilterButton).getByRole('marquee').getAttribute('aria-label')).toEqual(
+      '10 active filters'
     );
   });
 
@@ -273,7 +287,7 @@ describe('DataUsageMetrics', () => {
       ...getBaseMockedDataStreams,
       data: [],
     });
-    render(<DataUsageMetrics data-test-subj={testId} />);
+    renderComponent();
     expect(mockUseGetDataUsageMetrics).toHaveBeenCalledWith(
       expect.any(Object),
       expect.objectContaining({ enabled: false })
@@ -285,7 +299,7 @@ describe('DataUsageMetrics', () => {
       ...getBaseMockedDataUsageMetrics,
       isFetching: true,
     });
-    const { getByTestId } = render(<DataUsageMetrics data-test-subj={testId} />);
+    const { getByTestId } = renderComponent();
     expect(getByTestId(`${testId}-charts-loading`)).toBeTruthy();
   });
 
@@ -294,47 +308,63 @@ describe('DataUsageMetrics', () => {
       ...getBaseMockedDataUsageMetrics,
       isFetched: true,
       data: {
-        metrics: {
-          ingest_rate: [
-            {
-              name: '.ds-1',
-              data: [{ x: new Date(), y: 1000 }],
-            },
-            {
-              name: '.ds-10',
-              data: [{ x: new Date(), y: 1100 }],
-            },
-          ],
-          storage_retained: [
-            {
-              name: '.ds-2',
-              data: [{ x: new Date(), y: 2000 }],
-            },
-            {
-              name: '.ds-20',
-              data: [{ x: new Date(), y: 2100 }],
-            },
-          ],
-        },
+        ingest_rate: [
+          {
+            name: '.ds-1',
+            data: [{ x: new Date(), y: 1000 }],
+          },
+          {
+            name: '.ds-10',
+            data: [{ x: new Date(), y: 1100 }],
+          },
+        ],
+        storage_retained: [
+          {
+            name: '.ds-2',
+            data: [{ x: new Date(), y: 2000 }],
+          },
+          {
+            name: '.ds-20',
+            data: [{ x: new Date(), y: 2100 }],
+          },
+        ],
       },
     });
-    const { getByTestId } = render(<DataUsageMetrics data-test-subj={testId} />);
+    const { getByTestId } = renderComponent();
     expect(getByTestId(`${testId}-charts`)).toBeTruthy();
   });
 
+  it('should show no charts callout', () => {
+    mockUseGetDataUsageMetrics.mockReturnValue({
+      ...getBaseMockedDataUsageMetrics,
+      isFetched: false,
+    });
+    const { getByTestId } = renderComponent();
+    expect(getByTestId(`${testId}-no-charts-callout`)).toBeTruthy();
+  });
+
   it('should refetch usage metrics with `Refresh` button click', async () => {
+    mockUseGetDataUsageDataStreams.mockReturnValue({
+      error: undefined,
+      data: generateDataStreams(3),
+      isFetching: false,
+    });
     const refetch = jest.fn();
     mockUseGetDataUsageMetrics.mockReturnValue({
       ...getBaseMockedDataUsageMetrics,
-      data: ['.ds-1', '.ds-2'],
-      isFetched: true,
-    });
-    mockUseGetDataUsageMetrics.mockReturnValue({
-      ...getBaseMockedDataUsageMetrics,
-      isFetched: true,
+      data: {},
+      isFetched: false,
       refetch,
     });
-    const { getByTestId } = render(<DataUsageMetrics data-test-subj={testId} />);
+    const { getByTestId, getAllByTestId } = renderComponent();
+
+    const toggleFilterButton = getByTestId(`${testIdFilter}-dataStreams-popoverButton`);
+
+    expect(toggleFilterButton).toHaveTextContent('Data streams3');
+    await user.click(toggleFilterButton);
+    const allFilterOptions = getAllByTestId('dataStreams-filter-option');
+    await user.click(allFilterOptions[2]);
+
     const refreshButton = getByTestId(`${testIdFilter}-super-refresh-button`);
     // click refresh 5 times
     for (let i = 0; i < 5; i++) {
@@ -343,7 +373,7 @@ describe('DataUsageMetrics', () => {
 
     expect(mockUseGetDataUsageMetrics).toHaveBeenLastCalledWith(
       expect.any(Object),
-      expect.objectContaining({ enabled: false })
+      expect.objectContaining({ enabled: true })
     );
     expect(refetch).toHaveBeenCalledTimes(5);
   });
@@ -354,7 +384,7 @@ describe('DataUsageMetrics', () => {
       isFetched: true,
       error: new Error('Uh oh!'),
     });
-    render(<DataUsageMetrics data-test-subj={testId} />);
+    renderComponent();
     await waitFor(() => {
       expect(mockServices.notifications.toasts.addDanger).toHaveBeenCalledWith({
         title: 'Error getting usage metrics',
@@ -369,7 +399,7 @@ describe('DataUsageMetrics', () => {
       isFetched: true,
       error: new Error('Uh oh!'),
     });
-    render(<DataUsageMetrics data-test-subj={testId} />);
+    renderComponent();
     await waitFor(() => {
       expect(mockServices.notifications.toasts.addDanger).toHaveBeenCalledWith({
         title: 'Error getting data streams',

@@ -1099,6 +1099,25 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
       return body;
     },
 
+    async runRule(roleAuthc: RoleCredentials, ruleId: string) {
+      return await retry.tryForTime(retryTimeout, async () => {
+        try {
+          const response = await supertestWithoutAuth
+            .post(`/internal/alerting/rule/${ruleId}/_run_soon`)
+            .set(samlAuth.getInternalRequestHeader())
+            .set(roleAuthc.apiKeyHeader)
+            .expect(204);
+
+          if (response.status !== 204) {
+            throw new Error(`runRuleSoon got ${response.status} status`);
+          }
+          return response;
+        } catch (error) {
+          throw new Error(`[Rule] Running a rule ${ruleId} failed: ${error}`);
+        }
+      });
+    },
+
     async findInRules(roleAuthc: RoleCredentials, ruleId: string) {
       const response = await supertestWithoutAuth
         .get('/api/alerting/rules/_find')
@@ -1122,7 +1141,7 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
         .set(samlAuth.getInternalRequestHeader());
     },
 
-    async deleteRules({ roleAuthc, filter }: { roleAuthc: RoleCredentials; filter: string }) {
+    async deleteRules({ roleAuthc, filter = '' }: { roleAuthc: RoleCredentials; filter?: string }) {
       const response = await this.searchRules(roleAuthc, filter);
       return Promise.all(
         response.body.data.map((rule: any) => this.deleteRuleById({ roleAuthc, ruleId: rule.id }))
@@ -1167,14 +1186,14 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
       connectorIndexName,
     }: {
       roleAuthc: RoleCredentials;
-      ruleId: string;
+      ruleId?: string;
       consumer?: string;
       alertIndexName?: string;
       connectorIndexName?: string;
     }) {
       return Promise.allSettled([
         // Delete the rule by ID
-        this.deleteRuleById({ roleAuthc, ruleId }),
+        ruleId ? this.deleteRuleById({ roleAuthc, ruleId }) : this.deleteRules({ roleAuthc }),
         // Delete all documents in the alert index if specified
         alertIndexName
           ? es.deleteByQuery({

@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 export { BASE_PATH } from './base_path';
 export { API_BASE_PATH, INTERNAL_API_BASE_PATH } from './api_base_path';
 export { INVALID_INDEX_PATTERN_CHARS, INVALID_TEMPLATE_NAME_CHARS } from './invalid_characters';
+export * from './index_modes';
 export * from './index_statuses';
 
 // Since each index can have a max length or 255 characters and the max length of

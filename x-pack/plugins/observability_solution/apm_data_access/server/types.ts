@@ -5,35 +5,17 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import type { SecurityPluginStart, SecurityPluginSetup } from '@kbn/security-plugin-types-server';
-import type {
-  DataDefinitionRegistryServerStart,
-  DataDefinitionRegistryServerSetup,
-} from '@kbn/data-definition-registry-plugin/server';
 import type { APMIndices } from '.';
 import { getServices } from './services/get_services';
-import type { ApmDataAccessPrivilegesCheck } from './lib/check_privileges';
 
 export interface ApmDataAccessPluginSetup {
   apmIndicesFromConfigFile: APMIndices;
-  getApmIndices: (soClient: SavedObjectsClientContract) => Promise<APMIndices>;
+  getApmIndices: () => Promise<APMIndices>;
   getServices: typeof getServices;
 }
 
-export interface ApmDataAccessServerStartDependencies {
-  security?: SecurityPluginStart;
-  dataDefinitionRegistry?: DataDefinitionRegistryServerStart;
-}
-
-export interface ApmDataAccessServerSetupDependencies {
-  security?: SecurityPluginSetup;
-  dataDefinitionRegistry?: DataDefinitionRegistryServerSetup;
-}
-
-export interface ApmDataAccessPluginStart {
-  hasPrivileges: (params: Pick<ApmDataAccessPrivilegesCheck, 'request'>) => Promise<boolean>;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface ApmDataAccessPluginStart {}
 
 export type ApmDataAccessServices = ReturnType<typeof getServices>;
 export type { ApmDataAccessServicesParams } from './services/get_services';
@@ -45,4 +27,3 @@ export type {
   APMEventESSearchRequest,
   APMLogEventESSearchRequest,
 } from './lib/helpers';
-export type { ApmDataAccessPrivilegesCheck };

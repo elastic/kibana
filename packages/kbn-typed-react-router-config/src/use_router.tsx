@@ -20,7 +20,7 @@ export const RouterContextProvider = ({
   children: React.ReactNode;
 }) => <RouterContext.Provider value={router}>{children}</RouterContext.Provider>;
 
-export function useRouter(): Router<RouteMap> {
+export function useRouter<TRouteMap extends RouteMap = RouteMap>(): Router<TRouteMap> {
   const router = useContext(RouterContext);
 
   if (!router) {
