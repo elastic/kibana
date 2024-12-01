@@ -174,11 +174,7 @@ export const ModelsList: FC<Props> = ({
   const fetchModelsData = useCallback(async () => {
     setIsLoading(true);
     try {
-      const resultItems = await trainedModelsApiService.getTrainedModels(undefined, {
-        with_pipelines: true,
-        with_indices: false,
-        with_stats: true,
-      });
+      const resultItems = await trainedModelsApiService.getTrainedModelsList();
 
       setItems((prevItems) => {
         // Need to merge existing items with new items
@@ -187,7 +183,7 @@ export const ModelsList: FC<Props> = ({
           const prevItem = prevItems.find((i) => i.model_id === item.model_id);
           return {
             ...item,
-            ...(!isDFAModelItem(prevItem) && prevItem?.state === MODEL_STATE.DOWNLOADING
+            ...(isBaseNLPModelItem(prevItem) && prevItem?.state === MODEL_STATE.DOWNLOADING
               ? {
                   state: prevItem.state,
                   downloadState: prevItem.downloadState,

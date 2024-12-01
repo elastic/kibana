@@ -195,12 +195,12 @@ export class ModelsProvider {
    */
   async assignModelStats(
     trainedModels: ExistingModelBase[],
-    params: { modelId?: string }
+    params?: { modelId?: string }
   ): Promise<TrainedModelItem[]> {
     // Fetch trained model stats
     const { trained_model_stats: modelsStatsResponse } = await this._mlClient.getTrainedModelsStats(
       {
-        ...(params.modelId ? { model_id: params.modelId } : {}),
+        ...(params?.modelId ? { model_id: params.modelId } : {}),
         size: 10000,
       }
     );
@@ -242,6 +242,9 @@ export class ModelsProvider {
     });
   }
 
+  /**
+   * Merges the list of models with the list of models available for download.
+   */
   async includeModelDownloads(resultItems: TrainedModelUIItem[]): Promise<TrainedModelUIItem[]> {
     const idMap = new Map<string, TrainedModelUIItem>(
       resultItems.map((model) => [model.model_id, model])
@@ -369,12 +372,12 @@ export class ModelsProvider {
   /**
    * Returns a complete list of entities for the Trained Models UI
    */
-  async getTrainedModelList(params: GetTrainedModelsParams) {
+  async getTrainedModelList(): Promise<TrainedModelUIItem[]> {
     const resp = await this._mlClient.getTrainedModels({
-      ...(params.modelId ? { model_id: params.modelId } : {}),
-      size: params.size ?? DEFAULT_TRAINED_MODELS_PAGE_SIZE,
-      include: params.include,
+      size: DEFAULT_TRAINED_MODELS_PAGE_SIZE,
     } as MlGetTrainedModelsRequest);
+
+    let resultItems: TrainedModelUIItem[] = [];
 
     // Filter models based on enabled features
     const filteredModels = filterForEnabledFeatureModels(
@@ -397,28 +400,20 @@ export class ModelsProvider {
       };
     });
 
-    let models: TrainedModelUIItem[] = formattedModels as TrainedModelUIItem[];
-
     // Update inference endpoints info
-    // @ts-ignore FIXME: fix assignInferenceEndpoints type
-    await this.assignInferenceEndpoints(models);
+    await this.assignInferenceEndpoints(formattedModels);
 
-    if (params.withStats) {
-      // @ts-ignore FIXME: fix assignModelStats type
-      models = await this.assignModelStats(models, { modelId: params.modelId });
+    // Assign model stats
+    resultItems = await this.assignModelStats(formattedModels);
+
+    if (this._enabledFeatures.nlp) {
+      resultItems = await this.includeModelDownloads(resultItems);
     }
 
-    if (!params.modelId && this._enabledFeatures.nlp) {
-      // Means the full list is requested, hence include models downloads. Also make sure that NLP feature is enabled.
-      models = await this.includeModelDownloads(models);
-    }
+    // @ts-ignore FIXME: fix assignPipelines type
+    // models = await this.assignPipelines(models);
 
-    if (params.withPipelines) {
-      // @ts-ignore FIXME: fix assignPipelines type
-      // models = await this.assignPipelines(models);
-    }
-
-    return models;
+    return resultItems;
   }
 
   /**

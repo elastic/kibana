@@ -26,6 +26,7 @@ import type {
   MemoryUsageInfo,
   ModelDownloadState,
   TrainedModelUIItem,
+  TrainedModelConfigResponse,
 } from '../../../../common/types/trained_models';
 
 export interface InferenceQueryParams {
@@ -115,10 +116,23 @@ export function trainedModelsApiProvider(httpService: HttpService) {
     getTrainedModels(modelId?: string | string[], params?: InferenceQueryParams) {
       const model = Array.isArray(modelId) ? modelId.join(',') : modelId;
 
-      return httpService.http<TrainedModelUIItem[]>({
+      return httpService.http<TrainedModelConfigResponse[]>({
         path: `${ML_INTERNAL_BASE_PATH}/trained_models${model ? `/${model}` : ''}`,
         method: 'GET',
         ...(params ? { query: params as HttpFetchQuery } : {}),
+        version: '1',
+      });
+    },
+
+    /**
+     * Fetches a complete list of trained models required for UI
+     * including stats for each model, pipelines definitions, and
+     * models available for download.
+     */
+    getTrainedModelsList() {
+      return httpService.http<TrainedModelUIItem[]>({
+        path: `${ML_INTERNAL_BASE_PATH}/trained_models_list`,
+        method: 'GET',
         version: '1',
       });
     },

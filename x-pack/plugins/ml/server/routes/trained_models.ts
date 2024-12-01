@@ -68,6 +68,36 @@ export function trainedModelsRoutes(
 ) {
   router.versioned
     .get({
+      path: `${ML_INTERNAL_BASE_PATH}/trained_models_list`,
+      access: 'internal',
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetTrainedModels'],
+        },
+      },
+      summary: 'Get info of a trained inference model',
+      description: 'Retrieves configuration information for a trained model.',
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: false,
+      },
+      routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
+        try {
+          const modelsClient = modelsProvider(client, mlClient, cloud, getEnabledFeatures());
+          const models = await modelsClient.getTrainedModelList();
+          return response.ok({
+            body: models,
+          });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
+      })
+    );
+
+  router.versioned
+    .get({
       path: `${ML_INTERNAL_BASE_PATH}/trained_models/{modelId?}`,
       access: 'internal',
       security: {

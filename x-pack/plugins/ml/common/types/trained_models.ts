@@ -21,7 +21,7 @@ import type {
   FeatureImportanceBaseline,
   TotalFeatureImportance,
 } from '@kbn/ml-data-frame-analytics-utils';
-import type { IndexName, IndicesIndexState } from '@elastic/elasticsearch/lib/api/types';
+// import type { IndexName, IndicesIndexState } from '@elastic/elasticsearch/lib/api/types';
 import type { XOR } from './common';
 import type { MlSavedObjectType } from './saved_objects';
 
@@ -125,7 +125,6 @@ export type TrainedModelConfigResponse = estypes.MlTrainedModelConfig & {
    */
   // indices?: Array<Record<IndexName, IndicesIndexState | null>>;
 
-  // ONLY IF INCLUDE INFERENCE SERVICES
   /**
    * Whether the model has inference services
    */
@@ -348,7 +347,7 @@ export type ModelDownloadItem = BaseNLPModelItem &
 /** Trained NLP model, i.e. pytorch model returned by the trained_models API */
 export type NLPModelItem = BaseNLPModelItem &
   TrainedModelItem & {
-    stats?: Stats & { deployment_stats: TrainedModelDeploymentStatsResponse[] };
+    stats: Stats & { deployment_stats: TrainedModelDeploymentStatsResponse[] };
     /**
      * Description of the current model state
      */
