@@ -14,10 +14,10 @@ import {
   EuiFormRow,
   EuiSuperSelect,
   EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 
-import { euiThemeVars } from '@kbn/ui-theme';
 import {
   PromptResponse,
   PromptTypeEnum,
@@ -56,6 +56,7 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
   selectedPrompt,
   setIsSettingsModalVisible,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const { setSelectedSettingsTab } = useAssistantContext();
   const allSystemPrompts = useMemo(
     () => allPrompts.filter((p) => p.promptType === PromptTypeEnum.system),
@@ -128,7 +129,7 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
           <EuiSuperSelect
             // Limits popover z-index to prevent it from getting too high and covering tooltips.
             // If the z-index is not defined, when a popover is opened, it sets the target z-index + 2000
-            popoverProps={{ zIndex: euiThemeVars.euiZLevel8 }}
+            popoverProps={{ zIndex: euiTheme.levels.modal as number }}
             compressed={compressed}
             data-test-subj={TEST_IDS.PROMPT_SUPERSELECT}
             fullWidth
@@ -168,10 +169,10 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
                 inline-size: 16px;
                 block-size: 16px;
                 border-radius: 16px;
-                background: ${euiThemeVars.euiColorMediumShade};
+                background: ${euiTheme.colors.backgroundBaseFormsControlDisabled};
 
                 :hover:not(:disabled) {
-                  background: ${euiThemeVars.euiColorMediumShade};
+                  background: ${euiTheme.colors.backgroundBaseFormsControlDisabled};
                   transform: none;
                 }
 

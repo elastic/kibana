@@ -5,19 +5,27 @@
  * 2.0.
  */
 
-import { EuiText, EuiToolTip } from '@elastic/eui';
+import { EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import type { EuiSuperSelectOption } from '@elastic/eui';
-import React from 'react';
-import styled from '@emotion/styled';
+import React, { PropsWithChildren } from 'react';
 import { isEmpty } from 'lodash/fp';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { PromptResponse } from '@kbn/elastic-assistant-common';
 import { css } from '@emotion/react';
 import { EMPTY_PROMPT } from './translations';
 
-const Strong = styled.strong`
-  margin-right: ${euiThemeVars.euiSizeS};
-`;
+const Strong = (props: PropsWithChildren) => {
+  const { euiTheme } = useEuiTheme();
+
+  return (
+    <strong
+      css={css`
+        margin-right: ${euiTheme.size.s};
+      `}
+    >
+      {props.children}
+    </strong>
+  );
+};
 
 interface GetOptionFromPromptProps extends PromptResponse {
   content: string;
@@ -25,23 +33,28 @@ interface GetOptionFromPromptProps extends PromptResponse {
   name: string;
 }
 
+const InputDisplay = ({ name }: { name: string }) => {
+  const { euiTheme } = useEuiTheme();
+
+  return (
+    <span
+      data-test-subj="systemPromptText"
+      css={css`
+        color: ${euiTheme.colors.darkestShade};
+      `}
+    >
+      {name}
+    </span>
+  );
+};
+
 export const getOptionFromPrompt = ({
   content,
   id,
   name,
 }: GetOptionFromPromptProps): EuiSuperSelectOption<string> => ({
   value: id,
-  inputDisplay: (
-    <span
-      data-test-subj="systemPromptText"
-      // @ts-ignore
-      css={css`
-        color: ${euiThemeVars.euiColorDarkestShade};
-      `}
-    >
-      {name}
-    </span>
-  ),
+  inputDisplay: <InputDisplay name={name} />,
   dropdownDisplay: (
     <>
       <Strong data-test-subj={`systemPrompt-${name}`}>{name}</Strong>

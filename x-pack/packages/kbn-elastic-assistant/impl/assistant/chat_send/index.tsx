@@ -7,8 +7,7 @@
 
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { css } from '@emotion/react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { euiThemeVars } from '@kbn/ui-theme';
+import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { UseChatSend } from './use_chat_send';
 import { ChatActions } from '../chat_actions';
 import { PromptTextArea } from '../prompt_textarea';
@@ -32,6 +31,10 @@ export const ChatSend: React.FC<Props> = ({
   shouldRefocusPrompt,
   userPrompt,
 }) => {
+  const { euiTheme } = useEuiTheme();
+
+  console.error('eui', euiTheme);
+
   // For auto-focusing prompt within timeline
   const promptTextAreaRef = useRef<HTMLTextAreaElement>(null);
   useEffect(() => {
@@ -77,9 +80,9 @@ export const ChatSend: React.FC<Props> = ({
         css={css`
           right: 0;
           position: absolute;
-          margin-right: ${euiThemeVars.euiSizeS};
-          margin-bottom: ${euiThemeVars.euiSizeS};
         `}
+        // margin-right: ${euiTheme.size.s};
+        // margin-bottom: ${euiTheme.size.s};
         grow={false}
       >
         <ChatActions

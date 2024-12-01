@@ -13,9 +13,15 @@ import React, {
   useMemo,
   useRef,
 } from 'react';
-import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
+import {
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiText,
+  useEuiTheme,
+} from '@elastic/eui';
 import { HttpSetup } from '@kbn/core-http-browser';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/react';
 import { PromptResponse } from '@kbn/elastic-assistant-common';
 import { AssistantAnimatedIcon } from '../assistant_animated_icon';
@@ -53,6 +59,8 @@ export const AssistantBody: FunctionComponent<Props> = ({
   isWelcomeSetup,
   setIsSettingsModalVisible,
 }) => {
+  const { euiTheme } = useEuiTheme();
+
   const isEmptyConversation = useMemo(
     () => currentConversation?.messages.length === 0,
     [currentConversation?.messages.length]
@@ -64,16 +72,16 @@ export const AssistantBody: FunctionComponent<Props> = ({
         <EuiText
           data-test-subj="assistant-disclaimer"
           textAlign="center"
-          color={euiThemeVars.euiColorMediumShade}
+          color={euiTheme.colors.backgroundBaseFormsControlDisabled}
           size="xs"
           css={css`
-            margin: 0 ${euiThemeVars.euiSizeL} ${euiThemeVars.euiSizeM} ${euiThemeVars.euiSizeL};
+            margin: 0 ${euiTheme.size.l} ${euiTheme.size.m} ${euiTheme.size.l};
           `}
         >
           {i18n.DISCLAIMER}
         </EuiText>
       ),
-    [isEmptyConversation]
+    [euiTheme, isEmptyConversation]
   );
 
   // Start Scrolling

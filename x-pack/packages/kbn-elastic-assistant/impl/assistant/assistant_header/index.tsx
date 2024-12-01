@@ -14,9 +14,9 @@ import {
   EuiPanel,
   EuiToolTip,
   EuiSkeletonTitle,
+  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { isEmpty } from 'lodash';
 import { DataStreamApis } from '../use_data_stream_apis';
 import { Conversation } from '../../..';
@@ -79,6 +79,8 @@ export const AssistantHeader: React.FC<Props> = ({
   isAssistantEnabled,
   refetchPrompts,
 }) => {
+  const { euiTheme } = useEuiTheme();
+
   const showAnonymizedValuesChecked = useMemo(
     () =>
       selectedConversation?.replacements != null &&
@@ -148,8 +150,8 @@ export const AssistantHeader: React.FC<Props> = ({
         hasShadow={false}
         paddingSize="m"
         css={css`
-          padding-top: ${euiThemeVars.euiSizeS};
-          padding-bottom: ${euiThemeVars.euiSizeS};
+          padding-top: ${euiTheme.size.s};
+          padding-bottom: ${euiTheme.size.s};
         `}
       >
         <EuiFlexGroup alignItems={'center'} justifyContent={'spaceBetween'} gutterSize="s">

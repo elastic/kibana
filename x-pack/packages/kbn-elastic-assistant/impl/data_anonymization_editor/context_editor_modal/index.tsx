@@ -25,7 +25,6 @@ import {
 } from '@elastic/eui';
 import { i18n as I18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { euiThemeVars } from '@kbn/ui-theme';
 import {
   AnonymizationFieldResponse,
   PerformAnonymizationFieldsBulkActionRequestBody,
@@ -48,6 +47,7 @@ export interface Props {
 }
 
 const SelectedPromptContextEditorModalComponent = ({ onClose, onSave, promptContext }: Props) => {
+  const { euiTheme } = useEuiTheme();
   const { http, toasts } = useAssistantContext();
   const [checked, setChecked] = useState(false);
   const checkboxId = useGeneratedHtmlId({ prefix: 'updateSettingPresetsCheckbox' });
@@ -187,7 +187,7 @@ const SelectedPromptContextEditorModalComponent = ({ onClose, onSave, promptCont
 
       <EuiModalFooter
         css={css`
-          background: ${euiThemeVars.euiColorLightestShade};
+          background: ${euiTheme.colors.lightestShade};
           padding-block: 16px;
         `}
       >

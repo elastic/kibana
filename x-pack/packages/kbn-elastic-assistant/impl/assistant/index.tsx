@@ -23,8 +23,8 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiFlyoutBody,
+  useEuiTheme,
 } from '@elastic/eui';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { createPortal } from 'react-dom';
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
@@ -79,6 +79,7 @@ const AssistantComponent: React.FC<Props> = ({
   setChatHistoryVisible,
   shouldRefocusPrompt = false,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const {
     assistantAvailability: { isAssistantEnabled },
     assistantTelemetry,
@@ -378,7 +379,7 @@ const AssistantComponent: React.FC<Props> = ({
           })}
           // Avoid comments going off the flyout
           css={css`
-            padding-bottom: ${euiThemeVars.euiSizeL};
+            padding-bottom: ${euiTheme.size.l};
 
             > li > div:nth-child(2) {
               overflow: hidden;
@@ -402,6 +403,7 @@ const AssistantComponent: React.FC<Props> = ({
       setIsStreaming,
       currentUserAvatar,
       currentSystemPrompt?.content,
+      euiTheme.size.l,
       selectedPromptContextsCount,
     ]
   );
@@ -425,7 +427,7 @@ const AssistantComponent: React.FC<Props> = ({
           grow={false}
           css={css`
             inline-size: ${CONVERSATION_SIDE_PANEL_WIDTH}px;
-            border-right: 1px solid ${euiThemeVars.euiColorLightShade};
+            border-right: 1px solid ${euiTheme.colors.borderBasePlain};
           `}
         >
           <ConversationSidePanel
@@ -531,7 +533,7 @@ const AssistantComponent: React.FC<Props> = ({
               <EuiFlyoutFooter
                 css={css`
                   background: none;
-                  border-top: 1px solid ${euiThemeVars.euiColorLightShade};
+                  border-top: 1px solid ${euiTheme.colors.borderBasePlain};
                   overflow: hidden;
                   max-height: 60%;
                   display: flex;
@@ -591,7 +593,7 @@ const AssistantComponent: React.FC<Props> = ({
                 {!isDisabled && (
                   <EuiPanel
                     css={css`
-                      background: ${euiThemeVars.euiColorLightestShade};
+                      background: ${euiTheme.colors.lightestShade};
                     `}
                     hasShadow={false}
                     paddingSize="m"
