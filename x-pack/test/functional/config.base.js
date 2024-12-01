@@ -610,6 +610,26 @@ export default async function ({ readConfigFile }) {
           ],
         },
 
+        index_management_manage_index_templates: {
+          elasticsearch: {
+            cluster: ['manage_index_templates'],
+            indices: [
+              {
+                names: ['*'],
+                privileges: ['all'],
+              },
+            ],
+          },
+          kibana: [
+            {
+              feature: {
+                advancedSettings: ['read'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
+
         index_management_monitor_only: {
           elasticsearch: {
             cluster: ['monitor'],

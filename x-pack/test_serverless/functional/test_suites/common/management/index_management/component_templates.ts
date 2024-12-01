@@ -21,7 +21,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   describe('Index component templates', function () {
     before(async () => {
-      await security.testUser.setRoles(['index_management_user']);
+      await security.testUser.setRoles(['index_management_manage_index_templates']);
       await pageObjects.svlCommonPage.loginAsAdmin();
     });
 
@@ -101,6 +101,18 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await testSubjects.click('nextButton');
 
         expect(await testSubjects.getVisibleText('title')).to.contain(TEST_COMPONENT_TEMPLATE);
+      });
+    });
+
+    describe('no access', () => {
+      before(async () => {
+        await security.testUser.setRoles(['index_management_monitor_only']);
+        await pageObjects.common.navigateToApp('indexManagement');
+        await pageObjects.header.waitUntilLoadingHasFinished();
+      });
+
+      it('hides the component templates tab', async () => {
+        await testSubjects.missingOrFail('component_templatesTab');
       });
     });
   });
