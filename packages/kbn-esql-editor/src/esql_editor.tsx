@@ -585,7 +585,7 @@ export const ESQLEditor = memo(function ESQLEditor({
     lightbulb: {
       enabled: false,
     },
-    lineDecorationsWidth: 12,
+    lineDecorationsWidth: 20,
     lineNumbers: 'on',
     lineNumbersMinChars: 3,
     minimap: { enabled: false },
