@@ -829,7 +829,6 @@ function TestForm({
         shouldLoadQueryDynamically={stepDefineDefaultValue.shouldLoadQueryDynamically}
         queryBarTitle=""
         queryBarSavedId=""
-        thresholdFields={[]}
         {...formProps}
       />
       <button type="button" onClick={form.submit}>
