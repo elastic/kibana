@@ -6,12 +6,9 @@
  */
 
 import React from 'react';
-import { EuiAutoSizer } from '@elastic/eui';
 import { useDiffableRuleDataView } from '../hooks/use_diffable_rule_data_view';
 import type { DiffableRule } from '../../../../../../../../../common/api/detection_engine';
 import { ThresholdEdit } from '../../../../../../../rule_creation/components/threshold_edit';
-
-const MIN_ROW_LAYOUT_WIDTH = 560;
 
 interface ThresholdAdapterProps {
   finalDiffableRule: DiffableRule;
@@ -22,17 +19,5 @@ export function ThresholdAdapter({ finalDiffableRule }: ThresholdAdapterProps): 
 
   const esFields = dataView?.fields ?? [];
 
-  return (
-    <EuiAutoSizer disableHeight>
-      {(size) => (
-        <div style={{ width: `${size.width}px` }}>
-          <ThresholdEdit
-            path="threshold"
-            esFields={esFields}
-            direction={size.width < MIN_ROW_LAYOUT_WIDTH ? 'column' : 'row'}
-          />
-        </div>
-      )}
-    </EuiAutoSizer>
-  );
+  return <ThresholdEdit path="threshold" esFields={esFields} />;
 }

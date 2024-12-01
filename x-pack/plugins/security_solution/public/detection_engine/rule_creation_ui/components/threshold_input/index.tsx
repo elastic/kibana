@@ -7,14 +7,11 @@
 
 import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-
 import type { DataViewFieldBase } from '@kbn/es-query';
 import type { FieldHook } from '../../../../shared_imports';
 import { Field } from '../../../../shared_imports';
-import { ResponsiveGroup, Operator } from './layout';
 import { THRESHOLD_FIELD_PLACEHOLDER } from './translations';
-
-const FIELD_COMBO_BOX_WIDTH = 410;
+import * as styles from './styles';
 
 export interface FieldValueThreshold {
   field: string[];
@@ -31,7 +28,6 @@ interface ThresholdInputProps {
   thresholdCardinalityField: FieldHook;
   thresholdCardinalityValue: FieldHook;
   browserFields: DataViewFieldBase[];
-  direction?: 'row' | 'column';
 }
 
 const fieldDescribedByIds = ['detectionEngineStepDefineRuleThresholdField'];
@@ -45,7 +41,6 @@ const ThresholdInputComponent: React.FC<ThresholdInputProps> = ({
   browserFields,
   thresholdCardinalityField,
   thresholdCardinalityValue,
-  direction = 'row',
 }: ThresholdInputProps) => {
   const fieldEuiFieldProps = useMemo(
     () => ({
@@ -54,9 +49,8 @@ const ThresholdInputComponent: React.FC<ThresholdInputProps> = ({
       options: browserFields.map((field) => ({ label: field.name })),
       placeholder: THRESHOLD_FIELD_PLACEHOLDER,
       onCreateOption: undefined,
-      style: direction === 'row' ? { width: `${FIELD_COMBO_BOX_WIDTH}px` } : {},
     }),
-    [browserFields, direction]
+    [browserFields]
   );
   const cardinalityFieldEuiProps = useMemo(
     () => ({
@@ -65,16 +59,15 @@ const ThresholdInputComponent: React.FC<ThresholdInputProps> = ({
       options: browserFields.map((field) => ({ label: field.name })),
       placeholder: THRESHOLD_FIELD_PLACEHOLDER,
       onCreateOption: undefined,
-      style: direction === 'row' ? { width: `${FIELD_COMBO_BOX_WIDTH}px` } : {},
       singleSelection: { asPlainText: true },
     }),
-    [browserFields, direction]
+    [browserFields]
   );
 
   return (
-    <EuiFlexGroup direction="column" style={{ marginLeft: 0 }}>
-      <ResponsiveGroup direction={direction}>
-        <EuiFlexItem grow={false}>
+    <EuiFlexGroup direction="column" className={styles.mainContainer}>
+      <EuiFlexGroup className={styles.fieldSection}>
+        <EuiFlexItem className={styles.dropdownContainer}>
           <Field
             field={thresholdField}
             idAria={fieldDescribedByIds[0]}
@@ -84,8 +77,8 @@ const ThresholdInputComponent: React.FC<ThresholdInputProps> = ({
             euiFieldProps={fieldEuiFieldProps}
           />
         </EuiFlexItem>
-        <Operator />
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem className={styles.operatorContainer}>{'>='}</EuiFlexItem>
+        <EuiFlexItem className={styles.input}>
           <Field
             field={thresholdValue}
             idAria={valueDescribedByIds[0]}
@@ -94,9 +87,9 @@ const ThresholdInputComponent: React.FC<ThresholdInputProps> = ({
             type={thresholdValue.type}
           />
         </EuiFlexItem>
-      </ResponsiveGroup>
-      <ResponsiveGroup direction={direction}>
-        <EuiFlexItem grow={false}>
+      </EuiFlexGroup>
+      <EuiFlexGroup className={styles.fieldSection}>
+        <EuiFlexItem className={styles.dropdownContainer}>
           <Field
             field={thresholdCardinalityField}
             idAria={cardinalityFieldDescribedByIds[0]}
@@ -106,8 +99,8 @@ const ThresholdInputComponent: React.FC<ThresholdInputProps> = ({
             euiFieldProps={cardinalityFieldEuiProps}
           />
         </EuiFlexItem>
-        <Operator />
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem className={styles.operatorContainer}>{'>='}</EuiFlexItem>
+        <EuiFlexItem className={styles.input}>
           <Field
             field={thresholdCardinalityValue}
             idAria={cardinalityValueDescribedByIds[0]}
@@ -116,7 +109,7 @@ const ThresholdInputComponent: React.FC<ThresholdInputProps> = ({
             type={thresholdCardinalityValue.type}
           />
         </EuiFlexItem>
-      </ResponsiveGroup>
+      </EuiFlexGroup>
     </EuiFlexGroup>
   );
 };

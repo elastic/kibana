@@ -19,14 +19,9 @@ import {
 interface ThresholdEditProps {
   path: string;
   esFields: FieldSpec[];
-  direction?: 'row' | 'column';
 }
 
-export function ThresholdEdit({
-  path,
-  esFields,
-  direction = 'row',
-}: ThresholdEditProps): JSX.Element {
+export function ThresholdEdit({ path, esFields }: ThresholdEditProps): JSX.Element {
   const ThresholdInputChildren = useCallback(
     ({
       thresholdField,
@@ -40,10 +35,9 @@ export function ThresholdEdit({
         thresholdValue={thresholdValue}
         thresholdCardinalityField={thresholdCardinalityField}
         thresholdCardinalityValue={thresholdCardinalityValue}
-        direction={direction}
       />
     ),
-    [esFields, direction]
+    [esFields]
   );
 
   const cardinalityFieldConfig = useMemo(() => getCardinalityFieldConfig(path), [path]);
