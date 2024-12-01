@@ -5,12 +5,13 @@
  * 2.0.
  */
 
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { APMIndices } from '.';
 import { getServices } from './services/get_services';
 
 export interface ApmDataAccessPluginSetup {
   apmIndicesFromConfigFile: APMIndices;
-  getApmIndices: () => Promise<APMIndices>;
+  getApmIndices: (soClient: SavedObjectsClientContract) => Promise<APMIndices>;
   getServices: typeof getServices;
 }
 

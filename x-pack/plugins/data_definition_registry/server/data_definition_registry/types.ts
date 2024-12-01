@@ -7,39 +7,19 @@
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { IScopedClusterClient, KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
-import { ValuesType } from 'utility-types';
-import { ToolSchema, FromToolSchema } from '@kbn/inference-common';
 import { Observable } from 'rxjs';
 
 interface DataDefinitionBase {
   id: string;
 }
 
-interface MetricDefinition {
-  id: string;
-  label: string;
-  schema: ToolSchema;
-  properties: Record<string, any>;
-}
-
-interface MetricInput {
-  metric: Omit<MetricDefinition, 'schema'>;
-  input: Record<string, any>;
-}
-
-interface DynamicDataAsset {
+interface DynamicDataAsset<TProperties extends Record<string, any> = Record<string, any>> {
   type: string;
   name?: string;
   instance: {
     id: string;
   };
-  properties: Record<string, any>;
-}
-
-interface DataScope<TAsset extends DynamicDataAsset = DynamicDataAsset> {
-  assets: TAsset[];
-  index: string | string[];
-  query: QueryDslQueryContainer;
+  properties: TProperties;
 }
 
 interface KibanaClientOptions {
@@ -61,174 +41,56 @@ interface QueryOptions {
 interface DataStreamOptions {
   dataStreams$: Observable<{
     all: Set<string>;
-    matches: (indexPattern: string) => boolean;
+    matches: (indexPattern: string | string[], options?: { includeRemote: boolean }) => boolean;
   }>;
 }
 
-type InternalGetDataScopeOptions = TimeRangeOptions & DataStreamOptions & KibanaClientOptions;
+type InternalGetQueriesOptions = DataStreamOptions & KibanaClientOptions;
+type InternalGetAssetsOptions = DataStreamOptions & KibanaClientOptions;
 
-type GetDataScopeOptions = TimeRangeOptions & QueryOptions;
+type GetAssetOptions = TimeRangeOptions & QueryOptions;
+type GetQueriesOptions = TimeRangeOptions & QueryOptions;
 
-type InternalGetMetricDefinitionOptions = TimeRangeOptions &
-  DataStreamOptions &
-  KibanaClientOptions;
-
-type GetMetricDefinitionOptions = TimeRangeOptions & QueryOptions;
-
-type InternalGetTimeseriesOptions = TimeRangeOptions &
-  Omit<QueryOptions, 'index'> & { metrics: MetricInput[] };
-
-type GetTimeseriesOptions = Omit<TimeRangeOptions, 'index'> &
-  QueryOptions & {
-    metrics: Array<MetricInput & { definitionId: string }>;
-  };
-
-interface Timeseries {
-  id: string;
-  label: string;
-  values: Array<{ x: number; y: number | null }>;
-  metricId: string;
-}
-
-type InternalGetDataScopeResult<TAsset extends DynamicDataAsset = DynamicDataAsset> = Array<
-  DataScope<TAsset>
->;
-
-type InternalGetTimeseriesResult = Timeseries[];
-
-type InternalGetMetricDefinitionResult = Partial<{
-  [key: string]: Omit<MetricDefinition, 'id'>;
-}>;
-
-interface MetricInputOf<
-  TMetricId extends string,
-  TMetricDefinition extends Omit<MetricDefinition, 'id'>
-> {
-  metric: Omit<TMetricDefinition, 'schema'> & { id: TMetricId };
-  input: FromToolSchema<TMetricDefinition['schema']>;
-}
-
-type F = keyof InternalGetTimeseriesOptions['metrics'][number]['metric'];
-type B =
-  keyof InternalGetTimeseriesOptionsOf<InternalGetMetricDefinitionResult>['metrics'][number]['metric'];
-
-type InternalGetTimeseriesOptionsOf<
-  TMetricDefinitionResult extends InternalGetMetricDefinitionResult
-> = Omit<InternalGetTimeseriesOptions, 'metrics'> & {
-  metrics: Array<
-    ValuesType<
-      Required<{
-        [TKey in keyof TMetricDefinitionResult & string]: MetricInputOf<
-          TKey,
-          Exclude<TMetricDefinitionResult[TKey], undefined>
-        >;
-      }>
-    >
-  >;
+type InternalDynamicGetQueriesOptions<TAsset extends DynamicDataAsset> = DataStreamOptions & {
+  assets: TAsset[];
 };
 
-interface StaticDataDefinition extends DataDefinitionBase {
-  getMetricDefinitions: (
-    options: InternalGetMetricDefinitionOptions
-  ) => Promise<InternalGetMetricDefinitionResult>;
-  getTimeseries: (options: InternalGetTimeseriesOptions) => Promise<InternalGetTimeseriesResult>;
+interface EsqlQueryTemplate {
+  query: string;
+  description: string;
 }
 
-interface DynamicDataDefinition extends DataDefinitionBase {
-  id: string;
-  asset: {
-    type: string;
-    name?: string;
-  };
-  getScopes: (options: InternalGetDataScopeOptions) => Promise<InternalGetDataScopeResult>;
-  getMetricDefinitions?: (
-    options: InternalGetMetricDefinitionOptions,
-    assets?: DynamicDataAsset[]
-  ) => Promise<InternalGetMetricDefinitionResult>;
-  getTimeseries?: (options: InternalGetTimeseriesOptions) => Promise<InternalGetTimeseriesResult>;
+interface StaticDataDefinition extends DataDefinitionBase {
+  getQueries: (options: InternalGetQueriesOptions) => Promise<EsqlQueryTemplate[]>;
+}
+
+interface DynamicDataDefinition<TAsset extends DynamicDataAsset = DynamicDataAsset>
+  extends DataDefinitionBase {
+  getAssets: (options: InternalGetAssetsOptions) => Promise<TAsset[]>;
+  getQueries: (options: InternalDynamicGetQueriesOptions<TAsset>) => Promise<EsqlQueryTemplate[]>;
 }
 
 type DataDefinition = DynamicDataDefinition | StaticDataDefinition;
 
 interface DataDefinitionRegistry {
-  registerStaticDataDefinition<TMetricDefinitionResult extends InternalGetMetricDefinitionResult>(
-    metadata: {
-      id: string;
-    },
-    getMetricDefinitions: (
-      options: InternalGetMetricDefinitionOptions
-    ) => Promise<TMetricDefinitionResult>,
-    getTimeseries: (
-      options: InternalGetTimeseriesOptionsOf<TMetricDefinitionResult>
-    ) => Promise<InternalGetTimeseriesResult>
-  ): void;
-  registerDynamicDataDefinition<TAsset extends DynamicDataAsset>(
-    metadata: {
-      id: string;
-      asset: {
-        type: string;
-        name?: string;
-      };
-    },
-    getScopes: (options: InternalGetDataScopeOptions) => Promise<InternalGetDataScopeResult>
-  ): void;
-  registerDynamicDataDefinition<
-    TAsset extends DynamicDataAsset,
-    TMetricDefinitionResult extends InternalGetMetricDefinitionResult
-  >(
-    metadata: {
-      id: string;
-      asset: {
-        type: string;
-        name?: string;
-      };
-    },
-    getScopes: (
-      options: InternalGetDataScopeOptions
-    ) => Promise<InternalGetDataScopeResult<TAsset>>,
-    getMetricDefinitions: (
-      options: InternalGetMetricDefinitionOptions,
-      assets?: TAsset[]
-    ) => Promise<TMetricDefinitionResult>,
-    getTimeseries: (
-      options: InternalGetTimeseriesOptionsOf<TMetricDefinitionResult>
-    ) => Promise<InternalGetTimeseriesResult>
-  ): void;
+  registerStaticDataDefinition: (definition: StaticDataDefinition) => void;
+  registerDynamicDataDefinition: <TAsset extends DynamicDataAsset>(
+    definition: DynamicDataDefinition<TAsset>
+  ) => void;
   getClientWithRequest(request: KibanaRequest): Promise<DataDefinitionRegistryClient>;
 }
 
-type GetDataScopeResult = Array<DataScope & { definitionId: string }>;
-
-type GetMetricDefinitionResult = {
-  [TMetricId in keyof InternalGetMetricDefinitionResult]: InternalGetMetricDefinitionResult[TMetricId] & {
-    definitionId: string;
-  };
-};
-
-type GetTimeseriesResult = Timeseries[];
-
 interface DataDefinitionRegistryClient {
-  getScopes: (options: GetDataScopeOptions) => Promise<GetDataScopeResult>;
-  getMetricDefinitions: (
-    options: GetMetricDefinitionOptions,
-    assets?: DynamicDataAsset[]
-  ) => Promise<GetMetricDefinitionResult>;
-  getTimeseries: (options: GetTimeseriesOptions) => Promise<GetTimeseriesResult>;
+  getAssets: (options: GetAssetOptions) => Promise<DynamicDataAsset[]>;
+  getQueries: (options: GetQueriesOptions) => Promise<EsqlQueryTemplate[]>;
 }
 
 export type {
   DataDefinition,
   DataDefinitionRegistry,
   DataDefinitionRegistryClient,
-  DataScope,
   DynamicDataAsset,
   DynamicDataDefinition,
-  GetMetricDefinitionResult,
-  GetDataScopeResult,
   StaticDataDefinition,
-  InternalGetTimeseriesOptions,
-  InternalGetTimeseriesResult,
-  InternalGetMetricDefinitionOptions,
-  InternalGetTimeseriesOptionsOf,
-  InternalGetMetricDefinitionResult,
+  EsqlQueryTemplate,
 };

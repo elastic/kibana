@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { castArray, uniq } from 'lodash';
+
 function parseIndex(index: string) {
   if (!index.includes(':')) {
     return { remote: null, index };
@@ -40,12 +42,16 @@ export function createIndexPatternMatcher(indices: string[]) {
   const all = new Set(indices);
   return {
     all,
-    matches: (indexPattern: string) => {
-      const allPatterns = indexPattern.split(',');
+    matches: (indexPattern: string | string[], options?: { includeRemote?: boolean }) => {
+      const allPatterns = uniq(castArray(indexPattern).flatMap((pattern) => pattern.split(',')));
+
+      const includeRemote = options?.includeRemote || false;
+
+      const fallbackRemote = includeRemote ? '*' : '';
 
       return allPatterns.some((pattern) => {
         const parsed = parseIndex(pattern);
-        const remoteMatcher = createPatternMatcher(parsed.remote ?? '');
+        const remoteMatcher = createPatternMatcher(parsed.remote ?? fallbackRemote);
         const indexMatcher = createPatternMatcher(parsed.index);
 
         return indicesWithRemote.some((index) => {

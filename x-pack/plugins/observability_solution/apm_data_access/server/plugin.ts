@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import {
+  CoreSetup,
+  CoreStart,
+  Logger,
+  Plugin,
+  PluginInitializerContext,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import { APMDataAccessConfig } from '.';
 import {
   apmIndicesSavedObjectDefinition,
@@ -30,10 +37,7 @@ export class ApmDataAccessPlugin
     // register saved object
     core.savedObjects.registerType(apmIndicesSavedObjectDefinition);
 
-    const getApmIndices = async () => {
-      const [coreStart] = await core.getStartServices();
-      const soClient = await coreStart.savedObjects.createInternalRepository();
-
+    const getApmIndices = async (soClient: SavedObjectsClientContract) => {
       const apmIndicesFromSavedObject = await getApmIndicesSavedObject(soClient);
       return { ...this.config.indices, ...apmIndicesFromSavedObject };
     };
