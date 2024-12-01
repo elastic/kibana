@@ -12,7 +12,11 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { CoreSetup, ElasticsearchClient, ISavedObjectsRepository } from '@kbn/core/server';
-import { CASE_SAVED_OBJECT } from '../../common/constants';
+import {
+  CASE_COMMENT_SAVED_OBJECT,
+  CASE_SAVED_OBJECT,
+  CASE_USER_ACTION_SAVED_OBJECT,
+} from '../../common/constants';
 import { TASK_NAME } from './constants';
 import { CaseAnalyticsIndexSyncTaskFactory } from './task_factory';
 import type { CasesServerStartDependencies } from '../types';
@@ -26,7 +30,11 @@ export const registerCaseAnalyticsIndexSyncTask = ({
 }) => {
   const getSavedOjectClient = async (): Promise<ISavedObjectsRepository> => {
     const [{ savedObjects }] = await core.getStartServices();
-    return savedObjects.createInternalRepository([CASE_SAVED_OBJECT]);
+    return savedObjects.createInternalRepository([
+      CASE_SAVED_OBJECT,
+      CASE_USER_ACTION_SAVED_OBJECT,
+      CASE_COMMENT_SAVED_OBJECT,
+    ]);
   };
 
   const getESClient = async (): Promise<ElasticsearchClient> => {
