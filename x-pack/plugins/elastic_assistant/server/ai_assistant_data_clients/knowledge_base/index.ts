@@ -236,7 +236,9 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
           // it's being used in the mapping so we need to force delete
           force: true,
         });
-        this.options.logger.debug(`Deleted existing inference endpoint for ELSER model '${elserId}'`);
+        this.options.logger.debug(
+          `Deleted existing inference endpoint for ELSER model '${elserId}'`
+        );
       } catch (error) {
         this.options.logger.error(
           `Error deleting inference endpoint for ELSER model '${elserId}':\n${error}`
