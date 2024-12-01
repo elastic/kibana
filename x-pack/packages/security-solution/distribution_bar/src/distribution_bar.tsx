@@ -36,6 +36,7 @@ const useStyles = () => {
         position: relative;
         border-radius: 2px;
         height: 5px;
+        min-width: 10px; // prevents bar from shrinking too small
       `,
       empty: css`
         background-color: ${euiTheme.colors.lightShade};
