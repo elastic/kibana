@@ -35,6 +35,7 @@ function extendPageWithTestSubject(page: Page): ScoutPage['testSubj'] {
 
   const extendedMethods: Partial<Record<keyof Page, Function>> & {
     typeWithDelay?: ScoutPage['testSubj']['typeWithDelay'];
+    clearInput?: ScoutPage['testSubj']['clearInput'];
   } = {};
 
   for (const method of methods) {
@@ -58,6 +59,11 @@ function extendPageWithTestSubject(page: Page): ScoutPage['testSubj'] {
       await page.keyboard.insertText(char);
       await page.waitForTimeout(delay);
     }
+  };
+  // custom method to clear an input field
+  extendedMethods.clearInput = async (selector: string) => {
+    const testSubjSelector = subj(selector);
+    await page.locator(testSubjSelector).fill('');
   };
 
   return extendedMethods as ScoutPage['testSubj'];

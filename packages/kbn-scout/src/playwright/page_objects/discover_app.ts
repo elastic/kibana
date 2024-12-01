@@ -43,7 +43,7 @@ export class DiscoverApp {
     await this.page.waitForLoadingIndicatorHidden();
   }
 
-  async waitForHistoramRendered() {
+  async waitForHistogramRendered() {
     await this.page.testSubj.waitForSelector('unifiedHistogramRendered');
   }
 }

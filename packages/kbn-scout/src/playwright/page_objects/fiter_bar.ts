@@ -50,7 +50,7 @@ export class FilterBar {
     await expect(this.page.testSubj.locator('^filter-badge')).toBeVisible();
   };
 
-  hasFilter(options: FilterExistsOptions) {
+  async hasFilter(options: FilterExistsOptions) {
     const testSubjLocator = [
       '~filter',
       options.enabled !== undefined && `~filter-${options.enabled ? 'enabled' : 'disabled'}`,
@@ -62,6 +62,6 @@ export class FilterBar {
       .filter(Boolean)
       .join(' & ');
 
-    return this.page.testSubj.locator(testSubjLocator);
+    return this.page.testSubj.isVisible(testSubjLocator, { strict: true });
   }
 }

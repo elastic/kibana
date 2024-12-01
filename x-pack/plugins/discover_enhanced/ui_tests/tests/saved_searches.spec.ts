@@ -13,12 +13,12 @@ const assertNoFilterAndEmptyQuery = async (
   pageObjects: ExtendedScoutTestFixtures['pageObjects'],
   page: ExtendedScoutTestFixtures['page']
 ) => {
-  await expect(
-    pageObjects.filterBar.hasFilter({
+  expect(
+    await pageObjects.filterBar.hasFilter({
       field: 'category',
       value: `Men's Shoes`,
     })
-  ).toBeHidden();
+  ).toBe(false);
   await expect(page.testSubj.locator('queryInput')).toHaveText('');
 };
 
@@ -62,7 +62,7 @@ test.describe(
 
       await pageObjects.dashboard.customizePanel({
         name: PANEL_NAME,
-        customTimeRageCommonlyUsed: { value: 'Last_90' },
+        customTimeRageCommonlyUsed: { value: 'Last_90 days' },
       });
       await expect(
         page.testSubj.locator('embeddedSavedSearchDocTable').locator('.euiDataGrid__noResults')
@@ -83,18 +83,18 @@ test.describe(
       });
       await page.testSubj.fill('queryInput', SEARCH_QUERY);
       await page.testSubj.click('querySubmitButton');
-      await pageObjects.discover.waitForHistoramRendered();
+      await pageObjects.discover.waitForHistogramRendered();
 
       await pageObjects.discover.saveSearch(SAVED_SEARCH_NAME);
-      await pageObjects.discover.waitForHistoramRendered();
+      await pageObjects.discover.waitForHistogramRendered();
 
-      await expect(
-        pageObjects.filterBar.hasFilter({
+      expect(
+        await pageObjects.filterBar.hasFilter({
           field: 'category',
           value: `Men's Shoes`,
           enabled: true,
         })
-      ).toBeVisible();
+      ).toBe(true);
       await expect(page.testSubj.locator('queryInput')).toHaveText(SEARCH_QUERY);
 
       // create new search

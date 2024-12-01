@@ -104,5 +104,11 @@ export type ScoutPage = Page & {
      * @returns A Promise that resolves once the text has been typed.
      */
     typeWithDelay: (selector: string, text: string, options?: { delay: number }) => Promise<void>;
+    /**
+     * Clears the input field by filling it with an empty string.
+     * @param selector The selector for the input element (supports 'data-test-subj' attributes).
+     * @returns A Promise that resolves once the text has been cleared.
+     */
+    clearInput: (selector: string) => Promise<void>;
   };
 };

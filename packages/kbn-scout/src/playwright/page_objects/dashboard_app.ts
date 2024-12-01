@@ -18,6 +18,7 @@ export class DashboardApp {
 
   async openNewDashboard() {
     await this.page.testSubj.click('newItemButton');
+    await this.page.testSubj.waitForSelector('emptyDashboardWidget', { state: 'visible' });
   }
 
   async saveDashboard(name: string) {
@@ -32,7 +33,7 @@ export class DashboardApp {
     for (let i = 0; i < names.length; i++) {
       // clear search input after the first panel is added
       if (i > 0) {
-        await this.page.testSubj.locator('savedObjectFinderSearchInput').fill('');
+        await this.page.testSubj.clearInput('savedObjectFinderSearchInput');
       }
       await this.page.testSubj.typeWithDelay('savedObjectFinderSearchInput', names[i]);
       await this.page.testSubj.click(`savedObjectTitle${names[i].replace(/ /g, '-')}`);
@@ -51,7 +52,16 @@ export class DashboardApp {
 
   async customizePanel(options: {
     name: string;
-    customTimeRageCommonlyUsed?: { value: 'Last_90' };
+    customTimeRageCommonlyUsed?: {
+      value:
+        | 'Today'
+        | 'Last_15 minutes'
+        | 'Last_1 hour'
+        | 'Last_24 hours'
+        | 'Last_30 days'
+        | 'Last_90 days'
+        | 'Last_1 year';
+    };
   }) {
     await this.page.testSubj.hover(`embeddablePanelHeading-${options.name.replace(/ /g, '')}`);
     await this.page.testSubj.click('embeddablePanelAction-ACTION_CUSTOMIZE_PANEL');
@@ -61,7 +71,7 @@ export class DashboardApp {
         'customizePanelTimeRangeDatePicker > superDatePickerToggleQuickMenuButton'
       );
       await this.page.testSubj.click(
-        `^superDatePickerCommonlyUsed_${options.customTimeRageCommonlyUsed.value}`
+        `superDatePickerCommonlyUsed_${options.customTimeRageCommonlyUsed.value}`
       );
     }
 
