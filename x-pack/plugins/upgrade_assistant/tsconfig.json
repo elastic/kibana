@@ -40,9 +40,6 @@
     "@kbn/react-kibana-context-render",
     "@kbn/data-views-plugin",
     "@kbn/deeplinks-observability",
-    "@kbn/core-logging-server-mocks",
-    "@kbn/core-http-server-mocks",
-    "@kbn/core-http-server-utils",
     "@kbn/core-elasticsearch-server"
   ],
   "exclude": [
