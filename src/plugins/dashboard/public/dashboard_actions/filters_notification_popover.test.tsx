@@ -18,6 +18,8 @@ import { FiltersNotificationActionApi } from './filters_notification_action';
 import { FiltersNotificationPopover } from './filters_notification_popover';
 import { ViewMode } from '@kbn/presentation-publishing';
 
+const canEditUnifiedSearch = jest.fn().mockReturnValue(true);
+
 const getMockPhraseFilter = (key: string, value: string): Filter => {
   return {
     meta: {
@@ -51,7 +53,6 @@ describe('filters notification popover', () => {
   let updateFilters: (filters: Filter[]) => void;
   let updateQuery: (query: Query | AggregateQuery | undefined) => void;
   let updateViewMode: (viewMode: ViewMode) => void;
-  let updateCanEditUnifiedSearch: (value: boolean) => void;
 
   beforeEach(async () => {
     const filtersSubject = new BehaviorSubject<Filter[] | undefined>(undefined);
@@ -60,9 +61,6 @@ describe('filters notification popover', () => {
     updateQuery = (query) => querySubject.next(query);
     const viewModeSubject = new BehaviorSubject<ViewMode>('view');
     updateViewMode = (viewMode) => viewModeSubject.next(viewMode);
-    let canEditUnifiedSearchValue = true;
-    const canEditUnifiedSearch = jest.fn().mockReturnValue(canEditUnifiedSearchValue);
-    updateCanEditUnifiedSearch = (value: boolean) => (canEditUnifiedSearchValue = value);
 
     api = {
       uuid: 'testId',
@@ -106,7 +104,7 @@ describe('filters notification popover', () => {
 
   it('does not render an edit button when canEditUnifiedSearch returns false', async () => {
     await renderAndOpenPopover();
-    updateCanEditUnifiedSearch(false);
+    canEditUnifiedSearch.mockReturnValueOnce(false);
     expect(
       await screen.queryByTestId('filtersNotificationModal__editButton')
     ).not.toBeInTheDocument();
