@@ -30,6 +30,8 @@ import {
   testIndexName,
   testIndexSettings,
   testIndexStats,
+  testSystemIndexMock,
+  testSystemIndexName,
 } from './mocks';
 
 jest.mock('@kbn/code-editor', () => {
@@ -1373,6 +1375,37 @@ describe('<IndexDetailsPage />', () => {
       testBed.component.update();
       const tabs = testBed.actions.getIndexDetailsTabs();
       expect(tabs).toEqual(['Overview', 'Mappings', 'Settings', 'Statistics', 'Test tab']);
+    });
+  });
+});
+describe('<IndexDetailsPage /> systemIndices', () => {
+  let testBed: IndexDetailsPageTestBed;
+  let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
+  let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
+
+  beforeEach(async () => {
+    const mockEnvironment = setupEnvironment();
+    ({ httpSetup, httpRequestsMockHelpers } = mockEnvironment);
+    httpRequestsMockHelpers.setLoadIndexDetailsResponse(testSystemIndexName, testSystemIndexMock);
+
+    await act(async () => {
+      testBed = await setup({
+        httpSetup,
+        dependencies: {
+          url: {
+            locators: {
+              get: () => ({ navigate: jest.fn() }),
+            },
+          },
+        },
+      });
+    });
+    testBed.component.update();
+  });
+
+  describe('Overview tab', () => {
+    it('do not renders code block for system indices', () => {
+      expect(testBed.actions.overview.addDocCodeBlockExists()).toBe(false);
     });
   });
 });
