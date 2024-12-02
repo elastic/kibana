@@ -1132,7 +1132,7 @@ export class TimeSeriesExplorer extends React.Component {
                       &nbsp;
                       {chartDetails.entityData.count === 1 &&
                         chartDetails.entityData.entities.length > 0 && (
-                          <EuiTextColor color={'textAccentSecondary'} size="s" component="span">
+                          <EuiTextColor color="accentSecondary" size="s" component="span">
                             (
                             {chartDetails.entityData.entities
                               .map((entity) => {
@@ -1143,7 +1143,7 @@ export class TimeSeriesExplorer extends React.Component {
                           </EuiTextColor>
                         )}
                       {chartDetails.entityData.count > 1 && (
-                        <EuiTextColor color={'textAccentSecondary'} size="s" component="span">
+                        <EuiTextColor color="accentSecondary" size="s" component="span">
                           {chartDetails.entityData.entities.map((countData, i) => {
                             return (
                               <Fragment key={countData.fieldName}>
