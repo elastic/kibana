@@ -6,7 +6,7 @@
  */
 
 import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
-import { forkJoin, from as rxjsFrom, Observable, of } from 'rxjs';
+import { concat, forkJoin, from as rxjsFrom, Observable, of } from 'rxjs';
 import { catchError, tap } from 'rxjs';
 import * as https from 'https';
 import { SslConfig } from '@kbn/server-http-tools';
@@ -215,21 +215,43 @@ export class ServiceAPIClient {
 
     const monitorsByLocation = this.processServiceData(serviceData);
 
-    monitorsByLocation.forEach(({ location: { url, id }, monitors, data }) => {
-      const promise = this.callServiceEndpoint(data, method, url, endpoint);
-      promises.push(
-        rxjsFrom(promise).pipe(
+    monitorsByLocation.forEach(({ location: { url, id }, data }) => {
+      const sendRequest = (payload: ServicePayload): Observable<any> => {
+        const promise = this.callServiceEndpoint(payload, method, url, endpoint);
+        return rxjsFrom(promise).pipe(
           tap((result) => {
-            this.logSuccessMessage(url, method, monitors.length, result);
+            this.logSuccessMessage(url, method, payload.monitors.length, result);
           }),
           catchError((err: AxiosError<{ reason: string; status: number }>) => {
+            if (err.response?.status === 413 && payload.monitors.length > 1) {
+              // If payload is too large, split it and retry
+              const mid = Math.ceil(payload.monitors.length / 2);
+              const firstHalfMonitors = payload.monitors.slice(0, mid);
+              const secondHalfMonitors = payload.monitors.slice(mid);
+
+              return concat(
+                sendRequest({
+                  ...payload,
+                  monitors: firstHalfMonitors,
+                }), // Retry with the first half
+                sendRequest({
+                  ...payload,
+                  monitors: secondHalfMonitors,
+                }) // Retry with the second half
+              );
+            }
+
             pushErrors.push({ locationId: id, error: err.response?.data! });
-            this.logServiceError(err, url, method, monitors.length);
-            // we don't want to throw an unhandled exception here
+            this.logServiceError(err, url, method, payload.monitors.length);
+
+            // Return an empty observable to prevent unhandled exceptions
             return of(true);
           })
-        )
-      );
+        );
+      };
+
+      // Start with the initial data payload
+      promises.push(sendRequest(data));
     });
 
     const result = await forkJoin(promises).toPromise();
