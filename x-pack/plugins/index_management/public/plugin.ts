@@ -54,6 +54,7 @@ export class IndexMgmtUIPlugin
     enableDataStreamStats: boolean;
     enableSizeAndDocCount: boolean;
     editableIndexSettings: 'all' | 'limited';
+    isIndexManagementUiEnabled: boolean;
     enableMappingsSourceFieldSection: boolean;
     enableTogglingDataRetention: boolean;
     enableProjectLevelRetentionChecks: boolean;
@@ -70,6 +71,7 @@ export class IndexMgmtUIPlugin
     setExtensionsService(this.extensionsService);
     this.kibanaVersion = new SemVer(ctx.env.packageInfo.version);
     const {
+      ui: { enabled: isIndexManagementUiEnabled },
       enableIndexActions,
       enableLegacyTemplates,
       enableIndexStats,
@@ -82,6 +84,7 @@ export class IndexMgmtUIPlugin
       dev: { enableSemanticText },
     } = ctx.config.get<ClientConfigType>();
     this.config = {
+      isIndexManagementUiEnabled,
       enableIndexActions: enableIndexActions ?? true,
       enableLegacyTemplates: enableLegacyTemplates ?? true,
       enableIndexStats: enableIndexStats ?? true,
@@ -104,7 +107,10 @@ export class IndexMgmtUIPlugin
     this.capabilities$.subscribe((capabilities) => {
       const { monitor, manageEnrich, monitorEnrich, manageIndexTemplates } =
         capabilities.index_management;
-      if (monitor || manageEnrich || monitorEnrich || manageIndexTemplates) {
+      if (
+        this.config.isIndexManagementUiEnabled &&
+        (monitor || manageEnrich || monitorEnrich || manageIndexTemplates)
+      ) {
         management.sections.section.data.registerApp({
           id: PLUGIN.id,
           title: i18n.translate('xpack.idxMgmt.appTitle', { defaultMessage: 'Index Management' }),
