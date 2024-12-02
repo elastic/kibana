@@ -1,7 +1,0 @@
-{
-  "prefix": "assetInventory",
-  "paths": {
-    "assetInventory": "."
-  },
-  "translations": ["translations/ja-JP.json"]
-}
