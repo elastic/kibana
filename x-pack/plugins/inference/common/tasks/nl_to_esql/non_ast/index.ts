@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { VersionMismatchPage } from './version_mismatch_page';
-export { VersionMismatchError } from './version_mismatch_error';
+export { correctCommonEsqlMistakes, splitIntoCommands } from './correct_common_esql_mistakes';

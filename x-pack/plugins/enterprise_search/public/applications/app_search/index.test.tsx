@@ -16,7 +16,6 @@ import { Redirect } from 'react-router-dom';
 
 import { shallow, ShallowWrapper } from 'enzyme';
 
-import { VersionMismatchPage } from '../shared/version_mismatch';
 import { rerender } from '../test_helpers';
 
 jest.mock('./app_logic', () => ({ AppLogic: jest.fn() }));
@@ -39,12 +38,6 @@ describe('AppSearch', () => {
     const wrapper = shallow(<AppSearch />);
 
     expect(wrapper.find(SetupGuide)).toHaveLength(1);
-  });
-
-  it('renders VersionMismatchPage when there are mismatching versions', () => {
-    const wrapper = shallow(<AppSearch enterpriseSearchVersion="7.15.0" kibanaVersion="7.16.0" />);
-
-    expect(wrapper.find(VersionMismatchPage)).toHaveLength(1);
   });
 
   it('renders AppSearchUnconfigured when config.host is not set', () => {
