@@ -290,7 +290,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
                 'data-test-subj': 'detectionEngineStepAboutRuleAuthor',
                 euiFieldProps: {
                   fullWidth: true,
-                  isDisabled: isLoading || (ruleSource && ruleSource.type === 'external'), // We don't allow "author" customization if this is a prebuilt rule
+                  isDisabled: isLoading || ruleSource?.type === 'external', // We don't allow "author" customization if this is a prebuilt rule
                   placeholder: '',
                 },
               }}
@@ -303,7 +303,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
                 'data-test-subj': 'detectionEngineStepAboutRuleLicense',
                 euiFieldProps: {
                   fullWidth: true,
-                  disabled: isLoading || (ruleSource && ruleSource.type === 'external'), // We don't allow "license" customization if this is a prebuilt rule
+                  disabled: isLoading || ruleSource?.type === 'external', // We don't allow "license" customization if this is a prebuilt rule
                   placeholder: '',
                 },
               }}
