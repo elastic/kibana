@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type React from 'react';
+import { act } from '@testing-library/react';
 import type { UseHostIsolationActionProps } from './use_host_isolation_action';
 import { useHostIsolationAction } from './use_host_isolation_action';
 import type { AppContextTestRender, UserPrivilegesMockSetter } from '../../../../mock/endpoint';
@@ -15,7 +16,6 @@ import type { AlertTableContextMenuItem } from '../../../../../detections/compon
 import type { ResponseActionsApiCommandNames } from '../../../../../../common/endpoint/service/response_actions/constants';
 import { agentStatusMocks } from '../../../../../../common/endpoint/service/response_actions/mocks/agent_status.mocks';
 import { ISOLATE_HOST, UNISOLATE_HOST } from './translations';
-import type React from 'react';
 import {
   HOST_ENDPOINT_UNENROLLED_TOOLTIP,
   LOADING_ENDPOINT_DATA_TOOLTIP,
@@ -87,20 +87,22 @@ describe('useHostIsolationAction', () => {
         });
       }
 
-      const { result, waitForValueToChange } = render();
-      await waitForValueToChange(() => result.current);
+      const { result } = render();
 
-      expect(result.current).toEqual([
-        buildExpectedMenuItemResult({
-          ...(command === 'unisolate' ? { name: UNISOLATE_HOST } : {}),
-        }),
-      ]);
+      await appContextMock.waitFor(() =>
+        expect(result.current).toEqual([
+          buildExpectedMenuItemResult({
+            ...(command === 'unisolate' ? { name: UNISOLATE_HOST } : {}),
+          }),
+        ])
+      );
     }
   );
 
   it('should call `closePopover` callback when menu item `onClick` is called', async () => {
-    const { result, waitForValueToChange } = render();
-    await waitForValueToChange(() => result.current);
+    const { result } = render();
+    await appContextMock.waitFor(() => expect(result.current[0].onClick).toBeDefined());
+
     result.current[0].onClick!({} as unknown as React.MouseEvent);
 
     expect(hookProps.closePopover).toHaveBeenCalled();
@@ -135,12 +137,14 @@ describe('useHostIsolationAction', () => {
   it('should return disabled menu item while loading agent status', async () => {
     const { result } = render();
 
-    expect(result.current).toEqual([
-      buildExpectedMenuItemResult({
-        disabled: true,
-        toolTipContent: LOADING_ENDPOINT_DATA_TOOLTIP,
-      }),
-    ]);
+    await appContextMock.waitFor(() =>
+      expect(result.current).toEqual([
+        buildExpectedMenuItemResult({
+          disabled: true,
+          toolTipContent: LOADING_ENDPOINT_DATA_TOOLTIP,
+        }),
+      ])
+    );
   });
 
   it.each(['endpoint', 'non-endpoint'])(
@@ -156,37 +160,51 @@ describe('useHostIsolationAction', () => {
       if (type === 'non-endpoint') {
         hookProps.detailsData = endpointAlertDataMock.generateSentinelOneAlertDetailsItemData();
       }
-      const { result, waitForValueToChange } = render();
-      await waitForValueToChange(() => result.current);
-
-      expect(result.current).toEqual([
-        buildExpectedMenuItemResult({
-          disabled: true,
-          toolTipContent:
-            type === 'endpoint' ? HOST_ENDPOINT_UNENROLLED_TOOLTIP : NOT_FROM_ENDPOINT_HOST_TOOLTIP,
-        }),
-      ]);
+      const { result } = render();
+      await appContextMock.waitFor(() =>
+        expect(result.current).toEqual([
+          buildExpectedMenuItemResult({
+            disabled: true,
+            toolTipContent:
+              type === 'endpoint'
+                ? HOST_ENDPOINT_UNENROLLED_TOOLTIP
+                : NOT_FROM_ENDPOINT_HOST_TOOLTIP,
+          }),
+        ])
+      );
     }
   );
 
   it('should call isolate API when agent is currently NOT isolated', async () => {
-    const { result, waitForValueToChange } = render();
-    await waitForValueToChange(() => result.current);
+    const { result } = render();
+    await appContextMock.waitFor(() => expect(result.current[0].onClick).toBeDefined());
     result.current[0].onClick!({} as unknown as React.MouseEvent);
 
     expect(hookProps.onAddIsolationStatusClick).toHaveBeenCalledWith('isolateHost');
   });
 
   it('should call un-isolate API when agent is currently isolated', async () => {
-    apiMock.responseProvider.getAgentStatus.mockReturnValue(
-      agentStatusMocks.generateAgentStatusApiResponse({
-        data: { 'abfe4a35-d5b4-42a0-a539-bd054c791769': { isolated: true } },
-      })
-    );
-    const { result, waitForValueToChange } = render();
-    await waitForValueToChange(() => result.current);
-    result.current[0].onClick!({} as unknown as React.MouseEvent);
+    apiMock.responseProvider.getAgentStatus.mockImplementation(({ query }) => {
+      const agentId = (query!.agentIds as string[])[0];
 
-    expect(hookProps.onAddIsolationStatusClick).toHaveBeenCalledWith('unisolateHost');
+      return agentStatusMocks.generateAgentStatusApiResponse({
+        data: { [agentId]: { isolated: true } },
+      });
+    });
+
+    const { result } = render();
+
+    await appContextMock.waitFor(() => {
+      expect(apiMock.responseProvider.getAgentStatus).toHaveBeenCalled();
+      expect(result.current[0].onClick).toBeDefined();
+    });
+
+    act(() => {
+      result.current[0].onClick!({} as unknown as React.MouseEvent);
+    });
+
+    await appContextMock.waitFor(() =>
+      expect(hookProps.onAddIsolationStatusClick).toHaveBeenCalledWith('unisolateHost')
+    );
   });
 });
