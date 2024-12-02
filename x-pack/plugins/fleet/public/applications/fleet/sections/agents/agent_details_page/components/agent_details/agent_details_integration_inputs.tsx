@@ -66,8 +66,9 @@ const StyledEuiTreeView = styled(EuiTreeView)`
 export const AgentDetailsIntegrationInputs: React.FunctionComponent<{
   agent: Agent;
   packagePolicy: PackagePolicy;
+  linkToLogs?: boolean;
   'data-test-subj'?: string;
-}> = memo(({ agent, packagePolicy, 'data-test-subj': dataTestSubj }) => {
+}> = memo(({ agent, packagePolicy, linkToLogs = true, 'data-test-subj': dataTestSubj }) => {
   const { getHref } = useLink();
 
   const inputStatusMap = useMemo(
@@ -138,21 +139,25 @@ export const AgentDetailsIntegrationInputs: React.FunctionComponent<{
                     defaultMessage: 'View logs',
                   })}
                 >
-                  <StyledEuiLink
-                    href={getHref('agent_details', {
-                      agentId: agent.id,
-                      tabId: 'logs',
-                      logQuery: getLogsQueryByInputType(current.type),
-                    })}
-                    aria-label={i18n.translate(
-                      'xpack.fleet.agentDetailsIntegrations.viewLogsButton',
-                      {
-                        defaultMessage: 'View logs',
-                      }
-                    )}
-                  >
-                    {displayInputType(current.type)}
-                  </StyledEuiLink>
+                  {linkToLogs ? (
+                    <StyledEuiLink
+                      href={getHref('agent_details', {
+                        agentId: agent.id,
+                        tabId: 'logs',
+                        logQuery: getLogsQueryByInputType(current.type),
+                      })}
+                      aria-label={i18n.translate(
+                        'xpack.fleet.agentDetailsIntegrations.viewLogsButton',
+                        {
+                          defaultMessage: 'View logs',
+                        }
+                      )}
+                    >
+                      {displayInputType(current.type)}
+                    </StyledEuiLink>
+                  ) : (
+                    <>{displayInputType(current.type)}</>
+                  )}
                 </EuiToolTip>
               ),
               id: current.type,
