@@ -45899,6 +45899,7 @@ components:
       enum:
         - user
         - host
+        - service
       type: string
     Security_Entity_Analytics_API_HostEntity:
       type: object
