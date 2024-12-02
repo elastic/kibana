@@ -47,6 +47,7 @@ import {
 } from '@kbn/langchain/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 
+import { ProductDocBaseStartContract } from '@kbn/product-doc-base-plugin/server';
 import type { GetAIAssistantKnowledgeBaseDataClientParams } from './ai_assistant_data_clients/knowledge_base';
 import { AttackDiscoveryDataClient } from './lib/attack_discovery/persistence';
 import { AIAssistantConversationsDataClient } from './ai_assistant_data_clients/conversations';
@@ -72,7 +73,6 @@ export interface ElasticAssistantPluginStart {
    * Inference plugin start contract.
    */
   inference: InferenceServerStart;
-  llmTasks: LlmTasksPluginStart;
   /**
    * Register features to be used by the elastic assistant.
    *
@@ -118,6 +118,7 @@ export interface ElasticAssistantPluginStartDependencies {
   spaces?: SpacesPluginStart;
   security: SecurityServiceStart;
   licensing: LicensingPluginStart;
+  productDocBase: ProductDocBaseStartContract;
 }
 
 export interface ElasticAssistantApiRequestHandlerContext {

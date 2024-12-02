@@ -46,7 +46,7 @@ export interface AgentExecutorParams<T extends boolean> {
   dataClients?: AssistantDataClients;
   esClient: ElasticsearchClient;
   langChainMessages: BaseMessage[];
-  llmTasks: LlmTasksPluginStart;
+  llmTasks?: LlmTasksPluginStart;
   llmType?: string;
   isOssModel?: boolean;
   inference: InferenceServerStart;

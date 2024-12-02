@@ -19,6 +19,7 @@
       "licensing",
       "llmTasks",
       "inference",
+      "productDocBase",
       "spaces",
       "security"
     ]

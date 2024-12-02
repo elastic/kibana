@@ -21,13 +21,14 @@ export const PRODUCT_DOCUMENTATION_TOOL: AssistantTool = {
   ...toolDetails,
   sourceRegister: APP_UI_ID,
   isSupported: (params: AssistantToolParams): params is AssistantToolParams => {
-    const { kbDataClient, isEnabledKnowledgeBase } = params;
-    return isEnabledKnowledgeBase && kbDataClient != null;
+    return params.kbDataClient != null;
   },
   getTool(params: AssistantToolParams) {
     if (!this.isSupported(params)) return null;
 
     const { connectorId, llmTasks, request } = params as AssistantToolParams;
+
+    // This check is here and not in isSupported in order to satisfy TypeScript
     if (llmTasks == null || connectorId == null) return null;
 
     return new DynamicStructuredTool({

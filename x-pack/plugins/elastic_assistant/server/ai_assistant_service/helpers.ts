@@ -11,6 +11,8 @@ import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-ser
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import { DeleteByQueryRequest } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
+import { ProductDocBaseStartContract } from '@kbn/product-doc-base-plugin/server';
+import type { Logger } from '@kbn/logging';
 import { getResourceName } from '.';
 import { knowledgeBaseIngestPipeline } from '../ai_assistant_data_clients/knowledge_base/ingest_pipeline';
 import { GetElser } from '../types';
@@ -141,3 +143,31 @@ const ESQL_QUERY_GENERATION_TITLE = i18n.translate(
     defaultMessage: 'ES|QL Query Generation',
   }
 );
+
+export const ensureProductDocumentationInstalled = async (
+  productDocManager: ProductDocBaseStartContract['management'],
+  logger: Logger
+) => {
+  productDocManager
+    .getStatus()
+    .then(({ status }) => {
+      if (status !== 'installed') {
+        logger.debug(`Installing product documentation for AIAssistantService`);
+        productDocManager
+          .install()
+          .then(() => {
+            logger.debug(`Successfully installed product documentation for AIAssistantService`);
+          })
+          .catch((e) => {
+            logger.warn(
+              `Failed to install product documentation for AIAssistantService: ${e.message}`
+            );
+          });
+      }
+    })
+    .catch((e) => {
+      logger.warn(
+        `Failed to get status of product documentation installation for AIAssistantService: ${e.message}`
+      );
+    });
+};

@@ -51,7 +51,8 @@
     "@kbn/inference-plugin",
     "@kbn/data-views-plugin",
     "@kbn/core-analytics-server",
-    "@kbn/llm-tasks-plugin"
+    "@kbn/llm-tasks-plugin",
+    "@kbn/product-doc-common"
   ],
   "exclude": [
     "target/**/*",
