@@ -23,14 +23,14 @@
       "share",
       "uiActions",
       "usageCollection",
+      "embeddable",
     ],
     "optionalPlugins": [
       "observabilityAIAssistant",
     ],
     "requiredBundles": [
       "kibanaUtils",
-      "kibanaReact",
-      "unifiedDocViewer"
+      "kibanaReact"
     ],
     "extraPublicDirs": [
       "common"

@@ -35,8 +35,7 @@
       "usageCollection",
       "security",
       "monitoringCollection",
-      "spaces",
-      "serverless"
+      "spaces"
     ],
     "extraPublicDirs": [
       "common",
