@@ -33,6 +33,7 @@ export const useTriggerScan = (
           endpointIds: [endpointId],
           insightType: DefendInsightTypeEnum.incompatible_antivirus,
           anonymizationFields: [],
+          replacements: {},
           subAction: 'invokeAI',
           apiConfig: {
             connectorId,
