@@ -107,7 +107,7 @@ export const scoutPageFixture = base.extend<ScoutTestFixtures, ScoutWorkerFixtur
     extendedPage.gotoApp = (appName: string) => page.goto(kbnUrl.app(appName));
     // Method to wait for global loading indicator to be hidden
     extendedPage.waitForLoadingIndicatorHidden = () =>
-      page.testSubj.waitForSelector('globalLoadingIndicator-hidden', { state: 'attached' });
+      extendedPage.testSubj.waitForSelector('globalLoadingIndicator-hidden', { state: 'attached' });
 
     await use(extendedPage);
   },
