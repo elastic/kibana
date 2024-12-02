@@ -16,7 +16,9 @@ import type { QueryOptionsOverrides } from '../types/tanstack_query_utility_type
 
 export type UseFetchAlertsIndexNamesQueryParams = FetchAlertsIndexNamesParams;
 
-export const queryKeyPrefix = ['alerts', fetchAlertsIndexNames.name];
+// Query key prefix MUST contain explicit strings, not fetchAlertsIndexNames.name
+// Production builds cannot guarantee a unique function name
+export const queryKeyPrefix = ['alerts', 'fetchAlertsIndexNames'];
 
 /**
  * Fetch alerts index names feature ids
