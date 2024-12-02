@@ -1,6 +1,6 @@
 # Asset Inventory Kibana Plugin
 
-Asset Inventory centralizes the view and management of all cloud assets.
+Centralized asset inventory experience within the Elastic Security solution. A central place for users to view and manage all their assets from different environments.
 
 ---
 
