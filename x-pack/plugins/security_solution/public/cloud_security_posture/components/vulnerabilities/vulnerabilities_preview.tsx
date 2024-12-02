@@ -13,7 +13,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
 import { useVulnerabilitiesPreview } from '@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_preview';
 import {
-  buildEntityFlyoutPreviewQuery,
+  buildGenericEntityFlyoutPreviewQuery,
   getAbbreviatedNumber,
 } from '@kbn/cloud-security-posture-common';
 import { getVulnerabilityStats, hasVulnerabilitiesData } from '@kbn/cloud-security-posture';
@@ -73,7 +73,7 @@ export const VulnerabilitiesPreview = ({
   }, []);
 
   const { data } = useVulnerabilitiesPreview({
-    query: buildEntityFlyoutPreviewQuery(field, value),
+    query: buildGenericEntityFlyoutPreviewQuery(field, value),
     sort: [],
     enabled: true,
     pageSize: 1,
