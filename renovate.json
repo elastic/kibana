@@ -137,12 +137,10 @@
       "groupName": "@elastic/appex-qa dependencies",
       "matchDepNames": [
         "cheerio",
-        "@types/faker",
         "@types/pixelmatch",
         "@types/pngjs",
         "@types/supertest",
         "babel-plugin-istanbul",
-        "faker",
         "nyc",
         "oboe",
         "pixelmatch",
@@ -375,6 +373,26 @@
         "Team:Core",
         "release_note:skip",
         "backport:all-open"
+      ],
+      "enabled": true,
+      "minimumReleaseAge": "7 days"
+    },
+    {
+      "groupName": "@elastic/kibana-visualizations test dependencies",
+      "matchDepNames": [
+        "@types/faker",
+        "faker"
+      ],
+      "reviewers": [
+        "team:visualizations"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:Visualizations",
+        "release_note:skip",
+        "backport:prev-minor"
       ],
       "enabled": true,
       "minimumReleaseAge": "7 days"
