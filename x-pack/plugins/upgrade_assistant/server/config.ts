@@ -47,6 +47,11 @@ const configSchema = schema.object({
      * End users could get into a bad situation if this is enabled before this logic is fixed.
      */
     reindexCorrectiveActions: schema.boolean({ defaultValue: false }),
+    /**
+     * Migrating deprecated data streams should only be enabled for major version upgrades.
+     * Currently this is manually set to `true` on every `x.last` version.
+     */
+    migrateDataStreams: schema.boolean({ defaultValue: false }),
   }),
   /**
    * This config allows to hide the UI without disabling the plugin.

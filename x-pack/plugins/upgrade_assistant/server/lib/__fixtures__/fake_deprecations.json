@@ -148,5 +148,31 @@
         "resolve_during_rolling_upgrade": false
       }
     ]
+  },
+  "data_streams": {
+    "my-v7-data-stream" : [{
+      "level" : "critical",
+      "message" : "Old data stream with a compatibility version < 8.0",
+      "url" : "https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes-9.0.html",
+      "details" : "This data stream has backing indices that were created before Elasticsearch 8.0.0",
+      "resolve_during_rolling_upgrade" : false,
+      "_meta": {
+        "backing_indices": {
+          "count": 52,
+          "need_upgrading": {
+            "count": 37,
+            "searchable_snapshot": {
+              "count": 23,
+              "fully_mounted": {
+                "count": 7
+              },
+              "partially_mounted": {
+                "count": 16
+              }
+            }
+          }
+        }
+      }
+    }]
   }
 }
