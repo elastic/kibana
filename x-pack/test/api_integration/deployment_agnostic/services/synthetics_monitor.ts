@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { RoleCredentials } from '@kbn/ftr-common-functional-services';
+import { RoleCredentials, SamlAuthProviderType } from '@kbn/ftr-common-functional-services';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { syntheticsMonitorType } from '@kbn/synthetics-plugin/common/types/saved_objects';
 import { EncryptedSyntheticsSavedMonitor } from '@kbn/synthetics-plugin/common/runtime_types';
@@ -17,19 +17,16 @@ import { omit } from 'lodash';
 import { KibanaSupertestProvider } from '@kbn/ftr-common-functional-services';
 import { DeploymentAgnosticFtrProviderContext } from '../ftr_provider_context';
 
-// fix saml auth type
 export class SyntheticsMonitorTestService {
   private supertest: ReturnType<typeof KibanaSupertestProvider>;
   private getService: DeploymentAgnosticFtrProviderContext['getService'];
-  private supertestWithoutAuth: ReturnType<typeof KibanaSupertestProvider>;
   public apiKey: string | undefined = '';
-  public samlAuth: any;
+  public samlAuth: SamlAuthProviderType;
 
   constructor(getService: DeploymentAgnosticFtrProviderContext['getService']) {
     this.supertest = getService('supertestWithoutAuth');
     this.samlAuth = getService('samlAuth');
     this.getService = getService;
-    this.supertestWithoutAuth = getService('supertestWithoutAuth');
   }
 
   generateProjectAPIKey = async (accessToPublicLocations = true, user: RoleCredentials) => {
@@ -141,7 +138,7 @@ export class SyntheticsMonitorTestService {
 
   async addProjectMonitors(project: string, monitors: any, user: RoleCredentials) {
     if (this.apiKey) {
-      return this.supertestWithoutAuth
+      return this.supertest
         .put(
           SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project)
         )
