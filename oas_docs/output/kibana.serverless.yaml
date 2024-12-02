@@ -40,7 +40,7 @@ servers:
   - url: https://{kibana_url}
     variables:
       kibana_url:
-        default: localhost:5601
+        default: <KIBANA_URL>
 security:
   - apiKeyAuth: []
 tags:
@@ -34488,8 +34488,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/SLOs_409_response'
           description: Conflict - The SLO id already exists
-      servers:
-        - url: https://localhost:5601
       summary: Create an SLO
       tags:
         - slo
@@ -34529,8 +34527,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/SLOs_403_response'
           description: Unauthorized response
-      servers:
-        - url: https://localhost:5601
       summary: Batch delete rollup and summary data
       tags:
         - slo
