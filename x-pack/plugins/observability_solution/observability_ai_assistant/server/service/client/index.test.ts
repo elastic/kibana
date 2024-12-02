@@ -1348,6 +1348,7 @@ describe('Observability AI Assistant client', () => {
           await llmSimulator.chunk({ content: 'Looks like we are done here' });
         }
 
+        await llmSimulator.complete();
         await nextLlmCallPromise;
       }
 
@@ -1357,23 +1358,21 @@ describe('Observability AI Assistant client', () => {
         await requestAlertsFunctionCall();
       }
 
-      await llmSimulator.next({ content: 'Looks like we are done here' });
-      await llmSimulator.tokenCount({ completion: 0, prompt: 0, total: 0 });
       await llmSimulator.complete();
       await finished(stream);
     });
 
-    it.skip(`executed the function no more than ${maxFunctionCalls} times`, () => {
+    it(`executed the function no more than ${maxFunctionCalls} times`, () => {
       expect(functionClientMock.executeFunction).toHaveBeenCalledTimes(maxFunctionCalls);
     });
 
-    it.skip('asks the LLM to suggest next steps', () => {
+    it('asks the LLM to suggest next steps', () => {
       const firstBody = inferenceClientMock.chatComplete.mock.calls[0][0] as any;
       const body = inferenceClientMock.chatComplete.mock.lastCall![0] as any;
 
-      expect(firstBody.tools.length).toEqual(1);
+      expect(Object.keys(firstBody.tools ?? {}).length).toEqual(1);
 
-      expect(body.tools).toBeUndefined();
+      expect(body.tools).toEqual({});
     });
   });
 
@@ -1655,7 +1654,7 @@ describe('Observability AI Assistant client', () => {
 
         await waitFor(() =>
           inferenceClientMock.chatComplete.mock.calls.length === 3
-            ? llmSimulator.complete()
+            ? Promise.resolve()
             : llmSimulator.error(new Error('Waiting until execute is called again'))
         );
 
@@ -1669,7 +1668,7 @@ describe('Observability AI Assistant client', () => {
 
       it('appends a function response error and sends it back to the LLM', async () => {
         const messages = await completePromise;
-        expect(messages.length).toBe(3);
+        expect(messages.length).toBe(2);
 
         expect(messages[0].message.function_call?.name).toBe('my_action');
 
