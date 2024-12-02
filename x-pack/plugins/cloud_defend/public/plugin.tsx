@@ -71,7 +71,7 @@ export class CloudDefendPlugin
     const CloudDefendRouter = (props: CloudDefendRouterProps) => (
       <KibanaContextProvider services={{ ...core, ...plugins }}>
         <RedirectAppLinks coreStart={core}>
-          <div style={{ width: '100%', height: '100%' }}>
+          <div css={{ width: '100%', height: '100%' }}>
             <SetupContext.Provider value={{ isCloudEnabled: this.isCloudEnabled }}>
               <Router {...props} />
             </SetupContext.Provider>
