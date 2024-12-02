@@ -43,7 +43,7 @@ export const ElasticAgentCard: FunctionComponent<ElasticAgentCardProps> = ({
   const image = (
     <EuiImage
       size="fullWidth"
-      style={{
+      css={{
         width: 'max(100%, 360px)',
         height: 240,
         objectFit: 'cover',
