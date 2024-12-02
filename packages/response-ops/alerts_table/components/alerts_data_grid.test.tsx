@@ -24,7 +24,7 @@ import {
   mockRenderContext,
   mockColumns,
   mockAlerts,
-  mockBulkActionsState,
+  createMockBulkActionsState,
 } from '../mocks/context.mock';
 import {
   CELL_ACTIONS_EXPAND_TEST_ID,
@@ -106,7 +106,7 @@ describe('AlertsDataGrid', () => {
   > = (props) => {
     const bulkActionsStore = useReducer(
       bulkActionsReducer,
-      props.initialBulkActionsState || mockBulkActionsState
+      props.initialBulkActionsState || createMockBulkActionsState()
     );
     const renderContext = useMemo(
       () => ({
@@ -309,7 +309,7 @@ describe('AlertsDataGrid', () => {
 
         it('should show the row loader when callback triggered with false', async () => {
           const initialBulkActionsState = {
-            ...mockBulkActionsState,
+            ...createMockBulkActionsState(),
             rowSelection: new Map([[0, { isLoading: true }]]),
           };
 
@@ -382,7 +382,7 @@ describe('AlertsDataGrid', () => {
           <TestComponent
             {...mockDataGridProps}
             initialBulkActionsState={{
-              ...mockBulkActionsState,
+              ...createMockBulkActionsState(),
               rowSelection: new Map(),
             }}
           />
@@ -407,7 +407,7 @@ describe('AlertsDataGrid', () => {
               showColumnSelector: true,
             }}
             initialBulkActionsState={{
-              ...mockBulkActionsState,
+              ...createMockBulkActionsState(),
               rowSelection: new Map(),
             }}
           />
