@@ -9,6 +9,7 @@ import { EntityV2, EntityDefinition, EntityDefinitionUpdate } from '@kbn/entitie
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { Logger } from '@kbn/logging';
+import { uniq } from 'lodash';
 import {
   installEntityDefinition,
   installationInProgress,
@@ -24,7 +25,7 @@ import { deleteIndices } from './entities/delete_index';
 import { EntityDefinitionWithState } from './entities/types';
 import { EntityDefinitionUpdateConflict } from './entities/errors/entity_definition_update_conflict';
 import { EntitySource, getEntityInstancesQuery } from './queries';
-import { mergeEntitiesList, runESQLQuery } from './queries/utils';
+import { runESQLQuery } from './queries/utils';
 import { UnknownEntityType } from './entities/errors/unknown_entity_type';
 
 export class EntityClient {
@@ -232,53 +233,42 @@ export class EntityClient {
     filters?: string[];
     limit?: number;
   }) {
-    const entities = await Promise.all(
-      sources.map(async (source) => {
-        const mandatoryFields = [source.timestamp_field, ...source.identity_fields];
-        const metaFields = [...metadataFields, ...source.metadata_fields];
-        const { fields } = await this.options.esClient.fieldCaps({
-          index: source.index_patterns,
-          fields: [...mandatoryFields, ...metaFields],
-        });
+    const [mandatory, metadata] = [
+      uniq(
+        sources.flatMap((source) => [
+          ...(source.timestamp_field ? [source.timestamp_field] : []),
+          ...source.identity_fields,
+        ])
+      ),
+      uniq([...metadataFields, ...sources.flatMap((source) => source.metadata_fields)]),
+    ];
 
-        const sourceHasMandatoryFields = mandatoryFields.every((field) => !!fields[field]);
-        if (!sourceHasMandatoryFields) {
-          // we can't build entities without id fields so we ignore the source.
-          // filters should likely behave similarly.
-          this.options.logger.info(
-            `Ignoring source for type [${source.type}] with index_patterns [${source.index_patterns}] because some mandatory fields [${mandatoryFields}] are not mapped`
-          );
-          return [];
-        }
+    const { fields } = await this.options.esClient.fieldCaps({
+      index: sources.flatMap((source) => source.index_patterns),
+      fields: [...mandatory, ...metadata],
+    });
 
-        // but metadata field not being available is fine
-        const availableMetadataFields = metaFields.filter((field) => fields[field]);
+    const sourceHasMandatoryFields = mandatory.every((field) => !!fields[field]);
+    if (!sourceHasMandatoryFields) {
+      throw new Error(`Invalid identity fields configuration`);
+    }
 
-        const query = getEntityInstancesQuery({
-          source: {
-            ...source,
-            metadata_fields: availableMetadataFields,
-            filters: [...source.filters, ...filters],
-          },
-          start,
-          end,
-          limit,
-        });
-        this.options.logger.debug(`Entity query: ${query}`);
+    const availableMetadataFields = metadata.filter((field) => fields[field]);
 
-        const rawEntities = await runESQLQuery<EntityV2>({
-          query,
-          esClient: this.options.esClient,
-        });
+    const query = getEntityInstancesQuery({
+      sources,
+      start,
+      end,
+      limit,
+      metadataFields: availableMetadataFields,
+    });
+    this.options.logger.info(`Entity query: ${query}`);
 
-        return rawEntities.map((entity) => {
-          entity['entity.id'] = source.identity_fields.map((field) => entity[field]).join(':');
-          entity['entity.type'] = source.type;
-          return entity;
-        });
-      })
-    ).then((results) => results.flat());
+    const rawEntities = await runESQLQuery<EntityV2>({
+      query,
+      esClient: this.options.esClient,
+    });
 
-    return mergeEntitiesList(entities).slice(0, limit);
+    return rawEntities;
   }
 }
