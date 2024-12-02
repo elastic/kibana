@@ -153,7 +153,7 @@ export const syntheticsFeature = {
       }),
       description: i18n.translate('xpack.synthetics.features.app.elasticDescription', {
         defaultMessage:
-          'This feature allows you to use Elastic managed locations. This means you will be charged for the usage of these locations as per elastic pricing.',
+          'This feature enables users to create monitors that execute tests from Elastic managed infrastructure around the globe. There is an additional charge to use Elastic Managed testing locations. See the Elastic Cloud Pricing https://www.elastic.co/pricing page for current prices.',
       }),
       privilegeGroups: [elasticManagedLocationsEnabledPrivilege],
     },
