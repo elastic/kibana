@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
-import { waitFor } from '@testing-library/react';
+import { waitFor, renderHook } from '@testing-library/react';
 import { useToasts } from '../common/lib/kibana';
 import type { AppMockRenderer } from '../common/mock';
 import { createAppMockRenderer } from '../common/mock';
@@ -32,11 +31,9 @@ describe('useGetFeaturesIds', () => {
   it('returns the features ids correctly', async () => {
     const spy = jest.spyOn(api, 'getFeatureIds').mockRejectedValue([]);
 
-    const { waitForNextUpdate } = renderHook(() => useGetFeatureIds(['alert-id-1'], true), {
+    renderHook(() => useGetFeatureIds(['alert-id-1'], true), {
       wrapper: appMockRender.AppWrapper,
     });
-
-    await waitForNextUpdate();
 
     await waitFor(() => {
       expect(spy).toHaveBeenCalledWith({
@@ -67,11 +64,9 @@ describe('useGetFeaturesIds', () => {
       .spyOn(api, 'getFeatureIds')
       .mockRejectedValue(new Error('Something went wrong'));
 
-    const { waitForNextUpdate } = renderHook(() => useGetFeatureIds(['alert-id-1'], true), {
+    renderHook(() => useGetFeatureIds(['alert-id-1'], true), {
       wrapper: appMockRender.AppWrapper,
     });
-
-    await waitForNextUpdate();
 
     await waitFor(() => {
       expect(spy).toHaveBeenCalledWith({

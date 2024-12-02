@@ -28,7 +28,11 @@ export const updateAssetsRoute = (router: IRouter, osqueryContext: OsqueryAppCon
     .post({
       access: 'internal',
       path: '/internal/osquery/assets/update',
-      options: { tags: [`access:${PLUGIN_ID}-writePacks`] },
+      security: {
+        authz: {
+          requiredPrivileges: [`${PLUGIN_ID}-writePacks`],
+        },
+      },
     })
     .addVersion(
       {

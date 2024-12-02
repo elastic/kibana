@@ -13,7 +13,7 @@ import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
-import { asInteger } from '../../../../../common/utils/formatters';
+import { asDecimalOrInteger } from '../../../../../common/utils/formatters';
 import { TooltipContent } from './tooltip_content';
 import { Popover } from './popover';
 import { ChartType, getTimeSeriesColor } from '../helper/get_timeseries_color';
@@ -129,7 +129,7 @@ export function LogRateChart({ height }: { height: number }) {
         showAnnotations={false}
         fetchStatus={status}
         timeseries={timeseries}
-        yLabelFormat={asInteger}
+        yLabelFormat={asDecimalOrInteger}
       />
     </EuiPanel>
   );

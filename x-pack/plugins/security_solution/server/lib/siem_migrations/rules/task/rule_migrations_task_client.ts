@@ -8,27 +8,26 @@
 import type { AuthenticatedUser, Logger } from '@kbn/core/server';
 import { AbortError, abortSignalToPromise } from '@kbn/kibana-utils-plugin/server';
 import type { RunnableConfig } from '@langchain/core/runnables';
-import { SiemMigrationStatus } from '../../../../../common/siem_migrations/constants';
+import {
+  SiemMigrationTaskStatus,
+  SiemMigrationStatus,
+} from '../../../../../common/siem_migrations/constants';
+import type { RuleMigrationTaskStats } from '../../../../../common/siem_migrations/model/rule_migration.gen';
+import type { RuleMigrationsDataClient } from '../data/rule_migrations_data_client';
+import type { RuleMigrationDataStats } from '../data/rule_migrations_data_rules_client';
+import { getRuleMigrationAgent } from './agent';
+import type { MigrateRuleState } from './agent/types';
 import type {
-  RuleMigrationAllTaskStats,
-  RuleMigrationTaskStats,
-} from '../../../../../common/siem_migrations/model/rule_migration.gen';
-import type {
-  RuleMigrationDataStats,
-  RuleMigrationsDataClient,
-} from '../data/rule_migrations_data_client';
-import type {
+  MigrationAgent,
+  RuleMigrationTaskPrepareParams,
+  RuleMigrationTaskRunParams,
   RuleMigrationTaskStartParams,
   RuleMigrationTaskStartResult,
   RuleMigrationTaskStopResult,
-  RuleMigrationTaskPrepareParams,
-  RuleMigrationTaskRunParams,
-  MigrationAgent,
 } from './types';
-import { getRuleMigrationAgent } from './agent';
-import type { MigrateRuleState } from './agent/types';
-import { retrievePrebuiltRulesMap } from './util/prebuilt_rules';
 import { ActionsClientChat } from './util/actions_client_chat';
+import { IntegrationRetriever } from './util/integration_retriever';
+import { retrievePrebuiltRulesMap } from './util/prebuilt_rules';
 import { RuleResourceRetriever } from './util/rule_resource_retriever';
 
 const ITERATION_BATCH_SIZE = 50 as const;
@@ -91,6 +90,7 @@ export class RuleMigrationsTaskClient {
   }: RuleMigrationTaskPrepareParams): Promise<MigrationAgent> {
     const prebuiltRulesMap = await retrievePrebuiltRulesMap({ soClient, rulesClient });
     const resourceRetriever = new RuleResourceRetriever(migrationId, this.data);
+    const integrationRetriever = new IntegrationRetriever(this.data);
 
     const actionsClientChat = new ActionsClientChat(connectorId, actionsClient, this.logger);
     const model = await actionsClientChat.createModel({
@@ -104,6 +104,7 @@ export class RuleMigrationsTaskClient {
       inferenceClient,
       prebuiltRulesMap,
       resourceRetriever,
+      integrationRetriever,
       logger: this.logger,
     });
     return agent;
@@ -228,10 +229,10 @@ export class RuleMigrationsTaskClient {
   }
 
   /** Returns the stats of all migrations */
-  async getAllStats(): Promise<RuleMigrationAllTaskStats> {
+  async getAllStats(): Promise<RuleMigrationTaskStats[]> {
     const allDataStats = await this.data.rules.getAllStats();
     return allDataStats.map((dataStats) => {
-      const status = this.getTaskStatus(dataStats.migration_id, dataStats.rules);
+      const status = this.getTaskStatus(dataStats.id, dataStats.rules);
       return { status, ...dataStats };
     });
   }
@@ -239,17 +240,17 @@ export class RuleMigrationsTaskClient {
   private getTaskStatus(
     migrationId: string,
     dataStats: RuleMigrationDataStats['rules']
-  ): RuleMigrationTaskStats['status'] {
+  ): SiemMigrationTaskStatus {
     if (this.migrationsRunning.has(migrationId)) {
-      return 'running';
+      return SiemMigrationTaskStatus.RUNNING;
     }
     if (dataStats.pending === dataStats.total) {
-      return 'ready';
+      return SiemMigrationTaskStatus.READY;
     }
     if (dataStats.completed + dataStats.failed === dataStats.total) {
-      return 'finished';
+      return SiemMigrationTaskStatus.FINISHED;
     }
-    return 'stopped';
+    return SiemMigrationTaskStatus.STOPPED;
   }
 
   /** Stops one running migration */

@@ -10,7 +10,11 @@
 import type { MockedKeys } from '@kbn/utility-types-jest';
 import { CoreSetup, CoreStart, HttpFetchOptions, HttpHandler } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
-import { IEsSearchRequest, IKibanaSearchRequest } from '@kbn/search-types';
+import {
+  IEsSearchRequest,
+  IKibanaSearchRequest,
+  type IKibanaSearchResponse,
+} from '@kbn/search-types';
 import { SearchInterceptor } from './search_interceptor';
 import { AbortError } from '@kbn/kibana-utils-plugin/public';
 import { EsError, type IEsError } from '@kbn/search-errors';
@@ -59,7 +63,7 @@ const next = jest.fn();
 const error = jest.fn();
 const complete = jest.fn();
 
-function getResponseMock(responses: any[]) {
+function getHttpMock(responses: any[]) {
   let i = 0;
   return ((path: string, options?: HttpFetchOptions) => {
     const request = JSON.parse(options?.body as string) as IKibanaSearchRequest;
@@ -81,6 +85,38 @@ function getResponseMock(responses: any[]) {
       }
     });
   }) as HttpHandler;
+}
+
+function getMockSearchResponse(
+  { id, isPartial, isRunning, rawResponse }: IKibanaSearchResponse = {
+    rawResponse: {},
+  }
+) {
+  const body = {
+    ...(id ? { id } : {}),
+    is_partial: isPartial ?? false,
+    is_running: isRunning ?? false,
+    response: {
+      took: 2,
+      timed_out: false,
+      _shards: {
+        total: 12,
+        successful: 12,
+        skipped: 11,
+        failed: 0,
+      },
+      hits: {
+        total: {
+          value: 61,
+          relation: 'eq',
+        },
+        max_score: null,
+        hits: [],
+      },
+      ...rawResponse,
+    },
+  };
+  return { body };
 }
 
 describe('SearchInterceptor', () => {
@@ -175,30 +211,48 @@ describe('SearchInterceptor', () => {
 
   describe('search', () => {
     test('Observable should resolve if fetch is successful', async () => {
-      const mockResponse: any = { rawResponse: {} };
-      mockCoreSetup.http.post.mockResolvedValueOnce(mockResponse);
+      mockCoreSetup.http.post.mockResolvedValueOnce(getMockSearchResponse());
       const mockRequest: IEsSearchRequest = {
         params: {},
       };
       const response = searchInterceptor.search(mockRequest);
-      await expect(response.toPromise()).resolves.toBe(mockResponse);
+      await expect(response.toPromise()).resolves.toMatchInlineSnapshot(`
+        Object {
+          "id": undefined,
+          "isPartial": false,
+          "isRestored": false,
+          "isRunning": false,
+          "loaded": 12,
+          "rawResponse": Object {
+            "_shards": Object {
+              "failed": 0,
+              "skipped": 11,
+              "successful": 12,
+              "total": 12,
+            },
+            "hits": Object {
+              "hits": Array [],
+              "max_score": null,
+              "total": 61,
+            },
+            "timed_out": false,
+            "took": 2,
+          },
+          "requestParams": Object {},
+          "total": 12,
+          "warning": undefined,
+        }
+      `);
     });
 
     test('should resolve immediately if first call returns full result', async () => {
       const responses = [
         {
           time: 10,
-          value: {
-            isPartial: false,
-            isRunning: false,
-            id: 1,
-            rawResponse: {
-              took: 1,
-            },
-          },
+          value: getMockSearchResponse(),
         },
       ];
-      mockCoreSetup.http.post.mockImplementation(getResponseMock(responses));
+      mockCoreSetup.http.post.mockImplementation(getHttpMock(responses));
 
       const response = searchInterceptor.search({});
       response.subscribe({ next, error, complete });
@@ -206,7 +260,33 @@ describe('SearchInterceptor', () => {
       await timeTravel(10);
 
       expect(next).toHaveBeenCalled();
-      expect(next.mock.calls[0][0]).toStrictEqual(responses[0].value);
+      expect(next.mock.calls[0][0]).toMatchInlineSnapshot(`
+        Object {
+          "id": undefined,
+          "isPartial": false,
+          "isRestored": false,
+          "isRunning": false,
+          "loaded": 12,
+          "rawResponse": Object {
+            "_shards": Object {
+              "failed": 0,
+              "skipped": 11,
+              "successful": 12,
+              "total": 12,
+            },
+            "hits": Object {
+              "hits": Array [],
+              "max_score": null,
+              "total": 61,
+            },
+            "timed_out": false,
+            "took": 2,
+          },
+          "requestParams": Object {},
+          "total": 12,
+          "warning": undefined,
+        }
+      `);
       expect(complete).toHaveBeenCalled();
       expect(error).not.toHaveBeenCalled();
     });
@@ -215,29 +295,29 @@ describe('SearchInterceptor', () => {
       const responses = [
         {
           time: 10,
-          value: {
+          value: getMockSearchResponse({
             isPartial: true,
             isRunning: true,
-            id: 1,
+            id: '1',
             rawResponse: {
               took: 1,
             },
-          },
+          }),
         },
         {
           time: 20,
-          value: {
+          value: getMockSearchResponse({
             isPartial: false,
             isRunning: false,
-            id: 1,
+            id: '1',
             rawResponse: {
               took: 1,
             },
-          },
+          }),
         },
       ];
 
-      mockCoreSetup.http.post.mockImplementation(getResponseMock(responses));
+      mockCoreSetup.http.post.mockImplementation(getHttpMock(responses));
 
       const response = searchInterceptor.search({}, { pollInterval: 0 });
       response.subscribe({ next, error, complete });
@@ -245,14 +325,66 @@ describe('SearchInterceptor', () => {
       await timeTravel(10);
 
       expect(next).toHaveBeenCalled();
-      expect(next.mock.calls[0][0]).toStrictEqual(responses[0].value);
+      expect(next.mock.calls[0][0]).toMatchInlineSnapshot(`
+        Object {
+          "id": "1",
+          "isPartial": true,
+          "isRestored": false,
+          "isRunning": true,
+          "loaded": 12,
+          "rawResponse": Object {
+            "_shards": Object {
+              "failed": 0,
+              "skipped": 11,
+              "successful": 12,
+              "total": 12,
+            },
+            "hits": Object {
+              "hits": Array [],
+              "max_score": null,
+              "total": 61,
+            },
+            "timed_out": false,
+            "took": 1,
+          },
+          "requestParams": Object {},
+          "total": 12,
+          "warning": undefined,
+        }
+      `);
       expect(complete).not.toHaveBeenCalled();
       expect(error).not.toHaveBeenCalled();
 
       await timeTravel(20);
 
       expect(next).toHaveBeenCalledTimes(2);
-      expect(next.mock.calls[1][0]).toStrictEqual(responses[1].value);
+      expect(next.mock.calls[1][0]).toMatchInlineSnapshot(`
+        Object {
+          "id": "1",
+          "isPartial": false,
+          "isRestored": false,
+          "isRunning": false,
+          "loaded": 12,
+          "rawResponse": Object {
+            "_shards": Object {
+              "failed": 0,
+              "skipped": 11,
+              "successful": 12,
+              "total": 12,
+            },
+            "hits": Object {
+              "hits": Array [],
+              "max_score": null,
+              "total": 61,
+            },
+            "timed_out": false,
+            "took": 1,
+          },
+          "requestParams": Object {},
+          "total": 12,
+          "warning": undefined,
+        }
+      `);
       expect(complete).toHaveBeenCalled();
       expect(error).not.toHaveBeenCalled();
     });
@@ -261,15 +393,15 @@ describe('SearchInterceptor', () => {
       const responses = [
         {
           time: 500,
-          value: {
+          value: getMockSearchResponse({
             isPartial: false,
             isRunning: false,
             rawResponse: {},
-            id: 1,
-          },
+            id: '1',
+          }),
         },
       ];
-      mockCoreSetup.http.post.mockImplementation(getResponseMock(responses));
+      mockCoreSetup.http.post.mockImplementation(getHttpMock(responses));
 
       const abortController = new AbortController();
       abortController.abort();
@@ -288,24 +420,24 @@ describe('SearchInterceptor', () => {
       const responses = [
         {
           time: 10,
-          value: {
+          value: getMockSearchResponse({
             isPartial: true,
             isRunning: true,
             rawResponse: {},
-            id: 1,
-          },
+            id: '1',
+          }),
         },
         {
           time: 300,
-          value: {
+          value: getMockSearchResponse({
             isPartial: false,
             isRunning: false,
             rawResponse: {},
-            id: 1,
-          },
+            id: '1',
+          }),
         },
       ];
-      mockCoreSetup.http.post.mockImplementation(getResponseMock(responses));
+      mockCoreSetup.http.post.mockImplementation(getHttpMock(responses));
 
       const abortController = new AbortController();
       setTimeout(() => abortController.abort(), 250);
@@ -334,15 +466,15 @@ describe('SearchInterceptor', () => {
       const responses = [
         {
           time: 2000,
-          value: {
+          value: getMockSearchResponse({
             isPartial: false,
             isRunning: false,
             rawResponse: {},
-            id: 1,
-          },
+            id: '1',
+          }),
         },
       ];
-      mockCoreSetup.http.post.mockImplementation(getResponseMock(responses));
+      mockCoreSetup.http.post.mockImplementation(getHttpMock(responses));
 
       const response = searchInterceptor.search({}, { pollInterval: 0 });
       response.subscribe({ next, error });
@@ -354,12 +486,14 @@ describe('SearchInterceptor', () => {
     });
 
     test('should DELETE a running async search on async timeout after first response', async () => {
-      mockCoreSetup.http.post.mockResolvedValue({
-        isPartial: true,
-        isRunning: true,
-        rawResponse: {},
-        id: 1,
-      });
+      mockCoreSetup.http.post.mockResolvedValue(
+        getMockSearchResponse({
+          isPartial: true,
+          isRunning: true,
+          rawResponse: {},
+          id: '1',
+        })
+      );
 
       const response = searchInterceptor.search({}, { pollInterval: 0 });
       response.subscribe({ next, error });
@@ -378,14 +512,16 @@ describe('SearchInterceptor', () => {
     });
 
     test('should return the last response on async timeout', async () => {
-      mockCoreSetup.http.post.mockResolvedValue({
-        isPartial: true,
-        isRunning: true,
-        rawResponse: {
-          foo: 'bar',
-        },
-        id: 1,
-      });
+      mockCoreSetup.http.post.mockResolvedValue(
+        getMockSearchResponse({
+          isPartial: true,
+          isRunning: true,
+          rawResponse: {
+            foo: 'bar',
+          },
+          id: '1',
+        })
+      );
 
       const response = searchInterceptor.search({}, { pollInterval: 0 });
       response.subscribe({ next, error });
@@ -404,12 +540,30 @@ describe('SearchInterceptor', () => {
       expect(next.mock.calls[1]).toMatchInlineSnapshot(`
         Array [
           Object {
-            "id": 1,
+            "id": "1",
             "isPartial": true,
+            "isRestored": false,
             "isRunning": true,
+            "loaded": 12,
             "rawResponse": Object {
+              "_shards": Object {
+                "failed": 0,
+                "skipped": 11,
+                "successful": 12,
+                "total": 12,
+              },
               "foo": "bar",
+              "hits": Object {
+                "hits": Array [],
+                "max_score": null,
+                "total": 61,
+              },
+              "timed_out": false,
+              "took": 2,
             },
+            "requestParams": Object {},
+            "total": 12,
+            "warning": undefined,
           },
         ]
       `);
@@ -419,24 +573,24 @@ describe('SearchInterceptor', () => {
       const responses = [
         {
           time: 10,
-          value: {
+          value: getMockSearchResponse({
             isPartial: true,
             isRunning: true,
             rawResponse: {},
-            id: 1,
-          },
+            id: '1',
+          }),
         },
         {
           time: 10,
           value: {
             statusCode: 500,
             message: 'oh no',
-            id: 1,
+            id: '1',
           },
           isError: true,
         },
       ];
-      mockCoreSetup.http.post.mockImplementation(getResponseMock(responses));
+      mockCoreSetup.http.post.mockImplementation(getHttpMock(responses));
 
       const response = searchInterceptor.search({}, { pollInterval: 0 });
       response.subscribe({ next, error });
@@ -463,24 +617,24 @@ describe('SearchInterceptor', () => {
       const responses = [
         {
           time: 10,
-          value: {
+          value: getMockSearchResponse({
             isPartial: true,
             isRunning: true,
             rawResponse: {},
-            id: 1,
-          },
+            id: '1',
+          }),
         },
         {
           time: 10,
           value: {
             statusCode: 500,
             message: 'oh no',
-            id: 1,
+            id: '1',
           },
           isError: true,
         },
       ];
-      mockCoreSetup.http.post.mockImplementation(getResponseMock(responses));
+      mockCoreSetup.http.post.mockImplementation(getHttpMock(responses));
 
       const response = searchInterceptor.search({}, { pollInterval: 0 });
       response.subscribe({ next, error });
@@ -508,24 +662,24 @@ describe('SearchInterceptor', () => {
       const responses = [
         {
           time: 10,
-          value: {
+          value: getMockSearchResponse({
             isPartial: true,
             isRunning: true,
             rawResponse: {},
-            id: 1,
-          },
+            id: '1',
+          }),
         },
         {
           time: 300,
-          value: {
+          value: getMockSearchResponse({
             isPartial: false,
             isRunning: false,
             rawResponse: {},
-            id: 1,
-          },
+            id: '1',
+          }),
         },
       ];
-      mockCoreSetup.http.post.mockImplementation(getResponseMock(responses));
+      mockCoreSetup.http.post.mockImplementation(getHttpMock(responses));
 
       const abortController = new AbortController();
       setTimeout(() => abortController.abort(), 250);
@@ -650,14 +804,14 @@ describe('SearchInterceptor', () => {
               isPartial: false,
               isRunning: false,
               isRestored: true,
-              id: 1,
+              id: '1',
               rawResponse: {
                 took: 1,
               },
             },
           },
         ];
-        mockCoreSetup.http.post.mockImplementation(getResponseMock(responses));
+        mockCoreSetup.http.post.mockImplementation(getHttpMock(responses));
 
         const response = searchInterceptor.search(
           {},
@@ -685,14 +839,14 @@ describe('SearchInterceptor', () => {
               isPartial: false,
               isRunning: false,
               isRestored: false,
-              id: 1,
+              id: '1',
               rawResponse: {
                 took: 1,
               },
             },
           },
         ];
-        mockCoreSetup.http.post.mockImplementation(getResponseMock(responses));
+        mockCoreSetup.http.post.mockImplementation(getHttpMock(responses));
 
         const response = searchInterceptor.search(
           {},
@@ -717,18 +871,18 @@ describe('SearchInterceptor', () => {
         const responses = [
           {
             time: 10,
-            value: {
+            value: getMockSearchResponse({
               isPartial: false,
               isRunning: false,
               isRestored: false,
-              id: 1,
+              id: '1',
               rawResponse: {
                 took: 1,
               },
-            },
+            }),
           },
         ];
-        mockCoreSetup.http.post.mockImplementation(getResponseMock(responses));
+        mockCoreSetup.http.post.mockImplementation(getHttpMock(responses));
 
         searchInterceptor
           .search(
@@ -763,25 +917,25 @@ describe('SearchInterceptor', () => {
         const responses = [
           {
             time: 10,
-            value: {
+            value: getMockSearchResponse({
               isPartial: true,
               isRunning: true,
               rawResponse: {},
-              id: 1,
-            },
+              id: '1',
+            }),
           },
           {
             time: 300,
-            value: {
+            value: getMockSearchResponse({
               isPartial: false,
               isRunning: false,
               rawResponse: {},
-              id: 1,
-            },
+              id: '1',
+            }),
           },
         ];
 
-        mockCoreSetup.http.post.mockImplementation(getResponseMock(responses));
+        mockCoreSetup.http.post.mockImplementation(getHttpMock(responses));
       });
 
       test('should track searches', async () => {
@@ -880,39 +1034,39 @@ describe('SearchInterceptor', () => {
       const basicCompleteResponse = [
         {
           time: 10,
-          value: {
+          value: getMockSearchResponse({
             isPartial: false,
             isRunning: false,
-            id: 1,
+            id: '1',
             rawResponse: {
               took: 1,
             },
-          },
+          }),
         },
       ];
 
       const partialCompleteResponse = [
         {
           time: 10,
-          value: {
+          value: getMockSearchResponse({
             isPartial: true,
             isRunning: true,
-            id: 1,
+            id: '1',
             rawResponse: {
               took: 1,
             },
-          },
+          }),
         },
         {
           time: 20,
-          value: {
+          value: getMockSearchResponse({
             isPartial: false,
             isRunning: false,
-            id: 1,
+            id: '1',
             rawResponse: {
               took: 1,
             },
-          },
+          }),
         },
       ];
 
@@ -924,7 +1078,7 @@ describe('SearchInterceptor', () => {
       });
 
       test('should be disabled if there is no session', async () => {
-        mockCoreSetup.http.post.mockImplementation(getResponseMock(basicCompleteResponse));
+        mockCoreSetup.http.post.mockImplementation(getHttpMock(basicCompleteResponse));
 
         searchInterceptor.search(basicReq, {}).subscribe({ next, error, complete });
         expect(mockCoreSetup.http.post).toBeCalledTimes(1);
@@ -934,23 +1088,13 @@ describe('SearchInterceptor', () => {
       });
 
       test('should fetch different requests in a single session', async () => {
-        mockCoreSetup.http.post.mockImplementation(getResponseMock(basicCompleteResponse));
+        mockCoreSetup.http.post.mockImplementation(getHttpMock(basicCompleteResponse));
 
         const req2 = {
           params: {
             test: 2,
           },
         };
-
-        next.mockImplementation(() => {
-          console.log('next');
-        });
-        error.mockImplementation((...args) => {
-          console.log('error');
-        });
-        complete.mockImplementation((...args) => {
-          console.log('complete');
-        });
 
         searchInterceptor.search(basicReq, { sessionId }).subscribe({ next, error, complete });
         await timeTravel(10);
@@ -962,7 +1106,7 @@ describe('SearchInterceptor', () => {
       });
 
       test('should fetch the same request for two different sessions', async () => {
-        mockCoreSetup.http.post.mockImplementation(getResponseMock(basicCompleteResponse));
+        mockCoreSetup.http.post.mockImplementation(getHttpMock(basicCompleteResponse));
 
         searchInterceptor.search(basicReq, { sessionId }).subscribe({ next, error, complete });
         await timeTravel(10);
@@ -976,7 +1120,7 @@ describe('SearchInterceptor', () => {
       });
 
       test('should not track searches that come from cache', async () => {
-        mockCoreSetup.http.post.mockImplementation(getResponseMock(partialCompleteResponse));
+        mockCoreSetup.http.post.mockImplementation(getHttpMock(partialCompleteResponse));
         sessionService.isCurrentSession.mockImplementation(
           (_sessionId) => _sessionId === sessionId
         );
@@ -1022,16 +1166,16 @@ describe('SearchInterceptor', () => {
         const responses = [
           {
             time: 10,
-            value: {
+            value: getMockSearchResponse({
               isPartial: true,
               isRunning: true,
               rawResponse: {},
-              id: 1,
-            },
+              id: '1',
+            }),
           },
         ];
 
-        mockCoreSetup.http.post.mockImplementation(getResponseMock(responses));
+        mockCoreSetup.http.post.mockImplementation(getHttpMock(responses));
 
         searchInterceptor.search(basicReq, { sessionId }).subscribe({ next, error, complete });
         await timeTravel(10);
@@ -1046,15 +1190,17 @@ describe('SearchInterceptor', () => {
         const responses = [
           {
             time: 10,
-            value: {
+            value: getMockSearchResponse({
               isPartial: true,
               isRunning: false,
-              id: 1,
-            },
+              id: '1',
+              rawResponse: {},
+            }),
+            isError: true,
           },
         ];
 
-        mockCoreSetup.http.post.mockImplementation(getResponseMock(responses));
+        mockCoreSetup.http.post.mockImplementation(getHttpMock(responses));
 
         searchInterceptor.search(basicReq, { sessionId }).subscribe({ next, error, complete });
         await timeTravel(10);
@@ -1066,7 +1212,7 @@ describe('SearchInterceptor', () => {
       });
 
       test('should ignore anything outside params when hashing', async () => {
-        mockCoreSetup.http.post.mockImplementation(getResponseMock(basicCompleteResponse));
+        mockCoreSetup.http.post.mockImplementation(getHttpMock(basicCompleteResponse));
 
         const req = {
           something: 123,
@@ -1095,11 +1241,16 @@ describe('SearchInterceptor', () => {
         const responses = [
           {
             time: 10,
-            value: {},
+            value: {
+              statusCode: 500,
+              message: 'Aborted',
+              id: '1',
+            },
+            isError: true,
           },
         ];
 
-        mockCoreSetup.http.post.mockImplementation(getResponseMock(responses));
+        mockCoreSetup.http.post.mockImplementation(getHttpMock(responses));
 
         searchInterceptor.search(basicReq, { sessionId }).subscribe({ next, error, complete });
         searchInterceptor.search(basicReq, { sessionId }).subscribe({ next, error, complete });
@@ -1111,7 +1262,7 @@ describe('SearchInterceptor', () => {
       });
 
       test('should ignore preference when hashing', async () => {
-        mockCoreSetup.http.post.mockImplementation(getResponseMock(basicCompleteResponse));
+        mockCoreSetup.http.post.mockImplementation(getHttpMock(basicCompleteResponse));
 
         const req = {
           params: {
@@ -1137,7 +1288,7 @@ describe('SearchInterceptor', () => {
       });
 
       test('should return from cache for identical requests in the same session', async () => {
-        mockCoreSetup.http.post.mockImplementation(getResponseMock(basicCompleteResponse));
+        mockCoreSetup.http.post.mockImplementation(getHttpMock(basicCompleteResponse));
 
         searchInterceptor.search(basicReq, { sessionId }).subscribe({ next, error, complete });
         await timeTravel(10);
@@ -1149,7 +1300,7 @@ describe('SearchInterceptor', () => {
       });
 
       test('aborting a search that didnt get any response should retrigger search', async () => {
-        mockCoreSetup.http.post.mockImplementation(getResponseMock(basicCompleteResponse));
+        mockCoreSetup.http.post.mockImplementation(getHttpMock(basicCompleteResponse));
 
         const abortController = new AbortController();
 
@@ -1186,7 +1337,7 @@ describe('SearchInterceptor', () => {
       });
 
       test('aborting a running first search shouldnt clear cache', async () => {
-        mockCoreSetup.http.post.mockImplementation(getResponseMock(partialCompleteResponse));
+        mockCoreSetup.http.post.mockImplementation(getHttpMock(partialCompleteResponse));
         sessionService.isCurrentSession.mockImplementation(
           (_sessionId) => _sessionId === sessionId
         );
@@ -1253,7 +1404,7 @@ describe('SearchInterceptor', () => {
       });
 
       test('aborting a running second search shouldnt clear cache', async () => {
-        mockCoreSetup.http.post.mockImplementation(getResponseMock(partialCompleteResponse));
+        mockCoreSetup.http.post.mockImplementation(getHttpMock(partialCompleteResponse));
         sessionService.isCurrentSession.mockImplementation(
           (_sessionId) => _sessionId === sessionId
         );
@@ -1318,7 +1469,7 @@ describe('SearchInterceptor', () => {
       });
 
       test('aborting both requests should cancel underlaying search only once', async () => {
-        mockCoreSetup.http.post.mockImplementation(getResponseMock(partialCompleteResponse));
+        mockCoreSetup.http.post.mockImplementation(getHttpMock(partialCompleteResponse));
         sessionService.isCurrentSession.mockImplementation(
           (_sessionId) => _sessionId === sessionId
         );
@@ -1355,7 +1506,7 @@ describe('SearchInterceptor', () => {
       });
 
       test('aborting both searches should stop searching and clear cache', async () => {
-        mockCoreSetup.http.post.mockImplementation(getResponseMock(partialCompleteResponse));
+        mockCoreSetup.http.post.mockImplementation(getHttpMock(partialCompleteResponse));
         sessionService.isCurrentSession.mockImplementation(
           (_sessionId) => _sessionId === sessionId
         );
@@ -1412,7 +1563,7 @@ describe('SearchInterceptor', () => {
 
         // Clear mock and research
         mockCoreSetup.http.post.mockReset();
-        mockCoreSetup.http.post.mockImplementation(getResponseMock(partialCompleteResponse));
+        mockCoreSetup.http.post.mockImplementation(getHttpMock(partialCompleteResponse));
         // Run the search again to see that we don't hit the cache
         const response3 = searchInterceptor.search(req, { pollInterval: 1, sessionId });
         response3.subscribe({ next, error, complete });
@@ -1427,7 +1578,7 @@ describe('SearchInterceptor', () => {
       });
 
       test("aborting a completed search shouldn't effect cache", async () => {
-        mockCoreSetup.http.post.mockImplementation(getResponseMock(basicCompleteResponse));
+        mockCoreSetup.http.post.mockImplementation(getHttpMock(basicCompleteResponse));
 
         const abortController = new AbortController();
 

@@ -14,8 +14,10 @@ export default function searchSolutionNavigation({
   const { common, solutionNavigation } = getPageObjects(['common', 'solutionNavigation']);
   const spaces = getService('spaces');
   const browser = getService('browser');
+  const kibanaServer = getService('kibanaServer');
 
-  describe('Search Solution Navigation', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/201037
+  describe.skip('Search Solution Navigation', () => {
     let cleanUp: () => Promise<unknown>;
     let spaceCreated: { id: string } = { id: '' };
 
@@ -28,9 +30,18 @@ export default function searchSolutionNavigation({
       // Create a space with the search solution and navigate to its home page
       ({ cleanUp, space: spaceCreated } = await spaces.create({ solution: 'es' }));
       await browser.navigateTo(spaces.getRootUrl(spaceCreated.id));
+
+      // canvas application is only available when installation contains canvas workpads
+      await kibanaServer.importExport.load(
+        'x-pack/test/functional/fixtures/kbn_archiver/canvas/default'
+      );
     });
 
     after(async () => {
+      await kibanaServer.importExport.unload(
+        'x-pack/test/functional/fixtures/kbn_archiver/canvas/default'
+      );
+
       // Clean up space created
       await cleanUp();
     });
