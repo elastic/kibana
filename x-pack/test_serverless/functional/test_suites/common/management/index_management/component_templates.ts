@@ -107,8 +107,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     describe('no access', () => {
       before(async () => {
         await security.testUser.setRoles(['index_management_monitor_only']);
-        await pageObjects.svlCommonPage.loginAsAdmin();
-        await pageObjects.common.navigateToApp('indexManagement');
+        await browser.refresh();
         await pageObjects.header.waitUntilLoadingHasFinished();
       });
 
