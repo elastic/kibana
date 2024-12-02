@@ -45,7 +45,7 @@ export function ObservabilityOnboardingAppRoot({
 }: {
   appMountParameters: AppMountParameters;
 } & RenderAppProps) {
-  const { history, setHeaderActionMenu, theme$ } = appMountParameters;
+  const { history, setHeaderActionMenu } = appMountParameters;
   const services: ObservabilityOnboardingAppServices = {
     ...core,
     ...corePlugins,
@@ -67,19 +67,19 @@ export function ObservabilityOnboardingAppRoot({
         >
           <KibanaContextProvider services={services}>
             <KibanaThemeProvider
-              theme={{ theme$ }}
               modify={{
                 breakpoint: {
                   xxl: 1600,
                   xxxl: 2000,
                 },
               }}
+              {...core}
             >
               <Router history={history}>
                 <EuiErrorBoundary>
                   <ObservabilityOnboardingHeaderActionMenu
                     setHeaderActionMenu={setHeaderActionMenu}
-                    theme$={theme$}
+                    {...core}
                   />
                   <ObservabilityOnboardingFlow />
                 </EuiErrorBoundary>

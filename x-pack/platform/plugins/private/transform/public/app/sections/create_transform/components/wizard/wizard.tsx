@@ -225,7 +225,15 @@ export const Wizard: FC<WizardProps> = React.memo(({ cloneConfig, searchItems })
   const stepsConfig = [stepDefine, stepDetails, stepCreate];
 
   const datePickerDeps: DatePickerDependencies = {
-    ...pick(appDependencies, ['data', 'http', 'notifications', 'theme', 'uiSettings', 'i18n']),
+    ...pick(appDependencies, [
+      'data',
+      'http',
+      'notifications',
+      'theme',
+      'uiSettings',
+      'userProfile',
+      'i18n',
+    ]),
     uiSettingsKeys: UI_SETTINGS,
     showFrozenDataTierChoice: showNodeInfo,
   };

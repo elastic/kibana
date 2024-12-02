@@ -13,6 +13,15 @@ import { KibanaReactNotifications } from './types';
 import { toMountPoint } from '../util';
 
 export const createNotifications = (services: KibanaServices): KibanaReactNotifications => {
+  const checkCoreService = () => {
+    if (!services.notifications) {
+      throw new TypeError('Could not show notification as notifications service is not available.');
+    }
+    if (!services.userProfile) {
+      throw new TypeError('Could not show overlay as userProfile service is not available.');
+    }
+  };
+
   const show: KibanaReactNotifications['toasts']['show'] = ({
     title,
     body,
@@ -21,12 +30,16 @@ export const createNotifications = (services: KibanaServices): KibanaReactNotifi
     toastLifeTimeMs,
     onClose,
   }) => {
-    if (!services.notifications) {
-      throw new TypeError('Could not show notification as notifications service is not available.');
-    }
+    checkCoreService();
     services.notifications!.toasts.add({
-      title: toMountPoint(title, { theme$: services.theme?.theme$ }),
-      text: toMountPoint(<>{body || null}</>, { theme$: services.theme?.theme$ }),
+      title: toMountPoint(title, {
+        theme$: services.theme?.theme$,
+        userProfile: services.userProfile!,
+      }),
+      text: toMountPoint(<>{body || null}</>, {
+        theme$: services.theme?.theme$,
+        userProfile: services.userProfile!,
+      }),
       color,
       iconType,
       toastLifeTimeMs,

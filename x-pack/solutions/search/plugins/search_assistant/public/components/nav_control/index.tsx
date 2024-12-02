@@ -29,7 +29,7 @@ interface NavControlWithProviderDeps {
 export const NavControlWithProvider = ({ coreStart, pluginsStart }: NavControlWithProviderDeps) => {
   return (
     <EuiErrorBoundary>
-      <KibanaThemeProvider theme={coreStart.theme}>
+      <KibanaThemeProvider {...coreStart}>
         <KibanaContextProvider
           services={{
             ...coreStart,

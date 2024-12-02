@@ -44,7 +44,7 @@ interface UpdateButtonProps extends Pick<PackageInfo, 'name' | 'title' | 'versio
   agentPolicyIds: string[];
   isUpgradingPackagePolicies?: boolean;
   setIsUpgradingPackagePolicies?: React.Dispatch<React.SetStateAction<boolean>>;
-  startServices: Pick<FleetStartServices, 'analytics' | 'i18n' | 'theme'>;
+  startServices: Pick<FleetStartServices, 'analytics' | 'i18n' | 'theme' | 'userProfile'>;
 }
 
 /*

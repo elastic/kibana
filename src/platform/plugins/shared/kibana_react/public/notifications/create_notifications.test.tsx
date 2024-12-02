@@ -9,7 +9,7 @@
 
 import * as React from 'react';
 import { createNotifications } from './create_notifications';
-import { notificationServiceMock } from '@kbn/core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 
 test('throws if no overlays service provided', () => {
   const notifications = createNotifications({});
@@ -19,8 +19,8 @@ test('throws if no overlays service provided', () => {
 });
 
 test('creates wrapped notifications service', () => {
-  const notifications = notificationServiceMock.createStartContract();
-  const wrapper = createNotifications({ notifications });
+  const core = coreMock.createStart();
+  const wrapper = createNotifications(core);
 
   expect(wrapper).toMatchObject({
     toasts: {
@@ -33,15 +33,15 @@ test('creates wrapped notifications service', () => {
 });
 
 test('can display string element as title', () => {
-  const notifications = notificationServiceMock.createStartContract();
-  const wrapper = createNotifications({ notifications });
+  const core = coreMock.createStart();
+  const wrapper = createNotifications(core);
 
-  expect(notifications.toasts.add).toHaveBeenCalledTimes(0);
+  expect(core.notifications.toasts.add).toHaveBeenCalledTimes(0);
 
   wrapper.toasts.show({ title: 'foo' });
 
-  expect(notifications.toasts.add).toHaveBeenCalledTimes(1);
-  expect(notifications.toasts.add.mock.calls[0][0]).toMatchInlineSnapshot(`
+  expect(core.notifications.toasts.add).toHaveBeenCalledTimes(1);
+  expect(core.notifications.toasts.add.mock.calls[0][0]).toMatchInlineSnapshot(`
     Object {
       "color": undefined,
       "iconType": undefined,
@@ -58,15 +58,15 @@ test('can display string element as title', () => {
 });
 
 test('can display React element as title', () => {
-  const notifications = notificationServiceMock.createStartContract();
-  const wrapper = createNotifications({ notifications });
+  const core = coreMock.createStart();
+  const wrapper = createNotifications(core);
 
-  expect(notifications.toasts.add).toHaveBeenCalledTimes(0);
+  expect(core.notifications.toasts.add).toHaveBeenCalledTimes(0);
 
   wrapper.toasts.show({ title: <div>bar</div> });
 
-  expect(notifications.toasts.add).toHaveBeenCalledTimes(1);
-  expect((notifications.toasts.add.mock.calls[0][0] as any).title).toMatchInlineSnapshot(`
+  expect(core.notifications.toasts.add).toHaveBeenCalledTimes(1);
+  expect((core.notifications.toasts.add.mock.calls[0][0] as any).title).toMatchInlineSnapshot(`
     MountPoint {
       "reactNode": <div>
         bar
@@ -76,13 +76,13 @@ test('can display React element as title', () => {
 });
 
 test('can display React element as toast body', () => {
-  const notifications = notificationServiceMock.createStartContract();
-  const wrapper = createNotifications({ notifications });
+  const core = coreMock.createStart();
+  const wrapper = createNotifications(core);
 
   wrapper.toasts.show({ body: <div>baz</div> });
 
-  expect(notifications.toasts.add).toHaveBeenCalledTimes(1);
-  expect((notifications.toasts.add.mock.calls[0][0] as any).text).toMatchInlineSnapshot(`
+  expect(core.notifications.toasts.add).toHaveBeenCalledTimes(1);
+  expect((core.notifications.toasts.add.mock.calls[0][0] as any).text).toMatchInlineSnapshot(`
     MountPoint {
       "reactNode": <React.Fragment>
         <div>
@@ -94,8 +94,8 @@ test('can display React element as toast body', () => {
 });
 
 test('can set toast properties', () => {
-  const notifications = notificationServiceMock.createStartContract();
-  const wrapper = createNotifications({ notifications });
+  const core = coreMock.createStart();
+  const wrapper = createNotifications(core);
 
   wrapper.toasts.show({
     body: '1',
@@ -105,7 +105,7 @@ test('can set toast properties', () => {
     toastLifeTimeMs: 3,
   });
 
-  expect(notifications.toasts.add.mock.calls[0][0]).toMatchInlineSnapshot(`
+  expect(core.notifications.toasts.add.mock.calls[0][0]).toMatchInlineSnapshot(`
     Object {
       "color": "danger",
       "iconType": "foo",
@@ -124,15 +124,15 @@ test('can set toast properties', () => {
 });
 
 test('can display success, warning and danger toasts', () => {
-  const notifications = notificationServiceMock.createStartContract();
-  const wrapper = createNotifications({ notifications });
+  const core = coreMock.createStart();
+  const wrapper = createNotifications(core);
 
   wrapper.toasts.success({ title: '1' });
   wrapper.toasts.warning({ title: '2' });
   wrapper.toasts.danger({ title: '3' });
 
-  expect(notifications.toasts.add).toHaveBeenCalledTimes(3);
-  expect(notifications.toasts.add.mock.calls[0][0]).toMatchInlineSnapshot(`
+  expect(core.notifications.toasts.add).toHaveBeenCalledTimes(3);
+  expect(core.notifications.toasts.add.mock.calls[0][0]).toMatchInlineSnapshot(`
     Object {
       "color": "success",
       "iconType": "check",
@@ -146,7 +146,7 @@ test('can display success, warning and danger toasts', () => {
       "toastLifeTimeMs": undefined,
     }
   `);
-  expect(notifications.toasts.add.mock.calls[1][0]).toMatchInlineSnapshot(`
+  expect(core.notifications.toasts.add.mock.calls[1][0]).toMatchInlineSnapshot(`
     Object {
       "color": "warning",
       "iconType": "help",
@@ -160,7 +160,7 @@ test('can display success, warning and danger toasts', () => {
       "toastLifeTimeMs": undefined,
     }
   `);
-  expect(notifications.toasts.add.mock.calls[2][0]).toMatchInlineSnapshot(`
+  expect(core.notifications.toasts.add.mock.calls[2][0]).toMatchInlineSnapshot(`
     Object {
       "color": "danger",
       "iconType": "error",
@@ -177,12 +177,12 @@ test('can display success, warning and danger toasts', () => {
 });
 
 test('if body is not set, renders it empty', () => {
-  const notifications = notificationServiceMock.createStartContract();
-  const wrapper = createNotifications({ notifications });
+  const core = coreMock.createStart();
+  const wrapper = createNotifications(core);
 
   wrapper.toasts.success({ title: '1' });
 
-  expect((notifications.toasts.add.mock.calls[0][0] as any).text).toMatchInlineSnapshot(`
+  expect((core.notifications.toasts.add.mock.calls[0][0] as any).text).toMatchInlineSnapshot(`
     MountPoint {
       "reactNode": <React.Fragment />,
     }

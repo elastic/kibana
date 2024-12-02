@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { HttpStart, DocLinksStart, IUiSettingsClient, ApplicationStart } from '@kbn/core/public';
+import {
+  HttpStart,
+  DocLinksStart,
+  IUiSettingsClient,
+  ApplicationStart,
+  ThemeServiceStart,
+  UserProfileService,
+} from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ApmPluginStartDeps } from '../plugin';
 
@@ -14,6 +21,8 @@ interface UxKibanaServices extends ApmPluginStartDeps {
   docLinks: DocLinksStart;
   uiSettings: IUiSettingsClient;
   application: ApplicationStart;
+  theme: ThemeServiceStart;
+  userProfile: UserProfileService;
 }
 
 export function useKibanaServices() {

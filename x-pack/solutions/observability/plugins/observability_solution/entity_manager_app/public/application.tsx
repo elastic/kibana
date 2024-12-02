@@ -43,7 +43,7 @@ export function renderApp({
   isServerless?: boolean;
   entityClient: EntityClient;
 }) {
-  const { element, history, theme$ } = appMountParameters;
+  const { element, history } = appMountParameters;
 
   // ensure all divs are .kbnAppWrappers
   element.classList.add(APP_WRAPPER_CLASS);
@@ -56,7 +56,7 @@ export function renderApp({
   ReactDOM.render(
     <KibanaRenderContextProvider {...core}>
       <ApplicationUsageTrackingProvider>
-        <KibanaThemeProvider {...{ theme: { theme$ } }}>
+        <KibanaThemeProvider {...core}>
           <CloudProvider>
             <KibanaContextProvider
               services={{

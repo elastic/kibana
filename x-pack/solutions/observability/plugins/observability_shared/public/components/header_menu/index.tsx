@@ -12,9 +12,10 @@ import { HeaderMenuPortalProps } from '../../types';
 const HeaderMenuPortalLazy = lazy(() => import('./header_menu_portal'));
 
 export function HeaderMenuPortal(props: HeaderMenuPortalProps) {
+  const { setHeaderActionMenu, theme, userProfile, children } = props;
   return (
     <Suspense fallback={<EuiLoadingSpinner />}>
-      <HeaderMenuPortalLazy {...props} />
+      <HeaderMenuPortalLazy {...{ setHeaderActionMenu, theme, userProfile, children }} />
     </Suspense>
   );
 }

@@ -7,7 +7,12 @@
 
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import React from 'react';
-import { type AppMountParameters, type CoreStart } from '@kbn/core/public';
+import {
+  ThemeServiceStart,
+  type AppMountParameters,
+  type CoreStart,
+  type UserProfileService,
+} from '@kbn/core/public';
 import {
   BreadcrumbsContextProvider,
   RouteRenderer,
@@ -47,22 +52,27 @@ export function AppRoot({
           <BreadcrumbsContextProvider>
             <RouteRenderer />
           </BreadcrumbsContextProvider>
-          <StreamsAppHeaderActionMenu appMountParameters={appMountParameters} />
+          <StreamsAppHeaderActionMenu appMountParameters={appMountParameters} {...coreStart} />
         </RouterProvider>
       </RedirectAppLinks>
     </StreamsAppContextProvider>
   );
 }
 
+interface StreamsAppHeaderActionMenuProps {
+  appMountParameters: AppMountParameters;
+  theme: ThemeServiceStart;
+  userProfile: UserProfileService;
+}
+
 export function StreamsAppHeaderActionMenu({
   appMountParameters,
-}: {
-  appMountParameters: AppMountParameters;
-}) {
-  const { setHeaderActionMenu, theme$ } = appMountParameters;
+  ...startServices
+}: StreamsAppHeaderActionMenuProps) {
+  const { setHeaderActionMenu } = appMountParameters;
 
   return (
-    <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>
+    <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} {...startServices}>
       <EuiFlexGroup responsive={false} gutterSize="s">
         <EuiFlexItem>
           <></>

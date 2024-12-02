@@ -39,8 +39,7 @@ export const useAddToTimeline = ({
   indicator,
   field,
 }: UseAddToTimelineParam): UseAddToTimelineValue => {
-  const { analytics, i18n, theme } = useKibana().services;
-  const startServices = { analytics, i18n, theme };
+  const startServices = useKibana().services;
 
   const { key, value } =
     typeof indicator === 'string'

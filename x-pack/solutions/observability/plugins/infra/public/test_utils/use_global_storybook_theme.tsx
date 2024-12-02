@@ -8,7 +8,7 @@
 import type { DecoratorFn } from '@storybook/react';
 import type { FC, PropsWithChildren } from 'react';
 import React, { useEffect, useMemo, useState } from 'react';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 import type { CoreTheme } from '@kbn/core/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
@@ -18,6 +18,7 @@ type StoryContext = Parameters<DecoratorFn>[1];
 export const useGlobalStorybookTheme = ({ globals: { euiTheme } }: StoryContext) => {
   const theme = useMemo(() => euiThemeFromId(euiTheme), [euiTheme]);
   const [theme$] = useState(() => new BehaviorSubject(theme));
+  const userProfile = { getUserProfile$: () => of(null) };
 
   useEffect(() => {
     theme$.next(theme);
@@ -26,6 +27,7 @@ export const useGlobalStorybookTheme = ({ globals: { euiTheme } }: StoryContext)
   return {
     theme,
     theme$,
+    userProfile,
   };
 };
 
@@ -34,9 +36,9 @@ export const GlobalStorybookThemeProviders: FC<
     storyContext: StoryContext;
   }>
 > = ({ children, storyContext }) => {
-  const { theme, theme$ } = useGlobalStorybookTheme(storyContext);
+  const { theme, theme$, userProfile } = useGlobalStorybookTheme(storyContext);
   return (
-    <KibanaThemeProvider theme={{ theme$ }}>
+    <KibanaThemeProvider theme={{ theme$ }} userProfile={userProfile}>
       <EuiThemeProvider darkMode={theme.darkMode}>{children}</EuiThemeProvider>
     </KibanaThemeProvider>
   );

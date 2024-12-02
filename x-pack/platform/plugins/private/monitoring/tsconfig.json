@@ -47,6 +47,7 @@
     "@kbn/core-elasticsearch-server",
     "@kbn/share-plugin",
     "@kbn/analytics",
+    "@kbn/core-user-profile-browser",
   ],
   "exclude": [
     "target/**/*",
