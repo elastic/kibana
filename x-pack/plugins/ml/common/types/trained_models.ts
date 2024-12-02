@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { MlInferenceConfigCreateContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type {
   InferenceAPIConfigResponse,
   ModelDefinitionResponse,
@@ -106,8 +107,8 @@ export type TrainedModelConfigResponse = estypes.MlTrainedModelConfig & {
   metadata?: estypes.MlTrainedModelConfig['metadata'] & {
     analytics_config?: DataFrameAnalyticsConfig;
     input: unknown;
-    // total_feature_importance?: TotalFeatureImportance[];
-    // feature_importance_baseline?: FeatureImportanceBaseline;
+    total_feature_importance?: TotalFeatureImportance[];
+    feature_importance_baseline?: FeatureImportanceBaseline;
   } & Record<string, unknown>;
 };
 
@@ -375,8 +376,15 @@ export type ExistingModelBase = TrainedModelConfigResponse & BaseModelItem;
 export type TrainedModelItem = ExistingModelBase & { stats: Stats };
 
 /** Trained DFA model */
-export type DFAModelItem = TrainedModelItem & {
+export type DFAModelItem = Omit<TrainedModelItem, 'inference_config'> & {
   origin_job_exists?: boolean;
+  inference_config?: Pick<MlInferenceConfigCreateContainer, 'classification' | 'regression'>;
+  metadata?: estypes.MlTrainedModelConfig['metadata'] & {
+    analytics_config: DataFrameAnalyticsConfig;
+    input: unknown;
+    total_feature_importance?: TotalFeatureImportance[];
+    feature_importance_baseline?: FeatureImportanceBaseline;
+  } & Record<string, unknown>;
 };
 
 export type TrainedModelWithPipelines = TrainedModelItem & {

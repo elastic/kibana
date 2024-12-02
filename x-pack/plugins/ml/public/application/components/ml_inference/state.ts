@@ -60,7 +60,11 @@ export const getInitialState = (model: DFAModelItem): MlInferenceState => {
 
   if (modelType !== undefined) {
     targetField = model.inference_config
-      ? `ml.inference.${model.inference_config[modelType].results_field}`
+      ? `ml.inference.${
+          model.inference_config[
+            modelType as keyof Exclude<DFAModelItem['inference_config'], undefined>
+          ]!.results_field
+        }`
       : undefined;
   }
 

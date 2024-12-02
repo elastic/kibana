@@ -327,9 +327,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
                         <EuiDescriptionList
                           compressed={true}
                           type="column"
-                          listItems={formatToListItems(
-                            inferenceConfig[Object.keys(inferenceConfig)[0]]
-                          )}
+                          listItems={formatToListItems(Object.values(inferenceConfig)[0])}
                         />
                       </EuiPanel>
                     </EuiFlexItem>
