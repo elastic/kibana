@@ -234,6 +234,7 @@ enabled:
   - x-pack/test/functional/apps/lens/group4/config.ts
   - x-pack/test/functional/apps/lens/group5/config.ts
   - x-pack/test/functional/apps/lens/group6/config.ts
+  - x-pack/test/functional/apps/lens/group7/config.ts
   - x-pack/test/functional/apps/lens/open_in_lens/tsvb/config.ts
   - x-pack/test/functional/apps/lens/open_in_lens/agg_based/config.ts
   - x-pack/test/functional/apps/lens/open_in_lens/dashboard/config.ts
