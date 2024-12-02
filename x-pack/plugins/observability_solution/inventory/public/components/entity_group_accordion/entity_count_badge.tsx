@@ -7,7 +7,7 @@
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import React from 'react';
 
-export function InventoryPanelBadge({
+export function EntityCountBadge({
   name,
   value,
   'data-test-subj': dataTestSubj,
