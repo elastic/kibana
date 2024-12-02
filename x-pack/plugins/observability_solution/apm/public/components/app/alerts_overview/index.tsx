@@ -11,8 +11,12 @@ import { ObservabilityAlertSearchBar } from '@kbn/observability-plugin/public';
 import { AlertStatus } from '@kbn/observability-plugin/common/typings';
 import { EuiPanel, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { BoolQuery } from '@kbn/es-query';
-import { AlertConsumers, APM_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
+import { AlertConsumers } from '@kbn/rule-data-utils';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import {
+  apmAlertingConsumers,
+  apmAlertingRuleTypeIds,
+} from '../../../../common/alerting/config/apm_alerting_feature_ids';
 import { ApmPluginStartDeps } from '../../../plugin';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { SERVICE_NAME } from '../../../../common/es_fields/apm';
@@ -107,8 +111,8 @@ export function AlertsOverview() {
               alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
               id={'service-overview-alerts'}
               configurationId={AlertConsumers.OBSERVABILITY}
-              ruleTypeIds={APM_RULE_TYPE_IDS}
-              consumers={[AlertConsumers.APM, AlertConsumers.ALERTS, AlertConsumers.OBSERVABILITY]}
+              ruleTypeIds={apmAlertingRuleTypeIds}
+              consumers={apmAlertingConsumers}
               query={esQuery}
               showAlertStatusWithFlapping
               cellContext={{ observabilityRuleTypeRegistry }}

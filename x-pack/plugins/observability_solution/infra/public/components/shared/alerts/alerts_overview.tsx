@@ -8,10 +8,11 @@ import React, { useCallback, useMemo, useState } from 'react';
 import type { AlertStatus } from '@kbn/observability-plugin/common/typings';
 import type { TimeRange } from '@kbn/es-query';
 import { useSummaryTimeRange } from '@kbn/observability-plugin/public';
-import { AlertConsumers, INFRA_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
+import { AlertConsumers, OBSERVABILITY_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { BrushEndListener, XYBrushEvent } from '@elastic/charts';
 import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import { INFRA_ALERT_CONSUMERS } from '../../../../common/constants';
 import { AlertsCount } from '../../../hooks/use_alerts_count';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { createAlertsEsQuery } from '../../../utils/filters/create_alerts_es_query';
@@ -112,12 +113,8 @@ export const AlertsOverview = ({
       <EuiFlexItem>
         <AlertSummaryWidget
           chartProps={chartProps}
-          ruleTypeIds={INFRA_RULE_TYPE_IDS}
-          consumers={[
-            AlertConsumers.INFRASTRUCTURE,
-            AlertConsumers.ALERTS,
-            AlertConsumers.OBSERVABILITY,
-          ]}
+          ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS}
+          consumers={INFRA_ALERT_CONSUMERS}
           filter={alertsEsQuery}
           timeRange={summaryTimeRange}
           onLoaded={onLoaded}
@@ -130,12 +127,8 @@ export const AlertsOverview = ({
           alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
           id={'assetDetailsAlertsTable'}
           configurationId={AlertConsumers.OBSERVABILITY}
-          ruleTypeIds={INFRA_RULE_TYPE_IDS}
-          consumers={[
-            AlertConsumers.INFRASTRUCTURE,
-            AlertConsumers.ALERTS,
-            AlertConsumers.OBSERVABILITY,
-          ]}
+          ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS}
+          consumers={INFRA_ALERT_CONSUMERS}
           showAlertStatusWithFlapping
           query={alertsEsQueryByStatus}
           initialPageSize={5}

@@ -8,11 +8,11 @@
 import { isEmpty } from 'lodash';
 import { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
 import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
-import { APM_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import { DataTier } from '@kbn/observability-shared-plugin/common';
 import { searchExcludedDataTiers } from '@kbn/observability-plugin/common/ui_settings_keys';
 import { estypes } from '@elastic/elasticsearch';
 import { getDataTierFilterCombined } from '@kbn/apm-data-access-plugin/server/utils';
+import { apmAlertingRuleTypeIds } from '../../../common/alerting/config/apm_alerting_feature_ids';
 import type { MinimalAPMRouteHandlerResources } from '../../routes/apm_routes/register_apm_server_routes';
 
 export type ApmAlertsClient = Awaited<ReturnType<typeof getApmAlertsClient>>;
@@ -32,7 +32,7 @@ export async function getApmAlertsClient({
 
   const ruleRegistryPluginStart = await plugins.ruleRegistry.start();
   const alertsClient = await ruleRegistryPluginStart.getRacClientWithRequest(request);
-  const apmAlertsIndices = await alertsClient.getAuthorizedAlertsIndices(APM_RULE_TYPE_IDS);
+  const apmAlertsIndices = await alertsClient.getAuthorizedAlertsIndices(apmAlertingRuleTypeIds);
 
   if (!apmAlertsIndices || isEmpty(apmAlertsIndices)) {
     throw Error('No alert indices exist for "apm"');

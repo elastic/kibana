@@ -6,11 +6,16 @@
  */
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { AlertConsumers, ALERT_RULE_PRODUCER, INFRA_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
+import {
+  AlertConsumers,
+  INFRA_RULE_TYPE_IDS,
+  OBSERVABILITY_RULE_TYPE_IDS,
+} from '@kbn/rule-data-utils';
 import { BrushEndListener, type XYBrushEvent } from '@elastic/charts';
 import { useSummaryTimeRange } from '@kbn/observability-plugin/public';
 import { useBoolean } from '@kbn/react-hooks';
 import type { TimeRange } from '@kbn/es-query';
+import { INFRA_ALERT_CONSUMERS } from '../../../../../../../common/constants';
 import { useKibanaContextForPlugin } from '../../../../../../hooks/use_kibana';
 import { HeightRetainer } from '../../../../../../components/height_retainer';
 import { useUnifiedSearchContext } from '../../../hooks/use_unified_search';
@@ -24,13 +29,14 @@ import {
 import AlertsStatusFilter from '../../../../../../components/shared/alerts/alerts_status_filter';
 import { CreateAlertRuleButton } from '../../../../../../components/shared/alerts/links/create_alert_rule_button';
 import { LinkToAlertsPage } from '../../../../../../components/shared/alerts/links/link_to_alerts_page';
-import { INFRA_ALERT_FEATURE_ID } from '../../../../../../../common/constants';
 import { AlertFlyout } from '../../../../../../alerting/inventory/components/alert_flyout';
 import { usePluginConfig } from '../../../../../../containers/plugin_config_context';
+import { useHostsViewContext } from '../../../hooks/use_hosts_view';
 
 export const AlertsTabContent = () => {
   const { services } = useKibanaContextForPlugin();
   const { featureFlags } = usePluginConfig();
+  const { hostNodes } = useHostsViewContext();
 
   const { alertStatus, setAlertStatus, alertsEsQueryByStatus } = useAlertsQuery();
   const [isAlertFlyoutVisible, { toggle: toggleAlertFlyout }] = useBoolean(false);
@@ -41,6 +47,11 @@ export const AlertsTabContent = () => {
 
   const { alertsTableConfigurationRegistry, getAlertsStateTable: AlertsStateTable } =
     triggersActionsUi;
+
+  const hostsWithAlertsKuery = hostNodes
+    .filter((host) => host.alertsCount)
+    .map((host) => `"${host.name}"`)
+    .join(' OR ');
 
   return (
     <HeightRetainer>
@@ -62,7 +73,7 @@ export const AlertsTabContent = () => {
               <LinkToAlertsPage
                 dateRange={searchCriteria.dateRange}
                 data-test-subj="infraHostAlertsTabAlertsShowAllButton"
-                kuery={`${ALERT_RULE_PRODUCER}: ${INFRA_ALERT_FEATURE_ID}`}
+                kuery={`${hostsWithAlertsKuery}`}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -79,12 +90,8 @@ export const AlertsTabContent = () => {
             <AlertsStateTable
               alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
               configurationId={AlertConsumers.OBSERVABILITY}
-              ruleTypeIds={INFRA_RULE_TYPE_IDS}
-              consumers={[
-                AlertConsumers.INFRASTRUCTURE,
-                AlertConsumers.ALERTS,
-                AlertConsumers.OBSERVABILITY,
-              ]}
+              ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS}
+              consumers={INFRA_ALERT_CONSUMERS}
               id={ALERTS_TABLE_ID}
               initialPageSize={ALERTS_PER_PAGE}
               query={alertsEsQueryByStatus}

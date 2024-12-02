@@ -31,7 +31,6 @@ import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import { CloudSetup } from '@kbn/cloud-plugin/server';
 import { RouteConfig, RouteMethod, Headers } from '@kbn/core/server';
-import { LogsSharedPluginSetup } from '@kbn/logs-shared-plugin/server';
 import { ActionTypeRegistry } from '@kbn/actions-plugin/server/action_type_registry';
 import { ElasticsearchModifiedSource } from '../common/types/es';
 import { RulesByType } from '../common/types/alerts';
@@ -54,7 +53,6 @@ export interface PluginsSetup {
   alerting?: AlertingServerSetup;
   infra: InfraPluginSetup;
   cloud?: CloudSetup;
-  logsShared: LogsSharedPluginSetup;
 }
 
 export type RequestHandlerContextMonitoringPlugin = CustomRequestHandlerContext<{
