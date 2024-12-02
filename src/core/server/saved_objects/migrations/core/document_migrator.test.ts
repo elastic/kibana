@@ -429,7 +429,7 @@ describe('DocumentMigrator', () => {
           migrationVersion: { dog: '10.2.0' },
         })
       ).toThrow(
-        /Document "smelly" has property "dog" which belongs to a more recent version of Kibana \[10\.2\.0\]\. The last known version is \[undefined\]/i
+        /Document "smelly" has property "dog" which belongs to a more recent version of Kibana \[10\.2\.0\]\. The last known version is \[undefined\]\. Saved objects are not backwards compatible, and migrating saved objects from newer versions of Kibana into older versions is not supported\./i
       );
     });
 
@@ -452,7 +452,7 @@ describe('DocumentMigrator', () => {
           migrationVersion: { dawg: '1.2.4' },
         })
       ).toThrow(
-        /Document "fleabag" has property "dawg" which belongs to a more recent version of Kibana \[1\.2\.4\]\. The last known version is \[1\.2\.3\]/i
+        /Document "fleabag" has property "dawg" which belongs to a more recent version of Kibana \[1\.2\.4\]\. The last known version is \[1\.2\.3\]\. Saved objects are not backwards compatible, and migrating saved objects from newer versions of Kibana into older versions is not supported\./i
       );
     });
 

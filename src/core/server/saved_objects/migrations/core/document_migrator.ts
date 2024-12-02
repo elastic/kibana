@@ -727,7 +727,9 @@ function nextUnmigratedProp(doc: SavedObjectUnsanitizedDoc, migrations: ActiveMi
     if (docVersion && (!latestMigrationVersion || Semver.gt(docVersion, latestMigrationVersion))) {
       throw Boom.badData(
         `Document "${doc.id}" has property "${p}" which belongs to a more recent` +
-          ` version of Kibana [${docVersion}]. The last known version is [${latestMigrationVersion}]`,
+          ` version of Kibana [${docVersion}]. The last known version is [${latestMigrationVersion}].` +
+          ` Saved objects are not backwards compatible, and migrating saved objects from` +
+          ` newer versions of Kibana into older versions is not supported.`,
         doc
       );
     }
