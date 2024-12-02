@@ -11,6 +11,7 @@ import { EuiListGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ExpandPopoverListItem } from '@kbn/cloud-security-posture-graph/src/components/styles';
 import {
+  GRAPH_NODE_EXPAND_POPOVER_TEST_ID,
   GRAPH_NODE_POPOVER_EXPLORE_RELATED_ITEM_ID,
   GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID,
   GRAPH_NODE_POPOVER_SHOW_ACTIONS_ON_ITEM_ID,
@@ -41,18 +42,9 @@ export const GraphNodeExpandPopover: React.FC<GraphNodeExpandPopoverProps> = mem
         isOpen={isOpen}
         anchorElement={anchorElement}
         closePopover={closePopover}
-        data-test-subj="graphNodeExpandPopover"
+        data-test-subj={GRAPH_NODE_EXPAND_POPOVER_TEST_ID}
       >
         <EuiListGroup gutterSize="none" bordered={false} flush={true}>
-          <ExpandPopoverListItem
-            iconType="visTagCloud"
-            label={i18n.translate(
-              'xpack.securitySolution.flyout.documentDetails.left.graphNodeExpandPopover.exploreRelatedEntities',
-              { defaultMessage: 'Explore related entities' }
-            )}
-            onClick={onExploreRelatedEntitiesClick}
-            data-test-subj={GRAPH_NODE_POPOVER_EXPLORE_RELATED_ITEM_ID}
-          />
           <ExpandPopoverListItem
             iconType="users"
             label={i18n.translate(
@@ -70,6 +62,15 @@ export const GraphNodeExpandPopover: React.FC<GraphNodeExpandPopoverProps> = mem
             )}
             onClick={onShowActionsOnEntityClick}
             data-test-subj={GRAPH_NODE_POPOVER_SHOW_ACTIONS_ON_ITEM_ID}
+          />
+          <ExpandPopoverListItem
+            iconType="visTagCloud"
+            label={i18n.translate(
+              'xpack.securitySolution.flyout.documentDetails.left.graphNodeExpandPopover.showRelatedEvents',
+              { defaultMessage: 'Show related events' }
+            )}
+            onClick={onExploreRelatedEntitiesClick}
+            data-test-subj={GRAPH_NODE_POPOVER_EXPLORE_RELATED_ITEM_ID}
           />
         </EuiListGroup>
       </GraphPopover>

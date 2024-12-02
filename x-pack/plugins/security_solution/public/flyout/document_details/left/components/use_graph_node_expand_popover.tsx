@@ -45,13 +45,10 @@ export const useGraphNodeExpandPopover = ({
 
   const onNodeExpandButtonClick: ExpandButtonClickCallback = useCallback(
     (e, node, unToggleCallback) => {
-      if (selectedNode.current?.id === node.id) {
-        // If the same node is clicked again, close the popover
-        closePopoverHandler();
-      } else {
-        // Close the current popover if open
-        closePopoverHandler();
+      // Close the current popover if open
+      closePopoverHandler();
 
+      if (selectedNode.current?.id !== node.id) {
         // Set the pending open state
         setPendingOpen({ node, el: e.currentTarget, unToggleCallback });
       }

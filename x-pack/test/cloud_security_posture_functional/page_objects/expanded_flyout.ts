@@ -13,7 +13,7 @@ import { FtrService } from '../../functional/ftr_provider_context';
 const GRAPH_PREVIEW_TITLE_LINK_TEST_ID = 'securitySolutionFlyoutGraphPreviewTitleLink';
 const GRAPH_VISUALIZATION_TEST_ID = 'securitySolutionFlyoutGraphVisualization';
 const NODE_EXPAND_BUTTON_TEST_ID = 'nodeExpandButton';
-const GRAPH_NODE_EXPAND_POPOVER_TEST_ID = 'graphNodeExpandPopover';
+const GRAPH_NODE_EXPAND_POPOVER_TEST_ID = `${GRAPH_VISUALIZATION_TEST_ID}GraphNodeExpandPopover`;
 const GRAPH_NODE_POPOVER_EXPLORE_RELATED_TEST_ID = `${GRAPH_VISUALIZATION_TEST_ID}ExploreRelatedEntities`;
 const GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_TEST_ID = `${GRAPH_VISUALIZATION_TEST_ID}ShowActionsByEntity`;
 const GRAPH_NODE_POPOVER_SHOW_ACTIONS_ON_TEST_ID = `${GRAPH_VISUALIZATION_TEST_ID}ShowActionsOnEntity`;

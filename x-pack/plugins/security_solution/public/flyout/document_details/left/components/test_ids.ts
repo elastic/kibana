@@ -12,6 +12,8 @@ import { PREFIX } from '../../../shared/test_ids';
 export const ANALYZER_GRAPH_TEST_ID = `${PREFIX}AnalyzerGraph` as const;
 export const SESSION_VIEW_TEST_ID = `${PREFIX}SessionView` as const;
 export const GRAPH_VISUALIZATION_TEST_ID = `${PREFIX}GraphVisualization` as const;
+export const GRAPH_NODE_EXPAND_POPOVER_TEST_ID =
+  `${GRAPH_VISUALIZATION_TEST_ID}GraphNodeExpandPopover` as const;
 export const GRAPH_NODE_POPOVER_EXPLORE_RELATED_ITEM_ID =
   `${GRAPH_VISUALIZATION_TEST_ID}ExploreRelatedEntities` as const;
 export const GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID =
