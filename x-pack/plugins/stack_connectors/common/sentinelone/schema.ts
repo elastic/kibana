@@ -117,7 +117,7 @@ export const SentinelOneGetAgentsResponseSchema = schema.object(
             { unknowns: 'allow' }
           ),
           isDecommissioned: schema.boolean(),
-          rangerVersion: schema.string(),
+          rangerVersion: schema.nullable(schema.string()),
           userActionsNeeded: schema.arrayOf(
             schema.object(
               {
