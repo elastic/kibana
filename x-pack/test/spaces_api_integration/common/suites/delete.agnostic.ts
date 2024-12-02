@@ -78,38 +78,81 @@ export function deleteTestSuiteFactory({ getService }: DeploymentAgnosticFtrProv
           doc_count_error_upper_bound: 0,
           sum_other_doc_count: 0,
           buckets: [
-            { key: 'space', doc_count: 3 }, // since space objects are namespace-agnostic, they appear in the "default" agg bucket
-            { key: 'visualization', doc_count: 3 },
-            { key: 'legacy-url-alias', doc_count: 2 }, // aliases (1)
-            { key: 'dashboard', doc_count: 1 },
-            { key: 'index-pattern', doc_count: 11 },
+            {
+              key: 'index-pattern',
+              doc_count: 11,
+            },
+            {
+              key: 'space',
+              doc_count: 3,
+            },
+            {
+              key: 'visualization',
+              doc_count: 3,
+            },
+            {
+              key: 'legacy-url-alias',
+              doc_count: 2,
+            },
+            {
+              key: 'dashboard',
+              doc_count: 1,
+            },
           ],
         },
       },
       {
-        doc_count: 10,
         key: 'space_1',
+        doc_count: 10,
         countByType: {
           doc_count_error_upper_bound: 0,
           sum_other_doc_count: 0,
           buckets: [
-            { key: 'visualization', doc_count: 3 },
-            { key: 'dashboard', doc_count: 1 },
-            { key: 'index-pattern', doc_count: 6 },
-            // no legacy url alias objects exist in space_1
+            {
+              key: 'index-pattern',
+              doc_count: 6,
+            },
+            {
+              key: 'visualization',
+              doc_count: 3,
+            },
+            {
+              key: 'dashboard',
+              doc_count: 1,
+            },
           ],
         },
       },
       {
+        key: '*',
         doc_count: 3,
-        key: 'other_space',
         countByType: {
           doc_count_error_upper_bound: 0,
           sum_other_doc_count: 0,
           buckets: [
-            { key: 'legacy-url-alias', doc_count: 2 },
-            { key: 'index-pattern', doc_count: 1 },
-          ], // aliases (3)
+            {
+              key: 'index-pattern',
+              doc_count: 3,
+            },
+          ],
+        },
+      },
+      {
+        key: 'other_space',
+        doc_count: 3,
+        countByType: {
+          doc_count_error_upper_bound: 0,
+          sum_other_doc_count: 0,
+          buckets: [
+            {
+              key: 'legacy-url-alias',
+              doc_count: 2,
+            },
+            {
+              key: 'index-pattern',
+              doc_count: 1,
+            },
+          ],
         },
       },
     ];
@@ -122,11 +165,11 @@ export function deleteTestSuiteFactory({ getService }: DeploymentAgnosticFtrProv
     const multiNamespaceResponse = await es.search<Record<string, any>>({
       index: ALL_SAVED_OBJECT_INDICES,
       size: 100,
-      body: { query: { terms: { type: ['sharedtype'] } } },
+      body: { query: { terms: { type: ['index-pattern'] } } },
     });
     const docs = multiNamespaceResponse.hits.hits;
-    // Just 19 results, since spaces_2_only, conflict_1a_space_2, conflict_1b_space_2, conflict_1c_space_2, and conflict_2_space_2 got deleted.
-    expect(docs).length(19);
+    // Just 21 results, since spaces_2_only, conflict_1a_space_2, conflict_1b_space_2, conflict_1c_space_2, and conflict_2_space_2 got deleted.
+    expect(docs).length(21);
     docs.forEach((doc) => () => {
       const containsSpace2 = doc?._source?.namespaces.includes('space_2');
       expect(containsSpace2).to.eql(false);
