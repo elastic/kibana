@@ -441,29 +441,6 @@ export function useModelActions({
           return i18n.translate('xpack.ml.trainedModels.modelsList.deployModelActionLabel', {
             defaultMessage: 'Deploy model',
           });
-          // FIXME DFA model never had states, how did it work before?
-          // const hasDeployments = model.state === MODEL_STATE.STARTED;
-          // return (
-          //   <EuiToolTip
-          //     position="left"
-          //     content={
-          //       hasDeployments
-          //         ? i18n.translate(
-          //             'xpack.ml.trainedModels.modelsList.deleteDisabledWithDeploymentsTooltip',
-          //             {
-          //               defaultMessage: 'Model has started deployments',
-          //             }
-          //           )
-          //         : null
-          //     }
-          //   >
-          //     <>
-          //       {i18n.translate('xpack.ml.trainedModels.modelsList.deployModelActionLabel', {
-          //         defaultMessage: 'Deploy model',
-          //       })}
-          //     </>
-          //   </EuiToolTip>
-          // );
         },
         description: i18n.translate('xpack.ml.trainedModels.modelsList.deployModelActionLabel', {
           defaultMessage: 'Deploy model',
@@ -585,14 +562,13 @@ export function useModelActions({
         type: 'icon',
         isPrimary: true,
         available: (item) => {
-          // TODO: check if only supported by DFA jobs
           return (
             isDFAModelItem(item) ||
             (isExistingModel(item) && Array.isArray(item.indices) && item.indices.length > 0)
           );
         },
         onClick: async (item) => {
-          if (!isDFAModelItem(item) || !isNLPModelItem(item)) return;
+          if (!isDFAModelItem(item) || !isExistingModel(item)) return;
 
           let indexPatterns: string[] | undefined = item.indices;
 
@@ -600,6 +576,7 @@ export function useModelActions({
             const destIndex = item.metadata.analytics_config.dest?.index;
             indexPatterns = [destIndex];
           }
+
           const path = await urlLocator.getUrl({
             page: ML_PAGES.DATA_DRIFT_CUSTOM,
             pageState: indexPatterns ? { comparison: indexPatterns.join(',') } : {},
