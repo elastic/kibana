@@ -11,7 +11,7 @@ import { applyTimespanLiteralsCorrections } from './timespan_literals';
 
 export type { QueryCorrection } from './types';
 
-export const getCorrections = (query: ESQLAstQueryExpression): QueryCorrection[] => {
+export const correctAll = (query: ESQLAstQueryExpression): QueryCorrection[] => {
   const corrections: QueryCorrection[] = [];
   corrections.push(...applyTimespanLiteralsCorrections(query));
   return corrections;

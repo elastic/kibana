@@ -6,7 +6,7 @@
  */
 
 import { BasicPrettyPrinter, parse } from '@kbn/esql-ast';
-import { getCorrections, type QueryCorrection } from './corrections';
+import { correctAll, type QueryCorrection } from './corrections';
 
 interface CorrectWithAstResult {
   output: string;
@@ -23,7 +23,7 @@ export const correctQueryWithAst = (query: string): CorrectWithAstResult => {
     };
   }
 
-  const corrections = getCorrections(root);
+  const corrections = correctAll(root);
 
   const multiline = /\r?\n/.test(query);
   const formattedQuery = BasicPrettyPrinter.print(root, { multiline, pipeTab: '' });
