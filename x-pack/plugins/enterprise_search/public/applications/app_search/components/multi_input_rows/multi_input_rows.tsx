@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useRef } from 'react';
 
 import { useValues, useActions } from 'kea';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
@@ -16,8 +16,9 @@ import { CONTINUE_BUTTON_LABEL } from '../../../shared/constants';
 
 import {
   ADD_VALUE_BUTTON_LABEL,
-  DELETE_VALUE_BUTTON_LABEL,
+  DELETE_ROW_VALUE_BUTTON_LABEL,
   INPUT_ROW_PLACEHOLDER,
+  INPUT_ROW_CONTAINER_ARIA_LABEL,
 } from './constants';
 import { InputRow } from './input_row';
 import { MultiInputRowsLogic } from './multi_input_rows_logic';
@@ -43,12 +44,13 @@ export const MultiInputRows: React.FC<Props> = ({
   showSubmitButton = true,
   submitButtonText = CONTINUE_BUTTON_LABEL,
   addRowText = ADD_VALUE_BUTTON_LABEL,
-  deleteRowLabel = DELETE_VALUE_BUTTON_LABEL,
+  deleteRowLabel,
   inputPlaceholder = INPUT_ROW_PLACEHOLDER,
 }) => {
   const logic = MultiInputRowsLogic({ id, values: initialValues });
   const { values, addedNewRow, hasEmptyValues, hasOnlyOneValue } = useValues(logic);
   const { addValue, editValue, deleteValue } = useActions(logic);
+  const valuesContainerRef = useRef<HTMLDivElement>(null);
 
   useUpdateEffect(() => {
     if (onChange) {
@@ -68,23 +70,34 @@ export const MultiInputRows: React.FC<Props> = ({
             }
           : undefined
       }
+      tabIndex={-1}
     >
-      {values.map((value: string, index: number) => {
-        const firstRow = index === 0;
-        const lastRow = index === values.length - 1;
-        return (
-          <InputRow
-            key={`inputRow-${id}-${index}`}
-            value={value}
-            placeholder={inputPlaceholder}
-            autoFocus={addedNewRow ? lastRow : firstRow}
-            onChange={(newValue) => editValue(index, newValue)}
-            onDelete={() => deleteValue(index)}
-            disableDelete={hasOnlyOneValue}
-            deleteLabel={deleteRowLabel}
-          />
-        );
-      })}
+      <div
+        ref={valuesContainerRef}
+        role="group"
+        tabIndex={-1}
+        aria-label={INPUT_ROW_CONTAINER_ARIA_LABEL}
+      >
+        {values.map((value: string, index: number) => {
+          const firstRow = index === 0;
+          const lastRow = index === values.length - 1;
+          return (
+            <InputRow
+              key={`inputRow-${id}-${index}`}
+              value={value}
+              placeholder={inputPlaceholder}
+              autoFocus={addedNewRow ? lastRow : firstRow}
+              onChange={(newValue) => editValue(index, newValue)}
+              onDelete={() => {
+                deleteValue(index);
+                valuesContainerRef.current?.focus();
+              }}
+              disableDelete={hasOnlyOneValue}
+              deleteLabel={deleteRowLabel || DELETE_ROW_VALUE_BUTTON_LABEL(index + 1)}
+            />
+          );
+        })}
+      </div>
       <EuiButtonEmpty
         size="s"
         iconType="plusInCircle"
