@@ -13,8 +13,9 @@ import {
   isHttpFetchError,
 } from '@kbn/server-route-repository-client';
 import { type KueryNode, nodeTypes, toKqlExpression } from '@kbn/es-query';
-import type { EntityInstance, EntityMetadata } from '@kbn/entities-schema';
+import type { EntityDefinition, EntityInstance, EntityMetadata } from '@kbn/entities-schema';
 import { castArray } from 'lodash';
+import type { EntityDefinitionWithState } from '../../server/lib/entities/types';
 import {
   DisableManagedEntityResponse,
   EnableManagedEntityResponse,
@@ -77,6 +78,24 @@ export class EntityClient {
           query: {
             deleteData: query?.deleteData,
           },
+        },
+      });
+    } catch (err) {
+      if (isHttpFetchError(err) && err.body?.statusCode === 403) {
+        throw new EntityManagerUnauthorizedError(err.body.message);
+      }
+      throw err;
+    }
+  }
+
+  async getEntityDefinition(
+    id: string
+  ): Promise<{ definitions: EntityDefinition[] | EntityDefinitionWithState[] }> {
+    try {
+      return await this.repositoryClient('GET /internal/entities/definition/{id?}', {
+        params: {
+          path: { id },
+          query: { page: 1, perPage: 1 },
         },
       });
     } catch (err) {
