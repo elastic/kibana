@@ -52,7 +52,7 @@ export const getStaticValuesListControlFactory = (): ControlFactory<
       const api = buildApi(
         {
           ...defaultControl.api,
-          defaultPanelTitle: new BehaviorSubject<string | undefined>(displayName),
+          defaultPanelTitle: new BehaviorSubject<string | undefined>(initialState.variableName),
           selectedOptions$,
           serializeState: () => {
             const { rawState: defaultControlState } = defaultControl.serialize();
