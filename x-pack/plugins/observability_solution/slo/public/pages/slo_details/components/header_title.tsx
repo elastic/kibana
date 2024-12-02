@@ -21,11 +21,12 @@ export interface Props {
 
 export function HeaderTitle({ isLoading, slo }: Props) {
   if (isLoading || !slo) {
-    return <EuiSkeletonText lines={1} data-test-subj="loadingTitle" />;
+    return <EuiSkeletonText lines={2} data-test-subj="loadingTitle" />;
   }
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="s">
+    <EuiFlexGroup direction="column" gutterSize="m">
+      <SLOGroupings slo={slo} />
       <EuiFlexGroup
         direction="row"
         gutterSize="s"
@@ -59,7 +60,6 @@ export function HeaderTitle({ isLoading, slo }: Props) {
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <SLOGroupings slo={slo} />
     </EuiFlexGroup>
   );
 }

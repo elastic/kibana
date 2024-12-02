@@ -21,10 +21,10 @@ import { HeaderMenu } from '../../components/header_menu/header_menu';
 import { AutoRefreshButton } from '../../components/slo/auto_refresh_button';
 import { useAutoRefreshStorage } from '../../components/slo/auto_refresh_button/hooks/use_auto_refresh_storage';
 import { useFetchSloDetails } from '../../hooks/use_fetch_slo_details';
+import { useKibana } from '../../hooks/use_kibana';
 import { useLicense } from '../../hooks/use_license';
 import { usePermissions } from '../../hooks/use_permissions';
 import { usePluginContext } from '../../hooks/use_plugin_context';
-import { useKibana } from '../../hooks/use_kibana';
 import PageNotFound from '../404';
 import { HeaderControl } from './components/header_control';
 import { HeaderTitle } from './components/header_title';
@@ -125,21 +125,23 @@ export function SloDetailsPage() {
       pageHeader={{
         pageTitle: slo?.name ?? <EuiSkeletonText lines={1} />,
         children: <HeaderTitle isLoading={isPerformingAction} slo={slo} />,
-        rightSideItems: [
-          <HeaderControl isLoading={isPerformingAction} slo={slo} />,
-          <AutoRefreshButton
-            disabled={isPerformingAction}
-            isAutoRefreshing={isAutoRefreshing}
-            onClick={handleToggleAutoRefresh}
-          />,
-        ],
+        rightSideItems: !isLoading
+          ? [
+              <HeaderControl slo={slo!} />,
+              <AutoRefreshButton
+                isAutoRefreshing={isAutoRefreshing}
+                onClick={handleToggleAutoRefresh}
+              />,
+            ]
+          : undefined,
         tabs,
       }}
       data-test-subj="sloDetailsPage"
     >
       <HeaderMenu />
-      {isLoading && <EuiLoadingSpinner data-test-subj="sloDetailsLoading" />}
-      {!isLoading && (
+      {isLoading ? (
+        <EuiLoadingSpinner data-test-subj="sloDetailsLoading" />
+      ) : (
         <SloDetails slo={slo!} isAutoRefreshing={isAutoRefreshing} selectedTabId={selectedTabId} />
       )}
     </ObservabilityPageTemplate>
