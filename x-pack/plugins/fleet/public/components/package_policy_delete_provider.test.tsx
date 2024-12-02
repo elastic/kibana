@@ -24,13 +24,15 @@ jest.mock('../hooks', () => {
     useMultipleAgentPolicies: jest.fn(),
     useStartServices: jest.fn().mockReturnValue({
       notifications: {
-        toasts: { addSuccess: jest.fn() },
+        toasts: { addSuccess: jest.fn(), addDanger: jest.fn() },
       },
     }),
     sendGetAgents: jest.fn(),
     useConfig: jest.fn().mockReturnValue({
       agents: { enabled: true },
     }),
+    sendDeletePackagePolicy: jest.fn().mockResolvedValue({ data: [] }),
+    sendDeleteAgentPolicy: jest.fn().mockResolvedValue({ data: [] }),
   };
 });
 
