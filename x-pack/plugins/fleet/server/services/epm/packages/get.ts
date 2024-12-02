@@ -475,7 +475,11 @@ export async function getPackageInfo({
   let packageInfo;
   // We need to get input only packages from source to get all fields
   // see https://github.com/elastic/package-registry/issues/864
-  if (registryInfo && skipArchive && registryInfo.type !== 'input') {
+  if (
+    registryInfo &&
+    (skipArchive || appContextService.getConfig()?.isAirGapped) &&
+    registryInfo.type !== 'input'
+  ) {
     packageInfo = registryInfo;
     // Fix the paths
     paths =
@@ -626,6 +630,7 @@ export async function getPackageFromSource(options: {
     } catch (err) {
       if (err instanceof RegistryResponseError && err.status === 404) {
         res = await Registry.getBundledArchive(pkgName, pkgVersion);
+        logger.debug(`retrieved bundled package ${pkgName}-${pkgVersion}`);
       } else {
         throw err;
       }

@@ -106,16 +106,24 @@ async function _fetchFindLatestPackage(
     }
 
     try {
-      const res = await fetchUrl(url.toString(), 1);
-      const searchResults: RegistryPackage[] = JSON.parse(res);
+      if (!appContextService.getConfig()?.isAirGapped) {
+        const res = await fetchUrl(url.toString(), 1);
+        const searchResults: RegistryPackage[] = JSON.parse(res);
 
-      const latestPackageFromRegistry = searchResults[0] ?? null;
+        const latestPackageFromRegistry = searchResults[0] ?? null;
 
-      if (bundledPackage && semverGte(bundledPackage.version, latestPackageFromRegistry.version)) {
+        if (
+          bundledPackage &&
+          semverGte(bundledPackage.version, latestPackageFromRegistry.version)
+        ) {
+          return bundledPackage;
+        }
+        return latestPackageFromRegistry;
+      } else if (appContextService.getConfig()?.isAirGapped && bundledPackage) {
         return bundledPackage;
+      } else {
+        return null;
       }
-
-      return latestPackageFromRegistry;
     } catch (error) {
       logger.error(
         `Failed to fetch latest version of ${packageName} from registry: ${error.message}`
@@ -169,6 +177,13 @@ export async function fetchInfo(
   pkgVersion: string
 ): Promise<RegistryPackage | ArchivePackage> {
   const registryUrl = getRegistryUrl();
+  // if isAirGapped config enabled and bundled package, use the bundled version
+  if (appContextService.getConfig()?.isAirGapped) {
+    const archivePackage = await getBundledArchive(pkgName, pkgVersion);
+    if (archivePackage) {
+      return archivePackage.packageInfo;
+    }
+  }
   try {
     // Trailing slash avoids 301 redirect / extra hop
     const res = await fetchUrl(`${registryUrl}/package/${pkgName}/${pkgVersion}/`).then(JSON.parse);
@@ -264,6 +279,8 @@ function setConstraints(url: URL) {
 export async function fetchCategories(
   params?: GetCategoriesRequest['query']
 ): Promise<CategorySummaryList> {
+  if (appContextService.getConfig()?.isAirGapped) return [];
+
   const registryUrl = getRegistryUrl();
   const url = new URL(`${registryUrl}/categories`);
   if (params) {
