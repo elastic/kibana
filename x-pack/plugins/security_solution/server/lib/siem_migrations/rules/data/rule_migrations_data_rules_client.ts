@@ -34,6 +34,13 @@ export type UpdateRuleMigrationInput = { elastic_rule?: Partial<ElasticRule> } &
 export type RuleMigrationDataStats = Omit<RuleMigrationTaskStats, 'status'>;
 export type RuleMigrationAllDataStats = RuleMigrationDataStats[];
 
+export interface RuleMigrationFilterOptions {
+  migrationId: string;
+  status?: SiemMigrationStatus | SiemMigrationStatus[];
+  ids?: string[];
+  installable?: boolean;
+}
+
 /* BULK_MAX_SIZE defines the number to break down the bulk operations by.
  * The 500 number was chosen as a reasonable number to avoid large payloads. It can be adjusted if needed.
  */
@@ -101,9 +108,9 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
   }
 
   /** Retrieves an array of rule documents of a specific migrations */
-  async get(migrationId: string): Promise<StoredRuleMigration[]> {
+  async get(filters: RuleMigrationFilterOptions): Promise<StoredRuleMigration[]> {
     const index = await this.getIndexName();
-    const query = this.getFilterQuery(migrationId);
+    const query = this.getFilterQuery(filters);
 
     const storedRuleMigrations = await this.esClient
       .search<RuleMigration>({ index, query, sort: '_doc' })
@@ -123,7 +130,7 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
    */
   async takePending(migrationId: string, size: number): Promise<StoredRuleMigration[]> {
     const index = await this.getIndexName();
-    const query = this.getFilterQuery(migrationId, SiemMigrationStatus.PENDING);
+    const query = this.getFilterQuery({ migrationId, status: SiemMigrationStatus.PENDING });
 
     const storedRuleMigrations = await this.esClient
       .search<RuleMigration>({ index, query, sort: '_doc', size })
@@ -202,7 +209,7 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
     { refresh = false }: { refresh?: boolean } = {}
   ): Promise<void> {
     const index = await this.getIndexName();
-    const query = this.getFilterQuery(migrationId, statusToQuery);
+    const query = this.getFilterQuery({ migrationId, status: statusToQuery });
     const script = { source: `ctx._source['status'] = '${statusToUpdate}'` };
     await this.esClient.updateByQuery({ index, query, script, refresh }).catch((error) => {
       this.logger.error(`Error updating rule migrations status: ${error.message}`);
@@ -213,7 +220,7 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
   /** Retrieves the stats for the rule migrations with the provided id */
   async getStats(migrationId: string): Promise<RuleMigrationDataStats> {
     const index = await this.getIndexName();
-    const query = this.getFilterQuery(migrationId);
+    const query = this.getFilterQuery({ migrationId });
     const aggregations = {
       pending: { filter: { term: { status: SiemMigrationStatus.PENDING } } },
       processing: { filter: { term: { status: SiemMigrationStatus.PROCESSING } } },
@@ -283,10 +290,12 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
     }));
   }
 
-  private getFilterQuery(
-    migrationId: string,
-    status?: SiemMigrationStatus | SiemMigrationStatus[]
-  ): QueryDslQueryContainer {
+  private getFilterQuery({
+    migrationId,
+    status,
+    ids,
+    installable,
+  }: RuleMigrationFilterOptions): QueryDslQueryContainer {
     const filter: QueryDslQueryContainer[] = [{ term: { migration_id: migrationId } }];
     if (status) {
       if (Array.isArray(status)) {
@@ -294,6 +303,20 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
       } else {
         filter.push({ term: { status } });
       }
+    }
+    if (ids) {
+      filter.push({ terms: { _id: ids } });
+    }
+    if (installable) {
+      filter.push(
+        { term: { translation_result: 'full' } },
+        {
+          nested: {
+            path: 'elastic_rule',
+            query: { bool: { must_not: { exists: { field: 'elastic_rule.id' } } } },
+          },
+        }
+      );
     }
     return { bool: { filter } };
   }
