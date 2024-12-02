@@ -26,7 +26,7 @@ export const DragHandle = ({
   const { euiTheme } = useEuiTheme();
   return (
     <button
-      aria-label={i18n.translate('xpack.kbnGrid.dragHandle.ariaLabel', {
+      aria-label={i18n.translate('kbnGridLayout.dragHandle.ariaLabel', {
         defaultMessage: 'Drag to move',
       })}
       className="kbnGridPanel__dragHandle"

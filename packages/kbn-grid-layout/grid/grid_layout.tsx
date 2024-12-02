@@ -121,11 +121,6 @@ export const GridLayout = ({
           rowIndex={rowIndex}
           renderPanelContents={renderPanelContents}
           gridLayoutStateManager={gridLayoutStateManager}
-          toggleIsCollapsed={() => {
-            const newLayout = cloneDeep(gridLayoutStateManager.gridLayout$.value);
-            newLayout[rowIndex].isCollapsed = !newLayout[rowIndex].isCollapsed;
-            gridLayoutStateManager.gridLayout$.next(newLayout);
-          }}
           setInteractionEvent={(nextInteractionEvent) => {
             if (!nextInteractionEvent) {
               gridLayoutStateManager.activePanel$.next(undefined);

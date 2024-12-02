@@ -32,7 +32,7 @@ export const ResizeHandle = ({
       onMouseUp={(e) => {
         interactionStart('drop', e);
       }}
-      aria-label={i18n.translate('xpack.kbnGrid.resizeHandle.ariaLabel', {
+      aria-label={i18n.translate('kbnGridLayout.resizeHandle.ariaLabel', {
         defaultMessage: 'Resize panel',
       })}
       css={css`
