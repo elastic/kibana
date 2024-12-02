@@ -54,7 +54,7 @@ export const JobItem: FC<JobItemProps> = memo(
         <EuiFlexItem>
           <EuiFlexGroup gutterSize="s">
             <EuiFlexItem grow={false}>
-              <EuiText size="s" color="success">
+              <EuiText size="s" color="textAccentSecondary">
                 {jobPrefix}
                 {id}
               </EuiText>
