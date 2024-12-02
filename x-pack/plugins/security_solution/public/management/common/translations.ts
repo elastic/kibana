@@ -220,7 +220,7 @@ export const CROWDSTRIKE_CONSOLE_COMMANDS = {
     args: {
       raw: {
         about: i18n.translate(
-          'xpack.securitySolution.crowdStrikeConsoleCommands.execute.args.raw.about',
+          'xpack.securitySolution.crowdStrikeConsoleCommands.runscript.args.raw.about',
           {
             defaultMessage: 'Raw script content',
           }
@@ -228,7 +228,7 @@ export const CROWDSTRIKE_CONSOLE_COMMANDS = {
       },
       cloudFile: {
         about: i18n.translate(
-          'xpack.securitySolution.crowdStrikeConsoleCommands.execute.args.cloudFile.about',
+          'xpack.securitySolution.crowdStrikeConsoleCommands.runscript.args.cloudFile.about',
           {
             defaultMessage: 'Script name in cloud storage',
           }
@@ -236,7 +236,7 @@ export const CROWDSTRIKE_CONSOLE_COMMANDS = {
       },
       commandLine: {
         about: i18n.translate(
-          'xpack.securitySolution.crowdStrikeConsoleCommands.execute.args.commandLine.about',
+          'xpack.securitySolution.crowdStrikeConsoleCommands.runscript.args.commandLine.about',
           {
             defaultMessage: 'Command line arguments',
           }
@@ -244,7 +244,7 @@ export const CROWDSTRIKE_CONSOLE_COMMANDS = {
       },
       hostPath: {
         about: i18n.translate(
-          'xpack.securitySolution.crowdStrikeConsoleCommands.execute.args.hostPath.about',
+          'xpack.securitySolution.crowdStrikeConsoleCommands.runscript.args.hostPath.about',
           {
             defaultMessage: 'Absolute or relative path of script on host machine',
           }
@@ -252,24 +252,24 @@ export const CROWDSTRIKE_CONSOLE_COMMANDS = {
       },
       timeout: {
         about: i18n.translate(
-          'xpack.securitySolution.crowdStrikeConsoleCommands.execute.args.timeout.about',
+          'xpack.securitySolution.crowdStrikeConsoleCommands.runscript.args.timeout.about',
           {
             defaultMessage: 'Timeout in seconds',
           }
         ),
       },
     },
-    title: i18n.translate('xpack.securitySolution.crowdStrikeConsoleCommands.execute.title', {
+    title: i18n.translate('xpack.securitySolution.crowdStrikeConsoleCommands.runscript.title', {
       defaultMessage: 'Isolate',
     }),
-    about: i18n.translate('xpack.securitySolution.crowdStrikeConsoleCommands.execute.about', {
+    about: i18n.translate('xpack.securitySolution.crowdStrikeConsoleCommands.runscript.about', {
       defaultMessage: 'Run a script on the host',
     }),
     privileges: i18n.translate(
-      'xpack.securitySolution.crowdStrikeConsoleCommands.execute.privileges',
+      'xpack.securitySolution.crowdStrikeConsoleCommands.runscript.privileges',
       {
         defaultMessage:
-          'Insufficient privileges to isolate hosts. Contact your Kibana administrator if you think you should have this permission.',
+          'Insufficient privileges to run script. Contact your Kibana administrator if you think you should have this permission.',
       }
     ),
   },
