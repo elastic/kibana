@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import { fromKueryExpression } from '@kbn/es-query';
 import type { FormData, ValidationFunc } from '../../../shared_imports';
-import type { FieldValueQueryBar } from '../components/query_bar';
+import type { FieldValueQueryBar } from '../components/query_bar_field';
 
 export function kueryValidatorFactory(): ValidationFunc<FormData, string, FieldValueQueryBar> {
   return (...args) => {
