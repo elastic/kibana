@@ -47,6 +47,7 @@ import { urlTrackerMock } from './url_tracker.mock';
 import { createElement } from 'react';
 import { createContextAwarenessMocks } from '../context_awareness/__mocks__';
 import { DiscoverEBTManager } from '../services/discover_ebt_manager';
+import { discoverSharedPluginMock } from '@kbn/discover-shared-plugin/public/mocks';
 
 export function createDiscoverServicesMock(): DiscoverServices {
   const dataPlugin = dataPluginMock.createStartContract();
@@ -250,6 +251,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
     profilesManager: profilesManagerMock,
     ebtManager: new DiscoverEBTManager(),
     setHeaderActionMenu: jest.fn(),
+    discoverShared: discoverSharedPluginMock.createStartContract().features,
   } as unknown as DiscoverServices;
 }
 

@@ -196,6 +196,7 @@ describe('Task Runner', () => {
     supportsEphemeralTasks: false,
     uiSettings: uiSettingsService,
     usageCounter: mockUsageCounter,
+    isServerless: false,
   };
 
   const ephemeralTestParams: Array<
