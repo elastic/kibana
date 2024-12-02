@@ -176,6 +176,19 @@ const invalid: RuleTester.InvalidTestCase[] = [
     }`,
     errors: [{ messageId: 'noCssColorSpecific' }],
   },
+  {
+    name: 'Raises an error when a CSS color for the color property is used in a JSX className attribute for EuiComponents with the css template function',
+    filename: '/x-pack/plugins/observability_solution/observability/public/test_component.tsx',
+    code: `
+    import React from 'react';
+    
+    function TestComponent() {
+      return (
+        <EuiCode className={css\`{ color: '#dd4040' }\`}>This is a test</EuiCode>
+      )
+    }`,
+    errors: [{ messageId: 'noCssColor' }],
+  },
 ];
 
 const valid: RuleTester.ValidTestCase[] = [];

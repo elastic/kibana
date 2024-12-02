@@ -184,7 +184,13 @@ export const NoCssColor: Rule.RuleModule = {
   create(context) {
     return {
       JSXAttribute(node: TSESTree.JSXAttribute) {
-        if (!(node.name.name === 'style' || node.name.name === 'css')) {
+        if (
+          !(
+            node.name.name === 'style' ||
+            node.name.name === 'className' ||
+            node.name.name === 'css'
+          )
+        ) {
           return;
         }
 
@@ -376,6 +382,35 @@ export const NoCssColor: Rule.RuleModule = {
                 },
               });
             });
+
+            return;
+          }
+        }
+
+        if (node.name.name === 'className') {
+          /**
+           * @description check if css prop is a tagged template literal from emotion
+           * @example <EuiCode className={css`{ color: #dd4040 }`}>This is an example</EuiCode>
+           */
+          if (
+            node.value &&
+            node.value.type === 'JSXExpressionContainer' &&
+            node.value.expression.type === 'TaggedTemplateExpression' &&
+            node.value.expression.tag.type === 'Identifier' &&
+            node.value.expression.tag.name === 'css'
+          ) {
+            for (let i = 0; i < node.value.expression.quasi.quasis.length; i++) {
+              const declarationTemplateNode = node.value.expression.quasi.quasis[i];
+
+              if (htmlElementColorDeclarationRegex.test(declarationTemplateNode.value.raw)) {
+                context.report({
+                  loc: declarationTemplateNode.loc,
+                  messageId: 'noCssColor',
+                });
+
+                break;
+              }
+            }
 
             return;
           }
