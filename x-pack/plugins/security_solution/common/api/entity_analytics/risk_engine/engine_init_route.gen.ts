@@ -21,6 +21,7 @@ export const InitRiskEngineResult = z.object({
   risk_engine_enabled: z.boolean(),
   risk_engine_resources_installed: z.boolean(),
   risk_engine_configuration_created: z.boolean(),
+  legacy_risk_engine_disabled: z.boolean(),
   errors: z.array(z.string()),
 });
 
