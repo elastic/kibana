@@ -104,11 +104,6 @@ export const allowedExperimentalValues = Object.freeze({
   entityAlertPreviewDisabled: false,
 
   /**
-   * Enables the Assistant product documentation inference task introduced in 8.17.0
-   */
-  assistantProductDocumentation: false,
-
-  /**
    * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
    */
   assistantModelEvaluation: false,

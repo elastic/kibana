@@ -564,16 +564,10 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     this.licensing$ = plugins.licensing.license$;
     // Assistant Tool and Feature Registration
-    plugins.elasticAssistant.registerTools(
-      APP_UI_ID,
-      getAssistantTools({
-        assistantProductDocumentation: config.experimentalFeatures.assistantProductDocumentation,
-      })
-    );
+    plugins.elasticAssistant.registerTools(APP_UI_ID, assistantTools);
 
     const features = {
       assistantModelEvaluation: config.experimentalFeatures.assistantModelEvaluation,
-      assistantProductDocumentation: config.experimentalFeatures.assistantProductDocumentation,
     };
     plugins.elasticAssistant.registerFeatures(APP_UI_ID, features);
     plugins.elasticAssistant.registerFeatures('management', features);
