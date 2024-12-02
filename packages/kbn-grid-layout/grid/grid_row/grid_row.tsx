@@ -15,10 +15,10 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-theme';
 
-import { DragPreview } from './drag_preview';
-import { GridPanel } from './grid_panel';
-import { GridLayoutStateManager, GridRowData, PanelInteractionEvent } from './types';
-import { getKeysInOrder } from './utils/resolve_grid_row';
+import { DragPreview } from '../drag_preview';
+import { GridPanel } from '../grid_panel';
+import { GridLayoutStateManager, GridRowData, PanelInteractionEvent } from '../types';
+import { getKeysInOrder } from '../utils/resolve_grid_row';
 
 interface GridRowProps {
   rowIndex: number;
