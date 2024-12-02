@@ -27,9 +27,9 @@ import { CONTEXT_FUNCTION_NAME } from '../../functions/context';
 import { ChatFunctionClient } from '../chat_function_client';
 import type { KnowledgeBaseService } from '../knowledge_base_service';
 import { observableIntoStream } from '../util/observable_into_stream';
-import { CreateChatCompletionResponseChunk } from './adapters/process_openai_stream';
-import { ObservabilityAIAssistantConfig } from '../../config';
-import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
+import type { CreateChatCompletionResponseChunk } from './adapters/process_openai_stream';
+import type { ObservabilityAIAssistantConfig } from '../../config';
+import type { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
 
 type ChunkDelta = CreateChatCompletionResponseChunk['choices'][number]['delta'];
 
