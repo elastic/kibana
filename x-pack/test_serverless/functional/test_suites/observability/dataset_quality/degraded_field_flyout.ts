@@ -22,6 +22,7 @@ import { logsNginxMappings } from './custom_mappings/custom_integration_mappings
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects([
     'common',
+    'header',
     'navigationalSearch',
     'observabilityLogsExplorer',
     'datasetQuality',
@@ -452,6 +453,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             expandedDegradedField: 'test_field',
           });
 
+          await PageObjects.header.waitUntilLoadingHasFinished();
+
           await retry.tryForTime(5000, async () => {
             const fieldIgnoredMessageExists = await PageObjects.datasetQuality.doesTextExist(
               'datasetQualityDetailsDegradedFieldFlyoutFieldValue-cause',
@@ -468,6 +471,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             dataStream: degradedDatasetWithLimitDataStreamName,
             expandedDegradedField: 'test_field',
           });
+
+          await PageObjects.header.waitUntilLoadingHasFinished();
 
           await retry.tryForTime(5000, async () => {
             const testFieldValue1Exists = await PageObjects.datasetQuality.doesTextExist(
@@ -491,6 +496,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             expandedDegradedField: 'test_field',
           });
 
+          await PageObjects.header.waitUntilLoadingHasFinished();
+
           await retry.tryForTime(5000, async () => {
             const limitValueExists = await PageObjects.datasetQuality.doesTextExist(
               'datasetQualityDetailsDegradedFieldFlyoutFieldValue-characterLimit',
@@ -507,6 +514,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             dataStream: degradedDatasetWithLimitDataStreamName,
             expandedDegradedField: 'test_field',
           });
+
+          await PageObjects.header.waitUntilLoadingHasFinished();
 
           // Possible Mitigation Section should exist
           await testSubjects.existOrFail(
@@ -567,6 +576,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             expandedDegradedField: 'test_field',
           });
 
+          await PageObjects.header.waitUntilLoadingHasFinished();
           await PageObjects.datasetQuality.waitUntilPossibleMitigationsLoaded();
 
           // Possible Mitigation Section should exist
@@ -632,6 +642,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             expandedDegradedField: 'cloud',
           });
 
+          await PageObjects.header.waitUntilLoadingHasFinished();
+
           await retry.tryForTime(5000, async () => {
             const fieldLimitMessageExists = await PageObjects.datasetQuality.doesTextExist(
               'datasetQualityDetailsDegradedFieldFlyoutFieldValue-cause',
@@ -648,6 +660,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             dataStream: degradedDatasetWithLimitDataStreamName,
             expandedDegradedField: 'cloud',
           });
+
+          await PageObjects.header.waitUntilLoadingHasFinished();
 
           await retry.tryForTime(5000, async () => {
             const limitExists = await PageObjects.datasetQuality.doesTextExist(
@@ -666,6 +680,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             expandedDegradedField: 'cloud',
           });
 
+          await PageObjects.header.waitUntilLoadingHasFinished();
+
           await testSubjects.existOrFail(
             PageObjects.datasetQuality.testSubjectSelectors
               .datasetQualityDetailsDegradedFieldFlyoutIssueDoesNotExist
@@ -679,6 +695,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             dataStream: nginxAccessDataStreamName,
             expandedDegradedField: 'cloud.project.id',
           });
+
+          await PageObjects.header.waitUntilLoadingHasFinished();
 
           // Field Limit Mitigation Section should exist
           await testSubjects.existOrFail(
@@ -710,6 +728,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             expandedDegradedField: 'cloud.project',
           });
 
+          await PageObjects.header.waitUntilLoadingHasFinished();
+
           // Field Limit Mitigation Section should exist
           await testSubjects.existOrFail(
             'datasetQualityDetailsDegradedFieldFlyoutFieldLimitMitigationAccordion'
@@ -731,6 +751,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             dataStream: nginxAccessDataStreamName,
             expandedDegradedField: 'cloud.project.id',
           });
+
+          await PageObjects.header.waitUntilLoadingHasFinished();
 
           // Should display current field limit
           await testSubjects.existOrFail('datasetQualityIncreaseFieldMappingCurrentLimitFieldText');
@@ -782,6 +804,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             expandedDegradedField: 'cloud.project.id',
           });
 
+          await PageObjects.header.waitUntilLoadingHasFinished();
+
           // Should not allow values less than current limit of 44
           await testSubjects.setValue(
             'datasetQualityIncreaseFieldMappingProposedLimitFieldText',
@@ -816,6 +840,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             expandedDegradedField: 'cloud.project.id',
           });
 
+          await PageObjects.header.waitUntilLoadingHasFinished();
+
           await retry.tryForTime(5000, async () => {
             const applyButton = await testSubjects.find(
               'datasetQualityIncreaseFieldMappingLimitButtonButton'
@@ -834,6 +860,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             dataStream: nginxAccessDataStreamName,
             expandedDegradedField: 'cloud.project.id',
           });
+
+          await PageObjects.header.waitUntilLoadingHasFinished();
 
           const applyButton = await testSubjects.find(
             'datasetQualityIncreaseFieldMappingLimitButtonButton'
