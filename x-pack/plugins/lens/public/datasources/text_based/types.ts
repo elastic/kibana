@@ -15,7 +15,9 @@ export interface TextBasedLayerColumn {
   fieldName: string;
   label?: string;
   customLabel?: boolean;
-  format?: ValueFormatConfig;
+  params?: {
+    format?: ValueFormatConfig;
+  };
   meta?: DatatableColumn['meta'];
   inMetricDimension?: boolean;
 }

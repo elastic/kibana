@@ -8,7 +8,6 @@
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, useEuiTheme, EuiText } from '@elastic/eui';
-import { DataView } from '@kbn/data-views-plugin/common';
 import { euiThemeVars } from '@kbn/ui-theme';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { fetchFieldsFromESQL } from '@kbn/esql-editor';
@@ -54,7 +53,9 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
           expressions,
           { from: dateRange.fromDate, to: dateRange.toDate },
           undefined,
-          indexPatterns?.length ? (indexPatterns[0] as unknown as DataView) : undefined
+          Object.values(indexPatterns).length
+            ? Object.values(indexPatterns)[0].timeFieldName
+            : undefined
         );
         if (table) {
           const hasNumberTypeColumns = table.columns?.some(isNumeric);

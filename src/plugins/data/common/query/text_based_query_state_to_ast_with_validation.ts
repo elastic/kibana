@@ -8,12 +8,10 @@
  */
 
 import { isOfAggregateQueryType, Query } from '@kbn/es-query';
-import type { DataView } from '@kbn/data-views-plugin/common';
 import type { QueryState } from '..';
 import { textBasedQueryStateToExpressionAst } from './text_based_query_state_to_ast';
 
 interface Args extends QueryState {
-  dataView?: DataView;
   inputQuery?: Query;
   timeFieldName?: string;
   titleForInspector?: string;
@@ -26,7 +24,7 @@ interface Args extends QueryState {
  * @param query kibana query or aggregate query
  * @param inputQuery
  * @param time kibana time range
- * @param dataView
+ * @param timeFieldName
  * @param titleForInspector
  * @param descriptionForInspector
  */
@@ -35,7 +33,7 @@ export async function textBasedQueryStateToAstWithValidation({
   query,
   inputQuery,
   time,
-  dataView,
+  timeFieldName,
   titleForInspector,
   descriptionForInspector,
 }: Args) {
@@ -46,7 +44,7 @@ export async function textBasedQueryStateToAstWithValidation({
       query,
       inputQuery,
       time,
-      timeFieldName: dataView?.timeFieldName,
+      timeFieldName,
       titleForInspector,
       descriptionForInspector,
     });

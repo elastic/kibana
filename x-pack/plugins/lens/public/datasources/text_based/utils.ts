@@ -226,7 +226,7 @@ export function updateColumnFormat({
       ...layer.columns.slice(0, currentColumnIndex),
       {
         ...currentColumn,
-        format: value,
+        params: { format: value },
       },
       ...layer.columns.slice(currentColumnIndex + 1),
     ],

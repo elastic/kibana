@@ -318,10 +318,13 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
               meta: {
                 type: esFieldTypeToKibanaFieldType(type),
                 esType: type,
-                sourceParams: {
-                  appliedTimeRange: input?.timeRange,
-                  params: {},
-                },
+                sourceParams:
+                  type === 'date'
+                    ? {
+                        appliedTimeRange: input?.timeRange,
+                        params: {},
+                      }
+                    : {},
               },
               isNull: hasEmptyColumns ? !lookup.has(name) : false,
             })) ?? [];
