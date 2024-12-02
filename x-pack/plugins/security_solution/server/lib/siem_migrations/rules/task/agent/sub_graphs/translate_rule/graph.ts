@@ -37,7 +37,6 @@ export function getTranslateRuleGraph({
   const processQueryNode = getProcessQueryNode({
     model,
     resourceRetriever,
-    logger,
   });
   const retrieveIntegrationsNode = getRetrieveIntegrationsNode({
     model,
