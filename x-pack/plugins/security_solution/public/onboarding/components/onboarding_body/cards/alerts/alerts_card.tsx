@@ -6,21 +6,22 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiSpacer } from '@elastic/eui';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { css } from '@emotion/css';
-import { useStoredSelectedCardItemId } from '../../../../hooks/use_stored_state';
 import { SecuritySolutionLinkButton } from '../../../../../common/components/links';
 import { OnboardingCardId } from '../../../../constants';
 import type { OnboardingCardComponent } from '../../../../types';
 import { OnboardingCardContentAssetPanel } from '../common/card_content_asset_panel';
 import { CardCallOut } from '../common/card_callout';
+import { CardSubduedText } from '../common/card_subdued_text';
 import * as i18n from './translations';
 import type { CardSelectorListItem } from '../common/card_selector_list';
 import { CardSelectorList } from '../common/card_selector_list';
 import { ALERTS_CARD_ITEMS_BY_ID, ALERTS_CARD_ITEMS } from './alerts_card_config';
 import { useOnboardingContext } from '../../../onboarding_context';
 import { DEFAULT_ALERTS_CARD_ITEM_SELECTED } from './constants';
+import { useStoredSelectedCardItemId } from '../../../hooks/use_stored_state';
 
 export const AlertsCard: OnboardingCardComponent = ({
   isCardComplete,
@@ -68,9 +69,9 @@ export const AlertsCard: OnboardingCardComponent = ({
             width: 100%;
           `}
         >
-          <EuiText data-test-subj="alertsCardDescription" size="s">
+          <CardSubduedText data-test-subj="alertsCardDescription" size="s">
             {i18n.ALERTS_CARD_DESCRIPTION}
-          </EuiText>
+          </CardSubduedText>
           <EuiSpacer />
           <CardSelectorList
             title={i18n.ALERTS_CARD_STEP_SELECTOR_TITLE}

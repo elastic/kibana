@@ -6,20 +6,21 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiSpacer } from '@elastic/eui';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
-import { useStoredSelectedCardItemId } from '../../../../hooks/use_stored_state';
 import { OnboardingCardId } from '../../../../constants';
 import type { OnboardingCardComponent } from '../../../../types';
 import { OnboardingCardContentAssetPanel } from '../common/card_content_asset_panel';
 import { CardCallOut } from '../common/card_callout';
 import { CardLinkButton } from '../common/card_link_button';
+import { CardSubduedText } from '../common/card_subdued_text';
 import * as i18n from './translations';
 import type { CardSelectorListItem } from '../common/card_selector_list';
 import { CardSelectorList } from '../common/card_selector_list';
 import { DASHBOARDS_CARD_ITEMS_BY_ID, DASHBOARDS_CARD_ITEMS } from './dashboards_card_config';
 import { useOnboardingContext } from '../../../onboarding_context';
 import { DEFAULT_DASHBOARDS_CARD_ITEM_SELECTED } from './constants';
+import { useStoredSelectedCardItemId } from '../../../hooks/use_stored_state';
 
 export const DashboardsCard: OnboardingCardComponent = ({
   isCardComplete,
@@ -61,9 +62,9 @@ export const DashboardsCard: OnboardingCardComponent = ({
         alignItems="flexStart"
       >
         <EuiFlexItem grow={false}>
-          <EuiText data-test-subj="dashboardsDescription" size="s">
+          <CardSubduedText data-test-subj="dashboardsDescription" size="s">
             {i18n.DASHBOARDS_CARD_DESCRIPTION}
-          </EuiText>
+          </CardSubduedText>
           <EuiSpacer />
           <CardSelectorList
             items={DASHBOARDS_CARD_ITEMS}

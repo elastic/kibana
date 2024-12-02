@@ -6,15 +6,15 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiSpacer } from '@elastic/eui';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
-import { useStoredSelectedCardItemId } from '../../../../hooks/use_stored_state';
 import { SecuritySolutionLinkButton } from '../../../../../common/components/links';
 import { OnboardingCardId } from '../../../../constants';
 import type { OnboardingCardComponent } from '../../../../types';
 import { OnboardingCardContentAssetPanel } from '../common/card_content_asset_panel';
 import { CardCallOut } from '../common/card_callout';
 
+import { CardSubduedText } from '../common/card_subdued_text';
 import * as i18n from './translations';
 import type { CardSelectorListItem } from '../common/card_selector_list';
 import { CardSelectorList } from '../common/card_selector_list';
@@ -22,6 +22,7 @@ import { useOnboardingContext } from '../../../onboarding_context';
 import { RULES_CARD_ITEMS_BY_ID, RULES_CARD_ITEMS } from './rules_card_config';
 import { DEFAULT_RULES_CARD_ITEM_SELECTED } from './constants';
 import type { CardSelectorAssetListItem } from '../types';
+import { useStoredSelectedCardItemId } from '../../../hooks/use_stored_state';
 
 export const RulesCard: OnboardingCardComponent = ({ isCardComplete, setExpandedCardId }) => {
   const { spaceId } = useOnboardingContext();
@@ -60,9 +61,9 @@ export const RulesCard: OnboardingCardComponent = ({ isCardComplete, setExpanded
         alignItems="flexStart"
       >
         <EuiFlexItem grow={false}>
-          <EuiText data-test-subj="rulesCardDescription" size="s">
+          <CardSubduedText data-test-subj="rulesCardDescription" size="s">
             {i18n.RULES_CARD_DESCRIPTION}
-          </EuiText>
+          </CardSubduedText>
           <EuiSpacer />
           <CardSelectorList
             title={i18n.RULES_CARD_STEP_SELECTOR_TITLE}
@@ -70,6 +71,7 @@ export const RulesCard: OnboardingCardComponent = ({ isCardComplete, setExpanded
             onSelect={onSelectCard}
             selectedItem={selectedCardItem}
           />
+
           {!isIntegrationsCardComplete && (
             <>
               <EuiSpacer size="m" />
