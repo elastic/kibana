@@ -49,6 +49,7 @@ interface SavedSearchEmbeddableComponentProps {
   };
   dataView: DataView;
   onAddFilter?: DocViewFilterFn;
+  enableDocumentViewer: boolean;
   stateManager: SearchEmbeddableStateManager;
 }
 
@@ -59,6 +60,7 @@ export function SearchEmbeddableGridComponent({
   api,
   dataView,
   onAddFilter,
+  enableDocumentViewer,
   stateManager,
 }: SavedSearchEmbeddableComponentProps) {
   const discoverServices = useDiscoverServices();
@@ -272,6 +274,7 @@ export function SearchEmbeddableGridComponent({
       services={discoverServices}
       showTimeCol={!discoverServices.uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false)}
       dataGridDensityState={savedSearch.density}
+      enableDocumentViewer={enableDocumentViewer}
     />
   );
 }

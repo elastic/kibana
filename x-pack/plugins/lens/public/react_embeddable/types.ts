@@ -83,6 +83,7 @@ import type {
   SharingSavedObjectProps,
   Simplify,
   UserMessage,
+  VisualizationDisplayOptions,
   VisualizationMap,
 } from '../types';
 import type { LensPluginStartDependencies } from '../plugin';
@@ -278,7 +279,7 @@ export type LensSerializedState = Simplify<
     LensUnifiedSearchContext &
     LensPanelProps &
     SerializedTitles &
-    LensSharedProps &
+    Omit<LensSharedProps, 'noPadding'> &
     Partial<DynamicActionsSerializedState> & { isNewPanel?: boolean }
 >;
 
@@ -418,6 +419,7 @@ export type LensInternalApi = Simplify<
       validationMessages$: PublishingSubject<UserMessage[]>;
       updateValidationMessages: (newMessages: UserMessage[]) => void;
       resetAllMessages: () => void;
+      getDisplayOptions: () => VisualizationDisplayOptions;
     }
 >;
 

@@ -147,7 +147,7 @@ export function initializeDashboardServices(
       },
     },
     serialize: () => {
-      const { style, noPadding, className } = apiHasLensComponentProps(parentApi)
+      const { style, className } = apiHasLensComponentProps(parentApi)
         ? parentApi
         : ({} as LensComponentProps);
       const settings = apiPublishesSettings(parentApi)
@@ -160,7 +160,6 @@ export function initializeDashboardServices(
       return {
         ...serializeTitles(),
         style,
-        noPadding,
         className,
         ...settings,
         palette: initialState.palette,
