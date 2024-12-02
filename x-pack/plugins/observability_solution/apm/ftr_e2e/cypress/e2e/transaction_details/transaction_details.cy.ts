@@ -15,7 +15,6 @@ const timeRange = {
   rangeFrom: start,
   rangeTo: end,
 };
-// flaky
 describe('Transaction details', () => {
   before(() => {
     synthtrace.index(
@@ -105,6 +104,20 @@ describe('Transaction details', () => {
       })}`
     );
     cy.contains('Create SLO');
+  });
+
+  // flaky
+  it.skip('shows top errors table', () => {
+    cy.visitKibana(
+      `/app/apm/services/opbeans-java/transactions/view?${new URLSearchParams({
+        ...timeRange,
+        transactionName: 'GET /api/product',
+      })}`
+    );
+
+    cy.contains('Top 5 errors', { timeout: 30000 });
+    cy.getByTestSubj('topErrorsForTransactionTable').contains('a', '[MockError] Foo').click();
+    cy.url().should('include', 'opbeans-java/errors');
   });
 
   describe('when navigating to a trace sample', () => {
