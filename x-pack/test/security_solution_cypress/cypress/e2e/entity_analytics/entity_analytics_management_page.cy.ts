@@ -17,9 +17,6 @@ import {
   RISK_SCORE_STATUS,
   LOCAL_QUERY_BAR_SEARCH_INPUT_SELECTOR,
 } from '../../screens/entity_analytics_management';
-
-import { deleteRiskScore, installRiskScoreModule } from '../../tasks/api_calls/risk_scores';
-import { RiskScoreEntity } from '../../tasks/risk_scores/common';
 import { login } from '../../tasks/login';
 import { visit } from '../../tasks/navigation';
 import { ENTITY_ANALYTICS_MANAGEMENT_URL } from '../../urls/navigation';

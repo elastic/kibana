@@ -7,8 +7,6 @@
 
 import { login } from '../../../tasks/login';
 import { visitHostDetailsPage } from '../../../tasks/navigation';
-
-import { TABLE_CELL, TABLE_ROWS } from '../../../screens/alerts_details';
 import { deleteRiskEngineConfiguration } from '../../../tasks/api_calls/risk_engine';
 import { openRiskInformationFlyout, mockRiskEngineEnabled } from '../../../tasks/entity_analytics';
 import { ALERTS_COUNT, ALERT_GRID_CELL } from '../../../screens/alerts';
@@ -17,39 +15,7 @@ import { navigateToHostRiskDetailTab } from '../../../tasks/host_risk';
 import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
 
 describe('risk tab', { tags: ['@ess'] }, () => {
-  describe('with legacy risk score', () => {
-    beforeEach(() => {
-      cy.task('esArchiverLoad', { archiveName: 'risk_hosts' });
-      login();
-      deleteRiskEngineConfiguration();
-    });
-
-    after(() => {
-      cy.task('esArchiverUnload', { archiveName: 'risk_hosts' });
-    });
-
-    it('renders risk tab', () => {
-      visitHostDetailsPage('siem-kibana');
-      navigateToHostRiskDetailTab();
-
-      cy.get('[data-test-subj="topRiskScoreContributors"]')
-        .find(TABLE_ROWS)
-        .within(() => {
-          cy.get(TABLE_CELL).contains('Unusual Linux Username');
-        });
-    });
-
-    it('shows risk information overlay when button is clicked', () => {
-      visitHostDetailsPage('siem-kibana');
-      navigateToHostRiskDetailTab();
-
-      openRiskInformationFlyout();
-
-      cy.get(RISK_INFORMATION_FLYOUT_HEADER).contains('Entity Risk Analytics');
-    });
-  });
-
-  describe('with new risk score', { tags: ['@serverless'] }, () => {
+  describe('with risk score', { tags: ['@serverless'] }, () => {
     before(() => {
       cy.task('esArchiverLoad', { archiveName: 'risk_scores_new_complete_data' });
       cy.task('esArchiverLoad', { archiveName: 'query_alert', useCreate: true, docsOnly: true });
