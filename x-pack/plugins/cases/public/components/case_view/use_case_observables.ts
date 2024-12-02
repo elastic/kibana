@@ -22,7 +22,7 @@ export const useCaseObservables = (caseData: CaseUI) => {
     }
 
     const availableTypesSet = new Set([
-      OBSERVABLE_TYPES_BUILTIN_KEYS,
+      ...OBSERVABLE_TYPES_BUILTIN_KEYS,
       ...currentConfiguration.observableTypes.map(({ key }) => key),
     ]);
 
