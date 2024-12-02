@@ -28,6 +28,11 @@
     "@kbn/fields-metadata-plugin",
     "@kbn/esql-validation-autocomplete",
     "@kbn/esql-utils",
+    "@kbn/content-management-favorites-public",
+    "@kbn/usage-collection-plugin",
+    "@kbn/content-management-favorites-common",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/shared-ux-table-persist",
   ],
   "exclude": [
     "target/**/*",

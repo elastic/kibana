@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { Table } from './table';
+export { Table, FORBIDDEN_SEARCH_CHARS } from './table';
 export { UpdatedAtField } from './updated_at_field';
 export { ConfirmDeleteModal } from './confirm_delete_modal';
 export { ListingLimitWarning } from './listing_limit_warning';

@@ -55,29 +55,22 @@ export const AddDocumentsCodeExample = ({
     },
     [usageTracker]
   );
-  const sampleDocument = useMemo(() => {
-    // TODO: implement smart document generation
-    return generateSampleDocument(codeSampleMappings);
+  const sampleDocuments = useMemo(() => {
+    return [1, 2, 3].map((num) =>
+      generateSampleDocument(codeSampleMappings, `Example text ${num}`)
+    );
   }, [codeSampleMappings]);
-  const { apiKey, apiKeyIsVisible } = useSearchApiKey();
+  const { apiKey } = useSearchApiKey();
   const codeParams: IngestCodeSnippetParameters = useMemo(() => {
     return {
       indexName,
       elasticsearchURL: elasticsearchUrl,
-      sampleDocument,
+      sampleDocuments,
       indexHasMappings,
       mappingProperties: codeSampleMappings,
-      apiKey: apiKeyIsVisible && apiKey ? apiKey : undefined,
+      apiKey: apiKey || undefined,
     };
-  }, [
-    indexName,
-    elasticsearchUrl,
-    sampleDocument,
-    codeSampleMappings,
-    indexHasMappings,
-    apiKeyIsVisible,
-    apiKey,
-  ]);
+  }, [indexName, elasticsearchUrl, sampleDocuments, codeSampleMappings, indexHasMappings, apiKey]);
 
   return (
     <EuiPanel
@@ -95,22 +88,20 @@ export const AddDocumentsCodeExample = ({
               onSelectLanguage={onSelectLanguage}
             />
           </EuiFlexItem>
-          {selectedLanguage === 'curl' && (
-            <EuiFlexItem grow={false}>
-              <TryInConsoleButton
-                request={
-                  !indexHasMappings
-                    ? `${ingestCodeExamples.sense.updateMappingsCommand(
-                        codeParams
-                      )}\n\n${ingestCodeExamples.sense.ingestCommand(codeParams)}`
-                    : ingestCodeExamples.sense.ingestCommand(codeParams)
-                }
-                application={application}
-                sharePlugin={share}
-                consolePlugin={consolePlugin}
-              />
-            </EuiFlexItem>
-          )}
+          <EuiFlexItem grow={false}>
+            <TryInConsoleButton
+              request={
+                !indexHasMappings
+                  ? `${ingestCodeExamples.sense.updateMappingsCommand(
+                      codeParams
+                    )}\n\n${ingestCodeExamples.sense.ingestCommand(codeParams)}`
+                  : ingestCodeExamples.sense.ingestCommand(codeParams)
+              }
+              application={application}
+              sharePlugin={share}
+              consolePlugin={consolePlugin}
+            />
+          </EuiFlexItem>
         </EuiFlexGroup>
         {selectedCodeExamples.installCommand && (
           <EuiFlexItem>

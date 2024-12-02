@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { EntityDefinition, EntityDefinitionUpdate } from '@kbn/entities-schema';
+import { without } from 'lodash';
+import { EntityV2, EntityDefinition, EntityDefinitionUpdate } from '@kbn/entities-schema';
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { Logger } from '@kbn/logging';
 import {
   installEntityDefinition,
@@ -23,11 +24,31 @@ import { stopTransforms } from './entities/stop_transforms';
 import { deleteIndices } from './entities/delete_index';
 import { EntityDefinitionWithState } from './entities/types';
 import { EntityDefinitionUpdateConflict } from './entities/errors/entity_definition_update_conflict';
+import { EntitySource, SortBy, getEntityInstancesQuery } from './queries';
+import { mergeEntitiesList, runESQLQuery } from './queries/utils';
+import { UnknownEntityType } from './entities/errors/unknown_entity_type';
+
+interface SearchCommon {
+  start: string;
+  end: string;
+  sort?: SortBy;
+  metadataFields?: string[];
+  filters?: string[];
+  limit?: number;
+}
+
+export type SearchByType = SearchCommon & {
+  type: string;
+};
+
+export type SearchBySources = SearchCommon & {
+  sources: EntitySource[];
+};
 
 export class EntityClient {
   constructor(
     private options: {
-      clusterClient: IScopedClusterClient;
+      esClient: ElasticsearchClient;
       soClient: SavedObjectsClientContract;
       logger: Logger;
     }
@@ -40,16 +61,18 @@ export class EntityClient {
     definition: EntityDefinition;
     installOnly?: boolean;
   }) {
-    const secondaryAuthClient = this.options.clusterClient.asSecondaryAuthUser;
+    this.options.logger.info(
+      `Creating definition [${definition.id}] v${definition.version} (installOnly=${installOnly})`
+    );
     const installedDefinition = await installEntityDefinition({
       definition,
-      esClient: secondaryAuthClient,
+      esClient: this.options.esClient,
       soClient: this.options.soClient,
       logger: this.options.logger,
     });
 
     if (!installOnly) {
-      await startTransforms(secondaryAuthClient, installedDefinition, this.options.logger);
+      await startTransforms(this.options.esClient, installedDefinition, this.options.logger);
     }
 
     return installedDefinition;
@@ -62,16 +85,15 @@ export class EntityClient {
     id: string;
     definitionUpdate: EntityDefinitionUpdate;
   }) {
-    const secondaryAuthClient = this.options.clusterClient.asSecondaryAuthUser;
     const definition = await findEntityDefinitionById({
       id,
       soClient: this.options.soClient,
-      esClient: secondaryAuthClient,
+      esClient: this.options.esClient,
       includeState: true,
     });
 
     if (!definition) {
-      const message = `Unable to find entity definition with [${id}]`;
+      const message = `Unable to find entity definition [${id}]`;
       this.options.logger.error(message);
       throw new EntityDefinitionNotFound(message);
     }
@@ -86,49 +108,46 @@ export class EntityClient {
       definition as EntityDefinitionWithState
     ).state.components.transforms.some((transform) => transform.running);
 
+    this.options.logger.info(
+      `Updating definition [${definition.id}] from v${definition.version} to v${definitionUpdate.version}`
+    );
     const updatedDefinition = await reinstallEntityDefinition({
       definition,
       definitionUpdate,
       soClient: this.options.soClient,
-      esClient: secondaryAuthClient,
+      esClient: this.options.esClient,
       logger: this.options.logger,
     });
 
     if (shouldRestartTransforms) {
-      await startTransforms(secondaryAuthClient, updatedDefinition, this.options.logger);
+      await startTransforms(this.options.esClient, updatedDefinition, this.options.logger);
     }
     return updatedDefinition;
   }
 
   async deleteEntityDefinition({ id, deleteData = false }: { id: string; deleteData?: boolean }) {
-    const secondaryAuthClient = this.options.clusterClient.asSecondaryAuthUser;
     const definition = await findEntityDefinitionById({
       id,
-      esClient: secondaryAuthClient,
+      esClient: this.options.esClient,
       soClient: this.options.soClient,
     });
 
     if (!definition) {
-      const message = `Unable to find entity definition with [${id}]`;
-      this.options.logger.error(message);
-      throw new EntityDefinitionNotFound(message);
+      throw new EntityDefinitionNotFound(`Unable to find entity definition [${id}]`);
     }
 
+    this.options.logger.info(
+      `Uninstalling definition [${definition.id}] v${definition.version} (deleteData=${deleteData})`
+    );
     await uninstallEntityDefinition({
       definition,
-      esClient: secondaryAuthClient,
+      esClient: this.options.esClient,
       soClient: this.options.soClient,
       logger: this.options.logger,
     });
 
     if (deleteData) {
-      // delete data with current user as system user does not have
-      // .entities privileges
-      await deleteIndices(
-        this.options.clusterClient.asCurrentUser,
-        definition,
-        this.options.logger
-      );
+      await deleteIndices(this.options.esClient, definition, this.options.logger);
     }
   }
 
@@ -148,7 +167,7 @@ export class EntityClient {
     builtIn?: boolean;
   }) {
     const definitions = await findEntityDefinitions({
-      esClient: this.options.clusterClient.asSecondaryAuthUser,
+      esClient: this.options.esClient,
       soClient: this.options.soClient,
       page,
       perPage,
@@ -162,18 +181,125 @@ export class EntityClient {
   }
 
   async startEntityDefinition(definition: EntityDefinition) {
-    return startTransforms(
-      this.options.clusterClient.asSecondaryAuthUser,
-      definition,
-      this.options.logger
-    );
+    this.options.logger.info(`Starting transforms for definition [${definition.id}]`);
+    return startTransforms(this.options.esClient, definition, this.options.logger);
   }
 
   async stopEntityDefinition(definition: EntityDefinition) {
-    return stopTransforms(
-      this.options.clusterClient.asSecondaryAuthUser,
-      definition,
-      this.options.logger
-    );
+    this.options.logger.info(`Stopping transforms for definition [${definition.id}]`);
+    return stopTransforms(this.options.esClient, definition, this.options.logger);
+  }
+
+  async getEntitySources({ type }: { type: string }) {
+    const result = await this.options.esClient.search<EntitySource>({
+      index: 'kibana_entity_definitions',
+      query: {
+        bool: {
+          must: {
+            term: { entity_type: type },
+          },
+        },
+      },
+    });
+
+    return result.hits.hits.map((hit) => hit._source) as EntitySource[];
+  }
+
+  async searchEntities({
+    type,
+    start,
+    end,
+    sort,
+    metadataFields = [],
+    filters = [],
+    limit = 10,
+  }: SearchByType) {
+    const sources = await this.getEntitySources({ type });
+    if (sources.length === 0) {
+      throw new UnknownEntityType(`No sources found for entity type [${type}]`);
+    }
+
+    return this.searchEntitiesBySources({
+      sources,
+      start,
+      end,
+      metadataFields,
+      filters,
+      sort,
+      limit,
+    });
+  }
+
+  async searchEntitiesBySources({
+    sources,
+    start,
+    end,
+    sort,
+    metadataFields = [],
+    filters = [],
+    limit = 10,
+  }: SearchBySources) {
+    const entities = await Promise.all(
+      sources.map(async (source) => {
+        const mandatoryFields = [
+          ...source.identity_fields,
+          ...(source.timestamp_field ? [source.timestamp_field] : []),
+          ...(source.display_name ? [source.display_name] : []),
+        ];
+        const metaFields = [...metadataFields, ...source.metadata_fields];
+
+        // operations on an unmapped field result in a failing query so we verify
+        // field capabilities beforehand
+        const { fields } = await this.options.esClient.fieldCaps({
+          index: source.index_patterns,
+          fields: [...mandatoryFields, ...metaFields],
+        });
+
+        const sourceHasMandatoryFields = mandatoryFields.every((field) => !!fields[field]);
+        if (!sourceHasMandatoryFields) {
+          // we can't build entities without id fields so we ignore the source.
+          // TODO filters should likely behave similarly. we should also throw
+          const missingFields = mandatoryFields.filter((field) => !fields[field]);
+          this.options.logger.info(
+            `Ignoring source for type [${source.type}] with index_patterns [${
+              source.index_patterns
+            }] because some mandatory fields [${missingFields.join(', ')}] are not mapped`
+          );
+          return [];
+        }
+
+        // but metadata field not being available is fine
+        const availableMetadataFields = metaFields.filter((field) => fields[field]);
+        if (availableMetadataFields.length < metaFields.length) {
+          this.options.logger.info(
+            `Ignoring unmapped fields [${without(metaFields, ...availableMetadataFields).join(
+              ', '
+            )}]`
+          );
+        }
+
+        const query = getEntityInstancesQuery({
+          source: {
+            ...source,
+            metadata_fields: availableMetadataFields,
+            filters: [...source.filters, ...filters],
+          },
+          start,
+          end,
+          sort,
+          limit,
+        });
+        this.options.logger.debug(`Entity query: ${query}`);
+
+        const rawEntities = await runESQLQuery<EntityV2>({
+          query,
+          esClient: this.options.esClient,
+        });
+
+        return rawEntities;
+      })
+    ).then((results) => results.flat());
+
+    return mergeEntitiesList(sources, entities).slice(0, limit);
   }
 }

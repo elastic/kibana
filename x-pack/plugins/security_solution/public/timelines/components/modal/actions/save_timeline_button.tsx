@@ -15,7 +15,6 @@ import { SaveTimelineModal } from './save_timeline_modal';
 import * as i18n from './translations';
 import { selectTimelineById } from '../../../store/selectors';
 import type { State } from '../../../../common/store';
-import { TIMELINE_TOUR_CONFIG_ANCHORS } from '../../timeline/tour/step_config';
 
 export interface SaveTimelineButtonProps {
   /**
@@ -75,7 +74,6 @@ export const SaveTimelineButton = React.memo<SaveTimelineButtonProps>(
           data-test-subj="timeline-modal-save-timeline-tooltip"
         >
           <EuiButton
-            id={TIMELINE_TOUR_CONFIG_ANCHORS.SAVE_TIMELINE}
             fill
             size="s"
             color={buttonColor}

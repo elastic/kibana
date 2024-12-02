@@ -115,6 +115,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     it('relative timerange works', async () => {
       await common.navigateToApp('discover');
       await header.waitUntilLoadingHasFinished();
+      const url = await browser.getCurrentUrl();
+
       await searchSessions.save();
       await searchSessions.expectState('backgroundCompleted');
       const searchSessionId = await getSearchSessionId();
@@ -125,8 +127,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await searchSessionsManagement.goTo();
       const searchSessionListBeforeRestore = await searchSessionsManagement.getList();
       const searchesCountBeforeRestore = searchSessionListBeforeRestore[0].searchesCount;
+
       // navigate to Discover
-      await searchSessionListBeforeRestore[0].view();
+      // Instead of clicking the link to navigate to Discover, we load Discover from scratch (just like we did when we
+      // ran the search session before saving). This ensures that the same number of requests are made.
+      // await searchSessionListBeforeRestore[0].view();
+      const restoreUrl = new URL(searchSessionListBeforeRestore[0].mainUrl, url).href;
+      await browser.navigateTo(restoreUrl);
+
       await header.waitUntilLoadingHasFinished();
       await searchSessions.expectState('restored');
       expect(await discover.hasNoResults()).to.be(true);

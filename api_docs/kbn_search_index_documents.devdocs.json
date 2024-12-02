@@ -101,7 +101,7 @@
             "section": "def-server.ElasticsearchClient",
             "text": "ElasticsearchClient"
           },
-          ", indexName: string, query?: string | undefined, from?: number, size?: number) => Promise<",
+          ", indexName: string, query?: string | undefined, from?: number, size?: number, trackTotalHits?: boolean) => Promise<",
           {
             "pluginId": "@kbn/search-index-documents",
             "scope": "common",
@@ -192,6 +192,21 @@
             "description": [],
             "signature": [
               "number"
+            ],
+            "path": "packages/kbn-search-index-documents/lib/fetch_search_results.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/search-index-documents",
+            "id": "def-common.fetchSearchResults.$6",
+            "type": "boolean",
+            "tags": [],
+            "label": "trackTotalHits",
+            "description": [],
+            "signature": [
+              "boolean"
             ],
             "path": "packages/kbn-search-index-documents/lib/fetch_search_results.ts",
             "deprecated": false,
@@ -318,7 +333,7 @@
         "label": "Result",
         "description": [],
         "signature": [
-          "({ metaData, fields, defaultVisibleFields, compactCard, showScore, onDocumentClick, onDocumentDelete, }: ",
+          "({ metaData, fields, defaultVisibleFields, compactCard, showScore, onDocumentClick, onDocumentDelete, hasDeleteDocumentsPrivilege, }: ",
           "ResultProps",
           ") => React.JSX.Element"
         ],
@@ -331,7 +346,7 @@
             "id": "def-common.Result.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  metaData,\n  fields,\n  defaultVisibleFields = DEFAULT_VISIBLE_FIELDS,\n  compactCard = true,\n  showScore = false,\n  onDocumentClick,\n  onDocumentDelete,\n}",
+            "label": "{\n  metaData,\n  fields,\n  defaultVisibleFields = DEFAULT_VISIBLE_FIELDS,\n  compactCard = true,\n  showScore = false,\n  onDocumentClick,\n  onDocumentDelete,\n  hasDeleteDocumentsPrivilege,\n}",
             "description": [],
             "signature": [
               "ResultProps"

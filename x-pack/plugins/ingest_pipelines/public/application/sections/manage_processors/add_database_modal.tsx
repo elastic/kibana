@@ -137,7 +137,7 @@ export const AddDatabaseModal = ({
             helpText={
               <FormattedMessage
                 id="xpack.ingestPipelines.manageProcessors.geoip.addDatabaseForm.databaseTypeSelectHelpText"
-                defaultMessage="Select which provider you want to use"
+                defaultMessage="Select the provider you want to use."
               />
             }
           >
@@ -156,7 +156,7 @@ export const AddDatabaseModal = ({
                 title={
                   <FormattedMessage
                     id="xpack.ingestPipelines.manageProcessors.geoip.licenseCalloutTitle"
-                    defaultMessage="Add your MaxMind license key to keystore"
+                    defaultMessage="Add your MaxMind license token to the keystore"
                   />
                 }
                 iconType="iInCircle"
@@ -164,7 +164,7 @@ export const AddDatabaseModal = ({
                 <p>
                   <FormattedMessage
                     id="xpack.ingestPipelines.manageProcessors.geoip.licenseCalloutText"
-                    defaultMessage="In order to grant access to your MaxMind account, you must add the license key to the keystore."
+                    defaultMessage="The processor needs the license key to connect to the database."
                   />
                 </p>
               </EuiCallOut>
@@ -178,7 +178,7 @@ export const AddDatabaseModal = ({
                 title={
                   <FormattedMessage
                     id="xpack.ingestPipelines.manageProcessors.geoip.licenseCalloutTitle"
-                    defaultMessage="Add your IP Info license token to keystore"
+                    defaultMessage="Add your IP Info license token to the keystore"
                   />
                 }
                 iconType="iInCircle"
@@ -186,7 +186,7 @@ export const AddDatabaseModal = ({
                 <p>
                   <FormattedMessage
                     id="xpack.ingestPipelines.manageProcessors.geoip.licenseCalloutText"
-                    defaultMessage="In order to grant access to your IP Info account, you must add the license token to the keystore."
+                    defaultMessage="The processor needs the license key to connect to the database."
                   />
                 </p>
               </EuiCallOut>
@@ -246,7 +246,7 @@ export const AddDatabaseModal = ({
               <p>
                 <FormattedMessage
                   id="xpack.ingestPipelines.manageProcessors.geoip.nameExistsErrorText"
-                  defaultMessage="Database cannot be added multiple times."
+                  defaultMessage="A database needs to be added only once in order to be available."
                 />
               </p>
             </EuiCallOut>

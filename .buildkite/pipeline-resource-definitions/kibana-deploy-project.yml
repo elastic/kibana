@@ -26,11 +26,12 @@ spec:
       default_branch: main
       repository: elastic/kibana
       pipeline_file: .buildkite/pipelines/serverless_deployment/project-build-and-deploy-pr.yml
-      skip_intermediate_builds: true
       provider_settings:
+        build_pull_requests: true
         prefix_pull_request_fork_branch_names: false
         skip_pull_request_builds_for_existing_commits: true
         trigger_mode: none
+      cancel_intermediate_builds: true
       teams:
         kibana-operations:
           access_level: MANAGE_BUILD_AND_READ

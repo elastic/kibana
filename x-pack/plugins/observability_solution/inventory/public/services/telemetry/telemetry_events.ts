@@ -25,4 +25,85 @@ const inventoryAddDataEventType: TelemetryEvent = {
   },
 };
 
-export const inventoryTelemetryEventBasedTypes = [inventoryAddDataEventType];
+const entityInventoryViewedEventType: TelemetryEvent = {
+  eventType: TelemetryEventTypes.ENTITY_INVENTORY_VIEWED,
+  schema: {
+    view_state: {
+      type: 'keyword',
+      _meta: {
+        description: 'State of the view: empty, populated or eem_disabled.',
+      },
+    },
+  },
+};
+
+const searchQuerySubmittedEventType: TelemetryEvent = {
+  eventType: TelemetryEventTypes.ENTITY_INVENTORY_SEARCH_QUERY_SUBMITTED,
+  schema: {
+    kuery_fields: {
+      type: 'array',
+      items: {
+        type: 'text',
+        _meta: {
+          description: 'Kuery fields used in the search.',
+        },
+      },
+    },
+    action: {
+      type: 'keyword',
+      _meta: {
+        description: 'Action performed: submit or refresh.',
+      },
+    },
+  },
+};
+
+const entityInventoryEntityTypeFilteredEventType: TelemetryEvent = {
+  eventType: TelemetryEventTypes.ENTITY_INVENTORY_ENTITY_TYPE_FILTERED,
+  schema: {
+    include_entity_types: {
+      type: 'array',
+      items: {
+        type: 'keyword',
+        _meta: {
+          description: 'List of Entity types used to filter for.',
+        },
+      },
+    },
+    exclude_entity_types: {
+      type: 'array',
+      items: {
+        type: 'keyword',
+        _meta: {
+          description: 'List of Entity types used to filter out.',
+        },
+      },
+    },
+  },
+};
+
+const entityViewClickedEventType: TelemetryEvent = {
+  eventType: TelemetryEventTypes.ENTITY_VIEW_CLICKED,
+  schema: {
+    entity_type: {
+      type: 'keyword',
+      _meta: {
+        description: 'Type of the entity: container, host or service.',
+      },
+    },
+    view_type: {
+      type: 'keyword',
+      _meta: {
+        description: 'Type of the view: detail or flyout.',
+      },
+    },
+  },
+};
+
+export const inventoryTelemetryEventBasedTypes = [
+  inventoryAddDataEventType,
+  entityInventoryViewedEventType,
+  searchQuerySubmittedEventType,
+  entityViewClickedEventType,
+  entityInventoryEntityTypeFilteredEventType,
+];

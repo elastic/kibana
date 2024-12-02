@@ -10,7 +10,10 @@ import type { Client } from '@elastic/elasticsearch';
 import { KbnClient } from '@kbn/test';
 import pMap from 'p-map';
 import { makeDownSummary, makeUpSummary } from '@kbn/observability-synthetics-test-data';
-import { SyntheticsMonitor } from '@kbn/synthetics-plugin/common/runtime_types';
+import {
+  SyntheticsMonitor,
+  SyntheticsPrivateLocations,
+} from '@kbn/synthetics-plugin/common/runtime_types';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { journeyStart, journeySummary, step1, step2 } from './data/browser_docs';
 
@@ -221,14 +224,6 @@ export class SyntheticsServices {
     }
   }
 
-  async getRules() {
-    const response = await axios.get(this.kibanaUrl + '/internal/alerting/rules/_find', {
-      auth: { username: 'elastic', password: 'changeme' },
-      headers: { 'kbn-xsrf': 'true' },
-    });
-    return response.data.data;
-  }
-
   async setupTestConnector() {
     const indexConnector = {
       name: 'test index',
@@ -258,5 +253,13 @@ export class SyntheticsServices {
       body: settings,
     });
     return connector.data;
+  }
+
+  async getPrivateLocations(): Promise<SyntheticsPrivateLocations> {
+    const response = await this.requester.request({
+      path: SYNTHETICS_API_URLS.PRIVATE_LOCATIONS,
+      method: 'GET',
+    });
+    return response.data as SyntheticsPrivateLocations;
   }
 }

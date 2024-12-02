@@ -63,6 +63,13 @@ import { startTransforms } from '../../lib/entities/start_transforms';
  */
 export const enableEntityDiscoveryRoute = createEntityManagerServerRoute({
   endpoint: 'PUT /internal/entities/managed/enablement',
+  security: {
+    authz: {
+      enabled: false,
+      reason:
+        'This endpoint leverages the security plugin to evaluate the privileges needed as part of its core flow',
+    },
+  },
   params: z.object({
     query: createEntityDefinitionQuerySchema,
   }),
@@ -93,6 +100,7 @@ export const enableEntityDiscoveryRoute = createEntityManagerServerRoute({
         });
       }
 
+      logger.info(`Enabling managed entity discovery (installOnly=${params.query.installOnly})`);
       const soClient = core.savedObjects.getClient({
         includedHiddenTypes: [EntityDiscoveryApiKeyType.name],
       });
@@ -119,7 +127,7 @@ export const enableEntityDiscoveryRoute = createEntityManagerServerRoute({
 
       await saveEntityDiscoveryAPIKey(soClient, apiKey);
 
-      const esClient = core.elasticsearch.client.asSecondaryAuthUser;
+      const esClient = core.elasticsearch.client.asCurrentUser;
       const installedDefinitions = await installBuiltInEntityDefinitions({
         esClient,
         soClient,
@@ -134,6 +142,7 @@ export const enableEntityDiscoveryRoute = createEntityManagerServerRoute({
           )
         );
       }
+      logger.info('Managed entity discovery is enabled');
 
       return response.ok({ body: { success: true } });
     } catch (err) {

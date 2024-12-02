@@ -9,19 +9,10 @@ import { appContextService } from '..';
 import type { FleetConfigType } from '../../config';
 export { isOnlyAgentlessIntegration } from '../../../common/services/agentless_policy_helper';
 
-export const isAgentlessApiEnabled = () => {
-  const cloudSetup = appContextService.getCloud && appContextService.getCloud();
+export const isAgentlessEnabled = () => {
+  const cloudSetup = appContextService.getCloud();
   const isHosted = cloudSetup?.isCloudEnabled || cloudSetup?.isServerlessEnabled;
   return Boolean(isHosted && appContextService.getConfig()?.agentless?.enabled);
-};
-export const isDefaultAgentlessPolicyEnabled = () => {
-  const cloudSetup = appContextService.getCloud && appContextService.getCloud();
-  return Boolean(
-    cloudSetup?.isServerlessEnabled && appContextService.getExperimentalFeatures().agentless
-  );
-};
-export const isAgentlessEnabled = () => {
-  return isAgentlessApiEnabled() || isDefaultAgentlessPolicyEnabled();
 };
 
 const AGENTLESS_ESS_API_BASE_PATH = '/api/v1/ess';

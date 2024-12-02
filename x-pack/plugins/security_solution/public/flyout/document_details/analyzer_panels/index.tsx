@@ -7,13 +7,13 @@
 
 import React, { useCallback } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
-import { FlyoutBody } from '@kbn/security-solution-common';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { DocumentDetailsAnalyzerPanelKey } from '../shared/constants/panel_keys';
 import { DetailsPanel } from '../../../resolver/view/details_panel';
 import type { NodeEventOnClick } from '../../../resolver/view/panels/node_events_of_type';
 import { DocumentDetailsPreviewPanelKey } from '../shared/constants/panel_keys';
-import { ALERT_PREVIEW_BANNER } from '../preview/constants';
+import { ALERT_PREVIEW_BANNER, EVENT_PREVIEW_BANNER } from '../preview/constants';
+import { FlyoutBody } from '../../shared/components/flyout_body';
 
 interface AnalyzerPanelProps extends Record<string, unknown> {
   /**
@@ -34,7 +34,7 @@ export const AnalyzerPanel: React.FC<AnalyzerPanelProps> = ({ resolverComponentI
   const { openPreviewPanel } = useExpandableFlyoutApi();
 
   const openPreview = useCallback<NodeEventOnClick>(
-    ({ documentId, indexName, scopeId }) =>
+    ({ documentId, indexName, scopeId, isAlert }) =>
       () => {
         openPreviewPanel({
           id: DocumentDetailsPreviewPanelKey,
@@ -43,7 +43,7 @@ export const AnalyzerPanel: React.FC<AnalyzerPanelProps> = ({ resolverComponentI
             indexName,
             scopeId,
             isPreviewMode: true,
-            banner: ALERT_PREVIEW_BANNER,
+            banner: isAlert ? ALERT_PREVIEW_BANNER : EVENT_PREVIEW_BANNER,
           },
         });
       },

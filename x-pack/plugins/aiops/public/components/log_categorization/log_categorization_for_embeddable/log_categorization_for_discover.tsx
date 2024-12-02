@@ -12,7 +12,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer, useEuiPaddingSize } from '@elasti
 import type { DataViewField } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { Filter } from '@kbn/es-query';
-import { buildEmptyFilter } from '@kbn/es-query';
+import { buildEmptyFilter, buildEsQuery } from '@kbn/es-query';
 import { usePageUrlState } from '@kbn/ml-url-state';
 import type { FieldValidationResults } from '@kbn/ml-category-validator';
 
@@ -24,11 +24,11 @@ import type { EmbeddablePatternAnalysisInput } from '@kbn/aiops-log-pattern-anal
 import { css } from '@emotion/react';
 import { useTableState } from '@kbn/ml-in-memory-table/hooks/use_table_state';
 import useMountedState from 'react-use/lib/useMountedState';
+import { getEsQueryConfig } from '@kbn/data-service';
 import {
   type LogCategorizationPageUrlState,
   getDefaultLogCategorizationAppState,
 } from '../../../application/url_state/log_pattern_analysis';
-import { createMergedEsQuery } from '../../../application/utils/search_utils';
 import { useData } from '../../../hooks/use_data';
 import { useSearch } from '../../../hooks/use_search';
 import { useAiopsAppContext } from '../../../hooks/use_aiops_app_context';
@@ -90,7 +90,12 @@ export const LogCategorizationDiscover: FC<LogCategorizationEmbeddableProps> = (
   const [stateFromUrl] = usePageUrlState<LogCategorizationPageUrlState>(
     'logCategorization',
     getDefaultLogCategorizationAppState({
-      searchQuery: createMergedEsQuery(query, filters, dataView, uiSettings),
+      searchQuery: buildEsQuery(
+        dataView,
+        query ?? [],
+        filters ?? [],
+        uiSettings ? getEsQueryConfig(uiSettings) : undefined
+      ),
     })
   );
   const [selectedCategories, setSelectedCategories] = useState<Category[]>([]);

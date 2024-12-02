@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
 import { createTestConfig } from '../../config.base';
 
 export default createTestConfig({
@@ -20,16 +20,15 @@ export default createTestConfig({
   esServerArgs: [],
   kbnServerArgs: [
     `--xpack.cloud.id=ES3_FTR_TESTS:ZmFrZS1kb21haW4uY2xkLmVsc3RjLmNvJGZha2Vwcm9qZWN0aWQuZXMkZmFrZXByb2plY3RpZC5rYg==`,
-    `--xpack.cloud.serverless.project_id=fakeprojectid`,
     `--xpack.cloud.serverless.project_name=ES3_FTR_TESTS`,
-    `--xpack.cloud.base_url=https://fake-cloud.elastic.co`,
-    `--xpack.cloud.profile_url=/user/settings/`,
-    `--xpack.cloud.billing_url=/billing/overview/`,
-    `--xpack.cloud.deployments_url=/deployments`,
     `--xpack.cloud.deployment_url=/projects/elasticsearch/fakeprojectid`,
-    `--xpack.cloud.users_and_roles_url=/account/members/`,
-    `--xpack.cloud.projects_url=/projects/`,
-    `--xpack.cloud.organization_url=/account/`,
+    '--xpack.dataUsage.enabled=true',
+    '--xpack.dataUsage.enableExperimental=[]',
+    // dataUsage.autoops* config is set in kibana controller
+    '--xpack.dataUsage.autoops.enabled=true',
+    '--xpack.dataUsage.autoops.api.url=http://localhost:9000',
+    `--xpack.dataUsage.autoops.api.tls.certificate=${KBN_CERT_PATH}`,
+    `--xpack.dataUsage.autoops.api.tls.key=${KBN_KEY_PATH}`,
   ],
   apps: {
     serverlessElasticsearch: {
@@ -46,6 +45,9 @@ export default createTestConfig({
     },
     elasticsearchIndices: {
       pathname: '/app/elasticsearch/indices',
+    },
+    searchInferenceEndpoints: {
+      pathname: '/app/elasticsearch/relevance/inference_endpoints',
     },
   },
 });

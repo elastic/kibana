@@ -110,6 +110,7 @@ export const createDashboard = async (
     },
     lastSavedId: savedObjectId,
     managed: savedObjectResult.managed ?? false,
+    fullScreenMode: creationOptions?.fullScreenMode ?? false,
   };
 
   const dashboardContainer = new DashboardContainer(

@@ -30,8 +30,10 @@ export const getPrebuiltRulesAndTimelinesStatusRoute = (router: SecuritySolution
     .get({
       access: 'public',
       path: PREBUILT_RULES_STATUS_URL,
-      options: {
-        tags: ['access:securitySolution'],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
       },
     })
     .addVersion(

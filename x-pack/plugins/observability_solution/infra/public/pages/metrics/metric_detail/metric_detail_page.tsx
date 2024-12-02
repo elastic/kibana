@@ -54,18 +54,15 @@ export const MetricDetailPage = () => {
   });
 
   const breadcrumbOptions = parentBreadcrumbResolver.getBreadcrumbOptions(nodeType);
-  useMetricsBreadcrumbs(
-    [
-      {
-        ...breadcrumbOptions.link,
-        text: breadcrumbOptions.text,
-      },
-      {
-        text: name,
-      },
-    ],
-    { deeperContextServerless: true }
-  );
+  useMetricsBreadcrumbs([
+    {
+      ...breadcrumbOptions.link,
+      text: breadcrumbOptions.text,
+    },
+    {
+      text: name,
+    },
+  ]);
 
   const [sideNav, setSideNav] = useState<NavItem[]>([]);
 

@@ -14,13 +14,14 @@ import { withLazyHook } from '../../../../../common/components/with_lazy_hook';
 import {
   useStoredIntegrationSearchTerm,
   useStoredIntegrationTabId,
-} from '../../../../hooks/use_stored_state';
+} from '../../../hooks/use_stored_state';
 import { useOnboardingContext } from '../../../onboarding_context';
 import {
   DEFAULT_TAB,
   LOADING_SKELETON_TEXT_LINES,
   SCROLL_ELEMENT_ID,
   SEARCH_FILTER_CATEGORIES,
+  TELEMETRY_INTEGRATION_TAB,
   WITHOUT_SEARCH_BOX_HEIGHT,
   WITH_SEARCH_BOX_HEIGHT,
 } from './constants';
@@ -28,6 +29,7 @@ import { INTEGRATION_TABS, INTEGRATION_TABS_BY_ID } from './integration_tabs_con
 import { useIntegrationCardList } from './use_integration_card_list';
 import { IntegrationTabId } from './types';
 import { IntegrationCardTopCallout } from './callouts/integration_card_top_callout';
+import { trackOnboardingLinkClick } from '../../../lib/telemetry';
 
 export interface IntegrationsCardGridTabsProps {
   installedIntegrationsCount: number;
@@ -55,8 +57,10 @@ export const IntegrationsCardGridTabsComponent = React.memo<IntegrationsCardGrid
     const onTabChange = useCallback(
       (stringId: string) => {
         const id = stringId as IntegrationTabId;
+        const trackId = `${TELEMETRY_INTEGRATION_TAB}_${id}`;
         scrollElement.current?.scrollTo?.(0, 0);
         setSelectedTabIdToStorage(id);
+        trackOnboardingLinkClick(trackId);
       },
       [setSelectedTabIdToStorage]
     );

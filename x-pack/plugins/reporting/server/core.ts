@@ -29,11 +29,7 @@ import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { ReportingServerInfo } from '@kbn/reporting-common/types';
-import {
-  CsvSearchSourceExportType,
-  CsvSearchSourceImmediateExportType,
-  CsvV2ExportType,
-} from '@kbn/reporting-export-types-csv';
+import { CsvSearchSourceExportType, CsvV2ExportType } from '@kbn/reporting-export-types-csv';
 import { PdfExportType, PdfV1ExportType } from '@kbn/reporting-export-types-pdf';
 import { PngExportType } from '@kbn/reporting-export-types-png';
 import type { ReportingConfigType } from '@kbn/reporting-server';
@@ -382,23 +378,5 @@ export class ReportingCore {
   public getEventLogger(report: IReport, task?: { id: string }) {
     const ReportingEventLogger = reportingEventLoggerFactory(this.logger);
     return new ReportingEventLogger(report, task);
-  }
-
-  /**
-   * @deprecated
-   * Requires `xpack.reporting.csv.enablePanelActionDownload` set to `true` (default is false)
-   */
-  public async getCsvSearchSourceImmediate() {
-    const startDeps = await this.getPluginStartDeps();
-
-    const csvImmediateExport = new CsvSearchSourceImmediateExportType(
-      this.core,
-      this.config,
-      this.logger,
-      this.context
-    );
-    csvImmediateExport.setup(this.getPluginSetupDeps());
-    csvImmediateExport.start({ ...startDeps });
-    return csvImmediateExport;
   }
 }

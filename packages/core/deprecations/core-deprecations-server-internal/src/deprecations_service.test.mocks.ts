@@ -14,6 +14,14 @@ export const DeprecationsFactoryMock = jest
   .fn()
   .mockImplementation(() => mockedDeprecationFactoryInstance);
 
+export const registerConfigDeprecationsInfoMock = jest.fn();
+export const registerApiDeprecationsInfoMock = jest.fn();
+
+jest.doMock('./deprecations', () => ({
+  registerConfigDeprecationsInfo: registerConfigDeprecationsInfoMock,
+  registerApiDeprecationsInfo: registerApiDeprecationsInfoMock,
+}));
+
 jest.doMock('./deprecations_factory', () => ({
   DeprecationsFactory: DeprecationsFactoryMock,
 }));

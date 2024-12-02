@@ -16,7 +16,7 @@ import { EuiResizableContainer, EuiProgress, EuiCallOut, EuiSpacer } from '@elas
 import { buildFilter, FILTERS, TimeRange } from '@kbn/es-query';
 import { FieldPath, useFormContext } from 'react-hook-form';
 import { Serializable } from '@kbn/utility-types';
-import { useKibana } from '../../../../utils/kibana_react';
+import { useKibana } from '../../../../hooks/use_kibana';
 import { CreateSLOForm } from '../../types';
 import { QuerySearchBar } from './query_search_bar';
 import { SearchBarProps } from './query_builder';

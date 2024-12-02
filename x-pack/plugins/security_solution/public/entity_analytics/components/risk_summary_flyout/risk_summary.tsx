@@ -22,21 +22,19 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import dateMath from '@kbn/datemath';
 import { i18n } from '@kbn/i18n';
-import { ExpandablePanel } from '@kbn/security-solution-common';
 import { useKibana } from '../../../common/lib/kibana/kibana_react';
-
 import { EntityDetailsLeftPanelTab } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
-
 import { InspectButton, InspectButtonContainer } from '../../../common/components/inspect';
 import { ONE_WEEK_IN_HOURS } from '../../../flyout/entity_details/shared/constants';
 import { FormattedRelativePreferenceDate } from '../../../common/components/formatted_date';
 import { RiskScoreEntity } from '../../../../common/entity_analytics/risk_engine';
 import { VisualizationEmbeddable } from '../../../common/components/visualization_actions/visualization_embeddable';
+import { ExpandablePanel } from '../../../flyout/shared/components/expandable_panel';
 import type { RiskScoreState } from '../../api/hooks/use_risk_score';
 import { getRiskScoreSummaryAttributes } from '../../lens_attributes/risk_score_summary';
 
 import {
-  buildColumns,
+  columnsArray,
   getEntityData,
   getItems,
   isUserRiskData,
@@ -45,6 +43,7 @@ import {
   LENS_VISUALIZATION_MIN_WIDTH,
   SUMMARY_TABLE_MIN_WIDTH,
 } from './common';
+import { EntityEventTypes } from '../../../common/lib/telemetry';
 
 export interface RiskSummaryProps<T extends RiskScoreEntity> {
   riskScoreData: RiskScoreState<T>;
@@ -80,16 +79,13 @@ const FlyoutRiskSummaryComponent = <T extends RiskScoreEntity>({
   }, [entityData?.name, entityData?.risk?.calculated_level, riskData]);
 
   const xsFontSize = useEuiFontSize('xxs').fontSize;
-
-  const columns = useMemo(() => buildColumns(), []);
-
   const rows = useMemo(() => getItems(entityData), [entityData]);
 
   const onToggle = useCallback(
     (isOpen: boolean) => {
       const entity = isUserRiskData(riskData) ? 'user' : 'host';
 
-      telemetry.reportToggleRiskSummaryClicked({
+      telemetry.reportEvent(EntityEventTypes.ToggleRiskSummaryClicked, {
         entity,
         action: isOpen ? 'show' : 'hide',
       });
@@ -263,7 +259,7 @@ const FlyoutRiskSummaryComponent = <T extends RiskScoreEntity>({
                 <EuiBasicTable
                   data-test-subj="risk-summary-table"
                   responsiveBreakpoint={false}
-                  columns={columns}
+                  columns={columnsArray}
                   items={rows}
                   compressed
                   loading={riskScoreData.loading || recalculatingScore}

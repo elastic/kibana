@@ -7,14 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ESQLAstItem, ESQLProperNode, ESQLSingleAstItem } from '../types';
+import { ESQLAstExpression, ESQLAstItem, ESQLProperNode, ESQLSingleAstItem } from '../types';
 
 /**
  * Normalizes AST "item" list to only contain *single* items.
  *
  * @param items A list of single or nested items.
  */
-export function* singleItems(items: Iterable<ESQLAstItem>): Iterable<ESQLSingleAstItem> {
+export function* singleItems(
+  items: Iterable<ESQLAstItem | ESQLAstExpression>
+): Iterable<ESQLAstExpression> {
   for (const item of items) {
     if (Array.isArray(item)) {
       yield* singleItems(item);
@@ -30,10 +32,14 @@ export function* singleItems(items: Iterable<ESQLAstItem>): Iterable<ESQLSingleA
  * @param items Returns the first "single item" from the "item" list.
  * @returns A "single item", if any.
  */
-export const firstItem = (items: ESQLAstItem[]): ESQLSingleAstItem | undefined => {
+export const firstItem = (items: ESQLAstItem[]): ESQLAstExpression | undefined => {
   for (const item of singleItems(items)) {
     return item;
   }
+};
+
+export const resolveItem = (items: ESQLAstItem | ESQLAstItem[]): ESQLAstItem => {
+  return Array.isArray(items) ? resolveItem(items[0]) : items;
 };
 
 /**
@@ -49,7 +55,7 @@ export const lastItem = (items: ESQLAstItem[]): ESQLSingleAstItem | undefined =>
   return last as ESQLSingleAstItem;
 };
 
-export function* children(node: ESQLProperNode): Iterable<ESQLSingleAstItem> {
+export function* children(node: ESQLProperNode): Iterable<ESQLAstExpression> {
   switch (node.type) {
     case 'function':
     case 'command':

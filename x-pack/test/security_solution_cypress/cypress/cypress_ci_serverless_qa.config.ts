@@ -8,6 +8,7 @@
 import { defineCypressConfig } from '@kbn/cypress-config';
 import { esArchiver } from './support/es_archiver';
 import { samlAuthentication } from './support/saml_auth';
+import { esClient } from './support/es_client';
 
 // eslint-disable-next-line import/no-default-export
 export default defineCypressConfig({
@@ -56,6 +57,7 @@ export default defineCypressConfig({
         return launchOptions;
       });
       samlAuthentication(on, config);
+      esClient(on, config);
       process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       require('@cypress/grep/src/plugin')(config);

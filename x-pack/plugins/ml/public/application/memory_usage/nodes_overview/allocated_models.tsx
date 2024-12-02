@@ -24,6 +24,7 @@ import type {
   NodeDeploymentStatsResponse,
 } from '../../../../common/types/trained_models';
 import { useFieldFormatter } from '../../contexts/kibana/use_field_formatter';
+import { useEnabledFeatures } from '../../contexts/ml';
 
 interface AllocatedModelsProps {
   models: NodeDeploymentStatsResponse['allocated_models'];
@@ -38,6 +39,7 @@ export const AllocatedModels: FC<AllocatedModelsProps> = ({
   const dateFormatter = useFieldFormatter(FIELD_FORMAT_IDS.DATE);
   const durationFormatter = useFieldFormatter(FIELD_FORMAT_IDS.DURATION);
   const euiTheme = useEuiTheme();
+  const { showNodeInfo } = useEnabledFeatures();
 
   const columns: Array<EuiBasicTableColumn<AllocatedModel>> = [
     {
@@ -55,15 +57,17 @@ export const AllocatedModels: FC<AllocatedModelsProps> = ({
     {
       width: '8%',
       name: i18n.translate('xpack.ml.trainedModels.nodesList.modelsList.modelRoutingStateHeader', {
-        defaultMessage: 'Routing state',
+        defaultMessage: 'State',
       }),
       'data-test-subj': 'mlAllocatedModelsTableRoutingState',
       render: (v: AllocatedModel) => {
         const { routing_state: routingState, reason } = v.node.routing_state;
 
+        const isFailed = routingState === 'failed';
+
         return (
           <EuiToolTip content={reason ? reason : ''}>
-            <EuiBadge color={reason ? 'danger' : 'hollow'}>{routingState}</EuiBadge>
+            <EuiBadge color={isFailed ? 'danger' : 'hollow'}>{routingState}</EuiBadge>
           </EuiToolTip>
         );
       },
@@ -105,9 +109,20 @@ export const AllocatedModels: FC<AllocatedModelsProps> = ({
       width: '8%',
       name: (
         <EuiToolTip
-          content={i18n.translate('xpack.ml.trainedModels.nodesList.modelsList.allocationTooltip', {
-            defaultMessage: 'number_of_allocations times threads_per_allocation',
-          })}
+          content={
+            showNodeInfo
+              ? i18n.translate(
+                  'xpack.ml.trainedModels.nodesList.modelsList.allocationTooltipNodes',
+                  {
+                    defaultMessage:
+                      'Number of allocations per node multiplied by number of threads per allocation',
+                  }
+                )
+              : i18n.translate('xpack.ml.trainedModels.nodesList.modelsList.allocationTooltip', {
+                  defaultMessage:
+                    'Number of allocations multiplied by number of threads per allocation',
+                })
+          }
         >
           <span>
             {i18n.translate('xpack.ml.trainedModels.nodesList.modelsList.allocationHeader', {
@@ -239,7 +254,7 @@ export const AllocatedModels: FC<AllocatedModelsProps> = ({
       }),
       'data-test-subj': 'mlAllocatedModelsTableStartedTime',
       render: (v: AllocatedModel) => {
-        return dateFormatter(v.node.start_time);
+        return v.node.start_time ? dateFormatter(v.node.start_time) : '-';
       },
     },
     {

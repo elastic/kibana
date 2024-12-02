@@ -285,10 +285,12 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName
         fieldName={'host.name'}
         name={hostName}
         data-test-subj={ENTITIES_HOST_OVERVIEW_MISCONFIGURATIONS_TEST_ID}
+        telemetrySuffix={'host-entity-overview'}
       />
       <VulnerabilitiesInsight
         hostName={hostName}
         data-test-subj={ENTITIES_HOST_OVERVIEW_VULNERABILITIES_TEST_ID}
+        telemetrySuffix={'host-entity-overview'}
       />
     </EuiFlexGroup>
   );

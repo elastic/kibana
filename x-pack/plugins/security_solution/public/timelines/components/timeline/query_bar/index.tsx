@@ -17,7 +17,10 @@ import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { SourcererScopeName } from '../../../../sourcerer/store/model';
 
-import { convertKueryToElasticSearchQuery } from '../../../../common/lib/kuery';
+import {
+  convertKueryToElasticSearchQuery,
+  dataViewSpecToViewBase,
+} from '../../../../common/lib/kuery';
 import type { KqlMode } from '../../../store/model';
 import { useSavedQueryServices } from '../../../../common/utils/saved_query_services';
 import type { DispatchUpdateReduxTime } from '../../../../common/components/super_date_picker';
@@ -107,13 +110,18 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
     const [dateRangeTo, setDateRangTo] = useState<string>(
       toStr != null ? toStr : new Date(to).toISOString()
     );
-    const { browserFields, indexPattern } = useSourcererDataView(SourcererScopeName.timeline);
+    const { browserFields, sourcererDataView } = useSourcererDataView(SourcererScopeName.timeline);
     const [savedQuery, setSavedQuery] = useState<SavedQuery | undefined>(undefined);
     const [filterQueryConverted, setFilterQueryConverted] = useState<Query>({
       query: filterQuery != null ? filterQuery.expression : '',
       language: filterQuery != null ? filterQuery.kind : 'kuery',
     });
     const queryBarFilters = useMemo(() => getNonDropAreaFilters(filters), [filters]);
+
+    const indexPattern = useMemo(
+      () => dataViewSpecToViewBase(sourcererDataView),
+      [sourcererDataView]
+    );
 
     const [dataProvidersDsl, setDataProvidersDsl] = useState<string>(
       convertKueryToElasticSearchQuery(buildGlobalQuery(dataProviders, browserFields), indexPattern)
@@ -258,6 +266,10 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
       // eslint-disable-next-line react-hooks/exhaustive-deps
       [dataProvidersDsl, savedQueryId, savedQueryServices]
     );
+
+    if (!indexPattern) {
+      return null;
+    }
 
     return (
       <SearchBarContainer className="search_bar_container">

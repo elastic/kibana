@@ -21,6 +21,69 @@
     "functions": [
       {
         "parentPluginId": "@kbn/elastic-agent-utils",
+        "id": "def-common.getAgentName",
+        "type": "Function",
+        "tags": [],
+        "label": "getAgentName",
+        "description": [],
+        "signature": [
+          "(agentName: string | null, telemetryAgentName: string | null, telemetrySdkName: string | null) => string | null"
+        ],
+        "path": "packages/kbn-elastic-agent-utils/src/agent_guards.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/elastic-agent-utils",
+            "id": "def-common.getAgentName.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "agentName",
+            "description": [],
+            "signature": [
+              "string | null"
+            ],
+            "path": "packages/kbn-elastic-agent-utils/src/agent_guards.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/elastic-agent-utils",
+            "id": "def-common.getAgentName.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "telemetryAgentName",
+            "description": [],
+            "signature": [
+              "string | null"
+            ],
+            "path": "packages/kbn-elastic-agent-utils/src/agent_guards.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/elastic-agent-utils",
+            "id": "def-common.getAgentName.$3",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "telemetrySdkName",
+            "description": [],
+            "signature": [
+              "string | null"
+            ],
+            "path": "packages/kbn-elastic-agent-utils/src/agent_guards.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-agent-utils",
         "id": "def-common.hasOpenTelemetryPrefix",
         "type": "Function",
         "tags": [],

@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-import { EuiAvatar, EuiBadge, EuiBasicTableColumn, EuiIcon, EuiText } from '@elastic/eui';
+import {
+  EuiAvatar,
+  EuiBadge,
+  EuiBasicTableColumn,
+  EuiIcon,
+  EuiText,
+  EuiLoadingSpinner,
+  EuiToolTip,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useMemo } from 'react';
 import { FormattedDate } from '@kbn/i18n-react';
@@ -16,21 +24,34 @@ import {
 } from '@kbn/elastic-assistant-common';
 
 import useAsync from 'react-use/lib/useAsync';
+import { UserProfileAvatarData } from '@kbn/user-profile-components';
 import { useAssistantContext } from '../../..';
 import * as i18n from './translations';
 import { BadgesColumn } from '../../assistant/common/components/assistant_settings_management/badges';
 import { useInlineActions } from '../../assistant/common/components/assistant_settings_management/inline_actions';
 import { isSystemEntry } from './helpers';
+import { SetupKnowledgeBaseButton } from '../setup_knowledge_base_button';
 
 const AuthorColumn = ({ entry }: { entry: KnowledgeBaseEntryResponse }) => {
-  const { currentUserAvatar, userProfileService } = useAssistantContext();
+  const { userProfileService } = useAssistantContext();
 
   const userProfile = useAsync(async () => {
-    const profile = await userProfileService?.bulkGet({ uids: new Set([entry.createdBy]) });
-    return profile?.[0].user.username;
-  }, []);
+    if (isSystemEntry(entry) || entry.createdBy === 'unknown') {
+      return;
+    }
 
-  const userName = useMemo(() => userProfile?.value ?? 'Unknown', [userProfile?.value]);
+    const profile = await userProfileService?.bulkGet<{ avatar: UserProfileAvatarData }>({
+      uids: new Set([entry.createdBy]),
+      dataPath: 'avatar',
+    });
+    return { username: profile?.[0].user.username, avatar: profile?.[0].data.avatar };
+  }, [entry.createdBy]);
+
+  const userName = useMemo(
+    () => userProfile?.value?.username ?? 'Unknown',
+    [userProfile?.value?.username]
+  );
+  const userAvatar = userProfile?.value?.avatar;
   const badgeItem = isSystemEntry(entry) ? 'Elastic' : userName;
   const userImage = isSystemEntry(entry) ? (
     <EuiIcon
@@ -40,12 +61,12 @@ const AuthorColumn = ({ entry }: { entry: KnowledgeBaseEntryResponse }) => {
         margin-right: 14px;
       `}
     />
-  ) : currentUserAvatar?.imageUrl != null ? (
+  ) : userAvatar?.imageUrl != null ? (
     <EuiAvatar
       name={userName}
-      imageUrl={currentUserAvatar.imageUrl}
+      imageUrl={userAvatar.imageUrl}
       size={'s'}
-      color={currentUserAvatar?.color ?? 'subdued'}
+      color={userAvatar.color ?? 'subdued'}
       css={css`
         margin-right: 10px;
       `}
@@ -53,9 +74,9 @@ const AuthorColumn = ({ entry }: { entry: KnowledgeBaseEntryResponse }) => {
   ) : (
     <EuiAvatar
       name={userName}
-      initials={currentUserAvatar?.initials}
+      initials={userAvatar?.initials}
       size={'s'}
-      color={currentUserAvatar?.color ?? 'subdued'}
+      color={userAvatar?.color ?? 'subdued'}
       css={css`
         margin-right: 10px;
       `}
@@ -65,6 +86,39 @@ const AuthorColumn = ({ entry }: { entry: KnowledgeBaseEntryResponse }) => {
     <>
       {userImage}
       <EuiText size={'s'}>{badgeItem}</EuiText>
+    </>
+  );
+};
+
+const NameColumn = ({
+  entry,
+  existingIndices,
+}: {
+  entry: KnowledgeBaseEntryResponse;
+  existingIndices?: string[];
+}) => {
+  let showMissingIndexWarning = false;
+  if (existingIndices && entry.type === 'index') {
+    showMissingIndexWarning = !existingIndices.includes(entry.index);
+  }
+  return (
+    <>
+      <EuiText size={'s'}>{entry.name}</EuiText>
+      {showMissingIndexWarning && (
+        <EuiToolTip
+          data-test-subj="missing-index-tooltip"
+          content={i18n.MISSING_INDEX_TOOLTIP_CONTENT}
+        >
+          <EuiIcon
+            data-test-subj="missing-index-icon"
+            type="warning"
+            color="danger"
+            css={css`
+              margin-left: 10px;
+            `}
+          />
+        </EuiToolTip>
+      )}
     </>
   );
 };
@@ -89,15 +143,19 @@ export const useKnowledgeBaseTable = () => {
 
   const getColumns = useCallback(
     ({
+      existingIndices,
       isDeleteEnabled,
       isEditEnabled,
       onDeleteActionClicked,
       onEditActionClicked,
+      isKbSetupInProgress,
     }: {
+      existingIndices?: string[];
       isDeleteEnabled: (entry: KnowledgeBaseEntryResponse) => boolean;
       isEditEnabled: (entry: KnowledgeBaseEntryResponse) => boolean;
       onDeleteActionClicked: (entry: KnowledgeBaseEntryResponse) => void;
       onEditActionClicked: (entry: KnowledgeBaseEntryResponse) => void;
+      isKbSetupInProgress: boolean;
     }): Array<EuiBasicTableColumn<KnowledgeBaseEntryResponse>> => {
       return [
         {
@@ -107,7 +165,9 @@ export const useKnowledgeBaseTable = () => {
         },
         {
           name: i18n.COLUMN_NAME,
-          render: ({ name }: KnowledgeBaseEntryResponse) => name,
+          render: (entry: KnowledgeBaseEntryResponse) => (
+            <NameColumn entry={entry} existingIndices={existingIndices} />
+          ),
           sortable: ({ name }: KnowledgeBaseEntryResponse) => name,
           width: '30%',
         },
@@ -123,17 +183,32 @@ export const useKnowledgeBaseTable = () => {
         },
         {
           name: i18n.COLUMN_AUTHOR,
-          sortable: ({ users }: KnowledgeBaseEntryResponse) => users[0]?.name,
           render: (entry: KnowledgeBaseEntryResponse) => <AuthorColumn entry={entry} />,
         },
         {
           name: i18n.COLUMN_ENTRIES,
           render: (entry: KnowledgeBaseEntryResponse) => {
-            return isSystemEntry(entry)
-              ? entry.text
-              : entry.type === DocumentEntryType.value
-              ? '1'
-              : '-';
+            return isSystemEntry(entry) ? (
+              <>
+                {`${entry.text}`}
+                {isKbSetupInProgress ? (
+                  <EuiLoadingSpinner
+                    size="m"
+                    css={css`
+                      margin-left: 8px;
+                    `}
+                  />
+                ) : (
+                  <EuiToolTip content={i18n.SECURITY_LABS_NOT_FULLY_LOADED}>
+                    <SetupKnowledgeBaseButton display="refresh" />
+                  </EuiToolTip>
+                )}
+              </>
+            ) : entry.type === DocumentEntryType.value ? (
+              '1'
+            ) : (
+              '-'
+            );
           },
         },
         {

@@ -6,8 +6,13 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { EntityType } from '../../../../../common/api/entity_analytics';
+import {
+  EngineComponentResourceEnum,
+  type EngineComponentStatus,
+  type EntityType,
+} from '../../../../../common/api/entity_analytics';
 import { getEntitiesIndexName } from '../utils';
+import { createOrUpdateIndex } from '../../utils/create_or_update_index';
 
 interface Options {
   entityType: EntityType;
@@ -17,18 +22,13 @@ interface Options {
 }
 
 export const createEntityIndex = async ({ entityType, esClient, namespace, logger }: Options) => {
-  try {
-    await esClient.indices.create({
+  await createOrUpdateIndex({
+    esClient,
+    logger,
+    options: {
       index: getEntitiesIndexName(entityType, namespace),
-      body: {},
-    });
-  } catch (e) {
-    if (e.meta.body.error.type === 'resource_already_exists_exception') {
-      logger.debug(`Index for ${entityType} already exists, skipping creation.`);
-    } else {
-      throw e;
-    }
-  }
+    },
+  });
 };
 
 export const deleteEntityIndex = ({ entityType, esClient, namespace }: Options) =>
@@ -40,3 +40,21 @@ export const deleteEntityIndex = ({ entityType, esClient, namespace }: Options) 
       ignore: [404],
     }
   );
+
+export const getEntityIndexStatus = async ({
+  entityType,
+  esClient,
+  namespace,
+}: Pick<Options, 'entityType' | 'namespace' | 'esClient'>): Promise<EngineComponentStatus> => {
+  const index = getEntitiesIndexName(entityType, namespace);
+  const exists = await esClient.indices.exists(
+    {
+      index,
+    },
+    {
+      ignore: [404],
+    }
+  );
+
+  return { id: index, installed: exists, resource: EngineComponentResourceEnum.index };
+};

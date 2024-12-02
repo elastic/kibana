@@ -95,7 +95,7 @@ export async function getAlertEvents(
       id: _source[ALERT_UUID],
       title: `${_source[ALERT_RULE_CATEGORY]} breached`,
       description: _source[ALERT_REASON],
-      timestamp: new Date(_source['@timestamp']).getTime(),
+      timestamp: new Date(_source[ALERT_START] as string).getTime(),
       eventType: 'alert',
       alertStatus: _source[ALERT_STATUS],
     };

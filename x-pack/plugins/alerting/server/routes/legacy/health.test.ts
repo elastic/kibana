@@ -16,6 +16,7 @@ import { RecoveredActionGroup } from '../../types';
 import { alertsMock } from '../../mocks';
 import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
 import { RegistryAlertTypeWithAuth } from '../../authorization';
+import { docLinksServiceMock } from '@kbn/core/server/mocks';
 
 const rulesClient = rulesClientMock.create();
 
@@ -80,13 +81,15 @@ beforeEach(() => {
 });
 
 describe('healthRoute', () => {
+  const docLinks = docLinksServiceMock.createSetupContract();
+
   it('registers the route', async () => {
     rulesClient.listRuleTypes.mockResolvedValueOnce(new Set(ruleTypes));
     const router = httpServiceMock.createRouter();
 
     const licenseState = licenseStateMock.create();
     const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
-    healthRoute(router, licenseState, encryptedSavedObjects);
+    healthRoute(router, licenseState, encryptedSavedObjects, docLinks);
 
     const [config] = router.get.mock.calls[0];
 
@@ -100,7 +103,7 @@ describe('healthRoute', () => {
 
     const licenseState = licenseStateMock.create();
     const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
-    healthRoute(router, licenseState, encryptedSavedObjects, undefined, true);
+    healthRoute(router, licenseState, encryptedSavedObjects, docLinks, undefined, true);
 
     const [config] = router.get.mock.calls[0];
 
@@ -114,7 +117,7 @@ describe('healthRoute', () => {
 
     const licenseState = licenseStateMock.create();
     const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: false });
-    healthRoute(router, licenseState, encryptedSavedObjects);
+    healthRoute(router, licenseState, encryptedSavedObjects, docLinks);
     const [, handler] = router.get.mock.calls[0];
 
     const [context, req, res] = mockHandlerArguments(
@@ -140,7 +143,7 @@ describe('healthRoute', () => {
 
     const licenseState = licenseStateMock.create();
     const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: false });
-    healthRoute(router, licenseState, encryptedSavedObjects);
+    healthRoute(router, licenseState, encryptedSavedObjects, docLinks);
     const [, handler] = router.get.mock.calls[0];
 
     const [context, req, res] = mockHandlerArguments(
@@ -198,7 +201,7 @@ describe('healthRoute', () => {
     const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
     licenseState.getIsSecurityEnabled.mockReturnValueOnce(null);
 
-    healthRoute(router, licenseState, encryptedSavedObjects);
+    healthRoute(router, licenseState, encryptedSavedObjects, docLinks);
     const [, handler] = router.get.mock.calls[0];
 
     const [context, req, res] = mockHandlerArguments(
@@ -256,7 +259,7 @@ describe('healthRoute', () => {
     const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
     licenseState.getIsSecurityEnabled.mockReturnValueOnce(false);
 
-    healthRoute(router, licenseState, encryptedSavedObjects);
+    healthRoute(router, licenseState, encryptedSavedObjects, docLinks);
     const [, handler] = router.get.mock.calls[0];
 
     const [context, req, res] = mockHandlerArguments(
@@ -314,7 +317,7 @@ describe('healthRoute', () => {
     const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
     licenseState.getIsSecurityEnabled.mockReturnValueOnce(true);
 
-    healthRoute(router, licenseState, encryptedSavedObjects);
+    healthRoute(router, licenseState, encryptedSavedObjects, docLinks);
     const [, handler] = router.get.mock.calls[0];
 
     const [context, req, res] = mockHandlerArguments(
@@ -372,7 +375,7 @@ describe('healthRoute', () => {
     const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
     licenseState.getIsSecurityEnabled.mockReturnValueOnce(true);
 
-    healthRoute(router, licenseState, encryptedSavedObjects);
+    healthRoute(router, licenseState, encryptedSavedObjects, docLinks);
     const [, handler] = router.get.mock.calls[0];
 
     const [context, req, res] = mockHandlerArguments(
@@ -431,12 +434,40 @@ describe('healthRoute', () => {
     const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
     const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
 
-    healthRoute(router, licenseState, encryptedSavedObjects, mockUsageCounter);
+    healthRoute(router, licenseState, encryptedSavedObjects, docLinks, mockUsageCounter);
     const [, handler] = router.get.mock.calls[0];
     const [context, req, res] = mockHandlerArguments({ rulesClient }, { params: { id: '1' } }, [
       'ok',
     ]);
     await handler(context, req, res);
     expect(trackLegacyRouteUsage).toHaveBeenCalledWith('health', mockUsageCounter);
+  });
+
+  it('should be deprecated', async () => {
+    rulesClient.listRuleTypes.mockResolvedValueOnce(new Set(ruleTypes));
+    const router = httpServiceMock.createRouter();
+
+    const licenseState = licenseStateMock.create();
+    const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
+    healthRoute(router, licenseState, encryptedSavedObjects, docLinks);
+
+    const [config] = router.get.mock.calls[0];
+
+    expect(config.options?.deprecated).toMatchInlineSnapshot(
+      {
+        documentationUrl: expect.stringMatching(/#breaking-201550$/),
+      },
+      `
+      Object {
+        "documentationUrl": StringMatching /#breaking-201550\\$/,
+        "reason": Object {
+          "newApiMethod": "GET",
+          "newApiPath": "/api/alerting/rule/_health",
+          "type": "migrate",
+        },
+        "severity": "warning",
+      }
+    `
+    );
   });
 });

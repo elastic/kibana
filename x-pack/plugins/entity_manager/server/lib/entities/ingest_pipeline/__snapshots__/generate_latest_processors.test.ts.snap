@@ -16,25 +16,25 @@ Array [
   },
   Object {
     "set": Object {
-      "field": "entity.definitionId",
+      "field": "entity.definition_id",
       "value": "builtin_mock_entity_definition",
     },
   },
   Object {
     "set": Object {
-      "field": "entity.definitionVersion",
+      "field": "entity.definition_version",
       "value": "1.0.0",
     },
   },
   Object {
     "set": Object {
-      "field": "entity.schemaVersion",
+      "field": "entity.schema_version",
       "value": "v1",
     },
   },
   Object {
     "set": Object {
-      "field": "entity.identityFields",
+      "field": "entity.identity_fields",
       "value": Array [
         "log.logger",
       ],
@@ -92,7 +92,7 @@ if (ctx.entity?.metadata?.sourceIndex?.data != null) {
   },
   Object {
     "set": Object {
-      "field": "entity.displayName",
+      "field": "entity.display_name",
       "value": "{{log.logger}}",
     },
   },
@@ -121,25 +121,25 @@ Array [
   },
   Object {
     "set": Object {
-      "field": "entity.definitionId",
+      "field": "entity.definition_id",
       "value": "admin-console-services",
     },
   },
   Object {
     "set": Object {
-      "field": "entity.definitionVersion",
+      "field": "entity.definition_version",
       "value": "1.0.0",
     },
   },
   Object {
     "set": Object {
-      "field": "entity.schemaVersion",
+      "field": "entity.schema_version",
       "value": "v1",
     },
   },
   Object {
     "set": Object {
-      "field": "entity.identityFields",
+      "field": "entity.identity_fields",
       "value": Array [
         "log.logger",
       ],
@@ -197,7 +197,7 @@ if (ctx.entity?.metadata?.sourceIndex?.data != null) {
   },
   Object {
     "set": Object {
-      "field": "entity.displayName",
+      "field": "entity.display_name",
       "value": "{{log.logger}}",
     },
   },

@@ -45,6 +45,13 @@ import { createEntityManagerServerRoute } from '../create_entity_manager_server_
  */
 export const checkEntityDiscoveryEnabledRoute = createEntityManagerServerRoute({
   endpoint: 'GET /internal/entities/managed/enablement',
+  security: {
+    authz: {
+      enabled: false,
+      reason:
+        'This endpoint leverages the security plugin to evaluate the privileges needed as part of its core flow',
+    },
+  },
   handler: async ({ response, logger, server }) => {
     try {
       logger.debug('reading entity discovery API key from saved object');
@@ -66,8 +73,8 @@ export const checkEntityDiscoveryEnabledRoute = createEntityManagerServerRoute({
       const entityDiscoveryState = await Promise.all(
         builtInDefinitions.map(async (builtInDefinition) => {
           const definitions = await findEntityDefinitions({
-            esClient,
             soClient,
+            esClient,
             id: builtInDefinition.id,
             includeState: true,
           });

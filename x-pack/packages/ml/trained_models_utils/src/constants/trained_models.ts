@@ -288,6 +288,16 @@ export type InferenceServiceSettings =
       };
     }
   | {
+      service: 'watsonxai';
+      service_settings: {
+        api_key: string;
+        url: string;
+        model_id: string;
+        project_id: string;
+        api_version: string;
+      };
+    }
+  | {
       service: 'amazonbedrock';
       service_settings: {
         access_key: string;

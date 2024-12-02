@@ -30,6 +30,7 @@ import {
   SecurityCellActionType,
 } from '../../../common/components/cell_actions';
 import { FormattedRelativePreferenceDate } from '../../../common/components/formatted_date';
+import { formatRiskScore } from '../../common';
 
 type HostRiskScoreColumns = Array<EuiBasicTableColumn<HostRiskScore & UserRiskScore>>;
 
@@ -128,7 +129,7 @@ export const getRiskScoreColumns = (
       if (riskScore != null) {
         return (
           <span data-test-subj="risk-score-truncate" title={`${riskScore}`}>
-            {Math.round(riskScore)}
+            {formatRiskScore(riskScore)}
           </span>
         );
       }

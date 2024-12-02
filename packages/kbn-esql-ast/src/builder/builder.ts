@@ -9,18 +9,29 @@
 
 /* eslint-disable @typescript-eslint/no-namespace */
 
+import { LeafPrinter } from '../pretty_print';
 import {
   ESQLAstComment,
+  ESQLAstCommentMultiLine,
+  ESQLAstCommentSingleLine,
   ESQLAstQueryExpression,
   ESQLColumn,
   ESQLCommand,
   ESQLCommandOption,
   ESQLDecimalLiteral,
+  ESQLIdentifier,
   ESQLInlineCast,
   ESQLIntegerLiteral,
   ESQLList,
   ESQLLocation,
+  ESQLNamedParamLiteral,
+  ESQLParam,
+  ESQLPositionalParamLiteral,
+  ESQLOrderExpression,
   ESQLSource,
+  ESQLParamLiteral,
+  ESQLFunction,
+  ESQLAstItem,
 } from '../types';
 import { AstNodeParserFields, AstNodeTemplate, PartialFields } from './types';
 
@@ -63,17 +74,17 @@ export namespace Builder {
     };
   };
 
-  export const comment = (
-    subtype: ESQLAstComment['subtype'],
+  export const comment = <S extends ESQLAstComment['subtype']>(
+    subtype: S,
     text: string,
-    location: ESQLLocation
-  ): ESQLAstComment => {
+    location?: ESQLLocation
+  ): S extends 'multi-line' ? ESQLAstCommentMultiLine : ESQLAstCommentSingleLine => {
     return {
       type: 'comment',
       subtype,
       text,
       location,
-    };
+    } as S extends 'multi-line' ? ESQLAstCommentMultiLine : ESQLAstCommentSingleLine;
   };
 
   export namespace expression {
@@ -118,15 +129,36 @@ export namespace Builder {
     };
 
     export const column = (
-      template: Omit<AstNodeTemplate<ESQLColumn>, 'name' | 'quoted'>,
+      template: Omit<AstNodeTemplate<ESQLColumn>, 'name' | 'quoted' | 'parts'>,
       fromParser?: Partial<AstNodeParserFields>
     ): ESQLColumn => {
+      const node: ESQLColumn = {
+        ...template,
+        ...Builder.parserFields(fromParser),
+        parts: template.args.map((arg) =>
+          arg.type === 'identifier' ? arg.name : LeafPrinter.param(arg)
+        ),
+        quoted: false,
+        name: '',
+        type: 'column',
+      };
+
+      node.name = LeafPrinter.column(node);
+
+      return node;
+    };
+
+    export const order = (
+      operand: ESQLColumn,
+      template: Omit<AstNodeTemplate<ESQLOrderExpression>, 'name' | 'args'>,
+      fromParser?: Partial<AstNodeParserFields>
+    ): ESQLOrderExpression => {
       return {
         ...template,
         ...Builder.parserFields(fromParser),
-        quoted: false,
-        name: template.parts.join('.'),
-        type: 'column',
+        name: '',
+        args: [operand],
+        type: 'order',
       };
     };
 
@@ -141,6 +173,53 @@ export namespace Builder {
         name: '',
       };
     };
+
+    export namespace func {
+      export const node = (
+        template: AstNodeTemplate<ESQLFunction>,
+        fromParser?: Partial<AstNodeParserFields>
+      ): ESQLFunction => {
+        return {
+          ...template,
+          ...Builder.parserFields(fromParser),
+          type: 'function',
+        };
+      };
+
+      export const call = (
+        nameOrOperator: string | ESQLIdentifier | ESQLParamLiteral,
+        args: ESQLAstItem[],
+        template?: Omit<AstNodeTemplate<ESQLFunction>, 'subtype' | 'name' | 'operator' | 'args'>,
+        fromParser?: Partial<AstNodeParserFields>
+      ): ESQLFunction => {
+        let name: string;
+        let operator: ESQLIdentifier | ESQLParamLiteral;
+        if (typeof nameOrOperator === 'string') {
+          name = nameOrOperator;
+          operator = Builder.identifier({ name });
+        } else {
+          operator = nameOrOperator;
+          name = LeafPrinter.print(operator);
+        }
+        return Builder.expression.func.node(
+          { ...template, name, operator, args, subtype: 'variadic-call' },
+          fromParser
+        );
+      };
+
+      export const binary = (
+        name: string,
+        args: [left: ESQLAstItem, right: ESQLAstItem],
+        template?: Omit<AstNodeTemplate<ESQLFunction>, 'subtype' | 'name' | 'operator' | 'args'>,
+        fromParser?: Partial<AstNodeParserFields>
+      ): ESQLFunction => {
+        const operator = Builder.identifier({ name });
+        return Builder.expression.func.node(
+          { ...template, name, operator, args, subtype: 'binary-expression' },
+          fromParser
+        );
+      };
+    }
 
     export namespace literal {
       /**
@@ -160,6 +239,21 @@ export namespace Builder {
         return node;
       };
 
+      export const integer = (
+        value: number,
+        template?: Omit<AstNodeTemplate<ESQLIntegerLiteral | ESQLDecimalLiteral>, 'name'>,
+        fromParser?: Partial<AstNodeParserFields>
+      ): ESQLIntegerLiteral | ESQLDecimalLiteral => {
+        return Builder.expression.literal.numeric(
+          {
+            ...template,
+            value,
+            literalType: 'integer',
+          },
+          fromParser
+        );
+      };
+
       export const list = (
         template: Omit<AstNodeTemplate<ESQLList>, 'name'>,
         fromParser?: Partial<AstNodeParserFields>
@@ -172,5 +266,86 @@ export namespace Builder {
         };
       };
     }
+  }
+
+  export const identifier = (
+    template: AstNodeTemplate<ESQLIdentifier>,
+    fromParser?: Partial<AstNodeParserFields>
+  ): ESQLIdentifier => {
+    return {
+      ...template,
+      ...Builder.parserFields(fromParser),
+      type: 'identifier',
+    };
+  };
+
+  export namespace param {
+    export const unnamed = (fromParser?: Partial<AstNodeParserFields>): ESQLParam => {
+      const node = {
+        ...Builder.parserFields(fromParser),
+        name: '',
+        value: '',
+        paramType: 'unnamed',
+        type: 'literal',
+        literalType: 'param',
+      };
+
+      return node as ESQLParam;
+    };
+
+    export const named = (
+      template: Omit<AstNodeTemplate<ESQLNamedParamLiteral>, 'name' | 'literalType' | 'paramType'>,
+      fromParser?: Partial<AstNodeParserFields>
+    ): ESQLNamedParamLiteral => {
+      const node: ESQLNamedParamLiteral = {
+        ...template,
+        ...Builder.parserFields(fromParser),
+        name: '',
+        type: 'literal',
+        literalType: 'param',
+        paramType: 'named',
+      };
+
+      return node;
+    };
+
+    export const positional = (
+      template: Omit<
+        AstNodeTemplate<ESQLPositionalParamLiteral>,
+        'name' | 'literalType' | 'paramType'
+      >,
+      fromParser?: Partial<AstNodeParserFields>
+    ): ESQLPositionalParamLiteral => {
+      const node: ESQLPositionalParamLiteral = {
+        ...template,
+        ...Builder.parserFields(fromParser),
+        name: '',
+        type: 'literal',
+        literalType: 'param',
+        paramType: 'positional',
+      };
+
+      return node;
+    };
+
+    export const build = (
+      name: string,
+      options: Partial<ESQLParamLiteral> = {},
+      fromParser?: Partial<AstNodeParserFields>
+    ): ESQLParam => {
+      const value: string = name.startsWith('?') ? name.slice(1) : name;
+
+      if (!value) {
+        return Builder.param.unnamed(options);
+      }
+
+      const isNumeric = !isNaN(Number(value)) && String(Number(value)) === value;
+
+      if (isNumeric) {
+        return Builder.param.positional({ ...options, value: Number(value) }, fromParser);
+      } else {
+        return Builder.param.named({ ...options, value }, fromParser);
+      }
+    };
   }
 }

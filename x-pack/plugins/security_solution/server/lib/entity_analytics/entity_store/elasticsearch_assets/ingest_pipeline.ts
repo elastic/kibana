@@ -8,6 +8,7 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { EntityDefinition } from '@kbn/entities-schema';
+import { EngineComponentResourceEnum } from '../../../../../common/api/entity_analytics';
 import { type FieldRetentionDefinition } from '../field_retention_definition';
 import {
   debugDeepCopyContextStep,
@@ -67,7 +68,7 @@ const buildIngestPipeline = ({
     {
       set: {
         field: '@timestamp',
-        value: '{{entity.lastSeenTimestamp}}',
+        value: '{{entity.last_seen_timestamp}}',
       },
     },
     {
@@ -125,7 +126,7 @@ export const createPlatformPipeline = async ({
         managed_by: 'entity_store',
         managed: true,
       },
-      description: `Ingest pipeline for entity defiinition ${entityManagerDefinition.id}`,
+      description: `Ingest pipeline for entity definition ${entityManagerDefinition.id}`,
       processors: buildIngestPipeline({
         namespace: unitedDefinition.namespace,
         version: unitedDefinition.version,
@@ -160,4 +161,28 @@ export const deletePlatformPipeline = ({
       ignore: [404],
     }
   );
+};
+
+export const getPlatformPipelineStatus = async ({
+  definition,
+  esClient,
+}: {
+  definition: EntityDefinition;
+  esClient: ElasticsearchClient;
+}) => {
+  const pipelineId = getPlatformPipelineId(definition);
+  const pipeline = await esClient.ingest.getPipeline(
+    {
+      id: pipelineId,
+    },
+    {
+      ignore: [404],
+    }
+  );
+
+  return {
+    id: pipelineId,
+    installed: !!pipeline[pipelineId],
+    resource: EngineComponentResourceEnum.ingest_pipeline,
+  };
 };

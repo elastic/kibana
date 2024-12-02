@@ -23,7 +23,7 @@ import {
   setSecuritySolutionEndpointGroupPrivilege,
 } from '../../screens/stack_management/role_page';
 
-// FLAKY: https://github.com/elastic/kibana/issues/195477
+// Failing: See https://github.com/elastic/kibana/issues/200962
 describe.skip(
   'When defining a kibana role for Endpoint security access with space awareness enabled',
   {

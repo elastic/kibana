@@ -19,6 +19,7 @@ import type { ILicense } from '@kbn/licensing-plugin/server';
 import type { NewPackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
 import { FLEET_ENDPOINT_PACKAGE } from '@kbn/fleet-plugin/common';
 
+import { ensureIndicesExistsForPolicies } from './endpoint/migrations/ensure_indices_exists_for_policies';
 import { CompleteExternalResponseActionsTask } from './endpoint/lib/response_actions';
 import { registerAgentRoutes } from './endpoint/routes/agent';
 import { endpointPackagePoliciesStatsSearchStrategyProvider } from './search_strategy/endpoint_package_policies_stats';
@@ -55,7 +56,11 @@ import { registerEndpointRoutes } from './endpoint/routes/metadata';
 import { registerPolicyRoutes } from './endpoint/routes/policy';
 import { registerActionRoutes } from './endpoint/routes/actions';
 import { registerEndpointSuggestionsRoutes } from './endpoint/routes/suggestions';
-import { EndpointArtifactClient, ManifestManager } from './endpoint/services';
+import {
+  EndpointArtifactClient,
+  ManifestManager,
+  securityWorkflowInsightsService,
+} from './endpoint/services';
 import { EndpointAppContextService } from './endpoint/endpoint_app_context_services';
 import type { EndpointAppContext } from './endpoint/types';
 import { initUsageCollectors } from './usage';
@@ -119,10 +124,11 @@ import {
   allRiskScoreIndexPattern,
 } from '../common/entity_analytics/risk_engine';
 import { isEndpointPackageV2 } from '../common/endpoint/utils/package_v2';
-import { getAssistantTools } from './assistant/tools';
+import { assistantTools } from './assistant/tools';
 import { turnOffAgentPolicyFeatures } from './endpoint/migrations/turn_off_agent_policy_features';
 import { getCriblPackagePolicyPostCreateOrUpdateCallback } from './security_integrations';
 import { scheduleEntityAnalyticsMigration } from './lib/entity_analytics/migrations';
+import { SiemMigrationsService } from './lib/siem_migrations/siem_migrations_service';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -135,6 +141,7 @@ export class Plugin implements ISecuritySolutionPlugin {
 
   private readonly ruleMonitoringService: IRuleMonitoringService;
   private readonly endpointAppContextService = new EndpointAppContextService();
+  private readonly siemMigrationsService: SiemMigrationsService;
   private readonly telemetryReceiver: ITelemetryReceiver;
   private readonly telemetryEventsSender: ITelemetryEventsSender;
   private readonly asyncTelemetryEventsSender: IAsyncTelemetryEventsSender;
@@ -159,6 +166,11 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.productFeaturesService = new ProductFeaturesService(
       this.logger,
       this.config.experimentalFeatures
+    );
+    this.siemMigrationsService = new SiemMigrationsService(
+      this.config,
+      this.pluginContext.logger,
+      this.pluginContext.env.packageInfo.version
     );
 
     this.ruleMonitoringService = createRuleMonitoringService(this.config, this.logger);
@@ -225,6 +237,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       registerEntityStoreFieldRetentionEnrichTask({
         getStartServices: core.getStartServices,
         logger: this.logger,
+        telemetry: core.analytics,
         taskManager: plugins.taskManager,
       });
     }
@@ -236,6 +249,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       plugins,
       endpointAppContextService: this.endpointAppContextService,
       ruleMonitoringService: this.ruleMonitoringService,
+      siemMigrationsService: this.siemMigrationsService,
       kibanaVersion: pluginContext.env.packageInfo.version,
       kibanaBranch: pluginContext.env.packageInfo.branch,
       buildFlavor: pluginContext.env.packageInfo.buildFlavor,
@@ -381,7 +395,8 @@ export class Plugin implements ISecuritySolutionPlugin {
       core.getStartServices,
       securityRuleTypeOptions,
       previewRuleDataClient,
-      this.telemetryReceiver
+      this.telemetryReceiver,
+      this.pluginContext.env.packageInfo.buildFlavor === 'serverless'
     );
 
     registerEndpointRoutes(router, this.endpointContext);
@@ -427,7 +442,7 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     core
       .getStartServices()
-      .then(async ([_, depsStart]) => {
+      .then(async ([coreStart, depsStart]) => {
         appClientFactory.setup({
           getSpaceId: depsStart.spaces?.spacesService?.getSpaceId,
           config,
@@ -477,6 +492,8 @@ export class Plugin implements ISecuritySolutionPlugin {
          * Register a config for the security guide
          */
         plugins.guidedOnboarding?.registerGuideConfig(siemGuideId, getSiemGuideConfig());
+
+        this.siemMigrationsService.setup({ esClusterClient: coreStart.elasticsearch.client });
       })
       .catch(() => {}); // it shouldn't reject, but just in case
 
@@ -506,6 +523,12 @@ export class Plugin implements ISecuritySolutionPlugin {
     });
 
     featureUsageService.setup(plugins.licensing);
+
+    securityWorkflowInsightsService.setup({
+      kibanaVersion: pluginContext.env.packageInfo.version,
+      logger: this.logger,
+      isFeatureEnabled: config.experimentalFeatures.defendInsights,
+    });
 
     return {
       setProductFeaturesConfigurator:
@@ -542,15 +565,8 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.licensing$ = plugins.licensing.license$;
 
     // Assistant Tool and Feature Registration
-    plugins.elasticAssistant.registerTools(
-      APP_UI_ID,
-      getAssistantTools({
-        assistantKnowledgeBaseByDefault:
-          config.experimentalFeatures.assistantKnowledgeBaseByDefault,
-      })
-    );
+    plugins.elasticAssistant.registerTools(APP_UI_ID, assistantTools);
     const features = {
-      assistantKnowledgeBaseByDefault: config.experimentalFeatures.assistantKnowledgeBaseByDefault,
       assistantModelEvaluation: config.experimentalFeatures.assistantModelEvaluation,
     };
     plugins.elasticAssistant.registerFeatures(APP_UI_ID, features);
@@ -595,8 +611,10 @@ export class Plugin implements ISecuritySolutionPlugin {
       plugins.fleet
         .fleetSetupCompleted()
         .then(async () => {
+          logger.info('Dependent plugin setup complete');
+
           if (this.manifestTask) {
-            logger.info('Dependent plugin setup complete - Starting ManifestTask');
+            logger.info('Starting ManifestTask');
             await this.manifestTask.start({
               taskManager,
             });
@@ -614,6 +632,10 @@ export class Plugin implements ISecuritySolutionPlugin {
           );
 
           await turnOffAgentPolicyFeatures(fleetServices, productFeaturesService, logger);
+
+          // Ensure policies have backing DOT indices (We don't need to `await` this.
+          // It can run in the background)
+          ensureIndicesExistsForPolicies(this.endpointAppContextService).catch(() => {});
         })
         .catch(() => {});
 
@@ -660,6 +682,12 @@ export class Plugin implements ISecuritySolutionPlugin {
       plugins.taskManager,
       this.telemetryReceiver
     );
+
+    securityWorkflowInsightsService
+      .start({
+        esClient: core.elasticsearch.client.asInternalUser,
+      })
+      .catch(() => {});
 
     const endpointPkgInstallationPromise = this.endpointContext.service
       .getInternalFleetServices()
@@ -715,6 +743,8 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.endpointAppContextService.stop();
     this.policyWatcher?.stop();
     this.completeExternalResponseActionsTask.stop().catch(() => {});
+    this.siemMigrationsService.stop();
+    securityWorkflowInsightsService.stop();
     licenseService.stop();
   }
 }

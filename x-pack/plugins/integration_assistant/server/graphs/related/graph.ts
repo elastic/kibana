@@ -179,6 +179,6 @@ export async function getRelatedGraph({ client, model }: RelatedGraphParams) {
       }
     );
 
-  const compiledRelatedGraph = workflow.compile().withConfig({ runName: 'Related' });
+  const compiledRelatedGraph = workflow.compile();
   return compiledRelatedGraph;
 }

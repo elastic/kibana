@@ -3,5 +3,6 @@
   "private": true,
   "version": "1.0.0",
   "license": "Elastic License 2.0",
-  "description": "Shared components for cloud security posture, client side"
+  "description": "Shared components for cloud security posture, client side",
+  "sideEffects": false
 }

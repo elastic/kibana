@@ -323,7 +323,6 @@ describe('schema validation', () => {
     };
     const expectedResponse: GetCategoriesResponse = {
       items: [category],
-      response: [category],
     };
     (getCategoriesHandler as jest.Mock).mockImplementation((ctx, request, res) => {
       return res.ok({ body: expectedResponse });
@@ -386,7 +385,6 @@ describe('schema validation', () => {
     };
     const expectedResponse: GetPackagesResponse = {
       items: [packageItem],
-      response: [packageItem],
     };
     (getListHandler as jest.Mock).mockImplementation((ctx, request, res) => {
       return res.ok({ body: expectedResponse });
@@ -444,7 +442,6 @@ describe('schema validation', () => {
   it('get limited packages should return valid response', async () => {
     const expectedResponse: GetLimitedPackagesResponse = {
       items: ['test'],
-      response: ['test'],
     };
     (getLimitedListHandler as jest.Mock).mockImplementation((ctx, request, res) => {
       return res.ok({ body: expectedResponse });
@@ -513,7 +510,6 @@ describe('schema validation', () => {
       metadata: {
         has_policies: true,
       },
-      response: packageInfo,
     };
     (getInfoHandler as jest.Mock).mockImplementation((ctx, request, res) => {
       return res.ok({ body: expectedResponse });
@@ -530,7 +526,6 @@ describe('schema validation', () => {
   it('update package should return valid response', async () => {
     const expectedResponse: UpdatePackageResponse = {
       item: packageInfo,
-      response: packageInfo,
     };
     (updatePackageHandler as jest.Mock).mockImplementation((ctx, request, res) => {
       return res.ok({ body: expectedResponse });
@@ -556,13 +551,6 @@ describe('schema validation', () => {
       _meta: {
         install_source: 'registry',
       },
-      response: [
-        {
-          id: 'test',
-          type: KibanaSavedObjectType.dashboard,
-          originId: 'test',
-        },
-      ],
     };
     (installPackageFromRegistryHandler as jest.Mock).mockImplementation((ctx, request, res) => {
       return res.ok({ body: expectedResponse });
@@ -612,7 +600,6 @@ describe('schema validation', () => {
     };
     const expectedResponse: BulkInstallPackagesResponse = {
       items: [item, { name: 'test', statusCode: 400, error: 'test' }],
-      response: [item],
     };
     (bulkInstallPackagesFromRegistryHandler as jest.Mock).mockImplementation(
       (ctx, request, res) => {

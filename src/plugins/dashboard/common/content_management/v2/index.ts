@@ -8,4 +8,4 @@
  */
 
 export type { GridData, DashboardItem, SavedDashboardPanel } from '../v1/types'; // no changes made to types from v1 to v2
-export type { DashboardCrudTypes, DashboardAttributes } from './types';
+export type { ControlGroupAttributes, DashboardCrudTypes, DashboardAttributes } from './types';

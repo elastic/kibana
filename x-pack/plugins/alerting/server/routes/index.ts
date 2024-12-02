@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IRouter } from '@kbn/core/server';
+import { DocLinksServiceSetup, IRouter } from '@kbn/core/server';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { ConfigSchema } from '@kbn/unified-search-plugin/server/config';
@@ -20,7 +20,8 @@ import { deleteRuleRoute } from './rule/apis/delete/delete_rule_route';
 import { aggregateRulesRoute } from './rule/apis/aggregate/aggregate_rules_route';
 import { disableRuleRoute } from './rule/apis/disable/disable_rule_route';
 import { enableRuleRoute } from './rule/apis/enable/enable_rule_route';
-import { findRulesRoute, findInternalRulesRoute } from './rule/apis/find/find_rules_route';
+import { findRulesRoute } from './rule/apis/find/find_rules_route';
+import { findInternalRulesRoute } from './rule/apis/find/find_internal_rules_route';
 import { getRuleAlertSummaryRoute } from './get_rule_alert_summary';
 import { getRuleExecutionLogRoute } from './get_rule_execution_log';
 import { getGlobalExecutionLogRoute } from './get_global_execution_logs';
@@ -80,6 +81,7 @@ export interface RouteOptions {
   usageCounter?: UsageCounter;
   config$?: Observable<ConfigSchema>;
   isServerless?: boolean;
+  docLinks: DocLinksServiceSetup;
 }
 
 export function defineRoutes(opts: RouteOptions) {

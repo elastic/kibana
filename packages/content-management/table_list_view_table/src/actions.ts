@@ -11,6 +11,7 @@ import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { Query } from '@elastic/eui';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 import type { State } from './table_list_view_table';
+import type { SearchQueryError } from './types';
 
 /** Action to trigger a fetch of the table items */
 export interface OnFetchItemsAction {
@@ -72,8 +73,9 @@ export interface ShowConfirmDeleteItemsModalAction {
 export interface OnSearchQueryChangeAction {
   type: 'onSearchQueryChange';
   data: {
-    query: Query;
-    text: string;
+    query?: Query;
+    text?: string;
+    error: SearchQueryError | null;
   };
 }
 

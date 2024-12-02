@@ -21,6 +21,39 @@
     "functions": [
       {
         "parentPluginId": "@kbn/visualization-utils",
+        "id": "def-common.getDatasourceId",
+        "type": "Function",
+        "tags": [],
+        "label": "getDatasourceId",
+        "description": [],
+        "signature": [
+          "(datasourceStates: Record<string, unknown>) => \"formBased\" | \"textBased\" | undefined"
+        ],
+        "path": "packages/kbn-visualization-utils/src/get_datasource_id.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/visualization-utils",
+            "id": "def-common.getDatasourceId.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "datasourceStates",
+            "description": [],
+            "signature": [
+              "Record<string, unknown>"
+            ],
+            "path": "packages/kbn-visualization-utils/src/get_datasource_id.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/visualization-utils",
         "id": "def-common.getLensAttributesFromSuggestion",
         "type": "Function",
         "tags": [],
@@ -244,6 +277,47 @@
       },
       {
         "parentPluginId": "@kbn/visualization-utils",
+        "id": "def-common.mapVisToChartType",
+        "type": "Function",
+        "tags": [],
+        "label": "mapVisToChartType",
+        "description": [],
+        "signature": [
+          "(visualizationType: string) => ",
+          {
+            "pluginId": "@kbn/visualization-utils",
+            "scope": "common",
+            "docId": "kibKbnVisualizationUtilsPluginApi",
+            "section": "def-common.ChartType",
+            "text": "ChartType"
+          },
+          " | undefined"
+        ],
+        "path": "packages/kbn-visualization-utils/src/map_vis_to_chart_type.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/visualization-utils",
+            "id": "def-common.mapVisToChartType.$1",
+            "type": "string",
+            "tags": [],
+            "label": "visualizationType",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-visualization-utils/src/map_vis_to_chart_type.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/visualization-utils",
         "id": "def-common.TooltipWrapper",
         "type": "Function",
         "tags": [],
@@ -411,7 +485,20 @@
       }
     ],
     "interfaces": [],
-    "enums": [],
+    "enums": [
+      {
+        "parentPluginId": "@kbn/visualization-utils",
+        "id": "def-common.ChartType",
+        "type": "Enum",
+        "tags": [],
+        "label": "ChartType",
+        "description": [],
+        "path": "packages/kbn-visualization-utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "misc": [],
     "objects": []
   }

@@ -31,6 +31,7 @@ const MarkdownVisComponent = ({
         data-test-subj="markdownBody"
         openLinksInNewTab={openLinksInNewTab}
         markdown={markdown}
+        tabIndex={0}
       />
     </div>
   );

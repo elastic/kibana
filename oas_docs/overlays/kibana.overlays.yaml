@@ -4,6 +4,17 @@ info:
   title: Overlays for the Kibana API document
   version: 0.0.1
 actions:
+# Clean up server definitions
+  - target: '$.servers.*'
+    description: Remove all servers so we can add our own.
+    remove: true
+  - target: '$.servers'
+    description: Add server into the now empty server array.
+    update:
+      - url: https://{kibana_url}
+        variables:
+          kibana_url:
+            default: localhost:5601
 # Add an introduction to spaces
   - target: '$'
     description: Add an extra page about spaces
@@ -165,3 +176,38 @@ actions:
               examples:
                 updateObjectSpacesResponseExample1:
                   $ref: "../examples/update_saved_objects_spaces_response1.yaml"
+  - target: "$.paths['/api/security/role/{name}']['put']"
+    description: "Add examples to create role API"
+    update: 
+      requestBody:
+        content: 
+          application/json; Elastic-Api-Version=2023-10-31: 
+            examples:
+              createRoleRequest1:
+                $ref: "../examples/create_role_request1.yaml"
+              createRoleRequest2:
+                $ref: "../examples/create_role_request2.yaml"
+              createRoleRequest3:
+                $ref: "../examples/create_role_request3.yaml"
+              createRoleRequest4:
+                $ref: "../examples/create_role_request4.yaml"
+  - target: "$.paths['/api/security/role/{name}']['get']"
+    description: "Add example to get role API"
+    update:
+      responses:
+        200:
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                getRoleResponse1:
+                  $ref: '../examples/get_role_response1.yaml'
+  - target: "$.paths['/api/security/role']['get']"
+    description: "Add example to get roles API"
+    update:
+      responses:
+        200:
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              examples:
+                getRolesResponse1:
+                  $ref: '../examples/get_roles_response1.yaml'

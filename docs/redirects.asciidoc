@@ -418,10 +418,6 @@ This page has been deleted. Refer to <<machine-learning-api-sync>>.
 
 This page has been deleted. Refer to <<alerting-getting-started>>.
 
-[role="exclude",id="enhancements-and-bug-fixes-v8.10.0"]
-== Enhancements and bug fixes for 8.10.0
-
-This content has moved. Refer to <<enhancements-and-bug-fixes-v8.10.0-revised>> for 8.10.0.
 
 [role="exclude",id="gen-ai-action-type"]
 == Generative AI connector and action
@@ -1197,3 +1193,27 @@ Refer to {api-kibana}/group/endpoint-spaces[spaces APIs].
 == Update saved objects spaces API
 
 Refer to {api-kibana}/group/endpoint-spaces[spaces APIs].
+[role="exclude",id="role-management-api-delete]
+== Delete role API
+
+Refer to {api-kibana}/group/endpoint-roles[role APIs].
+
+[role="exclude",id="role-management-api-get"]
+== Get all {kib} roles API
+
+Refer to {api-kibana}/group/endpoint-roles[role APIs].
+
+[role="exclude",id="role-management-specific-api-get"]
+== Get specific role API
+
+Refer to {api-kibana}/group/endpoint-roles[role APIs].
+
+[role="exclude",id="role-management-api-put-bulk"]
+== Bulk create or update roles API
+
+Refer to {api-kibana}/group/endpoint-roles[role APIs].
+
+[role="exclude",id="role-management-api-put"]
+== Create or update role API
+
+Refer to {api-kibana}/group/endpoint-roles[role APIs].

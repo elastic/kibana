@@ -51,22 +51,22 @@ export function useCustomCardsForCategory(
           title: i18n.translate(
             'xpack.observability_onboarding.useCustomCardsForCategory.autoDetectTitle',
             {
-              defaultMessage: 'Auto-detect Integrations with Elastic Agent',
+              defaultMessage: 'Elastic Agent: Logs & Metrics',
             }
           ),
           description: i18n.translate(
             'xpack.observability_onboarding.useCustomCardsForCategory.autoDetectDescription',
             {
-              defaultMessage: 'Scan your host for log and metric files, auto-install integrations',
+              defaultMessage: 'Scan your host for log files, metrics, auto-install integrations',
             }
           ),
           extraLabelsBadges: [
-            <EuiFlexItem grow={false}>
+            <ExtraLabelBadgeWrapper>
               <LogoIcon logo="apple" size="m" />
-            </EuiFlexItem>,
-            <EuiFlexItem grow={false}>
+            </ExtraLabelBadgeWrapper>,
+            <ExtraLabelBadgeWrapper>
               <LogoIcon logo="linux" size="m" />
-            </EuiFlexItem>,
+            </ExtraLabelBadgeWrapper>,
           ],
           categories: ['observability'],
           icons: [
@@ -87,7 +87,7 @@ export function useCustomCardsForCategory(
           title: i18n.translate(
             'xpack.observability_onboarding.useCustomCardsForCategory.logsOtelTitle',
             {
-              defaultMessage: 'Host monitoring with EDOT Collector',
+              defaultMessage: 'OpenTelemetry: Logs & Metrics',
             }
           ),
           description: i18n.translate(
@@ -98,12 +98,12 @@ export function useCustomCardsForCategory(
             }
           ),
           extraLabelsBadges: [
-            <EuiFlexItem grow={false}>
+            <ExtraLabelBadgeWrapper>
               <LogoIcon logo="apple" size="m" />
-            </EuiFlexItem>,
-            <EuiFlexItem grow={false}>
+            </ExtraLabelBadgeWrapper>,
+            <ExtraLabelBadgeWrapper>
               <LogoIcon logo="linux" size="m" />
-            </EuiFlexItem>,
+            </ExtraLabelBadgeWrapper>,
           ],
           categories: ['observability'],
           icons: [
@@ -116,6 +116,7 @@ export function useCustomCardsForCategory(
           version: '',
           integration: '',
           isQuickstart: true,
+          release: 'preview',
         },
       ];
 
@@ -128,20 +129,19 @@ export function useCustomCardsForCategory(
           title: i18n.translate(
             'xpack.observability_onboarding.useCustomCardsForCategory.kubernetesTitle',
             {
-              defaultMessage: 'Kubernetes monitoring with Elastic Agent',
+              defaultMessage: 'Elastic Agent: Logs & Metrics',
             }
           ),
           description: i18n.translate(
             'xpack.observability_onboarding.useCustomCardsForCategory.kubernetesDescription',
             {
-              defaultMessage:
-                'Monitor your Kubernetes cluster with Elastic Agent, collect container logs',
+              defaultMessage: 'Collect logs and metrics from Kubernetes using Elastic Agent',
             }
           ),
           extraLabelsBadges: [
-            <EuiFlexItem grow={false}>
+            <ExtraLabelBadgeWrapper>
               <LogoIcon logo="kubernetes" size="m" />
-            </EuiFlexItem>,
+            </ExtraLabelBadgeWrapper>,
           ],
           categories: ['observability'],
           icons: [
@@ -162,20 +162,20 @@ export function useCustomCardsForCategory(
           title: i18n.translate(
             'xpack.observability_onboarding.useCustomCardsForCategory.kubernetesOtelTitle',
             {
-              defaultMessage: 'Kubernetes monitoring with EDOT Collector',
+              defaultMessage: 'OpenTelemetry: Full Observability',
             }
           ),
           description: i18n.translate(
             'xpack.observability_onboarding.useCustomCardsForCategory.kubernetesOtelDescription',
             {
               defaultMessage:
-                'Unified Kubernetes observability with Elastic Distro for OTel Collector',
+                'Collect logs, traces and metrics with the Elastic Distro for OTel Collector',
             }
           ),
           extraLabelsBadges: [
-            <EuiFlexItem grow={false}>
+            <ExtraLabelBadgeWrapper>
               <LogoIcon logo="kubernetes" size="m" />
-            </EuiFlexItem>,
+            </ExtraLabelBadgeWrapper>,
           ],
           categories: ['observability'],
           icons: [
@@ -188,6 +188,7 @@ export function useCustomCardsForCategory(
           version: '',
           integration: '',
           isQuickstart: true,
+          release: 'preview',
         },
       ];
 
@@ -355,4 +356,12 @@ export function useCustomCardsForCategory(
     default:
       return undefined;
   }
+}
+
+function ExtraLabelBadgeWrapper({ children }: { children: React.ReactNode }) {
+  return (
+    <EuiFlexItem grow={false} css={{ alignSelf: 'center' }}>
+      {children}
+    </EuiFlexItem>
+  );
 }

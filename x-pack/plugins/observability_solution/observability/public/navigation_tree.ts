@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import type { AddSolutionNavigationArg } from '@kbn/navigation-plugin/public';
-import { of } from 'rxjs';
+import { map, of } from 'rxjs';
 import type { ObservabilityPublicPluginsStart } from './plugin';
 
 const title = i18n.translate(
@@ -18,7 +18,7 @@ const title = i18n.translate(
 );
 const icon = 'logoObservability';
 
-export function createNavTree(pluginsStart: ObservabilityPublicPluginsStart) {
+function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
   const navTree: NavigationTreeDefinition = {
     body: [
       {
@@ -87,6 +87,13 @@ export function createNavTree(pluginsStart: ObservabilityPublicPluginsStart) {
             link: 'inventory',
             spaceBefore: 'm',
           },
+          ...(streamsAvailable
+            ? [
+                {
+                  link: 'streams' as const,
+                },
+              ]
+            : []),
           {
             id: 'apm',
             title: i18n.translate('xpack.observability.obltNav.applications', {
@@ -326,6 +333,15 @@ export function createNavTree(pluginsStart: ObservabilityPublicPluginsStart) {
                     ),
                   },
                   {
+                    link: 'ml:esqlDataVisualizer',
+                    title: i18n.translate(
+                      'xpack.observability.obltNav.ml.data_visualizer.esql_data_visualizer',
+                      {
+                        defaultMessage: 'ES|QL data visualizer',
+                      }
+                    ),
+                  },
+                  {
                     link: 'ml:dataDrift',
                     title: i18n.translate(
                       'xpack.observability.obltNav.ml.data_visualizer.data_drift',
@@ -549,6 +565,8 @@ export const createDefinition = (
   title,
   icon: 'logoObservability',
   homePage: 'observabilityOnboarding',
-  navigationTree$: of(createNavTree(pluginsStart)),
+  navigationTree$: (pluginsStart.streams?.status$ || of({ status: 'disabled' as const })).pipe(
+    map(({ status }) => createNavTree({ streamsAvailable: status === 'enabled' }))
+  ),
   dataTestSubj: 'observabilitySideNav',
 });

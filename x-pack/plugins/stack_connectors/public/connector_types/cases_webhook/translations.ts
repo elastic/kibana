@@ -54,13 +54,28 @@ export const UPDATE_METHOD_REQUIRED = i18n.translate(
   }
 );
 
-export const CREATE_COMMENT_URL_REQUIRED = i18n.translate(
+export const CREATE_COMMENT_URL_FORMAT_REQUIRED = i18n.translate(
   'xpack.stackConnectors.components.casesWebhook.error.requiredCreateCommentUrlText',
   {
     defaultMessage: 'Create comment URL must be URL format.',
   }
 );
-export const CREATE_COMMENT_MESSAGE = i18n.translate(
+
+export const CREATE_COMMENT_URL_MISSING = i18n.translate(
+  'xpack.stackConnectors.components.casesWebhook.error.requiredCreateCommentUrlMissing',
+  {
+    defaultMessage: 'Create comment URL is required.',
+  }
+);
+
+export const CREATE_COMMENT_JSON_MISSING = i18n.translate(
+  'xpack.stackConnectors.components.casesWebhook.error.requiredCreateCommentJsonMissing',
+  {
+    defaultMessage: 'Create comment Json is required.',
+  }
+);
+
+export const CREATE_COMMENT_FORMAT_MESSAGE = i18n.translate(
   'xpack.stackConnectors.components.casesWebhook.error.requiredCreateCommentIncidentText',
   {
     defaultMessage: 'Create comment object must be valid JSON.',
@@ -178,11 +193,22 @@ export const ADD_CASES_VARIABLE = i18n.translate(
     defaultMessage: 'Add variable',
   }
 );
-
+export const GET_INCIDENT_METHOD = i18n.translate(
+  'xpack.stackConnectors.components.casesWebhook.getIncidentMethodTextFieldLabel',
+  {
+    defaultMessage: 'Get case method',
+  }
+);
 export const GET_INCIDENT_URL = i18n.translate(
   'xpack.stackConnectors.components.casesWebhook.getIncidentUrlTextFieldLabel',
   {
     defaultMessage: 'Get case URL',
+  }
+);
+export const GET_METHOD_REQUIRED = i18n.translate(
+  'xpack.stackConnectors.components.casesWebhook.error.requiredGetMethodText',
+  {
+    defaultMessage: 'Get case method is required.',
   }
 );
 export const GET_INCIDENT_URL_HELP = i18n.translate(
@@ -203,6 +229,28 @@ export const GET_INCIDENT_TITLE_KEY_HELP = i18n.translate(
   'xpack.stackConnectors.components.casesWebhook.getIncidentResponseExternalTitleKeyHelp',
   {
     defaultMessage: 'JSON key in the get external case response that contains the case title',
+  }
+);
+
+export const GET_INCIDENT_JSON_HELP = i18n.translate(
+  'xpack.stackConnectors.components.casesWebhook.getIncidentJsonHelp',
+  {
+    defaultMessage:
+      'JSON object to get a case. Use the variable selector to add cases data to the payload.',
+  }
+);
+
+export const GET_INCIDENT_JSON = i18n.translate(
+  'xpack.stackConnectors.components.casesWebhook.getIncidentJsonTextFieldLabel',
+  {
+    defaultMessage: 'Get case object',
+  }
+);
+
+export const GET_INCIDENT_REQUIRED = i18n.translate(
+  'xpack.stackConnectors.components.casesWebhook.error.requiredGetIncidentText',
+  {
+    defaultMessage: 'Get case object is required and must be valid JSON.',
   }
 );
 
@@ -340,7 +388,7 @@ export const STEP_4A_DESCRIPTION = i18n.translate(
 );
 
 export const STEP_4B = i18n.translate('xpack.stackConnectors.components.casesWebhook.step4b', {
-  defaultMessage: 'Add comment in case (optional)',
+  defaultMessage: 'Add comment in case',
 });
 
 export const STEP_4B_DESCRIPTION = i18n.translate(

@@ -8,26 +8,26 @@
 import {
   EuiBadge,
   EuiButtonEmpty,
-  EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
   EuiPopoverFooter,
+  EuiPopoverTitle,
   copyToClipboard,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
+import type { EntityTypeCheckOptions } from '../../../common/rt_types';
 
 interface Props {
   field: string;
   value: string;
-  label?: string;
-  onFilter: () => void;
+  onFilter: (value: string, checked: EntityTypeCheckOptions) => void;
 }
 
-export function BadgeFilterWithPopover({ field, value, onFilter, label }: Props) {
+export function BadgeFilterWithPopover({ field, value, onFilter }: Props) {
   const [isOpen, setIsOpen] = useState(false);
   const theme = useEuiTheme();
 
@@ -43,60 +43,76 @@ export function BadgeFilterWithPopover({ field, value, onFilter, label }: Props)
             { defaultMessage: 'Open popover' }
           )}
         >
-          {label || value}
+          {value}
         </EuiBadge>
       }
       isOpen={isOpen}
       closePopover={() => setIsOpen(false)}
+      panelPaddingSize="s"
     >
-      <span data-test-subj="inventoryBadgeFilterWithPopoverTitle">
-        <EuiFlexGroup
-          data-test-subj="inventoryBadgeFilterWithPopoverContent"
-          responsive={false}
-          gutterSize="xs"
-          css={css`
-            font-family: ${theme.euiTheme.font.familyCode};
-          `}
-        >
-          <EuiFlexItem grow={false}>
-            <span
-              css={css`
-                font-weight: bold;
-              `}
-            >
-              {field}:
-            </span>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <span className="eui-textBreakWord">{value}</span>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </span>
+      <EuiPopoverTitle>
+        <span data-test-subj="inventoryBadgeFilterWithPopoverTitle">
+          <EuiFlexGroup
+            data-test-subj="inventoryBadgeFilterWithPopoverContent"
+            responsive={false}
+            gutterSize="xs"
+            css={css`
+              font-family: ${theme.euiTheme.font.familyCode};
+            `}
+          >
+            <EuiFlexItem grow={false}>
+              <span
+                css={css`
+                  font-weight: bold;
+                `}
+              >
+                {field}:
+              </span>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <span className="eui-textBreakWord">{value}</span>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </span>
+      </EuiPopoverTitle>
+      <EuiFlexGroup responsive={false}>
+        <EuiFlexItem>
+          <EuiButtonEmpty
+            data-test-subj="inventoryBadgeFilterWithPopoverFilterForButton"
+            iconType="plusInCircle"
+            onClick={() => {
+              onFilter(value, 'on');
+            }}
+          >
+            {i18n.translate('xpack.inventory.badgeFilterWithPopover.filterForButtonEmptyLabel', {
+              defaultMessage: 'Filter for',
+            })}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiButtonEmpty
+            data-test-subj="inventoryBadgeFilterWithPopoverFilterOutButton"
+            iconType="minusInCircle"
+            onClick={() => {
+              onFilter(value, 'off');
+            }}
+          >
+            {i18n.translate('xpack.inventory.badgeFilterWithPopover.filterForButtonEmptyLabel', {
+              defaultMessage: 'Filter out',
+            })}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      </EuiFlexGroup>
       <EuiPopoverFooter>
-        <EuiFlexGrid responsive={false} columns={2}>
-          <EuiFlexItem>
-            <EuiButtonEmpty
-              data-test-subj="inventoryBadgeFilterWithPopoverFilterForButton"
-              iconType="plusInCircle"
-              onClick={onFilter}
-            >
-              {i18n.translate('xpack.inventory.badgeFilterWithPopover.filterForButtonEmptyLabel', {
-                defaultMessage: 'Filter for',
-              })}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiButtonEmpty
-              data-test-subj="inventoryBadgeFilterWithPopoverCopyValueButton"
-              iconType="copyClipboard"
-              onClick={() => copyToClipboard(value)}
-            >
-              {i18n.translate('xpack.inventory.badgeFilterWithPopover.copyValueButtonEmptyLabel', {
-                defaultMessage: 'Copy value',
-              })}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        </EuiFlexGrid>
+        <EuiButtonEmpty
+          data-test-subj="inventoryBadgeFilterWithPopoverCopyValueButton"
+          iconType="copyClipboard"
+          onClick={() => copyToClipboard(value)}
+        >
+          {i18n.translate('xpack.inventory.badgeFilterWithPopover.copyValueButtonEmptyLabel', {
+            defaultMessage: 'Copy value',
+          })}
+        </EuiButtonEmpty>
       </EuiPopoverFooter>
     </EuiPopover>
   );

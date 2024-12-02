@@ -109,7 +109,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('@skipInServerless should be able to a read a execute immediately action correctly', async () => {
         // create connector/action
         const { body: hookAction } = await supertest
-          .post('/api/actions/action')
+          .post('/api/actions/connector')
           .set('kbn-xsrf', 'true')
           .send(getWebHookAction())
           .expect(200);
@@ -117,7 +117,7 @@ export default ({ getService }: FtrProviderContext) => {
         const action = {
           group: 'default',
           id: hookAction.id,
-          action_type_id: hookAction.actionTypeId,
+          action_type_id: hookAction.connector_type_id,
           params: {},
         };
 
@@ -151,7 +151,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('@skipInServerless should be able to a read a scheduled action correctly', async () => {
         // create connector/action
         const { body: hookAction } = await supertest
-          .post('/api/actions/action')
+          .post('/api/actions/connector')
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '2023-10-31')
           .send(getWebHookAction())
@@ -160,7 +160,7 @@ export default ({ getService }: FtrProviderContext) => {
         const action = {
           group: 'default',
           id: hookAction.id,
-          action_type_id: hookAction.actionTypeId,
+          action_type_id: hookAction.connector_type_id,
           params: {},
         };
 

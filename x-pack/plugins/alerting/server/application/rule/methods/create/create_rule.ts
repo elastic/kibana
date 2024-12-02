@@ -27,14 +27,13 @@ import { generateAPIKeyName, apiKeyAsRuleDomainProperties } from '../../../../ru
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import { RulesClientContext } from '../../../../rules_client/types';
 import { RuleDomain, RuleParams } from '../../types';
-import { SanitizedRule } from '../../../../types';
+import { RawRule, SanitizedRule } from '../../../../types';
 import {
   transformRuleAttributesToRuleDomain,
   transformRuleDomainToRuleAttributes,
   transformRuleDomainToRule,
 } from '../../transforms';
 import { ruleDomainSchema } from '../../schemas';
-import { RuleAttributes } from '../../../../data/rule/types';
 import type { CreateRuleData } from './types';
 import { createRuleDataSchema } from './schemas';
 import { createRuleSavedObject } from '../../../../rules_client/lib';
@@ -225,12 +224,11 @@ export async function createRule<Params extends RuleParams = never>(
     },
     params: {
       legacyId,
-      // @ts-expect-error upgrade typescript v4.9.5
       paramsWithRefs: updatedParams,
     },
   });
 
-  const createdRuleSavedObject: SavedObject<RuleAttributes> = await withSpan(
+  const createdRuleSavedObject: SavedObject<RawRule> = await withSpan(
     { name: 'createRuleSavedObject', type: 'rules' },
     () =>
       createRuleSavedObject(context, {
@@ -243,7 +241,7 @@ export async function createRule<Params extends RuleParams = never>(
       })
   );
 
-  // Convert ES RuleAttributes back to domain rule object
+  // Convert ES RawRule back to domain rule object
   const ruleDomain: RuleDomain<Params> = transformRuleAttributesToRuleDomain<Params>(
     createdRuleSavedObject.attributes,
     {

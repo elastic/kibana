@@ -16,7 +16,7 @@ import * as i18n from './translations';
 interface ReplaceCustomField {
   caseId: string;
   customFieldId: string;
-  customFieldValue: string | boolean | null;
+  customFieldValue: string | number | boolean | null;
   caseVersion: string;
 }
 

@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { TagWithRelations } from '../../../common';
+import { TagWithRelations } from '../../../common/types';
 import { getEditModalOpener } from '../../components/edition_modal';
 import { ITagInternalClient } from '../../services/tags';
 import { StartServices } from '../../types';

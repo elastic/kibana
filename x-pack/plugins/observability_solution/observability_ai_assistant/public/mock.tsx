@@ -47,7 +47,7 @@ export const mockChatService: ObservabilityAIAssistantChatService = {
       content: 'System',
     },
   }),
-  getScope: jest.fn(),
+  getScopes: jest.fn(),
 };
 
 export const mockService: ObservabilityAIAssistantService = {
@@ -64,9 +64,9 @@ export const mockService: ObservabilityAIAssistantService = {
     predefinedConversation$: new Observable(),
   },
   navigate: async () => of(),
-  setScope: jest.fn(),
-  getScope: jest.fn(),
-  scope$: new BehaviorSubject<AssistantScope>('all'),
+  setScopes: jest.fn(),
+  getScopes: jest.fn(),
+  scope$: new BehaviorSubject<AssistantScope[]>(['all']),
 };
 
 function createSetupContract(): ObservabilityAIAssistantPublicSetup {

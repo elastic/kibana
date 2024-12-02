@@ -6,10 +6,10 @@
  */
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/css';
-import { euiThemeVars } from '@kbn/ui-theme';
 import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
+import { isEqual } from 'lodash';
 import { useKibana } from '../hooks/use_kibana';
 import { ConversationList, ChatBody, ChatInlineEditingContent } from '../chat';
 import { useConversationKey } from '../hooks/use_conversation_key';
@@ -24,10 +24,10 @@ const SECOND_SLOT_CONTAINER_WIDTH = 400;
 
 interface ConversationViewProps {
   conversationId?: string;
-  navigateToConversation: (nextConversationId?: string) => void;
+  navigateToConversation?: (nextConversationId?: string) => void;
   getConversationHref?: (conversationId: string) => string;
   newConversationHref?: string;
-  scope?: AssistantScope;
+  scopes?: AssistantScope[];
 }
 
 export const ConversationView: React.FC<ConversationViewProps> = ({
@@ -35,7 +35,7 @@ export const ConversationView: React.FC<ConversationViewProps> = ({
   navigateToConversation,
   getConversationHref,
   newConversationHref,
-  scope,
+  scopes,
 }) => {
   const { euiTheme } = useEuiTheme();
 
@@ -61,10 +61,10 @@ export const ConversationView: React.FC<ConversationViewProps> = ({
   );
 
   useEffect(() => {
-    if (scope) {
-      service.setScope(scope);
+    if (scopes && !isEqual(scopes, service.getScopes())) {
+      service.setScopes(scopes);
     }
-  }, [scope, service]);
+  }, [scopes, service]);
 
   const { key: bodyKey, updateConversationIdInPlace } = useConversationKey(conversationId);
 
@@ -80,7 +80,9 @@ export const ConversationView: React.FC<ConversationViewProps> = ({
   const handleConversationUpdate = (conversation: { conversation: { id: string } }) => {
     if (!conversationId) {
       updateConversationIdInPlace(conversation.conversation.id);
-      navigateToConversation(conversation.conversation.id);
+      if (navigateToConversation) {
+        navigateToConversation(conversation.conversation.id);
+      }
     }
     handleRefreshConversations();
   };
@@ -102,7 +104,7 @@ export const ConversationView: React.FC<ConversationViewProps> = ({
   const conversationListContainerName = css`
     min-width: 250px;
     width: 250px;
-    border-right: solid 1px ${euiThemeVars.euiColorLightShade};
+    border-right: solid 1px ${euiTheme.border.color};
   `;
 
   const sidebarContainerClass = css`
@@ -114,8 +116,8 @@ export const ConversationView: React.FC<ConversationViewProps> = ({
     height: calc(100% - 56px);
     background-color: ${euiTheme.colors.lightestShade};
     width: ${isSecondSlotVisible ? SECOND_SLOT_CONTAINER_WIDTH : 0}px;
-    border-top: solid 1px ${euiThemeVars.euiColorLightShade};
-    border-left: solid 1px ${euiThemeVars.euiColorLightShade};
+    border-top: solid 1px ${euiTheme.border.color};
+    border-left: solid 1px ${euiTheme.border.color};
 
     .euiFlyoutHeader {
       padding: ${euiTheme.size.m};
@@ -142,7 +144,7 @@ export const ConversationView: React.FC<ConversationViewProps> = ({
           isLoading={conversationList.isLoading}
           onConversationDeleteClick={(deletedConversationId) => {
             conversationList.deleteConversation(deletedConversationId).then(() => {
-              if (deletedConversationId === conversationId) {
+              if (deletedConversationId === conversationId && navigateToConversation) {
                 navigateToConversation(undefined);
               }
             });

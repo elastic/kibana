@@ -18,9 +18,8 @@ export const INDEX_LOGS_AND_METRICS: estypes.SecurityIndicesPrivileges = {
   privileges: ['auto_configure', 'create_doc'],
 };
 
-// https://www.elastic.co/guide/en/observability/master/apm-api-key.html#apm-create-api-key-workflow-es
-export const WRITE_APM_EVENTS: estypes.SecurityApplicationPrivileges = {
-  application: 'apm',
-  privileges: ['event:write', 'config_agent:read'],
-  resources: ['*'],
+// https://www.elastic.co/guide/en/fleet/master/grant-access-to-elasticsearch.html#create-api-key-standalone-agent
+export const INDEX_LOGS_METRICS_AND_TRACES: estypes.SecurityIndicesPrivileges = {
+  names: ['logs-*-*', 'metrics-*-*', 'traces-*-*'],
+  privileges: ['auto_configure', 'create_doc'],
 };

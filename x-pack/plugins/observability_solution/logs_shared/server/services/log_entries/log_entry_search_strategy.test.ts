@@ -48,7 +48,11 @@ describe('LogEntry search strategy', () => {
         start_time_in_millis: 0,
       },
       statusCode: 200,
-      headers: {},
+      headers: {
+        'x-elasticsearch-async-id': 'ASYNC_REQUEST_ID',
+        'x-elasticsearch-async-is-running': '?0',
+        'x-elasticsearch-async-is-partial': '?0',
+      },
       warnings: [],
       meta: {} as any,
     } as TransportResult<AsyncSearchSubmitResponse> as any); // type inference for the mock fails
@@ -149,7 +153,11 @@ describe('LogEntry search strategy', () => {
         start_time_in_millis: 0,
       },
       statusCode: 200,
-      headers: {},
+      headers: {
+        'x-elasticsearch-async-id': 'ASYNC_REQUEST_ID',
+        'x-elasticsearch-async-is-running': '?0',
+        'x-elasticsearch-async-is-partial': '?0',
+      },
       warnings: [],
       meta: {} as any,
     } as TransportResult<AsyncSearchSubmitResponse> as any);

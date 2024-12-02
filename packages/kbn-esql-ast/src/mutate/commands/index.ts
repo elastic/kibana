@@ -9,5 +9,8 @@
 
 import * as from from './from';
 import * as limit from './limit';
+import * as sort from './sort';
+import * as stats from './stats';
+import * as where from './where';
 
-export { from, limit };
+export { from, limit, sort, stats, where };

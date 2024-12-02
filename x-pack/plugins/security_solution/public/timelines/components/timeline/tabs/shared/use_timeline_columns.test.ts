@@ -6,18 +6,14 @@
  */
 
 import { TestProviders } from '../../../../../common/mock';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useTimelineColumns } from './use_timeline_columns';
-import { defaultUdtHeaders } from '../../unified_components/default_headers';
-import { defaultHeaders } from '../../body/column_headers/default_headers';
+import { defaultUdtHeaders } from '../../body/column_headers/default_headers';
 import type { ColumnHeaderOptions } from '../../../../../../common/types/timeline/columns';
 
 jest.mock('../../../../../common/hooks/use_experimental_features', () => ({
   useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(true),
 }));
-
-const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
 
 describe('useTimelineColumns', () => {
   const mockColumns: ColumnHeaderOptions[] = [
@@ -33,15 +29,7 @@ describe('useTimelineColumns', () => {
     },
   ];
   describe('defaultColumns', () => {
-    it('should return the default columns', () => {
-      const { result } = renderHook(() => useTimelineColumns([]), {
-        wrapper: TestProviders,
-      });
-      expect(result.current.defaultColumns).toEqual(defaultHeaders);
-    });
-
     it('should return the default unified data table (udt) columns', () => {
-      useIsExperimentalFeatureEnabledMock.mockReturnValue(false);
       const { result } = renderHook(() => useTimelineColumns([]), {
         wrapper: TestProviders,
       });
@@ -50,16 +38,7 @@ describe('useTimelineColumns', () => {
   });
 
   describe('localColumns', () => {
-    it('should return the default columns', () => {
-      useIsExperimentalFeatureEnabledMock.mockReturnValue(true);
-      const { result } = renderHook(() => useTimelineColumns([]), {
-        wrapper: TestProviders,
-      });
-      expect(result.current.localColumns).toEqual([]);
-    });
-
     it('should return the default unified data table (udt) columns', () => {
-      useIsExperimentalFeatureEnabledMock.mockReturnValue(false);
       const { result } = renderHook(() => useTimelineColumns([]), {
         wrapper: TestProviders,
       });
@@ -75,16 +54,7 @@ describe('useTimelineColumns', () => {
   });
 
   describe('augmentedColumnHeaders', () => {
-    it('should return the default columns', () => {
-      useIsExperimentalFeatureEnabledMock.mockReturnValue(false);
-      const { result } = renderHook(() => useTimelineColumns([]), {
-        wrapper: TestProviders,
-      });
-      expect(result.current.augmentedColumnHeaders).toMatchSnapshot();
-    });
-
     it('should return the default unified data table (udt) columns', () => {
-      useIsExperimentalFeatureEnabledMock.mockReturnValue(false);
       const { result } = renderHook(() => useTimelineColumns([]), {
         wrapper: TestProviders,
       });

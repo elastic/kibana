@@ -7,8 +7,7 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { Connector } from '@kbn/search-connectors';
-import { ConnectorDefinition } from '@kbn/search-connectors-plugin/public';
+import { Connector, ConnectorDefinition } from '@kbn/search-connectors';
 
 import { Status } from '../../../../../../common/types/api';
 import { Actions } from '../../../../shared/api_logic/create_api_logic';
@@ -56,6 +55,7 @@ export interface NewConnectorValues {
     | undefined;
   generatedNameData: GenerateConnectorNamesApiResponse | undefined;
   isCreateLoading: boolean;
+  isFormDirty: boolean;
   isGenerateLoading: boolean;
   rawName: string;
   selectedConnector: ConnectorDefinition | null;
@@ -85,6 +85,7 @@ type NewConnectorActions = {
   createConnectorApi: AddConnectorApiLogicActions['makeRequest'];
   fetchConnector: ConnectorViewActions['fetchConnector'];
   setCurrentStep(step: ConnectorCreationSteps): { step: ConnectorCreationSteps };
+  setFormDirty: (isDirty: boolean) => { isDirty: boolean };
   setRawName(rawName: string): { rawName: string };
   setSelectedConnector(connector: ConnectorDefinition | null): {
     connector: ConnectorDefinition | null;
@@ -103,6 +104,7 @@ export const NewConnectorLogic = kea<MakeLogicType<NewConnectorValues, NewConnec
       shouldNavigateToConnectorAfterCreate,
     }),
     setCurrentStep: (step) => ({ step }),
+    setFormDirty: (isDirty) => ({ isDirty }),
     setRawName: (rawName) => ({ rawName }),
     setSelectedConnector: (connector) => ({ connector }),
   },
@@ -143,9 +145,7 @@ export const NewConnectorLogic = kea<MakeLogicType<NewConnectorValues, NewConnec
       }
     },
     connectorNameGenerated: ({ connectorName }) => {
-      if (!values.rawName) {
-        actions.setRawName(connectorName);
-      }
+      actions.setRawName(connectorName);
     },
     createConnector: ({
       isSelfManaged,
@@ -191,8 +191,8 @@ export const NewConnectorLogic = kea<MakeLogicType<NewConnectorValues, NewConnec
     setSelectedConnector: ({ connector }) => {
       if (connector) {
         actions.generateConnectorName({
-          connectorName: values.rawName,
           connectorType: connector.serviceType,
+          isManagedConnector: connector.isNative,
         });
       }
     },
@@ -215,6 +215,13 @@ export const NewConnectorLogic = kea<MakeLogicType<NewConnectorValues, NewConnec
           _: NewConnectorValues['currentStep'],
           { step }: { step: NewConnectorValues['currentStep'] }
         ) => step,
+      },
+    ],
+    isFormDirty: [
+      false, // Initial state (form is not dirty)
+      {
+        // @ts-expect-error upgrade typescript v5.1.6
+        setFormDirty: (_, { isDirty }) => isDirty,
       },
     ],
     rawName: [

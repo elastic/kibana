@@ -10,11 +10,12 @@ import { useAIAssistantAppService } from '@kbn/ai-assistant';
 import { AssistantScope } from '@kbn/ai-assistant-common';
 import { useObservable } from 'react-use/lib';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
+import { isEqual } from 'lodash';
 import { useKibana } from './use_kibana';
 
-const scopeUrlLookup: Record<string, AssistantScope> = {
-  [DEFAULT_APP_CATEGORIES.observability.id]: 'observability',
-  [DEFAULT_APP_CATEGORIES.enterpriseSearch.id]: 'search',
+const scopeUrlLookup: Record<string, AssistantScope[]> = {
+  [DEFAULT_APP_CATEGORIES.observability.id]: ['observability'],
+  [DEFAULT_APP_CATEGORIES.enterpriseSearch.id]: ['search'],
 };
 
 export function useNavControlScope() {
@@ -31,11 +32,9 @@ export function useNavControlScope() {
     const currentCategoryId =
       (currentApplication && applications?.get(currentApplication)?.category?.id) ||
       DEFAULT_APP_CATEGORIES.kibana.id;
-    const newScope = Object.entries(scopeUrlLookup).find(
-      ([categoryId]) => categoryId === currentCategoryId
-    )?.[1];
-    if (newScope && newScope !== service.getScope()) {
-      service.setScope(newScope);
+    const newScopes = scopeUrlLookup[currentCategoryId];
+    if (newScopes?.length && !isEqual(service.getScopes(), newScopes)) {
+      service.setScopes(newScopes);
     }
   }, [applications, currentApplication, service]);
 }

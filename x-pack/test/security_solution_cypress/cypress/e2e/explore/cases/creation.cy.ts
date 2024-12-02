@@ -51,18 +51,9 @@ import {
 import { visit, visitWithTimeRange } from '../../../tasks/navigation';
 
 import { CASES_URL, OVERVIEW_URL } from '../../../urls/navigation';
-import { ELASTICSEARCH_USERNAME, IS_SERVERLESS } from '../../../env_var_names_constants';
 import { deleteCases } from '../../../tasks/api_calls/cases';
 import { login } from '../../../tasks/login';
-
-const isServerless = Cypress.env(IS_SERVERLESS);
-const getUsername = () => {
-  if (isServerless) {
-    return cy.task('getFullname');
-  } else {
-    return cy.wrap(Cypress.env(ELASTICSEARCH_USERNAME));
-  }
-};
+import { getFullname } from '../../../tasks/common';
 
 // Tracked by https://github.com/elastic/security-team/issues/7696
 describe('Cases', { tags: ['@ess', '@serverless'] }, () => {
@@ -76,7 +67,7 @@ describe('Cases', { tags: ['@ess', '@serverless'] }, () => {
           ...getCase1(),
           timeline: {
             ...getCase1().timeline,
-            id: response.body.data.persistTimeline.timeline.savedObjectId,
+            id: response.body.savedObjectId,
           },
         })
         .as('mycase')
@@ -120,7 +111,7 @@ describe('Cases', { tags: ['@ess', '@serverless'] }, () => {
       `${this.mycase.description} ${this.mycase.timeline.title}`
     );
 
-    getUsername().then((username) => {
+    getFullname('platform_engineer').then((username) => {
       cy.get(CASE_DETAILS_USERNAMES).eq(REPORTER).should('contain', username);
       cy.get(CASE_DETAILS_USERNAMES).eq(PARTICIPANTS).should('contain', username);
     });

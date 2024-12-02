@@ -13,7 +13,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { useNavigateFindings } from '@kbn/cloud-security-posture/src/hooks/use_navigate_findings';
-import type { NavFilter } from '@kbn/cloud-security-posture/src/hooks/use_navigate_findings';
+import type { NavFilter } from '@kbn/cloud-security-posture/src/utils/query_utils';
 import type {
   BenchmarkData,
   ComplianceDashboardDataV2,

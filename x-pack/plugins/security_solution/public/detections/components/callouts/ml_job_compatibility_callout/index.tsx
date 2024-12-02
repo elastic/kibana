@@ -10,7 +10,7 @@ import React, { memo } from 'react';
 import type { CallOutMessage } from '../../../../common/components/callouts';
 import { CallOutSwitcher } from '../../../../common/components/callouts';
 import { useInstalledSecurityJobs } from '../../../../common/components/ml/hooks/use_installed_security_jobs';
-import { affectedJobIds } from './affected_job_ids';
+import { affectedJobIds } from '../../../../../common/machine_learning/affected_job_ids';
 import * as i18n from './translations';
 
 const mlJobCompatibilityCalloutMessage: CallOutMessage = {

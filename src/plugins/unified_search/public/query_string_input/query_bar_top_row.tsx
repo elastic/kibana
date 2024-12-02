@@ -209,7 +209,7 @@ export const SharingMetaFields = React.memo(function SharingMetaFields({
   try {
     const dateRangePretty = usePrettyDuration({
       timeFrom: toAbsoluteString(from),
-      timeTo: toAbsoluteString(to),
+      timeTo: toAbsoluteString(to, true),
       quickRanges: [],
       dateFormat,
     });
@@ -628,7 +628,7 @@ export const QueryBarTopRow = React.memo(
     function renderDataViewsPicker() {
       if (props.dataViewPickerComponentProps && !Boolean(isQueryLangSelected)) {
         return (
-          <EuiFlexItem style={{ maxWidth: '100%' }} grow={isMobile}>
+          <EuiFlexItem css={{ maxWidth: '100%' }} grow={isMobile}>
             <DataViewPicker
               {...props.dataViewPickerComponentProps}
               trigger={{ fullWidth: isMobile, ...props.dataViewPickerComponentProps.trigger }}
@@ -789,7 +789,7 @@ export const QueryBarTopRow = React.memo(
               )}
               <EuiFlexItem
                 grow={!shouldShowDatePickerAsBadge()}
-                style={{ minWidth: shouldShowDatePickerAsBadge() ? 'auto' : 320, maxWidth: '100%' }}
+                css={{ minWidth: shouldShowDatePickerAsBadge() ? 'auto' : 320, maxWidth: '100%' }}
               >
                 {!isQueryLangSelected ? renderQueryInput() : null}
               </EuiFlexItem>
