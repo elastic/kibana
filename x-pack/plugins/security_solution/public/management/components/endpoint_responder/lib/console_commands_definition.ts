@@ -588,19 +588,24 @@ const adjustCommandsForSentinelOne = ({
     } else {
       // processes is not currently supported for Windows hosts
       if (command.name === 'processes' && platform.toLowerCase() === 'windows') {
+        const message = i18n.translate(
+          'xpack.securitySolution.consoleCommandsDefinition.sentineloneProcessesWindowRestriction',
+          {
+            defaultMessage:
+              'Processes command is not currently supported for SentinelOne hosts running on Windows',
+          }
+        );
+
         command.helpDisabled = true;
         command.about = getCommandAboutInfo({
           aboutInfo: command.about,
           isSupported: false,
           dataTestSubj: 'sentineloneProcessesWindowsWarningTooltip',
-          tooltipContent: i18n.translate(
-            'xpack.securitySolution.consoleCommandsDefinition.sentineloneProcessesWindowRestriction',
-            {
-              defaultMessage:
-                'Processes command is not currently supported for SentinelOne hosts running on Windows',
-            }
-          ),
+          tooltipContent: message,
         });
+        command.validate = () => {
+          return message;
+        };
       }
     }
 
