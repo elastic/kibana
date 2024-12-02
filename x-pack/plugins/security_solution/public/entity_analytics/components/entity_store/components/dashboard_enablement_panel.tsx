@@ -17,7 +17,10 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { UseQueryResult } from '@tanstack/react-query';
 import type { GetEntityStoreStatusResponse } from '../../../../../common/api/entity_analytics/entity_store/status.gen';
-import type { StoreStatus } from '../../../../../common/api/entity_analytics';
+import type {
+  RiskEngineStatusResponse,
+  StoreStatus,
+} from '../../../../../common/api/entity_analytics';
 import { RiskEngineStatusEnum } from '../../../../../common/api/entity_analytics';
 import { useInitRiskEngineMutation } from '../../../api/hooks/use_init_risk_engine_mutation';
 import { useEnableEntityStoreMutation } from '../hooks/use_entity_store';
@@ -34,11 +37,10 @@ import {
 import type { Enablements } from './enablement_modal';
 import { EntityStoreEnablementModal } from './enablement_modal';
 import dashboardEnableImg from '../../../images/entity_store_dashboard.png';
-import type { RiskEngineStatus } from '../../../api/hooks/use_risk_engine_status';
 
 interface EnableEntityStorePanelProps {
   state: {
-    riskEngine: UseQueryResult<RiskEngineStatus>;
+    riskEngine: UseQueryResult<RiskEngineStatusResponse>;
     entityStore: UseQueryResult<GetEntityStoreStatusResponse>;
   };
 }
@@ -181,7 +183,7 @@ export const EnablementPanel: React.FC<EnableEntityStorePanelProps> = ({ state }
 
 const getEnablementTexts = (
   entityStoreStatus?: StoreStatus,
-  riskEngineStatus?: RiskEngineStatus['risk_engine_status']
+  riskEngineStatus?: RiskEngineStatusResponse['risk_engine_status']
 ): [string, string] => {
   if (
     (entityStoreStatus === 'not_installed' || entityStoreStatus === 'stopped') &&
