@@ -70,6 +70,8 @@ const statsCommand = ({ source }: { source: EntitySource }) => {
   }
 
   if (source.display_name) {
+    // ideally we want the latest value but there's no command yet
+    // so we use MAX for now
     aggs.push(`${source.display_name} = MAX(${source.display_name})`);
   }
 
@@ -93,9 +95,9 @@ const evalCommand = ({ source }: { source: EntitySource }) => {
   ].join(', ')}`;
 };
 
-const sortCommand = ({ source, sortBy }: { source: EntitySource; sortBy?: SortBy }) => {
-  if (sortBy) {
-    return `SORT ${sortBy.field} ${sortBy.direction}`;
+const sortCommand = ({ source, sort }: { source: EntitySource; sort?: SortBy }) => {
+  if (sort) {
+    return `SORT ${sort.field} ${sort.direction}`;
   }
 
   if (source.timestamp_field) {
@@ -110,20 +112,20 @@ export function getEntityInstancesQuery({
   limit,
   start,
   end,
-  sortBy,
+  sort,
 }: {
   source: EntitySource;
   limit: number;
   start: string;
   end: string;
-  sortBy?: SortBy;
+  sort?: SortBy;
 }): string {
   const commands = [
     sourceCommand({ source }),
     whereCommand({ source, start, end }),
     statsCommand({ source }),
     evalCommand({ source }),
-    sortCommand({ source, sortBy }),
+    sortCommand({ source, sort }),
     `LIMIT ${limit}`,
   ];
 

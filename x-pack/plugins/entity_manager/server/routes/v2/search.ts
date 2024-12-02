@@ -30,7 +30,7 @@ export const searchEntitiesRoute = createEntityManagerServerRoute({
         .refine((val) => moment(val).isValid(), {
           message: '[end] should be a date in ISO format',
         }),
-      sort_by: z.optional(
+      sort: z.optional(
         z.object({
           field: z.string(),
           direction: z.enum(['ASC', 'DESC']),
@@ -47,8 +47,8 @@ export const searchEntitiesRoute = createEntityManagerServerRoute({
         end,
         limit,
         filters,
+        sort,
         metadata_fields: metadataFields,
-        sort_by: sortBy,
       } = params.body;
 
       const client = await getScopedClient({ request });
@@ -58,7 +58,7 @@ export const searchEntitiesRoute = createEntityManagerServerRoute({
         metadataFields,
         start,
         end,
-        sortBy,
+        sort,
         limit,
       });
 
@@ -92,7 +92,7 @@ export const searchEntitiesPreviewRoute = createEntityManagerServerRoute({
         .refine((val) => moment(val).isValid(), {
           message: '[end] should be a date in ISO format',
         }),
-      sort_by: z.optional(
+      sort: z.optional(
         z.object({
           field: z.string(),
           direction: z.enum(['ASC', 'DESC']),
@@ -102,14 +102,14 @@ export const searchEntitiesPreviewRoute = createEntityManagerServerRoute({
     }),
   }),
   handler: async ({ request, response, params, getScopedClient }) => {
-    const { sources, start, end, limit, sort_by: sortBy } = params.body;
+    const { sources, start, end, limit, sort } = params.body;
 
     const client = await getScopedClient({ request });
     const entities = await client.searchEntitiesBySources({
       sources,
       start,
       end,
-      sortBy,
+      sort,
       limit,
     });
 

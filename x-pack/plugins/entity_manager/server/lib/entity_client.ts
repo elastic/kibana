@@ -28,6 +28,23 @@ import { EntitySource, SortBy, getEntityInstancesQuery } from './queries';
 import { mergeEntitiesList, runESQLQuery } from './queries/utils';
 import { UnknownEntityType } from './entities/errors/unknown_entity_type';
 
+interface SearchCommon {
+  start: string;
+  end: string;
+  sort?: SortBy;
+  metadataFields?: string[];
+  filters?: string[];
+  limit?: number;
+}
+
+export type SearchByType = SearchCommon & {
+  type: string;
+};
+
+export type SearchBySources = SearchCommon & {
+  sources: EntitySource[];
+};
+
 export class EntityClient {
   constructor(
     private options: {
@@ -192,19 +209,11 @@ export class EntityClient {
     type,
     start,
     end,
-    sortBy,
+    sort,
     metadataFields = [],
     filters = [],
     limit = 10,
-  }: {
-    type: string;
-    start: string;
-    end: string;
-    sortBy?: SortBy;
-    metadataFields?: string[];
-    filters?: string[];
-    limit?: number;
-  }) {
+  }: SearchByType) {
     const sources = await this.getEntitySources({ type });
     if (sources.length === 0) {
       throw new UnknownEntityType(`No sources found for entity type [${type}]`);
@@ -216,7 +225,7 @@ export class EntityClient {
       end,
       metadataFields,
       filters,
-      sortBy,
+      sort,
       limit,
     });
   }
@@ -225,19 +234,11 @@ export class EntityClient {
     sources,
     start,
     end,
-    sortBy,
+    sort,
     metadataFields = [],
     filters = [],
     limit = 10,
-  }: {
-    sources: EntitySource[];
-    start: string;
-    end: string;
-    sortBy?: SortBy;
-    metadataFields?: string[];
-    filters?: string[];
-    limit?: number;
-  }) {
+  }: SearchBySources) {
     const entities = await Promise.all(
       sources.map(async (source) => {
         const mandatoryFields = [
@@ -285,7 +286,7 @@ export class EntityClient {
           },
           start,
           end,
-          sortBy,
+          sort,
           limit,
         });
         this.options.logger.debug(`Entity query: ${query}`);
