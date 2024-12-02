@@ -33,7 +33,6 @@ import {
   SettingsProps,
   LEGACY_LIGHT_THEME,
 } from '@elastic/charts';
-import type { Observable } from 'rxjs';
 import { partition } from 'lodash';
 import { IconType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -58,7 +57,6 @@ import {
 import { PersistedState } from '@kbn/visualizations-plugin/public';
 import { getOverridesFor, ChartSizeSpec } from '@kbn/chart-expressions-common';
 import { useAppFixedViewport } from '@kbn/core-rendering-browser';
-import useObservable from 'react-use/lib/useObservable';
 import type {
   FilterEvent,
   BrushEvent,
@@ -135,7 +133,6 @@ export type XYChartRenderProps = Omit<XYChartProps, 'canNavigateToLens'> & {
   chartsActiveCursorService: ChartsPluginStart['activeCursor'];
   data: DataPublicPluginStart;
   paletteService: PaletteRegistry;
-  palettes$: Observable<PaletteRegistry>;
   formatFactory: FormatFactory;
   timeZone: string;
   useLegacyTimeAxis: boolean;
@@ -202,8 +199,7 @@ export function XYChart({
   timeZone,
   chartsThemeService,
   chartsActiveCursorService,
-  palettes$,
-  paletteService: paletteServiceFallback,
+  paletteService,
   minInterval,
   onClickValue,
   onClickMultiValue,
@@ -241,8 +237,6 @@ export function XYChart({
   const palettes = useKbnPalettes();
   const appFixedViewport = useAppFixedViewport();
   const filteredLayers = getFilteredLayers(layers);
-  const paletteService = useObservable(palettes$, paletteServiceFallback);
-
   const layersById = filteredLayers.reduce<Record<string, CommonXYLayerConfig>>(
     (hashMap, layer) => ({ ...hashMap, [layer.layerId]: layer }),
     {}

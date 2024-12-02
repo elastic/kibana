@@ -33,7 +33,6 @@ import {
 } from '@kbn/chart-expressions-common';
 
 import { ThemeServiceSetup } from '@kbn/core/public';
-import { Observable } from 'rxjs';
 import type { getDataLayers } from '../helpers';
 import { LayerTypes, SeriesTypes } from '../../common/constants';
 import type { CommonXYDataLayerConfig, XYChartProps } from '../../common';
@@ -52,7 +51,6 @@ export interface GetStartDeps {
   kibanaTheme: ThemeServiceSetup;
   activeCursor: ChartsPluginStart['activeCursor'];
   paletteService: PaletteRegistry;
-  palettes$: Observable<PaletteRegistry>;
   timeZone: string;
   useLegacyTimeAxis: boolean;
   eventAnnotationService: EventAnnotationServiceType;
@@ -273,7 +271,6 @@ export const getXyChartRenderer = ({
             chartsActiveCursorService={deps.activeCursor}
             chartsThemeService={deps.theme}
             paletteService={deps.paletteService}
-            palettes$={deps.palettes$}
             timeZone={deps.timeZone}
             timeFormat={deps.timeFormat}
             eventAnnotationService={deps.eventAnnotationService}

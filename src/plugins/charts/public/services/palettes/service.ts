@@ -9,10 +9,8 @@
 
 import type { PaletteRegistry, PaletteDefinition } from '@kbn/coloring';
 import { getActivePaletteName } from '@kbn/coloring';
-import { euiVisColors$ } from '@kbn/palettes';
 import type { ExpressionsSetup } from '@kbn/expressions-plugin/public';
-import { ThemeServiceSetup } from '@kbn/core/public';
-import { Observable, combineLatest } from 'rxjs';
+import { CoreTheme } from '@kbn/core/public';
 import type { ChartsPluginSetup } from '../..';
 
 export interface PaletteSetupPlugins {
@@ -22,35 +20,14 @@ export interface PaletteSetupPlugins {
 
 export class PaletteService {
   private palettes: Record<string, PaletteDefinition<unknown>> | undefined = undefined;
+  constructor() {}
 
-  public setup(theme: ThemeServiceSetup) {
-    const palettes$ = new Observable<PaletteRegistry>((subscriber) => {
-      const subscription = combineLatest([theme.theme$, euiVisColors$]).subscribe({
-        next: async ([newTheme, visColors]) => {
-          const { buildPalettes } = await import('./palettes');
-          const palettes = buildPalettes(newTheme);
-
-          subscriber.next({
-            get: (name: string) => {
-              const paletteName = getActivePaletteName(name);
-              return palettes[paletteName];
-            },
-            getAll: () => Object.values(palettes),
-          });
-        },
-        error: (err) => subscriber.error(err),
-        complete: () => subscriber.complete(),
-      });
-
-      return () => subscription.unsubscribe();
-    });
-
+  public setup(theme: CoreTheme) {
     return {
-      palettes$,
       getPalettes: async (): Promise<PaletteRegistry> => {
         if (!this.palettes) {
           const { buildPalettes } = await import('./palettes');
-          this.palettes = buildPalettes(theme.getTheme());
+          this.palettes = buildPalettes(theme);
         }
         return {
           get: (name: string) => {
