@@ -139,7 +139,7 @@ export const ProgressControls: FC<PropsWithChildren<ProgressControlProps>> = (pr
         {progress === 1 ? (
           <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
-              <EuiIcon type="checkInCircleFilled" color={euiTheme.colors.success} />
+              <EuiIcon type="checkInCircleFilled" color={euiTheme.colors.accentSecondary} />
             </EuiFlexItem>
             <EuiFlexItem grow={false} data-test-subj="aiopsAnalysisComplete">
               <small>
