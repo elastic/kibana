@@ -309,6 +309,7 @@ const LensInternalApiMock: LensInternalApi = {
   dispatchError: jest.fn(),
   updateValidationMessages: jest.fn(),
   setAsCreated: jest.fn(),
+  getDisplayOptions: jest.fn(() => ({})),
 };
 
 export function getLensInternalApiMock(overrides: Partial<LensInternalApi> = {}): LensInternalApi {

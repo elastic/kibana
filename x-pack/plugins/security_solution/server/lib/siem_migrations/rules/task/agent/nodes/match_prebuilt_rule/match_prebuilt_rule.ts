@@ -6,6 +6,7 @@
  */
 
 import { JsonOutputParser } from '@langchain/core/output_parsers';
+import { SiemMigrationRuleTranslationResult } from '../../../../../../../../common/siem_migrations/constants';
 import type { ChatModel } from '../../../util/actions_client_chat';
 import { filterPrebuiltRules, type PrebuiltRulesMapByName } from '../../../util/prebuilt_rules';
 import type { GraphNode } from '../../types';
@@ -51,6 +52,7 @@ export const getMatchPrebuiltRuleNode =
             prebuilt_rule_id: result.rule.rule_id,
             id: result.installedRuleId,
           },
+          translation_result: SiemMigrationRuleTranslationResult.FULL,
         };
       }
     }
