@@ -6,8 +6,8 @@
  */
 
 import React, { useCallback, useEffect } from 'react';
-import { capitalize } from 'lodash';
 import { EuiButtonEmpty, EuiFlexGroup } from '@elastic/eui';
+import { extractValidationMessages } from '../../../../../../rule_creation/logic/extract_validation_messages';
 import type { FormWithWarnSubmitHandler } from '../../../../../../../common/hooks/use_form_with_warn';
 import { useFormWithWarn } from '../../../../../../../common/hooks/use_form_with_warn';
 import { Form } from '../../../../../../../shared_imports';
@@ -21,7 +21,10 @@ import { useDiffableRuleContext } from '../../diffable_rule_context';
 import * as i18n from '../../translations';
 import type { RuleFieldEditComponentProps } from './rule_field_edit_component_props';
 import { useConfirmValidationErrorsModal } from '../../../../../../../common/hooks/use_confirm_validation_errors_modal';
-import { NON_BLOCKING_ERROR_CODES } from '../../../../../../rule_creation/constants/non_blocking_error_codes';
+import {
+  ERROR_CODE_FIELD_NAME_MAP,
+  NON_BLOCKING_ERROR_CODES,
+} from '../../../../../../rule_creation/constants/non_blocking_error_codes';
 
 type RuleFieldEditComponent = React.ComponentType<RuleFieldEditComponentProps>;
 
@@ -65,7 +68,7 @@ export function RuleFieldEditFormWrapper({
 
   const handleSubmit = useCallback<FormWithWarnSubmitHandler>(
     async (formData: FormData, isValid: boolean, { warnings }) => {
-      const warningMessages = warnings.map((x) => `${capitalize(x.path)}: ${x.message}`);
+      const warningMessages = extractValidationMessages(warnings, ERROR_CODE_FIELD_NAME_MAP);
 
       if (!isValid || !(await confirmValidationErrors(warningMessages))) {
         return;

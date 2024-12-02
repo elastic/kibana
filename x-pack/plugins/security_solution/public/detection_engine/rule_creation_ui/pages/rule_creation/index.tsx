@@ -79,6 +79,8 @@ import { useKibana, useUiSetting$ } from '../../../../common/lib/kibana';
 import { RulePreview } from '../../components/rule_preview';
 import { getIsRulePreviewDisabled } from '../../components/rule_preview/helpers';
 import { useStartMlJobs } from '../../../rule_management/logic/use_start_ml_jobs';
+import { ERROR_CODE_FIELD_NAME_MAP } from '../../../rule_creation/constants/non_blocking_error_codes';
+import { extractValidationMessages } from '../../../rule_creation/logic/extract_validation_messages';
 import { NextStep } from '../../components/next_step';
 import { useRuleForms, useRuleIndexPattern } from '../form';
 import { CustomHeaderPageMemo } from '..';
@@ -314,7 +316,7 @@ const CreateRulePageComponent: React.FC = () => {
 
           return {
             valid,
-            warnings: defineStepForm.getWarnings(),
+            warnings: defineStepForm.getValidationWarnings(),
           };
         }
 
@@ -323,7 +325,7 @@ const CreateRulePageComponent: React.FC = () => {
 
           return {
             valid,
-            warnings: aboutStepForm.getWarnings(),
+            warnings: aboutStepForm.getValidationWarnings(),
           };
         }
         case RuleStep.scheduleRule: {
@@ -331,7 +333,7 @@ const CreateRulePageComponent: React.FC = () => {
 
           return {
             valid,
-            warnings: scheduleStepForm.getWarnings(),
+            warnings: scheduleStepForm.getValidationWarnings(),
           };
         }
         case RuleStep.ruleActions: {
@@ -339,7 +341,7 @@ const CreateRulePageComponent: React.FC = () => {
 
           return {
             valid,
-            warnings: actionsStepForm.getWarnings(),
+            warnings: actionsStepForm.getValidationWarnings(),
           };
         }
       }
@@ -439,8 +441,9 @@ const CreateRulePageComponent: React.FC = () => {
   const submitRule = useCallback(
     async (enabled: boolean) => {
       const { valid, warnings } = await validateAllSteps();
+      const warningMessages = extractValidationMessages(warnings, ERROR_CODE_FIELD_NAME_MAP);
 
-      if (!valid || !(await confirmValidationErrors(warnings))) {
+      if (!valid || !(await confirmValidationErrors(warningMessages))) {
         return;
       }
 

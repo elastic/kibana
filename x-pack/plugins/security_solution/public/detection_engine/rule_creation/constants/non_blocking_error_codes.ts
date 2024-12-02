@@ -5,22 +5,23 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { EQL_ERROR_CODES } from '../../../common/hooks/eql/api';
 import { ESQL_ERROR_CODES } from '../components/esql_query_edit';
 
-// const ESQL_FIELD_NAME = i18n.translate(
-//   'xpack.securitySolution.detectionEngine.createRule.nonBlockingErrorCodes.esqlFieldName',
-//   {
-//     defaultMessage: 'ES|QL Query',
-//   }
-// );
+const ESQL_FIELD_NAME = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.nonBlockingErrorCodes.esqlFieldName',
+  {
+    defaultMessage: 'ES|QL Query',
+  }
+);
 
-// const EQL_FIELD_NAME = i18n.translate(
-//   'xpack.securitySolution.detectionEngine.createRule.nonBlockingErrorCodes.eqlFieldName',
-//   {
-//     defaultMessage: 'EQL Query',
-//   }
-// );
+const EQL_FIELD_NAME = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.nonBlockingErrorCodes.eqlFieldName',
+  {
+    defaultMessage: 'EQL Query',
+  }
+);
 
 export const NON_BLOCKING_ERROR_CODES = [
   ESQL_ERROR_CODES.INVALID_ESQL,
@@ -28,3 +29,10 @@ export const NON_BLOCKING_ERROR_CODES = [
   EQL_ERROR_CODES.INVALID_EQL,
   EQL_ERROR_CODES.MISSING_DATA_SOURCE,
 ] as const;
+
+export const ERROR_CODE_FIELD_NAME_MAP: Readonly<Record<string, string>> = {
+  [ESQL_ERROR_CODES.INVALID_ESQL]: ESQL_FIELD_NAME,
+  [EQL_ERROR_CODES.FAILED_REQUEST]: EQL_FIELD_NAME,
+  [EQL_ERROR_CODES.INVALID_EQL]: EQL_FIELD_NAME,
+  [EQL_ERROR_CODES.MISSING_DATA_SOURCE]: EQL_FIELD_NAME,
+};

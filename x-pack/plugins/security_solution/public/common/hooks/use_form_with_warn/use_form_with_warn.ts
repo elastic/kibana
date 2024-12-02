@@ -117,7 +117,7 @@ export function useFormWithWarn<T extends FormData = FormData, I extends FormDat
         validate,
         submit,
         getErrors: () => errorsRef.current.map((x) => x.message),
-        getWarnings: () => warningsRef.current.map((x) => x.message),
+        getValidationWarnings: () => warningsRef.current,
       },
     }),
     [form, validate, submit, isSubmitted, isSubmitting, isValid, errorsRef, warningsRef]

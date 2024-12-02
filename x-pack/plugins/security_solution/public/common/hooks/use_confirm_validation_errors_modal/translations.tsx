@@ -31,6 +31,6 @@ export const CONFIRM = i18n.translate(
 export const SAVE_WITH_ERRORS_MESSAGE = (errorsCount: number) =>
   i18n.translate('xpack.securitySolution.detectionEngine.createRule.saveWithErrorsModalMessage', {
     defaultMessage:
-      'There are {errorsCount} validation {errorsCount, plural, one {error} other {errors}} which can lead to failed rule executions, save anyway?',
+      'There {errorsCount, plural, one {is} other {are}} {errorsCount} validation {errorsCount, plural, one {error} other {errors}} which can lead to failed rule executions, save anyway?',
     values: { errorsCount },
   });
