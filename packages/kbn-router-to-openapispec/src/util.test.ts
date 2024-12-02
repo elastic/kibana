@@ -117,10 +117,12 @@ describe('assignToPaths', () => {
     assignToPaths(paths, '/foo', {});
     assignToPaths(paths, '/bar/{id?}', {});
     assignToPaths(paths, '/bar/file/{path*}', {});
+    assignToPaths(paths, '/bar/file/{path*}/{id?}', {});
     expect(paths).toEqual({
       '/foo': {},
       '/bar/{id}': {},
       '/bar/file/{path}': {},
+      '/bar/file/{path}/{id}': {},
     });
   });
 });

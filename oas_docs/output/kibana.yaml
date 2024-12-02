@@ -10445,41 +10445,6 @@ paths:
       summary: Start an Entity Engine
       tags:
         - Security Entity Analytics API
-  /api/entity_store/engines/{entityType}/stats:
-    post:
-      operationId: GetEntityEngineStats
-      parameters:
-        - description: The entity type of the engine (either 'user' or 'host').
-          in: path
-          name: entityType
-          required: true
-          schema:
-            $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityType'
-      responses:
-        '200':
-          content:
-            application/json; Elastic-Api-Version=2023-10-31:
-              schema:
-                type: object
-                properties:
-                  indexPattern:
-                    $ref: '#/components/schemas/Security_Entity_Analytics_API_IndexPattern'
-                  indices:
-                    items:
-                      type: object
-                    type: array
-                  status:
-                    $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineStatus'
-                  transforms:
-                    items:
-                      type: object
-                    type: array
-                  type:
-                    $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityType'
-          description: Successful response
-      summary: Get Entity Engine stats
-      tags:
-        - Security Entity Analytics API
   /api/entity_store/engines/{entityType}/stop:
     post:
       operationId: StopEntityEngine
@@ -10630,6 +10595,12 @@ paths:
   /api/entity_store/status:
     get:
       operationId: GetEntityStoreStatus
+      parameters:
+        - description: If true returns a detailed status of the engine including all it's components
+          in: query
+          name: include_components
+          schema:
+            type: boolean
       responses:
         '200':
           content:
@@ -10639,10 +10610,20 @@ paths:
                 properties:
                   engines:
                     items:
-                      $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineDescriptor'
+                      allOf:
+                        - $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineDescriptor'
+                        - type: object
+                          properties:
+                            components:
+                              items:
+                                $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineComponentStatus'
+                              type: array
                     type: array
                   status:
                     $ref: '#/components/schemas/Security_Entity_Analytics_API_StoreStatus'
+                required:
+                  - status
+                  - engines
           description: Successful response
       summary: Get the status of the Entity Store
       tags:
@@ -35089,7 +35070,7 @@ paths:
               schema:
                 type: object
           description: |
-            Indicates a successful call. NOTE: This HTTP response code indicates that the bulk operation succeeded.  Errors pertaining to individual objects will be returned in the response body.
+            Indicates a successful call. NOTE: This HTTP response code indicates that the bulk operation succeeded.  Errors pertaining to individual objects will be returned in the response body. 
         '400':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
@@ -35121,7 +35102,7 @@ paths:
               schema:
                 type: object
           description: |
-            Indicates a successful call. NOTE: This HTTP response code indicates that the bulk operation succeeded. Errors pertaining to individual objects will be returned in the response body.
+            Indicates a successful call. NOTE: This HTTP response code indicates that the bulk operation succeeded. Errors pertaining to individual objects will be returned in the response body. 
         '400':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
@@ -35140,8 +35121,6 @@ paths:
         Exported saved objects are not backwards compatible and cannot be imported into an older version of Kibana.
 
         NOTE: The `savedObjects.maxImportExportSize` configuration setting limits the number of saved objects which may be exported.
-
-        This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
       operationId: exportSavedObjectsDefault
       parameters:
         - $ref: '#/components/parameters/Saved_objects_kbn_xsrf'
@@ -35301,8 +35280,6 @@ paths:
       description: |
         Create sets of Kibana saved objects from a file created by the export API.
         Saved objects can be imported only into the same version, a newer minor on the same major, or the next major. Exported saved objects are not backwards compatible and cannot be imported into an older version of Kibana.
-
-        This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
       operationId: importSavedObjectsDefault
       parameters:
         - $ref: '#/components/parameters/Saved_objects_kbn_xsrf'
@@ -35399,8 +35376,6 @@ paths:
         * Retry certain saved objects
         * Overwrite specific saved objects
         * Change references to different saved objects
-
-        This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
       operationId: resolveImportErrors
       parameters:
         - $ref: '#/components/parameters/Saved_objects_kbn_xsrf'
@@ -53478,6 +53453,47 @@ components:
               $ref: '#/components/schemas/Security_Entity_Analytics_API_AssetCriticalityLevel'
           required:
             - criticality_level
+    Security_Entity_Analytics_API_EngineComponentResource:
+      enum:
+        - entity_engine
+        - entity_definition
+        - index
+        - component_template
+        - index_template
+        - ingest_pipeline
+        - enrich_policy
+        - task
+        - transform
+      type: string
+    Security_Entity_Analytics_API_EngineComponentStatus:
+      type: object
+      properties:
+        errors:
+          items:
+            type: object
+            properties:
+              message:
+                type: string
+              title:
+                type: string
+          type: array
+        health:
+          enum:
+            - green
+            - yellow
+            - red
+            - unknown
+          type: string
+        id:
+          type: string
+        installed:
+          type: boolean
+        resource:
+          $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineComponentResource'
+      required:
+        - id
+        - installed
+        - resource
     Security_Entity_Analytics_API_EngineDataviewUpdateResult:
       type: object
       properties:
