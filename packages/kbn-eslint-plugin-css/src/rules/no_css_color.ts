@@ -194,86 +194,90 @@ export const NoCssColor: Rule.RuleModule = {
           return;
         }
 
-        if (node.name.name === 'style') {
-          /**
-           * @example <EuiCode style={{ color: '#dd4040' }}>This is an example</EuiCode>
-           */
-          if (
-            node.value &&
-            node.value.type === 'JSXExpressionContainer' &&
-            node.value.expression.type === 'ObjectExpression'
-          ) {
-            const declarationPropertiesNode = node.value.expression.properties;
+        /**
+         * @example
+         * const codeStyle = { color: '#dd4040' };
+         * <EuiCode style={codeStyle}>This is an example</EuiCode>
+         *
+         * @example
+         * const codeStyle = { color: '#dd4040' };
+         * <EuiCode css={codeStyle}>This is an example</EuiCode>
+         */
+        if (
+          node.name.name !== 'className' &&
+          node.value?.type === 'JSXExpressionContainer' &&
+          node.value.expression.type === 'Identifier'
+        ) {
+          const styleVariableName = node.value.expression.name;
 
-            declarationPropertiesNode?.forEach((property) => {
-              handleObjectProperties(context, node, property, {
-                loc: property.loc,
-                messageId: 'noCssColorSpecific',
-                data: {
-                  // @ts-expect-error the key name is always present else this code will not execute
-                  property: property.key.name,
-                },
-              });
+          const styleVariableDeclaration = context.sourceCode
+            .getScope(node.value.expression)
+            .variables.find((variable) => variable.name === styleVariableName);
+
+          // we assume there's only one definition of the variable
+          (
+            styleVariableDeclaration?.defs[0].node.init as TSESTree.ObjectExpression
+          )?.properties.forEach((property) => {
+            handleObjectProperties(context, node, property, {
+              loc: node.loc,
+              messageId: 'noCSSColorSpecificDeclaredVariable',
+              data: {
+                property:
+                  property.type === 'SpreadElement'
+                    ? // @ts-expect-error the key name is always present else this code will not execute
+                      String(property.argument.name)
+                    : // @ts-expect-error the key name is always present else this code will not execute
+                      String(property.key.name),
+                variableName: styleVariableName,
+                line: String(property.loc.start.line),
+              },
             });
+          });
 
-            return;
-          }
-
-          /**
-           * @example
-           *
-           * const codeStyle = { color: '#dd4040' };
-           *
-           * <EuiCode style={codeStyle}>This is an example</EuiCode>
-           */
-          if (
-            node.value &&
-            node.value.type === 'JSXExpressionContainer' &&
-            node.value.expression.type === 'Identifier'
-          ) {
-            const styleVariableName = node.value.expression.name;
-
-            const styleVariableDeclaration = context.sourceCode
-              .getScope(node.value.expression)
-              .variables.find((variable) => variable.name === styleVariableName);
-
-            if (!styleVariableDeclaration) {
-              return;
-            }
-
-            // assuming there's only one definition of the variable, eslint would catch other occurrences of this
-            (
-              styleVariableDeclaration.defs[0].node.init as TSESTree.ObjectExpression
-            )?.properties.forEach((property) => {
-              handleObjectProperties(context, node, property, {
-                loc: node.loc,
-                messageId: 'noCSSColorSpecificDeclaredVariable',
-                data: {
-                  property:
-                    property.type === 'SpreadElement'
-                      ? // @ts-expect-error the key name is always present else this code will not execute
-                        String(property.argument.name)
-                      : // @ts-expect-error the key name is always present else this code will not execute
-                        String(property.key.name),
-                  variableName: styleVariableName,
-                  line: String(property.loc.start.line),
-                },
-              });
-            });
-
-            return;
-          }
+          return;
         }
 
-        if (node.name.name === 'css') {
+        /**
+         * @example
+         * <EuiCode style={{ color: '#dd4040' }}>This is an example</EuiCode>
+         *
+         * @example
+         * <EuiCode css={{ color: '#dd4040' }}>This is an example</EuiCode>
+         *
+         * @example
+         * const styleRules = { color: '#dd4040' };
+         * <EuiCode style={{ color: styleRules.color }}>This is an example</EuiCode>
+         *
+         * @example
+         * const styleRules = { color: '#dd4040' };
+         * <EuiCode css={{ color: styleRules.color }}>This is an example</EuiCode>
+         */
+        if (
+          node.value?.type === 'JSXExpressionContainer' &&
+          node.value.expression.type === 'ObjectExpression'
+        ) {
+          const declarationPropertiesNode = node.value.expression.properties;
+
+          declarationPropertiesNode?.forEach((property) => {
+            handleObjectProperties(context, node, property, {
+              loc: property.loc,
+              messageId: 'noCssColorSpecific',
+              data: {
+                // @ts-expect-error the key name is always present else this code will not execute
+                property: property.key.name,
+              },
+            });
+          });
+
+          return;
+        }
+
+        if (node.name.name === 'css' && node.value?.type === 'JSXExpressionContainer') {
           /**
-           * @example <EuiCode css={`{ color: '#dd4040' }`}>This is an example</EuiCode>
+           * @example
+           * <EuiCode css={`{ color: '#dd4040' }`}>This is an example</EuiCode>
            */
-          if (
-            node.value &&
-            node.value.type === 'JSXExpressionContainer' &&
-            node.value.expression.type === 'TemplateLiteral'
-          ) {
+          if (node.value.expression.type === 'TemplateLiteral') {
             for (let i = 0; i < node.value.expression.quasis.length; i++) {
               const declarationTemplateNode = node.value.expression.quasis[i];
 
@@ -289,36 +293,11 @@ export const NoCssColor: Rule.RuleModule = {
           }
 
           /**
-           * @example <EuiCode css={{ color: '#dd4040' }}>This is an example</EuiCode>
-           */
-          if (
-            node.value &&
-            node.value.type === 'JSXExpressionContainer' &&
-            node.value.expression.type === 'ObjectExpression'
-          ) {
-            const declarationPropertiesNode = node.value.expression.properties;
-
-            declarationPropertiesNode?.forEach((property) => {
-              handleObjectProperties(context, node, property, {
-                loc: property.loc,
-                messageId: 'noCssColorSpecific',
-                data: {
-                  // @ts-expect-error the key name is always present else this code will not execute
-                  property: property.key.name,
-                },
-              });
-            });
-
-            return;
-          }
-
-          /**
            * @description check if css prop is a tagged template literal from emotion
-           * @example <EuiCode css={css`{ color: #dd4040 }`}>This is an example</EuiCode>
+           * @example
+           * <EuiCode css={css`color: '#dd4040'`}>This is an example</EuiCode>
            */
           if (
-            node.value &&
-            node.value.type === 'JSXExpressionContainer' &&
             node.value.expression.type === 'TaggedTemplateExpression' &&
             node.value.expression.tag.type === 'Identifier' &&
             node.value.expression.tag.name === 'css'
@@ -340,13 +319,12 @@ export const NoCssColor: Rule.RuleModule = {
           }
 
           /**
-           * @example <EuiCode css={() => ({ color: '#dd4040' })}>This is an example</EuiCode>
+           * @example
+           * <EuiCode css={() => ({ color: '#dd4040' })}>This is an example</EuiCode>
            */
           if (
-            node.value &&
-            node.value.type === 'JSXExpressionContainer' &&
-            (node.value.expression.type === 'FunctionExpression' ||
-              node.value.expression.type === 'ArrowFunctionExpression')
+            node.value.expression.type === 'FunctionExpression' ||
+            node.value.expression.type === 'ArrowFunctionExpression'
           ) {
             let declarationPropertiesNode: TSESTree.Property[] = [];
 
@@ -387,14 +365,13 @@ export const NoCssColor: Rule.RuleModule = {
           }
         }
 
-        if (node.name.name === 'className') {
+        if (node.name.name === 'className' && node.value?.type === 'JSXExpressionContainer') {
           /**
            * @description check if css prop is a tagged template literal from emotion
-           * @example <EuiCode className={css`{ color: #dd4040 }`}>This is an example</EuiCode>
+           * @example
+           * <EuiCode className={css`{ color: #dd4040 }`}>This is an example</EuiCode>
            */
           if (
-            node.value &&
-            node.value.type === 'JSXExpressionContainer' &&
             node.value.expression.type === 'TaggedTemplateExpression' &&
             node.value.expression.tag.type === 'Identifier' &&
             node.value.expression.tag.name === 'css'
