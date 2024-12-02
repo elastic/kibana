@@ -8,7 +8,12 @@
 import React, { useState, useEffect } from 'react';
 import { EuiEmptyPrompt, useEuiTheme } from '@elastic/eui';
 import { Query, Filter } from '@kbn/es-query';
-import { FillStyle, SeriesType, TermsIndexPatternColumn } from '@kbn/lens-plugin/public';
+import {
+  FillStyle,
+  SeriesType,
+  TermsIndexPatternColumn,
+  UserMessage,
+} from '@kbn/lens-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useAsync from 'react-use/lib/useAsync';
@@ -124,36 +129,10 @@ export function RuleConditionChart({
   const [warningThresholdReferenceLine, setWarningThresholdReferenceLine] =
     useState<XYReferenceLinesLayer[]>();
   const [alertAnnotation, setAlertAnnotation] = useState<XYByValueAnnotationsLayer>();
-  const [chartLoading, setChartLoading] = useState<boolean>(false);
   const filters = [...(searchConfiguration.filter || []), ...additionalFilters];
   const formulaAsync = useAsync(() => {
     return lens.stateHelperApi();
   }, [lens]);
-
-  // Handle Lens error
-  useEffect(() => {
-    // Lens does not expose or provide a way to check if there is an error in the chart, yet.
-    // To work around this, we check if the element with class 'lnsEmbeddedError' is found in the DOM.
-    setTimeout(function () {
-      const errorDiv = document.querySelector('.lnsEmbeddedError');
-      if (errorDiv) {
-        const paragraphElements = errorDiv.querySelectorAll('p');
-        if (!paragraphElements || paragraphElements.length < 2) return;
-        paragraphElements[0].innerText = i18n.translate(
-          'xpack.observability.ruleCondition.chart.error_equation.title',
-          {
-            defaultMessage: 'An error occurred while rendering the chart',
-          }
-        );
-        paragraphElements[1].innerText = i18n.translate(
-          'xpack.observability.ruleCondition.chart.error_equation.description',
-          {
-            defaultMessage: 'Check the rule equation.',
-          }
-        );
-      }
-    });
-  }, [chartLoading, attributes]);
 
   // Build the warning threshold reference line
   useEffect(() => {
@@ -488,7 +467,6 @@ export function RuleConditionChart({
   return (
     <div>
       <lens.EmbeddableComponent
-        onLoad={setChartLoading}
         id="ruleConditionChart"
         style={{ height: 180 }}
         timeRange={timeRange}
@@ -496,6 +474,41 @@ export function RuleConditionChart({
         disableTriggers={true}
         query={(searchConfiguration.query as Query) || defaultQuery}
         filters={filters}
+        onBeforeBadgesRender={(badges): UserMessage[] => {
+          if (badges.length < 2) {
+            return [];
+          }
+          const genericErrorMessage = i18n.translate(
+            'xpack.observability.ruleCondition.chart.error_equation.title',
+            {
+              defaultMessage: 'An error occurred while rendering the chart',
+            }
+          );
+          const ruleMessage = i18n.translate(
+            'xpack.observability.ruleCondition.chart.error_equation.description',
+            {
+              defaultMessage: 'Check the rule equation.',
+            }
+          );
+          return [
+            {
+              uniqueId: 'generic_error',
+              severity: 'error',
+              shortMessage: '',
+              longMessage: genericErrorMessage,
+              fixableInEditor: false,
+              displayLocations: [{ id: 'visualization' }],
+            },
+            {
+              uniqueId: 'rule_error',
+              severity: 'error',
+              shortMessage: '',
+              longMessage: ruleMessage,
+              fixableInEditor: false,
+              displayLocations: [{ id: 'visualization' }],
+            },
+          ];
+        }}
       />
     </div>
   );
