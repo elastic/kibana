@@ -15,7 +15,7 @@ import { ElasticsearchResponse } from '../../../../../common/types/es';
 import {
   getIndexPatterns,
   getElasticsearchDataset,
-} from '../../../../lib/cluster/get_index_patterns';
+} from '../../../../../common/get_index_patterns';
 import { createValidationFunction } from '../../../../lib/create_route_validation_function';
 import { getMetrics } from '../../../../lib/details/get_metrics';
 import { handleError } from '../../../../lib/errors/handle_error';

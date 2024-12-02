@@ -18,14 +18,18 @@ const onlineStatusPath = 'https://api.crowdstrike.com/devices/entities/online-st
 const actionsPath = 'https://api.crowdstrike.com/devices/entities/devices-actions/v2';
 describe('CrowdstrikeConnector', () => {
   const logger = loggingSystemMock.createLogger();
-  const connector = new CrowdstrikeConnector({
-    configurationUtilities: actionsConfigMock.create(),
-    connector: { id: '1', type: CROWDSTRIKE_CONNECTOR_ID },
-    config: { url: 'https://api.crowdstrike.com' },
-    secrets: { clientId: '123', clientSecret: 'secret' },
-    logger,
-    services: actionsMock.createServices(),
-  });
+  const connector = new CrowdstrikeConnector(
+    {
+      configurationUtilities: actionsConfigMock.create(),
+      connector: { id: '1', type: CROWDSTRIKE_CONNECTOR_ID },
+      config: { url: 'https://api.crowdstrike.com' },
+      secrets: { clientId: '123', clientSecret: 'secret' },
+      logger,
+      services: actionsMock.createServices(),
+    },
+    // @ts-expect-error passing a true value just for testing purposes
+    { crowdstrikeConnectorRTROn: true }
+  );
   let mockedRequest: jest.Mock;
   let connectorUsageCollector: ConnectorUsageCollector;
 
@@ -339,6 +343,72 @@ describe('CrowdstrikeConnector', () => {
         connector.getAgentDetails({ ids: ['id1', 'id2'] }, connectorUsageCollector)
       ).rejects.toThrowError();
       expect(mockedRequest).toHaveBeenCalledTimes(3);
+    });
+  });
+  describe('batchInitRTRSession', () => {
+    it('should make a POST request to the correct URL with correct data', async () => {
+      const mockResponse = { data: { batch_id: 'testBatchId' } };
+      mockedRequest.mockResolvedValueOnce({ data: { access_token: 'testToken' } });
+      mockedRequest.mockResolvedValueOnce(mockResponse);
+
+      await connector.batchInitRTRSession(
+        { endpoint_ids: ['id1', 'id2'] },
+        connectorUsageCollector
+      );
+
+      expect(mockedRequest).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({
+          headers: {
+            accept: 'application/json',
+            'Content-Type': 'application/x-www-form-urlencoded',
+            authorization: expect.any(String),
+          },
+          method: 'post',
+          responseSchema: expect.any(Object),
+          url: tokenPath,
+        }),
+        connectorUsageCollector
+      );
+      expect(mockedRequest).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({
+          url: 'https://api.crowdstrike.com/real-time-response/combined/batch-init-session/v1',
+          method: 'post',
+          data: { host_ids: ['id1', 'id2'] },
+          paramsSerializer: expect.any(Function),
+          responseSchema: expect.any(Object),
+        }),
+        connectorUsageCollector
+      );
+      // @ts-expect-error private static - but I still want to test it
+      expect(CrowdstrikeConnector.currentBatchId).toBe('testBatchId');
+    });
+
+    it('should handle error when fetching batch init session', async () => {
+      mockedRequest.mockResolvedValueOnce({ data: { access_token: 'testToken' } });
+      mockedRequest.mockRejectedValueOnce(new Error('Failed to fetch batch init session'));
+
+      await expect(
+        connector.batchInitRTRSession({ endpoint_ids: ['id1', 'id2'] }, connectorUsageCollector)
+      ).rejects.toThrow('Failed to fetch batch init session');
+    });
+
+    it('should retry once if token is invalid', async () => {
+      const mockResponse = { data: { batch_id: 'testBatchId' } };
+      mockedRequest.mockResolvedValueOnce({ data: { access_token: 'testToken' } });
+      mockedRequest.mockRejectedValueOnce({ code: 401 });
+      mockedRequest.mockResolvedValueOnce({ data: { access_token: 'newTestToken' } });
+      mockedRequest.mockResolvedValueOnce(mockResponse);
+
+      await connector.batchInitRTRSession(
+        { endpoint_ids: ['id1', 'id2'] },
+        connectorUsageCollector
+      );
+
+      expect(mockedRequest).toHaveBeenCalledTimes(4);
+      // @ts-expect-error private static - but I still want to test it
+      expect(CrowdstrikeConnector.currentBatchId).toBe('testBatchId');
     });
   });
 });
