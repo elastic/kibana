@@ -532,6 +532,7 @@ export function LensEditConfigurationFlyout({
                     : undefined
                 }
                 editorIsInline
+                supportsVariables
                 hideRunQueryText
                 onTextLangQuerySubmit={async (q, a) => {
                   // do not run the suggestions if the query is the same as the previous one

@@ -176,6 +176,7 @@ export async function suggest(
     queryForFields.replace(EDITOR_MARKER, ''),
     resourceRetriever
   );
+  const supportsVariables = resourceRetriever?.canSuggestVariables?.() ?? false;
   const getVariablesByType = resourceRetriever?.getVariablesByType;
   const getSources = getSourcesHelper(resourceRetriever);
   const { getPolicies, getPolicyMetadata } = getPolicyRetriever(resourceRetriever);
@@ -257,7 +258,8 @@ export async function suggest(
       getFieldsMap,
       fullText,
       offset,
-      getVariablesByType
+      getVariablesByType,
+      supportsVariables
     );
   }
   if (astContext.type === 'list') {
@@ -279,14 +281,19 @@ export function getFieldsByTypeRetriever(
 ): { getFieldsByType: GetColumnsByTypeFn; getFieldsMap: GetFieldsMapFn } {
   const helpers = getFieldsByTypeHelper(queryString, resourceRetriever);
   const getVariablesByType = resourceRetriever?.getVariablesByType;
+  const supportsVariables = resourceRetriever?.canSuggestVariables?.() ?? false;
   return {
     getFieldsByType: async (
       expectedType: string | string[] = 'any',
       ignored: string[] = [],
       options
     ) => {
+      const updatedOptions = {
+        ...options,
+        supportsVariables,
+      };
       const fields = await helpers.getFieldsByType(expectedType, ignored);
-      return buildFieldsDefinitionsWithMetadata(fields, options, getVariablesByType);
+      return buildFieldsDefinitionsWithMetadata(fields, updatedOptions, getVariablesByType);
     },
     getFieldsMap: helpers.getFieldsMap,
   };
@@ -1030,7 +1037,8 @@ async function getFunctionArgsSuggestions(
   getFieldsMap: GetFieldsMapFn,
   fullText: string,
   offset: number,
-  getVariablesByType?: (type: string) => ESQLVariables[]
+  getVariablesByType?: (type: string) => ESQLVariables[],
+  supportsVariables?: boolean
 ): Promise<SuggestionRawDefinition[]> {
   const fnDefinition = getFunctionDefinition(node.name);
   // early exit on no hit
@@ -1152,7 +1160,11 @@ async function getFunctionArgsSuggestions(
         command.name,
         getTypesFromParamDefs(constantOnlyParamDefs) as string[],
         undefined,
-        { addComma: shouldAddComma, advanceCursorAndOpenSuggestions: hasMoreMandatoryArgs },
+        {
+          addComma: shouldAddComma,
+          advanceCursorAndOpenSuggestions: hasMoreMandatoryArgs,
+          supportsVariables,
+        },
         getVariablesByType
       )
     );

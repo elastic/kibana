@@ -223,6 +223,7 @@ export const buildFieldsDefinitionsWithMetadata = (
     openSuggestions?: boolean;
     addComma?: boolean;
     controlType?: EsqlControlType;
+    supportsVariables?: boolean;
   },
   getVariablesByType?: (type: string) => ESQLVariables[]
 ): SuggestionRawDefinition[] => {
@@ -242,18 +243,21 @@ export const buildFieldsDefinitionsWithMetadata = (
     };
   }) as SuggestionRawDefinition[];
 
-  const controlType = options?.controlType ?? EsqlControlType.FIELDS;
+  const suggestions = [...fieldsSuggestions];
+  if (options?.supportsVariables) {
+    const controlType = options?.controlType ?? EsqlControlType.FIELDS;
+    const variables = getVariablesByType?.(controlType) ?? [];
 
-  const variables = getVariablesByType?.(controlType) ?? [];
+    const controlSuggestions = fields.length
+      ? getControlSuggestion(
+          controlType,
+          variables?.map((v) => `?${v.key}`)
+        )
+      : [];
+    suggestions.push(...controlSuggestions);
+  }
 
-  const controlSuggestions = fields.length
-    ? getControlSuggestion(
-        controlType,
-        variables?.map((v) => `?${v.key}`)
-      )
-    : [];
-
-  return [...controlSuggestions, ...fieldsSuggestions];
+  return [...suggestions];
 };
 
 export const buildFieldsDefinitions = (fields: string[]): SuggestionRawDefinition[] => {
@@ -479,7 +483,11 @@ export function getCompatibleLiterals(
   commandName: string,
   types: string[],
   names?: string[],
-  options?: { advanceCursorAndOpenSuggestions?: boolean; addComma?: boolean },
+  options?: {
+    advanceCursorAndOpenSuggestions?: boolean;
+    addComma?: boolean;
+    supportsVariables?: boolean;
+  },
   getVariablesByType?: (type: string) => ESQLVariables[]
 ) {
   const suggestions: SuggestionRawDefinition[] = [];
@@ -494,15 +502,20 @@ export function getCompatibleLiterals(
     }
   }
   if (types.includes('time_literal')) {
-    const variables = getVariablesByType?.(EsqlControlType.TIME_LITERAL) ?? [];
+    const timeLiteralSuggestions = [
+      ...buildConstantsDefinitions(getUnitDuration(1), undefined, undefined, options),
+    ];
+    if (options?.supportsVariables) {
+      const variables = getVariablesByType?.(EsqlControlType.TIME_LITERAL) ?? [];
+      timeLiteralSuggestions.push(
+        ...getControlSuggestion(
+          EsqlControlType.TIME_LITERAL,
+          variables.map((v) => `?${v.key}`)
+        )
+      );
+    }
     // filter plural for now and suggest only unit + singular
-    suggestions.push(
-      ...getControlSuggestion(
-        EsqlControlType.TIME_LITERAL,
-        variables.map((v) => `?${v.key}`)
-      ),
-      ...buildConstantsDefinitions(getUnitDuration(1), undefined, undefined, options)
-    ); // i.e. 1 year
+    suggestions.push(...timeLiteralSuggestions); // i.e. 1 year
   }
   // this is a special type built from the suggestion system, not inherited from the AST
   if (types.includes('time_literal_unit')) {

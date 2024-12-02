@@ -53,6 +53,7 @@ export interface ESQLCallbacks {
   getPreferences?: () => Promise<{ histogramBarTarget: number }>;
   getFieldsMetadata?: Promise<PartialFieldsMetadataClient>;
   getVariablesByType?: (type: string) => ESQLVariables[];
+  canSuggestVariables?: () => boolean;
 }
 
 export type ReasonTypes = 'missingCommand' | 'unsupportedFunction' | 'unknownFunction';

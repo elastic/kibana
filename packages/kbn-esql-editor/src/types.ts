@@ -77,6 +77,9 @@ export interface ESQLEditorProps {
 
   /** The component by default focuses on the editor when it is mounted, this flag disabled it**/
   disableAutoFocus?: boolean;
+
+  /** The editor supports the creation of controls**/
+  supportsVariables?: boolean;
 }
 
 export interface ESQLEditorDeps {

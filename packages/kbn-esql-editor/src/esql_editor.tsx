@@ -87,6 +87,7 @@ export const ESQLEditor = memo(function ESQLEditor({
   dashboardApi,
   panelId,
   disableAutoFocus,
+  supportsVariables,
 }: ESQLEditorProps) {
   const popoverRef = useRef<HTMLDivElement>(null);
   const datePickerOpenStatusRef = useRef<boolean>(false);
@@ -439,6 +440,9 @@ export const ESQLEditor = memo(function ESQLEditor({
       getVariablesByType: (type: string) => {
         return esqlService.getVariablesByType(type);
       },
+      canSuggestVariables: () => {
+        return supportsVariables ?? false;
+      },
     };
     return callbacks;
   }, [
@@ -455,6 +459,7 @@ export const ESQLEditor = memo(function ESQLEditor({
     indexManagementApiService,
     histogramBarTarget,
     esqlService,
+    supportsVariables,
   ]);
 
   const queryRunButtonProperties = useMemo(() => {
