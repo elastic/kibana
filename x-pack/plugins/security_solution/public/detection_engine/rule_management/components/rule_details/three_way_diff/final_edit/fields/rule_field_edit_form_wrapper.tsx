@@ -6,8 +6,11 @@
  */
 
 import React, { useCallback, useEffect } from 'react';
+import { capitalize } from 'lodash';
 import { EuiButtonEmpty, EuiFlexGroup } from '@elastic/eui';
-import { useForm, Form } from '../../../../../../../shared_imports';
+import type { FormWithWarnSubmitHandler } from '../../../../../../../common/hooks/use_form_with_warn';
+import { useFormWithWarn } from '../../../../../../../common/hooks/use_form_with_warn';
+import { Form } from '../../../../../../../shared_imports';
 import type { FormSchema, FormData } from '../../../../../../../shared_imports';
 import type {
   DiffableAllFields,
@@ -17,6 +20,8 @@ import { useFinalSideContext } from '../../final_side/final_side_context';
 import { useDiffableRuleContext } from '../../diffable_rule_context';
 import * as i18n from '../../translations';
 import type { RuleFieldEditComponentProps } from './rule_field_edit_component_props';
+import { useConfirmValidationErrorsModal } from '../../../../../../../common/hooks/use_confirm_validation_errors_modal';
+import { NON_BLOCKING_ERROR_CODES } from '../../../../../../rule_creation/constants/non_blocking_error_codes';
 
 type RuleFieldEditComponent = React.ComponentType<RuleFieldEditComponentProps>;
 
@@ -56,9 +61,13 @@ export function RuleFieldEditFormWrapper({
     [deserializer, finalDiffableRule]
   );
 
-  const handleSubmit = useCallback(
-    async (formData: FormData, isValid: boolean) => {
-      if (!isValid) {
+  const { modal, confirmValidationErrors } = useConfirmValidationErrorsModal();
+
+  const handleSubmit = useCallback<FormWithWarnSubmitHandler>(
+    async (formData: FormData, isValid: boolean, { warnings }) => {
+      const warningMessages = warnings.map((x) => `${capitalize(x.path)}: ${x.message}`);
+
+      if (!isValid || !(await confirmValidationErrors(warningMessages))) {
         return;
       }
 
@@ -69,15 +78,24 @@ export function RuleFieldEditFormWrapper({
       });
       setReadOnlyMode();
     },
-    [fieldName, finalDiffableRule.rule_id, setReadOnlyMode, setRuleFieldResolvedValue]
+    [
+      confirmValidationErrors,
+      fieldName,
+      finalDiffableRule.rule_id,
+      setReadOnlyMode,
+      setRuleFieldResolvedValue,
+    ]
   );
 
-  const { form } = useForm({
+  const { form } = useFormWithWarn({
     schema: ruleFieldFormSchema,
     defaultValue: getDefaultValue(fieldName, finalDiffableRule),
     deserializer: deserialize,
     serializer,
     onSubmit: handleSubmit,
+    options: {
+      warningValidationCodes: NON_BLOCKING_ERROR_CODES,
+    },
   });
 
   // form.isValid has `undefined` value until all fields are dirty.
@@ -96,6 +114,7 @@ export function RuleFieldEditFormWrapper({
           {i18n.SAVE_BUTTON_LABEL}
         </EuiButtonEmpty>
       </EuiFlexGroup>
+      {modal}
       <Form form={form}>
         <FieldComponent
           finalDiffableRule={finalDiffableRule}
