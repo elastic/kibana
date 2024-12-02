@@ -881,6 +881,9 @@ exports[`buildOSSFeatures with a basic license returns the indexPatterns feature
 Array [
   Object {
     "privilege": Object {
+      "api": Array [
+        "indexPatterns:manage",
+      ],
       "app": Array [
         "kibana",
       ],
@@ -1520,6 +1523,9 @@ exports[`buildOSSFeatures with a enterprise license returns the indexPatterns fe
 Array [
   Object {
     "privilege": Object {
+      "api": Array [
+        "indexPatterns:manage",
+      ],
       "app": Array [
         "kibana",
       ],

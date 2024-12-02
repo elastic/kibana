@@ -133,6 +133,12 @@ export const registerHasEsDataRoute = (
     .addVersion(
       {
         version: '1',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'Authorization provided by Elasticsearch',
+          },
+        },
         validate: {
           response: {
             200: {
