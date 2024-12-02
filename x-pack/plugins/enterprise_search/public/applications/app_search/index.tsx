@@ -12,11 +12,9 @@ import { useValues } from 'kea';
 
 import { Routes, Route } from '@kbn/shared-ux-router';
 
-import { isVersionMismatch } from '../../../common/is_version_mismatch';
 import { InitialAppData } from '../../../common/types';
 import { KibanaLogic } from '../shared/kibana';
 import { EndpointsHeaderAction } from '../shared/layout/endpoints_header_action';
-import { VersionMismatchPage } from '../shared/version_mismatch';
 
 import { AppLogic } from './app_logic';
 import { Credentials } from './components/credentials';
@@ -45,21 +43,10 @@ import {
 
 export const AppSearch: React.FC<InitialAppData> = (props) => {
   const { config } = useValues(KibanaLogic);
-  const { enterpriseSearchVersion, kibanaVersion } = props;
-  const incompatibleVersions = isVersionMismatch(enterpriseSearchVersion, kibanaVersion);
-
   const showView = () => {
     if (!config.host) {
       return <AppSearchUnconfigured />;
-    } else if (incompatibleVersions) {
-      return (
-        <VersionMismatchPage
-          enterpriseSearchVersion={enterpriseSearchVersion}
-          kibanaVersion={kibanaVersion}
-        />
-      );
     }
-
     return <AppSearchConfigured {...(props as Required<InitialAppData>)} />;
   };
 

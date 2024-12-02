@@ -12,10 +12,8 @@ import { useActions, useValues } from 'kea';
 
 import { Routes, Route } from '@kbn/shared-ux-router';
 
-import { isVersionMismatch } from '../../../common/is_version_mismatch';
 import { InitialAppData } from '../../../common/types';
 import { KibanaLogic } from '../shared/kibana';
-import { VersionMismatchPage } from '../shared/version_mismatch';
 
 import { AppLogic } from './app_logic';
 import { WorkplaceSearchHeaderActions } from './components/layout';
@@ -50,18 +48,9 @@ import { SetupGuide } from './views/setup_guide';
 
 export const WorkplaceSearch: React.FC<InitialAppData> = (props) => {
   const { config } = useValues(KibanaLogic);
-  const { enterpriseSearchVersion, kibanaVersion } = props;
-  const incompatibleVersions = isVersionMismatch(enterpriseSearchVersion, kibanaVersion);
 
   if (!config.host) {
     return <WorkplaceSearchUnconfigured />;
-  } else if (incompatibleVersions) {
-    return (
-      <VersionMismatchPage
-        enterpriseSearchVersion={enterpriseSearchVersion}
-        kibanaVersion={kibanaVersion}
-      />
-    );
   }
 
   return <WorkplaceSearchConfigured {...props} />;

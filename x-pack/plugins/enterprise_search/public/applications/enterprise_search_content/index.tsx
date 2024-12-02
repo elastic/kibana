@@ -8,15 +8,10 @@
 import React from 'react';
 import { Redirect } from 'react-router-dom';
 
-import { useValues } from 'kea';
-
 import { Route, Routes } from '@kbn/shared-ux-router';
 
-import { isVersionMismatch } from '../../../common/is_version_mismatch';
 import { InitialAppData } from '../../../common/types';
 import { SetupGuide } from '../enterprise_search_overview/components/setup_guide';
-import { KibanaLogic } from '../shared/kibana';
-import { VersionMismatchPage } from '../shared/version_mismatch';
 
 import { ConnectorsRouter } from './components/connectors/connectors_router';
 import { CrawlersRouter } from './components/connectors/crawlers_router';
@@ -31,29 +26,14 @@ import {
 } from './routes';
 
 export const EnterpriseSearchContent: React.FC<InitialAppData> = (props) => {
-  const { config } = useValues(KibanaLogic);
-  const { enterpriseSearchVersion, kibanaVersion } = props;
-  const incompatibleVersions = isVersionMismatch(enterpriseSearchVersion, kibanaVersion);
-
-  const showView = () => {
-    if (config.host && config.canDeployEntSearch && incompatibleVersions) {
-      return (
-        <VersionMismatchPage
-          enterpriseSearchVersion={enterpriseSearchVersion}
-          kibanaVersion={kibanaVersion}
-        />
-      );
-    }
-
-    return <EnterpriseSearchContentConfigured {...(props as Required<InitialAppData>)} />;
-  };
-
   return (
     <Routes>
       <Route exact path={SETUP_GUIDE_PATH}>
         <SetupGuide />
       </Route>
-      <Route>{showView()}</Route>
+      <Route>
+        <EnterpriseSearchContentConfigured {...(props as Required<InitialAppData>)} />
+      </Route>
     </Routes>
   );
 };
