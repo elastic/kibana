@@ -7,7 +7,7 @@
 
 import rt from 'io-ts';
 import { PropsWithChildren } from 'react';
-import { EuiTheme } from '@kbn/kibana-react-plugin/common';
+import { WithEuiThemeProps } from '@elastic/eui';
 import { InventoryFormatterTypeRT } from '@kbn/metrics-data-access-plugin/common';
 import { MetricsTimeInput } from './hooks/use_metrics_time';
 import { NodeDetailsMetricData } from '../../../../common/http_api/node_details_api';
@@ -19,7 +19,7 @@ export interface LayoutProps {
   stopLiveStreaming?: () => void;
 }
 
-export type LayoutPropsWithTheme = LayoutProps & PropsWithChildren<{ theme: EuiTheme }>;
+export type LayoutPropsWithTheme = LayoutProps & PropsWithChildren & WithEuiThemeProps;
 
 const ChartTypesRT = rt.keyof({
   area: null,

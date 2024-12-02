@@ -8,15 +8,16 @@
 import { EuiDatePicker, EuiDatePickerProps } from '@elastic/eui';
 import React, { FunctionComponent } from 'react';
 import { StyledComponent } from 'styled-components';
-import { euiStyled, EuiTheme } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
+import { Theme } from '@emotion/react';
 
 // The return type of this component needs to be specified because the inferred
 // return type depends on types that are not exported from EUI. You get a TS4023
 // error if the return type is not specified.
 export const FixedDatePicker: StyledComponent<
   FunctionComponent<EuiDatePickerProps>,
-  EuiTheme
-> = euiStyled(
+  Theme
+> = styled(
   ({
     className,
     inputClassName,

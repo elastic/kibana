@@ -8,7 +8,9 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
-    "types/**/*"
+    "types/**/*",
+    // Emotion theme typing
+    "./emotion.d.ts"
   ],
   "kbn_references": [
     "@kbn/core",

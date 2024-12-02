@@ -6,20 +6,17 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import styled from '@emotion/styled';
 
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
-
-export const LogStatusbar = euiStyled(EuiFlexGroup).attrs(() => ({
-  alignItems: 'center',
-  gutterSize: 'none',
-  justifyContent: 'flexEnd',
-}))`
-  padding: ${(props) => props.theme.eui.euiSizeS};
-  border-top: ${(props) => props.theme.eui.euiBorderThin};
+export const LogStatusbar = styled(EuiFlexGroup)`
+  padding: ${(props) => props.theme.euiTheme.size.s};
+  border-top: ${(props) => props.theme.euiTheme.border.thin};
   max-height: 48px;
   min-height: 48px;
-  background-color: ${(props) => props.theme.eui.euiColorEmptyShade};
+  background-color: ${(props) => props.theme.euiTheme.colors.emptyShade};
   flex-direction: row;
 `;
+
+LogStatusbar.defaultProps = { alignItems: 'center', gutterSize: 'none', justifyContent: 'flexEnd' };
 
 export const LogStatusbarItem = EuiFlexItem;

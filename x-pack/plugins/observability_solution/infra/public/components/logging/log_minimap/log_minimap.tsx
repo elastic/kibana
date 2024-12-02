@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import {
   LogEntriesSummaryBucket,
   LogEntriesSummaryHighlightsBucket,
@@ -157,23 +157,23 @@ export class LogMinimap extends React.Component<LogMinimapProps, LogMinimapState
   }
 }
 
-const MinimapBorder = euiStyled.line`
-  stroke: ${(props) => props.theme.eui.euiColorMediumShade};
+const MinimapBorder = styled.line`
+  stroke: ${(props) => props.theme.euiTheme.colors.mediumShade};
   stroke-width: 1px;
 `;
 
-const TimeCursor = euiStyled.line`
+const TimeCursor = styled.line`
   pointer-events: none;
   stroke-width: 1px;
   stroke: ${(props) =>
     props.theme.darkMode
-      ? props.theme.eui.euiColorDarkestShade
-      : props.theme.eui.euiColorDarkShade};
+      ? props.theme.euiTheme.colors.darkestShade
+      : props.theme.euiTheme.colors.darkShade};
 `;
 
-const MinimapWrapper = euiStyled.svg`
+const MinimapWrapper = styled.svg`
   cursor: pointer;
-  fill: ${(props) => props.theme.eui.euiColorEmptyShade};
+  fill: ${(props) => props.theme.euiTheme.colors.emptyShade};
   & ${TimeCursor} {
     visibility: hidden;
   }

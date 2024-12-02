@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import {
   InfraWaffleMapBounds,
@@ -52,18 +51,18 @@ export const GroupOfGroups: React.FC<Props> = (props) => {
   );
 };
 
-const GroupOfGroupsContainer = euiStyled.div`
+const GroupOfGroupsContainer = styled.div`
   margin: 0 10px;
   width: 100%;
 `;
 
-const Groups = euiStyled.div`
+const Groups = styled.div`
   display: flex;
   background-color: rgba(0, 0, 0, 0.05);
   flex-wrap: wrap;
   justify-content: center;
   padding: 20px 10px 10px;
   border-radius: 4px;
-  border: 1px solid ${(props) => props.theme.eui.euiBorderColor};
+  border: 1px solid ${(props) => props.theme.euiTheme.euiBorderColor};
   box-shadow: 0 1px 7px rgba(0, 0, 0, 0.1);
 `;

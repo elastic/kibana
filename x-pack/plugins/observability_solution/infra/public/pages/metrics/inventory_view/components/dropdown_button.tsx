@@ -5,52 +5,59 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonEmpty,
+  withEuiTheme,
+  WithEuiThemeProps,
+  type EuiThemeComputed,
+} from '@elastic/eui';
 import React, { ReactNode } from 'react';
-import { withTheme, EuiTheme } from '@kbn/kibana-react-plugin/common';
 import { KubernetesTour } from './kubernetes_tour';
 
 interface Props {
   'data-test-subj'?: string;
   label: string;
   onClick: () => void;
-  theme: EuiTheme | undefined;
   children: ReactNode;
   showKubernetesInfo?: boolean;
 }
 
-const ButtonLabel = ({ label, theme }: { label: string; theme?: EuiTheme }) => (
+type PropsWithTheme = Props & WithEuiThemeProps;
+
+const ButtonLabel = ({ label, theme }: { label: string; theme?: EuiThemeComputed }) => (
   <EuiFlexItem
     grow={false}
     style={{
       padding: 12,
-      background: theme?.eui.euiFormInputGroupLabelBackground,
+      background: theme?.euiFormInputGroupLabelBackground,
       fontSize: '0.75em',
       fontWeight: 600,
-      color: theme?.eui.euiTitleColor,
+      color: theme?.euiTitleColor,
     }}
   >
     {label}
   </EuiFlexItem>
 );
 
-export const DropdownButton = withTheme((props: Props) => {
+export const DropdownButton = withEuiTheme((props: PropsWithTheme) => {
   const { onClick, label, theme, children, showKubernetesInfo } = props;
   return (
     <EuiFlexGroup
       alignItems="center"
       gutterSize="none"
       style={{
-        border: theme?.eui.euiFormInputGroupBorder,
-        boxShadow: `0px 3px 2px ${theme?.eui.euiTableActionsBorderColor}, 0px 1px 1px ${theme?.eui.euiTableActionsBorderColor}`,
+        border: theme?.euiTheme.euiFormInputGroupBorder,
+        boxShadow: `0px 3px 2px ${theme?.euiTheme.euiTableActionsBorderColor}, 0px 1px 1px ${theme?.euiTheme.euiTableActionsBorderColor}`,
       }}
     >
       {showKubernetesInfo ? (
         <KubernetesTour>
-          <ButtonLabel label={label} theme={theme} />
+          <ButtonLabel label={label} theme={theme.euiTheme} />
         </KubernetesTour>
       ) : (
-        <ButtonLabel label={label} theme={theme} />
+        <ButtonLabel label={label} theme={theme.euiTheme} />
       )}
       <EuiFlexItem grow={false}>
         <EuiButtonEmpty

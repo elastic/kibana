@@ -9,8 +9,7 @@ import { EuiButton, EuiEmptyPrompt, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 
 export const MlUnavailablePrompt: React.FunctionComponent<{}> = () => (
   <EmptyPrompt
@@ -60,6 +59,6 @@ export const MlUnavailablePrompt: React.FunctionComponent<{}> = () => (
   />
 );
 
-const EmptyPrompt = euiStyled(EuiEmptyPrompt)`
+const EmptyPrompt = styled(EuiEmptyPrompt)`
   align-self: center;
 `;

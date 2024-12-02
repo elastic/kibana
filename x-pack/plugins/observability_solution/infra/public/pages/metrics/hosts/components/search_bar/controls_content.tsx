@@ -13,7 +13,7 @@ import {
 } from '@kbn/controls-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import { useControlPanels } from '@kbn/observability-shared-plugin/public';
 import React, { useCallback, useEffect, useRef } from 'react';
 import { Subscription } from 'rxjs';
@@ -104,8 +104,8 @@ export const ControlsContent: React.FC<Props> = ({
   );
 };
 
-const ControlGroupContainer = euiStyled.div`
+const ControlGroupContainer = styled.div`
   .controlGroup {
-    min-height: ${(props) => props.theme.eui.euiSizeXXL}
+    min-height: ${(props) => props.theme.euiTheme.size.xxl};
   }
 `;

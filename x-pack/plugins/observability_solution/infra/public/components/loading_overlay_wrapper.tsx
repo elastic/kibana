@@ -8,7 +8,7 @@
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { transparentize } from 'polished';
 import React, { FC, PropsWithChildren } from 'react';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 
 export const LoadingOverlayWrapper: React.FC<
   React.HTMLAttributes<HTMLDivElement> & {
@@ -28,13 +28,13 @@ const Overlay: FC<PropsWithChildren<unknown>> = ({ children }) => (
   <OverlayDiv>{children ? children : <EuiLoadingSpinner size="xl" />}</OverlayDiv>
 );
 
-const RelativeDiv = euiStyled.div`
+const RelativeDiv = styled.div`
   position: relative;
 `;
 
-const OverlayDiv = euiStyled.div`
+const OverlayDiv = styled.div`
   align-items: center;
-  background-color: ${(props) => transparentize(0.3, props.theme.eui.euiColorEmptyShade)};
+  background-color: ${(props) => transparentize(0.3, props.theme.euiTheme.colors.emptyShade)};
   display: flex;
   height: 100%;
   justify-content: center;
@@ -42,5 +42,5 @@ const OverlayDiv = euiStyled.div`
   position: absolute;
   top: 0;
   width: 100%;
-  z-index: ${(props) => props.theme.eui.euiZLevel1};
+  z-index: ${(props) => props.theme.euiTheme.euiZLevel1};
 `;

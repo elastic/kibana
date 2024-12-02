@@ -27,7 +27,7 @@ import {
 import { EuiFlexItem } from '@elastic/eui';
 import { EuiFlexGroup } from '@elastic/eui';
 import { EuiIcon } from '@elastic/eui';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import { Metric } from '../../../../../../common/http_api/infra_ml';
 import { useTimelineChartTheme } from '../../../../../hooks/use_timeline_chart_theme';
 import { toMetricOpt } from '../../../../../../common/snapshot_metric_i18n';
@@ -298,32 +298,32 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
   );
 };
 
-const TimelineContainer = euiStyled.div`
-  background-color: ${(props) => props.theme.eui.euiPageBackgroundColor};
-  border-top: 1px solid ${(props) => props.theme.eui.euiColorLightShade};
+const TimelineContainer = styled.div`
+  background-color: ${(props) => props.theme.euiTheme.colors.euiPageBackgroundColor};
+  border-top: 1px solid ${(props) => props.theme.euiTheme.colors.lightShade};
   height: 220px;
   width: 100%;
-  padding: ${(props) => props.theme.eui.euiSizeS} ${(props) => props.theme.eui.euiSizeM};
+  padding: ${(props) => props.theme.euiTheme.size.s} ${(props) => props.theme.euiTheme.size.m};
   display: flex;
   flex-direction: column;
 `;
 
-const TimelineHeader = euiStyled.div`
+const TimelineHeader = styled.div`
   display: flex;
   width: 100%;
-  padding: ${(props) => props.theme.eui.euiSizeS} ${(props) => props.theme.eui.euiSizeM};
+  padding: ${(props) => props.theme.euiTheme.size.s} ${(props) => props.theme.euiTheme.size.m};
   @media only screen and (max-width: 767px) {
-      margin-top: 30px;
+    margin-top: 30px;
   }
 `;
 
-const TimelineChartContainer = euiStyled.div`
-  padding-left: ${(props) => props.theme.eui.euiSizeXS};
+const TimelineChartContainer = styled.div`
+  padding-left: ${(props) => props.theme.euiTheme.size.xs};
   width: 100%;
   height: 100%;
 `;
 
-const TimelineLoadingContainer = euiStyled.div`
+const TimelineLoadingContainer = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;

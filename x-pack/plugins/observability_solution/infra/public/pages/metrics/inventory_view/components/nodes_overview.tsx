@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import React, { useCallback, useMemo } from 'react';
 import { useCurrentEuiBreakpoint } from '@elastic/eui';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import {
   InfraWaffleMapBounds,
@@ -184,11 +184,11 @@ export const NodesOverview = ({
   );
 };
 
-const TableContainer = euiStyled.div`
-  padding: ${(props) => props.theme.eui.euiSizeL};
+const TableContainer = styled.div`
+  padding: ${(props) => props.theme.euiTheme.size.l};
 `;
 
-const MapContainer = euiStyled.div<{ positionStatic: boolean }>`
+const MapContainer = styled.div<{ positionStatic: boolean }>`
   position: ${(props) => (props.positionStatic ? 'static' : 'absolute')};
   display: flex;
   top: 0;

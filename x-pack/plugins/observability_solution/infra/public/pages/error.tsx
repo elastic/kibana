@@ -8,13 +8,12 @@
 import { EuiCallOut, EuiTitle, EuiPageTemplate } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import { ColumnarPage, PageContent } from '../components/page';
 
-const DetailPageContent = euiStyled(PageContent)`
+const DetailPageContent = styled(PageContent)`
   overflow: auto;
-  background-color: ${(props) => props.theme.eui.euiColorLightestShade};
+  background-color: ${(props) => props.theme.euiTheme.colors.lightestShade};
 `;
 
 interface Props {

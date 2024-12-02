@@ -19,10 +19,11 @@ import {
   EuiFlexItem,
   EuiText,
   EuiPopoverTitle,
+  WithEuiThemeProps,
+  withEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiTheme, withTheme } from '@kbn/kibana-react-plugin/common';
 import {
   SnapshotCustomAggregation,
   SnapshotCustomMetricInput,
@@ -51,204 +52,210 @@ const AGGREGATION_LABELS = {
 };
 
 interface Props {
-  theme: EuiTheme | undefined;
   metric?: SnapshotCustomMetricInput;
   customMetrics: SnapshotCustomMetricInput[];
   onChange: (metric: SnapshotCustomMetricInput) => void;
   onCancel: () => void;
 }
 
-export const CustomMetricForm = withTheme(({ theme, onCancel, onChange, metric }: Props) => {
-  const { metricsView } = useMetricsDataViewContext();
-  const [label, setLabel] = useState<string | undefined>(metric ? metric.label : void 0);
-  const [aggregation, setAggregation] = useState<SnapshotCustomAggregation>(
-    metric ? metric.aggregation : 'avg'
-  );
-  const [field, setField] = useState<string | undefined>(metric ? metric.field : void 0);
+type PropsWithTheme = Props & WithEuiThemeProps;
 
-  const handleSubmit = useCallback(() => {
-    if (metric && aggregation && field) {
-      onChange({
-        ...metric,
-        label,
-        aggregation,
-        field,
-      });
-    } else if (aggregation && field) {
-      const newMetric: SnapshotCustomMetricInput = {
-        type: 'custom',
-        id: uuidv4(),
-        label,
-        aggregation,
-        field,
-      };
-      onChange(newMetric);
-    }
-  }, [metric, aggregation, field, onChange, label]);
+export const CustomMetricForm = withEuiTheme(
+  ({ theme, onCancel, onChange, metric }: PropsWithTheme) => {
+    const { metricsView } = useMetricsDataViewContext();
+    const [label, setLabel] = useState<string | undefined>(metric ? metric.label : void 0);
+    const [aggregation, setAggregation] = useState<SnapshotCustomAggregation>(
+      metric ? metric.aggregation : 'avg'
+    );
+    const [field, setField] = useState<string | undefined>(metric ? metric.field : void 0);
 
-  const handleLabelChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      setLabel(e.target.value);
-    },
-    [setLabel]
-  );
+    const handleSubmit = useCallback(() => {
+      if (metric && aggregation && field) {
+        onChange({
+          ...metric,
+          label,
+          aggregation,
+          field,
+        });
+      } else if (aggregation && field) {
+        const newMetric: SnapshotCustomMetricInput = {
+          type: 'custom',
+          id: uuidv4(),
+          label,
+          aggregation,
+          field,
+        };
+        onChange(newMetric);
+      }
+    }, [metric, aggregation, field, onChange, label]);
 
-  const handleFieldChange = useCallback(
-    (selectedOptions: SelectedOption[]) => {
-      setField(selectedOptions[0].label);
-    },
-    [setField]
-  );
+    const handleLabelChange = useCallback(
+      (e: React.ChangeEvent<HTMLInputElement>) => {
+        setLabel(e.target.value);
+      },
+      [setLabel]
+    );
 
-  const handleAggregationChange = useCallback(
-    (e: React.ChangeEvent<HTMLSelectElement>) => {
-      const value = e.target.value;
-      const aggValue: SnapshotCustomAggregation = SnapshotCustomAggregationRT.is(value)
-        ? value
-        : 'avg';
-      setAggregation(aggValue);
-    },
-    [setAggregation]
-  );
+    const handleFieldChange = useCallback(
+      (selectedOptions: SelectedOption[]) => {
+        setField(selectedOptions[0].label);
+      },
+      [setField]
+    );
 
-  const fieldOptions = (metricsView?.fields ?? [])
-    .filter((f) => f.aggregatable && f.type === 'number' && !(field && field === f.name))
-    .map((f) => ({ label: f.name }));
+    const handleAggregationChange = useCallback(
+      (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const value = e.target.value;
+        const aggValue: SnapshotCustomAggregation = SnapshotCustomAggregationRT.is(value)
+          ? value
+          : 'avg';
+        setAggregation(aggValue);
+      },
+      [setAggregation]
+    );
 
-  const aggregationOptions = SNAPSHOT_CUSTOM_AGGREGATIONS.map((k) => ({
-    text: AGGREGATION_LABELS[k as SnapshotCustomAggregation],
-    value: k,
-  }));
+    const fieldOptions = (metricsView?.fields ?? [])
+      .filter((f) => f.aggregatable && f.type === 'number' && !(field && field === f.name))
+      .map((f) => ({ label: f.name }));
 
-  const isSubmitDisabled = !field || !aggregation;
+    const aggregationOptions = SNAPSHOT_CUSTOM_AGGREGATIONS.map((k) => ({
+      text: AGGREGATION_LABELS[k as SnapshotCustomAggregation],
+      value: k,
+    }));
 
-  const title = metric
-    ? i18n.translate('xpack.infra.waffle.customMetricPanelLabel.edit', {
-        defaultMessage: 'Edit custom metric',
-      })
-    : i18n.translate('xpack.infra.waffle.customMetricPanelLabel.add', {
-        defaultMessage: 'Add custom metric',
-      });
+    const isSubmitDisabled = !field || !aggregation;
 
-  const titleAriaLabel = metric
-    ? i18n.translate('xpack.infra.waffle.customMetricPanelLabel.editAriaLabel', {
-        defaultMessage: 'Back to custom metrics edit mode',
-      })
-    : i18n.translate('xpack.infra.waffle.customMetricPanelLabel.addAriaLabel', {
-        defaultMessage: 'Back to metric picker',
-      });
+    const title = metric
+      ? i18n.translate('xpack.infra.waffle.customMetricPanelLabel.edit', {
+          defaultMessage: 'Edit custom metric',
+        })
+      : i18n.translate('xpack.infra.waffle.customMetricPanelLabel.add', {
+          defaultMessage: 'Add custom metric',
+        });
 
-  return (
-    <div style={{ width: 685 }}>
-      <EuiForm>
-        <EuiPopoverTitle>
-          <EuiButtonEmpty
-            data-test-subj="infraCustomMetricFormButton"
-            iconType="arrowLeft"
-            onClick={onCancel}
-            color="text"
-            size="xs"
-            flush="left"
-            style={{ fontWeight: 700, textTransform: 'uppercase' }}
-            aria-label={titleAriaLabel}
+    const titleAriaLabel = metric
+      ? i18n.translate('xpack.infra.waffle.customMetricPanelLabel.editAriaLabel', {
+          defaultMessage: 'Back to custom metrics edit mode',
+        })
+      : i18n.translate('xpack.infra.waffle.customMetricPanelLabel.addAriaLabel', {
+          defaultMessage: 'Back to metric picker',
+        });
+
+    return (
+      <div style={{ width: 685 }}>
+        <EuiForm>
+          <EuiPopoverTitle>
+            <EuiButtonEmpty
+              data-test-subj="infraCustomMetricFormButton"
+              iconType="arrowLeft"
+              onClick={onCancel}
+              color="text"
+              size="xs"
+              flush="left"
+              style={{ fontWeight: 700, textTransform: 'uppercase' }}
+              aria-label={titleAriaLabel}
+            >
+              {title}
+            </EuiButtonEmpty>
+          </EuiPopoverTitle>
+          <div
+            style={{
+              padding: theme?.euiTheme.size.m,
+              borderBottom: `${theme?.euiTheme.border.thin} solid ${theme?.euiTheme.euiBorderColor}`,
+            }}
           >
-            {title}
-          </EuiButtonEmpty>
-        </EuiPopoverTitle>
-        <div
-          style={{
-            padding: theme?.eui.euiSizeM,
-            borderBottom: `${theme?.eui.euiBorderWidthThin} solid ${theme?.eui.euiBorderColor}`,
-          }}
-        >
-          <EuiFormRow
-            label={i18n.translate('xpack.infra.waffle.customMetrics.metricLabel', {
-              defaultMessage: 'Metric',
-            })}
-            display="rowCompressed"
-            fullWidth
-          >
-            <EuiFlexGroup alignItems="center" gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <EuiSelect
-                  data-test-subj="infraCustomMetricFormSelect"
-                  onChange={handleAggregationChange}
-                  value={aggregation}
-                  options={aggregationOptions}
-                  fullWidth
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiText color="subdued">
-                  <span>
-                    {i18n.translate('xpack.infra.waffle.customMetrics.ofLabel', {
-                      defaultMessage: 'of',
-                    })}
-                  </span>
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiComboBox
-                  fullWidth
-                  placeholder={i18n.translate('xpack.infra.waffle.customMetrics.fieldPlaceholder', {
-                    defaultMessage: 'Select a field',
-                  })}
-                  singleSelection={{ asPlainText: true }}
-                  selectedOptions={field ? [{ label: field }] : []}
-                  options={fieldOptions}
-                  onChange={handleFieldChange}
-                  isClearable={false}
-                  data-test-subj="infraCustomMetricFieldSelect"
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFormRow>
-          <EuiFormRow
-            label={i18n.translate('xpack.infra.waffle.customMetrics.labelLabel', {
-              defaultMessage: 'Label (optional)',
-            })}
-            display="rowCompressed"
-            fullWidth
-          >
-            <EuiFieldText
-              data-test-subj="infraCustomMetricFormFieldText"
-              name="label"
-              placeholder={i18n.translate('xpack.infra.waffle.customMetrics.labelPlaceholder', {
-                defaultMessage: 'Choose a name to appear in the "Metric" dropdown',
+            <EuiFormRow
+              label={i18n.translate('xpack.infra.waffle.customMetrics.metricLabel', {
+                defaultMessage: 'Metric',
               })}
-              value={label}
+              display="rowCompressed"
               fullWidth
-              onChange={handleLabelChange}
-            />
-          </EuiFormRow>
-        </div>
-        <div style={{ padding: theme?.eui.euiSizeM, textAlign: 'right' }}>
-          <EuiButtonEmpty
-            data-test-subj="infraCustomMetricFormCancelButton"
-            onClick={onCancel}
-            size="s"
-            style={{ paddingRight: theme?.eui.euiSizeXL }}
-          >
-            <FormattedMessage
-              id="xpack.infra.waffle.customMetrics.cancelLabel"
-              defaultMessage="Cancel"
-            />
-          </EuiButtonEmpty>
-          <EuiButton
-            data-test-subj="infraCustomMetricFormSaveButton"
-            type="submit"
-            size="s"
-            fill
-            onClick={handleSubmit}
-            disabled={isSubmitDisabled}
-          >
-            <FormattedMessage
-              id="xpack.infra.waffle.customMetrics.submitLabel"
-              defaultMessage="Save"
-            />
-          </EuiButton>
-        </div>
-      </EuiForm>
-    </div>
-  );
-});
+            >
+              <EuiFlexGroup alignItems="center" gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <EuiSelect
+                    data-test-subj="infraCustomMetricFormSelect"
+                    onChange={handleAggregationChange}
+                    value={aggregation}
+                    options={aggregationOptions}
+                    fullWidth
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiText color="subdued">
+                    <span>
+                      {i18n.translate('xpack.infra.waffle.customMetrics.ofLabel', {
+                        defaultMessage: 'of',
+                      })}
+                    </span>
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiComboBox
+                    fullWidth
+                    placeholder={i18n.translate(
+                      'xpack.infra.waffle.customMetrics.fieldPlaceholder',
+                      {
+                        defaultMessage: 'Select a field',
+                      }
+                    )}
+                    singleSelection={{ asPlainText: true }}
+                    selectedOptions={field ? [{ label: field }] : []}
+                    options={fieldOptions}
+                    onChange={handleFieldChange}
+                    isClearable={false}
+                    data-test-subj="infraCustomMetricFieldSelect"
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFormRow>
+            <EuiFormRow
+              label={i18n.translate('xpack.infra.waffle.customMetrics.labelLabel', {
+                defaultMessage: 'Label (optional)',
+              })}
+              display="rowCompressed"
+              fullWidth
+            >
+              <EuiFieldText
+                data-test-subj="infraCustomMetricFormFieldText"
+                name="label"
+                placeholder={i18n.translate('xpack.infra.waffle.customMetrics.labelPlaceholder', {
+                  defaultMessage: 'Choose a name to appear in the "Metric" dropdown',
+                })}
+                value={label}
+                fullWidth
+                onChange={handleLabelChange}
+              />
+            </EuiFormRow>
+          </div>
+          <div style={{ padding: theme?.euiTheme.size.m, textAlign: 'right' }}>
+            <EuiButtonEmpty
+              data-test-subj="infraCustomMetricFormCancelButton"
+              onClick={onCancel}
+              size="s"
+              style={{ paddingRight: theme?.euiTheme.size.xl }}
+            >
+              <FormattedMessage
+                id="xpack.infra.waffle.customMetrics.cancelLabel"
+                defaultMessage="Cancel"
+              />
+            </EuiButtonEmpty>
+            <EuiButton
+              data-test-subj="infraCustomMetricFormSaveButton"
+              type="submit"
+              size="s"
+              fill
+              onClick={handleSubmit}
+              disabled={isSubmitDisabled}
+            >
+              <FormattedMessage
+                id="xpack.infra.waffle.customMetrics.submitLabel"
+                defaultMessage="Save"
+              />
+            </EuiButton>
+          </div>
+        </EuiForm>
+      </div>
+    );
+  }
+);

@@ -8,20 +8,17 @@
 import { EuiPanel } from '@elastic/eui';
 import { FunctionComponent } from 'react';
 import { StyledComponent } from 'styled-components';
-import { euiStyled, EuiTheme } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 
 // The return type of this component needs to be specified because the inferred
 // return type depends on types that are not exported from EUI. You get a TS4023
 // error if the return type is not specified.
-export const Toolbar: StyledComponent<FunctionComponent, EuiTheme> = euiStyled(EuiPanel).attrs(
-  () => ({
-    grow: false,
-    paddingSize: 'none',
-  })
-)`
+export const Toolbar: StyledComponent<FunctionComponent, EuiTheme> = styled(EuiPanel)`
   border-top: none;
   border-right: none;
   border-left: none;
   border-radius: 0;
-  padding: ${(props) => props.theme.eui.euiSizeS} ${(props) => props.theme.eui.euiSizeL};
+  padding: ${(props) => props.theme.euiTheme.size.s} ${(props) => props.theme.size.l};
 `;
+
+Toolbar.defaultProps = { grow: false, paddingSize: 'none' };

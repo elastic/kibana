@@ -6,7 +6,7 @@
  */
 
 import React, { FC, PropsWithChildren } from 'react';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import { LogEntryExampleMessagesEmptyIndicator } from './log_entry_examples_empty_indicator';
 import { LogEntryExampleMessagesFailureIndicator } from './log_entry_examples_failure_indicator';
 import { LogEntryExampleMessagesLoadingIndicator } from './log_entry_examples_loading_indicator';
@@ -41,7 +41,7 @@ export const LogEntryExampleMessages: FC<PropsWithChildren<Props>> = ({
   );
 };
 
-const Wrapper = euiStyled.div`
+const Wrapper = styled.div`
   align-items: stretch;
   flex-direction: column;
   flex: 1 0 0%;

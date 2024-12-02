@@ -9,8 +9,7 @@ import { scaleLinear, scaleTime } from 'd3-scale';
 import { area, curveMonotoneY } from 'd3-shape';
 import { max } from 'lodash';
 import * as React from 'react';
-
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import { LogEntriesSummaryBucket } from '@kbn/logs-shared-plugin/common';
 
 interface DensityChartProps {
@@ -65,16 +64,16 @@ export const DensityChart: React.FC<DensityChartProps> = ({
   );
 };
 
-const DensityChartPositiveBackground = euiStyled.rect`
+const DensityChartPositiveBackground = styled.rect`
   fill: ${(props) =>
     props.theme.darkMode
-      ? props.theme.eui.euiColorLightShade
-      : props.theme.eui.euiColorLightestShade};
+      ? props.theme.euiTheme.colors.lightShade
+      : props.theme.euiTheme.colors.lightestShade};
 `;
 
-const PositiveAreaPath = euiStyled.path`
+const PositiveAreaPath = styled.path`
   fill: ${(props) =>
-    props.theme.darkMode
-      ? props.theme.eui.euiColorMediumShade
-      : props.theme.eui.euiColorLightShade};
+    props.theme.colorMode === 'dark'
+      ? props.theme.euiTheme.colors.mediumShade
+      : props.theme.euiTheme.colors.lightShade};
 `;

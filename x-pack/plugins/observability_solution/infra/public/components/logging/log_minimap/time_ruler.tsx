@@ -7,8 +7,7 @@
 
 import { scaleTime } from 'd3-scale';
 import * as React from 'react';
-
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import { useKibanaTimeZoneSetting } from '../../../hooks/use_kibana_time_zone_setting';
 import { getTimeLabelFormat } from './time_label_formatter';
 
@@ -59,19 +58,19 @@ export const TimeRuler: React.FC<TimeRulerProps> = ({ end, height, start, tickCo
 
 TimeRuler.displayName = 'TimeRuler';
 
-const TimeRulerTickLabel = euiStyled.text`
+const TimeRulerTickLabel = styled.text`
   font-size: 9px;
-  line-height: ${(props) => props.theme.eui.euiLineHeight};
-  fill: ${(props) => props.theme.eui.euiTextSubduedColor};
+  line-height: ${(props) => props.theme.euiTheme.euiLineHeight};
+  fill: ${(props) => props.theme.euiTheme.colors.textSubdued};
   user-select: none;
   pointer-events: none;
 `;
 
-const TimeRulerGridLine = euiStyled.line`
+const TimeRulerGridLine = styled.line`
   stroke: ${(props) =>
     props.theme.darkMode
-      ? props.theme.eui.euiColorDarkestShade
-      : props.theme.eui.euiColorDarkShade};
+      ? props.theme.euiTheme.colors.darkestShade
+      : props.theme.euiTheme.colors.darkShade};
   stroke-opacity: 0.5;
   stroke-width: 1px;
 `;

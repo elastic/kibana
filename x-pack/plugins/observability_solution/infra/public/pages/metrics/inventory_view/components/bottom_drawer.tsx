@@ -8,7 +8,7 @@
 import React, { useCallback, useState, useEffect, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiPanel } from '@elastic/eui';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import { useUiTracker } from '@kbn/observability-shared-plugin/public';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
@@ -117,19 +117,19 @@ export const BottomDrawer = ({ interval, formatter, view, nodeType }: Props) => 
   );
 };
 
-const BottomActionContainer = euiStyled.div`
+const BottomActionContainer = styled.div`
   position: sticky;
   bottom: 0;
   left: 0;
-  background: ${(props) => props.theme.eui.euiColorGhost};
-  width: calc(100% + ${(props) => props.theme.eui.euiSizeL} * 2);
-  margin-left: -${(props) => props.theme.eui.euiSizeL};
+  background: ${(props) => props.theme.euiTheme.colors.ghost};
+  width: calc(100% + ${(props) => props.theme.euiTheme.size.l} * 2);
+  margin-left: -${(props) => props.theme.euiTheme.size.l};
 `; // Additional width comes from the padding on the EuiPageBody and inner nodes container
 
-const BottomPanel = euiStyled(EuiPanel)`
-  padding: ${(props) => props.theme.eui.euiSizeL} 0;
+const BottomPanel = styled(EuiPanel)`
+  padding: ${(props) => props.theme.euiTheme.size.l} 0;
 `;
 
-const StickyPanel = euiStyled(EuiPanel)`
-  padding: 0 ${(props) => props.theme.eui.euiSizeL};
+const StickyPanel = styled(EuiPanel)`
+  padding: 0 ${(props) => props.theme.euiTheme.size.l};
 `;

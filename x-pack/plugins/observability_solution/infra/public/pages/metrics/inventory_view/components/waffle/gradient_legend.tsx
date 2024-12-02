@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import {
   InfraFormatter,
   InfraWaffleMapBounds,
@@ -53,7 +52,7 @@ export const GradientLegend: React.FC<Props> = ({ legend, bounds, formatter }) =
   );
 };
 
-const GradientLegendContainer = euiStyled.div`
+const GradientLegendContainer = styled.div`
   position: absolute;
   height: 10px;
   bottom: 0;
@@ -61,15 +60,15 @@ const GradientLegendContainer = euiStyled.div`
   right: 40px;
 `;
 
-const GradientLegendTick = euiStyled.div`
+const GradientLegendTick = styled.div`
   position: absolute;
   bottom: 0;
   top: -18px;
 `;
 
-const GradientLegendTickLine = euiStyled.div`
+const GradientLegendTickLine = styled.div`
   position: absolute;
-  background-color: ${(props) => props.theme.eui.euiBorderColor};
+  background-color: ${(props) => props.theme.euiTheme.colors.border.euiBorderColor};
   width: 1px;
   left: 0;
   top: 15px;
@@ -82,7 +81,7 @@ const GradientLegendTickLine = euiStyled.div`
   }
 `;
 
-const GradientLegendTickLabel = euiStyled.div`
+const GradientLegendTickLabel = styled.div`
   position: absolute;
   font-size: 11px;
   text-align: center;

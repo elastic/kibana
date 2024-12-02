@@ -8,7 +8,7 @@
 import { EuiFieldSearch, EuiOutsideClickDetector, EuiPanel } from '@elastic/eui';
 import React from 'react';
 import { QuerySuggestion } from '@kbn/unified-search-plugin/public';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import { composeStateUpdaters } from '../../utils/typed_react';
 import { SuggestionItem } from './suggestion_item';
 
@@ -302,19 +302,18 @@ const withUnfocused = (state: AutocompleteFieldState) => ({
   isFocused: false,
 });
 
-const AutocompleteContainer = euiStyled.div`
+const AutocompleteContainer = styled.div`
   position: relative;
 `;
 
-const SuggestionsPanel = euiStyled(EuiPanel).attrs(() => ({
-  paddingSize: 'none',
-  hasShadow: true,
-}))`
+const SuggestionsPanel = styled(EuiPanel)`
   position: absolute;
   width: 100%;
   margin-top: 2px;
   overflow-x: hidden;
   overflow-y: scroll;
-  z-index: ${(props) => props.theme.eui.euiZLevel1};
+  z-index: ${(props) => props.theme.euiTheme.euiZLevel1};
   max-height: 322px;
 `;
+
+SuggestionsPanel.defaultProps = { paddingSize: 'none', hasShadow: true };

@@ -8,8 +8,7 @@
 import React, { useContext, useState, useCallback, useMemo } from 'react';
 import { EuiButtonIcon, EuiFlexGrid, EuiFlexItem, EuiTitle, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { get } from 'lodash';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import { InfraMetadata } from '../../../../../common/http_api';
 import { MetadataContext } from '../containers/metadata_context';
 
@@ -165,18 +164,18 @@ export const MetadataDetails = (props: Props) => {
   );
 };
 
-const MetadataContainer = euiStyled.div`
-border-top: ${(props) => props.theme.eui.euiBorderWidthThin} solid ${(props) =>
-  props.theme.eui.euiBorderColor};
-border-bottom: ${(props) => props.theme.eui.euiBorderWidthThin} solid ${(props) =>
-  props.theme.eui.euiBorderColor};
-padding: ${(props) => props.theme.eui.euiSizeM} 0;
-margin-bottom: ${(props) => props.theme.eui.euiSizeM};
-display: flex;
+const MetadataContainer = styled.div`
+  border-top: ${(props) => props.theme.euiTheme.border.thin} solid
+    ${(props) => props.theme.eui.euiBorderColor};
+  border-bottom: ${(props) => props.theme.euiTheme.border.thin} solid
+    ${(props) => props.theme.eui.euiBorderColor};
+  padding: ${(props) => props.theme.euiTheme.size.m} 0;
+  margin-bottom: ${(props) => props.theme.euiTheme.size.m};
+  display: flex;
 `;
 
-const Controls = euiStyled.div`
-flex-grow: 0;
-margin-right: ${(props) => props.theme.eui.euiSizeM};
-min-width: 0px;
+const Controls = styled.div`
+  flex-grow: 0;
+  margin-right: ${(props) => props.theme.euiTheme.size.m};
+  min-width: 0px;
 `;
