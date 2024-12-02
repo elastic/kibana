@@ -59,8 +59,7 @@
       "charts",
       "entityManager",
       "inference",
-      "discoverShared",
-      "productDocBase"
+      "discoverShared"
     ],
     "optionalPlugins": [
       "encryptedSavedObjects",
