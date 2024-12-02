@@ -28,7 +28,7 @@ These surface runtime deprecations, e.g. a Painless script that uses a deprecate
 request to a deprecated API. These are also generally surfaced as deprecation headers within the
 response. Even if the cluster state is good, app maintainers need to watch the logs in case
 deprecations are discovered as data is migrated. Starting in 7.x, deprecation logs can be written to a file or a data stream ([#58924](https://github.com/elastic/elasticsearch/pull/58924)). When the data stream exists, the Upgrade Assistant provides a way to analyze the logs through Observability or Discover ([#106521](https://github.com/elastic/kibana/pull/106521)).
-* [**Kibana deprecations API.**](https://github.com/elastic/kibana/blob/main/src/core/server/deprecations/README.mdx) This is information about deprecated features and configs in Kibana. These deprecations are only communicated to the user if the deployment is using these features. Kibana engineers are responsible for adding deprecations to the deprecations API for their respective team.
+* [**Kibana deprecations API.**](https://github.com/elastic/kibana/blob/main/src/core/server/docs/kib_core_deprecations_service.mdx) This is information about deprecated features and configs in Kibana. These deprecations are only communicated to the user if the deployment is using these features. Kibana engineers are responsible for adding deprecations to the deprecations API for their respective team.
 
 ### Fixing problems
 
