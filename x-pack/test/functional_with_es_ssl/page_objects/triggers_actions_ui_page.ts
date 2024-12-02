@@ -166,31 +166,33 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
       await rules.common.clickCreateAlertButton();
     },
     async setAlertName(value: string) {
-      await testSubjects.setValue('ruleNameInput', value);
+      await testSubjects.setValue('ruleDetailsNameInput', value);
       await this.assertAlertName(value);
     },
     async assertAlertName(expectedValue: string) {
-      const actualValue = await testSubjects.getAttribute('ruleNameInput', 'value');
+      const actualValue = await testSubjects.getAttribute('ruleDetailsNameInput', 'value');
       expect(actualValue).to.eql(expectedValue);
     },
     async setAlertInterval(value: number, unit?: 's' | 'm' | 'h' | 'd') {
-      await testSubjects.setValue('intervalInput', value.toString());
+      await testSubjects.setValue('ruleScheduleNumberInput', value.toString());
       if (unit) {
-        await testSubjects.selectValue('intervalInputUnit', unit);
+        await testSubjects.selectValue('ruleScheduleUnitInput', unit);
       }
       await this.assertAlertInterval(value, unit);
     },
     async assertAlertInterval(expectedValue: number, expectedUnit?: 's' | 'm' | 'h' | 'd') {
-      const actualValue = await testSubjects.getAttribute('intervalInput', 'value');
+      const actualValue = await testSubjects.getAttribute('ruleScheduleNumberInput', 'value');
       expect(actualValue).to.eql(expectedValue);
       if (expectedUnit) {
-        const actualUnitValue = await testSubjects.getAttribute('intervalInputUnit', 'value');
+        const actualUnitValue = await testSubjects.getAttribute('ruleScheduleUnitInput', 'value');
         expect(actualUnitValue).to.eql(expectedUnit);
       }
     },
     async saveAlert() {
-      await testSubjects.click('saveRuleButton');
-      const isConfirmationModalVisible = await testSubjects.isDisplayed('confirmRuleSaveModal');
+      await testSubjects.click('rulePageFooterSaveButton');
+      const isConfirmationModalVisible = await testSubjects.isDisplayed(
+        'rulePageConfirmCreateRule'
+      );
       expect(isConfirmationModalVisible).to.eql(true, 'Expect confirmation modal to be visible');
       await testSubjects.click('confirmModalConfirmButton');
     },
