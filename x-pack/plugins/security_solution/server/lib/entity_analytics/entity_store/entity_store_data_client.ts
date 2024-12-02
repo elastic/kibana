@@ -20,19 +20,28 @@ import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import { isEqual } from 'lodash/fp';
 import moment from 'moment';
+import type { EntityDefinitionWithState } from '@kbn/entityManager-plugin/server/lib/entities/types';
+import type { EntityDefinition } from '@kbn/entities-schema';
+import type { estypes } from '@elastic/elasticsearch';
 import type {
+  GetEntityStoreStatusRequestQuery,
   GetEntityStoreStatusResponse,
+} from '../../../../common/api/entity_analytics/entity_store/status.gen';
+import type {
   InitEntityStoreRequestBody,
   InitEntityStoreResponse,
-} from '../../../../common/api/entity_analytics/entity_store/enablement.gen';
+} from '../../../../common/api/entity_analytics/entity_store/enable.gen';
 import type { AppClient } from '../../..';
-import { EntityType } from '../../../../common/api/entity_analytics';
+import { EngineComponentResourceEnum, EntityType } from '../../../../common/api/entity_analytics';
 import type {
   Entity,
   EngineDataviewUpdateResult,
   InitEntityEngineRequestBody,
   InitEntityEngineResponse,
   InspectQuery,
+  ListEntityEnginesResponse,
+  EngineComponentStatus,
+  EngineComponentResource,
 } from '../../../../common/api/entity_analytics';
 import { EngineDescriptorClient } from './saved_object/engine_descriptor';
 import { ENGINE_STATUS, ENTITY_STORE_STATUS, MAX_SEARCH_RESPONSE_SIZE } from './constants';
@@ -41,6 +50,7 @@ import { getUnitedEntityDefinition } from './united_entity_definitions';
 import {
   startEntityStoreFieldRetentionEnrichTask,
   removeEntityStoreFieldRetentionEnrichTask,
+  getEntityStoreFieldRetentionEnrichTaskState as getEntityStoreFieldRetentionEnrichTaskStatus,
 } from './task';
 import {
   createEntityIndex,
@@ -52,6 +62,10 @@ import {
   createFieldRetentionEnrichPolicy,
   executeFieldRetentionEnrichPolicy,
   deleteFieldRetentionEnrichPolicy,
+  getPlatformPipelineStatus,
+  getFieldRetentionEnrichPolicyStatus,
+  getEntityIndexStatus,
+  getEntityIndexComponentTemplateStatus,
 } from './elasticsearch_assets';
 import { RiskScoreDataClient } from '../risk_score/risk_score_data_client';
 import {
@@ -62,7 +76,6 @@ import {
   isPromiseRejected,
 } from './utils';
 import { EntityEngineActions } from './auditing/actions';
-import { EntityStoreResource } from './auditing/resources';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../audit';
 import type { EntityRecord, EntityStoreConfig } from './types';
 import {
@@ -70,6 +83,19 @@ import {
   ENTITY_ENGINE_RESOURCE_INIT_FAILURE_EVENT,
 } from '../../telemetry/event_based/events';
 import { CRITICALITY_VALUES } from '../asset_criticality/constants';
+
+// Workaround. TransformState type is wrong. The health type should be: TransformHealth from '@kbn/transform-plugin/common/types/transform_stats'
+export interface TransformHealth extends estypes.TransformGetTransformStatsTransformStatsHealth {
+  issues?: TransformHealthIssue[];
+}
+
+export interface TransformHealthIssue {
+  type: string;
+  issue: string;
+  details?: string;
+  count: number;
+  first_occurrence?: number;
+}
 
 interface EntityStoreClientOpts {
   logger: Logger;
@@ -131,6 +157,42 @@ export class EntityStoreDataClient {
     });
   }
 
+  private async getEngineComponentsState(
+    type: EntityType,
+    definition?: EntityDefinition
+  ): Promise<EngineComponentStatus[]> {
+    const { namespace, taskManager } = this.options;
+
+    return definition
+      ? Promise.all([
+          ...(taskManager
+            ? [getEntityStoreFieldRetentionEnrichTaskStatus({ namespace, taskManager })]
+            : []),
+          getPlatformPipelineStatus({
+            definition,
+            esClient: this.esClient,
+          }),
+          getFieldRetentionEnrichPolicyStatus({
+            definitionMetadata: {
+              namespace,
+              entityType: type,
+              version: definition.version,
+            },
+            esClient: this.esClient,
+          }),
+          getEntityIndexStatus({
+            entityType: type,
+            esClient: this.esClient,
+            namespace,
+          }),
+          getEntityIndexComponentTemplateStatus({
+            definitionId: definition.id,
+            esClient: this.esClient,
+          }),
+        ])
+      : Promise.resolve([] as EngineComponentStatus[]);
+  }
+
   public async enable(
     { indexPattern = '', filter = '', fieldHistoryLength = 10 }: InitEntityStoreRequestBody,
     { pipelineDebugMode = false }: { pipelineDebugMode?: boolean } = {}
@@ -152,7 +214,10 @@ export class EntityStoreDataClient {
     return { engines, succeeded: true };
   }
 
-  public async status(): Promise<GetEntityStoreStatusResponse> {
+  public async status({
+    include_components: withComponents = false,
+  }: GetEntityStoreStatusRequestQuery): Promise<GetEntityStoreStatusResponse> {
+    const { namespace } = this.options;
     const { engines, count } = await this.engineClient.list();
 
     let status = ENTITY_STORE_STATUS.RUNNING;
@@ -166,7 +231,38 @@ export class EntityStoreDataClient {
       status = ENTITY_STORE_STATUS.INSTALLING;
     }
 
-    return { engines, status };
+    if (withComponents) {
+      const enginesWithComponents = await Promise.all(
+        engines.map(async (engine) => {
+          const entityDefinitionId = buildEntityDefinitionId(engine.type, namespace);
+          const {
+            definitions: [definition],
+          } = await this.entityClient.getEntityDefinitions({
+            id: entityDefinitionId,
+            includeState: withComponents,
+          });
+
+          const definitionComponents = this.getComponentFromEntityDefinition(
+            entityDefinitionId,
+            definition
+          );
+
+          const entityStoreComponents = await this.getEngineComponentsState(
+            engine.type,
+            definition
+          );
+
+          return {
+            ...engine,
+            components: [...definitionComponents, ...entityStoreComponents],
+          };
+        })
+      );
+
+      return { engines: enginesWithComponents, status };
+    } else {
+      return { engines, status };
+    }
   }
 
   public async init(
@@ -203,7 +299,7 @@ export class EntityStoreDataClient {
     this.log('info', entityType, `Initializing entity store`);
     this.audit(
       EntityEngineActions.INIT,
-      EntityStoreResource.ENTITY_ENGINE,
+      EngineComponentResourceEnum.entity_engine,
       entityType,
       'Initializing entity engine'
     );
@@ -332,7 +428,7 @@ export class EntityStoreDataClient {
 
       this.audit(
         EntityEngineActions.INIT,
-        EntityStoreResource.ENTITY_ENGINE,
+        EngineComponentResourceEnum.entity_engine,
         entityType,
         'Failed to initialize entity engine resources',
         err
@@ -353,6 +449,50 @@ export class EntityStoreDataClient {
 
       await this.delete(entityType, taskManager, { deleteData: true, deleteEngine: false });
     }
+  }
+
+  public getComponentFromEntityDefinition(
+    id: string,
+    definition: EntityDefinitionWithState | EntityDefinition
+  ): EngineComponentStatus[] {
+    if (!definition) {
+      return [
+        {
+          id,
+          installed: false,
+          resource: EngineComponentResourceEnum.entity_definition,
+        },
+      ];
+    }
+
+    if ('state' in definition) {
+      return [
+        {
+          id: definition.id,
+          installed: definition.state.installed,
+          resource: EngineComponentResourceEnum.entity_definition,
+        },
+        ...definition.state.components.transforms.map(({ installed, running, stats }) => ({
+          id,
+          resource: EngineComponentResourceEnum.transform,
+          installed,
+          errors: (stats?.health as TransformHealth)?.issues?.map(({ issue, details }) => ({
+            title: issue,
+            message: details,
+          })),
+        })),
+        ...definition.state.components.ingestPipelines.map((pipeline) => ({
+          resource: EngineComponentResourceEnum.ingest_pipeline,
+          ...pipeline,
+        })),
+        ...definition.state.components.indexTemplates.map(({ installed }) => ({
+          id,
+          installed,
+          resource: EngineComponentResourceEnum.index_template,
+        })),
+      ];
+    }
+    return [];
   }
 
   public async getExistingEntityDefinition(entityType: EntityType) {
@@ -387,7 +527,7 @@ export class EntityStoreDataClient {
     const fullEntityDefinition = await this.getExistingEntityDefinition(entityType);
     this.audit(
       EntityEngineActions.START,
-      EntityStoreResource.ENTITY_DEFINITION,
+      EngineComponentResourceEnum.entity_definition,
       entityType,
       'Starting entity definition'
     );
@@ -414,7 +554,7 @@ export class EntityStoreDataClient {
     const fullEntityDefinition = await this.getExistingEntityDefinition(entityType);
     this.audit(
       EntityEngineActions.STOP,
-      EntityStoreResource.ENTITY_DEFINITION,
+      EngineComponentResourceEnum.entity_definition,
       entityType,
       'Stopping entity definition'
     );
@@ -428,7 +568,7 @@ export class EntityStoreDataClient {
     return this.engineClient.get(entityType);
   }
 
-  public async list() {
+  public async list(): Promise<ListEntityEnginesResponse> {
     return this.engineClient.list();
   }
 
@@ -457,7 +597,7 @@ export class EntityStoreDataClient {
     this.log('info', entityType, `Deleting entity store`);
     this.audit(
       EntityEngineActions.DELETE,
-      EntityStoreResource.ENTITY_ENGINE,
+      EngineComponentResourceEnum.entity_engine,
       entityType,
       'Deleting entity engine'
     );
@@ -525,7 +665,7 @@ export class EntityStoreDataClient {
 
       this.audit(
         EntityEngineActions.DELETE,
-        EntityStoreResource.ENTITY_ENGINE,
+        EngineComponentResourceEnum.entity_engine,
         entityType,
         'Failed to delete entity engine',
         err
@@ -672,7 +812,7 @@ export class EntityStoreDataClient {
 
   private audit(
     action: EntityEngineActions,
-    resource: EntityStoreResource,
+    resource: EngineComponentResource,
     entityType: EntityType,
     msg: string,
     error?: Error
