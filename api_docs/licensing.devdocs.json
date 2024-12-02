@@ -851,14 +851,6 @@
               "path": "x-pack/plugins/watcher/public/plugin.ts"
             },
             {
-              "plugin": "profiling",
-              "path": "x-pack/plugins/observability_solution/profiling/public/components/contexts/license/license_context.tsx"
-            },
-            {
-              "plugin": "apm",
-              "path": "x-pack/plugins/observability_solution/apm/public/context/license/license_context.tsx"
-            },
-            {
               "plugin": "slo",
               "path": "x-pack/plugins/observability_solution/slo/public/plugin.ts"
             }

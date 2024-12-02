@@ -42,6 +42,49 @@ components:
         - updating
         - error
     
+    EngineComponentStatus:
+      type: object
+      required:
+          - id
+          - installed
+          - resource
+      properties:
+        id: 
+          type: string
+        installed: 
+          type: boolean
+        resource:
+          $ref: '#/components/schemas/EngineComponentResource'
+        health: 
+          type: string
+          enum:
+            - green
+            - yellow
+            - red
+            - unknown
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              title:
+                type: string
+              message:
+                type: string
+
+    EngineComponentResource:
+      type: string
+      enum:
+        - entity_engine
+        - entity_definition
+        - index
+        - component_template
+        - index_template
+        - ingest_pipeline
+        - enrich_policy
+        - task
+        - transform
+
     StoreStatus:
       type: string
       enum:

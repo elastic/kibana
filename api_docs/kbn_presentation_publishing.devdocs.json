@@ -8025,6 +8025,36 @@
       },
       {
         "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-public.PublishesWritableDataViews",
+        "type": "Type",
+        "tags": [],
+        "label": "PublishesWritableDataViews",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishesDataViews",
+            "text": "PublishesDataViews"
+          },
+          " & { setDataViews: (dataViews: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataView",
+            "text": "DataView"
+          },
+          "[]) => void; }"
+        ],
+        "path": "packages/presentation/presentation_publishing/interfaces/publishes_data_views.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
         "id": "def-public.PublishesWritablePanelDescription",
         "type": "Type",
         "tags": [],

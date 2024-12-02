@@ -6,7 +6,7 @@
  */
 
 import type { CellAction, CellActionFactory } from '@kbn/cell-actions';
-import { isInSecurityApp } from '../../utils';
+import { isInSecurityApp } from '../../../../common/hooks/is_in_security_app';
 import type { StartServices } from '../../../../types';
 import { createCopyToClipboardCellActionFactory } from '../cell_action/copy_to_clipboard';
 

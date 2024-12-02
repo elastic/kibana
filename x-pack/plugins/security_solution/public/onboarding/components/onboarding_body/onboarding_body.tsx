@@ -17,7 +17,6 @@ import { useCompletedCards } from './hooks/use_completed_cards';
 
 export const OnboardingBody = React.memo(() => {
   const bodyConfig = useBodyConfig();
-
   const { expandedCardId, setExpandedCardId } = useExpandedCard();
   const { isCardComplete, setCardComplete, getCardCheckCompleteResult, checkCardComplete } =
     useCompletedCards(bodyConfig);

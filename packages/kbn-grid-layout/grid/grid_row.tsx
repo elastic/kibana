@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { forwardRef, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { combineLatest, map, pairwise, skip } from 'rxjs';
 
 import { EuiButtonIcon, EuiFlexGroup, EuiSpacer, EuiTitle, transparentize } from '@elastic/eui';
@@ -54,6 +54,7 @@ export const GridRow = forwardRef<
       // eslint-disable-next-line react-hooks/exhaustive-deps
       [rowIndex]
     );
+    const rowContainer = useRef<HTMLDivElement | null>(null);
 
     /** Set initial styles based on state at mount to prevent styles from "blipping" */
     const initialStyles = useMemo(() => {
@@ -74,7 +75,7 @@ export const GridRow = forwardRef<
     useEffect(
       () => {
         /** Update the styles of the grid row via a subscription to prevent re-renders */
-        const styleSubscription = combineLatest([
+        const interactionStyleSubscription = combineLatest([
           gridLayoutStateManager.interactionEvent$,
           gridLayoutStateManager.gridLayout$,
           gridLayoutStateManager.runtimeSettings$,
@@ -115,6 +116,36 @@ export const GridRow = forwardRef<
             }
           });
 
+        const expandedPanelStyleSubscription = gridLayoutStateManager.expandedPanelId$
+          .pipe(skip(1)) // skip the first emit because the `initialStyles` will take care of it
+          .subscribe((expandedPanelId) => {
+            const rowContainerRef = rowContainer.current;
+            if (!rowContainerRef) return;
+
+            if (expandedPanelId) {
+              // If any panel is expanded, move all rows with their panels out of the viewport.
+              // The expanded panel is repositioned to its original location in the GridPanel component
+              // and stretched to fill the viewport.
+
+              rowContainerRef.style.transform = 'translate(-9999px, -9999px)';
+
+              const panelsIds = Object.keys(
+                gridLayoutStateManager.gridLayout$.getValue()[rowIndex].panels
+              );
+              const includesExpandedPanel = panelsIds.includes(expandedPanelId);
+              if (includesExpandedPanel) {
+                // Stretch the row with the expanded panel to occupy the entire remaining viewport
+                rowContainerRef.style.height = '100%';
+              } else {
+                // Hide the row if it does not contain the expanded panel
+                rowContainerRef.style.height = '0';
+              }
+            } else {
+              rowContainerRef.style.transform = ``;
+              rowContainerRef.style.height = ``;
+            }
+          });
+
         /**
          * The things that should trigger a re-render are title, collapsed state, and panel ids - panel positions
          * are being controlled via CSS styles, so they do not need to trigger a re-render. This subscription ensures
@@ -147,8 +178,9 @@ export const GridRow = forwardRef<
           });
 
         return () => {
-          styleSubscription.unsubscribe();
+          interactionStyleSubscription.unsubscribe();
           rowStateSubscription.unsubscribe();
+          expandedPanelStyleSubscription.unsubscribe();
         };
       },
       // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -169,6 +201,11 @@ export const GridRow = forwardRef<
           interactionStart={(type, e) => {
             e.preventDefault();
             e.stopPropagation();
+
+            // Disable interactions when a panel is expanded
+            const isInteractive = gridLayoutStateManager.expandedPanelId$.value === undefined;
+            if (!isInteractive) return;
+
             const panelRef = gridLayoutStateManager.panelRefs.current[rowIndex][panelId];
             if (!panelRef) return;
 
@@ -201,25 +238,13 @@ export const GridRow = forwardRef<
     }, [panelIds, rowIndex, gridLayoutStateManager, renderPanelContents, setInteractionEvent]);
 
     return (
-      <>
+      <div ref={rowContainer}>
         {rowIndex !== 0 && (
-          <>
-            <EuiSpacer size="s" />
-            <EuiFlexGroup gutterSize="s">
-              <EuiButtonIcon
-                color="text"
-                aria-label={i18n.translate('kbnGridLayout.row.toggleCollapse', {
-                  defaultMessage: 'Toggle collapse',
-                })}
-                iconType={isCollapsed ? 'arrowRight' : 'arrowDown'}
-                onClick={toggleIsCollapsed}
-              />
-              <EuiTitle size="xs">
-                <h2>{rowTitle}</h2>
-              </EuiTitle>
-            </EuiFlexGroup>
-            <EuiSpacer size="s" />
-          </>
+          <GridRowHeader
+            isCollapsed={isCollapsed}
+            toggleIsCollapsed={toggleIsCollapsed}
+            rowTitle={rowTitle}
+          />
         )}
         {!isCollapsed && (
           <div
@@ -235,7 +260,37 @@ export const GridRow = forwardRef<
             <DragPreview rowIndex={rowIndex} gridLayoutStateManager={gridLayoutStateManager} />
           </div>
         )}
-      </>
+      </div>
     );
   }
 );
+
+const GridRowHeader = ({
+  isCollapsed,
+  toggleIsCollapsed,
+  rowTitle,
+}: {
+  isCollapsed: boolean;
+  toggleIsCollapsed: () => void;
+  rowTitle?: string;
+}) => {
+  return (
+    <>
+      <EuiSpacer size="s" />
+      <EuiFlexGroup gutterSize="s">
+        <EuiButtonIcon
+          color="text"
+          aria-label={i18n.translate('kbnGridLayout.row.toggleCollapse', {
+            defaultMessage: 'Toggle collapse',
+          })}
+          iconType={isCollapsed ? 'arrowRight' : 'arrowDown'}
+          onClick={toggleIsCollapsed}
+        />
+        <EuiTitle size="xs">
+          <h2>{rowTitle}</h2>
+        </EuiTitle>
+      </EuiFlexGroup>
+      <EuiSpacer size="s" />
+    </>
+  );
+};

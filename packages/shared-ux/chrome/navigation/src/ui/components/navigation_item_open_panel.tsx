@@ -21,6 +21,7 @@ import {
   useEuiTheme,
   transparentize,
   useIsWithinMinBreakpoint,
+  EuiButton,
 } from '@elastic/eui';
 import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 import { useNavigation as useServices } from '../../services';
@@ -45,6 +46,24 @@ const getStyles = (euiTheme: EuiThemeComputed<{}>) => css`
   }
 `;
 
+const getButtonStyles = (euiTheme: EuiThemeComputed<{}>, isActive: boolean) => css`
+  background-color: ${isActive ? transparentize(euiTheme.colors.lightShade, 0.5) : 'transparent'};
+  transform: none !important; /* don't translateY 1px */
+  color: inherit;
+  font-weight: inherit;
+  padding-inline: ${euiTheme.size.s};
+  & > span {
+    justify-content: flex-start;
+    position: relative;
+  }
+  & .euiIcon {
+    position: absolute;
+    right: 0;
+    top: 0;
+    transform: translateY(50%);
+  }
+`;
+
 interface Props {
   item: ChromeProjectNavigationNode;
   navigateToUrl: NavigateToUrlFn;
@@ -60,14 +79,17 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, navigateToUrl, active
   const href = deepLink?.url ?? item.href;
   const isNotMobile = useIsWithinMinBreakpoint('s');
   const isIconVisible = isNotMobile && !isSideNavCollapsed && !!children && children.length > 0;
-  const isActive = isActiveFromUrl(item.path, activeNodes);
   const hasLandingPage = Boolean(href);
+  const isExpanded = selectedNode?.path === path;
+  const isActive = hasLandingPage ? isActiveFromUrl(item.path, activeNodes) : isExpanded;
 
   const itemClassNames = classNames(
     'sideNavItem',
     { 'sideNavItem--isActive': isActive },
     getStyles(euiTheme)
   );
+
+  const buttonClassNames = classNames('sideNavItem', getButtonStyles(euiTheme, isActive));
 
   const dataTestSubj = classNames(`nav-item`, `nav-item-${path}`, {
     [`nav-item-deepLinkId-${deepLink?.id}`]: !!deepLink,
@@ -105,7 +127,21 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, navigateToUrl, active
     togglePanel();
   }, [togglePanel]);
 
-  const isExpanded = selectedNode?.path === path;
+  if (!hasLandingPage) {
+    return (
+      <EuiButton
+        onClick={onLinkClick}
+        iconSide="right"
+        iconType="arrowRight"
+        size="s"
+        fullWidth
+        className={buttonClassNames}
+        data-test-subj={dataTestSubj}
+      >
+        {title}
+      </EuiButton>
+    );
+  }
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="xs">
@@ -130,7 +166,7 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, navigateToUrl, active
             size="s"
             color="text"
             onClick={onIconClick}
-            iconType={hasLandingPage ? 'spaces' : 'arrowRight'}
+            iconType="spaces"
             iconSize="m"
             aria-label={i18n.translate('sharedUXPackages.chrome.sideNavigation.togglePanel', {
               defaultMessage: 'Toggle "{title}" panel navigation',

@@ -9,11 +9,13 @@
 
 import { cloneDeep } from 'lodash';
 import React, { useEffect, useMemo, useState } from 'react';
+import classNames from 'classnames';
 import { combineLatest, distinctUntilChanged, filter, map, pairwise, skip } from 'rxjs';
 
+import { css } from '@emotion/react';
 import { GridHeightSmoother } from './grid_height_smoother';
 import { GridRow } from './grid_row';
-import { GridLayoutData, GridSettings } from './types';
+import { GridAccessMode, GridLayoutData, GridSettings } from './types';
 import { useGridLayoutEvents } from './use_grid_layout_events';
 import { useGridLayoutState } from './use_grid_layout_state';
 import { isLayoutEqual } from './utils/equality_checks';
@@ -24,6 +26,8 @@ interface GridLayoutProps {
   gridSettings: GridSettings;
   renderPanelContents: (panelId: string) => React.ReactNode;
   onLayoutChange: (newLayout: GridLayoutData) => void;
+  expandedPanelId?: string;
+  accessMode?: GridAccessMode;
 }
 
 export const GridLayout = ({
@@ -31,10 +35,14 @@ export const GridLayout = ({
   gridSettings,
   renderPanelContents,
   onLayoutChange,
+  expandedPanelId,
+  accessMode = 'EDIT',
 }: GridLayoutProps) => {
   const { gridLayoutStateManager, setDimensionsRef } = useGridLayoutState({
     layout,
     gridSettings,
+    expandedPanelId,
+    accessMode,
   });
   useGridLayoutEvents({ gridLayoutStateManager });
 
@@ -132,12 +140,23 @@ export const GridLayout = ({
     });
   }, [rowCount, gridLayoutStateManager, renderPanelContents]);
 
+  const gridClassNames = classNames('kbnGrid', {
+    'kbnGrid--static': expandedPanelId || accessMode === 'VIEW',
+    'kbnGrid--hasExpandedPanel': Boolean(expandedPanelId),
+  });
+
   return (
     <GridHeightSmoother gridLayoutStateManager={gridLayoutStateManager}>
       <div
         ref={(divElement) => {
           setDimensionsRef(divElement);
         }}
+        className={gridClassNames}
+        css={css`
+          &.kbnGrid--hasExpandedPanel {
+            height: 100%;
+          }
+        `}
       >
         {children}
       </div>

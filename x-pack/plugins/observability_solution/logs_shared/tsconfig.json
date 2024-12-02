@@ -50,5 +50,7 @@
     "@kbn/core-ui-settings-common",
     "@kbn/field-formats-plugin",
     "@kbn/ui-theme",
+    "@kbn/embeddable-plugin",
+    "@kbn/saved-search-plugin",
   ]
 }

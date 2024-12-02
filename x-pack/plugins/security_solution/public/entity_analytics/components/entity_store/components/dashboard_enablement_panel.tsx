@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { UseQueryResult } from '@tanstack/react-query';
-import type { GetEntityStoreStatusResponse } from '../../../../../common/api/entity_analytics/entity_store/enablement.gen';
+import type { GetEntityStoreStatusResponse } from '../../../../../common/api/entity_analytics/entity_store/status.gen';
 import type { StoreStatus } from '../../../../../common/api/entity_analytics';
 import { RiskEngineStatusEnum } from '../../../../../common/api/entity_analytics';
 import { useInitRiskEngineMutation } from '../../../api/hooks/use_init_risk_engine_mutation';

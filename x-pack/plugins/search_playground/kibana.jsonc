@@ -18,6 +18,7 @@
       "actions",
       "data",
       "encryptedSavedObjects",
+      "ml",
       "navigation",
       "share",
       "security",
