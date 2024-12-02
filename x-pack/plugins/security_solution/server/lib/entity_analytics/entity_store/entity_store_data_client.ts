@@ -465,7 +465,7 @@ export class EntityStoreDataClient {
 
   public getComponentFromEntityDefinition(
     id: string,
-    definition: EntityDefinitionWithState | EntityDefinition
+    definition: EntityDefinitionWithState | EntityDefinition | undefined
   ): EngineComponentStatus[] {
     if (!definition) {
       return [
