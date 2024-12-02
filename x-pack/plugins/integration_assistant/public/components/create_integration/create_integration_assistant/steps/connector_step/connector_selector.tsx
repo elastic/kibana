@@ -25,7 +25,7 @@ const useRowCss = () => {
       background-color: ${euiTheme.colors.lightestShade};
     }
     .euiRadio {
-      color: ${euiTheme.colors.primaryText};
+      color: ${euiTheme.colors.textPrimary};
       label.euiRadio__label {
         padding-left: ${euiTheme.size.xl} !important;
       }
