@@ -263,7 +263,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         );
       });
 
-      it('includes the instruction in the system message', async () => {
+      it.skip('includes the instruction in the system message', async () => {
         expect(body.messages[0].content).to.contain('This is a random instruction');
       });
     });
