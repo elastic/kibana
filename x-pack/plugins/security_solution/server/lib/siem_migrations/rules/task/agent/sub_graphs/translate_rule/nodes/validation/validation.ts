@@ -35,7 +35,7 @@ export const getValidationNode = ({ logger }: GetValidationNodeParams): GraphNod
       }
     }
     if (esqlErrors) {
-      logger.info(`Elastic Rule validation failed: ${esqlErrors}`);
+      logger.debug(`ESQL query validation failed: ${esqlErrors}`);
     }
 
     return { validation_errors: { iterations: currentIteration, esql_errors: esqlErrors } };
