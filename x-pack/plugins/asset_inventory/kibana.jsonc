@@ -6,7 +6,7 @@
   ],
   "group": "security",
   "visibility": "private",
-  "description": "Centralized page to view and manage all cloud assets",
+  "description": "Centralized asset inventory experience within the Elastic Security solution. A central place for users to view and manage all their assets from different environments",
   "plugin": {
     "id": "assetInventory",
     "browser": true,
