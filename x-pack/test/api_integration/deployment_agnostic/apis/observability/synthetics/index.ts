@@ -8,7 +8,7 @@
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext) {
-  describe('Synthetics', () => {
+  describe('SyntheticsAPITests', () => {
     loadTestFile(require.resolve('./create_monitor'));
     loadTestFile(require.resolve('./create_monitor_private_location'));
     loadTestFile(require.resolve('./create_monitor_project'));
