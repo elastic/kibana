@@ -271,7 +271,7 @@ export function createCustomCallbackMocks(
     matchField: string;
     enrichFields: string[];
   }>
-) {
+): ESQLCallbacks {
   const finalColumnsSinceLastCommand =
     customColumnsSinceLastCommand ||
     fields.filter(({ type }) => !NOT_SUGGESTED_TYPES.includes(type));
@@ -281,6 +281,7 @@ export function createCustomCallbackMocks(
     getColumnsFor: jest.fn(async () => finalColumnsSinceLastCommand),
     getSources: jest.fn(async () => finalSources),
     getPolicies: jest.fn(async () => finalPolicies),
+    canCreateEnrichPolicy: jest.fn(() => true),
   };
 }
 

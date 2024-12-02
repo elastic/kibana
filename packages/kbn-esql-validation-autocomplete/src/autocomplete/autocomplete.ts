@@ -219,6 +219,9 @@ export async function suggest(
       getFieldsMap,
       getPolicies,
       getPolicyMetadata,
+      resourceRetriever?.canCreateEnrichPolicy
+        ? resourceRetriever?.canCreateEnrichPolicy
+        : () => false,
       resourceRetriever?.getPreferences,
       fullAst
     );
@@ -398,6 +401,7 @@ async function getSuggestionsWithinCommandExpression(
   getFieldsMap: GetFieldsMapFn,
   getPolicies: GetPoliciesFn,
   getPolicyMetadata: GetPolicyMetadataFn,
+  canCreateEnrichPolicy: () => boolean,
   getPreferences?: () => Promise<{ histogramBarTarget: number } | undefined>,
   fullAst?: ESQLAst
 ) {
@@ -431,7 +435,8 @@ async function getSuggestionsWithinCommandExpression(
       getColumnsByType,
       getFieldsMap,
       getPolicies,
-      getPolicyMetadata
+      getPolicyMetadata,
+      canCreateEnrichPolicy
     );
   }
 }
@@ -456,7 +461,8 @@ async function getExpressionSuggestionsByType(
   getFieldsByType: GetColumnsByTypeFn,
   getFieldsMap: GetFieldsMapFn,
   getPolicies: GetPoliciesFn,
-  getPolicyMetadata: GetPolicyMetadataFn
+  getPolicyMetadata: GetPolicyMetadataFn,
+  canCreateEnrichPolicy: () => boolean
 ) {
   const commandDef = getCommandDefinition(command.name);
   const { argIndex, prevIndex, lastArg, nodeArg } = extractArgMeta(command, node);
@@ -880,7 +886,12 @@ async function getExpressionSuggestionsByType(
             });
           });
         }
-        suggestions.push(...(policies.length ? policies : [buildNoPoliciesAvailableDefinition()]));
+
+        suggestions.push(
+          ...(policies.length
+            ? policies
+            : [buildNoPoliciesAvailableDefinition(canCreateEnrichPolicy())])
+        );
       } else {
         const indexes = getSourcesFromCommands(commands, 'index');
         const lastIndex = indexes[indexes.length - 1];

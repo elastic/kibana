@@ -275,6 +275,7 @@ export const QueryBarTopRow = React.memo(
       docLinks,
       http,
       dataViews,
+      application,
     } = kibana.services;
 
     const isQueryLangSelected = props.query && !isOfQueryType(props.query);
@@ -745,6 +746,7 @@ export const QueryBarTopRow = React.memo(
             hideRunQueryText={true}
             data-test-subj="unifiedTextLangEditor"
             isLoading={props.isLoading}
+            canCreateEnrichPolicy={!!application.capabilities.index_management?.manageEnrich}
           />
         )
       );
