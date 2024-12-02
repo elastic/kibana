@@ -82,7 +82,7 @@ function ChatContent({
   }, [next]);
 
   useEffect(() => {
-    if (state === ChatState.Ready && lastAssistantResponse) {
+    if (state !== ChatState.Loading && lastAssistantResponse) {
       chatService.sendAnalyticsEvent({
         type: ObservabilityAIAssistantTelemetryEventType.InsightResponse,
         payload: {
