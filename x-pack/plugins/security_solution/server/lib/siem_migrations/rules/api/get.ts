@@ -43,13 +43,19 @@ export const registerSiemRuleMigrationsGetRoute = (
           const ctx = await context.resolve(['securitySolution']);
           const ruleMigrationsClient = ctx.securitySolution.getSiemRuleMigrationsClient();
 
+          let from = 0;
+          if (page && perPage) {
+            from = page * perPage;
+          }
+          const size = perPage;
+
           const result = await ruleMigrationsClient.data.rules.get(
             {
               migrationId,
               searchTerm,
             },
-            page,
-            perPage
+            from,
+            size
           );
 
           return res.ok({ body: result });
