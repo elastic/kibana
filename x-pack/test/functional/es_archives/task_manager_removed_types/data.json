@@ -4,9 +4,7 @@
     "id": "task:ce7e1250-3322-11eb-94c1-db6995e83f6b",
     "index": ".kibana_task_manager",
     "source": {
-      "migrationVersion": {
-        "task": "7.6.0"
-      },
+      "typeMigrationVersion": "7.6.0",
       "references": [
       ],
       "task": {
@@ -35,9 +33,7 @@
     "id": "task:be7e1250-3322-11eb-94c1-db6995e83f6a",
     "index": ".kibana_task_manager",
     "source": {
-      "migrationVersion": {
-        "task": "7.6.0"
-      },
+      "typeMigrationVersion": "7.6.0",
       "references": [
       ],
       "task": {
