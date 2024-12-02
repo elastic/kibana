@@ -53,7 +53,7 @@ export interface ChatTimelineProps {
   chatState: ChatState;
   currentUser?: Pick<AuthenticatedUser, 'full_name' | 'username'>;
   onEdit: (message: Message, messageAfterEdit: Message) => void;
-  onFeedback: (message: Message, feedback: Feedback) => void;
+  onFeedback: (feedback: Feedback) => void;
   onRegenerate: (message: Message) => void;
   onSendTelemetry: (eventWithPayload: TelemetryEventTypeWithPayload) => void;
   onStopGenerating: () => void;
@@ -138,7 +138,7 @@ export function ChatTimeline({
               onActionClick({ message: item.message, payload });
             }}
             onFeedbackClick={(feedback) => {
-              onFeedback(item.message, feedback);
+              onFeedback(feedback);
             }}
             onRegenerateClick={() => {
               onRegenerate(item.message);
