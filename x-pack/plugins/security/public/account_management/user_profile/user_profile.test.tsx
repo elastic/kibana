@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react';
 import { mount } from 'enzyme';
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
