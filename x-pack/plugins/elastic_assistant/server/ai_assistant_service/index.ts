@@ -137,9 +137,11 @@ export class AIAssistantService {
       this.initPromise,
       this.installAndUpdateSpaceLevelResources.bind(this)
     );
-    options.productDocManager.then((productDocManager) => {
-      this.productDocManager = productDocManager;
-    });
+    options.productDocManager
+      .then((productDocManager) => {
+        this.productDocManager = productDocManager;
+      })
+      .catch();
   }
 
   public isInitialized() {
