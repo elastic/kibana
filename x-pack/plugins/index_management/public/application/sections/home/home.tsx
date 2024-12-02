@@ -41,6 +41,7 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
 }) => {
   const {
     plugins: { console: consolePlugin },
+    privs,
   } = useAppContext();
   const tabs = [
     {
@@ -74,7 +75,10 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
         />
       ),
     },
-    {
+  ];
+
+  if (privs.monitorEnrich) {
+    tabs.push({
       id: Section.EnrichPolicies,
       name: (
         <FormattedMessage
@@ -82,8 +86,8 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
           defaultMessage="Enrich Policies"
         />
       ),
-    },
-  ];
+    });
+  }
 
   const onSectionChange = (newSection: Section) => {
     history.push(`/${newSection}`);
@@ -143,7 +147,9 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
           ]}
           component={ComponentTemplateList}
         />
-        <Route exact path={`/${Section.EnrichPolicies}`} component={EnrichPoliciesList} />
+        {privs.monitorEnrich && (
+          <Route exact path={`/${Section.EnrichPolicies}`} component={EnrichPoliciesList} />
+        )}
       </Routes>
       {consolePlugin?.EmbeddableConsole ? <consolePlugin.EmbeddableConsole /> : null}
     </>
