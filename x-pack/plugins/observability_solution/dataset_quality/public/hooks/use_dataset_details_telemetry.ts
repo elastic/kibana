@@ -15,6 +15,7 @@ import { DataStreamDetails } from '../../common/api_types';
 import { Integration } from '../../common/data_streams_stats/integration';
 import { mapPercentageToQuality } from '../../common/utils';
 import { MASKED_FIELD_PLACEHOLDER, UNKOWN_FIELD_PLACEHOLDER } from '../../common/constants';
+import { calculatePercentage } from '../utils';
 
 export function useDatasetDetailsTelemetry() {
   const {
@@ -167,10 +168,11 @@ function getDatasetDetailsEbtProps({
     type: datasetDetails.type,
   };
   const degradedDocs = dataStreamDetails?.degradedDocsCount ?? 0;
-  const totalDocs = dataStreamDetails?.docsCount ?? 0;
-  const degradedPercentage =
-    totalDocs > 0 ? Number(((degradedDocs / totalDocs) * 100).toFixed(2)) : 0;
-  const health = mapPercentageToQuality(degradedPercentage);
+  const failedDocs = dataStreamDetails?.failedDocsCount ?? 0;
+  const totalDocs = (dataStreamDetails?.docsCount ?? 0) + failedDocs;
+  const degradedPercentage = calculatePercentage({ totalDocs, count: degradedDocs });
+  const failedPercentage = calculatePercentage({ totalDocs, count: failedDocs });
+  const health = mapPercentageToQuality([degradedPercentage, failedPercentage]);
   const { startDate: from, endDate: to } = getDateISORange(timeRange);
 
   return {

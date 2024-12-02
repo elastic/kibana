@@ -7,6 +7,7 @@
 
 import { EuiSkeletonRectangle, EuiFlexGroup, EuiLink } from '@elastic/eui';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { _IGNORED } from '../../../../common/es_fields';
 import { useDatasetRedirectLinkTelemetry, useRedirectLink } from '../../../hooks';
 import { QualityPercentageIndicator } from '../../quality_indicator';
@@ -38,6 +39,14 @@ export const DegradedDocsPercentageLink = ({
     timeRangeConfig: timeRange,
   });
 
+  const tooltip = (degradedDocsCount: number) =>
+    i18n.translate('xpack.datasetQuality.fewDegradedDocsTooltip', {
+      defaultMessage: '{degradedDocsCount} degraded docs in this data set.',
+      values: {
+        degradedDocsCount,
+      },
+    });
+
   return (
     <EuiSkeletonRectangle width="50px" height="20px" borderRadius="m" isLoading={isLoading}>
       <EuiFlexGroup alignItems="center" gutterSize="s">
@@ -46,10 +55,14 @@ export const DegradedDocsPercentageLink = ({
             data-test-subj="datasetQualityDegradedDocsPercentageLink"
             {...redirectLinkProps.linkProps}
           >
-            <QualityPercentageIndicator percentage={percentage} degradedDocsCount={count} />
+            <QualityPercentageIndicator
+              percentage={percentage}
+              docsCount={count}
+              tooltipContent={tooltip}
+            />
           </EuiLink>
         ) : (
-          <QualityPercentageIndicator percentage={percentage} />
+          <QualityPercentageIndicator percentage={percentage} tooltipContent={tooltip} />
         )}
       </EuiFlexGroup>
     </EuiSkeletonRectangle>

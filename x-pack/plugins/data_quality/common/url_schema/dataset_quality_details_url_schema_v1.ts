@@ -6,7 +6,7 @@
  */
 
 import * as rt from 'io-ts';
-import { dataStreamRT, degradedFieldRT, timeRangeRT } from './common';
+import { dataStreamRT, degradedFieldRT, qualityIssuesRT, timeRangeRT } from './common';
 
 export const urlSchemaRT = rt.exact(
   rt.intersection([
@@ -16,6 +16,7 @@ export const urlSchemaRT = rt.exact(
     rt.partial({
       v: rt.literal(1),
       timeRange: timeRangeRT,
+      qualityIssuesChart: qualityIssuesRT,
       breakdownField: rt.string,
       degradedFields: degradedFieldRT,
       expandedDegradedField: rt.string,

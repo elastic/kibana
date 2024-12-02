@@ -121,6 +121,10 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                         '#DatasetQualityDetailsController.initializing.checkBreakdownFieldIsEcs.fetching',
                       actions: ['storeBreakDownField'],
                     },
+                    QUALITY_ISSUES_CHART_CHANGE: {
+                      target: 'done',
+                      actions: ['storeQualityIssuesChart'],
+                    },
                   },
                 },
               },
@@ -448,6 +452,11 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
             ? {
                 dataStreamDetails: event.data,
               }
+            : {};
+        }),
+        storeQualityIssuesChart: assign((_context, event) => {
+          return 'qualityIssuesChart' in event
+            ? { qualityIssuesChart: event.qualityIssuesChart }
             : {};
         }),
         storeBreakDownField: assign((_context, event) => {

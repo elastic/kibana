@@ -22,6 +22,8 @@ import {
 
 type DatasetQualityESSearchParams = ESSearchRequest & {
   size: number;
+  // TODO: Remove search parameter once ::failures is supported
+  failure_store?: 'only';
 };
 
 export type DatasetQualityESClient = ReturnType<typeof createDatasetQualityESClient>;

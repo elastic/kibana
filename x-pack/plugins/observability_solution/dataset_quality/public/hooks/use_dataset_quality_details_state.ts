@@ -100,6 +100,8 @@ export const useDatasetQualityDetailsState = () => {
     rawName: dataStream,
   };
 
+  const docsTrendChart = useSelector(service, (state) => state.context.qualityIssuesChart);
+
   const loadingState = useSelector(service, (state) => ({
     nonAggregatableDatasetLoading: state.matches('initializing.nonAggregatableDataset.fetching'),
     dataStreamDetailsLoading: state.matches('initializing.dataStreamDetails.fetching'),
@@ -144,6 +146,7 @@ export const useDatasetQualityDetailsState = () => {
     datasetDetails,
     degradedFields,
     dataStreamDetails,
+    docsTrendChart,
     breakdownField,
     isBreakdownFieldEcs,
     isBreakdownFieldAsserted,

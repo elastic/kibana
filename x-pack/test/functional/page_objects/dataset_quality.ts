@@ -54,7 +54,7 @@ type SummaryPanelKpi = Record<
 >;
 
 type SummaryPanelKPI = Record<
-  'docsCountTotal' | 'size' | 'services' | 'hosts' | 'degradedDocs',
+  'docsCountTotal' | 'size' | 'services' | 'hosts' | 'degradedDocs' | 'failedDocs',
   string
 >;
 
@@ -70,6 +70,7 @@ const texts = {
   services: 'Services',
   hosts: 'Hosts',
   degradedDocs: 'Degraded docs',
+  failedDocs: 'Failed docs',
 };
 
 export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProviderContext) {
@@ -138,6 +139,7 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
       'datasetQualityDetailsDegradedFieldFlyoutIssueDoesNotExist',
     datasetQualityDetailsOverviewDegradedFieldToggleSwitch:
       'datasetQualityDetailsOverviewDegradedFieldToggleSwitch',
+    datasetQualityIssuesChartTypeButtonGroup: 'datasetQualityDetailsChartTypeButtonGroup',
   };
 
   return {
@@ -299,13 +301,14 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
       await this.waitUntilTableLoaded();
       const table = await this.getDatasetsTable();
       return this.parseTable(table, [
-        '0',
-        'Data Set Name',
+        'Data set name',
         'Namespace',
+        'Type',
         'Size',
-        'Data Set Quality',
-        'Degraded Docs (%)',
-        'Last Activity',
+        'Data set quality',
+        'Degraded docs (%)',
+        'Failed docs (%)',
+        'Last activity',
         'Actions',
       ]);
     },
@@ -395,6 +398,7 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
         { title: texts.services, key: 'services' },
         { title: texts.hosts, key: 'hosts' },
         { title: texts.degradedDocs, key: 'degradedDocs' },
+        { title: texts.failedDocs, key: 'failedDocs' },
       ].filter((item) => !excludeKeys.includes(item.key));
 
       const kpiTexts = await Promise.all(
@@ -413,6 +417,14 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
         }),
         {} as SummaryPanelKPI
       );
+    },
+
+    async selectQualityIssuesChartType(chartType: 'degradedDocs' | 'failedDocs') {
+      const datasetDetailsContainer: WebElementWrapper = await testSubjects.find(
+        testSubjectSelectors.datasetQualityIssuesChartTypeButtonGroup
+      );
+      const refreshButton = await datasetDetailsContainer.findByTestSubject(chartType);
+      return refreshButton.click();
     },
 
     /**

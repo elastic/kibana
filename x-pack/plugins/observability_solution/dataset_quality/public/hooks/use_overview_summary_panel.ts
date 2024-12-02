@@ -55,12 +55,19 @@ export const useOverviewSummaryPanel = () => {
     NUMBER_FORMAT
   );
 
+  const totalFailedDocsCount = formatNumber(dataStreamDetails?.failedDocsCount ?? 0, NUMBER_FORMAT);
+
   const degradedPercentage =
-    Number(totalDocsCount) > 0
-      ? (Number(totalDegradedDocsCount) / Number(totalDocsCount)) * 100
+    (dataStreamDetails.docsCount ?? 0) > 0
+      ? ((dataStreamDetails?.degradedDocsCount ?? 0) / dataStreamDetails.docsCount!) * 100
       : 0;
 
-  const quality = mapPercentageToQuality(degradedPercentage);
+  const failedPercentage =
+    (dataStreamDetails.docsCount ?? 0) > 0
+      ? ((dataStreamDetails?.failedDocsCount ?? 0) / dataStreamDetails.docsCount!) * 100
+      : 0;
+
+  const quality = mapPercentageToQuality([degradedPercentage, failedPercentage]);
 
   return {
     totalDocsCount,
@@ -70,6 +77,7 @@ export const useOverviewSummaryPanel = () => {
     totalHostsCount,
     isSummaryPanelLoading,
     totalDegradedDocsCount,
+    totalFailedDocsCount,
     quality,
   };
 };

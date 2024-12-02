@@ -7,7 +7,13 @@
 
 import expect from '@kbn/expect';
 import { DatasetQualityFtrProviderContext } from './config';
-import { datasetNames, getInitialTestLogs, getLogsForDataset, productionNamespace } from './data';
+import {
+  createFailedRecords,
+  datasetNames,
+  getInitialTestLogs,
+  getLogsForDataset,
+  productionNamespace,
+} from './data';
 
 export default function ({ getService, getPageObjects }: DatasetQualityFtrProviderContext) {
   const PageObjects = getPageObjects([
@@ -19,6 +25,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
   const synthtrace = getService('logSynthtraceEsClient');
   const testSubjects = getService('testSubjects');
   const to = '2024-01-01T12:00:00.000Z';
+  const failedDatasetName = 'synth.failed';
   const apacheAccessDatasetName = 'apache.access';
   const apacheAccessDatasetHumanName = 'Apache access logs';
   const apacheIntegrationName = 'Apache HTTP Server';
@@ -50,6 +57,13 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
           dataset: apacheAccessDatasetName,
           namespace: productionNamespace,
         }),
+        // Ingest Failed Logs
+        createFailedRecords({
+          to: new Date().toISOString(),
+          count: 10,
+          dataset: failedDatasetName,
+          rate: 0.5,
+        }),
       ]);
       await PageObjects.datasetQuality.navigateTo();
     });
@@ -61,7 +75,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
     it('shows full dataset names when toggled', async () => {
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
-      const datasetNameCol = cols['Data Set Name'];
+      const datasetNameCol = cols['Data set name'];
       const datasetNameColCellTexts = await datasetNameCol.getCellTexts();
       expect(datasetNameColCellTexts).to.eql(allDatasetNames);
 
@@ -83,7 +97,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
     it('searches the datasets', async () => {
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
-      const datasetNameCol = cols['Data Set Name'];
+      const datasetNameCol = cols['Data set name'];
       const datasetNameColCellTexts = await datasetNameCol.getCellTexts();
       expect(datasetNameColCellTexts).to.eql(allDatasetNames);
 
@@ -94,7 +108,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
       );
 
       const colsAfterSearch = await PageObjects.datasetQuality.parseDatasetTable();
-      const datasetNameColAfterSearch = colsAfterSearch['Data Set Name'];
+      const datasetNameColAfterSearch = colsAfterSearch['Data set name'];
       const datasetNameColCellTextsAfterSearch = await datasetNameColAfterSearch.getCellTexts();
       expect(datasetNameColCellTextsAfterSearch).to.eql([datasetNames[2]]);
 
@@ -104,7 +118,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
     it('filters for integration', async () => {
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
-      const datasetNameCol = cols['Data Set Name'];
+      const datasetNameCol = cols['Data set name'];
       const datasetNameColCellTexts = await datasetNameCol.getCellTexts();
       expect(datasetNameColCellTexts).to.eql(allDatasetNames);
 
@@ -112,7 +126,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
       await PageObjects.datasetQuality.filterForIntegrations([apacheIntegrationName]);
 
       const colsAfterFilter = await PageObjects.datasetQuality.parseDatasetTable();
-      const datasetNameColAfterFilter = colsAfterFilter['Data Set Name'];
+      const datasetNameColAfterFilter = colsAfterFilter['Data set name'];
       const datasetNameColCellTextsAfterFilter = await datasetNameColAfterFilter.getCellTexts();
 
       expect(datasetNameColCellTextsAfterFilter).to.eql([apacheAccessDatasetHumanName]);
@@ -143,7 +157,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
       const expectedQuality = 'Poor';
       // Get default quality
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
-      const datasetQuality = cols['Data Set Quality'];
+      const datasetQuality = cols['Data set quality'];
       const datasetQualityCellTexts = await datasetQuality.getCellTexts();
       expect(datasetQualityCellTexts).to.contain(expectedQuality);
 
@@ -151,7 +165,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
       await PageObjects.datasetQuality.filterForQualities([expectedQuality]);
 
       const colsAfterFilter = await PageObjects.datasetQuality.parseDatasetTable();
-      const datasetQualityAfterFilter = colsAfterFilter['Data Set Quality'];
+      const datasetQualityAfterFilter = colsAfterFilter['Data set quality'];
       const datasetQualityCellTextsAfterFilter = await datasetQualityAfterFilter.getCellTexts();
 
       expect(datasetQualityCellTextsAfterFilter).to.eql([expectedQuality]);

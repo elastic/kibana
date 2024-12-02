@@ -11,8 +11,10 @@ import rison from '@kbn/rison';
 import { KNOWN_TYPES } from '../../../common/constants';
 import {
   DataStreamDegradedDocsResponse,
+  DataStreamFailedDocsResponse,
   DataStreamTotalDocsResponse,
   getDataStreamDegradedDocsResponseRt,
+  getDataStreamFailedDocsResponseRt,
   getDataStreamsStatsResponseRt,
   getDataStreamTotalDocsResponseRt,
   getIntegrationsResponseRt,
@@ -23,6 +25,7 @@ import {
 import {
   DataStreamStatServiceResponse,
   GetDataStreamsDegradedDocsStatsQuery,
+  GetDataStreamsFailedDocsStatsQuery,
   GetDataStreamsStatsQuery,
   GetDataStreamsStatsResponse,
   GetDataStreamsTotalDocsQuery,
@@ -106,6 +109,30 @@ export class DataStreamsStatsClient implements IDataStreamsStatsClient {
     )(response);
 
     return degradedDocs;
+  }
+
+  public async getDataStreamsFailedStats(params: GetDataStreamsFailedDocsStatsQuery) {
+    const types = params.types.length === 0 ? KNOWN_TYPES : params.types;
+    const response = await this.http
+      .get<DataStreamFailedDocsResponse>('/internal/dataset_quality/data_streams/failed_docs', {
+        query: {
+          ...params,
+          types: rison.encodeArray(types),
+        },
+      })
+      .catch((error) => {
+        throw new DatasetQualityError(`Failed to fetch data streams failed stats: ${error}`, error);
+      });
+
+    const { failedDocs } = decodeOrThrow(
+      getDataStreamFailedDocsResponseRt,
+      (message: string) =>
+        new DatasetQualityError(
+          `Failed to decode data streams failed docs stats response: ${message}`
+        )
+    )(response);
+
+    return failedDocs;
   }
 
   public async getNonAggregatableDatasets(params: GetNonAggregatableDataStreamsParams) {

@@ -37,9 +37,10 @@ import { useDatasetRedirectLinkTelemetry, useRedirectLink } from '../../../hooks
 import { DegradedDocsPercentageLink } from './degraded_docs_percentage_link';
 import { TimeRangeConfig } from '../../../../common/types';
 import { DatasetQualityDetailsLink } from './dataset_quality_details_link';
+import { FailedDocsPercentageLink } from './failed_docs_percentage_link';
 
 const nameColumnName = i18n.translate('xpack.datasetQuality.nameColumnName', {
-  defaultMessage: 'Data Set Name',
+  defaultMessage: 'Data set name',
 });
 
 const namespaceColumnName = i18n.translate('xpack.datasetQuality.namespaceColumnName', {
@@ -55,15 +56,19 @@ const sizeColumnName = i18n.translate('xpack.datasetQuality.sizeColumnName', {
 });
 
 const degradedDocsColumnName = i18n.translate('xpack.datasetQuality.degradedDocsColumnName', {
-  defaultMessage: 'Degraded Docs (%)',
+  defaultMessage: 'Degraded docs (%)',
+});
+
+const failedDocsColumnName = i18n.translate('xpack.datasetQuality.failedDocsColumnName', {
+  defaultMessage: 'Failed docs (%)',
 });
 
 const datasetQualityColumnName = i18n.translate('xpack.datasetQuality.datasetQualityColumnName', {
-  defaultMessage: 'Data Set Quality',
+  defaultMessage: 'Data set quality',
 });
 
 const lastActivityColumnName = i18n.translate('xpack.datasetQuality.lastActivityColumnName', {
-  defaultMessage: 'Last Activity',
+  defaultMessage: 'Last activity',
 });
 
 const actionsColumnName = i18n.translate('xpack.datasetQuality.actionsColumnName', {
@@ -112,10 +117,17 @@ const degradedDocsColumnTooltip = (
   />
 );
 
+const failedDocsColumnTooltip = (
+  <FormattedMessage
+    id="xpack.datasetQuality.failedDocsColumnTooltip"
+    defaultMessage="The percentage of docs sent to failure store due to an issue during ingestion."
+  />
+);
+
 const datasetQualityColumnTooltip = (
   <FormattedMessage
     id="xpack.datasetQuality.datasetQualityColumnTooltip"
-    defaultMessage="Quality is based on the percentage of degraded docs in a data set. {visualQueue}"
+    defaultMessage="Quality is based on the percentage of degraded and failed docs in a data set. {visualQueue}"
     values={{
       visualQueue: (
         <EuiFlexGroup direction="column" gutterSize="xs">
@@ -159,7 +171,9 @@ export const getDatasetQualityTableColumns = ({
   canUserMonitorDataset,
   canUserMonitorAnyDataStream,
   loadingDataStreamStats,
+  loadingDocStats,
   loadingDegradedStats,
+  loadingFailedStats,
   showFullDatasetNames,
   isActiveDataset,
   timeRange,
@@ -169,7 +183,9 @@ export const getDatasetQualityTableColumns = ({
   canUserMonitorDataset: boolean;
   canUserMonitorAnyDataStream: boolean;
   loadingDataStreamStats: boolean;
+  loadingDocStats: boolean;
   loadingDegradedStats: boolean;
+  loadingFailedStats: boolean;
   showFullDatasetNames: boolean;
   isActiveDataset: (lastActivity: number) => boolean;
   timeRange: TimeRangeConfig;
@@ -248,7 +264,7 @@ export const getDatasetQualityTableColumns = ({
                     width="60px"
                     height="20px"
                     borderRadius="m"
-                    isLoading={loadingDataStreamStats || loadingDegradedStats}
+                    isLoading={loadingDataStreamStats || loadingDocStats}
                   >
                     {formatNumber(
                       DataStreamStat.calculateFilteredSize(dataStreamStat),
@@ -273,11 +289,11 @@ export const getDatasetQualityTableColumns = ({
           </EuiToolTip>
         </EuiTableHeader>
       ),
-      field: 'degradedDocs.percentage',
+      field: 'quality',
       sortable: true,
       render: (_, dataStreamStat: DataStreamStat) => (
         <DatasetQualityIndicator
-          isLoading={loadingDegradedStats}
+          isLoading={loadingDegradedStats || loadingFailedStats || loadingDocStats}
           quality={dataStreamStat.quality}
         />
       ),
@@ -307,35 +323,61 @@ export const getDatasetQualityTableColumns = ({
     },
     {
       name: (
-        <EuiTableHeader data-test-subj="datasetQualityLastActivityColumn">
-          {lastActivityColumnName}
+        <EuiTableHeader data-test-subj="datasetQualityFailedPercentageColumn">
+          <EuiToolTip content={failedDocsColumnTooltip}>
+            <span>
+              {`${failedDocsColumnName} `}
+              <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+            </span>
+          </EuiToolTip>
         </EuiTableHeader>
       ),
-      field: 'lastActivity',
-      render: (timestamp: number) => (
-        <EuiSkeletonRectangle
-          width="200px"
-          height="20px"
-          borderRadius="m"
-          isLoading={loadingDataStreamStats}
-        >
-          {!isActiveDataset(timestamp) ? (
-            <EuiFlexGroup gutterSize="xs" alignItems="center">
-              <EuiText size="s">{inactiveDatasetActivityColumnDescription}</EuiText>
-              <EuiToolTip position="top" content={inactiveDatasetActivityColumnTooltip}>
-                <EuiIcon tabIndex={0} type="iInCircle" size="s" />
-              </EuiToolTip>
-            </EuiFlexGroup>
-          ) : (
-            fieldFormats
-              .getDefaultInstance(KBN_FIELD_TYPES.DATE, [ES_FIELD_TYPES.DATE])
-              .convert(timestamp)
-          )}
-        </EuiSkeletonRectangle>
-      ),
-      width: '300px',
+      field: 'failedDocs.percentage',
       sortable: true,
+      render: (_, dataStreamStat: DataStreamStat) => (
+        <FailedDocsPercentageLink
+          isLoading={loadingFailedStats}
+          dataStreamStat={dataStreamStat}
+          timeRange={timeRange}
+        />
+      ),
+      width: '140px',
     },
+    ...(canUserMonitorDataset && canUserMonitorAnyDataStream
+      ? [
+          {
+            name: (
+              <EuiTableHeader data-test-subj="datasetQualityLastActivityColumn">
+                {lastActivityColumnName}
+              </EuiTableHeader>
+            ),
+            field: 'lastActivity',
+            render: (timestamp: number) => (
+              <EuiSkeletonRectangle
+                width="200px"
+                height="20px"
+                borderRadius="m"
+                isLoading={loadingDataStreamStats}
+              >
+                {!isActiveDataset(timestamp) ? (
+                  <EuiFlexGroup gutterSize="xs" alignItems="center">
+                    <EuiText size="s">{inactiveDatasetActivityColumnDescription}</EuiText>
+                    <EuiToolTip position="top" content={inactiveDatasetActivityColumnTooltip}>
+                      <EuiIcon tabIndex={0} type="iInCircle" size="s" />
+                    </EuiToolTip>
+                  </EuiFlexGroup>
+                ) : (
+                  fieldFormats
+                    .getDefaultInstance(KBN_FIELD_TYPES.DATE, [ES_FIELD_TYPES.DATE])
+                    .convert(timestamp)
+                )}
+              </EuiSkeletonRectangle>
+            ),
+            width: '300px',
+            sortable: true,
+          },
+        ]
+      : []),
     {
       name: actionsColumnName,
       render: (dataStreamStat: DataStreamStat) => (

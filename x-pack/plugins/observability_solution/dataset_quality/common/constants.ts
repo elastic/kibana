@@ -26,7 +26,7 @@ export const NONE = 'none';
 export const DEFAULT_TIME_RANGE = { from: 'now-24h', to: 'now' };
 export const DEFAULT_DATEPICKER_REFRESH = { value: 60000, pause: false };
 
-export const DEFAULT_DEGRADED_DOCS = {
+export const DEFAULT_QUALITY_DOC_STATS = {
   count: 0,
   percentage: 0,
 };

@@ -6,7 +6,16 @@
  */
 
 import expect from '@kbn/expect';
-import { defaultNamespace } from '@kbn/test-suites-xpack/functional/apps/dataset_quality/data';
+import {
+  createFailedRecords,
+  customLogLevelProcessor,
+  defaultNamespace,
+} from '@kbn/test-suites-xpack/functional/apps/dataset_quality/data';
+import merge from 'lodash/merge';
+import {
+  IndicesIndexTemplate,
+  IndicesPutIndexTemplateRequest,
+} from '@elastic/elasticsearch/lib/api/types';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import {
   datasetNames,
@@ -55,6 +64,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const regularDataStreamName = `logs-${datasetNames[0]}-${defaultNamespace}`;
   const degradedDatasetName = datasetNames[2];
   const degradedDataStreamName = `logs-${degradedDatasetName}-${defaultNamespace}`;
+  const failedDatasetName = datasetNames[1];
+  const failedDataStreamName = `logs-${failedDatasetName}-${defaultNamespace}`;
 
   describe('Dataset quality details', function () {
     before(async () => {
@@ -63,6 +74,31 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // Install Bitbucket Integration (package which does not has Dashboards) and ingest logs for it
       await PageObjects.observabilityLogsExplorer.installPackage(bitbucketPkg);
+
+      // Enable failure store for logs
+      await synthtrace.createCustomPipeline(customLogLevelProcessor, 'logs-apache.access@custom');
+      await synthtrace.createComponentTemplate('logs-apache.access@custom', undefined, {
+        'index.default_pipeline': 'logs-apache.access@custom',
+      });
+      await synthtrace.updateIndexTemplate(
+        'logs-apache.access',
+        (template: IndicesIndexTemplate): IndicesPutIndexTemplateRequest => {
+          const next = {
+            name: 'logs-apache.access',
+            index_patterns: template.index_patterns,
+            template: {
+              settings: template.template?.settings,
+              mappings: template.template?.mappings,
+              aliases: template.template?.aliases,
+            },
+            data_stream: {
+              failure_store: true,
+            },
+          };
+
+          return merge({}, template, next);
+        }
+      );
 
       await synthtrace.index([
         // Ingest basic logs
@@ -87,6 +123,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           dataset: apacheAccessDatasetName,
           namespace: productionNamespace,
           isMalformed: true,
+        }),
+        // Index failed docs for Apache integration
+        createFailedRecords({
+          to: new Date().toISOString(),
+          count: 10,
+          dataset: apacheAccessDatasetName,
+          namespace: productionNamespace,
+          rate: 0.5,
         }),
         // Index logs for Bitbucket integration
         getLogsForDataset({ to, count: 10, dataset: bitbucketDatasetName }),
@@ -163,6 +207,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expect(currentUrl).to.not.contain('breakdownField');
         });
       });
+
+      it('reflects the selected quality issue chart state in url', async () => {
+        await PageObjects.datasetQuality.navigateToDetails({ dataStream: failedDataStreamName });
+
+        const charType = 'failedDocs';
+        await PageObjects.datasetQuality.selectQualityIssuesChartType(charType);
+
+        // Wait for URL to contain "qualityIssuesChart:failedDocs"
+        await retry.tryForTime(5000, async () => {
+          const currentUrl = await browser.getCurrentUrl();
+          expect(decodeURIComponent(currentUrl)).to.contain(`qualityIssuesChart:${charType}`);
+        });
+      });
     });
 
     // FLAKY: https://github.com/elastic/kibana/issues/194575
@@ -172,15 +229,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           dataStream: apacheAccessDataStreamName,
         });
 
-        const { docsCountTotal, degradedDocs, services, hosts, size } =
+        const { docsCountTotal, degradedDocs, failedDocs, services, hosts, size } =
           await PageObjects.datasetQuality.parseOverviewSummaryPanelKpis();
-        expect(parseInt(docsCountTotal, 10)).to.be(226);
+        expect(parseInt(docsCountTotal, 10)).to.be(306);
         expect(parseInt(degradedDocs, 10)).to.be(1);
         expect(parseInt(services, 10)).to.be(3);
         expect(parseInt(hosts, 10)).to.be(52);
         // metering stats API is cached for 30seconds, waiting for the exact value is not optimal in this case
         // rather we can just check if any value is present
         expect(size).to.be.ok();
+        expect(parseInt(failedDocs, 10)).to.be(20);
       });
     });
 
@@ -377,7 +435,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const rows =
           await PageObjects.datasetQuality.getDatasetQualityDetailsDegradedFieldTableRows();
 
-        expect(rows.length).to.eql(3);
+        expect(rows.length).to.eql(2);
       });
 
       it('should display Spark Plot for every row of degraded fields', async () => {

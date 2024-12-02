@@ -14,7 +14,7 @@ import { DegradedFields } from './degraded_fields';
 
 const OverviewHeader = dynamic(() => import('./header'));
 const Summary = dynamic(() => import('./summary'));
-const DegradedDocs = dynamic(() => import('./document_trends/degraded_docs'));
+const DocumentTrends = dynamic(() => import('./document_trends'));
 
 export function Overview() {
   const { dataStream, isNonAggregatable, updateTimeRange } = useDatasetQualityDetailsState();
@@ -34,7 +34,7 @@ export function Overview() {
       <EuiSpacer size="m" />
       <Summary />
       <EuiSpacer size="m" />
-      <DegradedDocs lastReloadTime={lastReloadTime} />
+      <DocumentTrends lastReloadTime={lastReloadTime} />
       <EuiSpacer size="m" />
       <DegradedFields />
     </>

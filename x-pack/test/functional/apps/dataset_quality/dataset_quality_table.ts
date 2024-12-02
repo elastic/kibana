@@ -6,8 +6,11 @@
  */
 
 import expect from '@kbn/expect';
+import merge from 'lodash/merge';
 import { DatasetQualityFtrProviderContext } from './config';
 import {
+  createFailedRecords,
+  customLogLevelProcessor,
   datasetNames,
   defaultNamespace,
   getInitialTestLogs,
@@ -26,6 +29,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
   const to = '2024-01-01T12:00:00.000Z';
   const apacheAccessDatasetName = 'apache.access';
   const apacheAccessDatasetHumanName = 'Apache access logs';
+  const failedDatasetName = 'synth.failed';
   const pkg = {
     name: 'apache',
     version: '1.14.0',
@@ -33,6 +37,22 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
   describe('Dataset quality table', () => {
     before(async () => {
+      // Enable failure store for logs
+      await synthtrace.createCustomPipeline(customLogLevelProcessor);
+      await synthtrace.updateIndexTemplate(
+        'logs',
+        (template: Record<string, any>): Record<string, any> => {
+          const next: Record<string, any> = {
+            name: 'logs',
+            data_stream: {
+              failure_store: true,
+            },
+          };
+
+          return merge({}, template, next);
+        }
+      );
+
       // Install Integration and ingest logs for it
       await PageObjects.observabilityLogsExplorer.installPackage(pkg);
       // Ingest basic logs
@@ -53,6 +73,13 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
           dataset: apacheAccessDatasetName,
           namespace: productionNamespace,
         }),
+        // Ingest Failed Logs
+        createFailedRecords({
+          to: new Date().toISOString(),
+          count: 10,
+          dataset: failedDatasetName,
+          rate: 0.5,
+        }),
       ]);
       await PageObjects.datasetQuality.navigateTo();
     });
@@ -64,7 +91,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
     it('shows sort by dataset name and show namespace', async () => {
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
-      const datasetNameCol = cols['Data Set Name'];
+      const datasetNameCol = cols['Data set name'];
       await datasetNameCol.sort('descending');
       const datasetNameColCellTexts = await datasetNameCol.getCellTexts();
       expect(datasetNameColCellTexts).to.eql(
@@ -77,6 +104,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
         defaultNamespace,
         defaultNamespace,
         defaultNamespace,
+        defaultNamespace,
         productionNamespace,
       ]);
 
@@ -86,13 +114,15 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
     it('shows the last activity', async () => {
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
-      const lastActivityCol = cols['Last Activity'];
+      const lastActivityCol = cols['Last activity'];
       const activityCells = await lastActivityCol.getCellTexts();
-      const lastActivityCell = activityCells[activityCells.length - 1];
-      const restActivityCells = activityCells.slice(0, -1);
+      const lastActivityDegradedCell = activityCells[activityCells.length - 2];
+      const lastActivityFailedCell = activityCells[activityCells.length - 1];
+      const restActivityCells = activityCells.slice(0, -2);
 
       // The first cell of lastActivity should have data
-      expect(lastActivityCell).to.not.eql(PageObjects.datasetQuality.texts.noActivityText);
+      expect(lastActivityDegradedCell).to.not.eql(PageObjects.datasetQuality.texts.noActivityText);
+      expect(lastActivityFailedCell).to.not.eql(PageObjects.datasetQuality.texts.noActivityText);
       // The rest of the rows must show no activity
       expect(restActivityCells).to.eql([
         PageObjects.datasetQuality.texts.noActivityText,
@@ -104,9 +134,17 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
     it('shows degraded docs percentage', async () => {
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
 
-      const degradedDocsCol = cols['Degraded Docs (%)'];
+      const degradedDocsCol = cols['Degraded docs (%)'];
       const degradedDocsColCellTexts = await degradedDocsCol.getCellTexts();
-      expect(degradedDocsColCellTexts).to.eql(['0%', '0%', '0%', '100%']);
+      expect(degradedDocsColCellTexts).to.eql(['0%', '0%', '0%', '100%', '0%']);
+    });
+
+    it('shows failed docs percentage', async () => {
+      const cols = await PageObjects.datasetQuality.parseDatasetTable();
+
+      const failedDocsCol = cols['Failed docs (%)'];
+      const failedDocsColCellTexts = await failedDocsCol.getCellTexts();
+      expect(failedDocsColCellTexts).to.eql(['0%', '0%', '0%', '0%', '20%']);
     });
 
     it('shows the value in the size column', async () => {
@@ -122,7 +160,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
     it('shows dataset from integration', async () => {
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
-      const datasetNameCol = cols['Data Set Name'];
+      const datasetNameCol = cols['Data set name'];
 
       const datasetNameColCellTexts = await datasetNameCol.getCellTexts();
 
@@ -132,7 +170,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
     it('goes to log explorer page when opened', async () => {
       const rowIndexToOpen = 1;
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
-      const datasetNameCol = cols['Data Set Name'];
+      const datasetNameCol = cols['Data set name'];
       const actionsCol = cols.Actions;
 
       const datasetName = (await datasetNameCol.getCellTexts())[rowIndexToOpen];
@@ -150,7 +188,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
     it('hides inactive datasets', async () => {
       // Get number of rows with Last Activity not equal to "No activity in the selected timeframe"
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
-      const lastActivityCol = cols['Last Activity'];
+      const lastActivityCol = cols['Last activity'];
       const lastActivityColCellTexts = await lastActivityCol.getCellTexts();
       const activeDatasets = lastActivityColCellTexts.filter(
         (activity: string) => activity !== PageObjects.datasetQuality.texts.noActivityText

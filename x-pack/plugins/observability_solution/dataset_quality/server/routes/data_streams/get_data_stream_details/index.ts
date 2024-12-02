@@ -21,6 +21,7 @@ import { createDatasetQualityESClient } from '../../../utils';
 import { dataStreamService, datasetQualityPrivileges } from '../../../services';
 import { getDataStreams } from '../get_data_streams';
 import { getDataStreamsMeteringStats } from '../get_data_streams_metering_stats';
+import { getFailedDocsPaginated } from '../get_failed_docs';
 
 export async function getDataStreamSettings({
   esClient,
@@ -92,6 +93,14 @@ export async function getDataStreamDetails({
       end
     );
 
+    const failedDocs = await getFailedDocsPaginated({
+      esClient: esClientAsCurrentUser,
+      types: [],
+      datasetQuery: dataStream,
+      start,
+      end,
+    });
+
     const avgDocSizeInBytes =
       hasAccessToDataStream && dataStreamSummaryStats.docsCount > 0
         ? isServerless
@@ -103,6 +112,7 @@ export async function getDataStreamDetails({
 
     return {
       ...dataStreamSummaryStats,
+      failedDocsCount: failedDocs[0]?.count,
       sizeBytes,
       lastActivity: esDataStream?.lastActivity,
       userPrivileges: {
