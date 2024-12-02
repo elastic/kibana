@@ -6,11 +6,14 @@
  */
 
 import { SavedObject, SavedObjectsBulkCreateObject } from '@kbn/core/server';
+import { ActionsClient } from '@kbn/actions-plugin/server';
 import { AdHocRunSO } from '../../../data/ad_hoc_run/types';
 import { createBackfillError } from '../../../backfill_client/lib';
 import { ScheduleBackfillResult } from '../methods/schedule/types';
+import { transformRawActionsToDomainActions } from '../../rule/transforms';
 
 export const transformAdHocRunToBackfillResult = (
+  actionsClient: ActionsClient,
   { id, attributes, references, error }: SavedObject<AdHocRunSO>,
   originalSO?: SavedObjectsBulkCreateObject<AdHocRunSO>
 ): ScheduleBackfillResult => {
@@ -55,6 +58,13 @@ export const transformAdHocRunToBackfillResult = (
     rule: {
       ...attributes.rule,
       id: references[0].id,
+      actions: transformRawActionsToDomainActions({
+        ruleId: id,
+        actions: attributes.rule.actions,
+        references,
+        isSystemAction: (connectorId: string) => actionsClient.isSystemAction(connectorId),
+        omitGeneratedValues: true,
+      }),
     },
     spaceId: attributes.spaceId,
     start: attributes.start,

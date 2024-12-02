@@ -7,12 +7,14 @@
 
 import { RuleAction, RuleSystemAction } from '@kbn/alerting-types';
 import { asSavedObjectExecutionSource } from '@kbn/actions-plugin/server';
+import { TaskPriority } from '@kbn/task-manager-plugin/server';
 import { RULE_SAVED_OBJECT_TYPE } from '../../..';
 
 interface FormatActionToEnqueueOpts {
   action: RuleAction | RuleSystemAction;
   apiKey: string | null;
   executionId: string;
+  priority?: TaskPriority;
   ruleConsumer: string;
   ruleId: string;
   ruleTypeId: string;
@@ -20,7 +22,7 @@ interface FormatActionToEnqueueOpts {
 }
 
 export const formatActionToEnqueue = (opts: FormatActionToEnqueueOpts) => {
-  const { action, apiKey, executionId, ruleConsumer, ruleId, ruleTypeId, spaceId } = opts;
+  const { action, apiKey, executionId, priority, ruleConsumer, ruleId, ruleTypeId, spaceId } = opts;
 
   const namespace = spaceId === 'default' ? {} : { namespace: spaceId };
   return {
@@ -44,5 +46,6 @@ export const formatActionToEnqueue = (opts: FormatActionToEnqueueOpts) => {
       },
     ],
     actionTypeId: action.actionTypeId,
+    priority,
   };
 };

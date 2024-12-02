@@ -207,6 +207,7 @@ export class SummaryActionScheduler<
           action: actionToRun,
           apiKey: this.context.apiKey,
           executionId: this.context.executionId,
+          priority: this.context.priority,
           ruleConsumer: this.context.ruleConsumer,
           ruleId: this.context.rule.id,
           ruleTypeId: this.context.ruleType.id,

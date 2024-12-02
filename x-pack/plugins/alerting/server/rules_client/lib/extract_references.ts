@@ -26,7 +26,10 @@ export async function extractReferences<
   params: ExtractedParams;
   references: SavedObjectReference[];
 }> {
-  const { references: actionReferences, actions } = await denormalizeActions(context, ruleActions);
+  const { references: actionReferences, actions } = await denormalizeActions(
+    context.getActionsClient,
+    ruleActions
+  );
 
   // Extracts any references using configured reference extractor if available
   const extractedRefsAndParams = ruleType?.useSavedObjectReferences?.extractReferences
