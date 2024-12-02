@@ -15,11 +15,11 @@ jest.mock('../../common/lib/kibana');
 const mockDashboardContainer = {} as DashboardApi;
 
 describe('useDashboardRenderer', () => {
-  it('should set dashboard container correctly when dashboard is loaded', async () => {
+  it('should set dashboard container correctly when dashboard is loaded', () => {
     const { result } = renderHook(() => useDashboardRenderer());
 
-    await act(async () => {
-      await result.current.handleDashboardLoaded(mockDashboardContainer);
+    act(() => {
+      result.current.handleDashboardLoaded(mockDashboardContainer);
     });
 
     expect(result.current.dashboardContainer).toEqual(mockDashboardContainer);

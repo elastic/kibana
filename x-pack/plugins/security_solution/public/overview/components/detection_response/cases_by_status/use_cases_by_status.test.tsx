@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act, waitFor, renderHook } from '@testing-library/react';
+import { waitFor, renderHook } from '@testing-library/react';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { useKibana } from '../../../../common/lib/kibana';
 import { TestProviders } from '../../../../common/mock';
@@ -38,14 +38,6 @@ mockGetCasesMetrics.mockResolvedValue({
   },
 });
 
-mockGetCasesMetrics.mockResolvedValueOnce({
-  status: {
-    open: 0,
-    inProgress: 0,
-    closed: 0,
-  },
-});
-
 const mockUseKibana = {
   services: {
     cases: {
@@ -65,17 +57,28 @@ describe('useCasesByStatus', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
-  test('init', () => {
+  test('init', async () => {
+    mockGetCasesMetrics.mockResolvedValueOnce({
+      status: {
+        open: 0,
+        inProgress: 0,
+        closed: 0,
+      },
+    });
+
     const { result } = renderHook(() => useCasesByStatus({}), {
       wrapper: TestProviders,
     });
-    expect(result.current).toEqual({
-      closed: 0,
-      inProgress: 0,
-      isLoading: true,
-      open: 0,
-      totalCounts: 0,
-      updatedAt: dateNow,
+
+    await waitFor(() => {
+      expect(result.current).toEqual({
+        closed: 0,
+        inProgress: 0,
+        isLoading: true,
+        open: 0,
+        totalCounts: 0,
+        updatedAt: dateNow,
+      });
     });
   });
 
@@ -83,14 +86,16 @@ describe('useCasesByStatus', () => {
     const { result } = renderHook(() => useCasesByStatus({ skip: false }), {
       wrapper: TestProviders,
     });
-    await waitFor(() => expect(result.current.isLoading).toBe(false));
-    expect(result.current).toEqual({
-      closed: 3,
-      inProgress: 2,
-      isLoading: false,
-      open: 1,
-      totalCounts: 6,
-      updatedAt: dateNow,
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+      expect(result.current).toEqual({
+        closed: 3,
+        inProgress: 2,
+        isLoading: false,
+        open: 1,
+        totalCounts: 6,
+        updatedAt: dateNow,
+      });
     });
   });
 
@@ -102,14 +107,21 @@ describe('useCasesByStatus', () => {
   });
 
   test('it should call deleteQuery when unmounting', async () => {
+    // muting setState warning that happens on unmount
+    // because it's a noop and going to be removed
+    // in the next version of React
+    const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
     const { unmount } = renderHook(() => useCasesByStatus({ skip: false }), {
       wrapper: TestProviders,
     });
-    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     unmount();
 
-    expect(mockDeleteQuery).toHaveBeenCalled();
+    waitFor(() => {
+      expect(mockDeleteQuery).toHaveBeenCalled();
+    });
+
+    consoleError.mockRestore();
   });
 
   test('skip', async () => {
@@ -119,11 +131,14 @@ describe('useCasesByStatus', () => {
     const { rerender } = renderHook(() => useCasesByStatus(localProps), {
       wrapper: TestProviders,
     });
-    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     localProps.skip = true;
-    act(() => rerender());
-    act(() => rerender());
-    expect(abortSpy).toHaveBeenCalledTimes(2);
+
+    rerender();
+    rerender();
+
+    await waitFor(() => {
+      expect(abortSpy).toHaveBeenCalledTimes(2);
+    });
   });
 });

@@ -66,22 +66,22 @@ describe('useCaseItems', () => {
   it('should return default values', async () => {
     const { result } = renderUseCaseItems();
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
+    await waitFor(() => {
+      expect(result.current).toEqual({
+        items: [],
+        isLoading: false,
+        updatedAt: dateNow,
+      });
 
-    expect(result.current).toEqual({
-      items: [],
-      isLoading: false,
-      updatedAt: dateNow,
-    });
-
-    expect(mockCasesApi).toBeCalledWith({
-      from: '2020-07-07T08:20:18.966Z',
-      to: '2020-07-08T08:20:18.966Z',
-      owner: 'securitySolution',
-      sortField: 'createdAt',
-      sortOrder: 'desc',
-      page: 1,
-      perPage: 4,
+      expect(mockCasesApi).toBeCalledWith({
+        from: '2020-07-07T08:20:18.966Z',
+        to: '2020-07-08T08:20:18.966Z',
+        owner: 'securitySolution',
+        sortField: 'createdAt',
+        sortOrder: 'desc',
+        page: 1,
+        perPage: 4,
+      });
     });
   });
 
@@ -108,13 +108,11 @@ describe('useCaseItems', () => {
   test('it should call deleteQuery when unmounting', async () => {
     const { unmount } = renderUseCaseItems();
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
+    unmount();
 
-    act(() => {
-      unmount();
+    await waitFor(() => {
+      expect(mockDeleteQuery).toHaveBeenCalled();
     });
-
-    expect(mockDeleteQuery).toHaveBeenCalled();
   });
 
   it('should return new updatedAt', async () => {
