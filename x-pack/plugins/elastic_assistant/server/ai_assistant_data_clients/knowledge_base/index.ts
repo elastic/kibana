@@ -44,7 +44,10 @@ import {
   loadSecurityLabs,
   getSecurityLabsDocsCount,
 } from '../../lib/langchain/content_loaders/security_labs_loader';
-import { ASSISTANT_ELSER_INFERENCE_ID } from './field_maps_configuration';
+import {
+  ASSISTANT_ELSER_INFERENCE_ID,
+  ELASTICSEARCH_ELSER_INFERENCE_ID,
+} from './field_maps_configuration';
 
 /**
  * Params for when creating KbDataClient in Request Context Factory. Useful if needing to modify
@@ -133,17 +136,40 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     }
   };
 
+  public getInferenceEndpointId = async () => {
+    const esClient = await this.options.elasticsearchClientPromise;
+
+    try {
+      const elasticsearchInference = await esClient.inference.get({
+        inference_id: ASSISTANT_ELSER_INFERENCE_ID,
+        task_type: 'sparse_embedding',
+      });
+
+      if (elasticsearchInference) {
+        return ASSISTANT_ELSER_INFERENCE_ID;
+      }
+    } catch (error) {
+      this.options.logger.debug(
+        `Error checking if Inference endpoint ${ASSISTANT_ELSER_INFERENCE_ID} exists: ${error}`
+      );
+    }
+
+    // Fallback to the dedicated inference endpoint
+    return ELASTICSEARCH_ELSER_INFERENCE_ID;
+  };
+
   /**
    * Checks if the inference endpoint is deployed and allocated in Elasticsearch
    *
    * @returns Promise<boolean> indicating whether the model is deployed
    */
-  public isInferenceEndpointExists = async (): Promise<boolean> => {
+  public isInferenceEndpointExists = async (inferenceEndpointId?: string): Promise<boolean> => {
+    const inferenceId = inferenceEndpointId || (await this.getInferenceEndpointId());
+
     try {
       const esClient = await this.options.elasticsearchClientPromise;
-
       const inferenceExists = !!(await esClient.inference.get({
-        inference_id: ASSISTANT_ELSER_INFERENCE_ID,
+        inference_id: inferenceId,
         task_type: 'sparse_embedding',
       }));
       if (!inferenceExists) {
@@ -179,46 +205,57 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     const elserId = await this.options.getElserId();
     this.options.logger.debug(`Deploying ELSER model '${elserId}'...`);
     const esClient = await this.options.elasticsearchClientPromise;
+    const inferenceId = await this.getInferenceEndpointId();
+    const inferenceExists = await this.isInferenceEndpointExists(inferenceId);
 
-    try {
-      await esClient.inference.delete({
-        inference_id: ASSISTANT_ELSER_INFERENCE_ID,
-        // it's being used in the mapping so we need to force delete
-        force: true,
-      });
-      this.options.logger.debug(`Deleted existing inference endpoint for ELSER model '${elserId}'`);
-    } catch (error) {
-      this.options.logger.error(
-        `Error deleting inference endpoint for ELSER model '${elserId}':\n${error}`
-      );
-    }
+    // Don't try to create the inference endpoint for ELASTICSEARCH_ELSER_INFERENCE_ID
+    if (inferenceId === ASSISTANT_ELSER_INFERENCE_ID) {
+      if (inferenceExists) {
+        try {
+          await esClient.inference.delete({
+            inference_id: ASSISTANT_ELSER_INFERENCE_ID,
+            // it's being used in the mapping so we need to force delete
+            force: true,
+          });
+          this.options.logger.debug(
+            `Deleted existing inference endpoint for ELSER model '${elserId}'`
+          );
+        } catch (error) {
+          this.options.logger.error(
+            `Error deleting inference endpoint for ELSER model '${elserId}':\n${error}`
+          );
+        }
+      }
 
-    try {
-      await esClient.inference.put({
-        task_type: 'sparse_embedding',
-        inference_id: ASSISTANT_ELSER_INFERENCE_ID,
-        inference_config: {
-          service: 'elasticsearch',
-          service_settings: {
-            adaptive_allocations: {
-              enabled: true,
-              min_number_of_allocations: 0,
-              max_number_of_allocations: 8,
+      try {
+        await esClient.inference.put({
+          task_type: 'sparse_embedding',
+          inference_id: ASSISTANT_ELSER_INFERENCE_ID,
+          inference_config: {
+            service: 'elasticsearch',
+            service_settings: {
+              adaptive_allocations: {
+                enabled: true,
+                min_number_of_allocations: 0,
+                max_number_of_allocations: 8,
+              },
+              num_threads: 1,
+              model_id: elserId,
             },
-            num_threads: 1,
-            model_id: elserId,
+            task_settings: {},
           },
-          task_settings: {},
-        },
-      });
+        });
 
-      // await for the model to be deployed
-      await this.isInferenceEndpointExists();
-    } catch (error) {
-      this.options.logger.error(
-        `Error creating inference endpoint for ELSER model '${elserId}':\n${error}`
-      );
-      throw new Error(`Error creating inference endpoint for ELSER model '${elserId}':\n${error}`);
+        // await for the model to be deployed
+        await this.isInferenceEndpointExists();
+      } catch (error) {
+        this.options.logger.error(
+          `Error creating inference endpoint for ELSER model '${elserId}':\n${error}`
+        );
+        throw new Error(
+          `Error creating inference endpoint for ELSER model '${elserId}':\n${error}`
+        );
+      }
     }
   };
 
@@ -647,7 +684,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     }
 
     try {
-      const elserId = ASSISTANT_ELSER_INFERENCE_ID;
+      const elserId = await this.getInferenceEndpointId();
       const userFilter = getKBUserFilter(user);
       const results = await this.findDocuments<EsIndexEntry>({
         // Note: This is a magic number to set some upward bound as to not blow the context with too
