@@ -190,7 +190,16 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           },
           async (conversationSimulator) => {
             await conversationSimulator.next({
-              function_call: { name: 'my_action', arguments: JSON.stringify({ foo: 'bar' }) },
+              tool_calls: [
+                {
+                  id: 'fake-id',
+                  index: 'fake-index',
+                  function: {
+                    name: 'my_action',
+                    arguments: JSON.stringify({ foo: 'bar' }),
+                  },
+                },
+              ],
             });
             await conversationSimulator.complete();
           }
@@ -238,7 +247,16 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             body = conversationSimulator.body;
 
             await conversationSimulator.next({
-              function_call: { name: 'my_action', arguments: JSON.stringify({ foo: 'bar' }) },
+              tool_calls: [
+                {
+                  id: 'fake-id',
+                  index: 'fake-index',
+                  function: {
+                    name: 'my_action',
+                    arguments: JSON.stringify({ foo: 'bar' }),
+                  },
+                },
+              ],
             });
             await conversationSimulator.complete();
           }
