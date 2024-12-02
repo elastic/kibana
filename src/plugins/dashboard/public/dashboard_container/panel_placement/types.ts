@@ -40,6 +40,10 @@ export interface IProvidesLegacyPanelPlacementSettings<
   ) => Partial<PanelPlacementSettings>;
 }
 
-export type GetPanelPlacementSettings<SerializedState extends object = object> = (
-  serializedState?: SerializedState
+export type GetPanelPlacementSettings<
+  SerializedState extends object = object,
+  RuntimeState extends object = object
+> = (
+  serializedState?: SerializedState,
+  runtimeState?: RuntimeState
 ) => MaybePromise<PanelPlacementSettings>;

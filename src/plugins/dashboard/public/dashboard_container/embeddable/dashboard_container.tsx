@@ -346,9 +346,6 @@ export class DashboardContainer
 
     this.useMargins$ = new BehaviorSubject(this.getState().explicitInput.useMargins);
     this.panels$ = new BehaviorSubject(this.getState().explicitInput.panels);
-    this.panels$.subscribe((panels) => {
-      console.log('panels emit', panels);
-    })
     this.publishingSubscription.add(
       this.onStateChange(() => {
         const state = this.getState();
@@ -582,10 +579,10 @@ export class DashboardContainer
   public isEmbeddedExternally: boolean;
   public uuid$: BehaviorSubject<string>;
 
-  public async replacePanel(idToRemove: string, { panelType, initialState }: PanelPackage) {
+  public async replacePanel(idToRemove: string, { panelType, serializedState }: PanelPackage) {
     const newId = await this.replaceEmbeddable(
       idToRemove,
-      initialState as Partial<EmbeddableInput>,
+      serializedState as Partial<EmbeddableInput>,
       panelType,
       true
     );
@@ -600,7 +597,6 @@ export class DashboardContainer
     panelPackage: PanelPackage,
     displaySuccessMessage?: boolean
   ) {
-    debugger
     const onSuccess = (id?: string, title?: string) => {
       if (!displaySuccessMessage) return;
       coreServices.notifications.toasts.addSuccess({
@@ -622,7 +618,10 @@ export class DashboardContainer
       );
 
       const customPlacementSettings = getCustomPlacementSettingFunc
-        ? await getCustomPlacementSettingFunc(panelPackage.initialState)
+        ? await getCustomPlacementSettingFunc(
+            panelPackage.serializedState,
+            panelPackage.runtimeState
+          )
         : {};
 
       const placementSettings = {
@@ -647,11 +646,11 @@ export class DashboardContainer
         },
         explicitInput: {
           id: newId,
-          ...(panelPackage?.initialState ?? {})
+          ...(panelPackage?.serializedState ?? {}),
         },
       };
-      if (panelPackage.initialState) {
-        this.setRuntimeStateForChild(newId, panelPackage.initialState);
+      if (panelPackage.runtimeState) {
+        this.setRuntimeStateForChild(newId, panelPackage.runtimeState);
       }
       this.updateInput({ panels: { ...otherPanels, [newId]: newPanel } });
       onSuccess(newId, newPanel.explicitInput.title);
@@ -662,7 +661,7 @@ export class DashboardContainer
     if (!embeddableFactory) {
       throw new EmbeddableFactoryNotFoundError(panelPackage.panelType);
     }
-    const initialInput = panelPackage.initialState as Partial<EmbeddableInput>;
+    const initialInput = panelPackage.serializedState as Partial<EmbeddableInput>;
 
     let explicitInput: Partial<EmbeddableInput>;
     let attributes: unknown;

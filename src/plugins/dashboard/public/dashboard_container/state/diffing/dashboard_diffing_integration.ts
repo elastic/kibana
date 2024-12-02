@@ -117,8 +117,6 @@ export function startDiffingDashboardState(
       ),
     ]).subscribe(([dashboardChanges, unsavedPanelState, controlGroupChanges]) => {
       // calculate unsaved changes
-      console.log('dashboardChanges', dashboardChanges);
-      console.log('unsavedPanelState', unsavedPanelState);
       const hasUnsavedChanges =
         Object.keys(omit(dashboardChanges, keysNotConsideredUnsavedChanges)).length > 0 ||
         unsavedPanelState !== undefined ||

@@ -11,9 +11,10 @@ import { apiHasParentApi, apiHasUniqueId, PublishingSubject } from '@kbn/present
 import { BehaviorSubject, combineLatest, isObservable, map, Observable, of, switchMap } from 'rxjs';
 import { apiCanAddNewPanel, CanAddNewPanel } from './can_add_new_panel';
 
-export interface PanelPackage<SerializedState extends object = object> {
+export interface PanelPackage<SerializedState extends object = object, RuntimeState extends object = object> {
   panelType: string;
-  initialState?: SerializedState;
+  serializedState?: SerializedState;
+  runtimeState?: RuntimeState;
 }
 
 export interface PresentationContainer extends CanAddNewPanel {

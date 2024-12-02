@@ -136,7 +136,7 @@ export abstract class Container<
   ): Promise<ApiType | undefined> {
     const newEmbeddable = await this.addNewEmbeddable(
       panelPackage.panelType,
-      panelPackage.initialState as Partial<EmbeddableInput>
+      panelPackage.serializedState as Partial<EmbeddableInput>
     );
     return newEmbeddable as ApiType;
   }
@@ -548,7 +548,6 @@ export abstract class Container<
   }
 
   private async onPanelAdded(panel: PanelState) {
-    debugger
     // do nothing if this panel's type is in the new Embeddable registry.
     if (reactEmbeddableRegistryHasKey(panel.type)) {
       this.updateOutput({
