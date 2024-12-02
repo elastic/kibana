@@ -12,7 +12,7 @@ import { useNavigate, Page } from '../../../../common/hooks/use_navigate';
 import { useTelemetry } from '../../telemetry';
 import { useActions, type State } from '../state';
 import * as i18n from './translations';
-import { ExperimentalFeaturesService } from '../../../../services';
+// import { ExperimentalFeaturesService } from '../../../../services';
 
 // Generation button for Step 3
 const AnalyzeButtonText = React.memo<{ isGenerating: boolean }>(({ isGenerating }) => {
@@ -59,17 +59,16 @@ AnalyzeCelButtonText.displayName = 'AnalyzeCelButtonText';
 interface FooterProps {
   currentStep: State['step'];
   isGenerating: State['isGenerating'];
-  hasCelInput: State['hasCelInput'];
   isNextStepEnabled?: boolean;
 }
 
 export const Footer = React.memo<FooterProps>(
-  ({ currentStep, isGenerating, hasCelInput, isNextStepEnabled = false }) => {
+  ({ currentStep, isGenerating, isNextStepEnabled = false }) => {
     const telemetry = useTelemetry();
     const { setStep, setIsGenerating } = useActions();
     const navigate = useNavigate();
 
-    const { generateCel: isGenerateCelEnabled } = ExperimentalFeaturesService.get();
+    // const { generateCel: isGenerateCelEnabled } = ExperimentalFeaturesService.get();
 
     const onBack = useCallback(() => {
       if (currentStep === 1) {
@@ -92,21 +91,21 @@ export const Footer = React.memo<FooterProps>(
       if (currentStep === 3) {
         return <AnalyzeButtonText isGenerating={isGenerating} />;
       }
-      if (currentStep === 4 && (!isGenerateCelEnabled || !hasCelInput)) {
+      if (currentStep === 4) {
         return i18n.ADD_TO_ELASTIC;
       }
-      if (currentStep === 5 && isGenerateCelEnabled && hasCelInput) {
-        return <AnalyzeApiButtonText isGenerating={isGenerating} />;
-      }
-      if (currentStep === 6 && isGenerateCelEnabled && hasCelInput) {
-        return <AnalyzeCelButtonText isGenerating={isGenerating} />;
-      }
-      if (currentStep === 7 && isGenerateCelEnabled) {
-        return i18n.ADD_TO_ELASTIC;
-      }
-    }, [currentStep, isGenerating, hasCelInput, isGenerateCelEnabled]);
+      // if (currentStep === 5 && isGenerateCelEnabled && hasCelInput) {
+      //   return <AnalyzeApiButtonText isGenerating={isGenerating} />;
+      // }
+      // if (currentStep === 6 && isGenerateCelEnabled && hasCelInput) {
+      //   return <AnalyzeCelButtonText isGenerating={isGenerating} />;
+      // }
+      // if (currentStep === 7 && isGenerateCelEnabled) {
+      //   return i18n.ADD_TO_ELASTIC;
+      // }
+    }, [currentStep, isGenerating]);
 
-    if (currentStep === 8 || (currentStep === 5 && (!isGenerateCelEnabled || !hasCelInput))) {
+    if (currentStep === 5) {
       return <ButtonsFooter cancelButtonText={i18n.CLOSE} />;
     }
     return (

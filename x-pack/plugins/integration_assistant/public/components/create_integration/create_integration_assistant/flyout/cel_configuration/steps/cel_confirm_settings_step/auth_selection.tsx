@@ -21,7 +21,7 @@ export const AuthSelection = React.memo<AuthSelectionProps>(
   ({ selectedAuth, authOptions, invalidAuth, onChangeAuth }) => {
     return (
       <EuiFlexGroup direction="column" gutterSize="l" data-test-subj="confirmSettingsStep">
-        <EuiFormRow label={'Preferred method'}>
+        <EuiFormRow label={'Preferred method'} fullWidth>
           <EuiComboBox
             singleSelection={{ asPlainText: true }}
             fullWidth

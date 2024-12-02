@@ -42,10 +42,6 @@ const graphState: StateGraphArgs<CelInputState>['channels'] = {
     value: (x: string, y?: string) => y ?? x,
     default: () => '',
   },
-  exampleCelPrograms: {
-    value: (x: string[], y?: string[]) => y ?? x,
-    default: () => [],
-  },
   currentProgram: {
     value: (x: string, y?: string) => y ?? x,
     default: () => '',

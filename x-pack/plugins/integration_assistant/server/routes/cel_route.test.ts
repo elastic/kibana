@@ -38,7 +38,7 @@ describe('registerCelInputRoute', () => {
     path: CEL_INPUT_GRAPH_PATH,
     body: {
       connectorId: 'testConnector',
-      dataStreamName: 'testStream',
+      dataStreamTitle: 'testStream',
       celDetails: {
         path: 'testPath',
         auth: 'basic',

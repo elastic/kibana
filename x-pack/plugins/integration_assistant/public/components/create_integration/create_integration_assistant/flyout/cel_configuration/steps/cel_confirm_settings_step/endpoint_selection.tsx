@@ -8,7 +8,7 @@
 import React from 'react';
 import type { EuiRadioGroupOption, EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiRadioGroup } from '@elastic/eui';
-import type { IntegrationSettings } from '../../types';
+import type { IntegrationSettings } from '../../../../types';
 
 const loadPaths = (integrationSettings: IntegrationSettings | undefined): string[] => {
   const pathObjs = integrationSettings?.apiSpec?.getPaths();
@@ -63,7 +63,7 @@ export const EndpointSelection = React.memo<EndpointSelectionProps>(
         </EuiFlexGroup>
         {useOtherEndpoint && (
           <EuiFlexGroup direction="column">
-            <EuiFormRow label={'Choose API endpoint'}>
+            <EuiFormRow label={'Choose API endpoint'} fullWidth>
               <EuiComboBox
                 singleSelection={{ asPlainText: true }}
                 fullWidth

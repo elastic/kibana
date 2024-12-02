@@ -32,7 +32,7 @@ describe('registerApiAnalysisRoute', () => {
     path: ANALYZE_API_PATH,
     body: {
       connectorId: 'testConnector',
-      dataStreamName: 'testStream',
+      dataStreamTitle: 'testStream',
       pathOptions: { path1: 'testDescription', path2: 'testDescription' },
     },
   });

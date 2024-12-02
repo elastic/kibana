@@ -16,15 +16,10 @@ export async function handleGetSuggestedPaths({
   const outputParser = new JsonOutputParser();
   const suggestedPathsGraph = SUGGESTED_PATHS_PROMPT.pipe(model).pipe(outputParser);
 
-  // console.log('path_options', state.pathOptions);
-
   const paths = await suggestedPathsGraph.invoke({
     data_stream_name: state.dataStreamName,
     path_options: state.pathOptions,
-    // ex_answer: EX_ANSWER_PROGRAM,
   });
-
-  // console.log('paths selected by llm', paths);
 
   return {
     suggestedPaths: paths as string[],

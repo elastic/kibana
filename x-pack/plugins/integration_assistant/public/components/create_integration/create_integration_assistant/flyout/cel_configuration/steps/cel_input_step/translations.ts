@@ -7,6 +7,21 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const DATA_STREAM_TITLE_REQUIRED = i18n.translate(
+  'xpack.integrationAssistant.step.celInput.dataStreamTitleRequired',
+  {
+    defaultMessage: 'This field is mandatory',
+  }
+);
+
+export const OPEN_API_UPLOAD_INSTRUCTIONS = i18n.translate(
+  'xpack.integrationAssistant.step.celInput.uploadInstructions',
+  {
+    defaultMessage:
+      "Upload an OpenAPI spec file to generate a configuration for the CEL input. This is typically found in vendor's API reference documentation.",
+  }
+);
+
 export const ANALYZING = i18n.translate('xpack.integrationAssistant.step.celInput.analyzing', {
   defaultMessage: 'Analyzing',
 });
@@ -24,10 +39,10 @@ export const CEL_INPUT_DESCRIPTION = i18n.translate(
   }
 );
 
-export const API_DEFINITION_LABEL = i18n.translate(
-  'xpack.integrationAssistant.step.celInput.apiDefinition.label',
+export const API_DEFINITION_TITLE = i18n.translate(
+  'xpack.integrationAssistant.step.celInput.apiDefinition.title',
   {
-    defaultMessage: 'OpenAPI spec',
+    defaultMessage: 'OpenAPI Specification',
   }
 );
 

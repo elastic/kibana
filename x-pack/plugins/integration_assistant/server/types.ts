@@ -83,7 +83,6 @@ export interface CelInputState {
   lastExecutedChain: string;
   finalized: boolean;
   apiQuerySummary: string;
-  exampleCelPrograms: string[];
   currentProgram: string;
   hasProgramHeaders: boolean | undefined;
   stateVarNames: string[];

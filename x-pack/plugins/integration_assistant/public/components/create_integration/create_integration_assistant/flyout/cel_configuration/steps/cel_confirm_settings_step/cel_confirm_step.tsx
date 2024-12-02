@@ -7,23 +7,16 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import {
-  EuiCallOut,
-  EuiComboBox,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiForm,
-  EuiFormRow,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import type { KeyedSecuritySchemeObject, SecurityType } from 'oas/dist/types.cjs';
-import type { CelAuthType } from '../../../../../../common';
-import { StepContentWrapper } from '../step_content_wrapper';
-import { useActions, type State } from '../../state';
+import type { CelAuthType } from '../../../../../../../../common';
+import { useActions, type State } from '../../../../state';
 import type { OnComplete } from './generation_modal';
 import { GenerationModal } from './generation_modal';
 import * as i18n from './translations';
 import { EndpointSelection } from './endpoint_selection';
-import type { IntegrationSettings } from '../../types';
+import type { IntegrationSettings } from '../../../../types';
+import { AuthSelection } from './auth_selection';
 
 export const authOptions = [
   { label: 'Basic' },
@@ -34,14 +27,19 @@ export const authOptions = [
 
 interface CelConfirmStepProps {
   integrationSettings: State['integrationSettings'];
-  celSuggestedPaths: State['celSuggestedPaths'];
   connector: State['connector'];
-  isGenerating: State['isGenerating'];
+  isFlyoutGenerating: State['isFlyoutGenerating'];
+  suggestedPaths: string[];
 }
 
 export const CelConfirmStep = React.memo<CelConfirmStepProps>(
-  ({ integrationSettings, celSuggestedPaths, connector, isGenerating }) => {
-    const { setIsGenerating, setStep, setIntegrationSettings, setCelInputResult } = useActions();
+  ({ integrationSettings, connector, isFlyoutGenerating, suggestedPaths }) => {
+    const {
+      setIsFlyoutGenerating,
+      setIntegrationSettings,
+      setCelInputResult,
+      setShowCelCreateFlyout,
+    } = useActions();
 
     const [selectedPath, setSelectedPath] = useState<string>();
     const [selectedOtherPath, setSelectedOtherPath] = useState<string | undefined>();
@@ -53,17 +51,7 @@ export const CelConfirmStep = React.memo<CelConfirmStepProps>(
     >();
     const [invalidAuth, setInvalidAuth] = useState<boolean>(false);
 
-    // useEffect(() => {
-    //   setSelectedPath(celSuggestedPaths ? celSuggestedPaths[0] : '');
-    // }, [celSuggestedPaths]);
-    // useEffect(() => {
-    //   const path = selectedPath ? selectedPath : selectedOtherPath;
-    //   if (path) {
-    //     const authMethods = integrationSettings?.apiSpec?.operation(path, 'get').prepareSecurity();
-    //     setSpecDefinedAuthMethods(authMethods);
-    //     setSelectedAuth(authMethods ? Object.keys(authMethods)[0] : '');
-    //   }
-    // }, [selectedPath, selectedOtherPath, integrationSettings?.apiSpec]);
+    // const [successfulCelGeneration, setSuccessfulGeneration] = useState<boolean>(false);
 
     useEffect(() => {
       const path = selectedPath ? selectedPath : selectedOtherPath;
@@ -120,78 +108,71 @@ export const CelConfirmStep = React.memo<CelConfirmStepProps>(
       (result: State['celInputResult']) => {
         if (result) {
           setCelInputResult(result);
-          setIsGenerating(false);
-          setStep(7);
+          setIsFlyoutGenerating(false);
+          // setSuccessfulGeneration(true);
+          setShowCelCreateFlyout(false);
         }
       },
-      [setCelInputResult, setIsGenerating, setStep]
+      [setCelInputResult, setIsFlyoutGenerating, setShowCelCreateFlyout]
     );
     const onGenerationClosed = useCallback(() => {
-      setIsGenerating(false); // aborts generation
-    }, [setIsGenerating]);
+      setIsFlyoutGenerating(false); // aborts generation
+    }, [setIsFlyoutGenerating]);
 
     return (
       <EuiFlexGroup direction="column" gutterSize="l" data-test-subj="celInputStep">
-        <EuiFlexItem>
-          <StepContentWrapper
-            title={i18n.CONFIRM_ENDPOINT}
-            subtitle={i18n.CONFIRM_ENDPOINT_DESCRIPTION}
-          >
-            <EuiForm component="form" fullWidth>
-              <EndpointSelection
-                integrationSettings={integrationSettings}
-                pathSuggestions={celSuggestedPaths ?? []}
-                selectedPath={selectedPath}
-                selectedOtherPath={selectedOtherPath}
-                useOtherEndpoint={useOtherPath}
-                onChangeSuggestedPath={onChangeSuggestedPath}
-                onChangeOtherPath={onChangeOtherPath}
-              />
-            </EuiForm>
-          </StepContentWrapper>
-        </EuiFlexItem>
-
-        <EuiFlexItem>
-          <StepContentWrapper title={i18n.CONFIRM_AUTH} subtitle={i18n.CONFIRM_AUTH_DESCRIPTION}>
-            <EuiForm component="form" fullWidth>
-              {/* <AuthSelection
-                apiSpec={integrationSettings?.apiSpec}
-                selectedAuth={selectedAuth}
-                onChangeAuth={onChangeAuth}
-              /> */}
-              <EuiFlexGroup direction="column" gutterSize="l" data-test-subj="confirmSettingsStep">
-                <EuiFormRow label={'Preferred method'}>
-                  <EuiComboBox
-                    singleSelection={{ asPlainText: true }}
-                    fullWidth
-                    options={authOptions}
-                    selectedOptions={
-                      selectedAuth === undefined ? undefined : [{ label: selectedAuth }]
-                    }
-                    onChange={onChangeAuth}
-                  />
-                </EuiFormRow>
-                {invalidAuth && (
-                  <EuiCallOut
-                    title={i18n.AUTH_DOES_NOT_ALIGN}
-                    size="s"
-                    color="warning"
-                    iconType="warning"
-                  />
-                )}
-              </EuiFlexGroup>
-            </EuiForm>
-          </StepContentWrapper>
-        </EuiFlexItem>
-
-        {isGenerating && (
+        <EuiPanel hasShadow={false} hasBorder={false}>
+          <EuiFlexItem fullWidth>
+            <EuiTitle size="s">
+              <h2>{i18n.CONFIRM_ENDPOINT}</h2>
+            </EuiTitle>
+            <EuiSpacer size="m" />
+            <EuiText size="s">{i18n.CONFIRM_ENDPOINT_DESCRIPTION}</EuiText>
+            <EuiSpacer size="m" />
+            <EndpointSelection
+              integrationSettings={integrationSettings}
+              pathSuggestions={suggestedPaths}
+              selectedPath={selectedPath}
+              selectedOtherPath={selectedOtherPath}
+              useOtherEndpoint={useOtherPath}
+              onChangeSuggestedPath={onChangeSuggestedPath}
+              onChangeOtherPath={onChangeOtherPath}
+            />
+          </EuiFlexItem>
+          <EuiSpacer size="xl" />
+          <EuiFlexItem fullWidth>
+            <EuiTitle size="s">
+              <h2>{i18n.CONFIRM_AUTH}</h2>
+            </EuiTitle>
+            <EuiSpacer size="m" />
+            <EuiText size="s">{i18n.CONFIRM_AUTH_DESCRIPTION}</EuiText>
+            <EuiSpacer size="m" />
+            <AuthSelection
+              selectedAuth={selectedAuth}
+              authOptions={authOptions}
+              invalidAuth={invalidAuth}
+              onChangeAuth={onChangeAuth}
+            />
+          </EuiFlexItem>
+        </EuiPanel>
+        {isFlyoutGenerating && (
           <GenerationModal
             integrationSettings={integrationSettings}
             connector={connector}
+            // setSuccessfulGeneration={setSuccessfulGeneration}
             onComplete={onGenerationCompleted}
             onClose={onGenerationClosed}
           />
         )}
+        {/* {successfulCelGeneration && (
+          <EuiFlexGroup direction="column" gutterSize="l" data-test-subj="celInputStep">
+            <EuiFlexItem fullWidth>
+              <EuiPanel hasShadow={false} hasBorder={false}>
+                <EuiCallOut title="Good news, everyone!" color="success" iconType="check" />
+              </EuiPanel>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        )} */}
       </EuiFlexGroup>
     );
   }

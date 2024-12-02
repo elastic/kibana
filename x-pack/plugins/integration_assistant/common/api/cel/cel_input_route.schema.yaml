@@ -18,12 +18,12 @@ paths:
             schema:
               type: object
               required:
-                - dataStreamName
+                - dataStreamTitle
                 - celDetails
                 - connectorId
               properties:
-                dataStreamName:
-                  $ref: "../model/common_attributes.schema.yaml#/components/schemas/DataStreamName"
+                dataStreamTitle:
+                  $ref: "../model/common_attributes.schema.yaml#/components/schemas/DataStreamTitle"
                 celDetails:
                   $ref: "../model/cel_input_attributes.schema.yaml#/components/schemas/CelDetails"
                 connectorId:

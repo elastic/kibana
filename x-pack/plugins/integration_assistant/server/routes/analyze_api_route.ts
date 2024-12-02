@@ -41,7 +41,7 @@ export function registerApiAnalysisRoutes(
         },
       },
       withAvailability(async (context, req, res): Promise<IKibanaResponse<AnalyzeApiResponse>> => {
-        const { dataStreamName, pathOptions, langSmithOptions } = req.body;
+        const { dataStreamTitle, pathOptions, langSmithOptions } = req.body;
         const { getStartServices, logger } = await context.integrationAssistant;
         const [, { actions: actionsPlugin }] = await getStartServices();
 
@@ -68,7 +68,7 @@ export function registerApiAnalysisRoutes(
           });
 
           const parameters = {
-            dataStreamName,
+            dataStreamTitle,
             pathOptions,
           };
 

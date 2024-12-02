@@ -16,13 +16,13 @@
 
 import { z } from '@kbn/zod';
 
-import { DataStreamName, Connector, LangSmithOptions } from '../model/common_attributes.gen';
+import { DataStreamTitle, Connector, LangSmithOptions } from '../model/common_attributes.gen';
 import { PathOptions } from '../model/cel_input_attributes.gen';
 import { AnalyzeApiAPIResponse } from '../model/response_schemas.gen';
 
 export type AnalyzeApiRequestBody = z.infer<typeof AnalyzeApiRequestBody>;
 export const AnalyzeApiRequestBody = z.object({
-  dataStreamName: DataStreamName,
+  dataStreamTitle: DataStreamTitle,
   pathOptions: PathOptions,
   connectorId: Connector,
   langSmithOptions: LangSmithOptions.optional(),

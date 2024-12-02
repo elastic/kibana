@@ -23,8 +23,7 @@ export const CONFIRM_ENDPOINT = i18n.translate(
 export const CONFIRM_ENDPOINT_DESCRIPTION = i18n.translate(
   'xpack.integrationAssistant.step.celInput.confirmEndpointDescription',
   {
-    defaultMessage:
-      'Please select an endpoint to retrieve events. The recommended option is noted.',
+    defaultMessage: 'Recommended API endpoints (chosen from your spec file)',
   }
 );
 
@@ -34,8 +33,7 @@ export const CONFIRM_AUTH = i18n.translate('xpack.integrationAssistant.step.celI
 export const CONFIRM_AUTH_DESCRIPTION = i18n.translate(
   'xpack.integrationAssistant.step.celInput.confirmAuthDescription',
   {
-    defaultMessage:
-      'Please select the authentication method for the selected API endpoint. The recommended option is noted.',
+    defaultMessage: 'Please select the authentication method for the selected API endpoint.',
   }
 );
 

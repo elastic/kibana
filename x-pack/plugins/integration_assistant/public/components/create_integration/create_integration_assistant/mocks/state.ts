@@ -400,6 +400,7 @@ const rawSamples = [
 const logo =
   'PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGcgY2xpcC1wYXRoPSJ1cmwoI2NsaXAwXzMyNjlfMjExOTMpIj4KPHBhdGggZmlsbC1ydWxlPSJldmVub2RkIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik0xMC41IDExLjk5OTdMNC40MDQgMS42ODQyMUMzLjM4Nzc1IC0wLjAzNzA0MDIgMC43NSAwLjY4NDQ2IDAuNzUgMi42ODMyMVYyMS4zMTYyQzAuNzUgMjMuMzE1IDMuMzg3NzUgMjQuMDM2NSA0LjQwNCAyMi4zMTUyTDEwLjUgMTEuOTk5N1oiIGZpbGw9IiNGMDRFOTgiLz4KPHBhdGggZmlsbC1ydWxlPSJldmVub2RkIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik0xMy4xMTMzIDEyTDEyLjQzNzYgMTMuMTQ0NUw2LjM0MTU2IDIzLjQ2QzYuMjI2ODEgMjMuNjUzNSA2LjA5NzA2IDIzLjgzMDUgNS45NTgzMSAyNEgxMi44NDAzQzE0LjY1MDggMjQgMTYuMzMzMSAyMy4wNjc3IDE3LjI5MjMgMjEuNTMyNUwyMy4yNTAzIDEySDEzLjExMzNaIiBmaWxsPSIjRkE3NDRFIi8+CjxwYXRoIGZpbGwtcnVsZT0iZXZlbm9kZCIgY2xpcC1ydWxlPSJldmVub2RkIiBkPSJNMTcuMjkyNCAyLjQ2NzVDMTYuMzMzMiAwLjkzMjI1IDE0LjY1MDkgMCAxMi44Mzk3IDBINS45NTg0NEM2LjA5NjQ0IDAuMTY5NSA2LjIyNjk0IDAuMzQ2NSA2LjM0MDk0IDAuNTRMMTIuNDM2OSAxMC44NTU1TDEzLjExMzQgMTJIMjMuMjQ5N0wxNy4yOTI0IDIuNDY3NVoiIGZpbGw9IiMzNDM3NDEiLz4KPC9nPgo8ZGVmcz4KPGNsaXBQYXRoIGlkPSJjbGlwMF8zMjY5XzIxMTkzIj4KPHJlY3Qgd2lkdGg9IjI0IiBoZWlnaHQ9IjI0IiBmaWxsPSJ3aGl0ZSIvPgo8L2NsaXBQYXRoPgo8L2RlZnM+Cjwvc3ZnPgo=';
 
+// todo fix
 export const mockState: State = {
   step: 4,
   connector: {
@@ -423,7 +424,6 @@ export const mockState: State = {
     logSamples: rawSamples,
   },
   isGenerating: false,
-  hasCelInput: false,
   result,
 };
 
@@ -432,7 +432,8 @@ export const mockActions: Actions = {
   setConnector: jest.fn(),
   setIntegrationSettings: jest.fn(),
   setIsGenerating: jest.fn(),
-  setHasCelInput: jest.fn(),
   setResult: jest.fn(),
   setCelInputResult: jest.fn(),
+  setShowCelCreateFlyout: jest.fn(),
+  setIsFlyoutGenerating: jest.fn(),
 };
