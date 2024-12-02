@@ -41,8 +41,8 @@ const elasticManagedLocationsEnabledPrivilege: SubFeaturePrivilegeGroupConfig = 
   privileges: [
     {
       id: 'elastic_managed_locations_enabled',
-      name: i18n.translate('xpack.synthetics.features.elasticManagedLocations', {
-        defaultMessage: 'Elastic managed locations enabled',
+      name: i18n.translate('xpack.synthetics.features.elasticManagedLocations.label', {
+        defaultMessage: 'Enabled',
       }),
       includeIn: 'all',
       savedObject: {
@@ -60,7 +60,7 @@ const canManagePrivateLocationsPrivilege: SubFeaturePrivilegeGroupConfig = {
     {
       id: 'can_manage_private_locations',
       name: i18n.translate('xpack.synthetics.features.canManagePrivateLocations', {
-        defaultMessage: 'Can manage private locations',
+        defaultMessage: 'Can manage',
       }),
       includeIn: 'all',
       api: [PRIVATE_LOCATION_WRITE_API],
@@ -148,13 +148,24 @@ export const syntheticsFeature = {
   },
   subFeatures: [
     {
-      name: i18n.translate('xpack.synthetics.features.app', {
-        defaultMessage: 'Synthetics',
+      name: i18n.translate('xpack.synthetics.features.app.elastic', {
+        defaultMessage: 'Elastic managed locations',
       }),
-      privilegeGroups: [
-        elasticManagedLocationsEnabledPrivilege,
-        canManagePrivateLocationsPrivilege,
-      ],
+      description: i18n.translate('xpack.synthetics.features.app.elasticDescription', {
+        defaultMessage:
+          'This feature allows you to use Elastic managed locations. This means you will be charged for the usage of these locations as per elastic pricing.',
+      }),
+      privilegeGroups: [elasticManagedLocationsEnabledPrivilege],
+    },
+    {
+      name: i18n.translate('xpack.synthetics.features.app.private', {
+        defaultMessage: 'Private locations',
+      }),
+      description: i18n.translate('xpack.synthetics.features.app.private,description', {
+        defaultMessage:
+          'This feature allows you to manage your private locations, for example adding, or deleting them.',
+      }),
+      privilegeGroups: [canManagePrivateLocationsPrivilege],
     },
   ],
 };
