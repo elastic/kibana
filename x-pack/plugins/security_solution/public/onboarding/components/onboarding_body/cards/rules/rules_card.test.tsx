@@ -5,15 +5,21 @@
  * 2.0.
  */
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, fireEvent } from '@testing-library/react';
 import { RulesCard } from './rules_card';
 import { TestProviders } from '../../../../../common/mock';
+import { OnboardingContextProvider } from '../../../onboarding_context';
+
+const mockSetComplete = jest.fn();
+const mockSetExpandedCardId = jest.fn();
+const mockIsCardComplete = jest.fn();
 
 const props = {
-  setComplete: jest.fn(),
+  setComplete: mockSetComplete,
   checkComplete: jest.fn(),
-  isCardComplete: jest.fn(),
-  setExpandedCardId: jest.fn(),
+  isCardComplete: mockIsCardComplete,
+  setExpandedCardId: mockSetExpandedCardId,
+  isExpanded: true,
 };
 
 describe('RulesCard', () => {
@@ -24,34 +30,71 @@ describe('RulesCard', () => {
   it('description should be in the document', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <RulesCard {...props} />
+        <OnboardingContextProvider spaceId="default">
+          <RulesCard {...props} />
+        </OnboardingContextProvider>
       </TestProviders>
     );
 
     expect(getByTestId('rulesCardDescription')).toBeInTheDocument();
   });
 
-  it('card callout should be rendered if integrations cards is not complete', () => {
-    props.isCardComplete.mockReturnValueOnce(false);
+  it('renders card callout if integrations card is not complete', () => {
+    mockIsCardComplete.mockReturnValueOnce(false);
 
     const { getByText } = render(
       <TestProviders>
-        <RulesCard {...props} />
+        <OnboardingContextProvider spaceId="default">
+          <RulesCard {...props} />
+        </OnboardingContextProvider>
       </TestProviders>
     );
 
     expect(getByText('To add Elastic rules add integrations first.')).toBeInTheDocument();
   });
 
-  it('card button should be disabled if integrations cards is not complete', () => {
-    props.isCardComplete.mockReturnValueOnce(false);
+  it('renders a disabled button if integrations card is not complete', () => {
+    mockIsCardComplete.mockReturnValueOnce(false);
 
     const { getByTestId } = render(
       <TestProviders>
-        <RulesCard {...props} />
+        <OnboardingContextProvider spaceId="default">
+          <RulesCard {...props} />
+        </OnboardingContextProvider>
       </TestProviders>
     );
 
     expect(getByTestId('rulesCardButton').querySelector('button')).toBeDisabled();
+  });
+
+  it('renders an enabled button if integrations card is complete', () => {
+    mockIsCardComplete.mockReturnValueOnce(true);
+
+    const { getByTestId } = render(
+      <TestProviders>
+        <OnboardingContextProvider spaceId="default">
+          <RulesCard {...props} />
+        </OnboardingContextProvider>
+      </TestProviders>
+    );
+
+    expect(getByTestId('rulesCardButton').querySelector('button')).not.toBeDisabled();
+  });
+
+  it('calls setExpandedCardId when the callout link is clicked', () => {
+    mockIsCardComplete.mockReturnValueOnce(false);
+
+    const { getByText } = render(
+      <TestProviders>
+        <OnboardingContextProvider spaceId="default">
+          <RulesCard {...props} />
+        </OnboardingContextProvider>
+      </TestProviders>
+    );
+
+    const calloutLink = getByText('Add integrations step');
+    fireEvent.click(calloutLink);
+
+    expect(mockSetExpandedCardId).toHaveBeenCalledWith('integrations', { scroll: true });
   });
 });
