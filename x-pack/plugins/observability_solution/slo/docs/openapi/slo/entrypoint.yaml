@@ -12,8 +12,10 @@ tags:
   - name: slo
     description: SLO APIs enable you to define, manage and track service-level objectives
 servers:
-  - url: "http://localhost:5601"
-    description: local
+  - url: https://{kibana_url}
+    variables:
+      kibana_url:
+        default: localhost:5601
 paths:
   "/s/{spaceId}/api/observability/slos":
     $ref: "paths/s@{spaceid}@api@slos.yaml"
