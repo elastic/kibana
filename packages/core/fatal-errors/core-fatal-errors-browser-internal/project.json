@@ -1,0 +1,40 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/core-fatal-errors-browser-internal",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/**/*.ts",
+      "{projectRoot}/**/*.tsx",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "library",
+  "sourceRoot": "packages/core/fatal-errors/core-fatal-errors-browser-internal",
+  "implicitDependencies": [
+    "@kbn/core-injected-metadata-browser-internal",
+    "@kbn/core-theme-browser",
+    "@kbn/core-i18n-browser",
+    "@kbn/core-fatal-errors-browser",
+    "@kbn/i18n-react",
+    "@kbn/core-injected-metadata-browser-mocks",
+    "@kbn/core-theme-browser-mocks",
+    "@kbn/test-subj-selector",
+    "@kbn/test-jest-helpers",
+    "@kbn/react-kibana-context-root",
+    "@kbn/core-analytics-browser-mocks",
+    "@kbn/core-analytics-browser"
+  ]
+}

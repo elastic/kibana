@@ -95,25 +95,32 @@ async function read(readable, output) {
  * Run a child process and return it's stdout
  * @param {string} cmd
  * @param {string[]} args
- * @param {undefined | (SpawnOpts & { description?: string })} opts
+ * @param {undefined | (SpawnOpts & { description?: string, pipe?: boolean })} opts
  */
 export async function run(cmd, args, opts = undefined) {
+  const stdioOptions = opts?.pipe ? ['ignore', 'inherit', 'inherit'] : undefined;
   const proc = ChildProcess.spawn(cmd === 'node' ? process.execPath : cmd, args, {
     cwd: opts?.cwd ?? REPO_ROOT,
     env: {
       ...process.env,
       ...opts?.env,
     },
+    stdio: stdioOptions,
   });
 
   /** @type {string[]} */
   const output = [];
 
-  const [, , exitCode] = await Promise.all([
-    read(proc.stdout, output),
-    read(proc.stderr, output),
-    getExit(proc),
-  ]);
+  let exitCode = null;
+  if (!opts?.pipe) {
+    [, , exitCode] = await Promise.all([
+      read(proc.stdout, output),
+      read(proc.stderr, output),
+      getExit(proc),
+    ]);
+  } else {
+    exitCode = await getExit(proc);
+  }
 
   if (typeof exitCode === 'number' && exitCode > 0) {
     throw createCliError(

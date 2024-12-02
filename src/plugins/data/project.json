@@ -1,0 +1,76 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/data-plugin",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/common/**/*",
+      "{projectRoot}/public/**/*",
+      "{projectRoot}/server/**/*",
+      "{projectRoot}/config.mock.ts",
+      "{projectRoot}/common/**/*.json",
+      "{projectRoot}/public/**/*.json",
+      "{workspaceRoot}/typings/index.d.ts",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "application",
+  "sourceRoot": "src/plugins/data",
+  "implicitDependencies": [
+    "@kbn/core",
+    "@kbn/bfetch-plugin",
+    "@kbn/ui-actions-plugin",
+    "@kbn/share-plugin",
+    "@kbn/inspector-plugin",
+    "@kbn/usage-collection-plugin",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/kibana-react-plugin",
+    "@kbn/field-formats-plugin",
+    "@kbn/data-views-plugin",
+    "@kbn/screenshot-mode-plugin",
+    "@kbn/expressions-plugin",
+    "@kbn/field-types",
+    "@kbn/es-query",
+    "@kbn/expect",
+    "@kbn/datemath",
+    "@kbn/utility-types",
+    "@kbn/i18n",
+    "@kbn/utility-types-jest",
+    "@kbn/management-plugin",
+    "@kbn/test-jest-helpers",
+    "@kbn/i18n-react",
+    "@kbn/analytics",
+    "@kbn/core-http-browser",
+    "@kbn/crypto-browser",
+    "@kbn/config",
+    "@kbn/config-schema",
+    "@kbn/core-saved-objects-server",
+    "@kbn/core-saved-objects-utils-server",
+    "@kbn/data-service",
+    "@kbn/react-kibana-context-render",
+    "@kbn/search-errors",
+    "@kbn/search-response-warnings",
+    "@kbn/shared-ux-link-redirect-app",
+    "@kbn/bfetch-error",
+    "@kbn/es-types",
+    "@kbn/code-editor",
+    "@kbn/core-test-helpers-model-versions",
+    "@kbn/react-kibana-mount",
+    "@kbn/search-types",
+    "@kbn/safer-lodash-set",
+    "@kbn/esql-utils",
+    "@kbn/shared-ux-table-persist"
+  ]
+}

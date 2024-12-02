@@ -1,0 +1,36 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/telemetry-collection-xpack-plugin",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/common/**/*",
+      "{projectRoot}/server/**/*",
+      "{workspaceRoot}/typings/*",
+      "{projectRoot}/schema/xpack_monitoring.json",
+      "{projectRoot}/schema/xpack_plugins.json",
+      "{projectRoot}/schema/xpack_root.json",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "application",
+  "sourceRoot": "x-pack/plugins/telemetry_collection_xpack",
+  "implicitDependencies": [
+    "@kbn/core",
+    "@kbn/telemetry-collection-manager-plugin",
+    "@kbn/telemetry-plugin",
+    "@kbn/usage-collection-plugin"
+  ]
+}

@@ -1,0 +1,47 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/content-management-examples-plugin",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/index.ts",
+      "{projectRoot}/common/**/*",
+      "{projectRoot}/public/**/*.ts",
+      "{projectRoot}/public/**/*.tsx",
+      "{projectRoot}/server/**/*.ts",
+      "{workspaceRoot}/typings/**/*",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "application",
+  "sourceRoot": "examples/content_management_examples",
+  "implicitDependencies": [
+    "@kbn/core",
+    "@kbn/developer-examples-plugin",
+    "@kbn/content-management-plugin",
+    "@kbn/shared-ux-link-redirect-app",
+    "@kbn/content-management-table-list-view",
+    "@kbn/content-management-table-list-view-table",
+    "@kbn/i18n-react",
+    "@kbn/saved-objects-tagging-oss-plugin",
+    "@kbn/core-saved-objects-api-browser",
+    "@kbn/content-management-table-list-view-table",
+    "@kbn/content-management-table-list-view",
+    "@kbn/shared-ux-router",
+    "@kbn/saved-objects-finder-plugin",
+    "@kbn/content-management-table-list-view-common",
+    "@kbn/react-kibana-context-render"
+  ]
+}

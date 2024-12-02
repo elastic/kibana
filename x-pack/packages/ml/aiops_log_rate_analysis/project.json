@@ -1,0 +1,44 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/aiops-log-rate-analysis",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/**/*.ts",
+      "{projectRoot}/**/*.tsx",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "library",
+  "sourceRoot": "x-pack/packages/ml/aiops_log_rate_analysis",
+  "implicitDependencies": [
+    "@kbn/ml-agg-utils",
+    "@kbn/config-schema",
+    "@kbn/aiops-test-utils",
+    "@kbn/ml-random-sampler-utils",
+    "@kbn/core",
+    "@kbn/logging",
+    "@kbn/aiops-log-pattern-analysis",
+    "@kbn/aiops-common",
+    "@kbn/ml-is-populated-object",
+    "@kbn/core-elasticsearch-server",
+    "@kbn/field-types",
+    "@kbn/ml-chi2test",
+    "@kbn/ml-string-hash",
+    "@kbn/ml-response-stream",
+    "@kbn/i18n",
+    "@kbn/apm-utils"
+  ]
+}

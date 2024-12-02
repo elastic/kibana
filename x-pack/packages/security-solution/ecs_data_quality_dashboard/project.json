@@ -1,0 +1,38 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/ecs-data-quality-dashboard",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/**/*.ts",
+      "{projectRoot}/**/*.tsx",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "library",
+  "sourceRoot": "x-pack/packages/security-solution/ecs_data_quality_dashboard",
+  "implicitDependencies": [
+    "@kbn/i18n",
+    "@kbn/i18n-react",
+    "@kbn/ui-theme",
+    "@kbn/core-http-browser",
+    "@kbn/core-http-browser-mocks",
+    "@kbn/elastic-assistant",
+    "@kbn/triggers-actions-ui-plugin",
+    "@kbn/core",
+    "@kbn/core-notifications-browser",
+    "@kbn/core-notifications-browser-mocks"
+  ]
+}

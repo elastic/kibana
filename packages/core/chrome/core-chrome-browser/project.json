@@ -1,0 +1,40 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/core-chrome-browser",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/**/*.ts",
+      "{projectRoot}/**/*.tsx",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "library",
+  "sourceRoot": "packages/core/chrome/core-chrome-browser",
+  "implicitDependencies": [
+    "@kbn/core-mount-utils-browser",
+    "@kbn/core-application-common",
+    "@kbn/deeplinks-devtools",
+    "@kbn/deeplinks-analytics",
+    "@kbn/deeplinks-ml",
+    "@kbn/deeplinks-management",
+    "@kbn/deeplinks-search",
+    "@kbn/deeplinks-observability",
+    "@kbn/core-application-browser",
+    "@kbn/deeplinks-security",
+    "@kbn/deeplinks-fleet",
+    "@kbn/deeplinks-shared"
+  ]
+}

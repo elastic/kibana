@@ -1,0 +1,59 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/controls-plugin",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/common/**/*",
+      "{projectRoot}/public/**/*",
+      "{projectRoot}/public/**/*.json",
+      "{projectRoot}/server/**/*",
+      "{workspaceRoot}/typings/**/*",
+      "{projectRoot}/./jest_setup.ts",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "application",
+  "sourceRoot": "src/plugins/controls",
+  "implicitDependencies": [
+    "@kbn/core",
+    "@kbn/embeddable-plugin",
+    "@kbn/presentation-util-plugin",
+    "@kbn/data-plugin",
+    "@kbn/unified-search-plugin",
+    "@kbn/es-query",
+    "@kbn/data-views-plugin",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/utility-types",
+    "@kbn/i18n",
+    "@kbn/i18n-react",
+    "@kbn/datemath",
+    "@kbn/config-schema",
+    "@kbn/ui-theme",
+    "@kbn/safer-lodash-set",
+    "@kbn/ui-actions-plugin",
+    "@kbn/core-mount-utils-browser",
+    "@kbn/react-kibana-mount",
+    "@kbn/shared-ux-markdown",
+    "@kbn/presentation-containers",
+    "@kbn/presentation-publishing",
+    "@kbn/content-management-utils",
+    "@kbn/field-formats-plugin",
+    "@kbn/presentation-panel-plugin",
+    "@kbn/shared-ux-utility",
+    "@kbn/std",
+    "@kbn/react-hooks"
+  ]
+}

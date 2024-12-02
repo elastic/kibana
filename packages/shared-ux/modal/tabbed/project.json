@@ -1,0 +1,30 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/shared-ux-tabbed-modal",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/src/**/*",
+      "{projectRoot}/storybook/**/*",
+      "{projectRoot}/index.*",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "library",
+  "sourceRoot": "packages/shared-ux/modal/tabbed",
+  "implicitDependencies": [
+    "@kbn/shared-ux-storybook-mock"
+  ]
+}

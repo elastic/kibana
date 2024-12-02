@@ -1,0 +1,35 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/infra-forge",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/**/*.ts",
+      "{projectRoot}/./src/data_sources/composable/component/base.json",
+      "{projectRoot}/./src/data_sources/composable/component/event.json",
+      "{projectRoot}/./src/data_sources/composable/component/host.json",
+      "{projectRoot}/./src/data_sources/composable/component/metricset.json",
+      "{projectRoot}/./src/data_sources/composable/component/system.json",
+      "{projectRoot}/./src/data_sources/composable/template.json",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "library",
+  "sourceRoot": "x-pack/packages/kbn-infra-forge",
+  "implicitDependencies": [
+    "@kbn/tooling-log",
+    "@kbn/datemath"
+  ]
+}

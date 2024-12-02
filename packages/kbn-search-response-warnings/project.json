@@ -1,0 +1,35 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/search-response-warnings",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/*.ts",
+      "{projectRoot}/src/**/*",
+      "{projectRoot}/__mocks__/**/*.ts",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "library",
+  "sourceRoot": "packages/kbn-search-response-warnings",
+  "implicitDependencies": [
+    "@kbn/i18n",
+    "@kbn/inspector-plugin",
+    "@kbn/core",
+    "@kbn/react-kibana-mount",
+    "@kbn/core-i18n-browser",
+    "@kbn/es-types"
+  ]
+}

@@ -1,0 +1,84 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/core-root-browser-internal",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/**/*.ts",
+      "{projectRoot}/**/*.tsx",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "library",
+  "sourceRoot": "packages/core/root/core-root-browser-internal",
+  "implicitDependencies": [
+    "@kbn/std",
+    "@kbn/i18n",
+    "@kbn/ebt-tools",
+    "@kbn/core-execution-context-browser",
+    "@kbn/core-application-browser-internal",
+    "@kbn/core-base-browser-internal",
+    "@kbn/core-logging-browser-internal",
+    "@kbn/core-injected-metadata-browser-internal",
+    "@kbn/core-doc-links-browser-internal",
+    "@kbn/core-theme-browser-internal",
+    "@kbn/core-analytics-browser",
+    "@kbn/core-analytics-browser-internal",
+    "@kbn/core-i18n-browser-internal",
+    "@kbn/core-execution-context-browser-internal",
+    "@kbn/core-fatal-errors-browser",
+    "@kbn/core-fatal-errors-browser-internal",
+    "@kbn/core-http-browser-internal",
+    "@kbn/core-ui-settings-browser-internal",
+    "@kbn/core-deprecations-browser-internal",
+    "@kbn/core-integrations-browser-internal",
+    "@kbn/core-overlays-browser-internal",
+    "@kbn/core-saved-objects-browser-internal",
+    "@kbn/core-notifications-browser-internal",
+    "@kbn/core-chrome-browser-internal",
+    "@kbn/core-rendering-browser-internal",
+    "@kbn/core-apps-browser-internal",
+    "@kbn/core-lifecycle-browser-internal",
+    "@kbn/core-plugins-browser-internal",
+    "@kbn/utility-types-jest",
+    "@kbn/core-execution-context-browser-mocks",
+    "@kbn/core-injected-metadata-browser-mocks",
+    "@kbn/core-doc-links-browser-mocks",
+    "@kbn/core-theme-browser-mocks",
+    "@kbn/core-analytics-browser-mocks",
+    "@kbn/core-application-browser-mocks",
+    "@kbn/core-chrome-browser-mocks",
+    "@kbn/core-fatal-errors-browser-mocks",
+    "@kbn/core-http-browser-mocks",
+    "@kbn/core-i18n-browser-mocks",
+    "@kbn/core-notifications-browser-mocks",
+    "@kbn/core-overlays-browser-mocks",
+    "@kbn/core-plugins-browser-mocks",
+    "@kbn/core-ui-settings-browser-mocks",
+    "@kbn/core-rendering-browser-mocks",
+    "@kbn/core-integrations-browser-mocks",
+    "@kbn/core-apps-browser-mocks",
+    "@kbn/core-logging-browser-mocks",
+    "@kbn/config",
+    "@kbn/core-custom-branding-browser-internal",
+    "@kbn/core-custom-branding-browser-mocks",
+    "@kbn/core-security-browser-mocks",
+    "@kbn/core-security-browser-internal",
+    "@kbn/core-user-profile-browser-mocks",
+    "@kbn/core-user-profile-browser-internal",
+    "@kbn/core-injected-metadata-common-internal",
+    "@kbn/core-feature-flags-browser-internal"
+  ]
+}

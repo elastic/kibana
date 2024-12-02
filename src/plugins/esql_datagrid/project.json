@@ -1,0 +1,47 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/esql-datagrid",
+  "namedInputs": {
+    "src": [
+      "{workspaceRoot}/typings/**/*",
+      "{projectRoot}/common/**/*",
+      "{projectRoot}/public/**/*",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "application",
+  "sourceRoot": "src/plugins/esql_datagrid",
+  "implicitDependencies": [
+    "@kbn/data-plugin",
+    "@kbn/es-types",
+    "@kbn/es-query",
+    "@kbn/discover-utils",
+    "@kbn/data-views-plugin",
+    "@kbn/expressions-plugin",
+    "@kbn/cell-actions",
+    "@kbn/unified-data-table",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/kibana-react-plugin",
+    "@kbn/core",
+    "@kbn/ui-actions-plugin",
+    "@kbn/field-formats-plugin",
+    "@kbn/unified-doc-viewer-plugin",
+    "@kbn/core-notifications-browser",
+    "@kbn/shared-ux-utility",
+    "@kbn/share-plugin",
+    "@kbn/i18n"
+  ]
+}

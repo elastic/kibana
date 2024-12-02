@@ -1,0 +1,38 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/docs-utils",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/**/*.ts",
+      "{workspaceRoot}/typings/**/*",
+      "!{projectRoot}/**/__fixtures__/**",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "library",
+  "sourceRoot": "packages/kbn-docs-utils",
+  "implicitDependencies": [
+    "@kbn/tooling-log",
+    "@kbn/dev-cli-runner",
+    "@kbn/dev-cli-errors",
+    "@kbn/ci-stats-reporter",
+    "@kbn/repo-info",
+    "@kbn/std",
+    "@kbn/get-repo-files",
+    "@kbn/repo-packages",
+    "@kbn/apm-config-loader"
+  ]
+}

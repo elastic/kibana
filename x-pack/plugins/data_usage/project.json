@@ -1,0 +1,55 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/data-usage-plugin",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/index.ts",
+      "{projectRoot}/common/**/*",
+      "{projectRoot}/public/**/*",
+      "{projectRoot}/server/**/*",
+      "{workspaceRoot}/typings/**/*",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "application",
+  "sourceRoot": "x-pack/plugins/data_usage",
+  "implicitDependencies": [
+    "@kbn/core",
+    "@kbn/i18n",
+    "@kbn/data-plugin",
+    "@kbn/kibana-react-plugin",
+    "@kbn/management-plugin",
+    "@kbn/react-kibana-context-render",
+    "@kbn/shared-ux-router",
+    "@kbn/ebt-tools",
+    "@kbn/share-plugin",
+    "@kbn/config-schema",
+    "@kbn/logging",
+    "@kbn/deeplinks-observability",
+    "@kbn/unified-search-plugin",
+    "@kbn/core-http-browser",
+    "@kbn/core-chrome-browser",
+    "@kbn/features-plugin",
+    "@kbn/index-management-shared-types",
+    "@kbn/repo-info",
+    "@kbn/cloud-plugin",
+    "@kbn/server-http-tools",
+    "@kbn/utility-types-jest",
+    "@kbn/datemath",
+    "@kbn/ui-theme",
+    "@kbn/i18n-react"
+  ]
+}

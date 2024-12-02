@@ -1,0 +1,45 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/kibana-react-plugin",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/.storybook/**/*",
+      "{projectRoot}/common/**/*",
+      "{projectRoot}/public/**/*",
+      "{workspaceRoot}/typings/**/*",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "application",
+  "sourceRoot": "src/plugins/kibana_react",
+  "implicitDependencies": [
+    "@kbn/storybook",
+    "@kbn/core",
+    "@kbn/monaco",
+    "@kbn/test-jest-helpers",
+    "@kbn/i18n",
+    "@kbn/i18n-react",
+    "@kbn/react-kibana-mount",
+    "@kbn/react-kibana-context-theme",
+    "@kbn/core-i18n-browser",
+    "@kbn/core-theme-browser",
+    "@kbn/react-kibana-context-common",
+    "@kbn/react-kibana-context-styled",
+    "@kbn/code-editor",
+    "@kbn/core-analytics-browser",
+    "@kbn/shared-ux-link-redirect-app"
+  ]
+}

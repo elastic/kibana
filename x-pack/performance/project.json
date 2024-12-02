@@ -1,0 +1,36 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/test-suites-xpack-performance",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/**/*.ts",
+      "{projectRoot}/kbn_archives/large_arrays_data_view.json",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "library",
+  "sourceRoot": "x-pack/performance",
+  "implicitDependencies": [
+    "@kbn/journeys",
+    "@kbn/test-subj-selector",
+    "@kbn/tooling-log",
+    "@kbn/test",
+    "@kbn/expect",
+    "@kbn/dev-utils",
+    "@kbn/apm-synthtrace-client",
+    "@kbn/test-suites-src"
+  ]
+}

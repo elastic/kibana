@@ -1,0 +1,46 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/expression-tagcloud-plugin",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/common/**/*",
+      "{projectRoot}/public/**/*",
+      "{projectRoot}/server/**/*",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "application",
+  "sourceRoot": "src/plugins/chart_expressions/expression_tagcloud",
+  "implicitDependencies": [
+    "@kbn/core",
+    "@kbn/presentation-util-plugin",
+    "@kbn/expressions-plugin",
+    "@kbn/usage-collection-plugin",
+    "@kbn/visualizations-plugin",
+    "@kbn/charts-plugin",
+    "@kbn/field-formats-plugin",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/utility-types",
+    "@kbn/coloring",
+    "@kbn/i18n",
+    "@kbn/i18n-react",
+    "@kbn/analytics",
+    "@kbn/chart-expressions-common",
+    "@kbn/chart-icons",
+    "@kbn/data-plugin",
+    "@kbn/react-kibana-context-render"
+  ]
+}

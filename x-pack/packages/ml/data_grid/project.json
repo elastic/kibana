@@ -1,0 +1,44 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/ml-data-grid",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/**/*.ts",
+      "{projectRoot}/**/*.tsx",
+      "{projectRoot}/./emotion.d.ts",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "library",
+  "sourceRoot": "x-pack/packages/ml/data_grid",
+  "implicitDependencies": [
+    "@kbn/i18n",
+    "@kbn/core",
+    "@kbn/data-views-plugin",
+    "@kbn/field-types",
+    "@kbn/ml-nested-property",
+    "@kbn/ml-agg-utils",
+    "@kbn/ml-error-utils",
+    "@kbn/ml-data-frame-analytics-utils",
+    "@kbn/ui-theme",
+    "@kbn/i18n-react",
+    "@kbn/ml-is-populated-object",
+    "@kbn/ml-date-picker",
+    "@kbn/field-formats-plugin",
+    "@kbn/ml-query-utils",
+    "@kbn/ml-date-utils"
+  ]
+}

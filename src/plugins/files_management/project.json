@@ -1,0 +1,41 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/files-management-plugin",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/common/**/*",
+      "{projectRoot}/public/**/*",
+      "{projectRoot}/server/**/*",
+      "{projectRoot}/.storybook/**/*",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "application",
+  "sourceRoot": "src/plugins/files_management",
+  "implicitDependencies": [
+    "@kbn/core",
+    "@kbn/files-plugin",
+    "@kbn/management-plugin",
+    "@kbn/i18n",
+    "@kbn/content-management-table-list-view-table",
+    "@kbn/content-management-table-list-view",
+    "@kbn/i18n-react",
+    "@kbn/shared-ux-file-image",
+    "@kbn/shared-ux-router",
+    "@kbn/content-management-table-list-view-common",
+    "@kbn/react-kibana-context-render"
+  ]
+}

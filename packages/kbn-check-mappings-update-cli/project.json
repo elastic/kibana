@@ -1,0 +1,41 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/check-mappings-update-cli",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/**/*.ts",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "library",
+  "sourceRoot": "packages/kbn-check-mappings-update-cli",
+  "implicitDependencies": [
+    "@kbn/some-dev-log",
+    "@kbn/dev-cli-errors",
+    "@kbn/core-saved-objects-base-server-internal",
+    "@kbn/core-test-helpers-kbn-server",
+    "@kbn/core-plugins-server-internal",
+    "@kbn/core-saved-objects-migration-server-internal",
+    "@kbn/dev-cli-runner",
+    "@kbn/test",
+    "@kbn/core-elasticsearch-client-server-mocks",
+    "@kbn/safer-lodash-set",
+    "@kbn/tooling-log",
+    "@kbn/core-saved-objects-server",
+    "@kbn/utils",
+    "@kbn/dev-utils"
+  ]
+}

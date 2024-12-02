@@ -1,0 +1,52 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/search-examples-plugin",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/index.ts",
+      "{projectRoot}/common/**/*.ts",
+      "{projectRoot}/public/**/*.ts",
+      "{projectRoot}/public/**/*.tsx",
+      "{projectRoot}/server/**/*.ts",
+      "{workspaceRoot}/typings/**/*",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "application",
+  "sourceRoot": "examples/search_examples",
+  "implicitDependencies": [
+    "@kbn/core",
+    "@kbn/data-plugin",
+    "@kbn/data-views-plugin",
+    "@kbn/inspector-plugin",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/navigation-plugin",
+    "@kbn/share-plugin",
+    "@kbn/developer-examples-plugin",
+    "@kbn/unified-search-plugin",
+    "@kbn/i18n-react",
+    "@kbn/utility-types",
+    "@kbn/es-query",
+    "@kbn/i18n",
+    "@kbn/config-schema",
+    "@kbn/shared-ux-router",
+    "@kbn/search-types",
+    "@kbn/shared-ux-link-redirect-app",
+    "@kbn/react-kibana-mount",
+    "@kbn/search-response-warnings",
+    "@kbn/react-kibana-context-render"
+  ]
+}

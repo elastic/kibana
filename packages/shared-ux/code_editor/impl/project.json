@@ -1,0 +1,36 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/code-editor",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/**/*.ts",
+      "{projectRoot}/**/*.tsx",
+      "{workspaceRoot}/typings/**/*",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "library",
+  "sourceRoot": "packages/shared-ux/code_editor/impl",
+  "implicitDependencies": [
+    "@kbn/monaco",
+    "@kbn/i18n",
+    "@kbn/i18n-react",
+    "@kbn/ui-theme",
+    "@kbn/test-jest-helpers",
+    "@kbn/shared-ux-storybook-mock",
+    "@kbn/code-editor-mock"
+  ]
+}

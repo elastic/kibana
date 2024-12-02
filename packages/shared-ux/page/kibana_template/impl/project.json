@@ -1,0 +1,33 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/shared-ux-page-kibana-template",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/**/*.ts",
+      "{projectRoot}/**/*.tsx",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "library",
+  "sourceRoot": "packages/shared-ux/page/kibana_template/impl",
+  "implicitDependencies": [
+    "@kbn/shared-ux-page-no-data-config",
+    "@kbn/shared-ux-page-kibana-template-mocks",
+    "@kbn/shared-ux-page-solution-nav",
+    "@kbn/shared-ux-page-no-data-types",
+    "@kbn/shared-ux-page-kibana-template-types"
+  ]
+}

@@ -1,0 +1,47 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/streams-plugin",
+  "namedInputs": {
+    "src": [
+      "{workspaceRoot}/typings/**/*",
+      "{projectRoot}/common/**/*",
+      "{projectRoot}/server/**/*",
+      "{projectRoot}/public/**/*",
+      "{projectRoot}/types/**/*",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "application",
+  "sourceRoot": "x-pack/plugins/streams",
+  "implicitDependencies": [
+    "@kbn/config-schema",
+    "@kbn/core",
+    "@kbn/logging",
+    "@kbn/core-plugins-server",
+    "@kbn/core-http-server",
+    "@kbn/security-plugin",
+    "@kbn/core-saved-objects-api-server",
+    "@kbn/core-elasticsearch-server",
+    "@kbn/task-manager-plugin",
+    "@kbn/server-route-repository",
+    "@kbn/zod",
+    "@kbn/encrypted-saved-objects-plugin",
+    "@kbn/licensing-plugin",
+    "@kbn/server-route-repository-client",
+    "@kbn/observability-utils-server",
+    "@kbn/observability-utils-common"
+  ]
+}

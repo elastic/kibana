@@ -1,0 +1,62 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/event-annotation-listing-plugin",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/common/**/*",
+      "{projectRoot}/public/**/*",
+      "{projectRoot}/server/**/*",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "application",
+  "sourceRoot": "src/plugins/event_annotation_listing",
+  "implicitDependencies": [
+    "@kbn/core",
+    "@kbn/data-plugin",
+    "@kbn/i18n",
+    "@kbn/data-views-plugin",
+    "@kbn/saved-objects-management-plugin",
+    "@kbn/saved-objects-tagging-plugin",
+    "@kbn/presentation-util-plugin",
+    "@kbn/visualizations-plugin",
+    "@kbn/data-views-plugin",
+    "@kbn/visualization-ui-components",
+    "@kbn/dom-drag-drop",
+    "@kbn/i18n-react",
+    "@kbn/saved-objects-tagging-oss-plugin",
+    "@kbn/core-lifecycle-browser",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/unified-search-plugin",
+    "@kbn/content-management-table-list-view-table",
+    "@kbn/content-management-tabbed-table-list-view",
+    "@kbn/content-management-plugin",
+    "@kbn/event-annotation-plugin",
+    "@kbn/event-annotation-components",
+    "@kbn/event-annotation-common",
+    "@kbn/lens-plugin",
+    "@kbn/ui-theme",
+    "@kbn/test-jest-helpers",
+    "@kbn/expressions-plugin",
+    "@kbn/es-query",
+    "@kbn/core-ui-settings-browser",
+    "@kbn/core-notifications-browser-mocks",
+    "@kbn/core-notifications-browser",
+    "@kbn/core-saved-objects-api-browser",
+    "@kbn/content-management-table-list-view-common",
+    "@kbn/test-eui-helpers"
+  ]
+}

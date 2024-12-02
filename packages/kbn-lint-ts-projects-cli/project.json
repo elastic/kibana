@@ -1,0 +1,40 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/lint-ts-projects-cli",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/**/*.ts",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "library",
+  "sourceRoot": "packages/kbn-lint-ts-projects-cli",
+  "implicitDependencies": [
+    "@kbn/dev-cli-runner",
+    "@kbn/dev-cli-errors",
+    "@kbn/repo-path",
+    "@kbn/get-repo-files",
+    "@kbn/ts-projects",
+    "@kbn/repo-packages",
+    "@kbn/repo-info",
+    "@kbn/repo-linter",
+    "@kbn/json-ast",
+    "@kbn/std",
+    "@kbn/import-locator",
+    "@kbn/repo-file-maps",
+    "@kbn/some-dev-log"
+  ]
+}

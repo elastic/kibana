@@ -1,0 +1,59 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/vis-type-vega-plugin",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/server/**/*",
+      "{projectRoot}/public/**/*",
+      "{projectRoot}/*.ts",
+      "{projectRoot}/public/test_utils/vega_map_test.json",
+      "{projectRoot}/public/test_utils/vegalite_graph.json",
+      "{projectRoot}/public/test_utils/vega_graph.json",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "application",
+  "sourceRoot": "src/plugins/vis_types/vega",
+  "implicitDependencies": [
+    "@kbn/core",
+    "@kbn/data-plugin",
+    "@kbn/data-views-plugin",
+    "@kbn/visualizations-plugin",
+    "@kbn/maps-ems-plugin",
+    "@kbn/expressions-plugin",
+    "@kbn/inspector-plugin",
+    "@kbn/home-plugin",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/kibana-react-plugin",
+    "@kbn/vis-default-editor-plugin",
+    "@kbn/usage-collection-plugin",
+    "@kbn/es-query",
+    "@kbn/analytics",
+    "@kbn/core-execution-context-common",
+    "@kbn/i18n",
+    "@kbn/i18n-react",
+    "@kbn/monaco",
+    "@kbn/utility-types",
+    "@kbn/ui-theme",
+    "@kbn/std",
+    "@kbn/datemath",
+    "@kbn/mapbox-gl",
+    "@kbn/config-schema",
+    "@kbn/code-editor",
+    "@kbn/react-kibana-context-render",
+    "@kbn/search-types"
+  ]
+}

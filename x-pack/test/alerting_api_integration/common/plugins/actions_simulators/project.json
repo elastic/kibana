@@ -1,0 +1,37 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/actions-simulators-plugin",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/public/**/**/*",
+      "{projectRoot}/server/**/**/*",
+      "{projectRoot}/common/**/*",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "application",
+  "sourceRoot": "x-pack/test/alerting_api_integration/common/plugins/actions_simulators",
+  "implicitDependencies": [
+    "@kbn/core",
+    "@kbn/config-schema",
+    "@kbn/encrypted-saved-objects-plugin",
+    "@kbn/features-plugin",
+    "@kbn/actions-plugin",
+    "@kbn/alerting-api-integration-helpers",
+    "@kbn/expect",
+    "@kbn/dev-utils"
+  ]
+}

@@ -1,0 +1,54 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/core-lifecycle-server-mocks",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/**/*.ts",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "library",
+  "sourceRoot": "packages/core/lifecycle/core-lifecycle-server-mocks",
+  "implicitDependencies": [
+    "@kbn/utility-types-jest",
+    "@kbn/core-analytics-server-mocks",
+    "@kbn/core-capabilities-server-mocks",
+    "@kbn/core-doc-links-server-mocks",
+    "@kbn/core-deprecations-server-mocks",
+    "@kbn/core-elasticsearch-server-mocks",
+    "@kbn/core-environment-server-mocks",
+    "@kbn/core-execution-context-server-mocks",
+    "@kbn/core-http-context-server-mocks",
+    "@kbn/core-http-server-mocks",
+    "@kbn/core-http-resources-server-mocks",
+    "@kbn/core-i18n-server-mocks",
+    "@kbn/core-lifecycle-server",
+    "@kbn/core-metrics-server-mocks",
+    "@kbn/core-preboot-server-mocks",
+    "@kbn/core-rendering-server-mocks",
+    "@kbn/core-saved-objects-server-mocks",
+    "@kbn/core-status-server-mocks",
+    "@kbn/core-ui-settings-server-mocks",
+    "@kbn/core-usage-data-server-mocks",
+    "@kbn/core-http-request-handler-context-server",
+    "@kbn/core-logging-server-mocks",
+    "@kbn/core-custom-branding-server-mocks",
+    "@kbn/core-user-settings-server-mocks",
+    "@kbn/core-security-server-mocks",
+    "@kbn/core-user-profile-server-mocks",
+    "@kbn/core-feature-flags-server-mocks"
+  ]
+}

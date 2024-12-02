@@ -1,0 +1,86 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/osquery-plugin",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/common/**/*",
+      "{projectRoot}/public/**/*",
+      "{projectRoot}/scripts/**/*",
+      "{projectRoot}/scripts/**/**.json",
+      "{projectRoot}/server/**/*",
+      "{workspaceRoot}/typings/**/*",
+      "{projectRoot}/public/common/schemas/*/**.json",
+      "{projectRoot}/./emotion.d.ts",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "application",
+  "sourceRoot": "x-pack/plugins/osquery",
+  "implicitDependencies": [
+    "@kbn/core",
+    "@kbn/data-plugin",
+    "@kbn/navigation-plugin",
+    "@kbn/fleet-plugin",
+    "@kbn/cases-plugin",
+    "@kbn/es-ui-shared-plugin",
+    "@kbn/kibana-react-plugin",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/config-schema",
+    "@kbn/es-query",
+    "@kbn/utility-types",
+    "@kbn/securitysolution-io-ts-utils",
+    "@kbn/osquery-io-ts-types",
+    "@kbn/i18n-react",
+    "@kbn/discover-plugin",
+    "@kbn/lens-plugin",
+    "@kbn/security-plugin",
+    "@kbn/triggers-actions-ui-plugin",
+    "@kbn/timelines-plugin",
+    "@kbn/spaces-plugin",
+    "@kbn/i18n",
+    "@kbn/rison",
+    "@kbn/react-field",
+    "@kbn/dev-cli-runner",
+    "@kbn/telemetry-plugin",
+    "@kbn/actions-plugin",
+    "@kbn/features-plugin",
+    "@kbn/task-manager-plugin",
+    "@kbn/data-views-plugin",
+    "@kbn/rule-registry-plugin",
+    "@kbn/securitysolution-es-utils",
+    "@kbn/core-elasticsearch-client-server-mocks",
+    "@kbn/std",
+    "@kbn/core-elasticsearch-server",
+    "@kbn/core-saved-objects-api-server",
+    "@kbn/logging",
+    "@kbn/safer-lodash-set",
+    "@kbn/shared-ux-router",
+    "@kbn/licensing-plugin",
+    "@kbn/core-lifecycle-browser",
+    "@kbn/core-saved-objects-server",
+    "@kbn/monaco",
+    "@kbn/io-ts-utils",
+    "@kbn/shared-ux-page-kibana-template",
+    "@kbn/openapi-generator",
+    "@kbn/code-editor",
+    "@kbn/search-types",
+    "@kbn/react-kibana-context-render",
+    "@kbn/zod-helpers",
+    "@kbn/openapi-bundler",
+    "@kbn/repo-info",
+    "@kbn/zod"
+  ]
+}

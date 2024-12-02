@@ -1,0 +1,73 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/serverless-search",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/index.ts",
+      "{projectRoot}/common/**/*.ts",
+      "{projectRoot}/public/**/*.ts",
+      "{projectRoot}/public/**/*.tsx",
+      "{projectRoot}/server/**/*.ts",
+      "{workspaceRoot}/typings/**/*",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "application",
+  "sourceRoot": "x-pack/plugins/serverless_search",
+  "implicitDependencies": [
+    "@kbn/core",
+    "@kbn/config-schema",
+    "@kbn/management-plugin",
+    "@kbn/doc-links",
+    "@kbn/i18n",
+    "@kbn/kibana-react-plugin",
+    "@kbn/i18n-react",
+    "@kbn/serverless",
+    "@kbn/security-plugin",
+    "@kbn/cloud-plugin",
+    "@kbn/share-plugin",
+    "@kbn/management-cards-navigation",
+    "@kbn/core-elasticsearch-server",
+    "@kbn/search-api-panels",
+    "@kbn/search-index-documents",
+    "@kbn/serverless-search-settings",
+    "@kbn/core-lifecycle-browser",
+    "@kbn/react-kibana-context-theme",
+    "@kbn/search-connectors",
+    "@kbn/shared-ux-router",
+    "@kbn/data-views-plugin",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/index-management-plugin",
+    "@kbn/usage-collection-plugin",
+    "@kbn/es-types",
+    "@kbn/console-plugin",
+    "@kbn/core-chrome-browser",
+    "@kbn/core-logging-server-mocks",
+    "@kbn/discover-plugin",
+    "@kbn/search-connectors-plugin",
+    "@kbn/index-management-shared-types",
+    "@kbn/react-kibana-context-render",
+    "@kbn/security-api-key-management",
+    "@kbn/search-inference-endpoints",
+    "@kbn/security-plugin-types-common",
+    "@kbn/search-indices",
+    "@kbn/core-http-server",
+    "@kbn/logging",
+    "@kbn/security-plugin-types-public",
+    "@kbn/deeplinks-search",
+    "@kbn/core-application-browser"
+  ]
+}

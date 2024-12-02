@@ -1,0 +1,48 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/observability-ai-assistant-management-plugin",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/common/**/*",
+      "{projectRoot}/public/**/*",
+      "{projectRoot}/server/**/*",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "application",
+  "sourceRoot": "x-pack/plugins/observability_solution/observability_ai_assistant_management",
+  "implicitDependencies": [
+    "@kbn/core",
+    "@kbn/home-plugin",
+    "@kbn/kibana-react-plugin",
+    "@kbn/management-plugin",
+    "@kbn/i18n",
+    "@kbn/i18n-react",
+    "@kbn/typed-react-router-config",
+    "@kbn/core-chrome-browser",
+    "@kbn/observability-ai-assistant-plugin",
+    "@kbn/serverless",
+    "@kbn/management-settings-components-field-row",
+    "@kbn/observability-shared-plugin",
+    "@kbn/config-schema",
+    "@kbn/core-ui-settings-common",
+    "@kbn/logs-data-access-plugin",
+    "@kbn/core-plugins-browser",
+    "@kbn/ai-assistant",
+    "@kbn/core-plugins-server",
+    "@kbn/product-doc-base-plugin"
+  ]
+}

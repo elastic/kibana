@@ -1,0 +1,40 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/files-example-plugin",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/index.ts",
+      "{projectRoot}/common/**/*",
+      "{projectRoot}/public/**/*.ts",
+      "{projectRoot}/public/**/*.tsx",
+      "{projectRoot}/server/**/*.ts",
+      "{workspaceRoot}/typings/**/*",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "application",
+  "sourceRoot": "examples/files_example",
+  "implicitDependencies": [
+    "@kbn/core",
+    "@kbn/files-plugin",
+    "@kbn/shared-ux-file-types",
+    "@kbn/shared-ux-file-context",
+    "@kbn/shared-ux-file-image",
+    "@kbn/shared-ux-file-upload",
+    "@kbn/shared-ux-file-picker",
+    "@kbn/developer-examples-plugin"
+  ]
+}

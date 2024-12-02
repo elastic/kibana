@@ -1,0 +1,44 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/searchprofiler-plugin",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/common/**/*",
+      "{projectRoot}/public/**/*",
+      "{projectRoot}/server/**/*",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "application",
+  "sourceRoot": "x-pack/plugins/searchprofiler",
+  "implicitDependencies": [
+    "@kbn/core",
+    "@kbn/es-ui-shared-plugin",
+    "@kbn/dev-tools-plugin",
+    "@kbn/home-plugin",
+    "@kbn/licensing-plugin",
+    "@kbn/i18n",
+    "@kbn/share-plugin",
+    "@kbn/utility-types",
+    "@kbn/expect",
+    "@kbn/test-jest-helpers",
+    "@kbn/i18n-react",
+    "@kbn/config-schema",
+    "@kbn/react-kibana-context-render",
+    "@kbn/code-editor",
+    "@kbn/monaco"
+  ]
+}

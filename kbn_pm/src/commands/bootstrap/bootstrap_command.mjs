@@ -8,17 +8,34 @@
  */
 
 import { run } from '../../lib/spawn.mjs';
-import * as Bazel from '../../lib/bazel.mjs';
 import External from '../../lib/external_packages.js';
+import { buildPackages } from '../../lib/webpack.mjs';
 
-import { haveNodeModulesBeenManuallyDeleted, removeYarnIntegrityFileIfExists } from './yarn.mjs';
-import { setupRemoteCache } from './setup_remote_cache.mjs';
+import {
+  haveNodeModulesBeenManuallyDeleted,
+  removeYarnIntegrityFileIfExists,
+  yarnInstallDeps,
+} from './yarn.mjs';
 import { sortPackageJson } from './sort_package_json.mjs';
 import { regeneratePackageMap } from './regenerate_package_map.mjs';
 import { regenerateTsconfigPaths } from './regenerate_tsconfig_paths.mjs';
 import { regenerateBaseTsconfig } from './regenerate_base_tsconfig.mjs';
 import { discovery } from './discovery.mjs';
 import { updatePackageJson } from './update_package_json.mjs';
+
+const tryImportLockValidator = (() => {
+  let yarnLockValidator = null;
+  return () => {
+    try {
+      if (!yarnLockValidator) {
+        yarnLockValidator = External['@kbn/yarn-lock-validator']();
+      }
+      return yarnLockValidator;
+    } catch (_err) {
+      return null;
+    }
+  };
+})();
 
 /** @type {import('../../lib/command').Command} */
 export const command = {
@@ -41,6 +58,8 @@ export const command = {
     --no-validate        By default bootstrap validates the yarn.lock file to check for a handfull of
                           conditions. If you run into issues with this process locally you can disable it by
                           passing this flag.
+    --disable-nx-cache   Prevents NX from using any cached build artifacts. This is useful when you want to
+                          ensure that all packages are built from scratch.
     --no-vscode          By default bootstrap updates the .vscode directory to include commonly useful vscode
                           settings for local development. Disable this process either pass this flag or set
                           the KBN_BOOTSTRAP_NO_VSCODE=true environment variable.
@@ -54,29 +73,31 @@ export const command = {
     const offline = args.getBooleanValue('offline') ?? false;
     const validate = args.getBooleanValue('validate') ?? true;
     const quiet = args.getBooleanValue('quiet') ?? false;
+    const disableNXCache = args.getBooleanValue('disable-nx-cache') ?? false;
     const vscodeConfig =
       args.getBooleanValue('vscode') ?? (process.env.KBN_BOOTSTRAP_NO_VSCODE ? false : true);
 
-    // Force install is set in case a flag is passed into yarn kbn bootstrap or
-    // our custom logic have determined there is a chance node_modules have been manually deleted and as such bazel
-    // tracking mechanism is no longer valid
-    const forceInstall =
+    // Force install is set in case a flag is passed into yarn kbn bootstrap, or node_modules have been removed
+    let forceReinstall =
       args.getBooleanValue('force-install') ?? (await haveNodeModulesBeenManuallyDeleted());
+    if (!forceReinstall) {
+      const lockValidatorModule = tryImportLockValidator();
+      if (!lockValidatorModule) {
+        // linking is not done, we should install
+        forceReinstall = true;
+      } else {
+        const { findProductionDependencies, readYarnLock } = lockValidatorModule;
+        const yarnLock = await readYarnLock();
+        const allListedPackagesResolvedInYarnLock = !!findProductionDependencies(
+          log,
+          yarnLock,
+          false
+        );
+        forceReinstall = !allListedPackagesResolvedInYarnLock;
+      }
+    }
 
-    const [{ packageManifestPaths, tsConfigRepoRels }] = await Promise.all([
-      // discover the location of packages, plugins, etc
-      await time('discovery', discovery),
-
-      (async () => {
-        await Bazel.tryRemovingBazeliskFromYarnGlobal(log);
-
-        // Install bazel machinery tools if needed
-        await Bazel.ensureInstalled(log);
-
-        // Setup remote cache settings in .bazelrc.cache if needed
-        await setupRemoteCache(log);
-      })(),
-    ]);
+    const { packageManifestPaths, tsConfigRepoRels } = await time('discovery', discovery);
 
     // generate the package map and package.json file, if necessary
     const [packages] = await Promise.all([
@@ -97,45 +118,40 @@ export const command = {
       }),
     ]);
 
-    // Bootstrap process for Bazel packages
-    // Bazel is now managing dependencies so yarn install
-    // will happen as part of this
-    //
-    // NOTE: Bazel projects will be introduced incrementally
-    // And should begin from the ones with none dependencies forward.
-    // That way non bazel projects could depend on bazel projects but not the other way around
-    // That is only intended during the migration process while non Bazel projects are not removed at all.
-    if (forceInstall) {
+    if (forceReinstall) {
       await time('force install dependencies', async () => {
         await removeYarnIntegrityFileIfExists();
-        await Bazel.expungeCache(log, { quiet });
-        await Bazel.installYarnDeps(log, { offline, quiet });
+        await yarnInstallDeps(log, { offline, quiet });
       });
     }
 
     await time('pre-build webpack bundles for packages', async () => {
-      await Bazel.buildWebpackBundles(log, { offline, quiet });
+      await buildPackages(['@kbn/monaco', '@kbn/ui-shared-deps-src', '@kbn/ui-shared-deps-npm'], {
+        log,
+        disableNXCache,
+        quiet,
+      });
+      log.success('shared bundles built');
     });
 
-    await Promise.all([
-      time('sort package json', async () => {
-        await sortPackageJson(log);
-      }),
-      validate
-        ? time('validate dependencies', async () => {
-            // now that deps are installed we can import `@kbn/yarn-lock-validator`
-            const { readYarnLock, validateDependencies } = External['@kbn/yarn-lock-validator']();
-            await validateDependencies(log, await readYarnLock());
-          })
-        : undefined,
-      vscodeConfig
-        ? time('update vscode config', async () => {
-            // Update vscode settings
-            await run('node', ['scripts/update_vscode_config']);
+    await time('sort package json', async () => {
+      await sortPackageJson(log);
+    });
+    if (validate) {
+      await time('validate dependencies', async () => {
+        // now that deps are installed we can import `@kbn/yarn-lock-validator`
+        const lockValidatorModule = tryImportLockValidator();
+        const { readYarnLock, validateDependencies } = lockValidatorModule;
+        await validateDependencies(log, await readYarnLock());
+      });
+    }
+    if (vscodeConfig) {
+      await time('update vscode config', async () => {
+        // Update vscode settings
+        await run('node', ['scripts/update_vscode_config']);
 
-            log.success('vscode config updated');
-          })
-        : undefined,
-    ]);
+        log.success('vscode config updated');
+      });
+    }
   },
 };

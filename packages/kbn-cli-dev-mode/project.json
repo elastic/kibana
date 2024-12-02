@@ -1,0 +1,42 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/cli-dev-mode",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/**/*.ts",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "library",
+  "sourceRoot": "packages/kbn-cli-dev-mode",
+  "implicitDependencies": [
+    "@kbn/config",
+    "@kbn/config-schema",
+    "@kbn/logging",
+    "@kbn/optimizer",
+    "@kbn/server-http-tools",
+    "@kbn/repo-info",
+    "@kbn/ci-stats-reporter",
+    "@kbn/jest-serializers",
+    "@kbn/stdio-dev-helpers",
+    "@kbn/tooling-log",
+    "@kbn/repo-source-classifier",
+    "@kbn/import-resolver",
+    "@kbn/picomatcher",
+    "@kbn/repo-packages",
+    "@kbn/dev-utils"
+  ]
+}

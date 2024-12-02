@@ -1,0 +1,42 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/reporting-csv-share-panel",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/**/*.ts",
+      "{projectRoot}/**/*.tsx",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "library",
+  "sourceRoot": "packages/kbn-reporting/get_csv_panel_actions",
+  "implicitDependencies": [
+    "@kbn/core",
+    "@kbn/data-plugin",
+    "@kbn/i18n",
+    "@kbn/reporting-export-types-csv-common",
+    "@kbn/licensing-plugin",
+    "@kbn/i18n-react",
+    "@kbn/discover-utils",
+    "@kbn/saved-search-plugin",
+    "@kbn/discover-plugin",
+    "@kbn/embeddable-plugin",
+    "@kbn/ui-actions-plugin",
+    "@kbn/react-kibana-mount",
+    "@kbn/reporting-public",
+    "@kbn/presentation-publishing"
+  ]
+}

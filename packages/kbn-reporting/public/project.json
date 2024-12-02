@@ -1,0 +1,48 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/reporting-public",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/**/*.ts",
+      "{projectRoot}/**/*.tsx",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "library",
+  "sourceRoot": "packages/kbn-reporting/public",
+  "implicitDependencies": [
+    "@kbn/reporting-common",
+    "@kbn/core",
+    "@kbn/data-plugin",
+    "@kbn/kibana-react-plugin",
+    "@kbn/share-plugin",
+    "@kbn/es-ui-shared-plugin",
+    "@kbn/core-http-common",
+    "@kbn/i18n",
+    "@kbn/rison",
+    "@kbn/reporting-export-types-png-common",
+    "@kbn/reporting-export-types-pdf-common",
+    "@kbn/reporting-export-types-csv-common",
+    "@kbn/licensing-plugin",
+    "@kbn/screenshotting-plugin",
+    "@kbn/i18n-react",
+    "@kbn/test-jest-helpers",
+    "@kbn/react-kibana-mount",
+    "@kbn/home-plugin",
+    "@kbn/management-plugin",
+    "@kbn/ui-actions-plugin"
+  ]
+}

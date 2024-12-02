@@ -1,0 +1,68 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/logs-shared-plugin",
+  "namedInputs": {
+    "src": [
+      "{workspaceRoot}/typings/**/*",
+      "{projectRoot}/common/**/*",
+      "{projectRoot}/public/**/*",
+      "{projectRoot}/server/**/*",
+      "{projectRoot}/types/**/*",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "application",
+  "sourceRoot": "x-pack/plugins/observability_solution/logs_shared",
+  "implicitDependencies": [
+    "@kbn/core",
+    "@kbn/i18n",
+    "@kbn/i18n-react",
+    "@kbn/data-views-plugin",
+    "@kbn/io-ts-utils",
+    "@kbn/data-plugin",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/es-query",
+    "@kbn/utility-types",
+    "@kbn/core-http-server",
+    "@kbn/logging",
+    "@kbn/config-schema",
+    "@kbn/std",
+    "@kbn/logging-mocks",
+    "@kbn/kibana-react-plugin",
+    "@kbn/test-subj-selector",
+    "@kbn/observability-shared-plugin",
+    "@kbn/datemath",
+    "@kbn/core-http-browser",
+    "@kbn/ui-actions-plugin",
+    "@kbn/observability-ai-assistant-plugin",
+    "@kbn/deeplinks-observability",
+    "@kbn/share-plugin",
+    "@kbn/shared-ux-utility",
+    "@kbn/search-types",
+    "@kbn/discover-shared-plugin",
+    "@kbn/react-kibana-context-theme",
+    "@kbn/test-jest-helpers",
+    "@kbn/router-utils",
+    "@kbn/logs-data-access-plugin",
+    "@kbn/core-deprecations-common",
+    "@kbn/core-deprecations-server",
+    "@kbn/management-settings-ids",
+    "@kbn/observability-logs-overview",
+    "@kbn/charts-plugin",
+    "@kbn/core-ui-settings-common",
+    "@kbn/field-formats-plugin"
+  ]
+}

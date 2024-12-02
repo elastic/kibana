@@ -1,0 +1,33 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/ml-agg-utils",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/**/*.ts",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "library",
+  "sourceRoot": "x-pack/packages/ml/agg_utils",
+  "implicitDependencies": [
+    "@kbn/core-elasticsearch-server",
+    "@kbn/field-types",
+    "@kbn/ml-is-populated-object",
+    "@kbn/ml-string-hash",
+    "@kbn/data-views-plugin",
+    "@kbn/ml-random-sampler-utils"
+  ]
+}

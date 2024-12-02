@@ -1,0 +1,53 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/inference-plugin",
+  "namedInputs": {
+    "src": [
+      "{workspaceRoot}/typings/**/*",
+      "{projectRoot}/common/**/*",
+      "{projectRoot}/public/**/*",
+      "{workspaceRoot}/typings/**/*",
+      "{projectRoot}/public/**/*.json",
+      "{projectRoot}/server/**/*",
+      "{projectRoot}/scripts/**/*",
+      "{projectRoot}/.storybook/**/*",
+      "!{projectRoot}/target/**/*",
+      "!{projectRoot}/.storybook/**/*.js"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "application",
+  "sourceRoot": "x-pack/plugins/inference",
+  "implicitDependencies": [
+    "@kbn/i18n",
+    "@kbn/esql-ast",
+    "@kbn/esql-validation-autocomplete",
+    "@kbn/core",
+    "@kbn/logging",
+    "@kbn/babel-register",
+    "@kbn/dev-cli-runner",
+    "@kbn/expect",
+    "@kbn/tooling-log",
+    "@kbn/repo-info",
+    "@kbn/logging-mocks",
+    "@kbn/core-http-server",
+    "@kbn/actions-plugin",
+    "@kbn/config-schema",
+    "@kbn/inference-common",
+    "@kbn/es-types",
+    "@kbn/field-types",
+    "@kbn/expressions-plugin"
+  ]
+}

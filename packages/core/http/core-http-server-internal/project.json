@@ -1,0 +1,51 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/core-http-server-internal",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/**/*.ts",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "library",
+  "sourceRoot": "packages/core/http/core-http-server-internal",
+  "implicitDependencies": [
+    "@kbn/std",
+    "@kbn/server-http-tools",
+    "@kbn/logging",
+    "@kbn/config-schema",
+    "@kbn/crypto",
+    "@kbn/core-base-common",
+    "@kbn/core-base-server-internal",
+    "@kbn/core-execution-context-server-internal",
+    "@kbn/core-http-common",
+    "@kbn/core-http-server",
+    "@kbn/core-http-context-server-internal",
+    "@kbn/core-http-router-server-internal",
+    "@kbn/core-http-router-server-mocks",
+    "@kbn/core-logging-server-mocks",
+    "@kbn/dev-utils",
+    "@kbn/config",
+    "@kbn/repo-info",
+    "@kbn/hapi-mocks",
+    "@kbn/config-mocks",
+    "@kbn/core-execution-context-server-mocks",
+    "@kbn/core-http-context-server-mocks",
+    "@kbn/logging-mocks",
+    "@kbn/router-to-openapispec",
+    "@kbn/core-base-server-mocks"
+  ]
+}

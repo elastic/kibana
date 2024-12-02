@@ -1,0 +1,43 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/vis-type-xy-plugin",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/common/**/*",
+      "{projectRoot}/public/**/*",
+      "{projectRoot}/server/**/*",
+      "{projectRoot}/*.ts",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "application",
+  "sourceRoot": "src/plugins/vis_types/xy",
+  "implicitDependencies": [
+    "@kbn/core",
+    "@kbn/charts-plugin",
+    "@kbn/visualizations-plugin",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/vis-default-editor-plugin",
+    "@kbn/data-views-plugin",
+    "@kbn/expressions-plugin",
+    "@kbn/i18n",
+    "@kbn/data-plugin",
+    "@kbn/coloring",
+    "@kbn/test-jest-helpers",
+    "@kbn/i18n-react",
+    "@kbn/config-schema"
+  ]
+}

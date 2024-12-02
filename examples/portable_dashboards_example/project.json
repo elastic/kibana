@@ -1,0 +1,44 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/portable-dashboards-example",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/index.ts",
+      "{projectRoot}/public/**/*.ts",
+      "{projectRoot}/public/**/*.tsx",
+      "{projectRoot}/public/**/*.json",
+      "{workspaceRoot}/typings/**/*",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "application",
+  "sourceRoot": "examples/portable_dashboards_example",
+  "implicitDependencies": [
+    "@kbn/core",
+    "@kbn/es-query",
+    "@kbn/data-plugin",
+    "@kbn/dashboard-plugin",
+    "@kbn/navigation-plugin",
+    "@kbn/embeddable-plugin",
+    "@kbn/data-views-plugin",
+    "@kbn/developer-examples-plugin",
+    "@kbn/shared-ux-page-kibana-template",
+    "@kbn/controls-plugin",
+    "@kbn/shared-ux-router",
+    "@kbn/presentation-publishing",
+    "@kbn/react-kibana-context-render"
+  ]
+}

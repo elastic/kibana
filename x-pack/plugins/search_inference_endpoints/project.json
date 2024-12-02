@@ -1,0 +1,56 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/search-inference-endpoints",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/__mocks__/**/*",
+      "{projectRoot}/common/**/*",
+      "{projectRoot}/public/**/*",
+      "{projectRoot}/server/**/*",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "application",
+  "sourceRoot": "x-pack/plugins/search_inference_endpoints",
+  "implicitDependencies": [
+    "@kbn/config-schema",
+    "@kbn/core",
+    "@kbn/core-http-browser",
+    "@kbn/i18n",
+    "@kbn/i18n-react",
+    "@kbn/kibana-react-plugin",
+    "@kbn/ml-plugin",
+    "@kbn/ml-trained-models-utils",
+    "@kbn/shared-ux-router",
+    "@kbn/core-http-server",
+    "@kbn/share-plugin",
+    "@kbn/actions-plugin",
+    "@kbn/shared-ux-utility",
+    "@kbn/core-lifecycle-browser",
+    "@kbn/logging",
+    "@kbn/react-kibana-context-render",
+    "@kbn/doc-links",
+    "@kbn/console-plugin",
+    "@kbn/test-jest-helpers",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/features-plugin",
+    "@kbn/ui-theme",
+    "@kbn/deeplinks-search",
+    "@kbn/deeplinks-management",
+    "@kbn/serverless",
+    "@kbn/utility-types"
+  ]
+}

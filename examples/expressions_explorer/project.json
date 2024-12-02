@@ -1,0 +1,42 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/expressions-explorer-plugin",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/index.ts",
+      "{projectRoot}/public/**/*.ts",
+      "{projectRoot}/public/**/*.tsx",
+      "{workspaceRoot}/typings/**/*",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "application",
+  "sourceRoot": "examples/expressions_explorer",
+  "implicitDependencies": [
+    "@kbn/core",
+    "@kbn/kibana-react-plugin",
+    "@kbn/expressions-plugin",
+    "@kbn/ui-actions-plugin",
+    "@kbn/inspector-plugin",
+    "@kbn/developer-examples-plugin",
+    "@kbn/i18n",
+    "@kbn/i18n-react",
+    "@kbn/core-ui-settings-browser",
+    "@kbn/code-editor",
+    "@kbn/react-kibana-context-render",
+    "@kbn/core-lifecycle-browser"
+  ]
+}

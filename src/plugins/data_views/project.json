@@ -1,0 +1,57 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/data-views-plugin",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/common/**/*",
+      "{projectRoot}/public/**/*",
+      "{projectRoot}/server/**/*",
+      "{projectRoot}/config.ts",
+      "{projectRoot}/common/**/*.json",
+      "{projectRoot}/public/**/*.json",
+      "{projectRoot}/server/**/*.json",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "application",
+  "sourceRoot": "src/plugins/data_views",
+  "implicitDependencies": [
+    "@kbn/core",
+    "@kbn/usage-collection-plugin",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/field-formats-plugin",
+    "@kbn/expressions-plugin",
+    "@kbn/core-notifications-browser",
+    "@kbn/es-query",
+    "@kbn/field-types",
+    "@kbn/i18n",
+    "@kbn/utility-types",
+    "@kbn/core-test-helpers-http-setup-browser",
+    "@kbn/config-schema",
+    "@kbn/utility-types-jest",
+    "@kbn/safer-lodash-set",
+    "@kbn/core-http-server",
+    "@kbn/content-management-plugin",
+    "@kbn/content-management-utils",
+    "@kbn/object-versioning",
+    "@kbn/core-saved-objects-server",
+    "@kbn/logging",
+    "@kbn/crypto-browser",
+    "@kbn/core-http-browser",
+    "@kbn/core-http-browser-internal",
+    "@kbn/logging-mocks"
+  ]
+}

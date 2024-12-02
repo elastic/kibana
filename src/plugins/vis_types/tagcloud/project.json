@@ -1,0 +1,41 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/vis-type-tagcloud-plugin",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/public/**/*",
+      "{projectRoot}/server/**/*",
+      "{projectRoot}/*.ts",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "application",
+  "sourceRoot": "src/plugins/vis_types/tagcloud",
+  "implicitDependencies": [
+    "@kbn/core",
+    "@kbn/data-plugin",
+    "@kbn/expressions-plugin",
+    "@kbn/visualizations-plugin",
+    "@kbn/charts-plugin",
+    "@kbn/kibana-react-plugin",
+    "@kbn/vis-default-editor-plugin",
+    "@kbn/i18n",
+    "@kbn/coloring",
+    "@kbn/config-schema",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/data-views-plugin"
+  ]
+}

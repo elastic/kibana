@@ -1,0 +1,53 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/streams-app-plugin",
+  "namedInputs": {
+    "src": [
+      "{workspaceRoot}/typings/**/*",
+      "{projectRoot}/common/**/*",
+      "{projectRoot}/public/**/*",
+      "{workspaceRoot}/typings/**/*",
+      "{projectRoot}/public/**/*.json",
+      "{projectRoot}/server/**/*",
+      "{projectRoot}/.storybook/**/*",
+      "!{projectRoot}/target/**/*",
+      "!{projectRoot}/.storybook/**/*.js"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "application",
+  "sourceRoot": "x-pack/plugins/streams_app",
+  "implicitDependencies": [
+    "@kbn/core",
+    "@kbn/data-plugin",
+    "@kbn/data-views-plugin",
+    "@kbn/observability-shared-plugin",
+    "@kbn/unified-search-plugin",
+    "@kbn/react-kibana-context-render",
+    "@kbn/shared-ux-link-redirect-app",
+    "@kbn/typed-react-router-config",
+    "@kbn/i18n",
+    "@kbn/observability-utils-browser",
+    "@kbn/kibana-react-plugin",
+    "@kbn/es-query",
+    "@kbn/logging",
+    "@kbn/deeplinks-observability",
+    "@kbn/config-schema",
+    "@kbn/calculate-auto",
+    "@kbn/streams-plugin",
+    "@kbn/share-plugin",
+    "@kbn/observability-utils-server"
+  ]
+}

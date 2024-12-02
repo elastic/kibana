@@ -1,0 +1,38 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/search-navigation",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/__mocks__/**/*",
+      "{projectRoot}/common/**/*",
+      "{projectRoot}/public/**/*",
+      "{projectRoot}/server/**/*",
+      "{workspaceRoot}/typings/**/*",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    }
+  },
+  "projectType": "application",
+  "sourceRoot": "x-pack/plugins/search_solution/search_navigation",
+  "implicitDependencies": [
+    "@kbn/core",
+    "@kbn/i18n",
+    "@kbn/core-chrome-browser",
+    "@kbn/shared-ux-page-solution-nav",
+    "@kbn/logging",
+    "@kbn/serverless",
+    "@kbn/core-plugins-browser"
+  ]
+}
