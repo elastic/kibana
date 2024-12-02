@@ -60,7 +60,7 @@ export const useAddToNewCase = ({
     disabled:
       lensAttributes == null ||
       timeRange == null ||
-      !userCasesPermissions.create ||
+      !userCasesPermissions.createComment ||
       !userCasesPermissions.read,
   };
 };

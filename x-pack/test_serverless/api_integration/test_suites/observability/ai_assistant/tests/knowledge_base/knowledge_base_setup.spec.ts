@@ -56,7 +56,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         .expect(200);
 
       expect(res.body.service_settings.model_id).to.be('pt_tiny_elser');
-      expect(res.body.inference_id).to.be('ai_assistant_kb_inference');
+      expect(res.body.inference_id).to.be('obs_ai_assistant_kb_inference');
 
       await deleteKnowledgeBaseModel(ml);
       await deleteInferenceEndpoint({ es });

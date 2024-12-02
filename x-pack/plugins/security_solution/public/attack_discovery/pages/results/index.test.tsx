@@ -9,7 +9,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
 
 import { TestProviders } from '../../../common/mock';
-import { mockAttackDiscovery } from '../../mock/mock_attack_discovery';
+import { mockAttackDiscovery } from '../mock/mock_attack_discovery';
 import { Results } from '.';
 
 describe('Results', () => {

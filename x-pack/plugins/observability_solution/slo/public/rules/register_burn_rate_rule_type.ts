@@ -67,7 +67,9 @@ export const registerBurnRateRuleType = (
     documentationUrl(docLinks) {
       return `${docLinks.links.observability.sloBurnRateRule}`;
     },
-    ruleParamsExpression: lazy(() => import('../components/burn_rate_rule_editor')),
+    ruleParamsExpression: lazyWithContextProviders(
+      lazy(() => import('../components/burn_rate_rule_editor'))
+    ),
     validate: validateBurnRateRule,
     requiresAppContext: false,
     defaultActionMessage: sloBurnRateDefaultActionMessage,

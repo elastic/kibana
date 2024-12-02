@@ -19,6 +19,9 @@ jest.mock('../hooks/use_llms_models');
 jest.mock('react-router-dom-v5-compat', () => ({
   useSearchParams: jest.fn(() => [{ get: jest.fn() }]),
 }));
+jest.mock('../hooks/use_indices_validation', () => ({
+  useIndicesValidation: jest.fn((indices) => ({ isValidated: true, validIndices: indices })),
+}));
 
 let formHookSpy: jest.SpyInstance;
 
@@ -216,6 +219,7 @@ describe('FormProvider', () => {
   });
 
   it('updates indices from search params', async () => {
+    expect.assertions(1);
     const mockSearchParams = new URLSearchParams();
     mockSearchParams.get = jest.fn().mockReturnValue('new-index');
     mockUseSearchParams.mockReturnValue([mockSearchParams]);
@@ -237,10 +241,12 @@ describe('FormProvider', () => {
       </FormProvider>
     );
 
-    const { getValues } = formHookSpy.mock.results[0].value;
+    await act(async () => {
+      const { getValues } = formHookSpy.mock.results[0].value;
 
-    await waitFor(() => {
-      expect(getValues(ChatFormFields.indices)).toEqual(['new-index']);
+      await waitFor(() => {
+        expect(getValues(ChatFormFields.indices)).toEqual(['new-index']);
+      });
     });
   });
 });

@@ -3,10 +3,6 @@ info:
   contact:
     name: Kibana Team
   description: |
-    **Technical preview**  
-    This functionality is in technical preview and may be changed or removed in a future release.
-    Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
-
     The Kibana REST APIs for Elastic serverless enable you to manage resources
     such as connectors, data views, and saved objects. The API calls are
     stateless. Each request that you make happens in isolation from other calls
@@ -1018,24 +1014,17 @@ paths:
                       - last_execution_date
                   flapping:
                     additionalProperties: false
-                    description: >-
-                      When flapping detection is turned on, alerts that switch
-                      quickly between active and recovered states are identified
-                      as “flapping” and notifications are reduced.
+                    description: When flapping detection is turned on, alerts that switch quickly between active and recovered states are identified as “flapping” and notifications are reduced.
                     nullable: true
                     type: object
                     properties:
                       look_back_window:
-                        description: >-
-                          The minimum number of runs in which the threshold must
-                          be met.
+                        description: The minimum number of runs in which the threshold must be met.
                         maximum: 20
                         minimum: 2
                         type: number
                       status_change_threshold:
-                        description: >-
-                          The minimum number of times an alert must switch
-                          states in the look back window.
+                        description: The minimum number of times an alert must switch states in the look back window.
                         maximum: 20
                         minimum: 2
                         type: number
@@ -1610,24 +1599,17 @@ paths:
                   type: boolean
                 flapping:
                   additionalProperties: false
-                  description: >-
-                    When flapping detection is turned on, alerts that switch
-                    quickly between active and recovered states are identified
-                    as “flapping” and notifications are reduced.
+                  description: When flapping detection is turned on, alerts that switch quickly between active and recovered states are identified as “flapping” and notifications are reduced.
                   nullable: true
                   type: object
                   properties:
                     look_back_window:
-                      description: >-
-                        The minimum number of runs in which the threshold must
-                        be met.
+                      description: The minimum number of runs in which the threshold must be met.
                       maximum: 20
                       minimum: 2
                       type: number
                     status_change_threshold:
-                      description: >-
-                        The minimum number of times an alert must switch states
-                        in the look back window.
+                      description: The minimum number of times an alert must switch states in the look back window.
                       maximum: 20
                       minimum: 2
                       type: number
@@ -1945,24 +1927,17 @@ paths:
                       - last_execution_date
                   flapping:
                     additionalProperties: false
-                    description: >-
-                      When flapping detection is turned on, alerts that switch
-                      quickly between active and recovered states are identified
-                      as “flapping” and notifications are reduced.
+                    description: When flapping detection is turned on, alerts that switch quickly between active and recovered states are identified as “flapping” and notifications are reduced.
                     nullable: true
                     type: object
                     properties:
                       look_back_window:
-                        description: >-
-                          The minimum number of runs in which the threshold must
-                          be met.
+                        description: The minimum number of runs in which the threshold must be met.
                         maximum: 20
                         minimum: 2
                         type: number
                       status_change_threshold:
-                        description: >-
-                          The minimum number of times an alert must switch
-                          states in the look back window.
+                        description: The minimum number of times an alert must switch states in the look back window.
                         maximum: 20
                         minimum: 2
                         type: number
@@ -2540,24 +2515,17 @@ paths:
                     - active
                 flapping:
                   additionalProperties: false
-                  description: >-
-                    When flapping detection is turned on, alerts that switch
-                    quickly between active and recovered states are identified
-                    as “flapping” and notifications are reduced.
+                  description: When flapping detection is turned on, alerts that switch quickly between active and recovered states are identified as “flapping” and notifications are reduced.
                   nullable: true
                   type: object
                   properties:
                     look_back_window:
-                      description: >-
-                        The minimum number of runs in which the threshold must
-                        be met.
+                      description: The minimum number of runs in which the threshold must be met.
                       maximum: 20
                       minimum: 2
                       type: number
                     status_change_threshold:
-                      description: >-
-                        The minimum number of times an alert must switch states
-                        in the look back window.
+                      description: The minimum number of times an alert must switch states in the look back window.
                       maximum: 20
                       minimum: 2
                       type: number
@@ -2847,24 +2815,17 @@ paths:
                       - last_execution_date
                   flapping:
                     additionalProperties: false
-                    description: >-
-                      When flapping detection is turned on, alerts that switch
-                      quickly between active and recovered states are identified
-                      as “flapping” and notifications are reduced.
+                    description: When flapping detection is turned on, alerts that switch quickly between active and recovered states are identified as “flapping” and notifications are reduced.
                     nullable: true
                     type: object
                     properties:
                       look_back_window:
-                        description: >-
-                          The minimum number of runs in which the threshold must
-                          be met.
+                        description: The minimum number of runs in which the threshold must be met.
                         maximum: 20
                         minimum: 2
                         type: number
                       status_change_threshold:
-                        description: >-
-                          The minimum number of times an alert must switch
-                          states in the look back window.
+                        description: The minimum number of times an alert must switch states in the look back window.
                         maximum: 20
                         minimum: 2
                         type: number
@@ -3902,24 +3863,17 @@ paths:
                       - last_execution_date
                   flapping:
                     additionalProperties: false
-                    description: >-
-                      When flapping detection is turned on, alerts that switch
-                      quickly between active and recovered states are identified
-                      as “flapping” and notifications are reduced.
+                    description: When flapping detection is turned on, alerts that switch quickly between active and recovered states are identified as “flapping” and notifications are reduced.
                     nullable: true
                     type: object
                     properties:
                       look_back_window:
-                        description: >-
-                          The minimum number of runs in which the threshold must
-                          be met.
+                        description: The minimum number of runs in which the threshold must be met.
                         maximum: 20
                         minimum: 2
                         type: number
                       status_change_threshold:
-                        description: >-
-                          The minimum number of times an alert must switch
-                          states in the look back window.
+                        description: The minimum number of times an alert must switch states in the look back window.
                         maximum: 20
                         minimum: 2
                         type: number
@@ -7437,6 +7391,43 @@ paths:
       tags:
         - Security Endpoint Management API
       x-beta: true
+  /api/entity_store/enable:
+    post:
+      operationId: InitEntityStore
+      requestBody:
+        content:
+          application/json; Elastic-Api-Version=2023-10-31:
+            schema:
+              type: object
+              properties:
+                fieldHistoryLength:
+                  default: 10
+                  description: The number of historical values to keep for each field.
+                  type: integer
+                filter:
+                  type: string
+                indexPattern:
+                  $ref: '#/components/schemas/Security_Entity_Analytics_API_IndexPattern'
+        description: Schema for the entity store initialization
+        required: true
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                type: object
+                properties:
+                  engines:
+                    items:
+                      $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineDescriptor'
+                    type: array
+                  succeeded:
+                    type: boolean
+          description: Successful response
+      summary: Initialize the Entity Store
+      tags:
+        - Security Entity Analytics API
+      x-beta: true
   /api/entity_store/engines:
     get:
       operationId: ListEntityEngines
@@ -7566,42 +7557,6 @@ paths:
                     type: boolean
           description: Successful response
       summary: Start an Entity Engine
-      tags:
-        - Security Entity Analytics API
-      x-beta: true
-  /api/entity_store/engines/{entityType}/stats:
-    post:
-      operationId: GetEntityEngineStats
-      parameters:
-        - description: The entity type of the engine (either 'user' or 'host').
-          in: path
-          name: entityType
-          required: true
-          schema:
-            $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityType'
-      responses:
-        '200':
-          content:
-            application/json; Elastic-Api-Version=2023-10-31:
-              schema:
-                type: object
-                properties:
-                  indexPattern:
-                    $ref: '#/components/schemas/Security_Entity_Analytics_API_IndexPattern'
-                  indices:
-                    items:
-                      type: object
-                    type: array
-                  status:
-                    $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineStatus'
-                  transforms:
-                    items:
-                      type: object
-                    type: array
-                  type:
-                    $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityType'
-          description: Successful response
-      summary: Get Entity Engine stats
       tags:
         - Security Entity Analytics API
       x-beta: true
@@ -7752,6 +7707,43 @@ paths:
                   - total
           description: Entities returned successfully
       summary: List Entity Store Entities
+      tags:
+        - Security Entity Analytics API
+      x-beta: true
+  /api/entity_store/status:
+    get:
+      operationId: GetEntityStoreStatus
+      parameters:
+        - description: If true returns a detailed status of the engine including all it's components
+          in: query
+          name: include_components
+          schema:
+            type: boolean
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                type: object
+                properties:
+                  engines:
+                    items:
+                      allOf:
+                        - $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineDescriptor'
+                        - type: object
+                          properties:
+                            components:
+                              items:
+                                $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineComponentStatus'
+                              type: array
+                    type: array
+                  status:
+                    $ref: '#/components/schemas/Security_Entity_Analytics_API_StoreStatus'
+                required:
+                  - status
+                  - engines
+          description: Successful response
+      summary: Get the status of the Entity Store
       tags:
         - Security Entity Analytics API
       x-beta: true
@@ -9506,15 +9498,20 @@ paths:
                             agent_download_target_directory:
                               nullable: true
                             agent_download_timeout:
-                              default: 2h
                               nullable: true
                             agent_limits_go_max_procs:
                               nullable: true
+                            agent_logging_files_interval:
+                              nullable: true
+                            agent_logging_files_keepfiles:
+                              nullable: true
+                            agent_logging_files_rotateeverybytes:
+                              nullable: true
                             agent_logging_level:
-                              default: info
                               nullable: true
                             agent_logging_metrics_period:
-                              default: 30s
+                              nullable: true
+                            agent_logging_to_files:
                               nullable: true
                         agent_features:
                           items:
@@ -9892,6 +9889,11 @@ paths:
                                       required:
                                         - id
                                     type: array
+                                  supports_agentless:
+                                    default: false
+                                    description: Indicates whether the package policy belongs to an agentless agent policy.
+                                    nullable: true
+                                    type: boolean
                                   updated_at:
                                     type: string
                                   updated_by:
@@ -10031,15 +10033,20 @@ paths:
                     agent_download_target_directory:
                       nullable: true
                     agent_download_timeout:
-                      default: 2h
                       nullable: true
                     agent_limits_go_max_procs:
                       nullable: true
+                    agent_logging_files_interval:
+                      nullable: true
+                    agent_logging_files_keepfiles:
+                      nullable: true
+                    agent_logging_files_rotateeverybytes:
+                      nullable: true
                     agent_logging_level:
-                      default: info
                       nullable: true
                     agent_logging_metrics_period:
-                      default: 30s
+                      nullable: true
+                    agent_logging_to_files:
                       nullable: true
                 agent_features:
                   items:
@@ -10205,15 +10212,20 @@ paths:
                           agent_download_target_directory:
                             nullable: true
                           agent_download_timeout:
-                            default: 2h
                             nullable: true
                           agent_limits_go_max_procs:
                             nullable: true
+                          agent_logging_files_interval:
+                            nullable: true
+                          agent_logging_files_keepfiles:
+                            nullable: true
+                          agent_logging_files_rotateeverybytes:
+                            nullable: true
                           agent_logging_level:
-                            default: info
                             nullable: true
                           agent_logging_metrics_period:
-                            default: 30s
+                            nullable: true
+                          agent_logging_to_files:
                             nullable: true
                       agent_features:
                         items:
@@ -10591,6 +10603,11 @@ paths:
                                     required:
                                       - id
                                   type: array
+                                supports_agentless:
+                                  default: false
+                                  description: Indicates whether the package policy belongs to an agentless agent policy.
+                                  nullable: true
+                                  type: boolean
                                 updated_at:
                                   type: string
                                 updated_by:
@@ -10749,15 +10766,20 @@ paths:
                             agent_download_target_directory:
                               nullable: true
                             agent_download_timeout:
-                              default: 2h
                               nullable: true
                             agent_limits_go_max_procs:
                               nullable: true
+                            agent_logging_files_interval:
+                              nullable: true
+                            agent_logging_files_keepfiles:
+                              nullable: true
+                            agent_logging_files_rotateeverybytes:
+                              nullable: true
                             agent_logging_level:
-                              default: info
                               nullable: true
                             agent_logging_metrics_period:
-                              default: 30s
+                              nullable: true
+                            agent_logging_to_files:
                               nullable: true
                         agent_features:
                           items:
@@ -11135,6 +11157,11 @@ paths:
                                       required:
                                         - id
                                     type: array
+                                  supports_agentless:
+                                    default: false
+                                    description: Indicates whether the package policy belongs to an agentless agent policy.
+                                    nullable: true
+                                    type: boolean
                                   updated_at:
                                     type: string
                                   updated_by:
@@ -11273,15 +11300,20 @@ paths:
                           agent_download_target_directory:
                             nullable: true
                           agent_download_timeout:
-                            default: 2h
                             nullable: true
                           agent_limits_go_max_procs:
                             nullable: true
+                          agent_logging_files_interval:
+                            nullable: true
+                          agent_logging_files_keepfiles:
+                            nullable: true
+                          agent_logging_files_rotateeverybytes:
+                            nullable: true
                           agent_logging_level:
-                            default: info
                             nullable: true
                           agent_logging_metrics_period:
-                            default: 30s
+                            nullable: true
+                          agent_logging_to_files:
                             nullable: true
                       agent_features:
                         items:
@@ -11659,6 +11691,11 @@ paths:
                                     required:
                                       - id
                                   type: array
+                                supports_agentless:
+                                  default: false
+                                  description: Indicates whether the package policy belongs to an agentless agent policy.
+                                  nullable: true
+                                  type: boolean
                                 updated_at:
                                   type: string
                                 updated_by:
@@ -11797,15 +11834,20 @@ paths:
                     agent_download_target_directory:
                       nullable: true
                     agent_download_timeout:
-                      default: 2h
                       nullable: true
                     agent_limits_go_max_procs:
                       nullable: true
+                    agent_logging_files_interval:
+                      nullable: true
+                    agent_logging_files_keepfiles:
+                      nullable: true
+                    agent_logging_files_rotateeverybytes:
+                      nullable: true
                     agent_logging_level:
-                      default: info
                       nullable: true
                     agent_logging_metrics_period:
-                      default: 30s
+                      nullable: true
+                    agent_logging_to_files:
                       nullable: true
                 agent_features:
                   items:
@@ -11971,15 +12013,20 @@ paths:
                           agent_download_target_directory:
                             nullable: true
                           agent_download_timeout:
-                            default: 2h
                             nullable: true
                           agent_limits_go_max_procs:
                             nullable: true
+                          agent_logging_files_interval:
+                            nullable: true
+                          agent_logging_files_keepfiles:
+                            nullable: true
+                          agent_logging_files_rotateeverybytes:
+                            nullable: true
                           agent_logging_level:
-                            default: info
                             nullable: true
                           agent_logging_metrics_period:
-                            default: 30s
+                            nullable: true
+                          agent_logging_to_files:
                             nullable: true
                       agent_features:
                         items:
@@ -12357,6 +12404,11 @@ paths:
                                     required:
                                       - id
                                   type: array
+                                supports_agentless:
+                                  default: false
+                                  description: Indicates whether the package policy belongs to an agentless agent policy.
+                                  nullable: true
+                                  type: boolean
                                 updated_at:
                                   type: string
                                 updated_by:
@@ -12515,15 +12567,20 @@ paths:
                           agent_download_target_directory:
                             nullable: true
                           agent_download_timeout:
-                            default: 2h
                             nullable: true
                           agent_limits_go_max_procs:
                             nullable: true
+                          agent_logging_files_interval:
+                            nullable: true
+                          agent_logging_files_keepfiles:
+                            nullable: true
+                          agent_logging_files_rotateeverybytes:
+                            nullable: true
                           agent_logging_level:
-                            default: info
                             nullable: true
                           agent_logging_metrics_period:
-                            default: 30s
+                            nullable: true
+                          agent_logging_to_files:
                             nullable: true
                       agent_features:
                         items:
@@ -12901,6 +12958,11 @@ paths:
                                     required:
                                       - id
                                   type: array
+                                supports_agentless:
+                                  default: false
+                                  description: Indicates whether the package policy belongs to an agentless agent policy.
+                                  nullable: true
+                                  type: boolean
                                 updated_at:
                                   type: string
                                 updated_by:
@@ -13137,6 +13199,30 @@ paths:
                                   required:
                                     - enabled
                                 type: object
+                              limits:
+                                additionalProperties: false
+                                type: object
+                                properties:
+                                  go_max_procs:
+                                    type: number
+                              logging:
+                                additionalProperties: false
+                                type: object
+                                properties:
+                                  files:
+                                    additionalProperties: false
+                                    type: object
+                                    properties:
+                                      interval:
+                                        type: string
+                                      keepfiles:
+                                        type: number
+                                      rotateeverybytes:
+                                        type: number
+                                  level:
+                                    type: string
+                                  to_files:
+                                    type: boolean
                               monitoring:
                                 additionalProperties: false
                                 type: object
@@ -13815,6 +13901,16 @@ paths:
                   type: string
                 type: array
               - type: string
+        - in: query
+          name: pkgName
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: pkgVersion
+          required: false
+          schema:
+            type: string
         - in: query
           name: previewData
           required: false
@@ -19365,7 +19461,7 @@ paths:
       tags:
         - Elastic Package Manager (EPM)
       x-beta: true
-  /api/fleet/epm/packages/{pkgName}/{pkgVersion}/{filePath*}:
+  /api/fleet/epm/packages/{pkgName}/{pkgVersion}/{filePath}:
     get:
       operationId: get-fleet-epm-packages-pkgname-pkgversion-filepath
       parameters:
@@ -25461,6 +25557,11 @@ paths:
                           items:
                             type: string
                           type: array
+                        supports_agentless:
+                          default: false
+                          description: Indicates whether the package policy belongs to an agentless agent policy.
+                          nullable: true
+                          type: boolean
                         updated_at:
                           type: string
                         updated_by:
@@ -25789,6 +25890,11 @@ paths:
                         description: Agent policy IDs where that package policy will be added
                         type: string
                       type: array
+                    supports_agentless:
+                      default: false
+                      description: Indicates whether the package policy belongs to an agentless agent policy.
+                      nullable: true
+                      type: boolean
                     vars:
                       additionalProperties:
                         additionalProperties: false
@@ -25939,6 +26045,11 @@ paths:
                       items:
                         type: string
                       type: array
+                    supports_agentless:
+                      default: false
+                      description: Indicates whether the package policy belongs to an agentless agent policy.
+                      nullable: true
+                      type: boolean
                     vars:
                       additionalProperties:
                         anyOf:
@@ -26290,6 +26401,11 @@ paths:
                         items:
                           type: string
                         type: array
+                      supports_agentless:
+                        default: false
+                        description: Indicates whether the package policy belongs to an agentless agent policy.
+                        nullable: true
+                        type: boolean
                       updated_at:
                         type: string
                       updated_by:
@@ -26750,6 +26866,11 @@ paths:
                           items:
                             type: string
                           type: array
+                        supports_agentless:
+                          default: false
+                          description: Indicates whether the package policy belongs to an agentless agent policy.
+                          nullable: true
+                          type: boolean
                         updated_at:
                           type: string
                         updated_by:
@@ -27249,6 +27370,11 @@ paths:
                         items:
                           type: string
                         type: array
+                      supports_agentless:
+                        default: false
+                        description: Indicates whether the package policy belongs to an agentless agent policy.
+                        nullable: true
+                        type: boolean
                       updated_at:
                         type: string
                       updated_by:
@@ -27579,6 +27705,11 @@ paths:
                         description: Agent policy IDs where that package policy will be added
                         type: string
                       type: array
+                    supports_agentless:
+                      default: false
+                      description: Indicates whether the package policy belongs to an agentless agent policy.
+                      nullable: true
+                      type: boolean
                     vars:
                       additionalProperties:
                         additionalProperties: false
@@ -27728,6 +27859,11 @@ paths:
                       items:
                         type: string
                       type: array
+                    supports_agentless:
+                      default: false
+                      description: Indicates whether the package policy belongs to an agentless agent policy.
+                      nullable: true
+                      type: boolean
                     vars:
                       additionalProperties:
                         anyOf:
@@ -28078,6 +28214,11 @@ paths:
                         items:
                           type: string
                         type: array
+                      supports_agentless:
+                        default: false
+                        description: Indicates whether the package policy belongs to an agentless agent policy.
+                        nullable: true
+                        type: boolean
                       updated_at:
                         type: string
                       updated_by:
@@ -28855,6 +28996,11 @@ paths:
                                 items:
                                   type: string
                                 type: array
+                              supports_agentless:
+                                default: false
+                                description: Indicates whether the package policy belongs to an agentless agent policy.
+                                nullable: true
+                                type: boolean
                               updated_at:
                                 type: string
                               updated_by:
@@ -29134,6 +29280,11 @@ paths:
                                   description: Agent policy IDs where that package policy will be added
                                   type: string
                                 type: array
+                              supports_agentless:
+                                default: false
+                                description: Indicates whether the package policy belongs to an agentless agent policy.
+                                nullable: true
+                                type: boolean
                               vars:
                                 additionalProperties:
                                   additionalProperties: false
@@ -29763,6 +29914,7 @@ paths:
                       secret_storage_requirements_met:
                         type: boolean
                       use_space_awareness_migration_started_at:
+                        nullable: true
                         type: string
                       use_space_awareness_migration_status:
                         enum:
@@ -29896,6 +30048,7 @@ paths:
                       secret_storage_requirements_met:
                         type: boolean
                       use_space_awareness_migration_started_at:
+                        nullable: true
                         type: string
                       use_space_awareness_migration_status:
                         enum:
@@ -31541,13 +31694,6 @@ paths:
         required: true
       responses:
         '200':
-          content:
-            application/json; Elastic-Api-Version=2023-10-31:
-              schema:
-                type: object
-                properties:
-                  data:
-                    type: object
           description: Indicates the note was successfully deleted.
       summary: Delete a note
       tags:
@@ -31609,9 +31755,7 @@ paths:
           content:
             application/json; Elastic-Api-Version=2023-10-31:
               schema:
-                oneOf:
-                  - $ref: '#/components/schemas/Security_Timeline_API_GetNotesResult'
-                  - type: object
+                $ref: '#/components/schemas/Security_Timeline_API_GetNotesResult'
           description: Indicates the requested notes were returned.
       summary: Get notes
       tags:
@@ -31655,17 +31799,7 @@ paths:
           content:
             application/json; Elastic-Api-Version=2023-10-31:
               schema:
-                type: object
-                properties:
-                  data:
-                    type: object
-                    properties:
-                      persistNote:
-                        $ref: '#/components/schemas/Security_Timeline_API_ResponseNote'
-                    required:
-                      - persistNote
-                required:
-                  - data
+                $ref: '#/components/schemas/Security_Timeline_API_ResponseNote'
           description: Indicates the note was successfully created.
       summary: Add or update a note
       tags:
@@ -32018,17 +32152,7 @@ paths:
           content:
             application/json; Elastic-Api-Version=2023-10-31:
               schema:
-                type: object
-                properties:
-                  data:
-                    type: object
-                    properties:
-                      persistPinnedEventOnTimeline:
-                        $ref: '#/components/schemas/Security_Timeline_API_PersistPinnedEventResponse'
-                    required:
-                      - persistPinnedEventOnTimeline
-                required:
-                  - data
+                $ref: '#/components/schemas/Security_Timeline_API_PersistPinnedEventResponse'
           description: Indicates the event was successfully pinned to the Timeline.
       summary: Pin an event
       tags:
@@ -32103,8 +32227,6 @@ paths:
         Exported saved objects are not backwards compatible and cannot be imported into an older version of Kibana.
 
         NOTE: The `savedObjects.maxImportExportSize` configuration setting limits the number of saved objects which may be exported.
-
-        This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
       operationId: exportSavedObjectsDefault
       parameters:
         - $ref: '#/components/parameters/Serverless_saved_objects_kbn_xsrf'
@@ -32163,8 +32285,6 @@ paths:
       description: |
         Create sets of Kibana saved objects from a file created by the export API.
         Saved objects can be imported only into the same version, a newer minor on the same major, or the next major. Exported saved objects are not backwards compatible and cannot be imported into an older version of Kibana.
-
-        This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
       operationId: importSavedObjectsDefault
       parameters:
         - $ref: '#/components/parameters/Serverless_saved_objects_kbn_xsrf'
@@ -33639,20 +33759,6 @@ paths:
         required: true
       responses:
         '200':
-          content:
-            application/json; Elastic-Api-Version=2023-10-31:
-              schema:
-                type: object
-                properties:
-                  data:
-                    type: object
-                    properties:
-                      deleteTimeline:
-                        type: boolean
-                    required:
-                      - deleteTimeline
-                required:
-                  - data
           description: Indicates the Timeline was successfully deleted.
       summary: Delete Timelines or Timeline templates
       tags:
@@ -33677,20 +33783,7 @@ paths:
           content:
             application/json; Elastic-Api-Version=2023-10-31:
               schema:
-                oneOf:
-                  - type: object
-                    properties:
-                      data:
-                        type: object
-                        properties:
-                          getOneTimeline:
-                            $ref: '#/components/schemas/Security_Timeline_API_TimelineResponse'
-                        required:
-                          - getOneTimeline
-                    required:
-                      - data
-                  - additionalProperties: false
-                    type: object
+                $ref: '#/components/schemas/Security_Timeline_API_TimelineResponse'
           description: Indicates that the (template) Timeline was found and returned.
       summary: Get Timeline or Timeline template details
       tags:
@@ -34001,17 +34094,7 @@ paths:
           content:
             application/json; Elastic-Api-Version=2023-10-31:
               schema:
-                type: object
-                properties:
-                  data:
-                    type: object
-                    properties:
-                      persistFavorite:
-                        $ref: '#/components/schemas/Security_Timeline_API_FavoriteTimelineResponse'
-                    required:
-                      - persistFavorite
-                required:
-                  - data
+                $ref: '#/components/schemas/Security_Timeline_API_FavoriteTimelineResponse'
           description: Indicates the favorite status was successfully updated.
         '403':
           content:
@@ -34168,15 +34251,7 @@ paths:
           content:
             application/json; Elastic-Api-Version=2023-10-31:
               schema:
-                oneOf:
-                  - type: object
-                    properties:
-                      data:
-                        $ref: '#/components/schemas/Security_Timeline_API_ResolvedTimeline'
-                    required:
-                      - data
-                  - additionalProperties: false
-                    type: object
+                $ref: '#/components/schemas/Security_Timeline_API_ResolvedTimeline'
           description: The (template) Timeline has been found
         '400':
           description: The request is missing parameters
@@ -45656,6 +45731,47 @@ components:
               $ref: '#/components/schemas/Security_Entity_Analytics_API_AssetCriticalityLevel'
           required:
             - criticality_level
+    Security_Entity_Analytics_API_EngineComponentResource:
+      enum:
+        - entity_engine
+        - entity_definition
+        - index
+        - component_template
+        - index_template
+        - ingest_pipeline
+        - enrich_policy
+        - task
+        - transform
+      type: string
+    Security_Entity_Analytics_API_EngineComponentStatus:
+      type: object
+      properties:
+        errors:
+          items:
+            type: object
+            properties:
+              message:
+                type: string
+              title:
+                type: string
+          type: array
+        health:
+          enum:
+            - green
+            - yellow
+            - red
+            - unknown
+          type: string
+        id:
+          type: string
+        installed:
+          type: boolean
+        resource:
+          $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineComponentResource'
+      required:
+        - id
+        - installed
+        - resource
     Security_Entity_Analytics_API_EngineDataviewUpdateResult:
       type: object
       properties:
@@ -45922,6 +46038,14 @@ components:
         - index
         - description
         - category
+    Security_Entity_Analytics_API_StoreStatus:
+      enum:
+        - not_installed
+        - installing
+        - running
+        - stopped
+        - error
+      type: string
     Security_Entity_Analytics_API_TaskManagerUnavailableResponse:
       description: Task manager is unavailable
       type: object
@@ -47206,16 +47330,10 @@ components:
     Security_Timeline_API_FavoriteTimelineResponse:
       type: object
       properties:
-        code:
-          nullable: true
-          type: number
         favorite:
           items:
             $ref: '#/components/schemas/Security_Timeline_API_FavoriteTimelineResult'
           type: array
-        message:
-          nullable: true
-          type: string
         savedObjectId:
           type: string
         templateTimelineId:
@@ -47384,28 +47502,15 @@ components:
             - version
     Security_Timeline_API_PersistPinnedEventResponse:
       oneOf:
-        - allOf:
-            - $ref: '#/components/schemas/Security_Timeline_API_PinnedEvent'
-            - $ref: '#/components/schemas/Security_Timeline_API_PinnedEventBaseResponseBody'
-        - nullable: true
-          type: object
-    Security_Timeline_API_PersistTimelineResponse:
-      type: object
-      properties:
-        data:
-          type: object
+        - $ref: '#/components/schemas/Security_Timeline_API_PinnedEvent'
+        - type: object
           properties:
-            persistTimeline:
-              type: object
-              properties:
-                timeline:
-                  $ref: '#/components/schemas/Security_Timeline_API_TimelineResponse'
-              required:
-                - timeline
+            unpinned:
+              type: boolean
           required:
-            - persistTimeline
-      required:
-        - data
+            - unpinned
+    Security_Timeline_API_PersistTimelineResponse:
+      $ref: '#/components/schemas/Security_Timeline_API_TimelineResponse'
     Security_Timeline_API_PinnedEvent:
       allOf:
         - $ref: '#/components/schemas/Security_Timeline_API_BarePinnedEvent'
@@ -47418,15 +47523,6 @@ components:
           required:
             - pinnedEventId
             - version
-    Security_Timeline_API_PinnedEventBaseResponseBody:
-      type: object
-      properties:
-        code:
-          type: number
-        message:
-          type: string
-      required:
-        - code
     Security_Timeline_API_QueryMatchResult:
       type: object
       properties:
@@ -47467,15 +47563,9 @@ components:
     Security_Timeline_API_ResponseNote:
       type: object
       properties:
-        code:
-          type: number
-        message:
-          type: string
         note:
           $ref: '#/components/schemas/Security_Timeline_API_Note'
       required:
-        - code
-        - message
         - note
     Security_Timeline_API_RowRendererId:
       enum:

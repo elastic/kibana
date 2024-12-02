@@ -7,10 +7,13 @@
 
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import type { GetRuleMigrationResponse } from '../../../../../common/siem_migrations/model/api/rules/rules_migration.gen';
-import { GetRuleMigrationRequestParams } from '../../../../../common/siem_migrations/model/api/rules/rules_migration.gen';
-import { SIEM_RULE_MIGRATIONS_GET_PATH } from '../../../../../common/siem_migrations/constants';
+import {
+  GetRuleMigrationRequestParams,
+  type GetRuleMigrationResponse,
+} from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
+import { SIEM_RULE_MIGRATION_PATH } from '../../../../../common/siem_migrations/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
+import { withLicense } from './util/with_license';
 
 export const registerSiemRuleMigrationsGetRoute = (
   router: SecuritySolutionPluginRouter,
@@ -18,7 +21,7 @@ export const registerSiemRuleMigrationsGetRoute = (
 ) => {
   router.versioned
     .get({
-      path: SIEM_RULE_MIGRATIONS_GET_PATH,
+      path: SIEM_RULE_MIGRATION_PATH,
       access: 'internal',
       security: { authz: { requiredPrivileges: ['securitySolution'] } },
     })
@@ -29,19 +32,19 @@ export const registerSiemRuleMigrationsGetRoute = (
           request: { params: buildRouteValidationWithZod(GetRuleMigrationRequestParams) },
         },
       },
-      async (context, req, res): Promise<IKibanaResponse<GetRuleMigrationResponse>> => {
+      withLicense(async (context, req, res): Promise<IKibanaResponse<GetRuleMigrationResponse>> => {
         const migrationId = req.params.migration_id;
         try {
           const ctx = await context.resolve(['securitySolution']);
           const ruleMigrationsClient = ctx.securitySolution.getSiemRuleMigrationsClient();
 
-          const migrationRules = await ruleMigrationsClient.data.getRules(migrationId);
+          const migrationRules = await ruleMigrationsClient.data.rules.get({ migrationId });
 
           return res.ok({ body: migrationRules });
         } catch (err) {
           logger.error(err);
           return res.badRequest({ body: err.message });
         }
-      }
+      })
     );
 };

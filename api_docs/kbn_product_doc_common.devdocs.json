@@ -1,0 +1,454 @@
+{
+  "id": "@kbn/product-doc-common",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/product-doc-common",
+        "id": "def-common.getArtifactName",
+        "type": "Function",
+        "tags": [],
+        "label": "getArtifactName",
+        "description": [],
+        "signature": [
+          "({ productName, productVersion, excludeExtension, }: { productName: \"security\" | \"kibana\" | \"observability\" | \"elasticsearch\"; productVersion: string; excludeExtension?: boolean | undefined; }) => string"
+        ],
+        "path": "x-pack/packages/ai-infra/product-doc-common/src/artifact.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/product-doc-common",
+            "id": "def-common.getArtifactName.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  productName,\n  productVersion,\n  excludeExtension = false,\n}",
+            "description": [],
+            "path": "x-pack/packages/ai-infra/product-doc-common/src/artifact.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/product-doc-common",
+                "id": "def-common.getArtifactName.$1.productName",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "productName",
+                "description": [],
+                "signature": [
+                  "\"security\" | \"kibana\" | \"observability\" | \"elasticsearch\""
+                ],
+                "path": "x-pack/packages/ai-infra/product-doc-common/src/artifact.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/product-doc-common",
+                "id": "def-common.getArtifactName.$1.productVersion",
+                "type": "string",
+                "tags": [],
+                "label": "productVersion",
+                "description": [],
+                "path": "x-pack/packages/ai-infra/product-doc-common/src/artifact.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/product-doc-common",
+                "id": "def-common.getArtifactName.$1.excludeExtension",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "excludeExtension",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "x-pack/packages/ai-infra/product-doc-common/src/artifact.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/product-doc-common",
+        "id": "def-common.getProductDocIndexName",
+        "type": "Function",
+        "tags": [],
+        "label": "getProductDocIndexName",
+        "description": [],
+        "signature": [
+          "(productName: \"security\" | \"kibana\" | \"observability\" | \"elasticsearch\") => string"
+        ],
+        "path": "x-pack/packages/ai-infra/product-doc-common/src/indices.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/product-doc-common",
+            "id": "def-common.getProductDocIndexName.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "productName",
+            "description": [],
+            "signature": [
+              "\"security\" | \"kibana\" | \"observability\" | \"elasticsearch\""
+            ],
+            "path": "x-pack/packages/ai-infra/product-doc-common/src/indices.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/product-doc-common",
+        "id": "def-common.isArtifactContentFilePath",
+        "type": "Function",
+        "tags": [],
+        "label": "isArtifactContentFilePath",
+        "description": [],
+        "signature": [
+          "(path: string) => boolean"
+        ],
+        "path": "x-pack/packages/ai-infra/product-doc-common/src/artifact_content.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/product-doc-common",
+            "id": "def-common.isArtifactContentFilePath.$1",
+            "type": "string",
+            "tags": [],
+            "label": "path",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/packages/ai-infra/product-doc-common/src/artifact_content.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/product-doc-common",
+        "id": "def-common.parseArtifactName",
+        "type": "Function",
+        "tags": [],
+        "label": "parseArtifactName",
+        "description": [],
+        "signature": [
+          "(artifactName: string) => { productName: \"security\" | \"kibana\" | \"observability\" | \"elasticsearch\"; productVersion: string; } | undefined"
+        ],
+        "path": "x-pack/packages/ai-infra/product-doc-common/src/artifact.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/product-doc-common",
+            "id": "def-common.parseArtifactName.$1",
+            "type": "string",
+            "tags": [],
+            "label": "artifactName",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/packages/ai-infra/product-doc-common/src/artifact.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/product-doc-common",
+        "id": "def-common.ArtifactManifest",
+        "type": "Interface",
+        "tags": [],
+        "label": "ArtifactManifest",
+        "description": [],
+        "path": "x-pack/packages/ai-infra/product-doc-common/src/manifest.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/product-doc-common",
+            "id": "def-common.ArtifactManifest.formatVersion",
+            "type": "string",
+            "tags": [],
+            "label": "formatVersion",
+            "description": [],
+            "path": "x-pack/packages/ai-infra/product-doc-common/src/manifest.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/product-doc-common",
+            "id": "def-common.ArtifactManifest.productName",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "productName",
+            "description": [],
+            "signature": [
+              "\"security\" | \"kibana\" | \"observability\" | \"elasticsearch\""
+            ],
+            "path": "x-pack/packages/ai-infra/product-doc-common/src/manifest.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/product-doc-common",
+            "id": "def-common.ArtifactManifest.productVersion",
+            "type": "string",
+            "tags": [],
+            "label": "productVersion",
+            "description": [],
+            "path": "x-pack/packages/ai-infra/product-doc-common/src/manifest.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/product-doc-common",
+        "id": "def-common.ProductDocumentationAttributes",
+        "type": "Interface",
+        "tags": [],
+        "label": "ProductDocumentationAttributes",
+        "description": [],
+        "path": "x-pack/packages/ai-infra/product-doc-common/src/documents.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/product-doc-common",
+            "id": "def-common.ProductDocumentationAttributes.content_title",
+            "type": "string",
+            "tags": [],
+            "label": "content_title",
+            "description": [],
+            "path": "x-pack/packages/ai-infra/product-doc-common/src/documents.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/product-doc-common",
+            "id": "def-common.ProductDocumentationAttributes.content_body",
+            "type": "Object",
+            "tags": [],
+            "label": "content_body",
+            "description": [],
+            "signature": [
+              "SemanticTextField"
+            ],
+            "path": "x-pack/packages/ai-infra/product-doc-common/src/documents.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/product-doc-common",
+            "id": "def-common.ProductDocumentationAttributes.product_name",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "product_name",
+            "description": [],
+            "signature": [
+              "\"security\" | \"kibana\" | \"observability\" | \"elasticsearch\""
+            ],
+            "path": "x-pack/packages/ai-infra/product-doc-common/src/documents.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/product-doc-common",
+            "id": "def-common.ProductDocumentationAttributes.root_type",
+            "type": "string",
+            "tags": [],
+            "label": "root_type",
+            "description": [],
+            "path": "x-pack/packages/ai-infra/product-doc-common/src/documents.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/product-doc-common",
+            "id": "def-common.ProductDocumentationAttributes.slug",
+            "type": "string",
+            "tags": [],
+            "label": "slug",
+            "description": [],
+            "path": "x-pack/packages/ai-infra/product-doc-common/src/documents.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/product-doc-common",
+            "id": "def-common.ProductDocumentationAttributes.url",
+            "type": "string",
+            "tags": [],
+            "label": "url",
+            "description": [],
+            "path": "x-pack/packages/ai-infra/product-doc-common/src/documents.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/product-doc-common",
+            "id": "def-common.ProductDocumentationAttributes.version",
+            "type": "string",
+            "tags": [],
+            "label": "version",
+            "description": [],
+            "path": "x-pack/packages/ai-infra/product-doc-common/src/documents.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/product-doc-common",
+            "id": "def-common.ProductDocumentationAttributes.ai_subtitle",
+            "type": "string",
+            "tags": [],
+            "label": "ai_subtitle",
+            "description": [],
+            "path": "x-pack/packages/ai-infra/product-doc-common/src/documents.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/product-doc-common",
+            "id": "def-common.ProductDocumentationAttributes.ai_summary",
+            "type": "Object",
+            "tags": [],
+            "label": "ai_summary",
+            "description": [],
+            "signature": [
+              "SemanticTextField"
+            ],
+            "path": "x-pack/packages/ai-infra/product-doc-common/src/documents.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/product-doc-common",
+            "id": "def-common.ProductDocumentationAttributes.ai_questions_answered",
+            "type": "Object",
+            "tags": [],
+            "label": "ai_questions_answered",
+            "description": [],
+            "signature": [
+              "SemanticTextArrayField"
+            ],
+            "path": "x-pack/packages/ai-infra/product-doc-common/src/documents.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/product-doc-common",
+            "id": "def-common.ProductDocumentationAttributes.ai_tags",
+            "type": "Array",
+            "tags": [],
+            "label": "ai_tags",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/packages/ai-infra/product-doc-common/src/documents.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [
+      {
+        "parentPluginId": "@kbn/product-doc-common",
+        "id": "def-common.DocumentationProduct",
+        "type": "Enum",
+        "tags": [],
+        "label": "DocumentationProduct",
+        "description": [],
+        "path": "x-pack/packages/ai-infra/product-doc-common/src/product.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/product-doc-common",
+        "id": "def-common.productDocIndexPattern",
+        "type": "string",
+        "tags": [],
+        "label": "productDocIndexPattern",
+        "description": [],
+        "path": "x-pack/packages/ai-infra/product-doc-common/src/indices.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/product-doc-common",
+        "id": "def-common.productDocIndexPrefix",
+        "type": "string",
+        "tags": [],
+        "label": "productDocIndexPrefix",
+        "description": [],
+        "signature": [
+          "\".kibana_ai_product_doc\""
+        ],
+        "path": "x-pack/packages/ai-infra/product-doc-common/src/indices.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/product-doc-common",
+        "id": "def-common.ProductName",
+        "type": "Type",
+        "tags": [],
+        "label": "ProductName",
+        "description": [],
+        "signature": [
+          "\"security\" | \"kibana\" | \"observability\" | \"elasticsearch\""
+        ],
+        "path": "x-pack/packages/ai-infra/product-doc-common/src/product.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

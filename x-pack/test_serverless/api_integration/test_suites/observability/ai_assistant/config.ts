@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { SUPPORTED_TRAINED_MODELS } from '@kbn/test-suites-xpack/functional/services/ml/api';
 import { createTestConfig } from '../../../config.base';
 import { ObservabilityAIAssistantServices } from './common/ftr_provider_context';
 import { services as inheritedServices } from '../../../services';
@@ -28,7 +27,4 @@ export default createTestConfig({
   // include settings from project controller
   // https://github.com/elastic/project-controller/blob/main/internal/project/observability/config/elasticsearch.yml
   esServerArgs: ['xpack.ml.dfa.enabled=false'],
-  kbnServerArgs: [
-    `--xpack.observabilityAIAssistant.modelId=${SUPPORTED_TRAINED_MODELS.TINY_ELSER.name}`, // TODO: Remove
-  ],
 });

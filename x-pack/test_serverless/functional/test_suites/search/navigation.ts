@@ -95,17 +95,17 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       });
       // check Relevance
       // > Inference Endpoints
-      // await solutionNavigation.sidenav.clickLink({
-      //   deepLinkId: 'searchInferenceEndpoints',
-      // });
-      // await solutionNavigation.sidenav.expectLinkActive({
-      //   deepLinkId: 'searchInferenceEndpoints',
-      // });
-      // await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Relevance' });
-      // await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Inference Endpoints' });
-      // await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-      //   deepLinkId: 'searchInferenceEndpoints',
-      // });
+      await solutionNavigation.sidenav.clickLink({
+        deepLinkId: 'searchInferenceEndpoints',
+      });
+      await solutionNavigation.sidenav.expectLinkActive({
+        deepLinkId: 'searchInferenceEndpoints',
+      });
+      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Relevance' });
+      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Inference Endpoints' });
+      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
+        deepLinkId: 'searchInferenceEndpoints',
+      });
 
       // check Analyze
       // > Discover
@@ -241,11 +241,12 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Data' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Index Management' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Connectors' });
+      await solutionNavigation.sidenav.expectLinkExists({ text: 'Web crawlers' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Build' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Dev Tools' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Playground' });
-      // await solutionNavigation.sidenav.expectLinkExists({ text: 'Relevance' });
-      // await solutionNavigation.sidenav.expectLinkExists({ text: 'Inference Endpoints' });
+      await solutionNavigation.sidenav.expectLinkExists({ text: 'Relevance' });
+      await solutionNavigation.sidenav.expectLinkExists({ text: 'Inference Endpoints' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Analyze' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Discover' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Dashboards' });
@@ -265,11 +266,12 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         'data',
         'management:index_management',
         'serverlessConnectors',
+        'serverlessWebCrawlers',
         'build',
         'dev_tools',
         'searchPlayground',
-        // 'relevance',
-        // 'searchInferenceEndpoints',
+        'relevance',
+        'searchInferenceEndpoints',
         'analyze',
         'discover',
         'dashboards',

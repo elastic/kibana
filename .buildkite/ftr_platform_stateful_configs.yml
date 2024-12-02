@@ -231,6 +231,7 @@ enabled:
   - x-pack/test/functional/apps/lens/group4/config.ts
   - x-pack/test/functional/apps/lens/group5/config.ts
   - x-pack/test/functional/apps/lens/group6/config.ts
+  - x-pack/test/functional/apps/lens/group7/config.ts
   - x-pack/test/functional/apps/lens/open_in_lens/tsvb/config.ts
   - x-pack/test/functional/apps/lens/open_in_lens/agg_based/config.ts
   - x-pack/test/functional/apps/lens/open_in_lens/dashboard/config.ts
@@ -375,3 +376,4 @@ enabled:
   - x-pack/test/custom_branding/config.ts
   # stateful config files that run deployment-agnostic tests
   - x-pack/test/api_integration/deployment_agnostic/configs/stateful/platform.stateful.config.ts
+  - x-pack/test/api_integration/apis/cloud/config.ts

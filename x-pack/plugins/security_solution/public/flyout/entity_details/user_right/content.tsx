@@ -73,7 +73,7 @@ export const UserPanelContent = ({
         entity={{ name: userName, type: 'user' }}
         onChange={onAssetCriticalityChange}
       />
-      <EntityInsight name={userName} fieldName={'user.name'} isPreviewMode={isPreviewMode} />
+      <EntityInsight value={userName} field={'user.name'} isPreviewMode={isPreviewMode} />
       <ObservedEntity
         observedData={observedUser}
         contextID={contextID}

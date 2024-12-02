@@ -132,7 +132,7 @@ export const assignToPaths = (
   path: string,
   pathObject: OpenAPIV3.PathItemObject
 ): void => {
-  const pathName = path.replace('?', '');
+  const pathName = path.replace(/[\?\*]/g, '');
   paths[pathName] = { ...paths[pathName], ...pathObject };
 };
 

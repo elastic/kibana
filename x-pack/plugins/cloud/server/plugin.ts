@@ -9,6 +9,7 @@ import type { Logger } from '@kbn/logging';
 import type { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { SolutionId } from '@kbn/core-chrome-browser';
+
 import { registerCloudDeploymentMetadataAnalyticsContext } from '../common/register_cloud_deployment_id_analytics_context';
 import type { CloudConfigType } from './config';
 import { registerCloudUsageCollector } from './collectors';
@@ -18,7 +19,9 @@ import { decodeCloudId, DecodedCloudId } from '../common/decode_cloud_id';
 import { parseOnboardingSolution } from '../common/parse_onboarding_default_solution';
 import { getFullCloudUrl } from '../common/utils';
 import { readInstanceSizeMb } from './env';
-import { defineRoutes } from './routes/elasticsearch_routes';
+import { defineRoutes } from './routes';
+import { CloudRequestHandlerContext } from './routes/types';
+import { setupSavedObjects } from './saved_objects';
 
 interface PluginsSetup {
   usageCollection?: UsageCollectionSetup;
@@ -202,10 +205,15 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
     if (this.config.id) {
       decodedId = decodeCloudId(this.config.id, this.logger);
     }
-    const router = core.http.createRouter();
+    const router = core.http.createRouter<CloudRequestHandlerContext>();
     const elasticsearchUrl = core.elasticsearch.publicBaseUrl || decodedId?.elasticsearchUrl;
-    defineRoutes({ logger: this.logger, router, elasticsearchUrl });
+    defineRoutes({
+      logger: this.logger,
+      router,
+      elasticsearchUrl,
+    });
 
+    setupSavedObjects(core.savedObjects, this.logger);
     return {
       ...this.getCloudUrls(),
       cloudId: this.config.id,
