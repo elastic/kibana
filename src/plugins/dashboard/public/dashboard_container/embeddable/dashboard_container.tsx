@@ -617,12 +617,17 @@ export class DashboardContainer
         panelPackage.panelType
       );
 
-      const customPlacementSettings = getCustomPlacementSettingFunc
-        ? await getCustomPlacementSettingFunc(
+      let customPlacementSettings = {};
+      if (getCustomPlacementSettingFunc) {
+        try {
+          customPlacementSettings = await getCustomPlacementSettingFunc(
             panelPackage.serializedState,
             panelPackage.runtimeState
-          )
-        : {};
+          );
+        } catch (error) {
+          // fall back to defaults when getCustomPlacementSettingFunc throws
+        }
+      }
 
       const placementSettings = {
         width: DEFAULT_PANEL_WIDTH,
