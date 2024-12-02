@@ -68,7 +68,7 @@ export function AdvancedSettings() {
                   <EuiIconTip
                     content={i18n.translate('xpack.slo.sloEdit.settings.syncDelay.tooltip', {
                       defaultMessage:
-                        'The time delay in minutes between the current time and the latest source data time. Increasing the value will delay any alerting. The default value is 1 minute. The minimum value is 1m and the maximum is 359m.',
+                        'The time delay in minutes between the current time and the latest source data time. Increasing the value will delay any alerting. The default value is 1 minute. The minimum value is 1m and the maximum is 359m. It should always be greater then source index refresh interval.',
                     })}
                     position="top"
                   />
