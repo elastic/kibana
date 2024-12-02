@@ -1,10 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/apm-data-access-plugin",
-  "owner": [
-    "@elastic/obs-knowledge-team",
-    "@elastic/obs-ux-infra_services-team"
-  ],
+  "owner": ["@elastic/obs-ux-infra_services-team"],
   "group": "observability",
   "visibility": "private",
   "plugin": {
@@ -18,7 +15,9 @@
     "requiredPlugins": [
       "data"
     ],
-    "optionalPlugins": [],
+    "optionalPlugins": [
+      "security"
+    ],
     "requiredBundles": []
   }
 }

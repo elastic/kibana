@@ -14,7 +14,7 @@ import { convertKueryToElasticSearchQuery } from '../../../../common/lib/kuery';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useSourcererDataView } from '../../../../sourcerer/containers';
 import type { TimelineModel } from '../../../..';
-import type { FieldValueQueryBar } from '../../../../detection_engine/rule_creation_ui/components/query_bar';
+import type { FieldValueQueryBar } from '../../../../detection_engine/rule_creation_ui/components/query_bar_field';
 import { sourcererActions } from '../../../../sourcerer/store';
 import { useQueryTimelineById } from '../../../../timelines/components/open_timeline/helpers';
 import { useGetInitialUrlParamValue } from '../../../../common/utils/global_query_string/helpers';
