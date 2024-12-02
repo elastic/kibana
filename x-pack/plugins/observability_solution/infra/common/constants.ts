@@ -5,14 +5,24 @@
  * 2.0.
  */
 
+import { AlertConsumers, ValidFeatureId } from '@kbn/rule-data-utils';
+
 export const METRICS_INDEX_PATTERN = 'metrics-*,metricbeat-*';
 export const LOGS_INDEX_PATTERN = 'logs-*,filebeat-*,kibana_sample_data_logs*';
 export const METRICS_APP = 'metrics';
 export const LOGS_APP = 'logs';
 
-export const METRICS_FEATURE_ID = 'infrastructure';
-export const INFRA_ALERT_FEATURE_ID = 'infrastructure';
-export const LOGS_FEATURE_ID = 'logs';
+export const METRICS_FEATURE_ID = AlertConsumers.INFRASTRUCTURE;
+export const INFRA_ALERT_FEATURE_ID = AlertConsumers.INFRASTRUCTURE;
+export const LOGS_FEATURE_ID = AlertConsumers.LOGS;
+
+export const INFRA_ALERT_FEATURE_IDS: ValidFeatureId[] = [
+  AlertConsumers.INFRASTRUCTURE,
+  AlertConsumers.OBSERVABILITY,
+  AlertConsumers.LOGS,
+  AlertConsumers.SLO,
+  AlertConsumers.APM,
+];
 
 export type InfraFeatureId = typeof METRICS_FEATURE_ID | typeof LOGS_FEATURE_ID;
 
