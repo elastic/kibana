@@ -20,6 +20,7 @@ type FailedAttemptErrors = pRetry.FailedAttemptError | FetchError | Error;
 // not sure what to call this function, but we're not exporting it
 async function registryFetch(url: string) {
   const response = await fetch(url, getFetchOptions(url));
+
   if (response.ok) {
     return response;
   } else {
@@ -34,7 +35,14 @@ async function registryFetch(url: string) {
   }
 }
 
-export async function getResponse(url: string, retries: number = 5): Promise<Response> {
+export async function getResponse(url: string, retries: number = 5): Promise<Response | null> {
+  const logger = appContextService.getLogger();
+
+  if (appContextService.getConfig()?.isAirGapped) {
+    logger.debug('isAirGapped enabled, not reaching package registry');
+    return null;
+  }
+
   try {
     // we only want to retry certain failures like network issues
     // the rest should only try the one time then fail as they do now
@@ -70,13 +78,22 @@ export async function getResponse(url: string, retries: number = 5): Promise<Res
 export async function getResponseStream(
   url: string,
   retries?: number
-): Promise<NodeJS.ReadableStream> {
+): Promise<NodeJS.ReadableStream | null> {
   const res = await getResponse(url, retries);
-  return res.body;
+  if (res) {
+    return res.body;
+  }
+  return null;
 }
 
-export async function fetchUrl(url: string, retries?: number): Promise<string> {
-  return getResponseStream(url, retries).then(streamToString);
+export async function fetchUrl(url: string, retries?: number): Promise<string | null> {
+  const stream = getResponseStream(url, retries);
+
+  if (appContextService.getConfig()?.isAirGapped || stream === null) {
+    return null;
+  }
+
+  return stream.then(streamToString);
 }
 
 // node-fetch throws a FetchError for those types of errors and
