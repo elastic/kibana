@@ -21,10 +21,16 @@ export const AlertsCard: OnboardingCardComponent = ({
   isCardComplete,
   setExpandedCardId,
   setComplete,
+  isCardAvailable,
 }) => {
   const isIntegrationsCardComplete = useMemo(
     () => isCardComplete(OnboardingCardId.integrations),
     [isCardComplete]
+  );
+
+  const isIntegrationsCardAvailable = useMemo(
+    () => isCardAvailable(OnboardingCardId.integrations),
+    [isCardAvailable]
   );
 
   const expandIntegrationsCard = useCallback(() => {
@@ -43,7 +49,7 @@ export const AlertsCard: OnboardingCardComponent = ({
           <CardSubduedText data-test-subj="alertsCardDescription" size="s">
             {i18n.ALERTS_CARD_DESCRIPTION}
           </CardSubduedText>
-          {!isIntegrationsCardComplete && (
+          {isIntegrationsCardAvailable && !isIntegrationsCardComplete && (
             <>
               <EuiSpacer size="m" />
               <CardCallOut
@@ -69,7 +75,7 @@ export const AlertsCard: OnboardingCardComponent = ({
             onClick={() => setComplete(true)}
             deepLinkId={SecurityPageName.alerts}
             fill
-            isDisabled={!isIntegrationsCardComplete}
+            isDisabled={isIntegrationsCardAvailable && !isIntegrationsCardComplete}
           >
             {i18n.ALERTS_CARD_VIEW_ALERTS_BUTTON}
           </SecuritySolutionLinkButton>
