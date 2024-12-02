@@ -46,4 +46,4 @@ export const getTimelineBaseKibanaFeature = (): BaseKibanaFeatureConfig => ({
     },
   },
 });
-console.log('figure out what to add to `privileges`');
+// console.log('figure out what to add to `privileges`');

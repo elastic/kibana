@@ -170,22 +170,52 @@ describe('createAddToTimelineLensAction', () => {
     });
 
     it('should return false when the user does not have access to timeline', async () => {
-      KibanaServices.get().application.capabilities.securitySolutionTimeline.read = false;
-      KibanaServices.get().application.capabilities.securitySolutionTimeline.crud = false;
+      (
+        KibanaServices.get().application.capabilities.securitySolutionTimeline as {
+          crud: boolean;
+          read: boolean;
+        }
+      ).read = false;
+      (
+        KibanaServices.get().application.capabilities.securitySolutionTimeline as {
+          crud: boolean;
+          read: boolean;
+        }
+      ).crud = false;
       const _action = createAddToTimelineLensAction({ store, order: 1 });
       expect(await _action.isCompatible(context)).toEqual(false);
     });
 
     it('should return true when the user has read access to timeline', async () => {
-      KibanaServices.get().application.capabilities.securitySolutionTimeline.read = true;
-      KibanaServices.get().application.capabilities.securitySolutionTimeline.crud = false;
+      (
+        KibanaServices.get().application.capabilities.securitySolutionTimeline as {
+          crud: boolean;
+          read: boolean;
+        }
+      ).read = true;
+      (
+        KibanaServices.get().application.capabilities.securitySolutionTimeline as {
+          crud: boolean;
+          read: boolean;
+        }
+      ).crud = false;
       const _action = createAddToTimelineLensAction({ store, order: 1 });
       expect(await _action.isCompatible(context)).toEqual(false);
     });
 
     it('should return true if everything is okay', async () => {
-      KibanaServices.get().application.capabilities.securitySolutionTimeline.read = true;
-      KibanaServices.get().application.capabilities.securitySolutionTimeline.crud = true;
+      (
+        KibanaServices.get().application.capabilities.securitySolutionTimeline as {
+          crud: boolean;
+          read: boolean;
+        }
+      ).read = true;
+      (
+        KibanaServices.get().application.capabilities.securitySolutionTimeline as {
+          crud: boolean;
+          read: boolean;
+        }
+      ).crud = true;
 
       const _action = createAddToTimelineLensAction({ store, order: 1 });
       expect(await _action.isCompatible(context)).toEqual(false);

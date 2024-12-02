@@ -34,4 +34,4 @@ export const timelineDefaultProductFeaturesConfig: Record<
     subFeatureIds: [],
   },
 };
-console.log('figure out what to put into `ui`, `api` and others');
+// console.log('figure out what to put into `ui`, `api` and others');
