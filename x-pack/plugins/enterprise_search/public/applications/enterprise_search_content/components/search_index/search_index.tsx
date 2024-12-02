@@ -18,7 +18,6 @@ import { i18n } from '@kbn/i18n';
 import { ClientConfigType } from '../../../../../common/types';
 
 import { generateEncodedPath } from '../../../shared/encode_path_params';
-import { HttpLogic } from '../../../shared/http';
 import { KibanaLogic } from '../../../shared/kibana';
 import { SEARCH_INDEX_PATH, SEARCH_INDEX_TAB_PATH } from '../../routes';
 
@@ -70,7 +69,6 @@ export const SearchIndex: React.FC = () => {
   }>();
 
   const { indexName } = useValues(IndexNameLogic);
-  const { errorConnectingMessage } = useValues(HttpLogic);
 
   /**
    * Guided Onboarding needs us to mark the add data step as complete as soon as the user has data in an index.
@@ -285,20 +283,13 @@ export const SearchIndex: React.FC = () => {
       }}
     >
       <IndexError indexName={indexName} />
-      <Content
-        index={index}
-        errorConnectingMessage={errorConnectingMessage}
-        config={config}
-        tabs={tabs}
-        tabId={tabId}
-      />
+      <Content index={index} config={config} tabs={tabs} tabId={tabId} />
     </EnterpriseSearchContentPageTemplate>
   );
 };
 
 interface ContentProps {
   config?: ClientConfigType;
-  errorConnectingMessage: string;
   index?: ElasticsearchViewIndex;
   tabId?: string;
   tabs: EuiTabbedContentTab[];
