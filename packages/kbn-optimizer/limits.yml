@@ -2,7 +2,7 @@ pageLoadAssetSize:
   actions: 20000
   advancedSettings: 27596
   aiAssistantManagementSelection: 19146
-  aiops: 16670
+  aiops: 17680
   alerting: 106936
   apm: 64385
   banners: 17946
@@ -163,6 +163,7 @@ pageLoadAssetSize:
   stackAlerts: 58316
   stackConnectors: 67227
   streams: 16742
+  streamsApp: 20537
   synthetics: 55971
   telemetry: 51957
   telemetryManagementSection: 38586
