@@ -164,6 +164,7 @@ export function ESQLControlsFlyout({
   const [controlFlyoutType, setControlFlyoutType] = useState<EuiComboBoxOptionOption[]>([
     controlTypeOptions.find((option) => option.key === flyoutType)!,
   ]);
+  const [formIsInvalid, setFormIsInvalid] = useState(false);
   const controlGroupApi = useStateFromPublishingSubject(dashboardApi.controlGroupApi$);
   const children = useStateFromPublishingSubject(dashboardApi.children$);
   const embeddable = children[panelId!];
@@ -293,6 +294,20 @@ export function ESQLControlsFlyout({
     }
   }, [availableFieldsOptions.length, controlType, queryString, search]);
 
+  useEffect(() => {
+    if (controlType === EsqlControlType.FIELDS) {
+      setFormIsInvalid(!selectedFields.length || !variableName);
+    }
+
+    if (controlType === EsqlControlType.TIME_LITERAL) {
+      setFormIsInvalid(!values || !variableName);
+    }
+
+    if (controlType === EsqlControlType.VALUES) {
+      setFormIsInvalid(!valuesQuery || !variableName);
+    }
+  }, [controlType, selectedFields.length, values, valuesQuery, variableName]);
+
   const onValuesQuerySubmit = useCallback(
     async (query: string) => {
       if (valuesQuery !== query) {
@@ -387,6 +402,14 @@ export function ESQLControlsFlyout({
           })}
           fullWidth
           autoFocus
+          isInvalid={!variableName}
+          error={
+            !variableName
+              ? i18n.translate('esqlControls.flyout.variableName.error', {
+                  defaultMessage: 'Variable name is required',
+                })
+              : undefined
+          }
         >
           <EuiFieldText
             placeholder={i18n.translate('esqlControls.flyout.variableName.placeholder', {
@@ -406,6 +429,14 @@ export function ESQLControlsFlyout({
               defaultMessage: 'Values query',
             })}
             fullWidth
+            isInvalid={!valuesQuery}
+            error={
+              !valuesQuery
+                ? i18n.translate('esqlControls.flyout.valuesQueryEditor.error', {
+                    defaultMessage: 'Query is required',
+                  })
+                : undefined
+            }
           >
             <ESQLEditor
               query={{ esql: valuesQuery }}
@@ -436,6 +467,14 @@ export function ESQLControlsFlyout({
               defaultMessage: 'Select multiple values',
             })}
             fullWidth
+            isInvalid={!selectedFields.length}
+            error={
+              !selectedFields.length
+                ? i18n.translate('esqlControls.flyout.values.error', {
+                    defaultMessage: 'At least one field is required',
+                  })
+                : undefined
+            }
           >
             <EuiComboBox
               aria-label={i18n.translate('esqlControls.flyout.fieldsOptions.placeholder', {
@@ -461,6 +500,14 @@ export function ESQLControlsFlyout({
                 'Comma separated values (e.g. 5 minutes, 1 hour, 1 day, 1 week, 1 year)',
             })}
             fullWidth
+            isInvalid={!values}
+            error={
+              !values
+                ? i18n.translate('esqlControls.flyout.values.error', {
+                    defaultMessage: 'Values are required',
+                  })
+                : undefined
+            }
           >
             <EuiFieldText
               placeholder={i18n.translate('esqlControls.flyout.values.placeholder', {
@@ -563,7 +610,8 @@ export function ESQLControlsFlyout({
               aria-label={i18n.translate('esqlControls.flyout..applyFlyoutAriaLabel', {
                 defaultMessage: 'Apply changes',
               })}
-              // disabled={Boolean(isNewPanel) ? false : !isSaveable}
+              disabled={formIsInvalid}
+              color={formIsInvalid ? 'danger' : 'primary'}
               iconType="check"
               data-test-subj="saveEsqlControlsFlyoutButton"
             >
