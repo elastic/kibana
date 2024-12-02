@@ -7,8 +7,12 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
+import type { IndexVersionsByIndex } from './get_index_versions_by_index';
 import { getIndexVersionsByIndex } from './get_index_versions_by_index';
-import { getSignalVersionsByIndex } from './get_signal_versions_by_index';
+import {
+  getSignalVersionsByIndex,
+  type SignalVersionsByIndex,
+} from './get_signal_versions_by_index';
 import { isOutdated as getIsOutdated, signalsAreOutdated } from './helpers';
 import { getLatestIndexTemplateVersion } from './get_latest_index_template_version';
 import { getIndexAliasPerSpace } from './get_index_alias_per_space';
@@ -56,15 +60,27 @@ export const getNonMigratedSignalsInfo = async ({
       };
     }
 
-    const indexVersionsByIndex = await getIndexVersionsByIndex({
-      esClient,
-      index: indices,
-    });
+    let indexVersionsByIndex: IndexVersionsByIndex = {};
+    try {
+      indexVersionsByIndex = await getIndexVersionsByIndex({
+        esClient,
+        index: indices,
+      });
+    } catch (e) {
+      logger.debug(
+        `Getting information about legacy siem signals index version failed:"${e?.message}"`
+      );
+    }
 
-    const signalVersionsByIndex = await getSignalVersionsByIndex({
-      esClient,
-      index: indices,
-    });
+    let signalVersionsByIndex: SignalVersionsByIndex = {};
+    try {
+      signalVersionsByIndex = await getSignalVersionsByIndex({
+        esClient,
+        index: indices,
+      });
+    } catch (e) {
+      logger.debug(`Getting information about legacy siem signals versions failed:"${e?.message}"`);
+    }
 
     const outdatedIndices = indices.reduce<Array<{ indexName: string; space: string }>>(
       (acc, indexName) => {
@@ -99,6 +115,7 @@ export const getNonMigratedSignalsInfo = async ({
 
     const fromRange = await getOldestSignalTimestamp({
       esClient,
+      logger,
       index: outdatedIndexNames,
     });
 

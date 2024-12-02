@@ -6,9 +6,11 @@
  */
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { getOldestSignalTimestamp } from './get_oldest_signal_timestamp';
+import { loggerMock } from '@kbn/logging-mocks';
 
 describe('getOldestSignalTimestamp', () => {
   let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
+  const logger = loggerMock.create();
 
   beforeEach(() => {
     esClient = elasticsearchServiceMock.createElasticsearchClient();
@@ -29,6 +31,7 @@ describe('getOldestSignalTimestamp', () => {
 
     const result = await getOldestSignalTimestamp({
       esClient,
+      logger,
       index: ['index1'],
     });
 
