@@ -58,8 +58,8 @@ export const DrilldownTemplateTable: React.FC<DrilldownTemplateTableProps> = ({
       name: txtNameColumnTitle,
       sortable: true,
       render: (omit, item: DrilldownTemplateTableItem) => (
-        <div style={{ display: 'block' }}>
-          <div style={{ display: 'block' }}>{item.name}</div>
+        <div css={{ display: 'block' }}>
+          <div css={{ display: 'block' }}>{item.name}</div>
           <EuiText size={'xs'} color={'subdued'}>
             {item.description}
           </EuiText>

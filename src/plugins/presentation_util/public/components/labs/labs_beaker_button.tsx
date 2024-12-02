@@ -34,7 +34,7 @@ export const LabsBeakerButton = ({ solutions, ...props }: Props) => {
       <EuiButton {...props} onClick={onButtonClick} minWidth={0}>
         <EuiIcon type="beaker" />
         {overrideCount > 0 ? (
-          <EuiNotificationBadge color="subdued" style={{ marginLeft: 2 }}>
+          <EuiNotificationBadge color="subdued" css={{ marginLeft: 2 }}>
             {overrideCount}
           </EuiNotificationBadge>
         ) : null}

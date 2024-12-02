@@ -42,7 +42,7 @@ export default function ESQLToDataViewTransitionModal({
   return (
     <EuiModal
       onClose={() => onClose()}
-      style={{ width: 700 }}
+      css={{ width: 700 }}
       data-test-subj="discover-esql-to-dataview-modal"
     >
       <EuiModalHeader>

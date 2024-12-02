@@ -35,7 +35,7 @@ class DefaultEditorController implements IEditorController {
           <Suspense
             fallback={
               <div
-                style={{
+                css={{
                   display: 'flex',
                   flex: '1 1 auto',
                   justifyContent: 'center',

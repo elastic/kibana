@@ -6,7 +6,7 @@ exports[`TableHeader with time column renders correctly 1`] = `
   data-test-subj="docTableHeader"
 >
   <th
-    style="width: 24px;"
+    css="[object Object]"
   />
   <th
     data-test-subj="docTableHeaderField"
@@ -211,7 +211,7 @@ exports[`TableHeader without time column renders correctly 1`] = `
   data-test-subj="docTableHeader"
 >
   <th
-    style="width: 24px;"
+    css="[object Object]"
   />
   <th
     data-test-subj="docTableHeaderField"

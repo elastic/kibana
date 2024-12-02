@@ -326,7 +326,7 @@ export class FlyoutClass extends Component<
         ),
         render: (list: any[]) => {
           return (
-            <ul style={{ listStyle: 'none' }}>
+            <ul css={{ listStyle: 'none' }}>
               {take(list, 3).map((obj, key) => (
                 <li key={key}>{obj.title}</li>
               ))}

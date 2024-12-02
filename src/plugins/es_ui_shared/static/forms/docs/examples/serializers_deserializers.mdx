@@ -90,7 +90,7 @@ export const SerializersAndDeserializers = () => {
       <EuiSpacer />
 
       {/* We don't remove it from the DOM as we would lose the value entered in the field. */}
-      <div style={{ display: showAdvancedSettings ? 'block' : 'none' }}>
+      <div css={{ display: showAdvancedSettings ? 'block' : 'none' }}>
         <UseField path="customLabel" component={TextField} />
       </div>
       <EuiSpacer />
