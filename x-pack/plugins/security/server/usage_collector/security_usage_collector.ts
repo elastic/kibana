@@ -16,6 +16,7 @@ interface Usage {
   accessAgreementEnabled: boolean;
   authProviderCount: number;
   enabledAuthProviders: string[];
+  fipsModeEnabled: boolean;
   httpAuthSchemes: string[];
   sessionIdleTimeoutInMinutes: number;
   sessionLifespanInMinutes: number;
@@ -93,6 +94,12 @@ export function registerSecurityUsageCollector({ usageCollection, config, licens
           },
         },
       },
+      fipsModeEnabled: {
+        type: 'boolean',
+        _meta: {
+          description: 'Indicates if Kibana is being run in FIPS mode.',
+        },
+      },
       httpAuthSchemes: {
         type: 'array',
         items: {
@@ -139,7 +146,8 @@ export function registerSecurityUsageCollector({ usageCollection, config, licens
       },
     },
     fetch: () => {
-      const { allowRbac, allowAccessAgreement, allowAuditLogging } = license.getFeatures();
+      const { allowRbac, allowAccessAgreement, allowAuditLogging, allowFips } =
+        license.getFeatures();
       if (!allowRbac) {
         return {
           auditLoggingEnabled: false,
@@ -147,6 +155,7 @@ export function registerSecurityUsageCollector({ usageCollection, config, licens
           accessAgreementEnabled: false,
           authProviderCount: 0,
           enabledAuthProviders: [],
+          fipsModeEnabled: false,
           httpAuthSchemes: [],
           sessionIdleTimeoutInMinutes: 0,
           sessionLifespanInMinutes: 0,
@@ -170,6 +179,8 @@ export function registerSecurityUsageCollector({ usageCollection, config, licens
       const httpAuthSchemes = config.authc.http.schemes.filter((scheme) =>
         WELL_KNOWN_AUTH_SCHEMES.includes(scheme.toLowerCase())
       );
+
+      const fipsModeEnabled = allowFips && config.fipsMode.enabled;
 
       const sessionExpirations = config.session.getExpirationTimeouts(undefined); // use `undefined` to get global expiration values
       const sessionIdleTimeoutInMinutes = sessionExpirations.idleTimeout?.asMinutes() ?? 0;
@@ -202,6 +213,7 @@ export function registerSecurityUsageCollector({ usageCollection, config, licens
         accessAgreementEnabled,
         authProviderCount,
         enabledAuthProviders,
+        fipsModeEnabled,
         httpAuthSchemes,
         sessionIdleTimeoutInMinutes,
         sessionLifespanInMinutes,

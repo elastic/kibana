@@ -38,7 +38,9 @@ const mockUseStartServices = useStartServices as jest.Mock;
 
 const mockSendGetOutputHealth = sendGetOutputHealth as jest.Mock;
 
-describe('OutputHealth', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/201412
+// FLAKY: https://github.com/elastic/kibana/issues/201068
+describe.skip('OutputHealth', () => {
   function render(output: Output, showBadge?: boolean) {
     const renderer = createFleetTestRendererMock();
 
