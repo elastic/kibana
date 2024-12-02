@@ -10,15 +10,15 @@
 import React, { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { combineLatest, map, pairwise, skip } from 'rxjs';
 
-import { EuiButtonIcon, EuiFlexGroup, EuiSpacer, EuiTitle, transparentize } from '@elastic/eui';
+import { transparentize } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-theme';
 
 import { DragPreview } from '../drag_preview';
 import { GridPanel } from '../grid_panel';
 import { GridLayoutStateManager, GridRowData, PanelInteractionEvent } from '../types';
 import { getKeysInOrder } from '../utils/resolve_grid_row';
+import { GridRowHeader } from './grid_row_header';
 
 interface GridRowProps {
   rowIndex: number;
@@ -287,33 +287,3 @@ export const GridRow = forwardRef<HTMLDivElement, GridRowProps>(
     );
   }
 );
-
-const GridRowHeader = ({
-  isCollapsed,
-  toggleIsCollapsed,
-  rowTitle,
-}: {
-  isCollapsed: boolean;
-  toggleIsCollapsed: () => void;
-  rowTitle?: string;
-}) => {
-  return (
-    <>
-      <EuiSpacer size="s" />
-      <EuiFlexGroup gutterSize="s">
-        <EuiButtonIcon
-          color="text"
-          aria-label={i18n.translate('kbnGridLayout.row.toggleCollapse', {
-            defaultMessage: 'Toggle collapse',
-          })}
-          iconType={isCollapsed ? 'arrowRight' : 'arrowDown'}
-          onClick={toggleIsCollapsed}
-        />
-        <EuiTitle size="xs">
-          <h2>{rowTitle}</h2>
-        </EuiTitle>
-      </EuiFlexGroup>
-      <EuiSpacer size="s" />
-    </>
-  );
-};
