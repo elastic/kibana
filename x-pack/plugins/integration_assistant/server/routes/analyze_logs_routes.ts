@@ -18,7 +18,7 @@ import { buildRouteValidationWithZod } from '../util/route_validation';
 import { withAvailability } from './with_availability';
 import { isErrorThatHandlesItsOwnResponse, UnsupportedLogFormatError } from '../lib/errors';
 import { handleCustomErrors } from './routes_util';
-import { GenerationErrorCode } from '../../common/constants';
+import { ANALYZE_LOGS_RECURSION_LIMIT, GenerationErrorCode } from '../../common/constants';
 
 export function registerAnalyzeLogsRoutes(
   router: IRouter<IntegrationAssistantRouteHandlerContext>
@@ -84,6 +84,7 @@ export function registerAnalyzeLogsRoutes(
             streaming: false,
           });
           const options = {
+            recursionLimit: ANALYZE_LOGS_RECURSION_LIMIT,
             callbacks: [
               new APMTracer({ projectName: langSmithOptions?.projectName ?? 'default' }, logger),
               ...getLangSmithTracer({ ...langSmithOptions, logger }),
