@@ -90,7 +90,7 @@ export function AdvancedSettings() {
                     min={1}
                     max={359}
                     step={1}
-                    onChange={(event) => onChange(parseInt(event.target.value, 10))}
+                    onChange={(event) => onChange(event.target.value)}
                   />
                 )}
               />
@@ -130,7 +130,7 @@ export function AdvancedSettings() {
                     min={1}
                     max={59}
                     step={1}
-                    onChange={(event) => onChange(parseInt(event.target.value, 10))}
+                    onChange={(event) => onChange(event.target.value)}
                   />
                 )}
               />
