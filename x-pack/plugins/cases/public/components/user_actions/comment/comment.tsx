@@ -287,7 +287,8 @@ export const createCommentUserActionBuilder: UserActionBuilder = ({
       });
     }
 
-    const comment = caseData.comments.find((c) => c.id === commentUserAction.commentId);
+    debugger;
+    const comment = commentUserAction.payload.updatedComment;
 
     if (comment == null) {
       return [];

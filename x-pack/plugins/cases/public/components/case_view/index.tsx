@@ -79,16 +79,18 @@ export const CaseView = React.memo(
     ) : data ? (
       <CasesTimelineIntegrationProvider timelineIntegration={timelineIntegration}>
         {getLegacyUrlConflictCallout()}
-        <CaseViewPage
-          caseData={data.case}
-          fetchCase={refetch}
-          actionsNavigation={actionsNavigation}
-          ruleDetailsNavigation={ruleDetailsNavigation}
-          showAlertDetails={showAlertDetails}
-          useFetchAlertData={useFetchAlertData}
-          onAlertsTableLoaded={onAlertsTableLoaded}
-          refreshRef={refreshRef}
-        />
+        <div style={{ border: '1px solid red' }}>
+          <CaseViewPage
+            caseData={data.case}
+            fetchCase={refetch}
+            actionsNavigation={actionsNavigation}
+            ruleDetailsNavigation={ruleDetailsNavigation}
+            showAlertDetails={showAlertDetails}
+            useFetchAlertData={useFetchAlertData}
+            onAlertsTableLoaded={onAlertsTableLoaded}
+            refreshRef={refreshRef}
+          />
+        </div>
       </CasesTimelineIntegrationProvider>
     ) : null;
   }
