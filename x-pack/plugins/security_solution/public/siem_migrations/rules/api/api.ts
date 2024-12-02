@@ -11,12 +11,19 @@ import { KibanaServices } from '../../../common/lib/kibana';
 
 import {
   SIEM_RULE_MIGRATIONS_ALL_STATS_PATH,
+  SIEM_RULE_MIGRATION_INSTALL_TRANSLATED_PATH,
+  SIEM_RULE_MIGRATION_INSTALL_PATH,
   SIEM_RULE_MIGRATION_PATH,
+  SIEM_RULE_MIGRATION_START_PATH,
 } from '../../../../common/siem_migrations/constants';
 import type {
   GetAllStatsRuleMigrationResponse,
   GetRuleMigrationResponse,
+  StartRuleMigrationRequestBody,
+  InstallTranslatedMigrationRulesResponse,
+  InstallMigrationRulesResponse,
 } from '../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
+import type { InstallTranslatedRulesProps, InstallRulesProps } from '../types';
 
 /**
  * Retrieves the stats for all the existing migrations, aggregated by `migration_id`.
@@ -32,11 +39,31 @@ export const getRuleMigrationsStatsAll = async ({
 }): Promise<GetAllStatsRuleMigrationResponse> => {
   return KibanaServices.get().http.fetch<GetAllStatsRuleMigrationResponse>(
     SIEM_RULE_MIGRATIONS_ALL_STATS_PATH,
-    {
-      method: 'GET',
-      version: '1',
-      signal,
-    }
+    { method: 'GET', version: '1', signal }
+  );
+};
+
+/**
+ * Starts a new migration with the provided rules.
+ *
+ * @param migrationId `id` of the migration to start
+ * @param body The body containing the `connectorId` to use for the migration
+ * @param signal AbortSignal for cancelling request
+ *
+ * @throws An error if response is not OK
+ */
+export const startRuleMigration = async ({
+  migrationId,
+  body,
+  signal,
+}: {
+  migrationId: string;
+  body: StartRuleMigrationRequestBody;
+  signal: AbortSignal | undefined;
+}): Promise<GetAllStatsRuleMigrationResponse> => {
+  return KibanaServices.get().http.put<GetAllStatsRuleMigrationResponse>(
+    replaceParams(SIEM_RULE_MIGRATION_START_PATH, { migration_id: migrationId }),
+    { body: JSON.stringify(body), version: '1', signal }
   );
 };
 
@@ -57,8 +84,34 @@ export const getRuleMigrations = async ({
 }): Promise<GetRuleMigrationResponse> => {
   return KibanaServices.get().http.fetch<GetRuleMigrationResponse>(
     replaceParams(SIEM_RULE_MIGRATION_PATH, { migration_id: migrationId }),
+    { method: 'GET', version: '1', signal }
+  );
+};
+
+export const installMigrationRules = async ({
+  migrationId,
+  ids,
+  signal,
+}: InstallRulesProps): Promise<InstallMigrationRulesResponse> => {
+  return KibanaServices.get().http.fetch<InstallMigrationRulesResponse>(
+    replaceParams(SIEM_RULE_MIGRATION_INSTALL_PATH, { migration_id: migrationId }),
     {
-      method: 'GET',
+      method: 'POST',
+      version: '1',
+      body: JSON.stringify(ids),
+      signal,
+    }
+  );
+};
+
+export const installTranslatedMigrationRules = async ({
+  migrationId,
+  signal,
+}: InstallTranslatedRulesProps): Promise<InstallTranslatedMigrationRulesResponse> => {
+  return KibanaServices.get().http.fetch<InstallTranslatedMigrationRulesResponse>(
+    replaceParams(SIEM_RULE_MIGRATION_INSTALL_TRANSLATED_PATH, { migration_id: migrationId }),
+    {
+      method: 'POST',
       version: '1',
       signal,
     }
