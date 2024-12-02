@@ -343,7 +343,7 @@ export function resolveCopyToSpaceConflictsSuite(context: DeploymentAgnosticFtrP
       // the status code of the HTTP response differs depending on the error type
       // a 403 error actually comes back as an HTTP 200 response
       const statusCode = outcome === 'noAccess' ? 403 : 200;
-      const type = 'sharedtype';
+      const type = 'index-pattern';
       const exactMatchId = 'each_space';
       const inexactMatchIdA = `conflict_1a_${spaceId}`;
       const inexactMatchIdB = `conflict_1b_${spaceId}`;
@@ -360,7 +360,11 @@ export function resolveCopyToSpaceConflictsSuite(context: DeploymentAgnosticFtrP
             success: false,
             successCount: 0,
             errors: [
-              { statusCode: 403, error: 'Forbidden', message: `Unable to bulk_create sharedtype` },
+              {
+                statusCode: 403,
+                error: 'Forbidden',
+                message: `Unable to bulk_create index-pattern`,
+              },
             ],
           },
         });
