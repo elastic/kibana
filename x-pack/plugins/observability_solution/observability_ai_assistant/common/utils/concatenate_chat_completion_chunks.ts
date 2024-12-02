@@ -6,7 +6,7 @@
  */
 
 import { cloneDeep } from 'lodash';
-import { type Observable, scan, filter } from 'rxjs';
+import { type Observable, scan, filter, defaultIfEmpty } from 'rxjs';
 import type { ChatCompletionChunkEvent, ChatEvent } from '../conversation_complete';
 import { StreamingChatResponseEventType } from '../conversation_complete';
 import { MessageRole } from '../types';
@@ -50,5 +50,16 @@ export const concatenateChatCompletionChunks =
             role: MessageRole.Assistant,
           },
         } as ConcatenatedMessage
-      )
+      ),
+      defaultIfEmpty({
+        message: {
+          content: '',
+          function_call: {
+            name: '',
+            arguments: '',
+            trigger: MessageRole.Assistant,
+          },
+          role: MessageRole.Assistant,
+        },
+      })
     );
