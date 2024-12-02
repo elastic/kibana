@@ -100,3 +100,7 @@ export async function runESQLQuery<T>({
 
   return documents;
 }
+
+export function asKeyword(field: string) {
+  return `${field}::keyword`;
+}

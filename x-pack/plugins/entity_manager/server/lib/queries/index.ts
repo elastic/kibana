@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
+import { asKeyword } from './utils';
 
 export const entitySourceSchema = z.object({
   type: z.string(),
@@ -47,7 +48,7 @@ const whereCommand = ({
   end: string;
 }) => {
   const filters = [
-    source.identity_fields.map((field) => `${field} IS NOT NULL`).join(' AND '),
+    source.identity_fields.map((field) => `${asKeyword(field)} IS NOT NULL`).join(' AND '),
     ...source.filters,
   ];
 
@@ -63,7 +64,7 @@ const whereCommand = ({
 const statsCommand = ({ source }: { source: EntitySource }) => {
   const aggs = source.metadata_fields
     .filter((field) => !source.identity_fields.some((idField) => idField === field))
-    .map((field) => `${field} = VALUES(${field})`);
+    .map((field) => `${field} = VALUES(${asKeyword(field)})`);
 
   if (source.timestamp_field) {
     aggs.push(`entity.last_seen_timestamp = MAX(${source.timestamp_field})`);
@@ -72,10 +73,15 @@ const statsCommand = ({ source }: { source: EntitySource }) => {
   if (source.display_name) {
     // ideally we want the latest value but there's no command yet
     // so we use MAX for now
-    aggs.push(`${source.display_name} = MAX(${source.display_name})`);
+    aggs.push(`${source.display_name} = MAX(${asKeyword(source.display_name)})`);
   }
 
-  return `STATS ${aggs.join(', ')} BY ${source.identity_fields.join(', ')}`;
+  return `STATS ${aggs.join(', ')} BY ${source.identity_fields.map(asKeyword).join(', ')}`;
+};
+
+const renameCommand = ({ source }: { source: EntitySource }) => {
+  const operations = source.identity_fields.map((field) => `\`${asKeyword(field)}\` AS ${field}`);
+  return `RENAME ${operations.join(', ')}`;
 };
 
 const evalCommand = ({ source }: { source: EntitySource }) => {
@@ -124,6 +130,7 @@ export function getEntityInstancesQuery({
     sourceCommand({ source }),
     whereCommand({ source, start, end }),
     statsCommand({ source }),
+    renameCommand({ source }),
     evalCommand({ source }),
     sortCommand({ source, sort }),
     `LIMIT ${limit}`,
