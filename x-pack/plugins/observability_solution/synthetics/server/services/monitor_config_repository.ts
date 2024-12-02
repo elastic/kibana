@@ -107,26 +107,13 @@ export class MonitorConfigRepository {
         attributes,
       }))
     );
-    // return await this.soClient.bulkUpdate<MonitorFields>(
-    //   monitorsToUpdate.map(({ monitorWithRevision, decryptedPreviousMonitor }) => ({
-    //     type: syntheticsMonitorType,
-    //     id: decryptedPreviousMonitor.id,
-    //     attributes: {
-    //       ...monitorWithRevision,
-    //       [ConfigKey.CONFIG_ID]: decryptedPreviousMonitor.id,
-    //       [ConfigKey.MONITOR_QUERY_ID]:
-    //         monitorWithRevision[ConfigKey.CUSTOM_HEARTBEAT_ID] || decryptedPreviousMonitor.id,
-    //     },
-    //   }))
-    // );
   }
 
-  find<T>({ filter, fields }: Omit<SavedObjectsFindOptions, 'type'>) {
+  find<T>(options: Omit<SavedObjectsFindOptions, 'type'>) {
     return this.soClient.find<T>({
       type: syntheticsMonitorType,
-      perPage: 5000,
-      filter,
-      fields,
+      ...options,
+      perPage: options.perPage ?? 5000,
     });
   }
 
