@@ -28,27 +28,24 @@ export async function getESUpgradeStatus(
          * the constant `MachineLearningField.MIN_CHECKED_SUPPORTED_SNAPSHOT_VERSION`
          * is incremented to something higher than 7.0.0 in the Elasticsearch code.
          */
-        if (!featureSet.mlSnapshots) {
-          if (type === 'ml_settings' || correctiveAction?.type === 'mlSnapshot') {
-            return false;
-          }
+        if (type === 'ml_settings' || correctiveAction?.type === 'mlSnapshot') {
+          return featureSet.mlSnapshots;
         }
+
         /**
          * This disables showing the Data streams deprecations in the UA if
          * `featureSet.migrateDataStreams` is set to `false`.
          */
-        if (!featureSet.migrateDataStreams) {
-          if (type === 'data_streams') {
-            return false;
-          }
+        if (type === 'data_streams') {
+          return !!featureSet.migrateDataStreams;
         }
 
         /**
          * This disables showing the reindexing deprecations in the UA if
          * `featureSet.reindexCorrectiveActions` is set to `false`.
          */
-        if (!featureSet.reindexCorrectiveActions && correctiveAction?.type === 'reindex') {
-          return false;
+        if (correctiveAction?.type === 'reindex') {
+          return !!featureSet.reindexCorrectiveActions;
         }
 
         return true;

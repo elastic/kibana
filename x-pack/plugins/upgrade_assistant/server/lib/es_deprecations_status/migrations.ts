@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type {
+  MigrationDeprecationsResponse,
+  MigrationDeprecationsDeprecation,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import _ from 'lodash';
 import { EnrichedDeprecationInfo } from '../../../common/types';
-
 import {
   convertFeaturesToIndicesArray,
   getESSystemIndicesMigrationStatus,
@@ -19,43 +22,14 @@ import { esIndicesStateCheck } from '../es_indices_state_check';
 /**
  * Remove once the data_streams type is added to the `MigrationDeprecationsResponse` type
  */
-interface EsDeprecations extends estypes.MigrationDeprecationsResponse {
-  data_streams: Record<string, estypes.MigrationDeprecationsDeprecation[]>;
+interface EsDeprecations extends MigrationDeprecationsResponse {
+  data_streams: Record<string, MigrationDeprecationsDeprecation[]>;
 }
 
-// "data_streams" : {
-//   "my-v7-data-stream" : [
-//     {
-//       "level" : "critical",
-//       "message" : "Old data stream with a compatibility version < 8.0",
-//       "url" : "https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes-9.0.html",
-//       "details" : "This data stream has backing indices that were created before Elasticsearch 8.0.0",
-//       "resolve_during_rolling_upgrade" : false,
-//       "_meta": {
-//         "backing_indices": {
-//           "count": 52,
-//           "need_upgrading": {
-//             "count": 37,
-//             "searchable_snapshot": {
-//               "count": 23,
-//               "fully_mounted": {
-//                 "count": 7
-//               },
-//               "partially_mounted": {
-//                 "count": 16
-//               }
-//             }
-//           }
-//         }
-//       }
-//     }
-//   ]
-// }
-
 const createBaseMigrationDeprecation = (
-  migrationDeprecation: estypes.MigrationDeprecationsDeprecation,
+  migrationDeprecation: MigrationDeprecationsDeprecation,
   { deprecationType, indexName }: { deprecationType: keyof EsDeprecations; indexName?: string }
-): EnrichedDeprecationInfo => {
+) => {
   const {
     details,
     message,
@@ -74,14 +48,58 @@ const createBaseMigrationDeprecation = (
     message,
     url,
     isCritical: level === 'critical',
-    correctiveAction: getCorrectiveAction(message, metadata, indexName),
+    metadata,
     resolveDuringUpgrade,
   };
 };
+
+const normalizeEsResponse = (migrationsResponse: EsDeprecations) => {
+  const indexSettingsMigrations = Object.entries(migrationsResponse.index_settings).flatMap(
+    ([indexName, migrationDeprecations]) => {
+      return migrationDeprecations.flatMap((migrationDeprecation) =>
+        createBaseMigrationDeprecation(migrationDeprecation, {
+          indexName,
+          deprecationType: 'index_settings',
+        })
+      );
+    }
+  );
+
+  const dataStreamsMigrations = Object.entries(migrationsResponse.data_streams).flatMap(
+    ([indexName, dataStreamDeprecations]) => {
+      return dataStreamDeprecations.flatMap((depractionData) =>
+        createBaseMigrationDeprecation(depractionData, {
+          indexName,
+          deprecationType: 'data_streams',
+        })
+      );
+    }
+  );
+
+  const mlSettingsMigrations = migrationsResponse.ml_settings.map((depractionData) =>
+    createBaseMigrationDeprecation(depractionData, { deprecationType: 'ml_settings' })
+  );
+  const nodeSettingsMigrations = migrationsResponse.node_settings.map((depractionData) =>
+    createBaseMigrationDeprecation(depractionData, { deprecationType: 'node_settings' })
+  );
+
+  const clusterSettingsMigrations = migrationsResponse.cluster_settings.map((depractionData) =>
+    createBaseMigrationDeprecation(depractionData, { deprecationType: 'cluster_settings' })
+  );
+
+  return [
+    ...clusterSettingsMigrations,
+    ...mlSettingsMigrations,
+    ...nodeSettingsMigrations,
+    ...indexSettingsMigrations,
+    ...dataStreamsMigrations,
+  ].flat();
+};
+
 export const getEnrichedDeprecations = async (
   dataClient: IScopedClusterClient
 ): Promise<EnrichedDeprecationInfo[]> => {
-  const deprecations = await dataClient.asCurrentUser.migration.deprecations();
+  const deprecations = (await dataClient.asCurrentUser.migration.deprecations()) as EsDeprecations;
   const systemIndices = await getESSystemIndicesMigrationStatus(dataClient.asCurrentUser);
 
   const systemIndicesList = convertFeaturesToIndicesArray(systemIndices.features);
@@ -93,52 +111,47 @@ export const getEnrichedDeprecations = async (
     ? await esIndicesStateCheck(dataClient.asCurrentUser, indexSettingsIndexNames)
     : {};
 
-  return Object.entries(deprecations)
-    .map(([deprecationType, deprecationsByType]) => {
-      switch (deprecationType as keyof EsDeprecations) {
+  return normalizeEsResponse(deprecations)
+    .filter((deprecation) => {
+      switch (deprecation.type) {
         case 'index_settings': {
-          return Object.keys(deprecations.index_settings)
-            .filter((indexName) => {
-              // filter out system indices
-              return !systemIndicesList.includes(indexName!);
-            })
-            .map((indexName) => {
-              const enrichedDeprecation = createBaseMigrationDeprecation(deprecationsByType, {
-                indexName,
-                deprecationType,
-              });
-
-              // If we have found deprecation information for index/indices
-              // check whether the index is open or closed.
-              if (enrichedDeprecation.correctiveAction?.type === 'reindex') {
-                enrichedDeprecation.correctiveAction.blockerForReindexing =
-                  indexSettingsIndexStates[enrichedDeprecation.index!] === 'closed'
-                    ? 'index-closed'
-                    : undefined;
-              }
-
-              return enrichedDeprecation;
-            })
-            .flat();
+          if (!deprecation.index) {
+            return false;
+          }
+          // filter out system indices
+          return !systemIndicesList.includes(deprecation.index);
         }
-        case 'data_streams': {
-          return Object.entries(deprecationsByType).map(([indexName, dataSteamDeprecations]) => {
-            return dataSteamDeprecations.map((depractionData) =>
-              createBaseMigrationDeprecation(depractionData, { indexName, deprecationType })
-            );
-          });
-        }
+        case 'cluster_settings':
         case 'ml_settings':
         case 'node_settings':
-        case 'cluster_settings': {
-          return deprecationsByType.map((depractionData) =>
-            createBaseMigrationDeprecation(depractionData, { deprecationType })
-          );
+        case 'data_streams': {
+          return true;
         }
         default: {
-          throw new Error(`Unknown ES deprecation type "${deprecationType}"`);
+          // Throwing here to avoid allowing upgrades while we have unhandled deprecation types from ES
+          // That might cause the stack to fail to start after upgrade.
+          throw new Error(`Unknown ES deprecation type "${deprecation.type}"`);
         }
       }
     })
-    .flat();
+    .map((deprecation) => {
+      const correctiveAction = getCorrectiveAction(
+        deprecation.message,
+        deprecation.metadata,
+        deprecation.index!
+      );
+
+      // If we have found deprecation information for index/indices
+      // check whether the index is open or closed.
+      if (deprecation.type === 'index_settings' && correctiveAction?.type === 'reindex') {
+        correctiveAction.blockerForReindexing =
+          indexSettingsIndexStates[deprecation.index!] === 'closed' ? 'index-closed' : undefined;
+      }
+
+      const enrichedDeprecation = _.omit(deprecation, 'metadata');
+      return {
+        ...enrichedDeprecation,
+        correctiveAction,
+      };
+    });
 };

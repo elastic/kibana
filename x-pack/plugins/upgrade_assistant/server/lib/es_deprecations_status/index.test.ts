@@ -11,7 +11,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import fakeDeprecations from '../__fixtures__/fake_deprecations.json';
 import * as healthIndicatorsMock from '../__fixtures__/health_indicators';
-
+import * as esMigrationsMock from '../__fixtures__/es_deprecations';
 import type { FeatureSet } from '../../../common/types';
 import { getESUpgradeStatus } from '.';
 const fakeIndexNames = Object.keys(fakeDeprecations.index_settings);
@@ -21,7 +21,7 @@ describe('getESUpgradeStatus', () => {
     reindexCorrectiveActions: true,
     migrateSystemIndices: true,
     mlSnapshots: true,
-    reindexDataStreams: true,
+    migrateDataStreams: true,
   };
 
   const resolvedIndices = {
@@ -80,6 +80,7 @@ describe('getESUpgradeStatus', () => {
       node_settings: [],
       ml_settings: [],
       index_settings: {},
+      data_streams: {},
     });
 
     await expect(getESUpgradeStatus(esClient, featureSet)).resolves.toHaveProperty(
@@ -95,6 +96,7 @@ describe('getESUpgradeStatus', () => {
       node_settings: [],
       ml_settings: [],
       index_settings: {},
+      data_streams: {},
     });
 
     await expect(getESUpgradeStatus(esClient, featureSet)).resolves.toHaveProperty(
@@ -120,6 +122,7 @@ describe('getESUpgradeStatus', () => {
           },
         ],
       },
+      data_streams: {},
     });
 
     const upgradeStatus = await getESUpgradeStatus(esClient, featureSet);
@@ -129,38 +132,44 @@ describe('getESUpgradeStatus', () => {
   });
 
   it('filters out ml_settings if featureSet.mlSnapshots is set to false', async () => {
-    esClient.asCurrentUser.migration.deprecations.mockResponse({
-      cluster_settings: [],
-      node_settings: [],
-      ml_settings: [
-        {
-          level: 'warning',
-          message: 'Datafeed [deprecation-datafeed] uses deprecated query options',
-          url: 'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes-7.0.html#breaking_70_search_changes',
-          details:
-            '[Deprecated field [use_dis_max] used, replaced by [Set [tie_breaker] to 1 instead]]',
-          // @ts-ignore
-          resolve_during_rolling_upgrade: false,
-        },
-        {
-          level: 'critical',
-          message:
-            'model snapshot [1] for job [deprecation_check_job] needs to be deleted or upgraded',
-          url: '',
-          details: 'details',
-          // @ts-ignore
-          _meta: { snapshot_id: '1', job_id: 'deprecation_check_job' },
-          // @ts-ignore
-          resolve_during_rolling_upgrade: false,
-        },
-      ],
-      index_settings: {},
+    const mockResponse = {
+      ...esMigrationsMock.getMockEsDeprecations(),
+      ...esMigrationsMock.getMockMlSettingsDeprecations(),
+    };
+    // @ts-ignore missing property definitions in ES resolve_during_rolling_upgrade and _meta
+    esClient.asCurrentUser.migration.deprecations.mockResponse(mockResponse);
+
+    const enabledUpgradeStatus = await getESUpgradeStatus(esClient, { ...featureSet });
+    expect(enabledUpgradeStatus.deprecations).toHaveLength(2);
+    expect(enabledUpgradeStatus.totalCriticalDeprecations).toBe(1);
+
+    const disabledUpgradeStatus = await getESUpgradeStatus(esClient, {
+      ...featureSet,
+      mlSnapshots: false,
     });
 
-    const upgradeStatus = await getESUpgradeStatus(esClient, { ...featureSet, mlSnapshots: false });
+    expect(disabledUpgradeStatus.deprecations).toHaveLength(0);
+    expect(disabledUpgradeStatus.totalCriticalDeprecations).toBe(0);
+  });
 
-    expect(upgradeStatus.deprecations).toHaveLength(0);
-    expect(upgradeStatus.totalCriticalDeprecations).toBe(0);
+  it('filters out data_streams if featureSet.migrateDataStreams is set to false', async () => {
+    const mockResponse = {
+      ...esMigrationsMock.getMockEsDeprecations(),
+      ...esMigrationsMock.getMockDataStreamDeprecations(),
+    };
+    esClient.asCurrentUser.migration.deprecations.mockResponse(mockResponse);
+
+    const enabledUpgradeStatus = await getESUpgradeStatus(esClient, { ...featureSet });
+    expect(enabledUpgradeStatus.deprecations).toHaveLength(1);
+    expect(enabledUpgradeStatus.totalCriticalDeprecations).toBe(1);
+
+    const disabledUpgradeStatus = await getESUpgradeStatus(esClient, {
+      ...featureSet,
+      migrateDataStreams: false,
+    });
+
+    expect(disabledUpgradeStatus.deprecations).toHaveLength(0);
+    expect(disabledUpgradeStatus.totalCriticalDeprecations).toBe(0);
   });
 
   it('filters out reindex corrective actions if featureSet.reindexCorrectiveActions is set to false', async () => {
@@ -186,6 +195,7 @@ describe('getESUpgradeStatus', () => {
       ],
       ml_settings: [],
       index_settings: {},
+      data_streams: {},
     });
 
     const upgradeStatus = await getESUpgradeStatus(esClient, {
@@ -212,6 +222,7 @@ describe('getESUpgradeStatus', () => {
       ],
       ml_settings: [],
       index_settings: {},
+      data_streams: {},
     });
 
     esClient.asCurrentUser.healthReport.mockResponse({
@@ -260,6 +271,7 @@ describe('getESUpgradeStatus', () => {
             "type": "reindex",
           },
           "details": "This index was created using version: 6.8.13",
+          "index": undefined,
           "isCritical": true,
           "message": "Index created before 7.0",
           "resolveDuringUpgrade": false,
