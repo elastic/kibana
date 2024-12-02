@@ -97,6 +97,11 @@ import type { FullAgentConfigMap } from '../../common/types/models/agent_cm';
 
 import { fullAgentConfigMapToYaml } from '../../common/services/agent_cm_to_yaml';
 
+import {
+  MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS,
+  MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_20,
+} from '../constants';
+
 import { appContextService } from '.';
 
 import { mapAgentPolicySavedObjectToAgentPolicy } from './agent_policies/utils';
@@ -550,7 +555,7 @@ class AgentPolicyService {
         }
         return agentPolicy;
       },
-      { concurrency: 50 }
+      { concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS }
     );
 
     const result = agentPolicies.filter(
@@ -657,7 +662,7 @@ class AgentPolicyService {
 
           return agentPolicy;
         },
-        { concurrency: 50 }
+        { concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS }
       );
     }
 
@@ -955,7 +960,7 @@ class AgentPolicyService {
           );
         },
         {
-          concurrency: 50,
+          concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS,
         }
       );
       await pMap(
@@ -970,7 +975,7 @@ class AgentPolicyService {
           });
         },
         {
-          concurrency: 50,
+          concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS,
         }
       );
     }
@@ -1014,7 +1019,7 @@ class AgentPolicyService {
             }
           ),
         {
-          concurrency: 50,
+          concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS,
         }
       );
     }
@@ -1083,7 +1088,7 @@ class AgentPolicyService {
           this.triggerAgentPolicyUpdatedEvent(esClient, 'updated', policy.id, {
             spaceId: policy.namespaces?.[0],
           }),
-        { concurrency: 50 }
+        { concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS }
       );
     }
 
@@ -1352,7 +1357,7 @@ class AgentPolicyService {
           agentPolicy: agentPolicies?.find((policy) => policy.id === agentPolicyId),
         }),
       {
-        concurrency: 20,
+        concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_20,
       }
     );
 
@@ -1423,27 +1428,29 @@ class AgentPolicyService {
       );
     }
 
-    await Promise.all(
-      fleetServerPolicies
-        .filter((fleetServerPolicy) => {
-          const policy = policiesMap[fleetServerPolicy.policy_id];
-          return (
-            !policy.schema_version || lt(policy.schema_version, FLEET_AGENT_POLICIES_SCHEMA_VERSION)
-          );
-        })
-        .map((fleetServerPolicy) =>
-          // There are some potential performance concerns around using `agentPolicyService.update` in this context.
-          // This could potentially be a bottleneck in environments with several thousand agent policies being deployed here.
-          agentPolicyService.update(
-            soClient,
-            esClient,
-            fleetServerPolicy.policy_id,
-            {
-              schema_version: FLEET_AGENT_POLICIES_SCHEMA_VERSION,
-            },
-            { force: true }
-          )
-        )
+    const filteredFleetServerPolicies = fleetServerPolicies.filter((fleetServerPolicy) => {
+      const policy = policiesMap[fleetServerPolicy.policy_id];
+      return (
+        !policy.schema_version || lt(policy.schema_version, FLEET_AGENT_POLICIES_SCHEMA_VERSION)
+      );
+    });
+    await pMap(
+      filteredFleetServerPolicies,
+      (fleetServerPolicy) =>
+        // There are some potential performance concerns around using `agentPolicyService.update` in this context.
+        // This could potentially be a bottleneck in environments with several thousand agent policies being deployed here.
+        agentPolicyService.update(
+          soClient,
+          esClient,
+          fleetServerPolicy.policy_id,
+          {
+            schema_version: FLEET_AGENT_POLICIES_SCHEMA_VERSION,
+          },
+          { force: true }
+        ),
+      {
+        concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS,
+      }
     );
   }
 
@@ -1589,7 +1596,7 @@ class AgentPolicyService {
             }
           ),
         {
-          concurrency: 50,
+          concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS,
         }
       );
     }
@@ -1642,6 +1649,27 @@ class AgentPolicyService {
       internalSoClientWithoutSpaceExtension,
       esClient,
       currentPolicies.saved_objects,
+      options
+    );
+  }
+
+  public async bumpAgentPoliciesByIds(
+    soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
+    agentPolicyIds: string[],
+    options?: { user?: AuthenticatedUser }
+  ): Promise<SavedObjectsBulkUpdateResponse<AgentPolicy>> {
+    const internalSoClientWithoutSpaceExtension =
+      appContextService.getInternalUserSOClientWithoutSpaceExtension();
+    const savedObjectType = await getAgentPolicySavedObjectType();
+
+    const objects = agentPolicyIds.map((id: string) => ({ id, type: savedObjectType }));
+    const bulkGetResponse = await soClient.bulkGet<AgentPolicySOAttributes>(objects);
+
+    return this._bumpPolicies(
+      internalSoClientWithoutSpaceExtension,
+      esClient,
+      bulkGetResponse.saved_objects,
       options
     );
   }
@@ -1869,7 +1897,7 @@ class AgentPolicyService {
           return { integrationPolicyName: pkgPolicy?.name, id: pkgPolicy?.output_id ?? '' };
         },
         {
-          concurrency: 20,
+          concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_20,
         }
       );
     }
@@ -1902,7 +1930,7 @@ class AgentPolicyService {
         return { agentPolicyId: agentPolicy.id, ...output };
       },
       {
-        concurrency: 50,
+        concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS,
       }
     );
     return allOutputs;

@@ -17,6 +17,7 @@ import {
   EuiText,
   EuiSpacer,
   EuiButton,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -33,19 +34,25 @@ export const ManageQueriesModal: React.FC = () => {
   const [isModalVisible, setModalVisibility] = useState(false);
   const showModal = () => setModalVisibility(true);
   const hideModal = () => setModalVisibility(false);
+  const modalTitleId = useGeneratedHtmlId();
 
   return (
     <>
-      <EuiButton fill onClick={showModal} isLoading={queriesLoading}>
+      <EuiButton
+        data-test-subj="enterpriseSearchManageQueriesModalManageQueriesButton"
+        fill
+        onClick={showModal}
+        isLoading={queriesLoading}
+      >
         {i18n.translate(
           'xpack.enterpriseSearch.appSearch.engine.curations.manageQueryButtonLabel',
           { defaultMessage: 'Manage queries' }
         )}
       </EuiButton>
       {isModalVisible && (
-        <EuiModal onClose={hideModal}>
+        <EuiModal onClose={hideModal} aria-labelledby={modalTitleId}>
           <EuiModalHeader>
-            <EuiModalHeaderTitle>
+            <EuiModalHeaderTitle id={modalTitleId}>
               {i18n.translate(
                 'xpack.enterpriseSearch.appSearch.engine.curations.manageQueryTitle',
                 { defaultMessage: 'Manage queries' }

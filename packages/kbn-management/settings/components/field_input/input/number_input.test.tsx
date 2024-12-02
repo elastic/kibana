@@ -85,11 +85,11 @@ describe('NumberInput', () => {
     expect(input).toBeDisabled();
   });
 
-  it('recovers if value is null', () => {
+  it('recovers if value is null', async () => {
     const { getByTestId } = render(
       wrap(<NumberInput {...defaultProps} field={{ ...defaultProps.field, defaultValue: null }} />)
     );
-    const input = getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-${id}`);
-    waitFor(() => expect(input).toHaveValue(undefined));
+
+    await waitFor(() => expect(getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-${id}`)).toHaveValue(null));
   });
 });
