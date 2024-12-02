@@ -11,5 +11,5 @@ export const toAlphanumeric = (input: string) =>
   input
     .trim()
     .replace(/[^a-zA-Z0-9]+/g, '-') // Replace all special/non-alphanumerical characters with dashes
-    .replace(/^[-]+|[-]+$/g, '') // Strip all leading and trailing dashes
+    .replace(/(^-+|(?<!-)-+$)/g, '') // Strip all leading and trailing dashes
     .toLowerCase();
