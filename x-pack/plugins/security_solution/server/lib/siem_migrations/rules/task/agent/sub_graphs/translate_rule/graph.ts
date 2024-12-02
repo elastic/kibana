@@ -59,21 +59,24 @@ export function getTranslateRuleGraph({
     .addEdge('retrieveIntegrations', 'translateRule')
     .addEdge('translateRule', 'validation')
     .addEdge('esql_errors', 'validation')
-    .addConditionalEdges('validation', validationRouter);
+    .addConditionalEdges('validation', (state: TranslateRuleState) => validationRouter({ state }), {
+      esql_error: 'esql_errors',
+      end: END,
+    });
 
   const graph = translateRuleGraph.compile();
   graph.name = 'Translate Rule Graph';
   return graph;
 }
 
-const validationRouter = (state: TranslateRuleState) => {
-  if (state.validation_errors.iterations <= MAX_VALIDATION_ITERATIONS) {
-    if (
-      !isEmpty(state.validation_errors?.esql_errors) &&
-      state.translation_result === SiemMigrationRuleTranslationResult.FULL
-    ) {
-      return 'esql_errors';
+const validationRouter = ({ state }: TranslateRuleState) => {
+  if (
+    state.validation_errors.iterations <= MAX_VALIDATION_ITERATIONS &&
+    state.translation_result === SiemMigrationRuleTranslationResult.FULL
+  ) {
+    if (!isEmpty(state.validation_errors?.esql_errors)) {
+      return 'esql_error';
     }
   }
-  return END;
+  return 'end';
 };
