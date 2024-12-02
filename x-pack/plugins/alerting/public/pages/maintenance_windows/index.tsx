@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -27,7 +27,17 @@ import { CenterJustifiedSpinner } from './components/center_justified_spinner';
 import { ExperimentalBadge } from './components/page_header';
 import { useLicense } from '../../hooks/use_license';
 import { LicensePrompt } from './components/license_prompt';
-import { MAINTENANCE_WINDOW_FEATURE_ID, MAINTENANCE_WINDOW_DEEP_LINK_IDS } from '../../../common';
+import {
+  MAINTENANCE_WINDOW_FEATURE_ID,
+  MAINTENANCE_WINDOW_DEEP_LINK_IDS,
+  MAINTENANCE_WINDOW_DEFAULT_SEARCH_PAGE_SIZE,
+  MaintenanceWindowStatus
+} from '../../../common';
+
+interface FilterOptions {
+  searchText: string;
+  selectedStatuses: MaintenanceWindowStatus[]
+}
 
 export const MaintenanceWindowsPage = React.memo(() => {
   const {
@@ -38,11 +48,25 @@ export const MaintenanceWindowsPage = React.memo(() => {
   const { isAtLeastPlatinum } = useLicense();
   const hasLicense = isAtLeastPlatinum();
 
-  const { navigateToCreateMaintenanceWindow } = useCreateMaintenanceWindowNavigation();
+  const [page, setPage] = useState<number>(1);
+  const [perPage, setPerPage] = useState<number>(MAINTENANCE_WINDOW_DEFAULT_SEARCH_PAGE_SIZE);
 
-  const { isLoading, isInitialLoading, maintenanceWindows, refetch } = useFindMaintenanceWindows({
+  // move to the list component
+  const [inputText, setInputText] = useState<string>('');
+  const [selectedStatuses, setSelectedStatuses] = useState<MaintenanceWindowStatus[]>([])
+  const [filters, setFilters] = useState<FilterOptions>({ searchText: '', selectedStatuses: [] });
+
+  const { navigateToCreateMaintenanceWindow } = useCreateMaintenanceWindowNavigation();
+  console.log('FILTERS', filters)
+  const { isLoading, isInitialLoading, data, refetch } = useFindMaintenanceWindows({
     enabled: hasLicense,
+    page,
+    perPage,
+    filters,
   });
+
+
+  const { maintenanceWindows, total } = data;
 
   useBreadcrumbs(MAINTENANCE_WINDOW_DEEP_LINK_IDS.maintenanceWindows);
 
@@ -53,12 +77,15 @@ export const MaintenanceWindowsPage = React.memo(() => {
   const refreshData = useCallback(() => refetch(), [refetch]);
   const showWindowMaintenance = capabilities[MAINTENANCE_WINDOW_FEATURE_ID].show;
   const writeWindowMaintenance = capabilities[MAINTENANCE_WINDOW_FEATURE_ID].save;
+  const isFiltered = filters.searchText === '' && filters.selectedStatuses.length === 0
+
   const showEmptyPrompt =
     !isLoading &&
     maintenanceWindows.length === 0 &&
+    isFiltered &&
     showWindowMaintenance &&
     writeWindowMaintenance;
-
+  
   const readOnly = showWindowMaintenance && !writeWindowMaintenance;
 
   // if the user is read only then display the glasses badge in the global navigation header
@@ -80,6 +107,28 @@ export const MaintenanceWindowsPage = React.memo(() => {
       chrome.setBadge();
     };
   }, [setBadge, chrome]);
+
+  const onPageChange = useCallback(({ page: { index, size } }: { page: { index: number, size: number } }) => {
+    setPage(index + 1);
+    setPerPage(size);
+  }, [])
+
+  const onSelectedStatusesChange = useCallback((statuses: MaintenanceWindowStatus[]) => {
+    setSelectedStatuses(statuses);
+  }, [])
+
+  const onSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setInputText(e.target.value);
+    if (e.target.value === '') {
+      setFilters({ searchText: e.target.value, selectedStatuses: [] })
+    }
+  }, []);
+
+  const onSearchKeyup = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      setFilters({ searchText: inputText, selectedStatuses: [] })
+    }
+  }, [inputText]);
 
   if (isInitialLoading) {
     return <CenterJustifiedSpinner />;
@@ -128,13 +177,23 @@ export const MaintenanceWindowsPage = React.memo(() => {
             readOnly={readOnly}
             refreshData={refreshData}
             isLoading={isLoading}
-            items={maintenanceWindows}
+            items={data.maintenanceWindows}
+            page={page}
+            perPage={perPage}
+            total={total}
+            onPageChange={onPageChange}
+            inputText={inputText}
+            selectedStatuses={selectedStatuses}
+            onSelectedStatusesChange={onSelectedStatusesChange}
+            onSearchKeyup={onSearchKeyup}
+            onSearchChange={onSearchChange}
           />
         </>
       )}
     </>
   );
 });
+
 MaintenanceWindowsPage.displayName = 'MaintenanceWindowsPage';
 // eslint-disable-next-line import/no-default-export
 export { MaintenanceWindowsPage as default };
