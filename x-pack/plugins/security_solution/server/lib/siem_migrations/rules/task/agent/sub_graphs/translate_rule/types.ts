@@ -6,6 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
+import type { EditorError } from '@kbn/esql-ast';
 import type { InferenceClient } from '@kbn/inference-plugin/server';
 import type { ChatModel } from '../../../util/actions_client_chat';
 import type { IntegrationRetriever } from '../../../util/integration_retriever';
@@ -22,4 +23,9 @@ export interface TranslateRuleGraphParams {
   resourceRetriever: RuleResourceRetriever;
   integrationRetriever: IntegrationRetriever;
   logger: Logger;
+}
+
+export interface TranslateRuleValidationErrors {
+  iterations: number;
+  esql_errors?: EditorError[];
 }

@@ -7,14 +7,12 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { InferenceClient } from '@kbn/inference-plugin/server';
-import {
-  SIEM_RULE_MIGRATION_CIM_ECS_MAP,
-  SiemMigrationRuleTranslationResult,
-} from '../../../../../../../../../../common/siem_migrations/constants';
+import { SiemMigrationRuleTranslationResult } from '../../../../../../../../../../common/siem_migrations/constants';
 import type { ChatModel } from '../../../../../util/actions_client_chat';
+import { getEsqlKnowledgeBase } from '../../../../../util/esql_knowledge_base_caller';
 import type { RuleResourceRetriever } from '../../../../../util/rule_resource_retriever';
 import type { GraphNode } from '../../types';
-import { getEsqlKnowledgeBase } from './esql_knowledge_base_caller';
+import { SIEM_RULE_MIGRATION_CIM_ECS_MAP } from './cim_ecs_map';
 import { ESQL_TRANSLATION_PROMPT } from './prompts';
 
 interface GetTranslateRuleNodeParams {
@@ -46,7 +44,6 @@ export const getTranslateRuleNode = ({
       inline_query: state.inline_query,
       indexPatterns,
     });
-    logger.info(prompt);
     const response = await esqlKnowledgeBaseCaller(prompt);
 
     const esqlQuery = response.match(/```esql\n([\s\S]*?)\n```/)?.[1] ?? '';

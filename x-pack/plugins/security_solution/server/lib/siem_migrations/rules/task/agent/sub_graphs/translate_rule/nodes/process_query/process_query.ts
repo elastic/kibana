@@ -22,7 +22,6 @@ interface GetProcessQueryNodeParams {
 export const getProcessQueryNode = ({
   model,
   resourceRetriever,
-  logger,
 }: GetProcessQueryNodeParams): GraphNode => {
   return async (state) => {
     let query = state.original_rule.query;
