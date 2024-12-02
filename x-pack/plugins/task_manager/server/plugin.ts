@@ -25,7 +25,7 @@ import {
 } from './kibana_discovery_service/delete_inactive_nodes_task';
 import { KibanaDiscoveryService } from './kibana_discovery_service';
 import { TaskPollingLifecycle } from './polling_lifecycle';
-import { TaskManagerConfig } from './config';
+import { TaskManagerConfig, CLAIM_STRATEGY_MGET, MGET_DEFAULT_POLL_INTERVAL } from './config';
 import { createInitialMiddleware, addMiddlewareToChain, Middleware } from './lib/middleware';
 import { removeIfExists } from './lib/remove_if_exists';
 import { setupSavedObjects, BACKGROUND_TASK_NODE_SO_NAME, TASK_SO_NAME } from './saved_objects';
@@ -151,6 +151,15 @@ export class TaskManagerPlugin
       throw new Error(`TaskManager is unable to start as Kibana has no valid UUID assigned to it.`);
     } else {
       this.logger.info(`TaskManager is identified by the Kibana UUID: ${this.taskManagerId}`);
+    }
+
+    if (
+      this.config.claim_strategy === CLAIM_STRATEGY_MGET &&
+      this.config.poll_interval > MGET_DEFAULT_POLL_INTERVAL
+    ) {
+      this.logger.warn(
+        `Setting xpack.task_manager.poll_interval to a value greater than the default of "${MGET_DEFAULT_POLL_INTERVAL}" may increase task latency and reduce overall throughput. Please remove this setting unless it is explicitly required.`
+      );
     }
 
     const startServicesPromise = core.getStartServices().then(([coreServices]) => ({
