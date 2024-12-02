@@ -6,13 +6,13 @@
  */
 
 import type { IKibanaResponse, RequestHandler } from '@kbn/core/server';
+import type { GetWorkflowInsightsRequestQueryParams } from '../../../../common/api/endpoint/workflow_insights/workflow_insights';
+import { GetWorkflowInsightsRequestSchema } from '../../../../common/api/endpoint/workflow_insights/workflow_insights';
 import type {
   SearchParams,
   SecurityWorkflowInsight,
 } from '../../../../common/endpoint/types/workflow_insights';
 import { securityWorkflowInsightsService } from '../../services';
-import type { GetWorkflowInsightsRequestQueryParams } from '../../../../common/api/endpoint/workflow_insights/get_insights';
-import { GetWorkflowInsightsRequestSchema } from '../../../../common/api/endpoint/workflow_insights/get_insights';
 import { errorHandler } from '../error_handler';
 import { WORKFLOW_INSIGHTS_ROUTE } from '../../../../common/endpoint/constants';
 import { withEndpointAuthz } from '../with_endpoint_authz';

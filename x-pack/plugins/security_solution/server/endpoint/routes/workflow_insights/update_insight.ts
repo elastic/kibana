@@ -6,12 +6,13 @@
  */
 
 import type { RequestHandler } from '@kbn/core/server';
-import { securityWorkflowInsightsService } from '../../services';
 import type {
   UpdateWorkflowInsightsRequestBody,
   UpdateWorkflowInsightsRequestParams,
-} from '../../../../common/api/endpoint/workflow_insights/update_insights';
-import { UpdateWorkflowInsightRequestSchema } from '../../../../common/api/endpoint/workflow_insights/update_insights';
+} from '../../../../common/api/endpoint/workflow_insights/workflow_insights';
+import { UpdateWorkflowInsightRequestSchema } from '../../../../common/api/endpoint/workflow_insights/workflow_insights';
+import { securityWorkflowInsightsService } from '../../services';
+
 import { errorHandler } from '../error_handler';
 import { WORKFLOW_INSIGHTS_UPDATE_ROUTE } from '../../../../common/endpoint/constants';
 import { withEndpointAuthz } from '../with_endpoint_authz';

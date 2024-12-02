@@ -129,8 +129,8 @@ class SecurityWorkflowInsightsService {
 
     let index = backingIndex;
     if (!index) {
-      const insight = (await this.fetch({ ids: [id] }))[0];
-      index = insight?._index;
+      const retrievedInsight = (await this.fetch({ ids: [id] }))[0];
+      index = retrievedInsight?._index;
     }
 
     if (!index) {

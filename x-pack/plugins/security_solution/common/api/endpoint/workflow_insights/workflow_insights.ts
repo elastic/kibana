@@ -89,6 +89,39 @@ export const UpdateWorkflowInsightRequestSchema = {
   }),
 };
 
+export const GetWorkflowInsightsRequestSchema = {
+  query: schema.object({
+    size: schema.maybe(schema.number()),
+    from: schema.maybe(schema.number()),
+    ids: schema.maybe(arrayWithNonEmptyString),
+    categories: schema.maybe(schema.arrayOf(schema.oneOf([schema.literal('endpoint')]))),
+    types: schema.maybe(
+      schema.arrayOf(
+        schema.oneOf([
+          schema.literal('incompatible_antivirus'),
+          schema.literal('noisy_process_tree'),
+        ])
+      )
+    ),
+    sourceTypes: schema.maybe(schema.arrayOf(schema.oneOf([schema.literal('llm-connector')]))),
+    sourceIds: schema.maybe(arrayWithNonEmptyString),
+    targetTypes: schema.maybe(schema.arrayOf(schema.oneOf([schema.literal('endpoint')]))),
+    targetIds: schema.maybe(arrayWithNonEmptyString),
+    actionTypes: schema.arrayOf(
+      schema.oneOf([
+        schema.literal('refreshed'),
+        schema.literal('remediated'),
+        schema.literal('suppressed'),
+        schema.literal('dismissed'),
+      ])
+    ),
+  }),
+};
+
+export type GetWorkflowInsightsRequestQueryParams = TypeOf<
+  typeof GetWorkflowInsightsRequestSchema.query
+>;
+
 export type UpdateWorkflowInsightsRequestParams = TypeOf<
   typeof UpdateWorkflowInsightRequestSchema.params
 >;
