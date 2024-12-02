@@ -10,12 +10,13 @@ import { isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 import { createAction } from '@kbn/ui-actions-plugin/public';
 import { apiPublishesUnifiedSearch } from '@kbn/presentation-publishing';
 import { isLensApi } from '@kbn/lens-plugin/public';
+import { isInSecurityApp } from '../../../../common/hooks/is_in_security_app';
 import { KibanaServices } from '../../../../common/lib/kibana';
 import type { SecurityAppStore } from '../../../../common/store/types';
 import { addProvider } from '../../../../timelines/store/actions';
 import type { DataProvider } from '../../../../../common/types';
 import { EXISTS_OPERATOR, TimelineId } from '../../../../../common/types';
-import { fieldHasCellActions, isInSecurityApp } from '../../utils';
+import { fieldHasCellActions } from '../../utils';
 import {
   ADD_TO_TIMELINE,
   ADD_TO_TIMELINE_FAILED_TEXT,

@@ -37,6 +37,7 @@ import { initializeEditApi } from './initialize_edit_api';
 import { initializeFetch, isEsqlMode } from './initialize_fetch';
 import { initializeSearchEmbeddableApi } from './initialize_search_embeddable_api';
 import {
+  NonPersistedDisplayOptions,
   SearchEmbeddableApi,
   SearchEmbeddableRuntimeState,
   SearchEmbeddableSerializedState,
@@ -83,6 +84,11 @@ export const getSearchEmbeddableFactory = ({
       const defaultPanelDescription$ = new BehaviorSubject<string | undefined>(
         initialState?.savedObjectDescription
       );
+
+      /** By-value SavedSearchComponent package (non-dashboard contexts) state, to adhere to the comparator contract of an embeddable. */
+      const nonPersistedDisplayOptions$ = new BehaviorSubject<
+        NonPersistedDisplayOptions | undefined
+      >(initialState?.nonPersistedDisplayOptions);
 
       /** All other state */
       const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
@@ -201,6 +207,10 @@ export const getSearchEmbeddableFactory = ({
             defaultPanelDescription$,
             (value) => defaultPanelDescription$.next(value),
           ],
+          nonPersistedDisplayOptions: [
+            nonPersistedDisplayOptions$,
+            (value) => nonPersistedDisplayOptions$.next(value),
+          ],
         }
       );
 
@@ -304,7 +314,18 @@ export const getSearchEmbeddableFactory = ({
                       <SearchEmbeddableGridComponent
                         api={{ ...api, fetchWarnings$, fetchContext$ }}
                         dataView={dataView!}
-                        onAddFilter={isEsqlMode(savedSearch) ? undefined : onAddFilter}
+                        onAddFilter={
+                          isEsqlMode(savedSearch) ||
+                          initialState.nonPersistedDisplayOptions?.enableFilters === false
+                            ? undefined
+                            : onAddFilter
+                        }
+                        enableDocumentViewer={
+                          initialState.nonPersistedDisplayOptions?.enableDocumentViewer !==
+                          undefined
+                            ? initialState.nonPersistedDisplayOptions?.enableDocumentViewer
+                            : true
+                        }
                         stateManager={searchEmbeddable.stateManager}
                       />
                     </CellActionsProvider>
