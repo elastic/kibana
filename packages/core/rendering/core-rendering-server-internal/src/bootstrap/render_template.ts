@@ -9,14 +9,12 @@
 
 export interface BootstrapTemplateData {
   themeTag: string;
-  themeName: string;
   jsDependencyPaths: string[];
   publicPathMap: string;
 }
 
 export const renderTemplate = ({
   themeTag,
-  themeName,
   jsDependencyPaths,
   publicPathMap,
 }: BootstrapTemplateData) => {
@@ -53,7 +51,6 @@ function kbnBundlesLoader() {
 var kbnCsp = JSON.parse(document.querySelector('kbn-csp').getAttribute('data'));
 window.__kbnStrictCsp__ = kbnCsp.strictCsp;
 window.__kbnThemeTag__ = "${themeTag}";
-window.__euiTheme__ = "${themeName}";
 window.__kbnPublicPath__ = ${publicPathMap};
 window.__kbnBundles__ = kbnBundlesLoader();
 

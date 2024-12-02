@@ -111,7 +111,6 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
 
     const body = renderTemplate({
       themeTag,
-      themeName,
       jsDependencyPaths,
       publicPathMap,
     });
