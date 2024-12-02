@@ -59,7 +59,11 @@ export interface PresentationPanelInternalProps<
    */
   index?: number;
 
-  // TODO: Remove this
+  /**
+   * Set the drag handlers to be used by kbn-grid-layout
+   * Note: If we make kbn-grid-layout responsible for **all** panel placement
+   *       logic, then this could be removed.
+   */
   setDragHandles?: (refs: Array<HTMLElement | null>) => void;
 }
 

@@ -101,7 +101,7 @@ export const PresentationPanelHoverActions = ({
   api,
   index,
   getActions,
-  dragHandleRef,
+  setDragHandle,
   actionPredicate,
   children,
   className,
@@ -112,7 +112,7 @@ export const PresentationPanelHoverActions = ({
   index?: number;
   api: DefaultPresentationPanelApi | null;
   getActions: PresentationPanelInternalProps['getActions'];
-  dragHandleRef: React.MutableRefObject<HTMLDivElement>;
+  setDragHandle: (ref: HTMLDivElement | null) => void;
   actionPredicate?: (actionId: string) => boolean;
   children: ReactElement;
   className?: string;
@@ -126,9 +126,10 @@ export const PresentationPanelHoverActions = ({
   const [isContextMenuOpen, setIsContextMenuOpen] = useState<boolean>(false);
   const [notifications, setNotifications] = useState<AnyApiAction[]>([]);
   const hoverActionsRef = useRef<HTMLDivElement | null>(null);
+  const dragHandleRef = useRef<HTMLDivElement | null>(null);
   const anchorRef = useRef<HTMLDivElement | null>(null);
-  const leftHoverActionsRef = useRef<HTMLDivElement | null>(null);
   const rightHoverActionsRef = useRef<HTMLDivElement | null>(null);
+
   const [combineHoverActions, setCombineHoverActions] = useState<boolean>(false);
   const [borderStyles, setBorderStyles] = useState<string>(TOP_ROUNDED_CORNERS);
 
@@ -146,8 +147,8 @@ export const PresentationPanelHoverActions = ({
 
     // Left align hover actions when they would get cut off by the right edge of the window
     if (anchorLeft - (hoverActionsWidth - anchorWidth) <= parseInt(euiThemeVars.euiSize, 10)) {
-      dragHandleRef?.current.style.removeProperty('right');
-      dragHandleRef?.current.style.setProperty('left', '0');
+      dragHandleRef.current?.style.removeProperty('right');
+      dragHandleRef.current?.style.setProperty('left', '0');
     } else {
       hoverActionsRef.current.style.removeProperty('left');
       hoverActionsRef.current.style.setProperty('right', '0');
@@ -445,7 +446,12 @@ export const PresentationPanelHoverActions = ({
   );
 
   const dragHandle = (
-    <div ref={dragHandleRef}>
+    <div
+      ref={(ref) => {
+        dragHandleRef.current = ref;
+        setDragHandle(ref);
+      }}
+    >
       <EuiIcon
         type="move"
         color="text"
