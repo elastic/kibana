@@ -263,8 +263,21 @@ export function loadEmbeddableData(
   }
 
   const mergedSubscriptions = merge(
-    // This is an indirect observable, populated by the fetch$
-    unifiedSearch$.pipe(waitForChangeWithReason('searchContext')),
+    // make fetch$ populate the internal unifiedSearch$ and will filter that out
+    // before deciding to data load
+    fetch$(api).pipe(
+      tap((data) => {
+        const searchSessionId = apiPublishesSearchSession(parentApi) ? data.searchSessionId : '';
+        unifiedSearch$.next({
+          query: data.query,
+          filters: data.filters,
+          timeRange: data.timeRange,
+          timeslice: data.timeslice,
+          searchSessionId,
+        });
+      }),
+      map(() => 'searchContext' as ReloadReason)
+    ),
     // On state change, reload
     // this is used to refresh the chart on inline editing
     // just make sure to avoid to rerender if there's no substantial change
@@ -284,18 +297,6 @@ export function loadEmbeddableData(
   );
 
   const subscriptions: Subscription[] = [
-    // make fetch$ populate the internal unifiedSearch$ and will filter that out
-    // before deciding to data load
-    fetch$(api).subscribe((data) => {
-      const searchSessionId = apiPublishesSearchSession(parentApi) ? data.searchSessionId : '';
-      unifiedSearch$.next({
-        query: data.query,
-        filters: data.filters,
-        timeRange: data.timeRange,
-        timeslice: data.timeslice,
-        searchSessionId,
-      });
-    }),
     mergedSubscriptions.pipe(debounceTime(0)).subscribe(reload),
     // make sure to reload on viewMode change
     api.viewMode.subscribe(() => {
