@@ -9,6 +9,15 @@
 
 import { ScoutPage } from '../fixtures/types';
 
+type CommonlyUsedTimeRange =
+  | 'Today'
+  | 'Last_15 minutes'
+  | 'Last_1 hour'
+  | 'Last_24 hours'
+  | 'Last_30 days'
+  | 'Last_90 days'
+  | 'Last_1 year';
+
 export class DashboardApp {
   constructor(private readonly page: ScoutPage) {}
 
@@ -53,14 +62,7 @@ export class DashboardApp {
   async customizePanel(options: {
     name: string;
     customTimeRageCommonlyUsed?: {
-      value:
-        | 'Today'
-        | 'Last_15 minutes'
-        | 'Last_1 hour'
-        | 'Last_24 hours'
-        | 'Last_30 days'
-        | 'Last_90 days'
-        | 'Last_1 year';
+      value: CommonlyUsedTimeRange;
     };
   }) {
     await this.page.testSubj.hover(`embeddablePanelHeading-${options.name.replace(/ /g, '')}`);

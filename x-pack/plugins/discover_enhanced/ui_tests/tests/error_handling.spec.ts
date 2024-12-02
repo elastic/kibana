@@ -6,22 +6,16 @@
  */
 
 import { expect } from '@kbn/scout';
-import { test } from '../fixtures';
-import {
-  LOGSTASH_DEFAULT_END_TIME,
-  LOGSTASH_DEFAULT_START_TIME,
-  ES_ARCHIVES,
-  KBN_ARCHIVES,
-} from '../fixtures/constants';
+import { test, testData } from '../fixtures';
 
 test.describe('Discover app - errors', { tag: ['@ess'] }, () => {
   test.beforeAll(async ({ esArchiver, kbnClient, uiSettings }) => {
     await kbnClient.savedObjects.clean({ types: ['search', 'index-pattern'] });
-    await esArchiver.loadIfNeeded(ES_ARCHIVES.LOGSTASH);
-    await kbnClient.importExport.load(KBN_ARCHIVES.INVALID_SCRIPTED_FIELD);
+    await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.LOGSTASH);
+    await kbnClient.importExport.load(testData.KBN_ARCHIVES.INVALID_SCRIPTED_FIELD);
     await uiSettings.setDefaultTime({
-      from: LOGSTASH_DEFAULT_START_TIME,
-      to: LOGSTASH_DEFAULT_END_TIME,
+      from: testData.LOGSTASH_DEFAULT_START_TIME,
+      to: testData.LOGSTASH_DEFAULT_END_TIME,
     });
   });
 
@@ -36,6 +30,9 @@ test.describe('Discover app - errors', { tag: ['@ess'] }, () => {
 
   test('should render invalid scripted field error', async ({ page }) => {
     await page.testSubj.locator('discoverErrorCalloutTitle').waitFor({ state: 'visible' });
-    await expect(page.testSubj.locator('painlessStackTrace')).toBeVisible();
+    await expect(
+      page.testSubj.locator('painlessStackTrace'),
+      'Painless error stacktrace should be displayed'
+    ).toBeVisible();
   });
 });

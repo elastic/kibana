@@ -10,13 +10,13 @@
 import { ScoutPage } from '../fixtures/types';
 import { expect } from '..';
 
-interface AddFilterOptions {
+interface FilterCreationOptions {
   field: string;
   operator: 'is' | 'is not' | 'is one of' | 'is not one of' | 'exists' | 'does not exist';
   value: string;
 }
 
-interface FilterExistsOptions {
+interface FilterStateOptions {
   field: string;
   value: string;
   enabled?: boolean;
@@ -27,7 +27,7 @@ interface FilterExistsOptions {
 export class FilterBar {
   constructor(private readonly page: ScoutPage) {}
 
-  addFilter = async (options: AddFilterOptions) => {
+  async addFilter(options: FilterCreationOptions) {
     await this.page.testSubj.click('addFilter');
     await this.page.testSubj.waitForSelector('addFilterPopover');
     // set field name
@@ -47,10 +47,13 @@ export class FilterBar {
     // save filter
     await this.page.testSubj.click('saveFilter');
 
-    await expect(this.page.testSubj.locator('^filter-badge')).toBeVisible();
-  };
+    await expect(
+      this.page.testSubj.locator('^filter-badge'),
+      'New filter badge should be displayed'
+    ).toBeVisible();
+  }
 
-  async hasFilter(options: FilterExistsOptions) {
+  async hasFilter(options: FilterStateOptions) {
     const testSubjLocator = [
       '~filter',
       options.enabled !== undefined && `~filter-${options.enabled ? 'enabled' : 'disabled'}`,

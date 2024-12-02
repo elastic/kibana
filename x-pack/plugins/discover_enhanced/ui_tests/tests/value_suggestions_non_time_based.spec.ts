@@ -6,16 +6,15 @@
  */
 
 import { expect } from '@kbn/scout';
-import { test } from '../fixtures';
-import { ES_ARCHIVES, KBN_ARCHIVES } from '../fixtures/constants';
+import { test, testData, errorMessages } from '../fixtures';
 
 test.describe(
   'Discover app - value suggestions non-time based',
   { tag: ['@ess', '@svlSecurity', '@svlOblt', '@svlSearch'] },
   () => {
     test.beforeAll(async ({ esArchiver, kbnClient, uiSettings }) => {
-      await esArchiver.loadIfNeeded(ES_ARCHIVES.NO_TIME_FIELD);
-      await kbnClient.importExport.load(KBN_ARCHIVES.NO_TIME_FIELD);
+      await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.NO_TIME_FIELD);
+      await kbnClient.importExport.load(testData.KBN_ARCHIVES.NO_TIME_FIELD);
       await uiSettings.set({
         defaultIndex: 'without-timefield',
         'doc_table:legacy': false,
@@ -36,7 +35,10 @@ test.describe(
       page,
     }) => {
       await page.testSubj.fill('queryInput', 'type.keyword : ');
-      await expect(page.testSubj.locator('autoCompleteSuggestionText')).toHaveCount(1);
+      await expect(
+        page.testSubj.locator('autoCompleteSuggestionText'),
+        errorMessages.QUERY_BAR_VALIDATION.SUGGESTIONS_COUNT
+      ).toHaveCount(1);
       const actualSuggestions = await page.testSubj
         .locator('autoCompleteSuggestionText')
         .allTextContents();

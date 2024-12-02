@@ -60,10 +60,14 @@ export class DatePicker {
     await this.page.testSubj.click('parseAbsoluteDateFormat');
     await this.page.keyboard.press('Escape');
 
-    await expect(this.page.testSubj.locator('superDatePickerstartDatePopoverButton')).toHaveText(
-      from
-    );
-    await expect(this.page.testSubj.locator('superDatePickerendDatePopoverButton')).toHaveText(to);
+    await expect(
+      this.page.testSubj.locator('superDatePickerstartDatePopoverButton'),
+      `Date picker 'start date' is set incorrectly`
+    ).toHaveText(from);
+    await expect(
+      this.page.testSubj.locator('superDatePickerendDatePopoverButton'),
+      `Date picker 'end date' is set incorrectly`
+    ).toHaveText(to);
     await this.page.testSubj.click('querySubmitButton');
   }
 }

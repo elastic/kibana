@@ -6,21 +6,30 @@
  */
 
 import { expect } from '@kbn/scout';
-import { ExtendedScoutTestFixtures, test } from '../fixtures';
-import { DATA_VIEW, DATA_VIEW_ID, ES_ARCHIVES, KBN_ARCHIVES } from '../fixtures/constants';
+import { test, testData } from '../fixtures';
+import type { ExtendedScoutTestFixtures } from '../fixtures';
 
 const assertNoFilterAndEmptyQuery = async (
+  filterBadge: { field: string; value: string },
   pageObjects: ExtendedScoutTestFixtures['pageObjects'],
   page: ExtendedScoutTestFixtures['page']
 ) => {
   expect(
-    await pageObjects.filterBar.hasFilter({
-      field: 'category',
-      value: `Men's Shoes`,
-    })
+    // checking if filter exists, enabled or disabled
+    await pageObjects.filterBar.hasFilter(filterBadge),
+    `Filter ${JSON.stringify(filterBadge)} should exist`
   ).toBe(false);
-  await expect(page.testSubj.locator('queryInput')).toHaveText('');
+  await expect(
+    page.testSubj.locator('queryInput'),
+    'Query Bar input field should be empty'
+  ).toHaveText('');
 };
+
+const assertDataViewIsSelected = async (page: ExtendedScoutTestFixtures['page'], name: string) =>
+  await expect(
+    page.testSubj.locator('*dataView-switch-link'),
+    'Incorrect data view is selected'
+  ).toHaveText(name);
 
 test.describe(
   'Discover app - saved searches',
@@ -31,13 +40,17 @@ test.describe(
     const PANEL_NAME = 'Ecommerce Data';
     const SEARCH_QUERY = 'customer_gender:MALE';
     const SAVED_SEARCH_NAME = 'test-unselect-saved-search';
+    const filterFieldAndValue = {
+      field: 'category',
+      value: `Men's Shoes`,
+    };
 
     test.beforeAll(async ({ esArchiver, kbnClient, uiSettings }) => {
-      await esArchiver.loadIfNeeded(ES_ARCHIVES.ECOMMERCE);
-      await kbnClient.importExport.load(KBN_ARCHIVES.DISCOVER);
-      await kbnClient.importExport.load(KBN_ARCHIVES.ECOMMERCE);
+      await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.ECOMMERCE);
+      await kbnClient.importExport.load(testData.KBN_ARCHIVES.DISCOVER);
+      await kbnClient.importExport.load(testData.KBN_ARCHIVES.ECOMMERCE);
       await uiSettings.set({
-        defaultIndex: DATA_VIEW_ID.ECOMMERCE,
+        defaultIndex: testData.DATA_VIEW_ID.ECOMMERCE,
         'doc_table:legacy': false,
         'timepicker:timeDefaults': `{ "from": "${START_TIME}", "to": "${END_TIME}"}`,
       });
@@ -65,7 +78,8 @@ test.describe(
         customTimeRageCommonlyUsed: { value: 'Last_90 days' },
       });
       await expect(
-        page.testSubj.locator('embeddedSavedSearchDocTable').locator('.euiDataGrid__noResults')
+        page.testSubj.locator('embeddedSavedSearchDocTable').locator('.euiDataGrid__noResults'),
+        'No results message in Saved Search panel should be visible'
       ).toBeVisible();
     });
 
@@ -74,12 +88,10 @@ test.describe(
       page,
     }) => {
       await pageObjects.discover.goto();
-      await expect(page.testSubj.locator('*dataView-switch-link')).toHaveText(DATA_VIEW.ECOMMERCE);
-
+      await assertDataViewIsSelected(page, testData.DATA_VIEW.ECOMMERCE);
       await pageObjects.filterBar.addFilter({
-        field: 'category',
+        ...filterFieldAndValue,
         operator: 'is',
-        value: `Men's Shoes`,
       });
       await page.testSubj.fill('queryInput', SEARCH_QUERY);
       await page.testSubj.click('querySubmitButton');
@@ -90,29 +102,28 @@ test.describe(
 
       expect(
         await pageObjects.filterBar.hasFilter({
-          field: 'category',
-          value: `Men's Shoes`,
-          enabled: true,
+          ...filterFieldAndValue,
+          enabled: true, // Filter is enabled by default
         })
       ).toBe(true);
       await expect(page.testSubj.locator('queryInput')).toHaveText(SEARCH_QUERY);
 
       // create new search
       await pageObjects.discover.clickNewSearch();
-      await expect(page.testSubj.locator('*dataView-switch-link')).toHaveText(DATA_VIEW.ECOMMERCE);
-      await assertNoFilterAndEmptyQuery(pageObjects, page);
+      await assertDataViewIsSelected(page, testData.DATA_VIEW.ECOMMERCE);
+      await assertNoFilterAndEmptyQuery(filterFieldAndValue, pageObjects, page);
 
       // change data view
-      await pageObjects.discover.selectDataView(DATA_VIEW.LOGSTASH);
-      await assertNoFilterAndEmptyQuery(pageObjects, page);
+      await pageObjects.discover.selectDataView(testData.DATA_VIEW.LOGSTASH);
+      await assertNoFilterAndEmptyQuery(filterFieldAndValue, pageObjects, page);
 
       // change data view again
-      await pageObjects.discover.selectDataView(DATA_VIEW.ECOMMERCE);
-      await assertNoFilterAndEmptyQuery(pageObjects, page);
+      await pageObjects.discover.selectDataView(testData.DATA_VIEW.ECOMMERCE);
+      await assertNoFilterAndEmptyQuery(filterFieldAndValue, pageObjects, page);
 
       // create new search again
       await pageObjects.discover.clickNewSearch();
-      await expect(page.testSubj.locator('*dataView-switch-link')).toHaveText(DATA_VIEW.ECOMMERCE);
+      await assertDataViewIsSelected(page, testData.DATA_VIEW.ECOMMERCE);
     });
   }
 );

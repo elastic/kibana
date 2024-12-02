@@ -6,14 +6,7 @@
  */
 
 import { ScoutWorkerFixtures, expect } from '@kbn/scout';
-import { test } from '../fixtures';
-import {
-  LOGSTASH_DEFAULT_END_TIME,
-  LOGSTASH_DEFAULT_START_TIME,
-  ES_ARCHIVES,
-  KBN_ARCHIVES,
-  DATA_VIEW_ID,
-} from '../fixtures/constants';
+import { test, testData } from '../fixtures';
 
 const createSavedSearch = async (
   kbnClient: ScoutWorkerFixtures['kbnClient'],
@@ -51,11 +44,11 @@ test.describe(
     const SAVED_SEARCH_TITLE = 'TempSearch';
     const SAVED_SEARCH_ID = '90943e30-9a47-11e8-b64d-95841ca0b247';
     test.beforeAll(async ({ esArchiver, kbnClient, uiSettings }) => {
-      await esArchiver.loadIfNeeded(ES_ARCHIVES.LOGSTASH);
-      await kbnClient.importExport.load(KBN_ARCHIVES.DASHBOARD_DRILLDOWNS);
+      await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.LOGSTASH);
+      await kbnClient.importExport.load(testData.KBN_ARCHIVES.DASHBOARD_DRILLDOWNS);
       await uiSettings.set({
-        defaultIndex: DATA_VIEW_ID.LOGSTASH, // TODO: investigate why it is required for `node scripts/playwright_test.js` run
-        'timepicker:timeDefaults': `{ "from": "${LOGSTASH_DEFAULT_START_TIME}", "to": "${LOGSTASH_DEFAULT_END_TIME}"}`,
+        defaultIndex: testData.DATA_VIEW_ID.LOGSTASH, // TODO: investigate why it is required for `node scripts/playwright_test.js` run
+        'timepicker:timeDefaults': `{ "from": "${testData.LOGSTASH_DEFAULT_START_TIME}", "to": "${testData.LOGSTASH_DEFAULT_END_TIME}"}`,
       });
     });
 
@@ -79,7 +72,7 @@ test.describe(
         kbnClient,
         SAVED_SEARCH_ID,
         SAVED_SEARCH_TITLE,
-        DATA_VIEW_ID.LOGSTASH
+        testData.DATA_VIEW_ID.LOGSTASH
       );
       await pageObjects.dashboard.addPanelFromLibrary(SAVED_SEARCH_TITLE);
       await page.testSubj.locator('savedSearchTotalDocuments').waitFor({
@@ -94,10 +87,16 @@ test.describe(
 
       await page.reload();
       await page.waitForLoadingIndicatorHidden();
-      await expect(page.testSubj.locator('embeddableError')).toBeVisible();
+      await expect(
+        page.testSubj.locator('embeddableError'),
+        'Embeddable error should be displayed'
+      ).toBeVisible();
 
       await pageObjects.dashboard.removePanel('embeddableError');
-      await expect(page.testSubj.locator('embeddableError')).toBeHidden();
+      await expect(
+        page.testSubj.locator('embeddableError'),
+        'Embeddable error should not be displayed'
+      ).toBeHidden();
     });
   }
 );

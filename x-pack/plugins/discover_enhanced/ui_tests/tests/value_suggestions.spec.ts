@@ -6,28 +6,19 @@
  */
 
 import { expect } from '@kbn/scout';
-import { test } from '../fixtures';
-import {
-  DATA_VIEW_ID,
-  ES_ARCHIVES,
-  KBN_ARCHIVES,
-  LOGSTASH_DEFAULT_END_TIME,
-  LOGSTASH_DEFAULT_START_TIME,
-  LOGSTASH_IN_RANGE_DATES,
-  LOGSTASH_OUT_OF_RANGE_DATES,
-} from '../fixtures/constants';
+import { test, testData, errorMessages } from '../fixtures';
 
 test.describe(
   'Discover app - value suggestions: useTimeRange enabled',
   { tag: ['@ess', '@svlSecurity', '@svlOblt', '@svlSearch'] },
   () => {
     test.beforeAll(async ({ esArchiver, kbnClient, uiSettings }) => {
-      await esArchiver.loadIfNeeded(ES_ARCHIVES.LOGSTASH);
-      await kbnClient.importExport.load(KBN_ARCHIVES.DASHBOARD_DRILLDOWNS);
+      await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.LOGSTASH);
+      await kbnClient.importExport.load(testData.KBN_ARCHIVES.DASHBOARD_DRILLDOWNS);
       await uiSettings.set({
-        defaultIndex: DATA_VIEW_ID.LOGSTASH, // TODO: investigate why it is required for `node scripts/playwright_test.js` run
+        defaultIndex: testData.DATA_VIEW_ID.LOGSTASH, // TODO: investigate why it is required for `node scripts/playwright_test.js` run
         'doc_table:legacy': false,
-        'timepicker:timeDefaults': `{ "from": "${LOGSTASH_DEFAULT_START_TIME}", "to": "${LOGSTASH_DEFAULT_END_TIME}"}`,
+        'timepicker:timeDefaults': `{ "from": "${testData.LOGSTASH_DEFAULT_START_TIME}", "to": "${testData.LOGSTASH_DEFAULT_END_TIME}"}`,
       });
     });
 
@@ -42,15 +33,18 @@ test.describe(
     });
 
     test('dont show up if outside of range', async ({ page, pageObjects }) => {
-      await pageObjects.datePicker.setAbsoluteRange(LOGSTASH_OUT_OF_RANGE_DATES);
+      await pageObjects.datePicker.setAbsoluteRange(testData.LOGSTASH_OUT_OF_RANGE_DATES);
       await page.testSubj.fill('queryInput', 'extension.raw : ');
       await expect(page.testSubj.locator('autoCompleteSuggestionText')).toHaveCount(0);
     });
 
     test('show up if in range', async ({ page, pageObjects }) => {
-      await pageObjects.datePicker.setAbsoluteRange(LOGSTASH_IN_RANGE_DATES);
+      await pageObjects.datePicker.setAbsoluteRange(testData.LOGSTASH_IN_RANGE_DATES);
       await page.testSubj.fill('queryInput', 'extension.raw : ');
-      await expect(page.testSubj.locator('autoCompleteSuggestionText')).toHaveCount(5);
+      await expect(
+        page.testSubj.locator('autoCompleteSuggestionText'),
+        errorMessages.QUERY_BAR_VALIDATION.SUGGESTIONS_COUNT
+      ).toHaveCount(5);
       const actualSuggestions = await page.testSubj
         .locator('autoCompleteSuggestionText')
         .allTextContents();
@@ -58,7 +52,7 @@ test.describe(
     });
 
     test('also displays descriptions for operators', async ({ page, pageObjects }) => {
-      await pageObjects.datePicker.setAbsoluteRange(LOGSTASH_IN_RANGE_DATES);
+      await pageObjects.datePicker.setAbsoluteRange(testData.LOGSTASH_IN_RANGE_DATES);
       await page.testSubj.fill('queryInput', 'extension.raw');
       await expect(page.testSubj.locator('^autocompleteSuggestion-operator')).toHaveCount(2);
     });
