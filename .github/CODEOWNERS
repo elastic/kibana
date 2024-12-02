@@ -1503,7 +1503,6 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /x-pack/test_serverless/**/test_suites/**/ml/ @elastic/ml-ui
 /x-pack/test_serverless/**/test_suites/common/management/transforms/ @elastic/ml-ui
 /x-pack/test/api_integration/services/ml.ts @elastic/ml-ui
-/x-pack/plugins/security_solution/public/common/components/ml @elastic/ml-ui
 
 # Additional plugins and packages maintained by the ML team.
 /test/examples/response_stream/*.ts @elastic/ml-ui
@@ -2216,7 +2215,7 @@ x-pack/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/
 /x-pack/plugins/security_solution_serverless/public/upselling/pages/threat_intelligence_paywall.tsx @elastic/security-threat-hunting-investigations
 /x-pack/plugins/security_solution/public/common/mock/mock_timeline_control_columns.tsx @elastic/security-threat-hunting-investigations
 /x-pack/plugins/security_solution/public/common/components/exit_full_screen @elastic/security-threat-hunting-investigations
-/x-pack/plugins/security_solution/public/app/home/template_wrapper/timeline/index.tsx @elastic/security-threat-hunting-investigations
+/x-pack/plugins/security_solution/public/app/home/template_wrapper/timeline @elastic/security-threat-hunting-investigations
 
 /x-pack/plugins/security_solution/server/lib/timeline @elastic/security-threat-hunting-investigations
 
