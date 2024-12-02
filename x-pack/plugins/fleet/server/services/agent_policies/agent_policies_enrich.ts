@@ -43,7 +43,7 @@ export async function updatePoliciesEnrich(
                 inactivity_timeout: agentPolicy.inactivity_timeout,
                 is_managed: agentPolicy.is_managed,
                 package_policies: agentPolicy.package_policies?.map((packagePolicy) => ({
-                  id: agentPolicy.id,
+                  id: packagePolicy.id,
                   name: packagePolicy.name,
                   namespace: packagePolicy.namespace,
                   package: packagePolicy.package
