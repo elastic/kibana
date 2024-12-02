@@ -59,7 +59,7 @@ export function getTranslateRuleGraph({
     .addEdge('retrieveIntegrations', 'translateRule')
     .addEdge('translateRule', 'validation')
     .addEdge('esql_errors', 'validation')
-    .addConditionalEdges('validation', (state: TranslateRuleState) => validationRouter({ state }), {
+    .addConditionalEdges('validation', (state: TranslateRuleState) => validationRouter(state), {
       esql_error: 'esql_errors',
       end: END,
     });
@@ -69,7 +69,7 @@ export function getTranslateRuleGraph({
   return graph;
 }
 
-const validationRouter = ({ state }: TranslateRuleState) => {
+const validationRouter = (state: TranslateRuleState) => {
   if (
     state.validation_errors.iterations <= MAX_VALIDATION_ITERATIONS &&
     state.translation_result === SiemMigrationRuleTranslationResult.FULL

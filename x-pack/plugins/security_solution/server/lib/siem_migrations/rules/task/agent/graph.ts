@@ -36,7 +36,11 @@ export function getRuleMigrationAgent({
     .addNode('translationSubGraph', translationSubGraph)
     // Edges
     .addEdge(START, 'matchPrebuiltRule')
-    .addConditionalEdges('matchPrebuiltRule', matchedPrebuiltRuleConditional)
+    .addConditionalEdges(
+      'matchPrebuiltRule',
+      (state: MigrateRuleState) => matchedPrebuiltRuleConditional(state),
+      { translate: 'translationSubGraph', end: END }
+    )
     .addEdge('translationSubGraph', END);
 
   const graph = siemMigrationAgentGraph.compile();
@@ -46,7 +50,7 @@ export function getRuleMigrationAgent({
 
 const matchedPrebuiltRuleConditional = (state: MigrateRuleState) => {
   if (state.elastic_rule?.prebuilt_rule_id) {
-    return END;
+    return 'end';
   }
-  return 'translation';
+  return 'translate';
 };
