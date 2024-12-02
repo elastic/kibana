@@ -20,7 +20,6 @@ import { VersionMismatchPage } from '../shared/version_mismatch';
 import { WorkplaceSearchHeaderActions } from './components/layout';
 import { SourcesRouter } from './views/content_sources';
 import { SourceAdded } from './views/content_sources/components/source_added';
-import { ErrorState } from './views/error_state';
 import { NotFound } from './views/not_found';
 import { Overview } from './views/overview';
 import { RoleMappings } from './views/role_mappings';
@@ -55,27 +54,6 @@ describe('WorkplaceSearch', () => {
 
     expect(wrapper.find(WorkplaceSearchConfigured)).toHaveLength(1);
   });
-
-  it('renders ErrorState when not on SetupGuide', () => {
-    mockUseRouteMatch.mockReturnValue(false);
-    setMockValues({ errorConnectingMessage: '502 Bad Gateway' });
-
-    const wrapper = shallow(<WorkplaceSearch />);
-
-    const errorState = wrapper.find(ErrorState);
-    expect(errorState).toHaveLength(1);
-  });
-
-  it('does not render ErrorState when on SetupGuide', () => {
-    mockUseRouteMatch.mockReturnValue(true);
-    setMockValues({ errorConnectingMessage: '502 Bad Gateway' });
-
-    const wrapper = shallow(<WorkplaceSearch />);
-
-    const errorState = wrapper.find(ErrorState);
-    expect(errorState).toHaveLength(0);
-  });
-});
 
 describe('WorkplaceSearchUnconfigured', () => {
   it('renders the Setup Guide and redirects to the Setup Guide', () => {

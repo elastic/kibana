@@ -14,7 +14,6 @@ import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { isVersionMismatch } from '../../../common/is_version_mismatch';
 import { InitialAppData } from '../../../common/types';
-import { HttpLogic } from '../shared/http';
 import { KibanaLogic } from '../shared/kibana';
 import { VersionMismatchPage } from '../shared/version_mismatch';
 
@@ -39,7 +38,6 @@ import { AccountSettings } from './views/account_settings';
 import { ApiKeys } from './views/api_keys';
 import { SourcesRouter } from './views/content_sources';
 import { SourceAdded } from './views/content_sources/components/source_added';
-import { ErrorState } from './views/error_state';
 import { GroupsRouter } from './views/groups';
 import { NotFound } from './views/not_found';
 import { OAuthAuthorize } from './views/oauth_authorize';
@@ -52,10 +50,8 @@ import { SetupGuide } from './views/setup_guide';
 
 export const WorkplaceSearch: React.FC<InitialAppData> = (props) => {
   const { config } = useValues(KibanaLogic);
-  const { errorConnectingMessage } = useValues(HttpLogic);
   const { enterpriseSearchVersion, kibanaVersion } = props;
   const incompatibleVersions = isVersionMismatch(enterpriseSearchVersion, kibanaVersion);
-  const isSetupGuidePath = !!useRouteMatch(SETUP_GUIDE_PATH);
 
   if (!config.host) {
     return <WorkplaceSearchUnconfigured />;
@@ -66,8 +62,6 @@ export const WorkplaceSearch: React.FC<InitialAppData> = (props) => {
         kibanaVersion={kibanaVersion}
       />
     );
-  } else if (errorConnectingMessage && !isSetupGuidePath) {
-    return <ErrorState />;
   }
 
   return <WorkplaceSearchConfigured {...props} />;
