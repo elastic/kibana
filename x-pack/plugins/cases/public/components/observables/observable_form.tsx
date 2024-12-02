@@ -6,7 +6,12 @@
  */
 
 import React, { type FC, useCallback, useMemo, memo, useState } from 'react';
-import { useForm, Form, UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import {
+  useForm,
+  Form,
+  UseField,
+  useFormContext,
+} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { EuiButton, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 
 import {
@@ -30,6 +35,8 @@ export const ObservableFormFields = memo(({ observable }: ObservableFormFieldsPr
   const { data, isLoading } = useGetCaseConfiguration();
   const [selectedTypeKey, setSelectedTypeKey] = useState<string>(observable?.typeKey ?? '');
 
+  const { validateFields } = useFormContext();
+
   const options = useMemo(() => {
     return [...OBSERVABLE_TYPES_BUILTIN, ...data.observableTypes].map((observableType) => ({
       value: observableType.key,
@@ -37,13 +44,21 @@ export const ObservableFormFields = memo(({ observable }: ObservableFormFieldsPr
     }));
   }, [data.observableTypes]);
 
+  const handleSelectedTypeChange = useCallback(
+    (selectedTypeKeyValue: string) => {
+      validateFields(['value']);
+      setSelectedTypeKey(selectedTypeKeyValue);
+    },
+    [validateFields]
+  );
+
   return (
     <>
       {!observable && (
         <UseField
           component={SelectField}
           componentProps={{ euiFieldProps: { options, hasNoInitialSelection: true, isLoading } }}
-          onChange={setSelectedTypeKey}
+          onChange={handleSelectedTypeChange}
           path="typeKey"
           config={fieldsConfig.typeKey}
         />
@@ -84,8 +99,8 @@ export const ObservableForm: FC<ObservableFormProps> = ({
 
   const handleSubmitClick = useCallback(
     async (e: React.MouseEvent<HTMLButtonElement>) => {
-      await form.validate();
-      const { isValid, data } = await form.submit(e);
+      const isValid = await form.validate();
+      const { data } = await form.submit(e);
 
       if (isValid) {
         return onSubmit({
