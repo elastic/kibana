@@ -1130,19 +1130,20 @@ export class TimeSeriesExplorer extends React.Component {
                         )}
                       </span>
                       &nbsp;
-                      {chartDetails.entityData.count === 1 && (
-                        <EuiTextColor color={'success'} size={'s'} component={'span'}>
-                          {chartDetails.entityData.entities.length > 0 && '('}
-                          {chartDetails.entityData.entities
-                            .map((entity) => {
-                              return `${entity.fieldName}: ${entity.fieldValue}`;
-                            })
-                            .join(', ')}
-                          {chartDetails.entityData.entities.length > 0 && ')'}
-                        </EuiTextColor>
-                      )}
-                      {chartDetails.entityData.count !== 1 && (
-                        <EuiTextColor color={'success'} size={'s'} component={'span'}>
+                      {chartDetails.entityData.count === 1 &&
+                        chartDetails.entityData.entities.length > 0 && (
+                          <EuiTextColor color={'textAccentSecondary'} size="s" component="span">
+                            (
+                            {chartDetails.entityData.entities
+                              .map((entity) => {
+                                return `${entity.fieldName}: ${entity.fieldValue}`;
+                              })
+                              .join(', ')}
+                            )
+                          </EuiTextColor>
+                        )}
+                      {chartDetails.entityData.count > 1 && (
+                        <EuiTextColor color={'textAccentSecondary'} size="s" component="span">
                           {chartDetails.entityData.entities.map((countData, i) => {
                             return (
                               <Fragment key={countData.fieldName}>
