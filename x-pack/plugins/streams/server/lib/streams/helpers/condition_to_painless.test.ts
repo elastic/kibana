@@ -141,6 +141,19 @@ describe('conditionToPainless', () => {
     });
   });
 
+  test('wrapped with type checks for uinary conditions', () => {
+    const condition = { field: 'log', operator: 'exists' as const };
+    expect(conditionToPainless(condition)).toEqual(`try {
+  if (ctx.log !== null) {
+    return true;
+  }
+  return false;
+} catch (Exception e) {
+  return false;
+}
+`);
+  });
+
   test('wrapped with typechecks and try/catch', () => {
     const condition = {
       and: [
@@ -154,8 +167,8 @@ describe('conditionToPainless', () => {
       ],
     };
     expect(
-      expect(conditionToPainless(condition)).toEqual(`
-if (ctx.log?.logger instanceof Map || ctx.log?.level instanceof Map) {
+      expect(conditionToPainless(condition))
+        .toEqual(`if (ctx.log?.logger instanceof Map || ctx.log?.level instanceof Map) {
   return false;
 }
 try {

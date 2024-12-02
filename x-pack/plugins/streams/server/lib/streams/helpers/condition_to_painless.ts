@@ -86,7 +86,7 @@ function isUnaryFilterCondition(subject: FilterCondition): subject is UnaryFilte
 }
 
 function extractAllFields(condition: Condition, fields: string[] = []): string[] {
-  if (isFilterCondition(condition)) {
+  if (isFilterCondition(condition) && !isUnaryFilterCondition(condition)) {
     return uniq([...fields, condition.field]);
   } else if (isAndCondition(condition)) {
     return uniq(condition.and.map((cond) => extractAllFields(cond, fields)).flat());
@@ -116,11 +116,16 @@ export function conditionToStatement(condition: Condition, nested = false): stri
 
 export function conditionToPainless(condition: Condition): string {
   const fields = extractAllFields(condition);
-  return `
-if (${fields.map((field) => `${safePainlessField(field)} instanceof Map`).join(' || ')}) {
+  let fieldCheck = '';
+  if (fields.length !== 0) {
+    fieldCheck = `if (${fields
+      .map((field) => `${safePainlessField(field)} instanceof Map`)
+      .join(' || ')}) {
   return false;
 }
-try {
+`;
+  }
+  return `${fieldCheck}try {
   if (${conditionToStatement(condition)}) {
     return true;
   }
