@@ -58,7 +58,7 @@ function termToCssSelector(term: string) {
  *     - example: `foo > bar`
  *     - css equivalent: `[data-test-subj=foo] [data-test-subj=bar]`
  *     - DOM match example:
- *       <div data-test-subj="foo"
+ *       <div data-test-subj="foo">
  *          <div data-test-subj="bar"> </div>
  *      </div>
  *
