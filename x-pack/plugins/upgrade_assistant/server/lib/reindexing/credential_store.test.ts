@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import { CoreKibanaRequest } from '@kbn/core/server';
-import { loggingSystemMock, httpServerMock } from '@kbn/core/server/mocks';
+import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
-import { ReindexStep, ReindexStatus, ReindexSavedObject } from '../../../common/types';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { credentialStoreFactory } from './credential_store';
+import { ReindexStep, ReindexStatus, type ReindexSavedObject } from '../../../common/types';
 
 const basicAuthHeader = 'Basic abc';
 
 const logMock = loggingSystemMock.create().get();
-const requestMock = CoreKibanaRequest.from(
+const requestMock = kibanaRequestFactory(
   httpServerMock.createRawRequest({
     headers: {
       authorization: basicAuthHeader,

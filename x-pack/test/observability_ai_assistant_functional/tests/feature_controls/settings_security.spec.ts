@@ -15,7 +15,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const ui = getService('observabilityAIAssistantUI');
   const testSubjects = getService('testSubjects');
 
-  describe('ai assistant management privileges', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/191707
+  describe.skip('ai assistant management privileges', () => {
     // FLAKY: https://github.com/elastic/kibana/issues/191707
     describe.skip('all privileges', () => {
       before(async () => {

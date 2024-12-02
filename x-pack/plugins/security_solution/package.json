@@ -27,6 +27,7 @@
     "test:generate:serverless-dev": "NODE_TLS_REJECT_UNAUTHORIZED=0 node --no-warnings scripts/endpoint/resolver_generator --node https://elastic_serverless:changeme@127.0.0.1:9200 --kibana http://elastic_serverless:changeme@127.0.0.1:5601",
     "mappings:generate": "node scripts/mappings/mappings_generator",
     "mappings:load": "node scripts/mappings/mappings_loader",
+    "siem-migrations:graph:draw": "node scripts/siem_migration/draw_graphs",
     "junit:transform": "node scripts/junit_transformer --pathPattern '../../../target/kibana-security-solution/cypress/results/*.xml' --rootDirectory ../../../ --reportName 'Security Solution Cypress' --writeInPlace",
     "openapi:generate": "node scripts/openapi/generate",
     "openapi:generate:debug": "node --inspect-brk scripts/openapi/generate",

@@ -20,6 +20,7 @@ import {
   EuiRadio,
   EuiSpacer,
   EuiText,
+  useIsWithinBreakpoints,
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -33,7 +34,7 @@ import { GeneratedConfigFields } from '../../connector_detail/components/generat
 import { ConnectorViewLogic } from '../../connector_detail/connector_view_logic';
 import { NewConnectorLogic } from '../../new_index/method_connector/new_connector_logic';
 
-import { ChooseConnectorSelectable } from './components/choose_connector_selectable';
+import { ChooseConnector } from './components/choose_connector';
 import { ConnectorDescriptionPopover } from './components/connector_description_popover';
 import { ManualConfiguration } from './components/manual_configuration';
 import { SelfManagePreference } from './create_connector';
@@ -53,6 +54,7 @@ export const StartStep: React.FC<StartStepProps> = ({
   onSelfManagePreferenceChange,
   error,
 }) => {
+  const isMediumDevice = useIsWithinBreakpoints(['xs', 's', 'm', 'l']);
   const elasticManagedRadioButtonId = useGeneratedHtmlId({ prefix: 'elasticManagedRadioButton' });
   const selfManagedRadioButtonId = useGeneratedHtmlId({ prefix: 'selfManagedRadioButton' });
 
@@ -93,8 +95,8 @@ export const StartStep: React.FC<StartStepProps> = ({
               <h3>{title}</h3>
             </EuiTitle>
             <EuiSpacer size="m" />
-            <EuiFlexGroup>
-              <EuiFlexItem>
+            <EuiFlexGroup direction={isMediumDevice ? 'column' : 'row'}>
+              <EuiFlexItem grow={7}>
                 <EuiFormRow
                   fullWidth
                   label={i18n.translate(
@@ -102,10 +104,10 @@ export const StartStep: React.FC<StartStepProps> = ({
                     { defaultMessage: 'Connector' }
                   )}
                 >
-                  <ChooseConnectorSelectable selfManaged={selfManagePreference} />
+                  <ChooseConnector selfManaged={selfManagePreference} />
                 </EuiFormRow>
               </EuiFlexItem>
-              <EuiFlexItem>
+              <EuiFlexItem grow={5}>
                 <EuiFormRow
                   fullWidth
                   isInvalid={!!error}
@@ -142,6 +144,7 @@ export const StartStep: React.FC<StartStepProps> = ({
                         generateConnectorName({
                           connectorName: rawName,
                           connectorType: selectedConnector.serviceType,
+                          isManagedConnector: selectedConnector.isNative,
                         });
                       }
                     }}
