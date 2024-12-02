@@ -42,7 +42,7 @@ export function FiltersNotificationPopover({ api }: { api: FiltersNotificationAc
 
   const filters = useMemo(() => api.filters$?.value, [api]);
   const displayName = dashboardFilterNotificationActionStrings.getDisplayName();
-  const isSearchType = api.type === 'search';
+  const canEditUnifiedSearch = api.canEditUnifiedSearch?.() ?? true;
 
   const { queryString, queryLanguage } = useMemo(() => {
     const query = api.query$?.value;
@@ -68,7 +68,7 @@ export function FiltersNotificationPopover({ api }: { api: FiltersNotificationAc
     getViewModeSubject(api ?? undefined)
   );
 
-  const showEditButton = !disableEditbutton && parentViewMode === 'edit' && !isSearchType;
+  const showEditButton = !disableEditbutton && parentViewMode === 'edit' && canEditUnifiedSearch;
 
   return (
     <EuiPopover

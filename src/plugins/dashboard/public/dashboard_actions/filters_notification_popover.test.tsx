@@ -51,7 +51,7 @@ describe('filters notification popover', () => {
   let updateFilters: (filters: Filter[]) => void;
   let updateQuery: (query: Query | AggregateQuery | undefined) => void;
   let updateViewMode: (viewMode: ViewMode) => void;
-  let updateType: (type: string) => void;
+  let updateCanEditUnifiedSearch: (value: boolean) => void;
 
   beforeEach(async () => {
     const filtersSubject = new BehaviorSubject<Filter[] | undefined>(undefined);
@@ -60,7 +60,9 @@ describe('filters notification popover', () => {
     updateQuery = (query) => querySubject.next(query);
     const viewModeSubject = new BehaviorSubject<ViewMode>('view');
     updateViewMode = (viewMode) => viewModeSubject.next(viewMode);
-    updateType = (type) => ({ ...api, type });
+    let canEditUnifiedSearchValue = true;
+    const canEditUnifiedSearch = jest.fn().mockReturnValue(canEditUnifiedSearchValue);
+    updateCanEditUnifiedSearch = (value: boolean) => (canEditUnifiedSearchValue = value);
 
     api = {
       uuid: 'testId',
@@ -69,7 +71,7 @@ describe('filters notification popover', () => {
       parentApi: {
         viewMode: viewModeSubject,
       },
-      type: undefined,
+      canEditUnifiedSearch,
     };
   });
 
@@ -102,9 +104,9 @@ describe('filters notification popover', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('does not render an edit button when the type is search', async () => {
+  it('does not render an edit button when canEditUnifiedSearch returns false', async () => {
     await renderAndOpenPopover();
-    updateType('search');
+    updateCanEditUnifiedSearch(false);
     expect(
       await screen.queryByTestId('filtersNotificationModal__editButton')
     ).not.toBeInTheDocument();

@@ -35,9 +35,7 @@ export type FiltersNotificationActionApi = HasUniqueId &
   Partial<PublishesUnifiedSearch> &
   Partial<HasParentApi<Partial<PublishesDataViews>>> &
   Partial<CanLockHoverActions> &
-  Partial<CanAccessViewMode> & {
-    type?: string;
-  };
+  Partial<CanAccessViewMode>;
 
 const isApiCompatible = (api: unknown | null): api is FiltersNotificationActionApi =>
   Boolean(apiHasUniqueId(api) && apiPublishesPartialUnifiedSearch(api));
