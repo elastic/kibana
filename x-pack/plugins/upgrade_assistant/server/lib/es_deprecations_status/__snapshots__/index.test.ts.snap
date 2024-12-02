@@ -6,6 +6,7 @@ Object {
     Object {
       "correctiveAction": undefined,
       "details": "templates using \`template\` field: security_audit_log,watches,.monitoring-alerts,triggered_watches,.ml-anomalies-,.ml-notifications,.ml-meta,.monitoring-kibana,.monitoring-es,.monitoring-logstash,.watch-history-6,.ml-state,security-index-template",
+      "index": undefined,
       "isCritical": false,
       "message": "Template patterns are no longer using \`template\` field, but \`index_patterns\` instead",
       "resolveDuringUpgrade": false,
@@ -15,6 +16,7 @@ Object {
     Object {
       "correctiveAction": undefined,
       "details": "{.monitoring-logstash=[Coercion of boolean fields], .monitoring-es=[Coercion of boolean fields], .ml-anomalies-=[Coercion of boolean fields], .watch-history-6=[Coercion of boolean fields], .monitoring-kibana=[Coercion of boolean fields], security-index-template=[Coercion of boolean fields]}",
+      "index": undefined,
       "isCritical": false,
       "message": "one or more templates use deprecated mapping settings",
       "resolveDuringUpgrade": false,
@@ -24,6 +26,7 @@ Object {
     Object {
       "correctiveAction": undefined,
       "details": "[Deprecated field [use_dis_max] used, replaced by [Set [tie_breaker] to 1 instead]]",
+      "index": undefined,
       "isCritical": false,
       "message": "Datafeed [deprecation-datafeed] uses deprecated query options",
       "resolveDuringUpgrade": false,
@@ -37,6 +40,7 @@ Object {
         "type": "mlSnapshot",
       },
       "details": "details",
+      "index": undefined,
       "isCritical": true,
       "message": "model snapshot [1] for job [deprecation_check_job] needs to be deleted or upgraded",
       "resolveDuringUpgrade": false,
@@ -46,6 +50,7 @@ Object {
     Object {
       "correctiveAction": undefined,
       "details": "This node thing is wrong",
+      "index": undefined,
       "isCritical": true,
       "message": "A node-level issue",
       "resolveDuringUpgrade": true,
@@ -153,7 +158,17 @@ Object {
       "type": "index_settings",
       "url": "https://www.elastic.co/guide/en/elasticsearch/reference/6.0/breaking_60_mappings_changes.html#_coercion_of_boolean_fields",
     },
+    Object {
+      "correctiveAction": undefined,
+      "details": "This data stream has backing indices that were created before Elasticsearch 8.0.0",
+      "index": "my-v7-data-stream",
+      "isCritical": true,
+      "message": "Old data stream with a compatibility version < 8.0",
+      "resolveDuringUpgrade": false,
+      "type": "data_streams",
+      "url": "https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes-9.0.html",
+    },
   ],
-  "totalCriticalDeprecations": 4,
+  "totalCriticalDeprecations": 5,
 }
 `;
