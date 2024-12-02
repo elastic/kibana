@@ -5,5 +5,6 @@
  * 2.0.
  */
 
-export { VersionMismatchPage } from './version_mismatch_page';
-export { VersionMismatchError } from './version_mismatch_error';
+export const QUERY_BAR_VALIDATION = {
+  SUGGESTIONS_COUNT: 'The query bar suggestions count should be',
+};
