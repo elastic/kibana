@@ -62,11 +62,11 @@ export class DatePicker {
 
     await expect(
       this.page.testSubj.locator('superDatePickerstartDatePopoverButton'),
-      `Date picker 'start date' is set incorrectly`
+      `Date picker 'start date' should be set correctly`
     ).toHaveText(from);
     await expect(
       this.page.testSubj.locator('superDatePickerendDatePopoverButton'),
-      `Date picker 'end date' is set incorrectly`
+      `Date picker 'end date' should be set correctly`
     ).toHaveText(to);
     await this.page.testSubj.click('querySubmitButton');
   }

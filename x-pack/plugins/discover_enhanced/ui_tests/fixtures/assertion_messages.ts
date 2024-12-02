@@ -6,5 +6,5 @@
  */
 
 export const QUERY_BAR_VALIDATION = {
-  SUGGESTIONS_COUNT: 'The query bar suggestions count is incorrect',
+  SUGGESTIONS_COUNT: 'The query bar suggestions count should be',
 };

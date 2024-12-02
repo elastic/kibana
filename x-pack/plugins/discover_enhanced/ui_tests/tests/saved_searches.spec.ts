@@ -17,7 +17,7 @@ const assertNoFilterAndEmptyQuery = async (
   expect(
     // checking if filter exists, enabled or disabled
     await pageObjects.filterBar.hasFilter(filterBadge),
-    `Filter ${JSON.stringify(filterBadge)} should exist`
+    `Filter ${JSON.stringify(filterBadge)} should not exist`
   ).toBe(false);
   await expect(
     page.testSubj.locator('queryInput'),
