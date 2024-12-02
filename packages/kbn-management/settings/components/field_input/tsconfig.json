@@ -30,5 +30,6 @@
     "@kbn/core-analytics-browser-mocks",
     "@kbn/core-ui-settings-browser",
     "@kbn/code-editor",
+    "@kbn/core-user-profile-browser-mocks",
   ]
 }

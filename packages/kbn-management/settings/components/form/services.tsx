@@ -46,7 +46,7 @@ export const FormKibanaProvider: FC<PropsWithChildren<FormKibanaDependencies>> =
   children,
   ...deps
 }) => {
-  const { settings, notifications, docLinks, theme, i18n } = deps;
+  const { settings, notifications, docLinks, ...startDeps } = deps;
 
   const services: Services = {
     saveChanges: (changes, scope: UiSettingsScope) => {
@@ -57,7 +57,7 @@ export const FormKibanaProvider: FC<PropsWithChildren<FormKibanaDependencies>> =
       return Promise.all(arr);
     },
     showError: (message: string) => notifications.toasts.addDanger(message),
-    showReloadPagePrompt: () => notifications.toasts.add(reloadPageToast(theme, i18n)),
+    showReloadPagePrompt: () => notifications.toasts.add(reloadPageToast(startDeps)),
   };
 
   return (

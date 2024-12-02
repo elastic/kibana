@@ -80,7 +80,7 @@ export class GuidedOnboardingPlugin
     application,
     notifications,
   }: {
-    startServices: Pick<CoreStart, 'analytics' | 'i18n' | 'theme'>;
+    startServices: Pick<CoreStart, 'analytics' | 'i18n' | 'theme' | 'userProfile'>;
     targetDomElement: HTMLElement;
     api: ApiService;
     application: ApplicationStart;

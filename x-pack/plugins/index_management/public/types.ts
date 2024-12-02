@@ -10,6 +10,7 @@ import {
   I18nStart,
   OverlayStart,
   ThemeServiceStart,
+  UserProfileService,
 } from '@kbn/core/public';
 import { CloudSetup } from '@kbn/cloud-plugin/public';
 import { ConsolePluginStart } from '@kbn/console-plugin/public';
@@ -24,6 +25,7 @@ export interface IndexManagementStartServices {
   i18n: I18nStart;
   overlays: OverlayStart;
   theme: Pick<ThemeServiceStart, 'theme$'>;
+  userProfile: UserProfileService;
 }
 
 export interface SetupDependencies {

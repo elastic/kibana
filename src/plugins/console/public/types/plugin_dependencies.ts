@@ -8,7 +8,12 @@
  */
 
 import type { FC } from 'react';
-import type { AnalyticsServiceStart, I18nStart, ThemeServiceStart } from '@kbn/core/public';
+import type {
+  AnalyticsServiceStart,
+  I18nStart,
+  ThemeServiceStart,
+  UserProfileService,
+} from '@kbn/core/public';
 import { HomePublicPluginSetup, HomePublicPluginStart } from '@kbn/home-plugin/public';
 import { DevToolsSetup } from '@kbn/dev-tools-plugin/public';
 import { UsageCollectionSetup, UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
@@ -21,6 +26,7 @@ export interface ConsoleStartServices {
   analytics: Pick<AnalyticsServiceStart, 'reportEvent'>;
   i18n: I18nStart;
   theme: Pick<ThemeServiceStart, 'theme$'>;
+  userProfile: UserProfileService;
 }
 
 export interface AppSetupUIPluginDependencies {
