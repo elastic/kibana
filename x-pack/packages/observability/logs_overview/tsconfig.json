@@ -34,12 +34,9 @@
     "@kbn/es-query",
     "@kbn/router-utils",
     "@kbn/share-plugin",
-    "@kbn/field-formats-plugin",
-    "@kbn/data-service",
-    "@kbn/discover-utils",
     "@kbn/discover-plugin",
-    "@kbn/unified-data-table",
-    "@kbn/discover-contextual-components",
-    "@kbn/core-lifecycle-browser",
+    "@kbn/embeddable-plugin",
+    "@kbn/data-plugin",
+    "@kbn/saved-search-component",
   ]
 }
