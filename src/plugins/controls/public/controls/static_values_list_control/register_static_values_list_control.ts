@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ESQL_CONTROL_STATIC_VALUES } from '../../../../common';
-import { untilPluginStartServicesReady } from '../../../services/kibana_services';
-import { registerControlFactory } from '../../../control_factory_registry';
+import { ESQL_CONTROL_STATIC_VALUES } from '../../../common';
+import { untilPluginStartServicesReady } from '../../services/kibana_services';
+import { registerControlFactory } from '../../control_factory_registry';
 
 export function registerStaticValuesListControl() {
   registerControlFactory(ESQL_CONTROL_STATIC_VALUES, async () => {

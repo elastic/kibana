@@ -874,8 +874,6 @@
       "@kbn/esql-validation-autocomplete/*": ["packages/kbn-esql-validation-autocomplete/*"],
       "@kbn/esql-validation-example-plugin": ["examples/esql_validation_example"],
       "@kbn/esql-validation-example-plugin/*": ["examples/esql_validation_example/*"],
-      "@kbn/esql-variables": ["src/plugins/esql_variables"],
-      "@kbn/esql-variables/*": ["src/plugins/esql_variables/*"],
       "@kbn/eui-provider-dev-warning": ["test/plugin_functional/plugins/eui_provider_dev_warning"],
       "@kbn/eui-provider-dev-warning/*": ["test/plugin_functional/plugins/eui_provider_dev_warning/*"],
       "@kbn/event-annotation-common": ["packages/kbn-event-annotation-common"],

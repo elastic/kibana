@@ -12,8 +12,7 @@ import { PublishingSubject, StateComparators } from '@kbn/presentation-publishin
 import type { StaticValuesListControlState } from './types';
 
 export function initializeStaticValuesControlSelections(
-  initialState: StaticValuesListControlState,
-  onSelectionChange: () => void
+  initialState: StaticValuesListControlState
 ) {
   const availableOptions$ = new BehaviorSubject<string[]>(initialState.availableOptions ?? []);
   const selectedOptions$ = new BehaviorSubject<string[]>(initialState.selectedOptions ?? []);
@@ -26,7 +25,6 @@ export function initializeStaticValuesControlSelections(
   function setSelectedOptions(next: string[]) {
     if (!selectedOptionsComparatorFunction(selectedOptions$.value, next)) {
       selectedOptions$.next(next);
-      onSelectionChange();
     }
   }
 
@@ -45,6 +43,8 @@ export function initializeStaticValuesControlSelections(
     hasInitialSelections: initialState.selectedOptions?.length,
     selectedOptions$: selectedOptions$ as PublishingSubject<string[]>,
     availableOptions$: availableOptions$ as PublishingSubject<string[]>,
+    variableName$: variableName$ as PublishingSubject<string>,
+    variableType$: variableType$ as PublishingSubject<string>,
     setSelectedOptions,
   };
 }

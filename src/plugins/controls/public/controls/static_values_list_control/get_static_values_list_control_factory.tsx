@@ -8,17 +8,25 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { BehaviorSubject } from 'rxjs';
 import { EuiComboBox } from '@elastic/eui';
-import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import {
+  useBatchedPublishingSubjects,
+  getUnchangingComparator,
+} from '@kbn/presentation-publishing';
 import { esqlVariablesService } from '@kbn/esql/common';
-import { ESQL_CONTROL_STATIC_VALUES } from '../../../../common';
+import { ESQL_CONTROL_STATIC_VALUES } from '../../../common';
 import type { StaticValuesListControlState, StaticValuesListControlApi } from './types';
-import { initializeDataControl } from '../initialize_data_control';
-import type { DataControlFactory } from '../types';
+import { ControlFactory } from '../types';
+import { initializeDefaultControlApi } from '../initialize_default_control_api';
 import { initializeStaticValuesControlSelections } from './static_values_control_selections';
 
-export const getStaticValuesListControlFactory = (): DataControlFactory<
+const displayName = i18n.translate('controls.esqlValuesControl.displayName', {
+  defaultMessage: 'Static values list',
+});
+
+export const getStaticValuesListControlFactory = (): ControlFactory<
   StaticValuesListControlState,
   StaticValuesListControlApi
 > => {
@@ -26,11 +34,8 @@ export const getStaticValuesListControlFactory = (): DataControlFactory<
     type: ESQL_CONTROL_STATIC_VALUES,
     order: 3,
     getIconType: () => 'editorChecklist',
-    getDisplayName: () => 'Static values list',
-    isFieldCompatible: () => false,
-    CustomOptionsComponent: undefined,
+    getDisplayName: () => displayName,
     buildControl: async (initialState, buildApi, uuid, controlGroupApi) => {
-      const availableOptions$ = new BehaviorSubject<string[]>(initialState.availableOptions ?? []);
       const selectedOptions$ = new BehaviorSubject<string[]>(initialState.selectedOptions ?? []);
       const variableName$ = new BehaviorSubject<string>(initialState.variableName ?? '');
       const variableType$ = new BehaviorSubject<string>(initialState.variableType ?? '');
@@ -40,41 +45,26 @@ export const getStaticValuesListControlFactory = (): DataControlFactory<
         value: initialState.selectedOptions[0],
         type: initialState.variableType,
       });
-      const dataLoading$ = new BehaviorSubject<boolean | undefined>(undefined);
+      const defaultControl = initializeDefaultControlApi({ ...initialState, width: 'large' });
 
-      const dataControl = initializeDataControl<
-        Pick<StaticValuesListControlState, 'selectedOptions' | 'availableOptions'>
-      >(
-        uuid,
-        ESQL_CONTROL_STATIC_VALUES,
-        'optionsListDataView',
-        initialState,
-        {
-          selectedOptions: selectedOptions$,
-          availableOptions: availableOptions$,
-        },
-        controlGroupApi
-      );
-
-      const selections = initializeStaticValuesControlSelections(
-        initialState,
-        dataControl.setters.onSelectionChange
-      );
+      const selections = initializeStaticValuesControlSelections(initialState);
 
       const api = buildApi(
         {
-          ...dataControl.api,
-          blockingError: new BehaviorSubject<Error | undefined>(undefined),
-          dataLoading: dataLoading$,
-          getTypeDisplayName: () => 'Static values list',
+          ...defaultControl.api,
+          defaultPanelTitle: new BehaviorSubject<string | undefined>(displayName),
+          selectedOptions$,
           serializeState: () => {
-            const { rawState: dataControlState, references } = dataControl.serialize();
+            const { rawState: defaultControlState } = defaultControl.serialize();
             return {
               rawState: {
-                ...dataControlState,
+                ...defaultControlState,
                 selectedOptions: selections.selectedOptions$.getValue(),
+                availableOptions: selections.availableOptions$.getValue(),
+                variableName: selections.variableName$.getValue(),
+                variableType: selections.variableType$.getValue(),
               },
-              references, // does not have any references other than those provided by the data control serializer
+              references: [],
             };
           },
           clearSelections: () => {
@@ -85,7 +75,8 @@ export const getStaticValuesListControlFactory = (): DataControlFactory<
           },
         },
         {
-          ...dataControl.comparators,
+          ...defaultControl.comparators,
+          width: getUnchangingComparator(),
           ...selections.comparators,
         }
       );
@@ -96,7 +87,7 @@ export const getStaticValuesListControlFactory = (): DataControlFactory<
           // /** Get display settings - if these are ever made editable, should be part of stateManager instead */
           const [availableOptions, selectedOptions, variableName, variableType] =
             useBatchedPublishingSubjects(
-              availableOptions$,
+              selections.availableOptions$,
               selections.selectedOptions$,
               variableName$,
               variableType$
@@ -111,6 +102,7 @@ export const getStaticValuesListControlFactory = (): DataControlFactory<
                 options={availableOptions.map((option) => ({ label: option }))}
                 selectedOptions={selectedOptions.map((option) => ({ label: option }))}
                 compressed
+                fullWidth
                 onChange={(options) => {
                   const selectedValues = options.map((option) => option.label);
                   selections.setSelectedOptions(selectedValues);

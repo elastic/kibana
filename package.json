@@ -497,7 +497,6 @@
     "@kbn/esql-utils": "link:packages/kbn-esql-utils",
     "@kbn/esql-validation-autocomplete": "link:packages/kbn-esql-validation-autocomplete",
     "@kbn/esql-validation-example-plugin": "link:examples/esql_validation_example",
-    "@kbn/esql-variables": "link:src/plugins/esql_variables",
     "@kbn/eui-provider-dev-warning": "link:test/plugin_functional/plugins/eui_provider_dev_warning",
     "@kbn/event-annotation-common": "link:packages/kbn-event-annotation-common",
     "@kbn/event-annotation-components": "link:packages/kbn-event-annotation-components",

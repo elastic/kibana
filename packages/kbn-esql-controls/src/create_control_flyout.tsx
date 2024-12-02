@@ -9,6 +9,7 @@
 
 import React, { useCallback, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
+import { v4 as uuidv4 } from 'uuid';
 import { css } from '@emotion/react';
 import {
   EuiFlyoutBody,
@@ -230,9 +231,18 @@ export function ESQLControlsFlyout({
       variableType: controlType,
       grow: false,
     };
-    controlGroupApi?.addNewControl('esqlControlStaticValues', state);
 
     if (panelId && cursorPosition && availableOptions.length) {
+      // create a new control
+      controlGroupApi?.addNewPanel({
+        panelType: 'esqlControlStaticValues',
+        initialState: {
+          ...state,
+          id: uuidv4(),
+        },
+      });
+
+      // add the variable to the service
       const cursorColumn = cursorPosition?.column ?? 0;
       const query = [
         queryString.slice(0, cursorColumn - 1),
@@ -241,6 +251,8 @@ export function ESQLControlsFlyout({
       ].join('');
 
       addToESQLVariablesService(varName, availableOptions[0], controlType, query);
+
+      // open the edit flyout to continue editing
       await openEditFlyout(embeddable);
     }
     closeFlyout();

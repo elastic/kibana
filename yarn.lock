@@ -5530,10 +5530,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/esql-variables@link:src/plugins/esql_variables":
-  version "0.0.0"
-  uid ""
-
 "@kbn/esql@link:src/plugins/esql":
   version "0.0.0"
   uid ""
