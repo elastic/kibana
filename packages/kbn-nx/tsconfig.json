@@ -1,7 +1,7 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "target/",
+    "outDir": "target/types",
     "types": [
       "node",
       "jest"
@@ -12,5 +12,11 @@
   ],
   "exclude": [
     "target/**/*",
+  ],
+  "kbn_references": [
+    "@kbn/dev-cli-runner",
+    "@kbn/repo-info",
+    "@kbn/repo-packages",
+    "@kbn/tooling-log",
   ]
 }
