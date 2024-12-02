@@ -30,11 +30,7 @@ import {
 } from '../../tasks/api_calls/risk_engine';
 import { updateDateRangeInLocalDatePickers } from '../../tasks/date_picker';
 import { submitLocalSearch } from '../../tasks/search_bar';
-import {
-  riskEngineStatusChange,
-  upgradeRiskEngine,
-  previewErrorButtonClick,
-} from '../../tasks/entity_analytics';
+import { riskEngineStatusChange, previewErrorButtonClick } from '../../tasks/entity_analytics';
 
 describe(
   'Entity analytics management page',
