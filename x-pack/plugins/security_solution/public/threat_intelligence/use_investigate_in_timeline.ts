@@ -15,7 +15,6 @@ import { useStartTransaction } from '../common/lib/apm/use_start_transaction';
 import { useCreateTimeline } from '../timelines/hooks/use_create_timeline';
 import type { CreateTimelineProps } from '../detections/components/alerts_table/types';
 import { useUpdateTimeline } from '../timelines/components/open_timeline/use_update_timeline';
-import { useUserPrivileges } from '../common/components/user_privileges';
 
 interface UseInvestigateInTimelineActionProps {
   /**
@@ -45,10 +44,6 @@ export const useInvestigateInTimeline = ({
   from,
   to,
 }: UseInvestigateInTimelineActionProps) => {
-  const {
-    timelinePrivileges: { crud, read },
-  } = useUserPrivileges();
-  const canSeeTimeline = crud || read;
   const { startTransaction } = useStartTransaction();
 
   const clearActiveTimeline = useCreateTimeline({
@@ -109,8 +104,5 @@ export const useInvestigateInTimeline = ({
     });
   }, [startTransaction, createTimeline, dataProviders, from, to]);
 
-  if (!canSeeTimeline) {
-    return;
-  }
   return investigateInTimelineClick;
 };

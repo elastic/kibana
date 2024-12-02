@@ -31,10 +31,18 @@ import { deleteOneQuery, setQuery } from '../common/store/inputs/actions';
 import { InputsModelId } from '../common/store/inputs/constants';
 import { ArtifactFlyout } from '../management/components/artifact_list_page/components/artifact_flyout';
 import { SecurityRoutePageWrapper } from '../common/components/security_route_page_wrapper';
+import { extractTimelineCapabilities } from '../common/utils/timeline_capabilities';
 
 const ThreatIntelligence = memo(() => {
-  const { threatIntelligence, http } = useKibana().services;
+  const {
+    threatIntelligence,
+    http,
+    application: { capabilities },
+  } = useKibana().services;
   const ThreatIntelligencePlugin = threatIntelligence.getComponent();
+
+  const timelineCapabilities = extractTimelineCapabilities(capabilities);
+  const hasAccessToTimeline = timelineCapabilities.read || timelineCapabilities.crud;
 
   const sourcererDataView = useSourcererDataView();
 
@@ -50,6 +58,7 @@ const ThreatIntelligence = memo(() => {
       licenseService,
       sourcererDataView: sourcererDataView as unknown as SelectedDataView,
       getUseInvestigateInTimeline: useInvestigateInTimeline,
+      hasAccessToTimeline,
 
       blockList: {
         canWriteBlocklist,
@@ -85,7 +94,7 @@ const ThreatIntelligence = memo(() => {
 
       SiemSearchBar,
     }),
-    [canWriteBlocklist, http, securitySolutionStore, sourcererDataView]
+    [canWriteBlocklist, http, securitySolutionStore, sourcererDataView, hasAccessToTimeline]
   );
 
   return (
