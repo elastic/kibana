@@ -15,7 +15,7 @@
  */
 
 import { parse } from '../../parser';
-import { ESQLAstQueryExpression } from '../../types';
+import { ESQLAstItem, ESQLAstQueryExpression } from '../../types';
 import { Visitor } from '../visitor';
 
 test('change LIMIT from 24 to 42', () => {
@@ -93,7 +93,7 @@ test('can remove a specific WHERE command', () => {
       })
       .on('visitCommand', (ctx) => {
         if (ctx.node.name === 'where') {
-          ctx.node.args = [...ctx.visitArguments()].filter(Boolean);
+          ctx.node.args = [...ctx.visitArguments()].filter(Boolean) as ESQLAstItem[];
         }
         return ctx.node;
       })
