@@ -29,7 +29,11 @@ import { IncreaseFieldMappingLimit } from './increase_field_mapping_limit';
 import { FieldLimitDocLink } from './field_limit_documentation_link';
 import { MessageCallout } from './message_callout';
 
-export function FieldMappingLimit({ isIntegration }: { isIntegration: boolean }) {
+export function FieldMappingLimit({
+  areIntegrationAssetsAvailable,
+}: {
+  areIntegrationAssetsAvailable: boolean;
+}) {
   const accordionId = useGeneratedHtmlId({
     prefix: increaseFieldMappingLimitTitle,
   });
@@ -66,7 +70,7 @@ export function FieldMappingLimit({ isIntegration }: { isIntegration: boolean })
           </ul>
         </EuiText>
         <EuiHorizontalRule margin="s" />
-        {isIntegration && (
+        {areIntegrationAssetsAvailable && (
           <>
             <IncreaseFieldMappingLimit
               totalFieldLimit={degradedFieldAnalysis?.totalFieldLimit ?? 0}
