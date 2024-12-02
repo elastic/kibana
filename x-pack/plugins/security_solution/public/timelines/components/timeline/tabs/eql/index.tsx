@@ -116,7 +116,7 @@ export const EqlTabContentComponent: React.FC<Props> = ({
       indexNames: selectedPatterns,
       language: 'eql',
       limit: sampleSize,
-      runtimeMappings: sourcererDataView.runtimeFieldMap as RunTimeMappings,
+      runtimeMappings: sourcererDataView?.runtimeFieldMap as RunTimeMappings,
       skip: !canQueryTimeline(),
       startDate: start,
       timerangeKind,

@@ -10,7 +10,7 @@ import React, { useMemo } from 'react';
 import { RootDragDropProvider } from '@kbn/dom-drag-drop';
 import { StyledTableFlexGroup, StyledUnifiedTableFlexItem } from '../unified_components/styles';
 import { UnifiedTimeline } from '../unified_components';
-import { defaultUdtHeaders } from './column_headers/default_headers';
+import { defaultHeaders } from './column_headers/default_headers';
 
 export interface UnifiedTimelineBodyProps extends ComponentProps<typeof UnifiedTimeline> {
   header: ReactElement;
@@ -38,7 +38,7 @@ export const UnifiedTimelineBody = (props: UnifiedTimelineBodyProps) => {
     onUpdatePageIndex,
   } = props;
 
-  const columnsHeader = useMemo(() => columns ?? defaultUdtHeaders, [columns]);
+  const columnsHeader = useMemo(() => columns ?? defaultHeaders, [columns]);
 
   return (
     <StyledTableFlexGroup direction="column" gutterSize="s">
