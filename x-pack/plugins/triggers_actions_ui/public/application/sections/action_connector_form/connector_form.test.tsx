@@ -17,6 +17,7 @@ describe('ConnectorForm', () => {
   let appMockRenderer: AppMockRenderer;
   const onChange = jest.fn();
   const onFormModifiedChange = jest.fn();
+  const resetErrorMessage = jest.fn();
 
   const connector = {
     actionTypeId: 'test',
@@ -99,6 +100,7 @@ describe('ConnectorForm', () => {
         connector={connector}
         onChange={onChange}
         onFormModifiedChange={onFormModifiedChange}
+        resetErrorMessage={resetErrorMessage}
       />
     );
 
@@ -118,6 +120,8 @@ describe('ConnectorForm', () => {
       preSubmitValidator: expect.anything(),
       submit: expect.anything(),
     });
+
+    expect(resetErrorMessage).not.toHaveBeenCalled();
   });
 
   it('registers the pre submit validator correctly', async () => {
