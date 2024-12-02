@@ -8,27 +8,22 @@ import { EuiAccordion, EuiPanel, EuiSpacer, EuiTitle, useEuiTheme } from '@elast
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useState } from 'react';
+import { EntityCountBadge } from './entity_count_badge';
 import { GroupedEntitiesGrid } from './grouped_entities_grid';
-import { InventoryPanelBadge } from './inventory_panel_badge';
 
 const ENTITIES_COUNT_BADGE = i18n.translate(
   'xpack.inventory.inventoryGroupPanel.entitiesBadgeLabel',
   { defaultMessage: 'Entities' }
 );
 
-export interface InventoryGroupAccordionProps {
+export interface Props {
   groupBy: string;
   groupValue: string;
   groupCount: number;
   isLoading?: boolean;
 }
 
-export function InventoryGroupAccordion({
-  groupBy,
-  groupValue,
-  groupCount,
-  isLoading,
-}: InventoryGroupAccordionProps) {
+export function EntityGroupAccordion({ groupBy, groupValue, groupCount, isLoading }: Props) {
   const { euiTheme } = useEuiTheme();
   const [open, setOpen] = useState(false);
 
@@ -55,8 +50,8 @@ export function InventoryGroupAccordion({
           }
           buttonElement="div"
           extraAction={
-            <InventoryPanelBadge
-              data-test-subj={`inventoryPanelBadgeEntitiesCount_${groupBy}_${groupValue}`}
+            <EntityCountBadge
+              data-test-subj={`entityCountBadge_${groupBy}_${groupValue}`}
               name={ENTITIES_COUNT_BADGE}
               value={groupCount}
             />
