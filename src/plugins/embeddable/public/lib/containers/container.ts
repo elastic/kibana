@@ -548,6 +548,7 @@ export abstract class Container<
   }
 
   private async onPanelAdded(panel: PanelState) {
+    debugger
     // do nothing if this panel's type is in the new Embeddable registry.
     if (reactEmbeddableRegistryHasKey(panel.type)) {
       this.updateOutput({

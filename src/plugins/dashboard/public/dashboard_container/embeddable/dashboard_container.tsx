@@ -346,6 +346,9 @@ export class DashboardContainer
 
     this.useMargins$ = new BehaviorSubject(this.getState().explicitInput.useMargins);
     this.panels$ = new BehaviorSubject(this.getState().explicitInput.panels);
+    this.panels$.subscribe((panels) => {
+      console.log('panels emit', panels);
+    })
     this.publishingSubscription.add(
       this.onStateChange(() => {
         const state = this.getState();
@@ -597,6 +600,7 @@ export class DashboardContainer
     panelPackage: PanelPackage,
     displaySuccessMessage?: boolean
   ) {
+    debugger
     const onSuccess = (id?: string, title?: string) => {
       if (!displaySuccessMessage) return;
       coreServices.notifications.toasts.addSuccess({
@@ -643,6 +647,7 @@ export class DashboardContainer
         },
         explicitInput: {
           id: newId,
+          ...(panelPackage?.initialState ?? {})
         },
       };
       if (panelPackage.initialState) {

@@ -91,15 +91,18 @@ export const ReactEmbeddableRenderer = <
         const buildEmbeddable = async () => {
           const factory = await getReactEmbeddableFactory<SerializedState, RuntimeState, Api>(type);
           const serializedState = parentApi.getSerializedStateForChild(uuid);
+          if (type !== 'control_group') console.log('serializedState', serializedState);
           const lastSavedRuntimeState = serializedState
             ? await factory.deserializeState(serializedState)
             : ({} as RuntimeState);
+          if (type !== 'control_group') console.log('lastSavedRuntimeState', lastSavedRuntimeState);
 
           // If the parent provides runtime state for the child (usually as a state backup or cache),
           // we merge it with the last saved runtime state.
           const partialRuntimeState = apiHasRuntimeChildState<RuntimeState>(parentApi)
             ? parentApi.getRuntimeStateForChild(uuid) ?? ({} as Partial<RuntimeState>)
             : ({} as Partial<RuntimeState>);
+          if (type !== 'control_group') console.log('partialRuntimeState', partialRuntimeState);
 
           const initialRuntimeState = { ...lastSavedRuntimeState, ...partialRuntimeState };
 

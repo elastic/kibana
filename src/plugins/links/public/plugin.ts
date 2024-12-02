@@ -66,7 +66,9 @@ export class LinksPlugin
           const initialState = await deserializeLinksSavedObject(savedObject);
           container.addNewPanel<LinksRuntimeState>({
             panelType: CONTENT_ID,
-            initialState,
+            initialState: {
+              savedObjectId: savedObject.id
+            },
           });
         },
         embeddableType: CONTENT_ID,
