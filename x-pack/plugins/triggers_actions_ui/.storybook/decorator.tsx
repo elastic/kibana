@@ -50,6 +50,8 @@ const notifications: NotificationsStart = {
   showErrorDialog: () => {},
 };
 
+const userProfile = { getUserProfile$: () => of(null) };
+
 export const StorybookContextDecorator: FC<PropsWithChildren<StorybookContextDecoratorProps>> = (
   props
 ) => {
@@ -75,7 +77,7 @@ export const StorybookContextDecorator: FC<PropsWithChildren<StorybookContextDec
   return (
     <I18nProvider>
       <EuiThemeProvider darkMode={darkMode}>
-        <KibanaThemeProvider theme$={EMPTY}>
+        <KibanaThemeProvider theme$={EMPTY} userProfile={userProfile}>
           <KibanaContextProvider
             services={{
               notifications,
