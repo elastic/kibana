@@ -29,6 +29,9 @@ export function createStreamsIndex(scopedClusterClient: IScopedClusterClient) {
         id: {
           type: 'keyword',
         },
+        managed: {
+          type: 'boolean',
+        },
       },
     },
   });
