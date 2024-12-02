@@ -14,6 +14,7 @@ import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { StreamDetailRouting } from '../stream_detail_routing';
 import { StreamDetailEnriching } from '../stream_detail_enriching';
 import { StreamDetailSchemaEditor } from '../stream_detail_schema_editor';
+import { useKibana } from '../../hooks/use_kibana';
 
 type ManagementSubTabs = 'route' | 'enrich' | 'schemaEditor';
 
@@ -151,6 +152,11 @@ function assetToTitle(asset: { type: string; id: string }) {
 }
 
 function UnmanagedStreamOverview({ definition }: { definition: StreamDefinition }) {
+  const {
+    core: {
+      http: { basePath },
+    },
+  } = useKibana();
   const groupedAssets = (definition.unmanaged_elasticsearch_assets ?? []).reduce((acc, asset) => {
     const title = assetToTitle(asset);
     if (title) {
@@ -177,7 +183,7 @@ function UnmanagedStreamOverview({ definition }: { definition: StreamDefinition 
           <EuiListGroup
             listItems={assets.map((asset) => ({
               label: asset.id,
-              href: assetToLink(asset),
+              href: basePath.prepend(assetToLink(asset)),
               iconType: 'index',
               target: '_blank',
             }))}
