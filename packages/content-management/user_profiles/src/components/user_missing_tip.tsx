@@ -11,25 +11,47 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiIconTip, IconType } from '@elastic/eui';
 import React from 'react';
 
-export const NoCreatorTip = (props: { iconType?: IconType }) => (
+export const NoCreatorTip = (props: { iconType?: IconType; includeVersionTip?: boolean }) => (
   <NoUsersTip
     content={
-      <FormattedMessage
-        id="contentManagement.userProfiles.noCreatorTip"
-        defaultMessage="Creators are assigned when objects are created"
-      />
+      <>
+        <FormattedMessage
+          id="contentManagement.userProfiles.noCreatorTip"
+          defaultMessage="Creators are assigned when objects are created "
+        />
+        {props.includeVersionTip && (
+          <>
+            {' '}
+            <FormattedMessage
+              id="contentManagement.userProfiles.noCreatorTipVersion"
+              defaultMessage=" (after version {version})"
+              values={{ version: '8.14' }}
+            />
+          </>
+        )}
+      </>
     }
     {...props}
   />
 );
 
-export const NoUpdaterTip = (props: { iconType?: string }) => (
+export const NoUpdaterTip = (props: { iconType?: string; includeVersionTip?: boolean }) => (
   <NoUsersTip
     content={
-      <FormattedMessage
-        id="contentManagement.userProfiles.noUpdaterTip"
-        defaultMessage="Updated by is set when objects are updated"
-      />
+      <>
+        <FormattedMessage
+          id="contentManagement.userProfiles.noUpdaterTip"
+          defaultMessage="Updated by is set when objects are updated"
+        />
+        <>
+          {' '}
+          <FormattedMessage
+            id="contentManagement.userProfiles.noCreatorTipVersion"
+            defaultMessage=" (after version {version})"
+            values={{ version: '8.14' }}
+          />
+        </>
+      </>
     }
     {...props}
   />

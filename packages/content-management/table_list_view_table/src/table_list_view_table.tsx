@@ -380,6 +380,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
 
   const openContentEditor = useOpenContentEditor();
   const contentInsightsServices = useContentInsightsServices();
+  const isKibanaVersioningEnabled = contentInsightsServices?.isKibanaVersioningEnabled ?? false;
 
   const isInRouterContext = useInRouterContext();
 
@@ -646,7 +647,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
           ) : record.managed ? (
             <ManagedAvatarTip entityName={entityName} />
           ) : (
-            <NoCreatorTip iconType={'minus'} />
+            <NoCreatorTip iconType={'minus'} includeVersionTip={isKibanaVersioningEnabled} />
           ),
         sortable:
           false /* createdBy column is not sortable because it doesn't make sense to sort by id*/,
@@ -753,6 +754,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
     inspectItem,
     entityName,
     isFavoritesEnabled,
+    isKibanaVersioningEnabled,
   ]);
 
   const itemsById = useMemo(() => {

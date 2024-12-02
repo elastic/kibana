@@ -73,24 +73,39 @@ export const ViewsStats = ({ item }: { item: Item }) => {
   );
 };
 
-const NoViewsTip = () => (
-  <EuiIconTip
-    aria-label={i18n.translate('contentManagement.contentEditor.viewsStats.noViewsTipAriaLabel', {
-      defaultMessage: 'Additional information',
-    })}
-    position="top"
-    color="inherit"
-    iconProps={{ style: { verticalAlign: 'text-bottom', marginLeft: 2 } }}
-    css={{ textWrap: 'balance' }}
-    type="questionInCircle"
-    content={
-      <FormattedMessage
-        id="contentManagement.contentEditor.viewsStats.noViewsTip"
-        defaultMessage="Views are counted every time someone opens a dashboard"
-      />
-    }
-  />
-);
+const NoViewsTip = () => {
+  const isKibanaVersioningEnabled = useServices()?.isKibanaVersioningEnabled ?? false;
+  return (
+    <EuiIconTip
+      aria-label={i18n.translate('contentManagement.contentEditor.viewsStats.noViewsTipAriaLabel', {
+        defaultMessage: 'Additional information',
+      })}
+      position="top"
+      color="inherit"
+      iconProps={{ style: { verticalAlign: 'text-bottom', marginLeft: 2 } }}
+      css={{ textWrap: 'balance' }}
+      type="questionInCircle"
+      content={
+        <>
+          <FormattedMessage
+            id="contentManagement.contentEditor.viewsStats.noViewsTip"
+            defaultMessage="Views are counted every time someone opens a dashboard"
+          />
+          {isKibanaVersioningEnabled && (
+            <>
+              {' '}
+              <FormattedMessage
+                id="contentManagement.contentEditor.viewsStats.noViewsVersionTip"
+                defaultMessage="(after version {version})"
+                values={{ version: '8.16' }}
+              />
+            </>
+          )}
+        </>
+      }
+    />
+  );
+};
 
 export function getTotalDays(stats: ContentInsightsStats) {
   return moment.utc().diff(moment.utc(stats.from), 'days');

@@ -184,6 +184,12 @@ export interface TableListViewKibanaDependencies {
    * Content insights client to enable content insights features.
    */
   contentInsightsClient?: ContentInsightsClientPublic;
+
+  /**
+   * Flag to indicate if Kibana versioning is enabled. (aka not Serverless)
+   * Used to determine if we should show the version mentions in the help text.
+   */
+  isKibanaVersioningEnabled?: boolean;
 }
 
 /**
@@ -250,7 +256,10 @@ export const TableListViewKibanaProvider: FC<
     <RedirectAppLinksKibanaProvider coreStart={core}>
       <UserProfilesKibanaProvider core={core}>
         <ContentEditorKibanaProvider core={core} savedObjectsTagging={savedObjectsTagging}>
-          <ContentInsightsProvider contentInsightsClient={services.contentInsightsClient}>
+          <ContentInsightsProvider
+            contentInsightsClient={services.contentInsightsClient}
+            isKibanaVersioningEnabled={true}
+          >
             <FavoritesContextProvider
               favoritesClient={services.favorites}
               notifyError={(title, text) => {

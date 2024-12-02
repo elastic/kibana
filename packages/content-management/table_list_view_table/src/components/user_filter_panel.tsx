@@ -14,6 +14,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { UserProfile, UserProfilesPopover } from '@kbn/user-profile-components';
 import { i18n } from '@kbn/i18n';
 import { useUserProfiles, NoCreatorTip } from '@kbn/content-management-user-profiles';
+import { useContentInsightsServices } from '@kbn/content-management-content-insights-public';
 
 interface Context {
   enabled: boolean;
@@ -43,6 +44,9 @@ export const UserFilterPanel: FC<{}> = () => {
   const componentContext = React.useContext(UserFilterContext);
   if (!componentContext)
     throw new Error('UserFilterPanel must be used within a UserFilterContextProvider');
+
+  const contentInsightsServices = useContentInsightsServices();
+  const isKibanaVersioningEnabled = contentInsightsServices?.isKibanaVersioningEnabled ?? false;
 
   const { onSelectedUsersChange, selectedUsers, showNoUserOption } = componentContext;
 
@@ -126,7 +130,7 @@ export const UserFilterPanel: FC<{}> = () => {
                 id="contentManagement.tableList.listing.userFilter.emptyMessage"
                 defaultMessage="None of the dashboards have creators"
               />
-              {<NoCreatorTip />}
+              {<NoCreatorTip includeVersionTip={isKibanaVersioningEnabled} />}
             </p>
           ),
           nullOptionLabel: i18n.translate(
@@ -136,7 +140,7 @@ export const UserFilterPanel: FC<{}> = () => {
             }
           ),
           nullOptionProps: {
-            append: <NoCreatorTip />,
+            append: <NoCreatorTip includeVersionTip={isKibanaVersioningEnabled} />,
           },
           clearButtonLabel: (
             <FormattedMessage
