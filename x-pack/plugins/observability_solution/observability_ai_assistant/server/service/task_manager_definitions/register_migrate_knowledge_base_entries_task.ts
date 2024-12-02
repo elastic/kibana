@@ -15,6 +15,7 @@ import { resourceNames } from '..';
 import { getElserModelStatus } from '../inference_endpoint';
 import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
 import { ObservabilityAIAssistantConfig } from '../../config';
+import { setupConversationAndKbIndexAssets } from '../setup_conversation_and_kb_index_assets';
 
 const TASK_ID = 'obs-ai-assistant:knowledge-base-migration-task-id';
 const TASK_TYPE = 'obs-ai-assistant:knowledge-base-migration';
@@ -47,8 +48,21 @@ export async function registerMigrateKnowledgeBaseEntriesTask({
           return {
             async run() {
               logger.debug(`Run task: "${TASK_TYPE}"`);
+              const esClient = coreStart.elasticsearch.client;
 
-              const esClient = { asInternalUser: coreStart.elasticsearch.client.asInternalUser };
+              const hasExistingIndices = await esClient.asInternalUser.indices.exists({
+                index: [resourceNames.aliases.kb, resourceNames.aliases.conversations],
+              });
+
+              if (!hasExistingIndices) {
+                logger.debug('Indices do not exist. Skipping migration.');
+                return;
+              }
+
+              // update fields and mappings
+              await setupConversationAndKbIndexAssets({ logger, core });
+
+              // run migration
               await runSemanticTextKnowledgeBaseMigration({ esClient, logger, config });
             },
           };

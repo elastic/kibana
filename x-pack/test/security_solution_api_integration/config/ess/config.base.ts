@@ -86,7 +86,6 @@ export function createTestConfig(options: CreateTestConfigOptions, testFiles?: s
             'riskScoringRoutesEnabled',
           ])}`,
           '--xpack.task_manager.poll_interval=1000',
-          '--xpack.observabilityAIAssistant.autoCreateKnowledgeBaseAssets=false', // disable auto-creation of Observability AI Assistant assets
           `--xpack.actions.preconfigured=${JSON.stringify(PRECONFIGURED_ACTION_CONNECTORS)}`,
           ...(ssl
             ? [

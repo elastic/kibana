@@ -36,7 +36,6 @@ import { recallRankingEvent } from './analytics/recall_ranking';
 import { initLangtrace } from './service/client/instrumentation/init_langtrace';
 import { aiAssistantCapabilities } from '../common/capabilities';
 import { registerMigrateKnowledgeBaseEntriesTask } from './service/task_manager_definitions/register_migrate_knowledge_base_entries_task';
-import { setupConversationAndKbIndexAssets } from './service/setup_conversation_and_kb_index_assets';
 
 export class ObservabilityAIAssistantPlugin
   implements
@@ -131,22 +130,14 @@ export class ObservabilityAIAssistantPlugin
       config: this.config,
     }));
 
-    setupConversationAndKbIndexAssets({ core, logger: this.logger, config: this.config })
-      .then((didSetupAssets) => {
-        if (didSetupAssets) {
-          return registerMigrateKnowledgeBaseEntriesTask({
-            core,
-            taskManager: plugins.taskManager,
-            logger: this.logger,
-            config: this.config,
-          });
-        }
-      })
-      .catch((e) => {
-        this.logger.error(
-          `Observability Assistant assets were not setup successfully: ${e.message}`
-        );
-      });
+    registerMigrateKnowledgeBaseEntriesTask({
+      core,
+      taskManager: plugins.taskManager,
+      logger: this.logger,
+      config: this.config,
+    }).catch((e) => {
+      this.logger.error(`Knowledge base migration was not successfully: ${e.message}`);
+    });
 
     service.register(registerFunctions);
 

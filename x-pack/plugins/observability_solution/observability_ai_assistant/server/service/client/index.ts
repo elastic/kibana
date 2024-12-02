@@ -733,19 +733,19 @@ export class ObservabilityAIAssistantClient {
   };
 
   setupKnowledgeBase = async (modelId: string | undefined) => {
-    const { esClient } = this.dependencies;
+    const { esClient, core, logger, knowledgeBaseService } = this.dependencies;
 
     // setup the knowledge base
-    const res = await this.dependencies.knowledgeBaseService.setup(esClient, modelId);
+    const res = await knowledgeBaseService.setup(esClient, modelId);
 
-    this.dependencies.core
+    core
       .getStartServices()
       .then(([_, pluginsStart]) => {
-        this.dependencies.logger.debug('Schedule semantic text migration task');
+        logger.debug('Schedule semantic text migration task');
         return scheduleSemanticTextMigration(pluginsStart);
       })
       .catch((error) => {
-        this.dependencies.logger.error(`Failed to run semantic text migration task: ${error}`);
+        logger.error(`Failed to run semantic text migration task: ${error}`);
       });
 
     return res;
