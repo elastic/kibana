@@ -14,7 +14,7 @@ import { DrilldownsManager } from '../drilldowns_manager';
 
 export const App = ({ core }: { core: CoreStart }) => {
   return (
-    <KibanaRenderContextProvider i18n={core.i18n} theme={core.theme}>
+    <KibanaRenderContextProvider {...core}>
       <EuiPage>
         <Page title={'UI Actions Enhanced'}>
           <DrilldownsManager />

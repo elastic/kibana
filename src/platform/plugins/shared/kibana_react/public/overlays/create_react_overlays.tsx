@@ -17,12 +17,18 @@ export const createReactOverlays = (services: KibanaServices): KibanaReactOverla
     if (!services.overlays) {
       throw new TypeError('Could not show overlay as overlays service is not available.');
     }
+    if (!services.userProfile) {
+      throw new TypeError('Could not show overlay as userProfile service is not available.');
+    }
   };
 
   const openFlyout: KibanaReactOverlays['openFlyout'] = (node, options?) => {
     checkCoreService();
     return services.overlays!.openFlyout(
-      toMountPoint(<>{node}</>, { theme$: services.theme?.theme$ }),
+      toMountPoint(<>{node}</>, {
+        theme$: services.theme?.theme$,
+        userProfile: services.userProfile!,
+      }),
       options
     );
   };
@@ -30,7 +36,10 @@ export const createReactOverlays = (services: KibanaServices): KibanaReactOverla
   const openModal: KibanaReactOverlays['openModal'] = (node, options?) => {
     checkCoreService();
     return services.overlays!.openModal(
-      toMountPoint(<>{node}</>, { theme$: services.theme?.theme$ }),
+      toMountPoint(<>{node}</>, {
+        theme$: services.theme?.theme$,
+        userProfile: services.userProfile!,
+      }),
       options
     );
   };

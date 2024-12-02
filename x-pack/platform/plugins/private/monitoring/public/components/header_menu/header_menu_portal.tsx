@@ -14,13 +14,17 @@ import type { HeaderMenuPortalProps } from '../../types';
 export default function HeaderMenuPortal({
   children,
   setHeaderActionMenu,
-  theme$,
+  theme,
+  userProfile,
 }: HeaderMenuPortalProps) {
   const portalNode = useMemo(() => createHtmlPortalNode(), []);
 
   useEffect(() => {
     setHeaderActionMenu((element) => {
-      const mount = toMountPoint(<OutPortal node={portalNode} />, { theme$ });
+      const mount = toMountPoint(<OutPortal node={portalNode} />, {
+        theme$: theme.theme$,
+        userProfile,
+      });
       return mount(element);
     });
 
@@ -28,7 +32,7 @@ export default function HeaderMenuPortal({
       portalNode.unmount();
       setHeaderActionMenu(undefined);
     };
-  }, [portalNode, setHeaderActionMenu, theme$]);
+  }, [portalNode, setHeaderActionMenu, theme, userProfile]);
 
   return <InPortal node={portalNode}>{children}</InPortal>;
 }

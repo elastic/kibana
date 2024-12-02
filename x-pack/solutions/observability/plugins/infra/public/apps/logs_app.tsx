@@ -77,8 +77,8 @@ const LogsApp: React.FC<{
         appName="Logs UI"
         setHeaderActionMenu={setHeaderActionMenu}
         storage={storage}
-        theme$={theme$}
         triggersActionsUI={plugins.triggersActionsUi}
+        {...core}
       >
         <Router history={history}>
           <KbnUrlStateStorageFromRouterProvider

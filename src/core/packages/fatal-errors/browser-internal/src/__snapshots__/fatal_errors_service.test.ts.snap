@@ -23,6 +23,11 @@ Array [
           "theme$": Rx.Observable,
         }
       }
+      userProfile={
+        Object {
+          "getUserProfile$": [Function],
+        }
+      }
     >
       <FatalErrorsScreen
         errorInfo$={Rx.Observable}

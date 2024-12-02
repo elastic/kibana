@@ -7,6 +7,8 @@
 
 import { ReactNode } from 'react';
 import { AppMountParameters } from '@kbn/core-application-browser';
+import type { UserProfileService } from '@kbn/core-user-profile-browser';
+import { ThemeServiceStart } from '@kbn/core-theme-browser';
 
 export interface ApmIndicesConfig {
   error: string;
@@ -32,7 +34,8 @@ export interface UXMetrics {
 export interface HeaderMenuPortalProps {
   children: ReactNode;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
-  theme$: AppMountParameters['theme$'];
+  theme: ThemeServiceStart;
+  userProfile: UserProfileService;
 }
 
 export interface TimePickerTimeDefaults {

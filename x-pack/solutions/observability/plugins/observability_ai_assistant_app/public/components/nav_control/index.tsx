@@ -41,12 +41,7 @@ export const NavControlWithProvider = ({
   isServerless,
 }: NavControlWithProviderDeps) => {
   return (
-    <SharedProviders
-      coreStart={coreStart}
-      pluginsStart={pluginsStart}
-      service={appService}
-      theme$={coreStart.theme.theme$}
-    >
+    <SharedProviders coreStart={coreStart} pluginsStart={pluginsStart}>
       <NavControl isServerless={isServerless} />
     </SharedProviders>
   );

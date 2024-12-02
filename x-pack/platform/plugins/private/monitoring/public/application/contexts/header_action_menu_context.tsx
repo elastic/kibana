@@ -5,12 +5,18 @@
  * 2.0.
  */
 
-import React from 'react';
-import { AppMountParameters } from '@kbn/core/public';
+import React, { useContext } from 'react';
+import { AppMountParameters, ThemeServiceStart, UserProfileService } from '@kbn/core/public';
 
 interface ContextProps {
-  setHeaderActionMenu?: AppMountParameters['setHeaderActionMenu'];
-  theme$?: AppMountParameters['theme$'];
+  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
+  theme: ThemeServiceStart;
+  userProfile: UserProfileService;
 }
 
-export const HeaderActionMenuContext = React.createContext<ContextProps>({});
+export const HeaderActionMenuContext = React.createContext<ContextProps | null>(null);
+
+export const useHeaderActionMenu = () => {
+  // TODO: throw error if context is null?
+  return useContext(HeaderActionMenuContext);
+};

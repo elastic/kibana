@@ -145,13 +145,13 @@ export function UXAppRoot({
             }}
           >
             <KibanaThemeProvider
-              theme={core.theme}
               modify={{
                 breakpoint: {
                   xxl: 1600,
                   xxxl: 2000,
                 },
               }}
+              {...core}
             >
               <PluginContext.Provider
                 value={{

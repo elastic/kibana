@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 
 import { I18nProvider } from '@kbn/i18n-react';
 import type { MountPoint } from '@kbn/core/public';
@@ -41,7 +41,7 @@ const i18n: I18nStart = {
 export interface ToMountPointOptions {
   analytics?: AnalyticsServiceStart;
   theme$?: Observable<CoreTheme>;
-  userProfile?: UserProfileService;
+  userProfile: Pick<UserProfileService, 'getUserProfile$'>;
 }
 
 /**
@@ -49,7 +49,9 @@ export interface ToMountPointOptions {
  */
 export const toMountPoint = (
   node: React.ReactNode,
-  { analytics, theme$, userProfile }: ToMountPointOptions = {}
+  { analytics, theme$, userProfile }: ToMountPointOptions = {
+    userProfile: { getUserProfile$: () => of(null) },
+  }
 ): MountPoint => {
   const theme = theme$ ? { theme$ } : themeStart;
   return _toMountPoint(node, { analytics, theme, i18n, userProfile });

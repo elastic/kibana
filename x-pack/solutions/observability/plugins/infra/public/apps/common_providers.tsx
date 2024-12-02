@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { AppMountParameters, CoreStart } from '@kbn/core/public';
+import type {
+  AppMountParameters,
+  CoreStart,
+  ThemeServiceStart,
+  UserProfileService,
+} from '@kbn/core/public';
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
@@ -31,16 +36,17 @@ export const CommonInfraProviders: FC<
     storage: Storage;
     triggersActionsUI: TriggersAndActionsUIPublicPluginStart;
     setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
-    theme$: AppMountParameters['theme$'];
+    theme: ThemeServiceStart;
+    userProfile: UserProfileService;
   }>
-> = ({ children, triggersActionsUI, setHeaderActionMenu, appName, storage, theme$ }) => {
+> = ({ children, triggersActionsUI, setHeaderActionMenu, appName, storage, ...startServices }) => {
   const darkMode = useIsDarkMode();
 
   return (
     <TriggersActionsProvider triggersActionsUI={triggersActionsUI}>
       <EuiThemeProvider darkMode={darkMode}>
         <DataUIProviders appName={appName} storage={storage}>
-          <HeaderActionMenuProvider setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>
+          <HeaderActionMenuProvider setHeaderActionMenu={setHeaderActionMenu} {...startServices}>
             <NavigationWarningPromptProvider>{children}</NavigationWarningPromptProvider>
           </HeaderActionMenuProvider>
         </DataUIProviders>

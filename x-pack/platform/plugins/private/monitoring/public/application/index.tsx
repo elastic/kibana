@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { AppMountParameters, CoreStart, CoreTheme, MountPoint } from '@kbn/core/public';
+import { AppMountParameters, CoreStart, MountPoint } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Redirect } from 'react-router-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
-import { Observable } from 'rxjs';
 import {
   CODE_PATH_APM,
   CODE_PATH_BEATS,
@@ -65,7 +64,7 @@ import { RouteInit } from './route_init';
 export const renderApp = (
   core: CoreStart,
   plugins: MonitoringStartPluginDependencies,
-  { element, history, setHeaderActionMenu, theme$ }: AppMountParameters,
+  { element, history, setHeaderActionMenu }: AppMountParameters,
   externalConfig: ExternalConfig
 ) => {
   // dispatch synthetic hash change event to update hash history objects
@@ -80,7 +79,6 @@ export const renderApp = (
       plugins={plugins}
       externalConfig={externalConfig}
       setHeaderActionMenu={setHeaderActionMenu}
-      theme$={theme$}
     />,
     element
   );
@@ -96,8 +94,7 @@ const MonitoringApp: React.FC<{
   plugins: MonitoringStartPluginDependencies;
   externalConfig: ExternalConfig;
   setHeaderActionMenu: (element: MountPoint<HTMLElement> | undefined) => void;
-  theme$: Observable<CoreTheme>;
-}> = ({ core, plugins, externalConfig, setHeaderActionMenu, theme$ }) => {
+}> = ({ core, plugins, externalConfig, setHeaderActionMenu }) => {
   const history = createPreserveQueryHistory();
   const startServices: MonitoringStartServices = { ...core, ...plugins };
 
@@ -110,7 +107,7 @@ const MonitoringApp: React.FC<{
             toasts={core.notifications.toasts}
             uiSettings={core.uiSettings}
           >
-            <HeaderActionMenuContext.Provider value={{ setHeaderActionMenu, theme$ }}>
+            <HeaderActionMenuContext.Provider value={{ setHeaderActionMenu, ...core }}>
               <MonitoringTimeContainer>
                 <BreadcrumbContainer history={history}>
                   <Router history={history}>

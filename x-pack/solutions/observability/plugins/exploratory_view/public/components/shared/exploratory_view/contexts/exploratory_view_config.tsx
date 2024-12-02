@@ -12,7 +12,7 @@ import type { AppDataType, ConfigProps, ReportViewType, SeriesConfig } from '../
 
 export type ReportConfigMap = Record<string, Array<(config: ConfigProps) => SeriesConfig>>;
 
-type StartServices = Pick<CoreStart, 'analytics' | 'i18n' | 'theme'>;
+type StartServices = Pick<CoreStart, 'analytics' | 'i18n' | 'theme' | 'userProfile'>;
 
 interface ExploratoryViewContextValue extends StartServices {
   dataTypes: Array<{ id: AppDataType; label: string }>;

@@ -24,11 +24,10 @@ type ServerError = IHttpFetchError<ResponseErrorBody>;
 
 export function useCreateSlo() {
   const {
-    i18n: i18nStart,
-    theme,
     application: { navigateToUrl },
     http,
     notifications: { toasts },
+    ...startServices
   } = useKibana().services;
   const { sloClient } = usePluginContext();
   const services = useKibana().services;
@@ -69,10 +68,7 @@ export function useCreateSlo() {
                   }}
                 />
               </RedirectAppLinks>,
-              {
-                i18n: i18nStart,
-                theme,
-              }
+              startServices
             ),
           },
           {

@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { render } from 'react-dom';
-import { ReplaySubject, first, tap } from 'rxjs';
+import { ReplaySubject, first, of, tap } from 'rxjs';
 
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type { InternalInjectedMetadataSetup } from '@kbn/core-injected-metadata-browser-internal';
@@ -90,6 +90,8 @@ export class FatalErrorsService {
   }
 
   private renderError({ analytics, i18n, theme, injectedMetadata }: FatalErrorsServiceSetupDeps) {
+    // FIXME
+    const userProfile = { getUserProfile$: () => of(null) };
     // delete all content in the rootDomElement
     this.rootDomElement.textContent = '';
 
@@ -102,6 +104,7 @@ export class FatalErrorsService {
         analytics={analytics}
         i18n={i18n}
         theme={theme}
+        userProfile={userProfile}
         globalStyles={true}
       >
         <FatalErrorsScreen

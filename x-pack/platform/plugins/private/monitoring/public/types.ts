@@ -5,10 +5,16 @@
  * 2.0.
  */
 
-import { PluginInitializerContext, CoreStart, AppMountParameters } from '@kbn/core/public';
+import {
+  PluginInitializerContext,
+  CoreStart,
+  AppMountParameters,
+  ThemeServiceStart,
+} from '@kbn/core/public';
 import { NavigationPublicPluginStart as NavigationStart } from '@kbn/navigation-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
+import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 export type { MonitoringConfig } from '../server';
 export type { MLJobs } from '../server/lib/elasticsearch/get_ml_jobs';
@@ -46,5 +52,6 @@ export type MonitoringStartServices = CoreStart & MonitoringStartPluginDependenc
 export interface HeaderMenuPortalProps {
   children: ReactNode;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
-  theme$: AppMountParameters['theme$'];
+  theme: ThemeServiceStart;
+  userProfile: UserProfileService;
 }

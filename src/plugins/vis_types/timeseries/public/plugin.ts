@@ -29,6 +29,7 @@ import { metricsVisDefinition } from './metrics_type';
 import {
   setUISettings,
   setI18n,
+  setUserProfile,
   setFieldFormats,
   setCoreStart,
   setDataStart,
@@ -109,6 +110,7 @@ export class MetricsPlugin implements Plugin<void, void> {
   ) {
     setCharts(charts);
     setI18n(core.i18n);
+    setUserProfile(core.userProfile);
     setFieldFormats(fieldFormats);
     setDataStart(data);
     setUnifiedSearchStart(unifiedSearch);

@@ -42,7 +42,7 @@ export const renderApp = ({
   apmServices: ApmServices;
   kibanaEnvironment: KibanaEnvContext;
 }) => {
-  const { element, theme$ } = appMountParameters;
+  const { element } = appMountParameters;
   const apmPluginContextValue = {
     appMountParameters,
     config,
@@ -74,7 +74,7 @@ export const renderApp = ({
   ReactDOM.render(
     <KibanaRenderContextProvider {...coreStart}>
       <KibanaThemeProvider
-        theme={{ theme$ }}
+        {...coreStart}
         modify={{
           breakpoint: {
             xxl: 1600,

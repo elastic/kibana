@@ -26,14 +26,7 @@ export const mount =
     const stateHelpers = await plugins.lens.stateHelperApi();
 
     const reactElement = (
-      <KibanaRenderContextProvider
-        {...{
-          uiSettings: core.uiSettings,
-          settings: core.settings,
-          theme: core.theme,
-          i18n: core.i18n,
-        }}
-      >
+      <KibanaRenderContextProvider {...core}>
         {dataView ? (
           <App
             core={core}

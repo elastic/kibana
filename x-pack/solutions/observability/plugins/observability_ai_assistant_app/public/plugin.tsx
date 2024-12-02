@@ -84,7 +84,6 @@ export class ObservabilityAIAssistantAppPlugin
         ReactDOM.render(
           <Application
             {...appMountParameters}
-            service={this.appService!}
             coreStart={coreStart}
             pluginsStart={pluginsStart as ObservabilityAIAssistantAppPluginStartDependencies}
           />,
@@ -139,12 +138,7 @@ export class ObservabilityAIAssistantAppPlugin
 
     const withProviders = <P extends {}, R = {}>(Component: React.ComponentType<P>) =>
       React.forwardRef((props: P, ref: React.Ref<R>) => (
-        <SharedProviders
-          coreStart={coreStart}
-          pluginsStart={pluginsStart}
-          service={service}
-          theme$={coreStart.theme.theme$}
-        >
+        <SharedProviders coreStart={coreStart} pluginsStart={pluginsStart}>
           <Component {...props} ref={ref} />
         </SharedProviders>
       ));

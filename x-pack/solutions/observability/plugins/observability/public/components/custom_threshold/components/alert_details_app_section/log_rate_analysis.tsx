@@ -200,6 +200,7 @@ export function LogRateAnalysis({ alert, dataView, services }: AlertDetailsLogRa
                 'storage',
                 'uiSettings',
                 'unifiedSearch',
+                'userProfile',
                 'theme',
                 'lens',
                 'i18n',

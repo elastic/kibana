@@ -93,8 +93,8 @@ const MetricsApp: React.FC<{
         appName="Metrics UI"
         setHeaderActionMenu={setHeaderActionMenu}
         storage={storage}
-        theme$={theme$}
         triggersActionsUI={plugins.triggersActionsUi}
+        {...core}
       >
         <SourceProvider sourceId="default">
           <MetricsDataViewProvider>

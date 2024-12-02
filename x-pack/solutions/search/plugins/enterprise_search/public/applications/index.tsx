@@ -130,7 +130,7 @@ export const renderApp = (
     productFeatures,
     renderHeaderActions: (HeaderActions) =>
       params.setHeaderActionMenu(
-        HeaderActions ? renderHeaderActions.bind(null, HeaderActions, store, params) : undefined
+        HeaderActions ? renderHeaderActions.bind(null, HeaderActions, store, core) : undefined
       ),
     security,
     setBreadcrumbs: chrome.setBreadcrumbs,
@@ -153,7 +153,7 @@ export const renderApp = (
   const unmountFlashMessagesLogic = mountFlashMessagesLogic({ notifications });
   ReactDOM.render(
     <I18nProvider>
-      <KibanaThemeProvider theme={{ theme$: params.theme$ }}>
+      <KibanaThemeProvider {...core}>
         <EuiThemeProvider darkMode={core.theme.getTheme().darkMode}>
           <KibanaContextProvider
             services={{
@@ -208,12 +208,12 @@ export const renderApp = (
 export const renderHeaderActions = (
   HeaderActions: React.FC,
   store: Store,
-  params: AppMountParameters,
+  core: CoreStart,
   kibanaHeaderEl: HTMLElement
 ) => {
   ReactDOM.render(
     <I18nProvider>
-      <KibanaThemeProvider theme={{ theme$: params.theme$ }}>
+      <KibanaThemeProvider {...core}>
         <Provider store={store}>
           <HeaderActions />
         </Provider>

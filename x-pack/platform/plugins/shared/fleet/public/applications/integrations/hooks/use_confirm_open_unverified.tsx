@@ -18,7 +18,7 @@ import { ConfirmOpenUnverifiedModal } from '../components/confirm_open_unverifie
 
 type StartServicesConfirmOpen = Pick<
   FleetStartServices,
-  'docLinks' | 'overlays' | 'analytics' | 'i18n' | 'theme'
+  'docLinks' | 'overlays' | 'analytics' | 'i18n' | 'theme' | 'userProfile'
 >;
 
 const confirmOpenUnverified = ({

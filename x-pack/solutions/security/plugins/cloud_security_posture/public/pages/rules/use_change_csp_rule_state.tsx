@@ -51,8 +51,7 @@ const showChangeBenchmarkRuleStatesSuccessToast = (
     numberOfDetectionRules: number;
   }
 ) => {
-  const { notifications, analytics, i18n, theme } = cloudSecurityStartServices;
-  const startServices = { analytics, i18n, theme };
+  const { notifications, ...startServices } = cloudSecurityStartServices;
 
   return notifications.toasts.addSuccess({
     toastLifeTimeMs: 10000,
@@ -118,9 +117,7 @@ const showChangeBenchmarkRuleStatesSuccessToast = (
 export const useChangeCspRuleState = () => {
   const { http } = useKibana().services;
 
-  const { notifications, analytics, i18n: i18nStart, theme } = useKibana().services;
-
-  const startServices = { notifications, analytics, i18n: i18nStart, theme };
+  const startServices = useKibana().services;
 
   const queryClient = useQueryClient();
 

@@ -6,7 +6,7 @@
  */
 
 import { EuiPage, EuiPageBody, EuiPageTemplate, EuiTab, EuiTabs, EuiSpacer } from '@elastic/eui';
-import React, { useContext, useState, useEffect, useCallback, FC, PropsWithChildren } from 'react';
+import React, { useState, useEffect, useCallback, FC, PropsWithChildren } from 'react';
 import { useHistory } from 'react-router-dom';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import { useTitle } from '../hooks/use_title';
@@ -23,7 +23,7 @@ import { SetupModeFeature } from '../../../common/enums';
 import { AlertsDropdown } from '../../alerts/alerts_dropdown';
 import { useRequestErrorHandler } from '../hooks/use_request_error_handler';
 import { SetupModeToggleButton } from '../../components/setup_mode/toggle_button';
-import { HeaderActionMenuContext } from '../contexts/header_action_menu_context';
+import { useHeaderActionMenu } from '../contexts/header_action_menu_context';
 import { HeaderMenuPortal } from '../../components/header_menu';
 
 export interface TabMenuItem {
@@ -58,7 +58,7 @@ export const PageTemplate: FC<PropsWithChildren<PageTemplateProps>> = ({
   const history = useHistory();
   const [hasError, setHasError] = useState(false);
   const handleRequestError = useRequestErrorHandler();
-  const { setHeaderActionMenu, theme$ } = useContext(HeaderActionMenuContext);
+  const headerActionMenuContext = useHeaderActionMenu();
 
   const getPageDataResponseHandler = useCallback(
     (result: any) => {
@@ -118,8 +118,8 @@ export const PageTemplate: FC<PropsWithChildren<PageTemplateProps>> = ({
       data-test-subj="monitoringAppContainer"
     >
       <EuiPageTemplate.Section>
-        {setHeaderActionMenu && theme$ && (
-          <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>
+        {headerActionMenuContext && (
+          <HeaderMenuPortal {...headerActionMenuContext}>
             {supported && (
               <SetupModeToggleButton enabled={enabled} toggleSetupMode={toggleSetupMode} />
             )}

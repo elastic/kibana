@@ -64,7 +64,8 @@ export const mountManagementSection = async ({ core, mountParams, config }: Moun
           </KibanaContextProvider>
         </I18nProvider>
       </RedirectToHomeIfUnauthorized>,
-      theme$
+      theme$,
+      coreStart.userProfile
     ),
     element
   );

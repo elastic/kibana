@@ -42,7 +42,7 @@ export interface KibanaThemeProviderProps extends EuiProps {
   /** The `ThemeServiceStart` API. */
   theme: ThemeServiceStart;
   /** The `UserProfileService` start API. */
-  userProfile?: Pick<UserProfileService, 'getUserProfile$'>;
+  userProfile: Pick<UserProfileService, 'getUserProfile$'>;
 }
 
 /**

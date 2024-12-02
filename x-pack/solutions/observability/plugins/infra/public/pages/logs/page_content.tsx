@@ -7,7 +7,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiHeaderLink, EuiHeaderLinks } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useContext } from 'react';
+import React from 'react';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { HeaderMenuPortal, useLinkProps } from '@kbn/observability-shared-plugin/public';
@@ -22,7 +22,7 @@ import { type LogsLocatorParams, LOGS_LOCATOR_ID } from '@kbn/logs-shared-plugin
 import { LazyAlertDropdownWrapper } from '../../alerting/log_threshold';
 import { HelpCenterContent } from '../../components/help_center_content';
 import { useReadOnlyBadge } from '../../hooks/use_readonly_badge';
-import { HeaderActionMenuContext } from '../../containers/header_action_menu_provider';
+import { useHeaderActionMenu } from '../../containers/header_action_menu_provider';
 import { RedirectWithQueryParams } from '../../utils/redirect_with_query_params';
 import { NotFoundPage } from '../404';
 import { getLogsAppRoutes } from './routes';
@@ -47,7 +47,7 @@ export const LogsPageContent: React.FunctionComponent = () => {
   const onboardingLocator = share?.url.locators.get<ObservabilityOnboardingLocatorParams>(
     OBSERVABILITY_ONBOARDING_LOCATOR
   );
-  const { setHeaderActionMenu, theme$ } = useContext(HeaderActionMenuContext);
+  const headerActionMenuContext = useHeaderActionMenu();
 
   const enableDeveloperRoutes = isDevMode();
 
@@ -64,8 +64,8 @@ export const LogsPageContent: React.FunctionComponent = () => {
     <>
       <HelpCenterContent feedbackLink={feedbackLinkUrl} appName={pageTitle} />
 
-      {setHeaderActionMenu && theme$ && (
-        <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>
+      {headerActionMenuContext && (
+        <HeaderMenuPortal {...headerActionMenuContext}>
           <EuiFlexGroup responsive={false} gutterSize="s">
             <EuiFlexItem>
               <EuiHeaderLinks gutterSize="xs">

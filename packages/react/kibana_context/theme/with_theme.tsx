@@ -21,5 +21,5 @@ import { KibanaThemeProvider } from './theme_provider';
 export const wrapWithTheme = (
   node: React.ReactNode,
   theme: ThemeServiceStart,
-  userProfile?: UserProfileService
+  userProfile: UserProfileService
 ) => <KibanaThemeProvider {...{ theme, userProfile }}>{node}</KibanaThemeProvider>;

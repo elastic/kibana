@@ -46,7 +46,7 @@ export const DetectionRuleCounter = ({ tags, createRuleFn }: DetectionRuleCounte
   const [isCreateRuleLoading, setIsCreateRuleLoading] = useState(false);
 
   const queryClient = useQueryClient();
-  const { http, notifications, analytics, i18n, theme } = useKibana().services;
+  const { http, notifications, analytics, i18n, theme, userProfile } = useKibana().services;
 
   const history = useHistory();
 
@@ -68,7 +68,7 @@ export const DetectionRuleCounter = ({ tags, createRuleFn }: DetectionRuleCounte
   }, [history]);
 
   const createDetectionRuleOnClick = useCallback(async () => {
-    const startServices = { analytics, notifications, i18n, theme };
+    const startServices = { analytics, notifications, i18n, theme, userProfile };
 
     try {
       setIsCreateRuleLoading(true);
@@ -92,7 +92,7 @@ export const DetectionRuleCounter = ({ tags, createRuleFn }: DetectionRuleCounte
         text: e.message,
       });
     }
-  }, [createRuleFn, http, analytics, notifications, i18n, theme, queryClient]);
+  }, [createRuleFn, http, analytics, notifications, i18n, theme, userProfile, queryClient]);
 
   if (alertsIsError) return <>{'-'}</>;
 

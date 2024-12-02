@@ -6,6 +6,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import type { ThemeServiceStart, UserProfileService } from '@kbn/core/public';
 import { type AppMountParameters, type CoreStart } from '@kbn/core/public';
 import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
@@ -46,7 +47,10 @@ export function AppRoot({
         <RouterProvider history={history} router={inventoryRouter as any}>
           <UnifiedSearchProvider>
             <RouteRenderer />
-            <InventoryHeaderActionMenu appMountParameters={appMountParameters} />
+            <InventoryHeaderActionMenu
+              setHeaderActionMenu={appMountParameters.setHeaderActionMenu}
+              {...coreStart}
+            />
           </UnifiedSearchProvider>
         </RouterProvider>
       </RedirectAppLinks>
@@ -54,15 +58,18 @@ export function AppRoot({
   );
 }
 
-export function InventoryHeaderActionMenu({
-  appMountParameters,
-}: {
-  appMountParameters: AppMountParameters;
-}) {
-  const { setHeaderActionMenu, theme$ } = appMountParameters;
+interface InventoryHeaderActionMenuProps {
+  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
+  theme: ThemeServiceStart;
+  userProfile: UserProfileService;
+}
 
+export function InventoryHeaderActionMenu({
+  setHeaderActionMenu,
+  ...startServices
+}: InventoryHeaderActionMenuProps) {
   return (
-    <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>
+    <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} {...startServices}>
       <EuiFlexGroup responsive={false} gutterSize="s">
         <EuiFlexItem>
           <HeaderActionMenuItems />
