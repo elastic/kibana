@@ -212,14 +212,14 @@ export const MissingFieldsCallout = ({
 
   return (
     <EuiCallOut
-      style={{
+      css={{
         borderRadius: 4,
         overflow: 'hidden',
       }}
       size="s"
       iconType="iInCircle"
       title={
-        <span style={{ color: euiTheme.colors.text }}>
+        <span css={{ color: euiTheme.colors.text }}>
           <FormattedMessage
             id="xpack.csp.findings.findingsFlyout.calloutTitle"
             defaultMessage="Some fields not provided by {vendor}"
@@ -252,7 +252,7 @@ export const FindingsRuleFlyout = ({
           <EuiFlexItem grow={false}>
             <CspEvaluationBadge type={finding.result?.evaluation} />
           </EuiFlexItem>
-          <EuiFlexItem grow style={{ minWidth: 0 }}>
+          <EuiFlexItem grow css={{ minWidth: 0 }}>
             <EuiTitle size="m" className="eui-textTruncate">
               <EuiTextColor color="primary" title={finding.rule?.name}>
                 {finding.rule?.name}
@@ -287,7 +287,7 @@ export const FindingsRuleFlyout = ({
       </EuiFlyoutHeader>
       <EuiFlyoutBody key={tab.id}>
         {!isNativeCspFinding(finding) && ['overview', 'rule'].includes(tab.id) && (
-          <div style={{ marginBottom: euiThemeVars.euiSize }}>
+          <div css={{ marginBottom: euiThemeVars.euiSize }}>
             <MissingFieldsCallout finding={finding} />
           </div>
         )}

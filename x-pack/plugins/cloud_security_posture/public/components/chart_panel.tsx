@@ -6,6 +6,7 @@
  */
 
 import React, { ReactNode, FC, PropsWithChildren } from 'react';
+import type { Interpolation, Theme } from '@emotion/react';
 import {
   EuiPanel,
   EuiText,
@@ -24,6 +25,7 @@ interface ChartPanelProps {
   isError?: boolean;
   rightSideItems?: ReactNode[];
   styles?: React.CSSProperties;
+  css?: Interpolation<Theme>;
   children: React.ReactNode;
 }
 
@@ -57,6 +59,7 @@ export const ChartPanel: FC<PropsWithChildren<ChartPanelProps>> = ({
   children,
   rightSideItems,
   styles,
+  css,
 }) => {
   const { euiTheme } = useEuiTheme();
   const renderChart = () => {
@@ -66,23 +69,29 @@ export const ChartPanel: FC<PropsWithChildren<ChartPanelProps>> = ({
   };
 
   return (
-    <EuiPanel hasBorder={hasBorder} hasShadow={false} style={styles} data-test-subj="chart-panel">
-      <EuiFlexGroup direction="column" gutterSize="m" style={{ height: '100%' }}>
+    <EuiPanel
+      hasBorder={hasBorder}
+      hasShadow={false}
+      style={styles}
+      css={css}
+      data-test-subj="chart-panel"
+    >
+      <EuiFlexGroup direction="column" gutterSize="m" css={{ height: '100%' }}>
         <EuiFlexItem grow={false}>
           <EuiFlexGroup justifyContent={'spaceBetween'}>
-            <EuiFlexItem grow={false} style={{ justifyContent: 'center' }}>
+            <EuiFlexItem grow={false} css={{ justifyContent: 'center' }}>
               {title && (
                 <EuiTitle size="s">
-                  <h3 style={{ lineHeight: 'initial', paddingLeft: euiTheme.size.s }}>{title}</h3>
+                  <h3 css={{ lineHeight: 'initial', paddingLeft: euiTheme.size.s }}>{title}</h3>
                 </EuiTitle>
               )}
             </EuiFlexItem>
-            <EuiFlexItem grow={false} style={{ flexDirection: 'row', gap: euiTheme.size.s }}>
+            <EuiFlexItem grow={false} css={{ flexDirection: 'row', gap: euiTheme.size.s }}>
               {rightSideItems}
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiFlexItem style={{ height: '100%' }}>{renderChart()}</EuiFlexItem>
+        <EuiFlexItem css={{ height: '100%' }}>{renderChart()}</EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>
   );

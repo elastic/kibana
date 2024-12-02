@@ -31,7 +31,7 @@ export const Rules = ({ match: { params } }: RouteComponentProps<PageUrlParams>)
         bottomBorder
         pageTitle={
           <EuiFlexGroup direction="column" gutterSize="none">
-            <EuiFlexItem style={{ width: 'fit-content' }}>
+            <EuiFlexItem css={{ width: 'fit-content' }}>
               <Link to={generatePath(cloudPosturePages.benchmarks.path)}>
                 <EuiButtonEmpty iconType="arrowLeft" contentProps={{ style: { padding: 0 } }}>
                   <FormattedMessage
@@ -43,7 +43,7 @@ export const Rules = ({ match: { params } }: RouteComponentProps<PageUrlParams>)
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiFlexGroup gutterSize="s">
-                <EuiFlexItem grow={false} style={{ marginBottom: 6 }}>
+                <EuiFlexItem grow={false} css={{ marginBottom: 6 }}>
                   <CISBenchmarkIcon type={params.benchmarkId} size={'l'} />
                 </EuiFlexItem>
                 <EuiFlexItem>
