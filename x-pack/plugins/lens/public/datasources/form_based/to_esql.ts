@@ -39,7 +39,9 @@ export function getESQLForLayer(
   if (timeZone !== 'UTC') return;
 
   let esql = `FROM ${indexPattern.title} | `;
-  esql += `WHERE ${indexPattern.timeFieldName} >= ?_tstart AND ${indexPattern.timeFieldName} <= ?_tend | `;
+  if (indexPattern.timeFieldName) {
+    esql += `WHERE ${indexPattern.timeFieldName} >= ?_tstart AND ${indexPattern.timeFieldName} <= ?_tend | `;
+  }
 
   const histogramBarsTarget = uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET);
   const absDateRange = convertToAbsoluteDateRange(dateRange, nowInstant);
