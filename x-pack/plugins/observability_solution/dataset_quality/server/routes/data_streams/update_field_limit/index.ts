@@ -11,7 +11,7 @@ import { createDatasetQualityESClient } from '../../../utils';
 import { updateComponentTemplate } from './update_component_template';
 import { updateLastBackingIndexSettings } from './update_settings_last_backing_index';
 import { UpdateFieldLimitResponse } from '../../../../common/api_types';
-import { getDataStreamSettings } from '../get_data_stream_details';
+import { getDataStreamSettings } from '../get_datastream_settings';
 
 export async function updateFieldLimit({
   esClient,
