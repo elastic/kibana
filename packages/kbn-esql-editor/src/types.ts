@@ -17,6 +17,7 @@ import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { PresentationContainer } from '@kbn/presentation-containers';
+import type { EsqlVariablesService } from '@kbn/esql/common';
 
 export interface ESQLEditorProps {
   /** The aggregate type query */
@@ -87,4 +88,5 @@ export interface ESQLEditorDeps {
   indexManagementApiService?: IndexManagementPluginSetup['apiService'];
   fieldsMetadata?: FieldsMetadataPublicStart;
   usageCollection?: UsageCollectionStart;
+  esqlService: EsqlVariablesService;
 }

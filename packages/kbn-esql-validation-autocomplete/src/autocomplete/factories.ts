@@ -28,6 +28,7 @@ import { DOUBLE_BACKTICK, SINGLE_TICK_REGEX } from '../shared/constants';
 import { ESQLRealField } from '../validation/types';
 import { EsqlControlType } from './types';
 import { isNumericType } from '../shared/esql_types';
+import type { ESQLVariables } from '../shared/types';
 import { getTestFunctions } from '../shared/test_functions';
 import { builtinFunctions } from '../definitions/builtin';
 
@@ -222,7 +223,8 @@ export const buildFieldsDefinitionsWithMetadata = (
     openSuggestions?: boolean;
     addComma?: boolean;
     controlType?: EsqlControlType;
-  }
+  },
+  getVariablesByType?: (type: string) => ESQLVariables[]
 ): SuggestionRawDefinition[] => {
   const fieldsSuggestions = fields.map((field) => {
     const titleCaseType = field.type.charAt(0).toUpperCase() + field.type.slice(1);
@@ -240,8 +242,15 @@ export const buildFieldsDefinitionsWithMetadata = (
     };
   }) as SuggestionRawDefinition[];
 
+  const controlType = options?.controlType ?? EsqlControlType.FIELDS;
+
+  const variables = getVariablesByType?.(controlType) ?? [];
+
   const controlSuggestions = fields.length
-    ? getControlSuggestion(options?.controlType ?? EsqlControlType.FIELDS)
+    ? getControlSuggestion(
+        controlType,
+        variables?.map((v) => `?${v.key}`)
+      )
     : [];
 
   return [...controlSuggestions, ...fieldsSuggestions];
@@ -470,7 +479,8 @@ export function getCompatibleLiterals(
   commandName: string,
   types: string[],
   names?: string[],
-  options?: { advanceCursorAndOpenSuggestions?: boolean; addComma?: boolean }
+  options?: { advanceCursorAndOpenSuggestions?: boolean; addComma?: boolean },
+  getVariablesByType?: (type: string) => ESQLVariables[]
 ) {
   const suggestions: SuggestionRawDefinition[] = [];
   if (types.some(isNumericType)) {
@@ -484,9 +494,13 @@ export function getCompatibleLiterals(
     }
   }
   if (types.includes('time_literal')) {
+    const variables = getVariablesByType?.(EsqlControlType.TIME_LITERAL) ?? [];
     // filter plural for now and suggest only unit + singular
     suggestions.push(
-      ...getControlSuggestion(EsqlControlType.TIME_LITERAL),
+      ...getControlSuggestion(
+        EsqlControlType.TIME_LITERAL,
+        variables.map((v) => `?${v.key}`)
+      ),
       ...buildConstantsDefinitions(getUnitDuration(1), undefined, undefined, options)
     ); // i.e. 1 year
   }
@@ -579,7 +593,10 @@ export function getDateLiterals(options?: {
   ];
 }
 
-export function getControlSuggestion(type: EsqlControlType): SuggestionRawDefinition[] {
+export function getControlSuggestion(
+  type: EsqlControlType,
+  variables?: string[]
+): SuggestionRawDefinition[] {
   // need to get the variables from the service
   return [
     {
@@ -608,12 +625,17 @@ export function getControlSuggestion(type: EsqlControlType): SuggestionRawDefini
         ),
       },
     } as SuggestionRawDefinition,
-    // ...buildConstantsDefinitions(
-    //   TIME_SYSTEM_PARAMS,
-    //   i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.namedParamDefinition', {
-    //     defaultMessage: 'Named parameter',
-    //   }),
-    //   '1A'
-    // ),
+    ...(variables?.length
+      ? buildConstantsDefinitions(
+          variables,
+          i18n.translate(
+            'kbn-esql-validation-autocomplete.esql.autocomplete.namedParamDefinition',
+            {
+              defaultMessage: 'Named parameter',
+            }
+          ),
+          '1A'
+        )
+      : []),
   ];
 }

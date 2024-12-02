@@ -101,6 +101,7 @@ export const ESQLEditor = memo(function ESQLEditor({
     fieldsMetadata,
     uiSettings,
     uiActions,
+    esqlService,
   } = kibana.services;
   const darkMode = core.theme?.getTheme().darkMode;
 
@@ -435,12 +436,16 @@ export const ESQLEditor = memo(function ESQLEditor({
       },
       // @ts-expect-error To prevent circular type import, type defined here is partial of full client
       getFieldsMetadata: fieldsMetadata?.getClient(),
+      getVariablesByType: (type: string) => {
+        return esqlService.getVariablesByType(type);
+      },
     };
     return callbacks;
   }, [
+    fieldsMetadata,
+    dataSourcesCache,
     query.esql,
     memoizedSources,
-    dataSourcesCache,
     dataViews,
     core,
     esqlFieldsCache,
@@ -449,7 +454,7 @@ export const ESQLEditor = memo(function ESQLEditor({
     abortController,
     indexManagementApiService,
     histogramBarTarget,
-    fieldsMetadata,
+    esqlService,
   ]);
 
   const queryRunButtonProperties = useMemo(() => {

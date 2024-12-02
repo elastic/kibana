@@ -37,6 +37,12 @@ export interface ESQLSourceResult {
   type?: string;
 }
 
+export interface ESQLVariables {
+  key: string;
+  value: string;
+  type: string;
+}
+
 export interface ESQLCallbacks {
   getSources?: CallbackFn<{}, ESQLSourceResult>;
   getColumnsFor?: CallbackFn<{ query: string }, ESQLRealField>;
@@ -46,6 +52,7 @@ export interface ESQLCallbacks {
   >;
   getPreferences?: () => Promise<{ histogramBarTarget: number }>;
   getFieldsMetadata?: Promise<PartialFieldsMetadataClient>;
+  getVariablesByType?: (type: string) => ESQLVariables[];
 }
 
 export type ReasonTypes = 'missingCommand' | 'unsupportedFunction' | 'unknownFunction';

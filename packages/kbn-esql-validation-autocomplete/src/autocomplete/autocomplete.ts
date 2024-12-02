@@ -89,7 +89,7 @@ import {
   getPolicyHelper,
   getSourcesHelper,
 } from '../shared/resources_helpers';
-import { ESQLCallbacks, ESQLSourceResult } from '../shared/types';
+import { ESQLCallbacks, ESQLSourceResult, ESQLVariables } from '../shared/types';
 import {
   getFunctionsToIgnoreForStats,
   getQueryForFields,
@@ -176,6 +176,7 @@ export async function suggest(
     queryForFields.replace(EDITOR_MARKER, ''),
     resourceRetriever
   );
+  const getVariablesByType = resourceRetriever?.getVariablesByType;
   const getSources = getSourcesHelper(resourceRetriever);
   const { getPolicies, getPolicyMetadata } = getPolicyRetriever(resourceRetriever);
 
@@ -254,9 +255,9 @@ export async function suggest(
       astContext,
       getFieldsByType,
       getFieldsMap,
-      getPolicyMetadata,
       fullText,
-      offset
+      offset,
+      getVariablesByType
     );
   }
   if (astContext.type === 'list') {
@@ -277,6 +278,7 @@ export function getFieldsByTypeRetriever(
   resourceRetriever?: ESQLCallbacks
 ): { getFieldsByType: GetColumnsByTypeFn; getFieldsMap: GetFieldsMapFn } {
   const helpers = getFieldsByTypeHelper(queryString, resourceRetriever);
+  const getVariablesByType = resourceRetriever?.getVariablesByType;
   return {
     getFieldsByType: async (
       expectedType: string | string[] = 'any',
@@ -284,7 +286,7 @@ export function getFieldsByTypeRetriever(
       options
     ) => {
       const fields = await helpers.getFieldsByType(expectedType, ignored);
-      return buildFieldsDefinitionsWithMetadata(fields, options);
+      return buildFieldsDefinitionsWithMetadata(fields, options, getVariablesByType);
     },
     getFieldsMap: helpers.getFieldsMap,
   };
@@ -1026,9 +1028,9 @@ async function getFunctionArgsSuggestions(
   },
   getFieldsByType: GetColumnsByTypeFn,
   getFieldsMap: GetFieldsMapFn,
-  getPolicyMetadata: GetPolicyMetadataFn,
   fullText: string,
-  offset: number
+  offset: number,
+  getVariablesByType?: (type: string) => ESQLVariables[]
 ): Promise<SuggestionRawDefinition[]> {
   const fnDefinition = getFunctionDefinition(node.name);
   // early exit on no hit
@@ -1150,7 +1152,8 @@ async function getFunctionArgsSuggestions(
         command.name,
         getTypesFromParamDefs(constantOnlyParamDefs) as string[],
         undefined,
-        { addComma: shouldAddComma, advanceCursorAndOpenSuggestions: hasMoreMandatoryArgs }
+        { addComma: shouldAddComma, advanceCursorAndOpenSuggestions: hasMoreMandatoryArgs },
+        getVariablesByType
       )
     );
 

@@ -16,6 +16,7 @@ import type { IndexManagementPluginSetup } from '@kbn/index-management-shared-ty
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { esqlVariablesService, type EsqlVariablesService } from '../common';
 
 export let core: CoreStart;
 
@@ -28,6 +29,7 @@ interface ServiceDeps {
   indexManagementApiService?: IndexManagementPluginSetup['apiService'];
   fieldsMetadata?: FieldsMetadataPublicStart;
   usageCollection?: UsageCollectionStart;
+  esqlService?: EsqlVariablesService;
 }
 
 const servicesReady$ = new BehaviorSubject<ServiceDeps | undefined>(undefined);
@@ -51,7 +53,8 @@ export const setKibanaServices = (
   uiActions: UiActionsStart,
   indexManagement?: IndexManagementPluginSetup,
   fieldsMetadata?: FieldsMetadataPublicStart,
-  usageCollection?: UsageCollectionStart
+  usageCollection?: UsageCollectionStart,
+  esqlService?: EsqlVariablesService
 ) => {
   core = kibanaCore;
   servicesReady$.next({
@@ -63,5 +66,6 @@ export const setKibanaServices = (
     indexManagementApiService: indexManagement?.apiService,
     fieldsMetadata,
     usageCollection,
+    esqlService: esqlVariablesService,
   });
 };
