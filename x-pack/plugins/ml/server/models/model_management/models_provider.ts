@@ -304,19 +304,28 @@ export class ModelsProvider {
       Array.from(s)
     );
 
-    // Get all pipelines first in one call:
-    const modelPipelinesMap = await this.getModelsPipelines(modelIdsAndAliases);
+    try {
+      // Get all pipelines first in one call:
+      const modelPipelinesMap = await this.getModelsPipelines(modelIdsAndAliases);
 
-    trainedModels.forEach((model) => {
-      const modelAliasesAndDeployments = modelToAliasesAndDeployments[model.model_id];
-      // Check model pipelines map for any pipelines associated with the model
-      for (const [modelEntityId, pipelines] of modelPipelinesMap) {
-        if (modelAliasesAndDeployments.has(modelEntityId)) {
-          // Merge pipeline definitions into the model
-          model.pipelines = model.pipelines ? Object.assign(model.pipelines, pipelines) : pipelines;
+      trainedModels.forEach((model) => {
+        const modelAliasesAndDeployments = modelToAliasesAndDeployments[model.model_id];
+        // Check model pipelines map for any pipelines associated with the model
+        for (const [modelEntityId, pipelines] of modelPipelinesMap) {
+          if (modelAliasesAndDeployments.has(modelEntityId)) {
+            // Merge pipeline definitions into the model
+            model.pipelines = model.pipelines
+              ? Object.assign(model.pipelines, pipelines)
+              : pipelines;
+          }
         }
-      }
-    });
+      });
+    } catch (e) {
+      // the user might not have required permissions to fetch pipelines
+      // log the error to the debug log as this might be a common situation and
+      // we don't need to fill kibana's log with these messages.
+      mlLog.debug(e);
+    }
   }
 
   /**

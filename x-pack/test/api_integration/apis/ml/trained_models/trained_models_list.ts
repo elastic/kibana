@@ -15,7 +15,7 @@ export default ({ getService }: FtrProviderContext) => {
   const ml = getService('ml');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
 
-  describe('GET trained_models', () => {
+  describe('GET trained_models_list', () => {
     let testModelIds: string[] = [];
 
     before(async () => {
@@ -44,43 +44,50 @@ export default ({ getService }: FtrProviderContext) => {
       await ml.api.cleanMlIndices();
     });
 
-    it('returns all trained models', async () => {
+    it('returns a foramtted list of trained model with stats, associated pipelines and indices', async () => {
       const { body, status } = await supertest
-        .get(`/internal/ml/trained_models`)
+        .get(`/internal/ml/trained_models_list`)
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
         .set(getCommonRequestHeader('1'));
       ml.api.assertResponseStatusCode(200, status, body);
 
-      // Created models + system model
-      expect(body.length).to.eql(6);
+      // Created models + system model + model downloads
+      expect(body.length).to.eql(10);
+
+      const dfaRegressionN0 = body.find((v: any) => v.model_id === 'dfa_regression_model_n_0');
+
+      expect(Object.keys(dfaRegressionN0.pipelines).length).to.eql(2);
+
+      const dfaRegressionN1 = body.find((v: any) => v.model_id === 'dfa_regression_model_n_1');
+      expect(Object.keys(dfaRegressionN1.pipelines).length).to.eql(
+        1,
+        `Expected number of pipelines for dfa_regression_model_n_1 to be ${1} (got ${
+          Object.keys(dfaRegressionN1.pipelines).length
+        })`
+      );
+      expect(dfaRegressionN1.indices.length).to.eql(
+        1,
+        `Expected number of indices for dfa_regression_model_n_1 to be ${1} (got ${
+          dfaRegressionN1.indices.length
+        })`
+      );
     });
 
-    it('returns trained model by id', async () => {
+    it('returns models without pipeline in case user does not have required permission', async () => {
       const { body, status } = await supertest
-        .get(`/internal/ml/trained_models/dfa_regression_model_n_1`)
+        .get(`/internal/ml/trained_models_list`)
         .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
         .set(getCommonRequestHeader('1'));
       ml.api.assertResponseStatusCode(200, status, body);
 
-      expect(body.length).to.eql(1);
-
-      const sampleModel = body[0];
-      expect(sampleModel.model_id).to.eql('dfa_regression_model_n_1');
+      expect(body.length).to.eql(10);
+      const sampleModel = body.find((v: any) => v.model_id === 'dfa_regression_model_n_0');
       expect(sampleModel.pipelines).to.eql(undefined);
-      expect(sampleModel.indices).to.eql(undefined);
-    });
-
-    it('returns 404 if requested trained model does not exist', async () => {
-      const { body, status } = await supertest
-        .get(`/internal/ml/trained_models/not_existing_model`)
-        .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
-        .set(getCommonRequestHeader('1'));
-      ml.api.assertResponseStatusCode(404, status, body);
     });
 
     it('returns an error for unauthorized user', async () => {
       const { body, status } = await supertest
-        .get(`/internal/ml/trained_models/dfa_regression_model_n_1`)
+        .get(`/internal/ml/trained_models_list`)
         .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
         .set(getCommonRequestHeader('1'));
       ml.api.assertResponseStatusCode(403, status, body);
