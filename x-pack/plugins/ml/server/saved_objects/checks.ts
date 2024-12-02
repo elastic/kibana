@@ -76,7 +76,6 @@ export interface StatusResponse {
 export function checksFactory(
   client: IScopedClusterClient,
   mlSavedObjectService: MLSavedObjectService
-  // this needs mlCapabilities
 ) {
   async function checkStatus(): Promise<StatusResponse> {
     const {
