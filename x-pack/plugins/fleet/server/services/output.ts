@@ -44,6 +44,7 @@ import {
   DEFAULT_OUTPUT_ID,
   OUTPUT_SAVED_OBJECT_TYPE,
   OUTPUT_HEALTH_DATA_STREAM,
+  MAX_CONCURRENT_BACKFILL_OUTPUTS_PRESETS,
 } from '../constants';
 import {
   SO_SEARCH_LIMIT,
@@ -1165,7 +1166,7 @@ class OutputService {
         await agentPolicyService.bumpAllAgentPoliciesForOutput(esClient, output.id);
       },
       {
-        concurrency: 5,
+        concurrency: MAX_CONCURRENT_BACKFILL_OUTPUTS_PRESETS,
       }
     );
   }
