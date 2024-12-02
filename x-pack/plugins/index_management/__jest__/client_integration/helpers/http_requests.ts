@@ -172,6 +172,13 @@ const registerHttpRequestMockHelpers = (
       response,
       error
     );
+  const setGetMatchingDataStreams = (response?: HttpResponse, error?: ResponseError) =>
+    mockResponse(
+      'POST',
+      `${INTERNAL_API_BASE_PATH}/enrich_policies/get_matching_data_streams`,
+      response,
+      error
+    );
 
   const setGetFieldsFromIndices = (response?: HttpResponse, error?: ResponseError) =>
     mockResponse(
@@ -249,6 +256,7 @@ const registerHttpRequestMockHelpers = (
     setGetPrivilegesResponse,
     setCreateEnrichPolicy,
     setInferenceModels,
+    setGetMatchingDataStreams,
   };
 };
 

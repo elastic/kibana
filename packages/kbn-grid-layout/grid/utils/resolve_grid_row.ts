@@ -34,7 +34,7 @@ const getAllCollisionsWithPanel = (
   return collidingPanels;
 };
 
-const getKeysInOrder = (rowData: GridRowData, draggedId?: string): string[] => {
+export const getKeysInOrder = (rowData: GridRowData, draggedId?: string): string[] => {
   const panelKeys = Object.keys(rowData.panels);
   return panelKeys.sort((panelKeyA, panelKeyB) => {
     const panelA = rowData.panels[panelKeyA];
@@ -57,7 +57,7 @@ const getKeysInOrder = (rowData: GridRowData, draggedId?: string): string[] => {
   });
 };
 
-export const compactGridRow = (originalLayout: GridRowData) => {
+const compactGridRow = (originalLayout: GridRowData) => {
   const nextRowData = { ...originalLayout, panels: { ...originalLayout.panels } };
   // compact all vertical space.
   const sortedKeysAfterMove = getKeysInOrder(nextRowData);

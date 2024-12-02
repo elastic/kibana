@@ -1126,22 +1126,10 @@ export const PARAMETERS_DEFINITION: { [key in ParameterName]: ParameterDefinitio
   },
   inference_id: {
     fieldConfig: {
-      defaultValue: 'elser_model_2',
+      defaultValue: '',
       label: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.inferenceIdLabel', {
         defaultMessage: 'Select an inference endpoint:',
       }),
-      validations: [
-        {
-          validator: emptyField(
-            i18n.translate(
-              'xpack.idxMgmt.mappingsEditor.parameters.validations.inferenceIdIsRequiredErrorMessage',
-              {
-                defaultMessage: 'Inference ID is required.',
-              }
-            )
-          ),
-        },
-      ],
     },
     schema: t.string,
   },

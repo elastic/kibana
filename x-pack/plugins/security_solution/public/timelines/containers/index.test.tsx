@@ -30,7 +30,7 @@ jest.mock('../../notes/hooks/use_fetch_notes');
 const onLoadMock = jest.fn();
 const useFetchNotesMock = useFetchNotes as jest.Mock;
 
-const mockEvents = mockTimelineData.filter((i, index) => index <= 11);
+const mockEvents = mockTimelineData.slice(0, 10);
 
 const mockSearch = jest.fn();
 
@@ -70,13 +70,13 @@ jest.mock('../../common/lib/kibana', () => ({
                     },
                     edges: mockEvents.map((item) => ({ node: item })),
                     pageInfo: {
-                      activePage: 0,
+                      activePage: args.pagination.activePage,
                       totalPages: 10,
                     },
                     rawResponse: {},
                     totalCount: mockTimelineData.length,
                   });
-                }, 0);
+                }, 50);
                 return { unsubscribe: jest.fn() };
               }),
             };
@@ -124,12 +124,12 @@ describe('useTimelineEvents', () => {
   const endDate: string = '3000-01-01T00:00:00.000Z';
   const props: UseTimelineEventsProps = {
     dataViewId: 'data-view-id',
-    endDate: '',
+    endDate,
     id: TimelineId.active,
     indexNames: ['filebeat-*'],
     fields: ['@timestamp', 'event.kind'],
     filterQuery: '',
-    startDate: '',
+    startDate,
     limit: 25,
     runtimeMappings: {},
     sort: initSortDefault,
@@ -166,10 +166,9 @@ describe('useTimelineEvents', () => {
     >((args) => useTimelineEvents(args), {
       initialProps: props,
     });
-
     // useEffect on params request
     await waitFor(() => new Promise((resolve) => resolve(null)));
-    rerender({ ...props, startDate, endDate });
+    rerender({ ...props, startDate: '', endDate: '' });
     // useEffect on params request
     await waitFor(() => {
       expect(mockSearch).toHaveBeenCalledTimes(2);
@@ -197,12 +196,6 @@ describe('useTimelineEvents', () => {
       initialProps: props,
     });
 
-    // useEffect on params request
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-    rerender({ ...props, startDate, endDate });
-    // useEffect on params request
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-
     mockUseRouteSpy.mockReturnValue([
       {
         pageName: SecurityPageName.timelines,
@@ -213,7 +206,13 @@ describe('useTimelineEvents', () => {
       },
     ]);
 
-    expect(mockSearch).toHaveBeenCalledTimes(2);
+    rerender({ ...props, startDate, endDate });
+
+    await waitFor(() => {
+      expect(result.current[0]).toEqual(DataLoadingState.loaded);
+    });
+
+    expect(mockSearch).toHaveBeenCalledTimes(1);
 
     expect(result.current).toEqual([
       DataLoadingState.loaded,
@@ -283,7 +282,7 @@ describe('useTimelineEvents', () => {
     // useEffect on params request
     await waitFor(() => new Promise((resolve) => resolve(null)));
 
-    expect(mockSearch).toHaveBeenCalledTimes(2);
+    expect(mockSearch).toHaveBeenCalledTimes(1);
     mockSearch.mockClear();
 
     rerender({
@@ -307,7 +306,7 @@ describe('useTimelineEvents', () => {
     // useEffect on params request
     await waitFor(() => new Promise((resolve) => resolve(null)));
 
-    expect(mockSearch).toHaveBeenCalledTimes(2);
+    expect(mockSearch).toHaveBeenCalledTimes(1);
     mockSearch.mockClear();
 
     rerender({ ...props, startDate, endDate, fields: ['@timestamp'] });
@@ -325,7 +324,7 @@ describe('useTimelineEvents', () => {
     // useEffect on params request
     await waitFor(() => new Promise((resolve) => resolve(null)));
 
-    expect(mockSearch).toHaveBeenCalledTimes(2);
+    expect(mockSearch).toHaveBeenCalledTimes(1);
     mockSearch.mockClear();
 
     // remove `event.kind` from default fields
@@ -343,16 +342,22 @@ describe('useTimelineEvents', () => {
     await waitFor(() => expect(mockSearch).toHaveBeenCalledTimes(0));
   });
 
-  describe('Fetch Notes', () => {
-    test('should call onLoad for notes when events are fetched', async () => {
-      renderHook((args) => useTimelineEvents(args), {
-        initialProps: props,
-      });
+  test('should return the combined list of events for all the pages when multiple pages are queried', async () => {
+    const { result } = renderHook((args) => useTimelineEvents(args), {
+      initialProps: { ...props },
+    });
+    await waitFor(() => {
+      expect(result.current[1].events).toHaveLength(10);
+    });
 
-      await waitFor(() => {
-        expect(mockSearch).toHaveBeenCalledTimes(1);
-        expect(onLoadMock).toHaveBeenNthCalledWith(1, expect.objectContaining(mockEvents));
-      });
+    result.current[1].loadPage(1);
+
+    await waitFor(() => {
+      expect(result.current[0]).toEqual(DataLoadingState.loadingMore);
+    });
+
+    await waitFor(() => {
+      expect(result.current[1].events).toHaveLength(20);
     });
   });
 });
