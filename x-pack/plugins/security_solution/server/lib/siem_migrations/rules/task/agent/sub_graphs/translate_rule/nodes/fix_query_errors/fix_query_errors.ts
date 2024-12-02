@@ -11,17 +11,17 @@ import { getEsqlKnowledgeBase } from '../../../../../util/esql_knowledge_base_ca
 import type { GraphNode } from '../../types';
 import { RESOLVE_ESQL_ERRORS_TEMPLATE } from './prompts';
 
-interface GetEsqlErrorsNodeParams {
+interface GetFixQueryErrorsNodeParams {
   inferenceClient: InferenceClient;
   connectorId: string;
   logger: Logger;
 }
 
-export const getEsqlErrorsNode = ({
+export const getFixQueryErrorsNode = ({
   inferenceClient,
   connectorId,
   logger,
-}: GetEsqlErrorsNodeParams): GraphNode => {
+}: GetFixQueryErrorsNodeParams): GraphNode => {
   const esqlKnowledgeBaseCaller = getEsqlKnowledgeBase({ inferenceClient, connectorId, logger });
   return async (state) => {
     const rule = state.elastic_rule;

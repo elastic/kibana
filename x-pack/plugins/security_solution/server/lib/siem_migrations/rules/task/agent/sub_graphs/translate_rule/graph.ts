@@ -8,7 +8,7 @@
 import { END, START, StateGraph } from '@langchain/langgraph';
 import { isEmpty } from 'lodash/fp';
 import { SiemMigrationRuleTranslationResult } from '../../../../../../../../common/siem_migrations/constants';
-import { getEsqlErrorsNode } from './nodes/esql_errors';
+import { getFixQueryErrorsNode } from './nodes/fix_query_errors';
 import { getProcessQueryNode } from './nodes/process_query';
 import { getRetrieveIntegrationsNode } from './nodes/retrieve_integrations';
 import { getTranslateRuleNode } from './nodes/translate_rule';
@@ -37,14 +37,13 @@ export function getTranslateRuleGraph({
   const processQueryNode = getProcessQueryNode({
     model,
     resourceRetriever,
-    logger,
   });
   const retrieveIntegrationsNode = getRetrieveIntegrationsNode({
     model,
     integrationRetriever,
   });
   const validationNode = getValidationNode({ logger });
-  const esqlErrorsNode = getEsqlErrorsNode({ inferenceClient, connectorId, logger });
+  const fixQueryErrorsNode = getFixQueryErrorsNode({ inferenceClient, connectorId, logger });
 
   const translateRuleGraph = new StateGraph(translateRuleState)
     // Nodes
@@ -52,17 +51,14 @@ export function getTranslateRuleGraph({
     .addNode('retrieveIntegrations', retrieveIntegrationsNode)
     .addNode('translateRule', translateRuleNode)
     .addNode('validation', validationNode)
-    .addNode('esql_errors', esqlErrorsNode)
+    .addNode('fixQueryErrors', fixQueryErrorsNode)
     // Edges
     .addEdge(START, 'processQuery')
     .addEdge('processQuery', 'retrieveIntegrations')
     .addEdge('retrieveIntegrations', 'translateRule')
     .addEdge('translateRule', 'validation')
-    .addEdge('esql_errors', 'validation')
-    .addConditionalEdges('validation', (state: TranslateRuleState) => validationRouter(state), {
-      esql_error: 'esql_errors',
-      end: END,
-    });
+    .addEdge('fixQueryErrors', 'validation')
+    .addConditionalEdges('validation', validationRouter);
 
   const graph = translateRuleGraph.compile();
   graph.name = 'Translate Rule Graph';
@@ -75,8 +71,8 @@ const validationRouter = (state: TranslateRuleState) => {
     state.translation_result === SiemMigrationRuleTranslationResult.FULL
   ) {
     if (!isEmpty(state.validation_errors?.esql_errors)) {
-      return 'esql_error';
+      return 'fixQueryErrors';
     }
   }
-  return 'end';
+  return END;
 };

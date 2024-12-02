@@ -6,7 +6,6 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { EditorError } from '@kbn/esql-ast';
 import { isEmpty } from 'lodash/fp';
 import type { GraphNode } from '../../types';
 import { parseEsqlQuery } from './esql_query';
@@ -24,13 +23,19 @@ export const getValidationNode = ({ logger }: GetValidationNodeParams): GraphNod
     const query = state.elastic_rule.query;
 
     // We want to prevent infinite loops, so we increment the iterations counter for each validation run.
-    const currentIteration = state.validation_errors.iterations++;
-    let esqlErrors: EditorError[] = [];
+    const currentIteration = ++state.validation_errors.iterations;
+    let esqlErrors: string = '';
     if (!isEmpty(query)) {
-      esqlErrors = parseEsqlQuery(query);
-      if (!isEmpty(esqlErrors)) {
-        logger.debug(`Esql validation errors: ${JSON.stringify(esqlErrors)}`);
+      const { errors, isEsqlQueryAggregating, hasMetadataOperator } = parseEsqlQuery(query);
+      if (!isEmpty(errors)) {
+        esqlErrors = JSON.stringify(errors);
+      } else if (!isEsqlQueryAggregating && !hasMetadataOperator) {
+        esqlErrors =
+          'Queries that don’t use the STATS...BY function (non-aggregating queries) must include the "metadata _id, _version, _index" operator after the source command. For example: FROM logs* metadata _id, _version, _index.';
       }
+    }
+    if (esqlErrors) {
+      logger.info(`Elastic Rule validation failed: ${esqlErrors}`);
     }
 
     return { validation_errors: { iterations: currentIteration, esql_errors: esqlErrors } };
