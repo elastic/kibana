@@ -40,6 +40,7 @@ import type {
 import { isDefined } from '@kbn/ml-is-defined';
 import type { MlFeatures } from '../../../common/constants/app';
 import type {
+  DFAModelItem,
   ExistingModelBase,
   ModelDownloadItem,
   NLPModelItem,
@@ -47,6 +48,7 @@ import type {
   TrainedModelUIItem,
   TrainedModelWithPipelines,
 } from '../../../common/types/trained_models';
+import { isExistingModel } from '../../../common/types/trained_models';
 import {
   isDFAModelItem,
   isElasticModel,
@@ -91,15 +93,6 @@ interface ModelMapResult {
 }
 
 export type GetCuratedModelConfigParams = Parameters<ModelsProvider['getCuratedModelConfig']>;
-
-interface GetTrainedModelsParams {
-  modelId?: string;
-  withPipelines?: boolean;
-  withIndices?: boolean;
-  withStats?: boolean;
-  include?: string;
-  size?: number;
-}
 
 export class ModelsProvider {
   private _transforms?: TransformGetTransformTransformSummary[];
@@ -293,7 +286,7 @@ export class ModelsProvider {
   /**
    * Assigns pipelines to trained models
    */
-  async assignPipelines(trainedModels: TrainedModelItem[]): Promise<TrainedModelUIItem[]> {
+  async assignPipelines(trainedModels: TrainedModelItem[]): Promise<void> {
     // For each model create a dict with model aliases and deployment ids for faster lookup
     const modelToAliasesAndDeployments: Record<string, Set<string>> = Object.fromEntries(
       trainedModels.map((model) => [
@@ -314,7 +307,7 @@ export class ModelsProvider {
     // Get all pipelines first in one call:
     const modelPipelinesMap = await this.getModelsPipelines(modelIdsAndAliases);
 
-    return trainedModels.map((model) => {
+    trainedModels.forEach((model) => {
       const modelAliasesAndDeployments = modelToAliasesAndDeployments[model.model_id];
       // Check model pipelines map for any pipelines associated with the model
       for (const [modelEntityId, pipelines] of modelPipelinesMap) {
@@ -323,14 +316,13 @@ export class ModelsProvider {
           model.pipelines = model.pipelines ? Object.assign(model.pipelines, pipelines) : pipelines;
         }
       }
-      return model;
     });
   }
 
   /**
    * Assigns indices to trained models
    */
-  async assignModelIndices(trainedModels: TrainedModelItem[]): Promise<TrainedModelItem[]> {
+  async assignModelIndices(trainedModels: TrainedModelItem[]): Promise<void> {
     // Get a list of all uniquer pipeline ids to retrieve mapping with indices
     const pipelineIds = new Set<string>(
       trainedModels
@@ -340,21 +332,19 @@ export class ModelsProvider {
 
     const pipelineToIndicesMap = await this.getPipelineToIndicesMap(pipelineIds);
 
-    return trainedModels.map((model) => {
-      if (isEmpty(model.pipelines)) {
-        return model;
+    trainedModels.forEach((model) => {
+      if (!isEmpty(model.pipelines)) {
+        model.indices = Object.entries(pipelineToIndicesMap)
+          .filter(([pipelineId]) => !isEmpty(model.pipelines?.[pipelineId]))
+          .flatMap(([_, indices]) => indices);
       }
-      model.indices = Object.entries(pipelineToIndicesMap)
-        .filter(([pipelineId]) => !isEmpty(model.pipelines?.[pipelineId]))
-        .flatMap(([_, indices]) => indices);
-      return model;
     });
   }
 
   /**
    * Assign a check for each DFA model if origin job exists
    */
-  async assignDFAJobCheck(trainedModels: TrainedModelItem[]) {
+  async assignDFAJobCheck(trainedModels: DFAModelItem[]): Promise<void> {
     try {
       const dfaJobIds = trainedModels
         .map((model) => {
@@ -371,7 +361,7 @@ export class ModelsProvider {
           allow_no_match: true,
         });
 
-        trainedModels.filter(isDFAModelItem).forEach((model) => {
+        trainedModels.forEach((model) => {
           const dfaId = model?.metadata?.analytics_config?.id;
           if (dfaId !== undefined) {
             // if this is a dfa model, set origin_job_exists
@@ -425,12 +415,15 @@ export class ModelsProvider {
       resultItems = await this.includeModelDownloads(resultItems);
     }
 
-    resultItems = await this.assignPipelines(resultItems);
+    const existingModels = resultItems.filter(isExistingModel);
+
+    // Assign pipelines to existing models
+    await this.assignPipelines(existingModels);
 
     // Assign indices
-    resultItems = await this.assignModelIndices(resultItems);
+    await this.assignModelIndices(existingModels);
 
-    await this.assignDFAJobCheck(resultItems);
+    await this.assignDFAJobCheck(resultItems.filter(isDFAModelItem));
 
     return resultItems;
   }
@@ -602,7 +595,6 @@ export class ModelsProvider {
     };
 
     let pipelinesResponse;
-    let indicesSettings;
 
     try {
       pipelinesResponse = await this.getModelsPipelines([modelId]);

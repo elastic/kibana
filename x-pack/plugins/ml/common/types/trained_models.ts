@@ -103,24 +103,12 @@ export type PutTrainedModelConfig = {
 >; // compressed_definition and definition are mutually exclusive
 
 export type TrainedModelConfigResponse = estypes.MlTrainedModelConfig & {
-  // PART OF THE DFA
-  // origin_job_exists?: boolean;
-
   metadata?: estypes.MlTrainedModelConfig['metadata'] & {
     analytics_config?: DataFrameAnalyticsConfig;
     input: unknown;
     // total_feature_importance?: TotalFeatureImportance[];
     // feature_importance_baseline?: FeatureImportanceBaseline;
   } & Record<string, unknown>;
-
-  /**
-   * Whether the model has inference services
-   */
-  hasInferenceServices?: boolean;
-  /**
-   * Inference services associated with the model
-   */
-  inference_apis?: InferenceAPIConfigResponse[];
 };
 
 export interface PipelineDefinition {
@@ -317,6 +305,22 @@ export type Stats = Omit<TrainedModelStat, 'model_id' | 'deployment_stats'>;
 interface BaseModelItem {
   type?: string[];
   tags: string[];
+  /**
+   * Whether the model has inference services
+   */
+  hasInferenceServices?: boolean;
+  /**
+   * Inference services associated with the model
+   */
+  inference_apis?: InferenceAPIConfigResponse[];
+  /**
+   * Associated pipelines. Extends response from the ES endpoint.
+   */
+  pipelines?: Record<string, PipelineDefinition>;
+  /**
+   * Indices with associated pipelines that have inference processors utilizing the model deployments.
+   */
+  indices?: string[];
 }
 
 /** Common properties for existing NLP models and NLP model download configs */
@@ -368,16 +372,7 @@ export const isElasticModel = (item: TrainedModelConfigResponse) =>
 export type ExistingModelBase = TrainedModelConfigResponse & BaseModelItem;
 
 /** Any model returned by the trained_models API, e.g. lang_ident, elser, dfa model */
-export type TrainedModelItem = ExistingModelBase & { stats: Stats } & {
-  /**
-   * Associated pipelines. Extends response from the ES endpoint.
-   */
-  pipelines?: Record<string, PipelineDefinition>;
-  /**
-   * Indices with associated pipelines that have inference processors utilizing the model deployments.
-   */
-  indices?: string[];
-};
+export type TrainedModelItem = ExistingModelBase & { stats: Stats };
 
 /** Trained DFA model */
 export type DFAModelItem = TrainedModelItem & {

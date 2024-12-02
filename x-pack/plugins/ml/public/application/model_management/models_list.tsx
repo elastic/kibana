@@ -50,7 +50,6 @@ import type {
 import {
   isBaseNLPModelItem,
   isBuiltInModel,
-  isDFAModelItem,
   isModelDownloadItem,
   isNLPModelItem,
 } from '../../../common/types/trained_models';
@@ -324,7 +323,9 @@ export const ModelsList: FC<Props> = ({
       if (type) {
         acc.add(type);
       }
-      acc.add(item.model_type);
+      if (item.model_type) {
+        acc.add(item.model_type);
+      }
       return acc;
     }, new Set<string>());
     return [...result]
@@ -507,7 +508,7 @@ export const ModelsList: FC<Props> = ({
       truncateText: false,
       width: '150px',
       render: (item: TrainedModelUIItem) => {
-        if (isDFAModelItem(item)) return null;
+        if (!isBaseNLPModelItem(item)) return null;
 
         const { state, downloadState } = item;
         const config = getModelStateColor(state);

@@ -34,10 +34,6 @@ export interface InferenceQueryParams {
   include_model_definition?: boolean;
   size?: number;
   tags?: string;
-  // Custom kibana endpoint query params
-  with_pipelines?: boolean;
-  with_indices?: boolean;
-  with_stats?: boolean;
   include?: 'total_feature_importance' | 'feature_importance_baseline' | string;
 }
 
