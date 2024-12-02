@@ -19,6 +19,7 @@ import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { TriggersAndActionsUIPublicPluginSetup } from '@kbn/triggers-actions-ui-plugin/public';
 import {
+  CCS_REMOTE_PATTERN,
   RULE_DETAILS,
   RULE_THREAD_POOL_SEARCH_REJECTIONS,
   RULE_THREAD_POOL_WRITE_REJECTIONS,
@@ -38,6 +39,7 @@ import {
   MonitoringStartPluginDependencies,
   LegacyMonitoringStartPluginDependencies,
 } from './types';
+import { getIndexPatterns } from '../common/get_index_patterns';
 
 interface MonitoringSetupPluginDependencies {
   home?: HomePublicPluginSetup;
@@ -154,6 +156,7 @@ export class MonitoringPlugin
         monitoring.ui.kibana.reporting.stale_status_threshold_seconds,
       ],
       ['isCcsEnabled', monitoring.ui.ccs.enabled],
+      ['logsIndices', getLogsIndices(monitoring)],
     ];
   }
 
@@ -188,3 +191,11 @@ export class MonitoringPlugin
     }
   }
 }
+
+const getLogsIndices = (config: MonitoringConfig) => {
+  return getIndexPatterns({
+    config,
+    type: 'logs',
+    ccs: CCS_REMOTE_PATTERN,
+  });
+};
