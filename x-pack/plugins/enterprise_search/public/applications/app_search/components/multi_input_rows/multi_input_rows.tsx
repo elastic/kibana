@@ -70,7 +70,6 @@ export const MultiInputRows: React.FC<Props> = ({
             }
           : undefined
       }
-      tabIndex={-1}
     >
       <div
         ref={valuesContainerRef}
