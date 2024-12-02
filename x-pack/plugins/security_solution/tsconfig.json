@@ -236,6 +236,5 @@
     "@kbn/react-hooks",
     "@kbn/index-adapter",
     "@kbn/core-http-server-utils",
-    "@kbn/product-doc-common"
   ]
 }
