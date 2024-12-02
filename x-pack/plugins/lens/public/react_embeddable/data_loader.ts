@@ -254,17 +254,12 @@ export function loadEmbeddableData(
   }
 
   // Build a custom operator to be resused for various observables
-  function waitForChangeWithReason(reason: ReloadReason) {
-    return pipe(
-      distinctUntilChanged(fastIsEqual),
-      skip(1),
-      map(() => reason)
-    );
+  function waitUntilChanged() {
+    return pipe(distinctUntilChanged(fastIsEqual), skip(1));
   }
 
   const mergedSubscriptions = merge(
-    // make fetch$ populate the internal unifiedSearch$ and will filter that out
-    // before deciding to data load
+    // on data change from the parentApi, reload
     fetch$(api).pipe(
       tap((data) => {
         const searchSessionId = apiPublishesSearchSession(parentApi) ? data.searchSessionId : '';
@@ -283,17 +278,21 @@ export function loadEmbeddableData(
     // just make sure to avoid to rerender if there's no substantial change
     // make sure to debounce one tick to make the refresh work
     internalApi.attributes$.pipe(
-      waitForChangeWithReason('attributes'),
+      waitUntilChanged(),
       tap(() => {
         // the ES|QL query may have changed, so recompute the args for view underlying data
         if (api.isTextBasedLanguage()) {
           api.loadViewUnderlyingData();
         }
-      })
+      }),
+      map(() => 'attributes' as ReloadReason)
     ),
-    api.savedObjectId.pipe(waitForChangeWithReason('savedObjectId')),
-    internalApi.overrides$.pipe(waitForChangeWithReason('overrides')),
-    internalApi.disableTriggers$.pipe(waitForChangeWithReason('disableTriggers'))
+    api.savedObjectId.pipe(
+      waitUntilChanged(),
+      map(() => 'savedObjectId' as ReloadReason)
+    ),
+    internalApi.overrides$.pipe(waitUntilChanged(), map(() => 'overrides' as ReloadReason)),
+    internalApi.disableTriggers$.pipe(waitUntilChanged(), map(() => 'disableTriggers' as ReloadReason)
   );
 
   const subscriptions: Subscription[] = [
