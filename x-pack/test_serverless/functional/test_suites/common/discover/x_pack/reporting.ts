@@ -109,6 +109,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('Generate CSV: new search', () => {
       it('generates a report from a new search with data: default', async () => {
         await PageObjects.discover.clickNewSearchButton();
+        await PageObjects.reporting.setTimepickerInEcommerceDataRange();
         await PageObjects.unifiedFieldList.clickFieldListItemAdd('order_id');
         await PageObjects.discover.clickFieldSort('order_id', 'Sort A-Z');
         await PageObjects.discover.saveSearch('my search - with data - expectReportCanBeCreated');
