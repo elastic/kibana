@@ -28,6 +28,8 @@ import type { State } from '../../state';
 import * as i18n from './translations';
 import { useTelemetry } from '../../../telemetry';
 import type { AIConnector, IntegrationSettings } from '../../types';
+import type { ErrorMessageWithLink } from '../../../../../../common/api/generation_error';
+import { GenerationErrorCode } from '../../../../../../common/constants';
 
 export type OnComplete = (result: State['result']) => void;
 export const ProgressOrder = ['analyzeLogs', 'ecs', 'categorization', 'related'] as const;
@@ -48,12 +50,23 @@ interface RunGenerationProps {
 
 // If the result is classified as a generation error, produce an error message
 // as defined in the i18n file. Otherwise, return undefined.
-function generationErrorMessage(body: unknown | undefined): string | undefined {
+function generationErrorMessage(
+  body: unknown | undefined
+): string | ErrorMessageWithLink | undefined {
   if (!isGenerationErrorBody(body)) {
     return;
   }
 
   const errorCode = body.attributes.errorCode;
+  if (errorCode === GenerationErrorCode.CEF_ERROR) {
+    if (body.attributes.errorMessageWithLink !== undefined) {
+      return {
+        link: body.attributes.errorMessageWithLink.link,
+        errorMessage: i18n.DECODE_CEF_LINK,
+        linkText: body.attributes.errorMessageWithLink.linkText,
+      };
+    }
+  }
   const translation = i18n.GENERATION_ERROR_TRANSLATION[errorCode];
   return typeof translation === 'function' ? translation(body.attributes) : translation;
 }
@@ -72,7 +85,7 @@ export const useGeneration = ({
   const { reportGenerationComplete } = useTelemetry();
   const { http, notifications } = useKibana().services;
   const [progress, setProgress] = useState<ProgressItem>();
-  const [error, setError] = useState<null | string>(null);
+  const [error, setError] = useState<null | string | ErrorMessageWithLink>(null);
   const [isRequesting, setIsRequesting] = useState<boolean>(true);
 
   useEffect(() => {

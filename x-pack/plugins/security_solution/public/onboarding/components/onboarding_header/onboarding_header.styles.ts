@@ -18,5 +18,8 @@ export const useOnboardingHeaderStyles = () => {
     .onboardingHeaderGreetings {
       color: ${euiTheme.colors.darkShade};
     }
+    .onboardingHeaderTopicSelector {
+      width: calc(${PAGE_CONTENT_WIDTH} / 3);
+    }
   `;
 };

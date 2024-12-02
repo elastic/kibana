@@ -5,15 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiPanel,
-  EuiTitle,
-  EuiCode,
-  EuiSpacer,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-} from '@elastic/eui';
+import { EuiPanel, EuiTitle, EuiCode, EuiSpacer, EuiText, EuiCodeBlock } from '@elastic/eui';
 import { ConnectorStatus } from '@kbn/search-connectors';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -31,6 +23,14 @@ export const ConnectionDetails: React.FC<ConnectionDetailsProps> = ({
   status,
 }) => {
   const { elasticsearchUrl } = useElasticsearchUrl();
+  const codeBlock = `connectors:
+-
+  connector_id: ${connectorId}
+  service_type: ${serviceType}
+  api_key:
+elasticsearch:
+  host: ${elasticsearchUrl}
+  api_key:`;
   return (
     <EuiPanel hasBorder>
       <EuiTitle size="xs">
@@ -43,38 +43,19 @@ export const ConnectionDetails: React.FC<ConnectionDetailsProps> = ({
         </h3>
       </EuiTitle>
       <EuiSpacer />
-      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiText size="s">
-            <strong>connector_id</strong>
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false} data-test-subj="serverlessSearchConnectorConnectorId">
-          <EuiCode>{connectorId}</EuiCode>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <EuiText color="subdued">
+        <FormattedMessage
+          id="xpack.serverlessSearch.connectors.config.apiKeyExplanation"
+          defaultMessage="You will need to fill in the {api_key} fields with an API key. One can be generated on the Getting Started page."
+          values={{
+            api_key: <EuiCode>api_key</EuiCode>,
+          }}
+        />
+      </EuiText>
       <EuiSpacer />
-      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiText size="s">
-            <strong>service_type</strong>
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false} data-test-subj="serverlessSearchConnectorServiceType">
-          {Boolean(serviceType) && <EuiCode>{serviceType}</EuiCode>}
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer />
-      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiText size="s">
-            <strong>elasticsearch.host</strong>
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiCode>{elasticsearchUrl}</EuiCode>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <EuiCodeBlock language="yaml" isCopyable>
+        {codeBlock}
+      </EuiCodeBlock>
     </EuiPanel>
   );
 };

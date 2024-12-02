@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useKibana } from '../../../../common/lib/kibana';
-import { useStoredCompletedCardIds } from '../../../hooks/use_stored_state';
+import { useStoredCompletedCardIds } from '../../hooks/use_stored_state';
 import type { OnboardingCardId } from '../../../constants';
 import type {
   CheckCompleteResult,
   CheckCompleteResponse,
-  OnboardingGroupConfig,
   OnboardingCardConfig,
+  OnboardingGroupConfig,
 } from '../../../types';
 import { useOnboardingContext } from '../../onboarding_context';
 
@@ -32,10 +32,9 @@ export type CardCheckCompleteResult = Partial<Record<OnboardingCardId, CheckComp
 /**
  * This hook implements the logic for tracking which onboarding cards have been completed using Local Storage.
  */
-export const useCompletedCards = (cardsGroupConfig: OnboardingGroupConfig[]) => {
-  const { spaceId, reportCardComplete } = useOnboardingContext();
+export const useCompletedCards = (bodyConfig: OnboardingGroupConfig[]) => {
+  const { spaceId, telemetry } = useOnboardingContext();
   const services = useKibana().services;
-  const autoCheckCompletedRef = useRef<boolean>(false);
 
   // Use stored state to keep localStorage in sync, and a local state to avoid unnecessary re-renders.
   const [storedCompleteCardIds, setStoredCompleteCardIds] = useStoredCompletedCardIds(spaceId);
@@ -55,7 +54,7 @@ export const useCompletedCards = (cardsGroupConfig: OnboardingGroupConfig[]) => 
         const isCurrentlyComplete = currentCompleteCards.includes(cardId);
         if (completed && !isCurrentlyComplete) {
           const newCompleteCardIds = [...currentCompleteCards, cardId];
-          reportCardComplete(cardId, options);
+          telemetry.reportCardComplete(cardId, options);
           setStoredCompleteCardIds(newCompleteCardIds); // Keep the stored state in sync with the local state
           return newCompleteCardIds;
         } else if (!completed && isCurrentlyComplete) {
@@ -66,7 +65,7 @@ export const useCompletedCards = (cardsGroupConfig: OnboardingGroupConfig[]) => 
         return currentCompleteCards; // No change
       });
     },
-    [reportCardComplete, setStoredCompleteCardIds] // static dependencies, this function needs to be stable
+    [setStoredCompleteCardIds, telemetry] // static dependencies, this function needs to be stable
   );
 
   const getCardCheckCompleteResult = useCallback<GetCardCheckCompleteResult>(
@@ -88,11 +87,11 @@ export const useCompletedCards = (cardsGroupConfig: OnboardingGroupConfig[]) => 
   // Internal: stores all cards that have a checkComplete function in a flat array
   const cardsWithAutoCheck = useMemo(
     () =>
-      cardsGroupConfig.reduce<OnboardingCardConfig[]>((acc, group) => {
+      bodyConfig.reduce<OnboardingCardConfig[]>((acc, group) => {
         acc.push(...group.cards.filter((card) => card.checkComplete));
         return acc;
       }, []),
-    [cardsGroupConfig]
+    [bodyConfig]
   );
 
   // Internal: sets the result of a checkComplete function
@@ -118,9 +117,7 @@ export const useCompletedCards = (cardsGroupConfig: OnboardingGroupConfig[]) => 
           .checkComplete?.(services)
           .catch((err: Error) => {
             services.notifications.toasts.addError(err, { title: cardConfig.title });
-            return {
-              isComplete: false,
-            };
+            return { isComplete: false };
           })
           .then((checkCompleteResult) => {
             processCardCheckCompleteResult(cardId, checkCompleteResult);
@@ -131,19 +128,13 @@ export const useCompletedCards = (cardsGroupConfig: OnboardingGroupConfig[]) => 
   );
 
   useEffect(() => {
-    // Initial auto-check for all cards, it should run only once, after cardsGroupConfig is properly populated
-    if (cardsWithAutoCheck.length === 0 || autoCheckCompletedRef.current) {
-      return;
-    }
-    autoCheckCompletedRef.current = true;
+    // Initial auto-check for all body cards, it should run once per `bodyConfig` (topic) change.
     cardsWithAutoCheck.map((card) =>
       card
         .checkComplete?.(services)
         .catch((err: Error) => {
           services.notifications.toasts.addError(err, { title: card.title });
-          return {
-            isComplete: false,
-          };
+          return { isComplete: false };
         })
         .then((checkCompleteResult) => {
           processCardCheckCompleteResult(card.id, checkCompleteResult);

@@ -54,8 +54,9 @@ export class SearchAssistantPlugin
       pluginsStart,
     });
     const isEnabled = appService.isEnabled();
+    const aiAssistantIsEnabled = coreStart.application.capabilities.observabilityAIAssistant?.show;
 
-    if (!isEnabled) {
+    if (!isEnabled || !aiAssistantIsEnabled) {
       return {};
     }
 

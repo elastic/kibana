@@ -10,10 +10,7 @@ import React, { useEffect, useMemo, useState, type FC } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, combineLatest, distinctUntilChanged, map } from 'rxjs';
-import { createBrowserHistory } from 'history';
 
-import { UrlStateProvider } from '@kbn/ml-url-state';
-import { Router } from '@kbn/shared-ux-router';
 import { AIOPS_EMBEDDABLE_ORIGIN } from '@kbn/aiops-common/constants';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { UI_SETTINGS } from '@kbn/data-service';
@@ -22,6 +19,7 @@ import type { TimeRange } from '@kbn/es-query';
 import { DatePickerContextProvider } from '@kbn/ml-date-picker';
 import type { SignificantItem } from '@kbn/ml-agg-utils';
 
+import type { WindowParameters } from '@kbn/aiops-log-rate-analysis';
 import { AiopsAppContext, type AiopsAppContextValue } from '../hooks/use_aiops_app_context';
 import { DataSourceContextProvider } from '../hooks/use_data_source';
 import { ReloadContextProvider } from '../hooks/use_reload';
@@ -60,6 +58,7 @@ export interface LogRateAnalysisEmbeddableWrapperProps {
   onLoading: (isLoading: boolean) => void;
   onRenderComplete: () => void;
   onError: (error: Error) => void;
+  windowParameters?: WindowParameters;
 }
 
 const LogRateAnalysisEmbeddableWrapperWithDeps: FC<LogRateAnalysisPropsWithDeps> = ({
@@ -71,6 +70,7 @@ const LogRateAnalysisEmbeddableWrapperWithDeps: FC<LogRateAnalysisPropsWithDeps>
   timeRange,
   embeddingOrigin,
   lastReloadRequestTime,
+  windowParameters,
 }) => {
   const deps = useMemo(() => {
     const { lens, data, usageCollection, fieldFormats, charts, share, storage, unifiedSearch } =
@@ -120,8 +120,6 @@ const LogRateAnalysisEmbeddableWrapperWithDeps: FC<LogRateAnalysisPropsWithDeps>
     );
   }, [manualReload$]);
 
-  const history = createBrowserHistory();
-
   // We use the following pattern to track changes of dataViewId, and if there's
   // a change, we unmount and remount the complete inner component. This makes
   // sure the component is reinitialized correctly when the options of the
@@ -150,26 +148,22 @@ const LogRateAnalysisEmbeddableWrapperWithDeps: FC<LogRateAnalysisPropsWithDeps>
       }}
     >
       {showComponent && (
-        <Router history={history}>
-          <ReloadContextProvider reload$={resultObservable$}>
-            <AiopsAppContext.Provider value={aiopsAppContextValue}>
-              <DatePickerContextProvider {...datePickerDeps}>
-                <UrlStateProvider>
-                  <DataSourceContextProvider
-                    dataViews={pluginStart.data.dataViews}
-                    dataViewId={dataViewId}
-                  >
-                    <FilterQueryContextProvider timeRange={timeRange}>
-                      <LogRateAnalysisReduxProvider>
-                        <LogRateAnalysisForEmbeddable timeRange={timeRange} />
-                      </LogRateAnalysisReduxProvider>
-                    </FilterQueryContextProvider>
-                  </DataSourceContextProvider>
-                </UrlStateProvider>
-              </DatePickerContextProvider>
-            </AiopsAppContext.Provider>
-          </ReloadContextProvider>
-        </Router>
+        <ReloadContextProvider reload$={resultObservable$}>
+          <AiopsAppContext.Provider value={aiopsAppContextValue}>
+            <DatePickerContextProvider {...datePickerDeps}>
+              <DataSourceContextProvider
+                dataViews={pluginStart.data.dataViews}
+                dataViewId={dataViewId}
+              >
+                <FilterQueryContextProvider timeRange={timeRange}>
+                  <LogRateAnalysisReduxProvider initialAnalysisStart={windowParameters}>
+                    <LogRateAnalysisForEmbeddable timeRange={timeRange} />
+                  </LogRateAnalysisReduxProvider>
+                </FilterQueryContextProvider>
+              </DataSourceContextProvider>
+            </DatePickerContextProvider>
+          </AiopsAppContext.Provider>
+        </ReloadContextProvider>
       )}
     </div>
   );

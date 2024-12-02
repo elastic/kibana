@@ -5,24 +5,19 @@
  * 2.0.
  */
 import React, { type PropsWithChildren } from 'react';
-import { COLOR_MODES_STANDARD, EuiPanel, useEuiTheme, type EuiPanelProps } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { EuiPanel, type EuiPanelProps } from '@elastic/eui';
+import classnames from 'classnames';
+import { useCardContentPanelStyles, NESTED_PANEL_CLASS_NAME } from './card_content_panel.styles';
 
 export const OnboardingCardContentPanel = React.memo<PropsWithChildren<EuiPanelProps>>(
-  ({ children, ...panelProps }) => {
-    const { euiTheme, colorMode } = useEuiTheme();
-    const isDarkMode = colorMode === COLOR_MODES_STANDARD.dark;
+  ({ children, className, ...panelProps }) => {
+    const styles = useCardContentPanelStyles();
+    const panelClassName = classnames(styles);
+    const nestedClassName = classnames(NESTED_PANEL_CLASS_NAME, className);
+
     return (
-      <EuiPanel
-        paddingSize="m"
-        hasShadow={false}
-        hasBorder={false}
-        css={css`
-          background-color: ${isDarkMode ? euiTheme.colors.lightestShade : ''};
-          padding-top: 0;
-        `}
-      >
-        <EuiPanel {...panelProps} hasShadow={false} paddingSize="l">
+      <EuiPanel paddingSize="m" hasShadow={false} hasBorder={false} className={panelClassName}>
+        <EuiPanel {...panelProps} hasShadow={false} paddingSize="l" className={nestedClassName}>
           {children}
         </EuiPanel>
       </EuiPanel>

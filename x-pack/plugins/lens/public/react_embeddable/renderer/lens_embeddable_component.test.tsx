@@ -13,6 +13,12 @@ import { PublishingSubject } from '@kbn/presentation-publishing';
 import React from 'react';
 import { LensEmbeddableComponent } from './lens_embeddable_component';
 
+jest.mock('../expression_wrapper', () => ({
+  ExpressionWrapper: () => (
+    <div className="lnsExpressionRenderer" data-test-subj="lens-embeddable" />
+  ),
+}));
+
 type GetValueType<Type> = Type extends PublishingSubject<infer X> ? X : never;
 
 function getDefaultProps({
@@ -38,5 +44,18 @@ describe('Lens Embeddable component', () => {
 
     render(<LensEmbeddableComponent {...props} />);
     expect(screen.queryByTestId('lens-embeddable')).not.toBeInTheDocument();
+  });
+
+  it('shoud not render the title if the visualization forces the title to be hidden', () => {
+    const getDisplayOptions = jest.fn(() => ({ noPanelTitle: true }));
+    const props = getDefaultProps({
+      internalApiOverrides: {
+        getDisplayOptions,
+      },
+    });
+
+    render(<LensEmbeddableComponent {...props} />);
+    expect(props.internalApi.getDisplayOptions).toHaveBeenCalled();
+    expect(screen.getByTestId('lens-embeddable').parentElement).not.toHaveAttribute('data-title');
   });
 });
