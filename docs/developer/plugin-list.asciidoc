@@ -470,6 +470,10 @@ The plugin exposes the static DefaultEditorController class to consume.
 |WARNING: Missing README.
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/asset_inventory/README.md[assetInventory]
+|Asset Inventory centralizes the view and management of all cloud assets.
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/banners/README.md[banners]
 |Allow to add a header banner that will be displayed on every page of the Kibana application
 
