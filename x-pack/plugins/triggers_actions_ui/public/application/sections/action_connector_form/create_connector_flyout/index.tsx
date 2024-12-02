@@ -9,6 +9,7 @@ import React, { memo, ReactNode, useCallback, useEffect, useRef, useState } from
 import {
   EuiButton,
   EuiButtonGroup,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -18,6 +19,7 @@ import {
 
 import { getConnectorCompatibility } from '@kbn/actions-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import {
   ActionConnector,
   ActionType,
@@ -126,6 +128,11 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
       }
     }
   };
+
+  // Hide All fields required error message
+  const resetRequiredFieldsErrorMessage = useCallback(() => {
+    setIsRequiredFieldError(false);
+  }, []);
 
   const validateAndCreateConnector = useCallback(async () => {
     setPreSubmitValidationErrorMessage(null);
@@ -237,12 +244,18 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
             )}
             {isRequiredFieldError && (
               <>
-                <p data-test-subj="requiredFieldErrorMsg">
-                  <FormattedMessage
-                    id="xpack.triggersActionsUI.sections.actionConnectorAdd.requiredFieldError"
-                    defaultMessage="All fields are required"
-                  />
-                </p>
+                <EuiCallOut
+                  size="s"
+                  color="danger"
+                  iconType="warning"
+                  data-test-subj="required-field-error-label"
+                  title={i18n.translate(
+                    'xpack.triggersActionsUI.sections.actionConnectorAdd.requiredFieldError',
+                    {
+                      defaultMessage: 'All fields are required',
+                    }
+                  )}
+                />
                 <EuiSpacer size="m" />
               </>
             )}
@@ -252,6 +265,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
               isEdit={false}
               onChange={setFormState}
               setResetForm={setResetForm}
+              resetErrorMessage={resetRequiredFieldsErrorMessage}
             />
             {!!preSubmitValidationErrorMessage && <p>{preSubmitValidationErrorMessage}</p>}
             <EuiFlexItem grow={false}>
