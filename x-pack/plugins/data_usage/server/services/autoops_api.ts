@@ -14,12 +14,12 @@ import { Logger } from '@kbn/logging';
 import type { AxiosError, AxiosRequestConfig } from 'axios';
 import axios from 'axios';
 import { LogMeta } from '@kbn/core/server';
+import { momentDateParser } from '../../common/utils';
 import {
   UsageMetricsAutoOpsResponseSchema,
   type UsageMetricsAutoOpsResponseSchemaBody,
   type UsageMetricsRequestBody,
 } from '../../common/rest_types';
-import { dateParser } from '../../common/utils';
 import { AutoOpsConfig } from '../types';
 import { AutoOpsError } from './errors';
 import { appContextService } from './app_context';
@@ -76,8 +76,8 @@ export class AutoOpsAPIService {
     const requestConfig: AxiosRequestConfig = {
       url: getAutoOpsAPIRequestUrl(autoopsConfig.api?.url, cloudSetup?.serverless.projectId),
       data: {
-        from: dateParser(requestBody.from),
-        to: dateParser(requestBody.to),
+        from: momentDateParser(requestBody.from)?.toISOString(),
+        to: momentDateParser(requestBody.to)?.toISOString(),
         size: requestBody.dataStreams.length,
         level: 'datastream',
         metric_types: requestBody.metricTypes,
@@ -123,7 +123,7 @@ export class AutoOpsAPIService {
             `${AUTO_OPS_AGENT_CREATION_PREFIX} with an error ${error} ${requestConfigDebugStatus}`,
             errorMetadataWithRequestConfig
           );
-          throw new Error(withRequestIdMessage(error.message));
+          throw new AutoOpsError(withRequestIdMessage(error.message));
         }
 
         const errorLogCodeCause = `${error.code}  ${this.convertCauseErrorsToString(error)}`;
@@ -152,14 +152,16 @@ export class AutoOpsAPIService {
             `${AUTO_OPS_AGENT_CREATION_PREFIX} while sending the request to the AutoOps API: ${errorLogCodeCause} ${requestConfigDebugStatus}`,
             errorMetadataWithRequestConfig
           );
-          throw new Error(withRequestIdMessage(`no response received from the AutoOps API`));
+          throw new AutoOpsError(withRequestIdMessage(`no response received from the AutoOps API`));
         } else {
           // Something happened in setting up the request that triggered an Error
           this.logger.error(
-            `${AUTO_OPS_AGENT_CREATION_PREFIX} to be created ${errorLogCodeCause} ${requestConfigDebugStatus}`,
+            `${AUTO_OPS_AGENT_CREATION_PREFIX} to be created ${errorLogCodeCause} ${requestConfigDebugStatus} ${error.toJSON()}`,
             errorMetadataWithRequestConfig
           );
-          throw new AutoOpsError(withRequestIdMessage(AGENT_CREATION_FAILED_ERROR));
+          throw new AutoOpsError(
+            withRequestIdMessage(`${AGENT_CREATION_FAILED_ERROR}, ${error.message}`)
+          );
         }
       }
     );
