@@ -16,7 +16,6 @@ import type { InferenceClient } from '@kbn/inference-plugin/server';
 import { ChatCompletionEventType as InferenceChatCompletionEventType } from '@kbn/inference-common';
 import { ObservabilityAIAssistantClient } from '.';
 import { MessageRole, type Message } from '../../../common';
-import { ObservabilityAIAssistantConnectorType } from '../../../common/connectors';
 import {
   ChatCompletionChunkEvent,
   MessageAddEvent,
@@ -166,15 +165,6 @@ describe('Observability AI Assistant client', () => {
 
     functionClientMock.hasAction.mockReturnValue(false);
     functionClientMock.getActions.mockReturnValue([]);
-
-    actionsClientMock.get.mockResolvedValue({
-      actionTypeId: ObservabilityAIAssistantConnectorType.OpenAI,
-      id: 'foo',
-      name: 'My connector',
-      isPreconfigured: false,
-      isDeprecated: false,
-      isSystemAction: false,
-    });
 
     currentUserEsClientMock.search.mockResolvedValue({
       hits: {
@@ -1306,10 +1296,10 @@ describe('Observability AI Assistant client', () => {
         return new Promise<void>((resolve) => onLlmCall.addListener('next', resolve));
       }
 
-      inferenceClientMock.chatComplete.mockImplementationOnce(() => {
+      inferenceClientMock.chatComplete.mockImplementation(() => {
         return new Observable((subscriber) => {
-          llmSimulator = createLlmSimulator(subscriber);
           onLlmCall.emit('next');
+          llmSimulator = createLlmSimulator(subscriber);
         });
       });
 
@@ -1348,7 +1338,6 @@ describe('Observability AI Assistant client', () => {
 
       async function requestAlertsFunctionCall() {
         const body = inferenceClientMock.chatComplete.mock.lastCall![0];
-
         let nextLlmCallPromise: Promise<void>;
 
         if (Object.keys(body.tools ?? {}).length) {
@@ -1358,11 +1347,8 @@ describe('Observability AI Assistant client', () => {
           nextLlmCallPromise = Promise.resolve();
           await llmSimulator.chunk({ content: 'Looks like we are done here' });
         }
-        // await llmSimulator.next({ content: 'Looks like we are done here' });
-        // await llmSimulator.tokenCount({ completion: 0, prompt: 0, total: 0 });
-        await llmSimulator.complete();
 
-        // await nextLlmCallPromise;
+        await nextLlmCallPromise;
       }
 
       await nextTick();
@@ -1371,7 +1357,9 @@ describe('Observability AI Assistant client', () => {
         await requestAlertsFunctionCall();
       }
 
-      // await llmSimulator.complete();
+      await llmSimulator.next({ content: 'Looks like we are done here' });
+      await llmSimulator.tokenCount({ completion: 0, prompt: 0, total: 0 });
+      await llmSimulator.complete();
       await finished(stream);
     });
 
@@ -1528,7 +1516,7 @@ describe('Observability AI Assistant client', () => {
         content: repeat('word ', 10000),
       });
 
-      await waitFor(() => actionsClientMock.execute.mock.calls.length > 1);
+      await waitFor(() => inferenceClientMock.chatComplete.mock.calls.length > 1);
 
       await llmSimulator.next({ content: 'Looks like this was truncated' });
 
@@ -1539,14 +1527,18 @@ describe('Observability AI Assistant client', () => {
 
     it('truncates the message', () => {
       const body = inferenceClientMock.chatComplete.mock.lastCall![0];
-      const parsed = last(body.messages)?.response;
+      const parsed = last(body.messages);
 
       expect(parsed).toEqual({
-        message: 'Function response exceeded the maximum length allowed and was truncated',
-        truncated: expect.any(String),
+        role: 'tool',
+        response: {
+          message: 'Function response exceeded the maximum length allowed and was truncated',
+          truncated: expect.any(String),
+        },
+        toolCallId: expect.any(String),
       });
 
-      expect(parsed.truncated.includes('word ')).toBe(true);
+      expect((parsed as any).response.truncated.includes('word ')).toBe(true);
     });
   });
 
