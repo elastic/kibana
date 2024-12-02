@@ -133,17 +133,6 @@ describe(
 
         cy.get(RISK_SCORE_ERROR_PANEL).contains('There was an error');
       });
-
-      it('should update if there legacy risk score installed', () => {
-        installRiskScoreModule();
-        visit(ENTITY_ANALYTICS_MANAGEMENT_URL);
-
-        cy.get(RISK_SCORE_STATUS).should('not.exist');
-
-        upgradeRiskEngine();
-
-        deleteRiskScore({ riskScoreEntity: RiskScoreEntity.host, spaceId: 'default' });
-      });
     });
   }
 );

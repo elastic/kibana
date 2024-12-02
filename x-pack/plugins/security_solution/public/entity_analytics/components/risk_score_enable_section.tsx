@@ -71,9 +71,9 @@ const RiskEngineHealth: React.FC<{ currentRiskEngineStatus?: RiskEngineStatus | 
     return <EuiHealth color="subdued">{'-'}</EuiHealth>;
   }
   if (currentRiskEngineStatus === RiskEngineStatusEnum.ENABLED) {
-    return <EuiHealth color="success">{i18n.RISK_SCORE_MODULE_STATUS_ON}</EuiHealth>;
+    return <EuiHealth color="success">{i18n.RISK_ENGINE_STATUS_ON}</EuiHealth>;
   }
-  return <EuiHealth color="subdued">{i18n.RISK_SCORE_MODULE_STATUS_OFF}</EuiHealth>;
+  return <EuiHealth color="subdued">{i18n.RISK_ENGINE_STATUS_OFF}</EuiHealth>;
 };
 
 const RiskEngineStatusRow: React.FC<{
@@ -121,18 +121,18 @@ export const RiskScoreEnableSection: React.FC<{
   const { data: riskEngineStatus, isFetching: isStatusLoading } = useRiskEngineStatus();
   const initRiskEngineMutation = useInitRiskEngineMutation({
     onSuccess: () => {
-      addSuccess(i18n.RISK_SCORE_MODULE_TURNED_ON, toastOptions);
+      addSuccess(i18n.RISK_ENGINE_TURNED_ON, toastOptions);
     },
   });
 
   const enableRiskEngineMutation = useEnableRiskEngineMutation({
     onSuccess: () => {
-      addSuccess(i18n.RISK_SCORE_MODULE_TURNED_ON, toastOptions);
+      addSuccess(i18n.RISK_ENGINE_TURNED_ON, toastOptions);
     },
   });
   const disableRiskEngineMutation = useDisableRiskEngineMutation({
     onSuccess: () => {
-      addSuccess(i18n.RISK_SCORE_MODULE_TURNED_OFF, toastOptions);
+      addSuccess(i18n.RISK_ENGINE_TURNED_OFF, toastOptions);
     },
   });
 
@@ -170,7 +170,7 @@ export const RiskScoreEnableSection: React.FC<{
     <>
       <>
         <EuiTitle>
-          <h2>{i18n.RISK_SCORE_MODULE_STATUS}</h2>
+          <h2>{i18n.RISK_ENGINE_STATUS}</h2>
         </EuiTitle>
         {initRiskEngineMutation.isError && <RiskScoreErrorPanel errors={initRiskEngineErrors} />}
         {disableRiskEngineMutation.isError && (
