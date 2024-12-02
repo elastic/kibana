@@ -9,6 +9,7 @@ import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import {
   GetRuleMigrationRequestParams,
+  GetRuleMigrationRequestQuery,
   type GetRuleMigrationResponse,
 } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import { SIEM_RULE_MIGRATION_PATH } from '../../../../../common/siem_migrations/constants';
@@ -29,18 +30,29 @@ export const registerSiemRuleMigrationsGetRoute = (
       {
         version: '1',
         validate: {
-          request: { params: buildRouteValidationWithZod(GetRuleMigrationRequestParams) },
+          request: {
+            params: buildRouteValidationWithZod(GetRuleMigrationRequestParams),
+            query: buildRouteValidationWithZod(GetRuleMigrationRequestQuery),
+          },
         },
       },
       withLicense(async (context, req, res): Promise<IKibanaResponse<GetRuleMigrationResponse>> => {
-        const migrationId = req.params.migration_id;
+        const { migration_id: migrationId } = req.params;
+        const { page, per_page: perPage, search_term: searchTerm } = req.query;
         try {
           const ctx = await context.resolve(['securitySolution']);
           const ruleMigrationsClient = ctx.securitySolution.getSiemRuleMigrationsClient();
 
-          const migrationRules = await ruleMigrationsClient.data.rules.get({ migrationId });
+          const result = await ruleMigrationsClient.data.rules.get(
+            {
+              migrationId,
+              searchTerm,
+            },
+            page,
+            perPage
+          );
 
-          return res.ok({ body: migrationRules });
+          return res.ok({ body: result });
         } catch (err) {
           logger.error(err);
           return res.badRequest({ body: err.message });

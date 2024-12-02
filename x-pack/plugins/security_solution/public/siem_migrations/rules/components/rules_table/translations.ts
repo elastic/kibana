@@ -7,10 +7,17 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const SEARCH_PLACEHOLDER = i18n.translate(
+export const SEARCH_MIGRATION_RULES = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.table.searchAriaLabel',
+  {
+    defaultMessage: 'Search migration rules',
+  }
+);
+
+export const SEARCH_MIGRATION_RULES_PLACEHOLDER = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.table.searchBarPlaceholder',
   {
-    defaultMessage: 'Search by rule name',
+    defaultMessage: 'Search by migration rule name',
   }
 );
 
