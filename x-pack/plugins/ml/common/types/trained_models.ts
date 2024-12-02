@@ -347,10 +347,6 @@ export type NLPModelItem = BaseNLPModelItem &
      */
     deployment_ids: string[];
   };
-/** Trained DFA model */
-export type DFAModelItem = TrainedModelItem & {
-  origin_job_exists?: boolean;
-};
 
 export function isBaseNLPModelItem(item: unknown): item is BaseNLPModelItem {
   return (
@@ -381,6 +377,11 @@ export type TrainedModelItem = ExistingModelBase & { stats: Stats } & {
    * Indices with associated pipelines that have inference processors utilizing the model deployments.
    */
   indices?: string[];
+};
+
+/** Trained DFA model */
+export type DFAModelItem = TrainedModelItem & {
+  origin_job_exists?: boolean;
 };
 
 export type TrainedModelWithPipelines = TrainedModelItem & {

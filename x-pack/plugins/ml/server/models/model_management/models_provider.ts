@@ -48,6 +48,7 @@ import type {
   TrainedModelWithPipelines,
 } from '../../../common/types/trained_models';
 import {
+  isDFAModelItem,
   isElasticModel,
   isNLPModelItem,
   type ModelDownloadState,
@@ -351,6 +352,39 @@ export class ModelsProvider {
   }
 
   /**
+   * Assign a check for each DFA model if origin job exists
+   */
+  async assignDFAJobCheck(trainedModels: TrainedModelItem[]) {
+    try {
+      const dfaJobIds = trainedModels
+        .map((model) => {
+          const id = model.metadata?.analytics_config?.id;
+          if (id) {
+            return `${id}*`;
+          }
+        })
+        .filter(isDefined);
+
+      if (dfaJobIds.length > 0) {
+        const { data_frame_analytics: jobs } = await this._mlClient.getDataFrameAnalytics({
+          id: dfaJobIds.join(','),
+          allow_no_match: true,
+        });
+
+        trainedModels.filter(isDFAModelItem).forEach((model) => {
+          const dfaId = model?.metadata?.analytics_config?.id;
+          if (dfaId !== undefined) {
+            // if this is a dfa model, set origin_job_exists
+            model.origin_job_exists = jobs.find((job) => job.id === dfaId) !== undefined;
+          }
+        });
+      }
+    } catch (e) {
+      return;
+    }
+  }
+
+  /**
    * Returns a complete list of entities for the Trained Models UI
    */
   async getTrainedModelList(): Promise<TrainedModelUIItem[]> {
@@ -396,7 +430,7 @@ export class ModelsProvider {
     // Assign indices
     resultItems = await this.assignModelIndices(resultItems);
 
-    // TODO complete DFA list
+    await this.assignDFAJobCheck(resultItems);
 
     return resultItems;
   }
