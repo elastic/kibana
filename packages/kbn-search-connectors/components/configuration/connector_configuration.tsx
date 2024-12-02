@@ -47,6 +47,7 @@ interface ConnectorConfigurationProps {
   isLoading: boolean;
   saveConfig: (configuration: Record<string, string | number | boolean | null>) => void;
   saveAndSync?: (configuration: Record<string, string | number | boolean | null>) => void;
+  onEditStateChange?: (isEdit: boolean) => void;
   stackManagementLink?: string;
   subscriptionLink?: string;
   children?: React.ReactNode;
@@ -94,6 +95,7 @@ export const ConnectorConfigurationComponent: FC<
   isLoading,
   saveConfig,
   saveAndSync,
+  onEditStateChange,
   subscriptionLink,
   stackManagementLink,
 }) => {
@@ -109,6 +111,12 @@ export const ConnectorConfigurationComponent: FC<
     features?.[FeatureName.DOCUMENT_LEVEL_SECURITY]?.enabled
   );
   const [isEditing, setIsEditing] = useState(false);
+
+  useEffect(function propogateEditState() {
+    if (onEditStateChange) {
+      onEditStateChange(isEditing)
+    }
+  }, [isEditing, onEditStateChange])
 
   useEffect(() => {
     if (!isDeepEqual(configuration, configurationRef.current)) {

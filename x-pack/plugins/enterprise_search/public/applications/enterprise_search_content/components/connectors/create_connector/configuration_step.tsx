@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { useActions, useValues } from 'kea';
 
@@ -21,6 +21,7 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 import { ConnectorConfigurationComponent, ConnectorStatus } from '@kbn/search-connectors';
 
@@ -40,6 +41,8 @@ export const ConfigurationStep: React.FC<ConfigurationStepProps> = ({ title, set
   const { connector } = useValues(ConnectorViewLogic);
   const { updateConnectorConfiguration } = useActions(ConnectorViewLogic);
   const { setFormDirty } = useActions(NewConnectorLogic);
+  const { overlays } = useKibana().services;
+  const [isFormEditing, setIsFormEditing] = useState<boolean>(false);
   const { status } = useValues(ConnectorConfigurationApiLogic);
   const isSyncing = false;
 
@@ -77,6 +80,7 @@ export const ConfigurationStep: React.FC<ConfigurationStepProps> = ({ title, set
                   connectorId: connector.id,
                 });
               }}
+              onEditStateChange={setIsFormEditing}
             />
             <EuiSpacer size="m" />
             {isSyncing && (
@@ -111,7 +115,21 @@ export const ConfigurationStep: React.FC<ConfigurationStepProps> = ({ title, set
             <EuiSpacer size="m" />
             <EuiButton
               data-test-subj="enterpriseSearchStartStepGenerateConfigurationButton"
-              onClick={() => {
+              onClick={async () => {
+                if (isFormEditing) {
+                  const confirmResponse = await overlays?.openConfirm(
+                    i18n.translate(
+                      'xpack.enterpriseSearch.createConnector.configurationStep.confirmEditableStepNext',
+                      {
+                        defaultMessage:
+                          'Connector configuration is in editable mode and there might be unsaved changes. Are you sure you want to finish configuration without saving the configuration?',
+                      }
+                    )
+                  );
+                  if (!confirmResponse) {
+                    return;
+                  }
+                }
                 setFormDirty(false);
                 setCurrentStep('finish');
               }}
