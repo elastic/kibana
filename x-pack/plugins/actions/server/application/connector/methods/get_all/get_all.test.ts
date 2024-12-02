@@ -52,7 +52,6 @@ const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
 const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
 const actionExecutor = actionExecutorMock.create();
 const authorization = actionsAuthorizationMock.create();
-const ephemeralExecutionEnqueuer = jest.fn();
 const bulkExecutionEnqueuer = jest.fn();
 const request = httpServerMock.createKibanaRequest();
 const auditLogger = auditLoggerMock.create();
@@ -78,7 +77,6 @@ describe('getAll()', () => {
       kibanaIndices,
       inMemoryConnectors: [],
       actionExecutor,
-      ephemeralExecutionEnqueuer,
       bulkExecutionEnqueuer,
       request,
       authorization: authorization as unknown as ActionsAuthorization,
@@ -134,7 +132,6 @@ describe('getAll()', () => {
           scopedClusterClient,
           kibanaIndices,
           actionExecutor,
-          ephemeralExecutionEnqueuer,
           bulkExecutionEnqueuer,
           request,
           authorization: authorization as unknown as ActionsAuthorization,
@@ -279,7 +276,6 @@ describe('getAll()', () => {
         scopedClusterClient,
         kibanaIndices,
         actionExecutor,
-        ephemeralExecutionEnqueuer,
         bulkExecutionEnqueuer,
         request,
         authorization: authorization as unknown as ActionsAuthorization,
@@ -382,7 +378,6 @@ describe('getAll()', () => {
         scopedClusterClient,
         kibanaIndices,
         actionExecutor,
-        ephemeralExecutionEnqueuer,
         bulkExecutionEnqueuer,
         request,
         authorization: authorization as unknown as ActionsAuthorization,
@@ -487,7 +482,6 @@ describe('getAll()', () => {
         scopedClusterClient,
         kibanaIndices,
         actionExecutor,
-        ephemeralExecutionEnqueuer,
         bulkExecutionEnqueuer,
         request,
         authorization: authorization as unknown as ActionsAuthorization,
@@ -579,7 +573,6 @@ describe('getAll()', () => {
         scopedClusterClient,
         kibanaIndices,
         actionExecutor,
-        ephemeralExecutionEnqueuer,
         bulkExecutionEnqueuer,
         request,
         authorization: authorization as unknown as ActionsAuthorization,
@@ -613,7 +606,6 @@ describe('getAll()', () => {
           scopedClusterClient,
           kibanaIndices,
           actionExecutor,
-          ephemeralExecutionEnqueuer,
           bulkExecutionEnqueuer,
           request,
           authorization: authorization as unknown as ActionsAuthorization,
@@ -690,7 +682,6 @@ describe('getAll()', () => {
         scopedClusterClient,
         kibanaIndices,
         actionExecutor,
-        ephemeralExecutionEnqueuer,
         bulkExecutionEnqueuer,
         request,
         authorization: authorization as unknown as ActionsAuthorization,
