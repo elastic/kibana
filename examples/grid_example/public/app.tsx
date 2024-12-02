@@ -26,6 +26,7 @@ import {
 import { css } from '@emotion/react';
 import { AppMountParameters } from '@kbn/core-application-browser';
 import { CoreStart } from '@kbn/core-lifecycle-browser';
+import { AddEmbeddableButton } from '@kbn/embeddable-examples-plugin/public';
 import {
   SearchApi,
   SearchSerializedState,
@@ -37,7 +38,6 @@ import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
-import { AddButton } from './add_button';
 import {
   clearSerializedDashboardState,
   getSerializedDashboardState,
@@ -154,7 +154,7 @@ export const GridExample = ({
           <EuiSpacer size="m" />
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
             <EuiFlexItem grow={false}>
-              <AddButton dashboardApi={mockDashboardApi} uiActions={uiActions} />
+              <AddEmbeddableButton pageApi={mockDashboardApi} uiActions={uiActions} />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiFlexGroup gutterSize="xs" alignItems="center">
