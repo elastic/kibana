@@ -7,6 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import { DocLinksServiceSetup } from '@kbn/core/server';
 import type { AlertingRouter } from '../../types';
 import { ILicenseState } from '../../lib/license_state';
 import { verifyApiAccess } from '../../lib/license_api_access';
@@ -47,6 +48,7 @@ const bodySchema = schema.object({
 export const updateAlertRoute = (
   router: AlertingRouter,
   licenseState: ILicenseState,
+  docLinks: DocLinksServiceSetup,
   usageCounter?: UsageCounter,
   isServerless?: boolean
 ) => {
@@ -61,8 +63,15 @@ export const updateAlertRoute = (
         access: isServerless ? 'internal' : 'public',
         summary: 'Update an alert',
         tags: ['oas-tag:alerting'],
-        // @ts-expect-error TODO(https://github.com/elastic/kibana/issues/196095): Replace {RouteDeprecationInfo}
-        deprecated: true,
+        deprecated: {
+          documentationUrl: docLinks.links.alerting.legacyRuleApiDeprecations,
+          severity: 'warning',
+          reason: {
+            type: 'migrate',
+            newApiMethod: 'PUT',
+            newApiPath: '/api/alerting/rule/rule/{id}',
+          },
+        },
       },
     },
     handleDisabledApiKeysError(
