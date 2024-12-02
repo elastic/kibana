@@ -20,16 +20,15 @@ import { GridPanel } from './grid_panel';
 import { GridLayoutStateManager, GridRowData, PanelInteractionEvent } from './types';
 import { getKeysInOrder } from './utils/resolve_grid_row';
 
-export const GridRow = forwardRef<
-  HTMLDivElement,
-  {
-    rowIndex: number;
-    toggleIsCollapsed: () => void;
-    renderPanelContents: (panelId: string) => React.ReactNode;
-    setInteractionEvent: (interactionData?: PanelInteractionEvent) => void;
-    gridLayoutStateManager: GridLayoutStateManager;
-  }
->(
+interface GridRowProps {
+  rowIndex: number;
+  toggleIsCollapsed: () => void;
+  renderPanelContents: (panelId: string) => React.ReactNode;
+  setInteractionEvent: (interactionData?: PanelInteractionEvent) => void;
+  gridLayoutStateManager: GridLayoutStateManager;
+}
+
+export const GridRow = forwardRef<HTMLDivElement, GridRowProps>(
   (
     {
       rowIndex,
@@ -41,9 +40,15 @@ export const GridRow = forwardRef<
     gridRef
   ) => {
     const currentRow = gridLayoutStateManager.gridLayout$.value[rowIndex];
-    const [panelIds, setPanelIds] = useState<string[]>(getKeysInOrder(currentRow.panels));
+
+    const [panelIds, setPanelIds] = useState<string[]>(() => getKeysInOrder(currentRow.panels));
     const [rowTitle, setRowTitle] = useState<string>(currentRow.title);
     const [isCollapsed, setIsCollapsed] = useState<boolean>(currentRow.isCollapsed);
+
+    /** Sync panel ids in order after a change in the grid layout, like adding, removing or reordering */
+    const syncPanelIdsAfterChange = useCallback(() => {
+      setPanelIds(getKeysInOrder(gridLayoutStateManager.gridLayout$.value[rowIndex].panels));
+    }, [setPanelIds, gridLayoutStateManager.gridLayout$, rowIndex]);
 
     const getRowCount = useCallback(
       (row: GridRowData) => {
@@ -148,9 +153,14 @@ export const GridRow = forwardRef<
           });
 
         /**
-         * The things that should trigger a re-render are title, collapsed state, and panel ids - panel positions
-         * are being controlled via CSS styles, so they do not need to trigger a re-render. This subscription ensures
-         * that the row will re-render when one of those three things changes.
+         * This subscription ensures that the row will re-render when one of the following changes:
+         * - Title
+         * - Collapsed state
+         * - Panel IDs (adding/removing/replacing, but not reordering)
+         *
+         * Note: During dragging or resizing actions, the row should not re-render because panel positions are controlled via CSS styles for performance reasons.
+         * However, once the user finishes the interaction, the elements in the grid need to be displayed as read on the screen for accessibility reasons (screen readers and focus management).
+         * This is handled in the onInteractionConfirmed callback.
          */
         const rowStateSubscription = gridLayoutStateManager.gridLayout$
           .pipe(
@@ -158,7 +168,7 @@ export const GridRow = forwardRef<
               return {
                 title: gridLayout[rowIndex].title,
                 isCollapsed: gridLayout[rowIndex].isCollapsed,
-                panelIds: getKeysInOrder(gridLayout[rowIndex].panels),
+                panelIds: Object.keys(gridLayout[rowIndex].panels),
               };
             }),
             pairwise()
@@ -174,7 +184,7 @@ export const GridRow = forwardRef<
                 newRowData.panelIds.every((p) => oldRowData.panelIds.includes(p))
               )
             ) {
-              setPanelIds(newRowData.panelIds);
+              syncPanelIdsAfterChange();
             }
           });
 
@@ -187,6 +197,10 @@ export const GridRow = forwardRef<
       // eslint-disable-next-line react-hooks/exhaustive-deps
       [rowIndex]
     );
+
+    const onInteractionConfirmed = useCallback(() => {
+      syncPanelIdsAfterChange();
+    }, [syncPanelIdsAfterChange]);
 
     /**
      * Memoize panel children components to prevent unnecessary re-renders
@@ -213,6 +227,7 @@ export const GridRow = forwardRef<
             const panelRect = panelRef.getBoundingClientRect();
             if (type === 'drop') {
               setInteractionEvent(undefined);
+              onInteractionConfirmed();
             } else {
               setInteractionEvent({
                 type,
@@ -236,7 +251,14 @@ export const GridRow = forwardRef<
           }}
         />
       ));
-    }, [panelIds, rowIndex, gridLayoutStateManager, renderPanelContents, setInteractionEvent]);
+    }, [
+      panelIds,
+      rowIndex,
+      gridLayoutStateManager,
+      renderPanelContents,
+      setInteractionEvent,
+      onInteractionConfirmed,
+    ]);
 
     return (
       <div ref={rowContainer}>
