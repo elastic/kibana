@@ -56,7 +56,11 @@ export const Template: FunctionComponent<Props> = ({
         {/* Inject EUI reset and global styles before all other component styles */}
         <meta name={EUI_STYLES_GLOBAL} />
         <meta name="emotion" />
-        <Styles darkMode={darkMode} stylesheetPaths={stylesheetPaths} />
+        <Styles
+          darkMode={darkMode}
+          themeName={injectedMetadata.theme.name}
+          stylesheetPaths={stylesheetPaths}
+        />
         {scriptPaths.map((path) => (
           <script key={path} src={path} />
         ))}

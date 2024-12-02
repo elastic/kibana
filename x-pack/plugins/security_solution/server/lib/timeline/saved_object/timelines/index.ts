@@ -298,61 +298,67 @@ export const getDraftTimeline = async (
   return getAllSavedTimeline(request, options);
 };
 
+interface InternalPersistFavoriteResponse {
+  code: number;
+  message: string;
+  favoriteTimeline: FavoriteTimelineResponse;
+}
+
 export const persistFavorite = async (
   request: FrameworkRequest,
   timelineId: string | null,
   templateTimelineId: string | null,
   templateTimelineVersion: number | null,
   timelineType: TimelineType
-): Promise<FavoriteTimelineResponse> => {
+): Promise<InternalPersistFavoriteResponse> => {
   const userName = request.user?.username ?? UNAUTHENTICATED_USER;
   const fullName = request.user?.full_name ?? '';
-  try {
-    let timeline: SavedTimeline = {};
-    if (timelineId != null) {
-      const {
-        eventIdToNoteIds,
-        notes,
-        noteIds,
-        pinnedEventIds,
-        pinnedEventsSaveObject,
-        savedObjectId,
-        version,
-        ...savedTimeline
-      } = await getBasicSavedTimeline(request, timelineId);
-      timelineId = savedObjectId; // eslint-disable-line no-param-reassign
-      timeline = savedTimeline;
-    }
+  let timeline: SavedTimeline = {};
+  if (timelineId != null) {
+    const {
+      eventIdToNoteIds,
+      notes,
+      noteIds,
+      pinnedEventIds,
+      pinnedEventsSaveObject,
+      savedObjectId,
+      version,
+      ...savedTimeline
+    } = await getBasicSavedTimeline(request, timelineId);
+    timelineId = savedObjectId; // eslint-disable-line no-param-reassign
+    timeline = savedTimeline;
+  }
 
-    const userFavoriteTimeline = {
-      keySearch: userName != null ? convertStringToBase64(userName) : null,
-      favoriteDate: new Date().valueOf(),
-      fullName,
-      userName,
-    };
-    if (timeline.favorite != null) {
-      const alreadyExistsTimelineFavoriteByUser = timeline.favorite.findIndex(
-        (user) => user.userName === userName
-      );
+  const userFavoriteTimeline = {
+    keySearch: userName != null ? convertStringToBase64(userName) : null,
+    favoriteDate: new Date().valueOf(),
+    fullName,
+    userName,
+  };
+  if (timeline.favorite != null) {
+    const alreadyExistsTimelineFavoriteByUser = timeline.favorite.findIndex(
+      (user) => user.userName === userName
+    );
 
-      timeline.favorite =
-        alreadyExistsTimelineFavoriteByUser > -1
-          ? [
-              ...timeline.favorite.slice(0, alreadyExistsTimelineFavoriteByUser),
-              ...timeline.favorite.slice(alreadyExistsTimelineFavoriteByUser + 1),
-            ]
-          : [...timeline.favorite, userFavoriteTimeline];
-    } else if (timeline.favorite == null) {
-      timeline.favorite = [userFavoriteTimeline];
-    }
+    timeline.favorite =
+      alreadyExistsTimelineFavoriteByUser > -1
+        ? [
+            ...timeline.favorite.slice(0, alreadyExistsTimelineFavoriteByUser),
+            ...timeline.favorite.slice(alreadyExistsTimelineFavoriteByUser + 1),
+          ]
+        : [...timeline.favorite, userFavoriteTimeline];
+  } else if (timeline.favorite == null) {
+    timeline.favorite = [userFavoriteTimeline];
+  }
 
-    const persistResponse = await persistTimeline(request, timelineId, null, {
-      ...timeline,
-      templateTimelineId,
-      templateTimelineVersion,
-      timelineType,
-    });
-    return {
+  const persistResponse = await persistTimeline(request, timelineId, null, {
+    ...timeline,
+    templateTimelineId,
+    templateTimelineVersion,
+    timelineType,
+  });
+  return {
+    favoriteTimeline: {
       savedObjectId: persistResponse.timeline.savedObjectId,
       version: persistResponse.timeline.version,
       favorite:
@@ -362,19 +368,10 @@ export const persistFavorite = async (
       templateTimelineId,
       templateTimelineVersion,
       timelineType,
-    };
-  } catch (err) {
-    if (getOr(null, 'output.statusCode', err) === 403) {
-      return {
-        savedObjectId: '',
-        version: '',
-        favorite: [],
-        code: 403,
-        message: err.message,
-      };
-    }
-    throw err;
-  }
+    },
+    code: persistResponse.code,
+    message: persistResponse.message,
+  };
 };
 
 export interface InternalTimelineResponse {

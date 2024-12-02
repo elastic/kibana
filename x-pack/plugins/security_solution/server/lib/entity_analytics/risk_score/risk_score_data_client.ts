@@ -120,29 +120,9 @@ export class RiskScoreDataClient {
       const oldComponentTemplateExists = await esClient.cluster.existsComponentTemplate({
         name: mappingComponentName,
       });
-      // If present then copy the contents to a new component template with the namespace in the name
       if (oldComponentTemplateExists) {
-        const oldComponentTemplateResponse = await esClient.cluster.getComponentTemplate(
-          {
-            name: mappingComponentName,
-          },
-          { ignore: [404] }
-        );
-        const oldComponentTemplate = oldComponentTemplateResponse?.component_templates[0];
-        const newComponentTemplateName = nameSpaceAwareMappingsComponentName(namespace);
-        await esClient.cluster.putComponentTemplate({
-          name: newComponentTemplateName,
-          body: oldComponentTemplate.component_template,
-        });
+        await this.updateComponentTemplateNamewithNamespace(namespace);
       }
-
-      // Delete the component template without the namespace in the name
-      await esClient.cluster.deleteComponentTemplate(
-        {
-          name: mappingComponentName,
-        },
-        { ignore: [404] }
-      );
 
       // Update the new component template with the required data
       await Promise.all([
@@ -187,6 +167,14 @@ export class RiskScoreDataClient {
           },
         },
       });
+
+      // Delete the component template without the namespace in the name
+      await esClient.cluster.deleteComponentTemplate(
+        {
+          name: mappingComponentName,
+        },
+        { ignore: [404] }
+      );
 
       await createDataStream({
         logger: this.options.logger,
@@ -326,5 +314,21 @@ export class RiskScoreDataClient {
         }),
       { logger: this.options.logger }
     );
+  }
+
+  private async updateComponentTemplateNamewithNamespace(namespace: string): Promise<void> {
+    const esClient = this.options.esClient;
+    const oldComponentTemplateResponse = await esClient.cluster.getComponentTemplate(
+      {
+        name: mappingComponentName,
+      },
+      { ignore: [404] }
+    );
+    const oldComponentTemplate = oldComponentTemplateResponse?.component_templates[0];
+    const newComponentTemplateName = nameSpaceAwareMappingsComponentName(namespace);
+    await esClient.cluster.putComponentTemplate({
+      name: newComponentTemplateName,
+      body: oldComponentTemplate.component_template,
+    });
   }
 }

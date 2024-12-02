@@ -53,8 +53,6 @@ export type BulkResponse = KnowledgeBaseEntryBulkCrudActionResults & {
   errors?: BulkOperationError[];
 };
 
-export type BulkActionError = BulkOperationError | unknown;
-
 const buildBulkResponse = (
   response: KibanaResponseFactory,
   {
@@ -251,7 +249,6 @@ export const bulkActionKnowledgeBaseEntriesRoute = (router: ElasticAssistantPlug
               throw new Error(`Could not find documents to ${operation}: ${nonAvailableIds}.`);
             }
           };
-
           await validateDocumentsModification(body.delete?.ids ?? [], 'delete');
           await validateDocumentsModification(
             body.update?.map((entry) => entry.id) ?? [],

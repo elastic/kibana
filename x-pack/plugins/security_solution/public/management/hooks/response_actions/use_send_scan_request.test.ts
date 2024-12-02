@@ -7,7 +7,7 @@
 
 import { useMutation as _useMutation } from '@tanstack/react-query';
 import type { AppContextTestRender } from '../../../common/mock/endpoint';
-import type { RenderHookResult } from '@testing-library/react-hooks/src/types';
+import type { RenderHookResult } from '@testing-library/react';
 import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
 import { responseActionsHttpMocks } from '../../mocks/response_actions_http_mocks';
 import {
@@ -38,7 +38,7 @@ describe('When using the `useSendScanRequest()` hook', () => {
   let customOptions: ScanRequestCustomOptions;
   let http: AppContextTestRender['coreStart']['http'];
   let apiMocks: ReturnType<typeof responseActionsHttpMocks>;
-  let renderHook: () => RenderHookResult<ScanRequestCustomOptions, UseSendScanRequestResult>;
+  let renderHook: () => RenderHookResult<UseSendScanRequestResult, ScanRequestCustomOptions>;
 
   beforeEach(() => {
     const testContext = createAppRootMockRenderer();

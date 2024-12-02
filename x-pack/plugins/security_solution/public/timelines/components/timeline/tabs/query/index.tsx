@@ -6,7 +6,7 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import React, { useMemo, useEffect, useCallback } from 'react';
+import React, { useMemo, useEffect, useCallback, useState } from 'react';
 import type { ConnectedProps } from 'react-redux';
 import { connect, useDispatch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
@@ -15,6 +15,7 @@ import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { DataLoadingState } from '@kbn/unified-data-table';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
+import { useFetchNotes } from '../../../../../notes/hooks/use_fetch_notes';
 import {
   DocumentDetailsLeftPanelKey,
   DocumentDetailsRightPanelKey,
@@ -92,6 +93,13 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     selectedPatterns,
     sourcererDataView,
   } = useSourcererDataView(SourcererScopeName.timeline);
+  /*
+   * `pageIndex` needs to be maintained for each table in each tab independently
+   * and consequently it cannot be the part of common redux state
+   * of the timeline.
+   *
+   */
+  const [pageIndex, setPageIndex] = useState(0);
 
   const { uiSettings, telemetry, timelineDataService } = useKibana().services;
   const {
@@ -167,7 +175,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
 
   const [
     dataLoadingState,
-    { events, inspect, totalCount, pageInfo, loadPage, refreshedAt, refetch },
+    { events, inspect, totalCount, loadPage: loadNextEventBatch, refreshedAt, refetch },
   ] = useTimelineEvents({
     dataViewId,
     endDate: end,
@@ -183,6 +191,26 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     startDate: start,
     timerangeKind,
   });
+
+  const { onLoad: loadNotesOnEventsLoad } = useFetchNotes();
+
+  useEffect(() => {
+    // This useEffect loads the notes only for the events on the current
+    // page.
+    const eventsOnCurrentPage = events.slice(
+      itemsPerPage * pageIndex,
+      itemsPerPage * (pageIndex + 1)
+    );
+
+    loadNotesOnEventsLoad(eventsOnCurrentPage);
+  }, [events, pageIndex, itemsPerPage, loadNotesOnEventsLoad]);
+
+  /**
+   *
+   * Triggers on Datagrid page change
+   *
+   */
+  const onUpdatePageIndex = useCallback((newPageIndex: number) => setPageIndex(newPageIndex), []);
 
   const { openFlyout } = useExpandableFlyoutApi();
   const securitySolutionNotesDisabled = useIsExperimentalFeatureEnabled(
@@ -280,15 +308,6 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     [dataLoadingState]
   );
 
-  useEffect(() => {
-    dispatch(
-      timelineActions.updateIsLoading({
-        id: timelineId,
-        isLoading: isQueryLoading || loadingSourcerer,
-      })
-    );
-  }, [loadingSourcerer, timelineId, isQueryLoading, dispatch]);
-
   // NOTE: The timeline is blank after browser FORWARD navigation (after using back button to navigate to
   // the previous page from the timeline), yet we still see total count. This is because the timeline
   // is not getting refreshed when using browser navigation.
@@ -364,11 +383,11 @@ export const QueryTabContentComponent: React.FC<Props> = ({
         dataLoadingState={dataLoadingState}
         totalCount={isBlankTimeline ? 0 : totalCount}
         leadingControlColumns={leadingControlColumns as EuiDataGridControlColumn[]}
-        onChangePage={loadPage}
+        onFetchMoreRecords={loadNextEventBatch}
         activeTab={activeTab}
         updatedAt={refreshedAt}
         isTextBasedQuery={false}
-        pageInfo={pageInfo}
+        onUpdatePageIndex={onUpdatePageIndex}
       />
     </>
   );

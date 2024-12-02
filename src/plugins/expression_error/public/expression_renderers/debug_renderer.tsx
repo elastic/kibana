@@ -17,7 +17,6 @@ import { i18n } from '@kbn/i18n';
 import { withSuspense } from '@kbn/presentation-util-plugin/public';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { KibanaErrorBoundary, KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
-import { defaultTheme$ } from '@kbn/presentation-util-plugin/common';
 import { JSON } from '../../common';
 import { LazyDebugRenderComponent } from '../components';
 
@@ -38,8 +37,7 @@ const strings = {
 };
 
 export const getDebugRenderer =
-  (theme$: Observable<CoreTheme> = defaultTheme$) =>
-  (): ExpressionRenderDefinition<any> => ({
+  (theme$: Observable<CoreTheme>) => (): ExpressionRenderDefinition<any> => ({
     name: 'debug',
     displayName: strings.getDisplayName(),
     help: strings.getHelpDescription(),

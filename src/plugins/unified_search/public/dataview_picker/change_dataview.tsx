@@ -17,6 +17,7 @@ import {
   EuiContextMenuItem,
   useEuiTheme,
   useGeneratedHtmlId,
+  useIsWithinBreakpoints,
   EuiIcon,
   EuiText,
   EuiContextMenuPanelProps,
@@ -68,10 +69,13 @@ export function ChangeDataView({
   const kibana = useKibana<IUnifiedSearchPluginServices>();
   const { application, data, dataViews, dataViewEditor } = kibana.services;
 
+  const isMobile = useIsWithinBreakpoints(['xs']);
+
   const styles = changeDataViewStyles({
     fullWidth: trigger.fullWidth,
     dataViewsList,
     theme: euiTheme,
+    isMobile,
   });
 
   // Create a reusable id to ensure search input is the first focused item in the popover even though it's not the first item

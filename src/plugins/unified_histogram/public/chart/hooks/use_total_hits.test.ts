@@ -12,11 +12,10 @@ import { UnifiedHistogramFetchStatus, UnifiedHistogramInput$ } from '../../types
 import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';
 import { useTotalHits } from './use_total_hits';
 import { useEffect as mockUseEffect } from 'react';
-import { renderHook } from '@testing-library/react-hooks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import { of, Subject, throwError } from 'rxjs';
-import { waitFor } from '@testing-library/react';
+import { waitFor, renderHook } from '@testing-library/react';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { DataViewType, SearchSourceSearchOptions } from '@kbn/data-plugin/common';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
