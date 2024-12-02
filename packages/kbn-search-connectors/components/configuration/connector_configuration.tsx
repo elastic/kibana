@@ -112,11 +112,14 @@ export const ConnectorConfigurationComponent: FC<
   );
   const [isEditing, setIsEditing] = useState(false);
 
-  useEffect(function propogateEditState() {
-    if (onEditStateChange) {
-      onEditStateChange(isEditing)
-    }
-  }, [isEditing, onEditStateChange])
+  useEffect(
+    function propogateEditState() {
+      if (onEditStateChange) {
+        onEditStateChange(isEditing);
+      }
+    },
+    [isEditing, onEditStateChange]
+  );
 
   useEffect(() => {
     if (!isDeepEqual(configuration, configurationRef.current)) {
