@@ -39,7 +39,6 @@
     "@kbn/shared-ux-link-redirect-app",
     "@kbn/react-kibana-context-render",
     "@kbn/data-views-plugin",
-    "@kbn/core-http-server-utils",
     "@kbn/deeplinks-observability",
     "@kbn/core-elasticsearch-server"
   ],
