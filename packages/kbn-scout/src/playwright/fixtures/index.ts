@@ -15,6 +15,7 @@ import { scoutTestFixtures } from './test';
 export const scoutCoreFixtures = mergeTests(scoutWorkerFixtures, scoutTestFixtures);
 
 export type {
+  EsArchiverFixture,
   ScoutTestFixtures,
   ScoutWorkerFixtures,
   ScoutPage,

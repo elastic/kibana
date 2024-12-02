@@ -9,7 +9,7 @@ import { expect } from '@kbn/scout';
 import { test, testData, assertionMessages } from '../fixtures';
 
 test.describe(
-  'Discover app - value suggestions: useTimeRange enabled',
+  'Discover app - value suggestions: useTimeRange disabled',
   { tag: ['@ess', '@svlSecurity', '@svlOblt', '@svlSearch'] },
   () => {
     test.beforeAll(async ({ esArchiver, kbnClient, uiSettings }) => {
@@ -19,11 +19,13 @@ test.describe(
         defaultIndex: testData.DATA_VIEW_ID.LOGSTASH, // TODO: investigate why it is required for `node scripts/playwright_test.js` run
         'doc_table:legacy': false,
         'timepicker:timeDefaults': `{ "from": "${testData.LOGSTASH_DEFAULT_START_TIME}", "to": "${testData.LOGSTASH_DEFAULT_END_TIME}"}`,
+        'autocomplete:useTimeRange': false,
       });
     });
 
-    test.afterAll(async ({ kbnClient, uiSettings }) => {
+    test.afterAll(async ({ uiSettings, kbnClient }) => {
       await uiSettings.unset('doc_table:legacy', 'defaultIndex', 'timepicker:timeDefaults');
+      await uiSettings.set({ 'autocomplete:useTimeRange': true });
       await kbnClient.savedObjects.cleanStandardList();
     });
 
@@ -32,10 +34,17 @@ test.describe(
       await pageObjects.discover.goto();
     });
 
-    test('dont show up if outside of range', async ({ page, pageObjects }) => {
+    test('show up if outside of range', async ({ page, pageObjects }) => {
       await pageObjects.datePicker.setAbsoluteRange(testData.LOGSTASH_OUT_OF_RANGE_DATES);
       await page.testSubj.fill('queryInput', 'extension.raw : ');
-      await expect(page.testSubj.locator('autoCompleteSuggestionText')).toHaveCount(0);
+      await expect(
+        page.testSubj.locator('autoCompleteSuggestionText'),
+        assertionMessages.QUERY_BAR_VALIDATION.SUGGESTIONS_COUNT
+      ).toHaveCount(5);
+      const actualSuggestions = await page.testSubj
+        .locator('autoCompleteSuggestionText')
+        .allTextContents();
+      expect(actualSuggestions.join(',')).toContain('jpg');
     });
 
     test('show up if in range', async ({ page, pageObjects }) => {
@@ -49,12 +58,6 @@ test.describe(
         .locator('autoCompleteSuggestionText')
         .allTextContents();
       expect(actualSuggestions.join(',')).toContain('jpg');
-    });
-
-    test('also displays descriptions for operators', async ({ page, pageObjects }) => {
-      await pageObjects.datePicker.setAbsoluteRange(testData.LOGSTASH_IN_RANGE_DATES);
-      await page.testSubj.fill('queryInput', 'extension.raw');
-      await expect(page.testSubj.locator('^autocompleteSuggestion-operator')).toHaveCount(2);
     });
   }
 );
