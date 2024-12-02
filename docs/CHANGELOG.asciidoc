@@ -113,8 +113,7 @@ The `metrics:allowCheckingForFailedShards` advanced setting has been removed. Wi
 === Features
 {kib} 8.17.0 adds the following new and notable features.
 
-Alerting::
-* The Case action is now GA ({kibana-pull}196972[#196972]).
+Cases::
 * Files can now be attached to cases directly via API ({kibana-pull}198377[#198377]).
 Data ingestion and Fleet::
 * Exposes advanced file logging configuration in the UI ({kibana-pull}200274[#200274]).
@@ -145,9 +144,14 @@ For detailed information about the 8.17.0 release, review the enhancements and b
 [float]
 [[enhancement-v8.17.0]]
 === Enhancements
+Alerting::
+* Allows users to create rules with predefined nonrandom IDs ({kibana-pull}199119[#199119]).
+Cases::
+* Refactors Jira Connector to use latest API only ({kibana-pull}197787[#197787]).
+* The Case action is now GA ({kibana-pull}196972[#196972]).
 Dashboards & Visualizations::
 * Allows creating a dashboard with ES|QL chart even when there are no data views ({kibana-pull}196658[#196658]).
-* Newly and default configured Lens line charts are now interpolated by default with a straight linear interpolation in *Lens* ({kibana-pull}196184[#196184]).
+* Newly and default configured line charts are now interpolated by default with a straight linear interpolation in *Lens* ({kibana-pull}196184[#196184]).
 * Simplifies access to some actions when hovering over panels ({kibana-pull}182535[#182535]).
 * Improves URL drilldown authoring experience ({kibana-pull}197454[#197454]).
 Data ingestion and Fleet::
