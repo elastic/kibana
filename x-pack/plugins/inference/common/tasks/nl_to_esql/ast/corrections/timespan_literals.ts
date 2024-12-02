@@ -19,9 +19,7 @@ import { QueryCorrection } from './types';
  * `BUCKET(@timestamp, "1 week")` => `BUCKET(@timestamp, 1 week)`
  *
  */
-export const correctTimespanLiterals = (
-  query: ESQLAstQueryExpression
-): QueryCorrection[] => {
+export const correctTimespanLiterals = (query: ESQLAstQueryExpression): QueryCorrection[] => {
   const corrections: QueryCorrection[] = [];
 
   Walker.walk(query, {
