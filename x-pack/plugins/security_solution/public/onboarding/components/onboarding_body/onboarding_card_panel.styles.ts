@@ -14,6 +14,7 @@ export const useCardPanelStyles = () => {
   const { euiTheme, colorMode } = useEuiTheme();
   const successBackgroundColor = useEuiBackgroundColor('success');
   const isDarkMode = colorMode === COLOR_MODES_STANDARD.dark;
+  const darkModeStyles = useDarkPanelStyles(isDarkMode);
 
   return css`
     .onboardingCardHeader {
@@ -57,11 +58,15 @@ export const useCardPanelStyles = () => {
         background-color: ${successBackgroundColor};
       }
     }
-    ${isDarkMode
-      ? `
-          background-color: ${euiTheme.colors.lightestShade};
-          border: 1px solid ${euiTheme.colors.mediumShade};
-        `
-      : ''}
+    ${darkModeStyles}
   `;
+};
+
+export const useDarkPanelStyles = (isDarkMode: boolean) => {
+  const { euiTheme } = useEuiTheme();
+  const darkPanelStyles = css`
+    background-color: ${euiTheme.colors.lightestShade};
+    border-color: ${euiTheme.colors.mediumShade};
+  `;
+  return isDarkMode ? darkPanelStyles : '';
 };

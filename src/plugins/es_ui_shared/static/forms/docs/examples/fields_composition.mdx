@@ -7,8 +7,8 @@ tags: ['forms', 'kibana', 'dev']
 date: 2021-04-14
 ---
 
-If your form does not have a fix set of fields (single interface) and you need to add/remove fields dynamically, you can leverage the power of field composition with the form lib. It let's you swap fields in your form whenever needed. Any field that **is not in the DOM** is automatically cleared when unmounting and its value won't be returned in the form data.  
-If you _do_ need to keep a field value, but hide the field in the UI, then you need to use CSS (`<div style={{ display: isVisible ? 'block' : 'none' }}>...</div>`)
+If your form does not have a fix set of fields (single interface) and you need to add/remove fields dynamically, you can leverage the power of field composition with the form lib. It let's you swap fields in your form whenever needed. Any field that **is not in the DOM** is automatically cleared when unmounting and its value won't be returned in the form data.
+If you _do_ need to keep a field value, but hide the field in the UI, then you need to use CSS (`<div css={{ display: isVisible ? 'block' : 'none' }}>...</div>`)
 
 Imagine you're building an app that lets people buy a car online. You want to build a form that lets the user select the model of the car (`sedan`, `golf cart`, `clown mobile`), and based on their selection you'll show a different form for configuring the selected model's options.
 
