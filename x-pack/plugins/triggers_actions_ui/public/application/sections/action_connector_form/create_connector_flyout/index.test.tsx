@@ -469,7 +469,7 @@ describe('CreateConnectorFlyout', () => {
         name: 'My test',
         secrets: {},
       });
-      expect(queryByTestId('requiredFieldErrorMsg')).not.toBeInTheDocument();
+      expect(queryByTestId('required-field-error-label')).not.toBeInTheDocument();
     });
 
     it('show Required all fields message', async () => {
@@ -497,7 +497,7 @@ describe('CreateConnectorFlyout', () => {
 
       expect(onClose).not.toHaveBeenCalled();
       expect(onConnectorCreated).not.toHaveBeenCalled();
-      expect(getByTestId('requiredFieldErrorMsg')).toBeInTheDocument();
+      expect(getByTestId('required-field-error-label')).toBeInTheDocument();
     });
 
     it('runs pre submit validator correctly', async () => {
