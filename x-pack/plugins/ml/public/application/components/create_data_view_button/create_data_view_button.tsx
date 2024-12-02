@@ -18,20 +18,20 @@ export const CreateDataViewButton = ({
   onDataViewCreated: (dataView: DataView) => void;
   allowAdHocDataView?: boolean;
 }) => {
-  const { dataViewEditor } = useMlKibana().services;
+  const { dataViewEditor, dataViews } = useMlKibana().services;
   const canEditDataView = Boolean(dataViewEditor?.userPermissions.editDataView());
   const closeDataViewEditorRef = useRef<() => void | undefined>();
 
   const createNewDataView = useCallback(() => {
     closeDataViewEditorRef.current = dataViewEditor?.openEditor({
-      onSave: async (dataView) => {
-        if (dataView.id && onDataViewCreated) {
-          onDataViewCreated(dataView);
+      onSave: async (dataViewLazy) => {
+        if (dataViewLazy.id && onDataViewCreated) {
+          dataViews.toDataView(dataViewLazy).then(onDataViewCreated);
         }
       },
       allowAdHocDataView,
     });
-  }, [onDataViewCreated, dataViewEditor, allowAdHocDataView]);
+  }, [onDataViewCreated, dataViewEditor, allowAdHocDataView, dataViews]);
 
   useEffect(function cleanUpFlyout() {
     return () => {

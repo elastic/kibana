@@ -6,7 +6,7 @@
  */
 
 import { EuiFormRow } from '@elastic/eui';
-import { DataView } from '@kbn/data-views-plugin/public';
+import { DataView, DataViewLazy } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
@@ -106,9 +106,10 @@ export function IndexSelection({ selectedDataView }: { selectedDataView?: DataVi
             onDataViewCreated={() => {
               dataViewEditor.openEditor({
                 allowAdHocDataView: true,
-                onSave: (dataView: DataView) => {
+                onSave: async (dataView: DataViewLazy) => {
                   if (!dataView.isPersisted()) {
-                    setAdHocDataViews([...adHocDataViews, dataView]);
+                    const dv = await dataViewsService.toDataView(dataView);
+                    setAdHocDataViews([...adHocDataViews, dv]);
                     field.onChange(dataView.id);
                     setValue(INDEX_FIELD, dataView.getIndexPattern());
                   } else {

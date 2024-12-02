@@ -147,6 +147,8 @@ export interface DataViewsServicePublicMethods {
    */
   clearInstanceCache: (id?: string) => void;
 
+  clearDataViewInstanceCache(id: string): void;
+
   /**
    * Create data view based on the provided spec.
    * @param spec - Data view spec.
@@ -522,6 +524,10 @@ export class DataViewsService {
       this.dataViewCache.clear();
     }
   };
+
+  clearDataViewInstanceCache(id: string) {
+    this.dataViewCache.delete(id);
+  }
 
   /**
    * Get cache, contains data view saved objects.

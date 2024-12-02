@@ -110,8 +110,9 @@ export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopove
             closeDataViewEditor.current = dataViewEditor.openEditor({
               onSave: async (createdDataView) => {
                 if (createdDataView.id) {
+                  const dv = await dataViews.toDataView(createdDataView);
                   if (!createdDataView.isPersisted()) {
-                    onAddAdHocDataView(createdDataView);
+                    onAddAdHocDataView(dv);
                   }
 
                   await loadPersistedDataViews();
@@ -122,7 +123,7 @@ export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopove
             });
           }
         : undefined,
-    [dataViewEditor, loadPersistedDataViews, onChangeDataView, onAddAdHocDataView]
+    [dataViewEditor, loadPersistedDataViews, onChangeDataView, onAddAdHocDataView, dataViews]
   );
 
   useEffect(() => {

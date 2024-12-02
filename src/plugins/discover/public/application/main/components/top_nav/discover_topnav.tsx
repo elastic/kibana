@@ -110,10 +110,12 @@ export const DiscoverTopNav = ({
 
   const createNewDataView = useCallback(() => {
     closeDataViewEditor.current = dataViewEditor.openEditor({
-      onSave: stateContainer.actions.onDataViewCreated,
+      onSave: (dataViewLazy) => {
+        services.dataViews.toDataView(dataViewLazy).then(stateContainer.actions.onDataViewCreated);
+      },
       allowAdHocDataView: true,
     });
-  }, [dataViewEditor, stateContainer]);
+  }, [dataViewEditor, stateContainer, services.dataViews]);
 
   const updateSavedQueryId = (newSavedQueryId: string | undefined) => {
     const { appState } = stateContainer;

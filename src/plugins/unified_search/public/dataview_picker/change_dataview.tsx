@@ -156,11 +156,13 @@ export function ChangeDataView({
             data-test-subj="indexPattern-manage-field"
             onClick={async () => {
               if (onEditDataView) {
-                const dataView = await dataViews.get(currentDataViewId!);
+                const dataView = await dataViews.getDataViewLazy(currentDataViewId!);
                 dataViewEditor.openEditor({
                   editData: dataView,
                   onSave: (updatedDataView) => {
-                    onEditDataView(updatedDataView);
+                    dataViews.toDataView(updatedDataView).then((dv) => {
+                      onEditDataView(dv);
+                    });
                   },
                 });
               } else {
