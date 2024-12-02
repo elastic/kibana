@@ -127,7 +127,7 @@ export class AddToLibraryAction implements Action<EmbeddableApiContext> {
       if (byRefState) {
         await embeddable.parentApi.replacePanel(embeddable.uuid, {
           panelType: embeddable.type,
-          initialState: byRefState,
+          serializedState: byRefState,
         });
       }
       coreServices.notifications.toasts.addSuccess({

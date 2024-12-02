@@ -45,6 +45,6 @@ export const unlinkLegacyEmbeddable = async (embeddable: CommonLegacyEmbeddable)
   }
   await root.replacePanel(panelToReplace.explicitInput.id, {
     panelType: embeddable.type,
-    initialState: { ...newInput, title: embeddable.getTitle() },
+    serializedState: { ...newInput, title: embeddable.getTitle() },
   });
 };

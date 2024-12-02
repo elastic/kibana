@@ -141,10 +141,10 @@ export abstract class Container<
     return newEmbeddable as ApiType;
   }
 
-  public async replacePanel(idToRemove: string, { panelType, initialState }: PanelPackage) {
+  public async replacePanel(idToRemove: string, { panelType, serializedState }: PanelPackage) {
     return await this.replaceEmbeddable(
       idToRemove,
-      initialState as Partial<EmbeddableInput>,
+      serializedState as Partial<EmbeddableInput>,
       panelType,
       true
     );

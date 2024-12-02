@@ -12,9 +12,12 @@ import { panelPlacementStrings } from '../_dashboard_container_strings';
 
 const registry = new Map<string, GetPanelPlacementSettings>();
 
-export const registerDashboardPanelPlacementSetting = (
+export const registerDashboardPanelPlacementSetting = <
+  SerializedState extends object = object,
+  RuntimeState extends object = object
+>(
   embeddableType: string,
-  getPanelPlacementSettings: GetPanelPlacementSettings
+  getPanelPlacementSettings: GetPanelPlacementSettings<SerializedState, RuntimeState>
 ) => {
   if (registry.has(embeddableType)) {
     throw new Error(panelPlacementStrings.getPanelPlacementSettingsExistsError(embeddableType));

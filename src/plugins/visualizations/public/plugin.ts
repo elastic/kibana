@@ -415,7 +415,7 @@ export class VisualizationsPlugin
       onAdd: (container, savedObject) => {
         container.addNewPanel<VisualizeSerializedState>({
           panelType: VISUALIZE_EMBEDDABLE_TYPE,
-          initialState: { savedObjectId: savedObject.id },
+          serializedState: { savedObjectId: savedObject.id },
         });
       },
       embeddableType: VISUALIZE_EMBEDDABLE_TYPE,

@@ -380,7 +380,7 @@ export const initializeDashboard = async ({
           if (!incomingEmbeddable.size) {
             return await container.addNewPanel<{ uuid: string }>({
               panelType: incomingEmbeddable.type,
-              initialState: incomingEmbeddable.input,
+              runtimeState: incomingEmbeddable.input,
             });
           }
 
