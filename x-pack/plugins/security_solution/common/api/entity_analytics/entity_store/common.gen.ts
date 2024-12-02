@@ -39,6 +39,37 @@ export const EngineDescriptor = z.object({
   error: z.object({}).optional(),
 });
 
+export type EngineComponentResource = z.infer<typeof EngineComponentResource>;
+export const EngineComponentResource = z.enum([
+  'entity_engine',
+  'entity_definition',
+  'index',
+  'component_template',
+  'index_template',
+  'ingest_pipeline',
+  'enrich_policy',
+  'task',
+  'transform',
+]);
+export type EngineComponentResourceEnum = typeof EngineComponentResource.enum;
+export const EngineComponentResourceEnum = EngineComponentResource.enum;
+
+export type EngineComponentStatus = z.infer<typeof EngineComponentStatus>;
+export const EngineComponentStatus = z.object({
+  id: z.string(),
+  installed: z.boolean(),
+  resource: EngineComponentResource,
+  health: z.enum(['green', 'yellow', 'red', 'unknown']).optional(),
+  errors: z
+    .array(
+      z.object({
+        title: z.string().optional(),
+        message: z.string().optional(),
+      })
+    )
+    .optional(),
+});
+
 export type StoreStatus = z.infer<typeof StoreStatus>;
 export const StoreStatus = z.enum(['not_installed', 'installing', 'running', 'stopped', 'error']);
 export type StoreStatusEnum = typeof StoreStatus.enum;
