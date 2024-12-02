@@ -7,7 +7,7 @@
 
 import deepEqual from 'fast-deep-equal';
 import { isEmpty, noop } from 'lodash/fp';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { Subscription } from 'rxjs';
 
@@ -41,17 +41,26 @@ import { TimelineId } from '../../../common/types/timeline';
 import { useRouteSpy } from '../../common/utils/route/use_route_spy';
 import { activeTimeline } from './active_timeline_context';
 import type {
-  EqlOptionsSelected,
+  EqlOptions,
   TimelineEqlResponse,
 } from '../../../common/search_strategy/timeline/events/eql';
 import { useTrackHttpRequest } from '../../common/lib/apm/use_track_http_request';
 import { APP_UI_ID } from '../../../common/constants';
-import { useFetchNotes } from '../../notes/hooks/use_fetch_notes';
 
 export interface TimelineArgs {
   events: TimelineItem[];
   id: string;
   inspect: InspectResponse;
+
+  /**
+   * `loadPage` loads the next page/batch of records.
+   * This is different from the data grid pages. Data grid pagination is only
+   * client side and changing data grid pages does not impact this function.
+   *
+   * When user manually requests next batch of records, then a next batch is fetched
+   * irrespective of where user is in Data grid pagination.
+   *
+   */
   loadPage: LoadPage;
   pageInfo: Pick<PaginationInputPaginated, 'activePage' | 'querySize'>;
   refetch: inputsModel.Refetch;
@@ -84,7 +93,7 @@ type TimelineResponse<T extends KueryFilterQueryKind> = T extends 'kuery'
 export interface UseTimelineEventsProps {
   dataViewId: string | null;
   endDate?: string;
-  eqlOptions?: EqlOptionsSelected;
+  eqlOptions?: EqlOptions;
   fields: string[];
   filterQuery?: ESQuery | string;
   id: string;
@@ -112,7 +121,7 @@ export const initSortDefault: TimelineRequestSortField[] = [
   },
 ];
 
-const deStructureEqlOptions = (eqlOptions?: EqlOptionsSelected) => ({
+const deStructureEqlOptions = (eqlOptions?: EqlOptions) => ({
   ...(!isEmpty(eqlOptions?.eventCategoryField)
     ? {
         eventCategoryField: eqlOptions?.eventCategoryField,
@@ -174,6 +183,15 @@ export const useTimelineEventsHandler = ({
     }
   }, [dispatch, id]);
 
+  /**
+   * `wrappedLoadPage` loads the next page/batch of records.
+   * This is different from the data grid pages. Data grid pagination is only
+   * client side and changing data grid pages does not impact this function.
+   *
+   * When user manually requests next batch of records, then a next batch is fetched
+   * irrespective of where user is in Data grid pagination.
+   *
+   */
   const wrappedLoadPage = useCallback(
     (newActivePage: number) => {
       clearSignalsState();
@@ -185,6 +203,12 @@ export const useTimelineEventsHandler = ({
     },
     [clearSignalsState, id]
   );
+
+  useEffect(() => {
+    return () => {
+      searchSubscription$.current?.unsubscribe();
+    };
+  }, []);
 
   const refetchGrid = useCallback(() => {
     if (refetch.current != null) {
@@ -240,10 +264,12 @@ export const useTimelineEventsHandler = ({
             next: (response) => {
               if (!isRunningResponse(response)) {
                 endTracking('success');
+
                 setLoading(DataLoadingState.loaded);
                 setTimelineResponse((prevResponse) => {
                   const newTimelineResponse = {
                     ...prevResponse,
+                    /**/
                     events: getTimelineEvents(response.edges),
                     inspect: getInspectResponse(response, prevResponse.inspect),
                     pageInfo: response.pageInfo,
@@ -269,6 +295,7 @@ export const useTimelineEventsHandler = ({
             },
             error: (msg) => {
               endTracking(abortCtrl.current.signal.aborted ? 'aborted' : 'error');
+
               setLoading(DataLoadingState.loaded);
               data.search.showError(msg);
               searchSubscription$.current.unsubscribe();
@@ -483,8 +510,8 @@ export const useTimelineEvents = ({
   sort = initSortDefault,
   skip = false,
   timerangeKind,
-  fetchNotes = true,
 }: UseTimelineEventsProps): [DataLoadingState, TimelineArgs] => {
+  const [eventsPerPage, setEventsPerPage] = useState<TimelineItem[][]>([[]]);
   const [dataLoadingState, timelineResponse, timelineSearchHandler] = useTimelineEventsHandler({
     dataViewId,
     endDate,
@@ -501,19 +528,35 @@ export const useTimelineEvents = ({
     skip,
     timerangeKind,
   });
-  const { onLoad } = useFetchNotes();
 
-  const onTimelineSearchComplete: OnNextResponseHandler = useCallback(
-    (response) => {
-      if (fetchNotes) onLoad(response.events);
-    },
-    [fetchNotes, onLoad]
-  );
+  useEffect(() => {
+    /*
+     * `timelineSearchHandler` only returns the events for the current page.
+     * This effect is responsible for storing the events for each page so that
+     * the combined list of events can be supplied to DataGrid.
+     *
+     * */
+    setEventsPerPage((prev) => {
+      const result = [...prev];
+      result[timelineResponse.pageInfo.activePage] = timelineResponse.events;
+      return result;
+    });
+  }, [timelineResponse.events, timelineResponse.pageInfo.activePage]);
 
   useEffect(() => {
     if (!timelineSearchHandler) return;
-    timelineSearchHandler(onTimelineSearchComplete);
-  }, [timelineSearchHandler, onTimelineSearchComplete]);
+    timelineSearchHandler();
+  }, [timelineSearchHandler]);
 
-  return [dataLoadingState, timelineResponse];
+  const combinedEvents = useMemo(() => eventsPerPage.flat(), [eventsPerPage]);
+
+  const combinedResponse = useMemo(
+    () => ({
+      ...timelineResponse,
+      events: combinedEvents,
+    }),
+    [timelineResponse, combinedEvents]
+  );
+
+  return [dataLoadingState, combinedResponse];
 };

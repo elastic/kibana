@@ -343,7 +343,7 @@
                 "section": "def-public.FavoritesClientPublic",
                 "text": "FavoritesClientPublic"
               },
-              " | undefined"
+              "<void> | undefined"
             ],
             "path": "packages/content-management/table_list_view_table/src/services.tsx",
             "deprecated": false,

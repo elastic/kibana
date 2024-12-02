@@ -100,15 +100,17 @@ export const containsCommentsOrEmpty =
   (message: string) =>
   (...args: Parameters<ValidationFunc>): ReturnType<ValidationFunc<any, ERROR_CODE>> => {
     const [{ value, path }] = args;
+
+    if (value === null || value === undefined || value === '') {
+      return undefined;
+    }
+
     if (typeof value !== 'string') {
       return {
         code: 'ERR_FIELD_FORMAT',
         formatType: 'STRING',
         message,
       };
-    }
-    if (value.length === 0) {
-      return undefined;
     }
 
     const comment = templateActionVariable(
@@ -128,16 +130,30 @@ export const isUrlButCanBeEmpty =
   (message: string) =>
   (...args: Parameters<ValidationFunc>) => {
     const [{ value }] = args;
+
     const error: ValidationError<ERROR_CODE> = {
       code: 'ERR_FIELD_FORMAT',
       formatType: 'URL',
       message,
     };
-    if (typeof value !== 'string') {
-      return error;
-    }
-    if (value.length === 0) {
+
+    if (value === null || value === undefined || value === '') {
       return undefined;
     }
-    return isUrl(value) ? undefined : error;
+    return typeof value === 'string' && isUrl(value) ? undefined : error;
+  };
+
+export const validateCreateComment =
+  (message: string, fieldName: string) =>
+  (...args: Parameters<ValidationFunc>) => {
+    const [{ value, formData }] = args;
+    const otherFielValue = formData[fieldName];
+
+    const error: ValidationError<ERROR_CODE> = {
+      code: 'ERR_FIELD_FORMAT',
+      formatType: 'STRING',
+      message,
+    };
+
+    return !value && otherFielValue ? error : undefined;
   };

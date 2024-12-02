@@ -392,6 +392,20 @@
             "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-public.IndexMappingProps.hasUpdateMappingsPrivilege",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hasUpdateMappingsPrivilege",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/packages/index-management/index_management_shared_types/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

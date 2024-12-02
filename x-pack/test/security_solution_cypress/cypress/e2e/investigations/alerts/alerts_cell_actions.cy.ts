@@ -47,57 +47,67 @@ describe('Alerts cell actions', { tags: ['@ess', '@serverless'] }, () => {
     waitForAlertsToPopulate();
   });
 
-  it('should filter in and out existing values', () => {
-    scrollAlertTableColumnIntoViewAndTest(ALERT_TABLE_SEVERITY_HEADER, () => {
-      cy.get(ALERT_TABLE_SEVERITY_VALUES)
-        .first()
-        .invoke('text')
-        .then((severityVal) => {
-          filterForAlertProperty(ALERT_TABLE_SEVERITY_VALUES, 0);
-          cy.get(FILTER_BADGE).first().should('have.text', `kibana.alert.severity: ${severityVal}`);
-        });
-      removeKqlFilter();
-    });
+  // Flaky in Serverless MKI only
+  // https://github.com/elastic/kibana/issues/201117
+  it(
+    'should filter in and out existing values',
+    {
+      tags: ['@skipInServerlessMKI'],
+    },
+    () => {
+      scrollAlertTableColumnIntoViewAndTest(ALERT_TABLE_SEVERITY_HEADER, () => {
+        cy.get(ALERT_TABLE_SEVERITY_VALUES)
+          .first()
+          .invoke('text')
+          .then((severityVal) => {
+            filterForAlertProperty(ALERT_TABLE_SEVERITY_VALUES, 0);
+            cy.get(FILTER_BADGE)
+              .first()
+              .should('have.text', `kibana.alert.severity: ${severityVal}`);
+          });
+        removeKqlFilter();
+      });
 
-    cy.log('should work for empty properties');
-    // add query condition to make sure the field is empty
-    fillKqlQueryBar('not file.name: *{enter}');
+      cy.log('should work for empty properties');
+      // add query condition to make sure the field is empty
+      fillKqlQueryBar('not file.name: *{enter}');
 
-    scrollAlertTableColumnIntoViewAndTest(ALERT_TABLE_FILE_NAME_HEADER, () => {
-      cy.log('filter for alert property');
+      scrollAlertTableColumnIntoViewAndTest(ALERT_TABLE_FILE_NAME_HEADER, () => {
+        cy.log('filter for alert property');
 
-      filterForAlertProperty(ALERT_TABLE_FILE_NAME_VALUES, 0);
+        filterForAlertProperty(ALERT_TABLE_FILE_NAME_VALUES, 0);
 
-      cy.get(FILTER_BADGE).first().should('have.text', 'NOT file.name: exists');
-      removeKqlFilter();
-    });
+        cy.get(FILTER_BADGE).first().should('have.text', 'NOT file.name: exists');
+        removeKqlFilter();
+      });
 
-    cy.log('filter out alert property');
+      cy.log('filter out alert property');
 
-    scrollAlertTableColumnIntoViewAndTest(ALERT_TABLE_FILE_NAME_HEADER, () => {
-      cy.get(ALERT_TABLE_FILE_NAME_VALUES)
-        .first()
-        .then(() => {
-          filterOutAlertProperty(ALERT_TABLE_FILE_NAME_VALUES, 0);
-          cy.get(FILTER_BADGE).first().should('have.text', 'file.name: exists');
-        });
-      removeKqlFilter();
-    });
+      scrollAlertTableColumnIntoViewAndTest(ALERT_TABLE_FILE_NAME_HEADER, () => {
+        cy.get(ALERT_TABLE_FILE_NAME_VALUES)
+          .first()
+          .then(() => {
+            filterOutAlertProperty(ALERT_TABLE_FILE_NAME_VALUES, 0);
+            cy.get(FILTER_BADGE).first().should('have.text', 'file.name: exists');
+          });
+        removeKqlFilter();
+      });
 
-    cy.log('should filter out a non-empty property');
+      cy.log('should filter out a non-empty property');
 
-    scrollAlertTableColumnIntoViewAndTest(ALERT_TABLE_SEVERITY_HEADER, () => {
-      cy.get(ALERT_TABLE_SEVERITY_VALUES)
-        .first()
-        .invoke('text')
-        .then((severityVal) => {
-          filterOutAlertProperty(ALERT_TABLE_SEVERITY_VALUES, 0);
-          cy.get(FILTER_BADGE)
-            .first()
-            .should('have.text', `NOT kibana.alert.severity: ${severityVal}`);
-        });
-    });
-  });
+      scrollAlertTableColumnIntoViewAndTest(ALERT_TABLE_SEVERITY_HEADER, () => {
+        cy.get(ALERT_TABLE_SEVERITY_VALUES)
+          .first()
+          .invoke('text')
+          .then((severityVal) => {
+            filterOutAlertProperty(ALERT_TABLE_SEVERITY_VALUES, 0);
+            cy.get(FILTER_BADGE)
+              .first()
+              .should('have.text', `NOT kibana.alert.severity: ${severityVal}`);
+          });
+      });
+    }
+  );
 
   it('should allow copy paste', () => {
     scrollAlertTableColumnIntoViewAndTest(ALERT_TABLE_SEVERITY_HEADER, () => {

@@ -459,6 +459,7 @@ export type TestSubjects =
   | 'advancedConfiguration.dynamicMappingsToggle.input'
   | 'advancedConfiguration.metaField'
   | 'advancedConfiguration.routingRequiredToggle.input'
+  | 'sourceValueField'
   | 'sourceField.includesField'
   | 'sourceField.excludesField'
   | 'dynamicTemplatesEditor'
