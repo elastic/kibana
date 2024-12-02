@@ -8,7 +8,6 @@
 import type { CoreSetup } from '@kbn/core/public';
 import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type { EditorFrameSetup } from '../../types';
-import { transparentizePalettes } from './palette_config';
 
 export interface GaugeVisualizationPluginSetupPlugins {
   editorFrame: EditorFrameSetup;
@@ -19,8 +18,8 @@ export class GaugeVisualization {
   setup(core: CoreSetup, { editorFrame, charts }: GaugeVisualizationPluginSetupPlugins) {
     editorFrame.registerVisualization(async () => {
       const { getGaugeVisualization } = await import('../../async_services');
-      const palettes = transparentizePalettes(await charts.palettes.getPalettes());
-      return getGaugeVisualization({ paletteService: palettes, theme: core.theme });
+      const palettes = await charts.palettes.getPalettes();
+      return getGaugeVisualization({ paletteService: palettes });
     });
   }
 }

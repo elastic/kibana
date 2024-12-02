@@ -5,15 +5,8 @@
  * 2.0.
  */
 
-import {
-  ChartColorConfiguration,
-  PaletteDefinition,
-  PaletteRegistry,
-  SeriesLayer,
-  RequiredPaletteParamTypes,
-} from '@kbn/coloring';
+import { RequiredPaletteParamTypes } from '@kbn/coloring';
 
-import chroma from 'chroma-js';
 import { defaultPaletteParams as sharedDefaultParams } from '../../shared_components';
 
 export const DEFAULT_PALETTE_NAME = 'temperature';
@@ -28,24 +21,4 @@ export const defaultPaletteParams: RequiredPaletteParamTypes = {
   name: DEFAULT_PALETTE_NAME,
   steps: DEFAULT_COLOR_STEPS,
   maxSteps: 5,
-};
-
-export const transparentizePalettes = (palettes: PaletteRegistry) => {
-  const addAlpha = (c: string | null) => (c ? chroma(c).hex() + `80` : `000000`).toUpperCase();
-  const transparentizePalette = (palette: PaletteDefinition<unknown>) => ({
-    ...palette,
-    getCategoricalColor: (
-      series: SeriesLayer[],
-      chartConfiguration?: ChartColorConfiguration,
-      state?: unknown
-    ) => addAlpha(palette.getCategoricalColor(series, chartConfiguration, state)),
-    getCategoricalColors: (size: number, state?: unknown): string[] =>
-      palette.getCategoricalColors(size, state),
-  });
-
-  return {
-    ...palettes,
-    get: (name: string) => transparentizePalette(palettes.get(name)),
-    getAll: () => palettes.getAll().map((singlePalette) => transparentizePalette(singlePalette)),
-  };
 };

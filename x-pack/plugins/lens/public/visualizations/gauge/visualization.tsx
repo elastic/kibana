@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { ThemeServiceStart } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Ast } from '@kbn/interpreter';
 import { buildExpressionFunction, DatatableRow } from '@kbn/expressions-plugin/common';
@@ -58,7 +57,6 @@ import {
 
 interface GaugeVisualizationDeps {
   paletteService: PaletteRegistry;
-  theme: ThemeServiceStart;
 }
 
 export const isNumericMetric = (op: OperationMetadata) =>

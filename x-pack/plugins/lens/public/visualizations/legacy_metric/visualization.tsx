@@ -14,7 +14,6 @@ import {
   shiftPalette,
   getDefaultColorStops,
 } from '@kbn/coloring';
-import { ThemeServiceStart } from '@kbn/core/public';
 import { ColorMode, CustomPaletteState } from '@kbn/charts-plugin/common';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { IconChartMetric } from '@kbn/chart-icons';
@@ -156,10 +155,8 @@ const toExpression = (
 
 export const getLegacyMetricVisualization = ({
   paletteService,
-  theme,
 }: {
   paletteService: PaletteRegistry;
-  theme: ThemeServiceStart;
 }): Visualization<LegacyMetricState> => ({
   id: 'lnsLegacyMetric',
 
