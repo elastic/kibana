@@ -50,6 +50,60 @@ For Elastic Security solution release information, refer to {security-guide}/rel
 
 
 [discrete]
+[[breaking-201550]]
+.Removed legacy alerting endpoints (9.0.0)
+[%collapsible]
+====
+*Details* +
+--
+* `POST /api/alerts/alert/{id?}` has been replaced by `POST /api/alerting/rule/{id?}`
+* `GET /api/alerts/alert/{id}` has been replaced by `GET /api/alerting/rule/{id}`
+* `PUT /api/alerts/alert/{id}` has been replaced by `PUT /api/alerting/rule/rule/{id}`
+* `DELETE: /api/alerts/alert/{id}` has been replaced by `DELETE /api/alerting/rule/{id}`
+* `POST /api/alerts/alert/{id}/_disable` has been replaced by `POST /api/alerting/rule/{id}/_disable`
+* `POST /api/alerts/alert/{id}/_enable` has been replaced by `POST /api/alerting/rule/{id}/_enable`
+* `GET /api/alerts/_find` has been replaced by `GET /api/alerting/rules/_find`
+* `GET /api/alerts/_health` has been replaced by `GET /api/alerting/rule/_health`
+* `GET /api/alerts/list_alert_types` has been replaced by `GET /api/alerting/rule_types`
+* `POST /api/alerts/alert/{alert_id}/alert_instance/{alert_instance_id}/_mute` has been replaced by `POST /api/alerting/rule/{rule_id}/alert/{alert_id}/_mute`
+* `POST /api/alerts/alert/{alert_id}/alert_instance/{alert_instance_id}/_unmute` has been replaced by `POST /api/alerting/rule/{rule_id}/alert/{alert_id}/_unmute`
+* `POST /api/alerts/alert/{id}/_mute_all` has been replaced by `POST /api/alerting/rule/{id}/_mute_all`
+* `POST /api/alerts/alert/{id}/_unmute_all` has been replaced by `POST /api/alerting/rule/{id}/_unmute_all`
+* `POST /api/alerts/alert/{id}/_update_api_key` has been replaced by `POST /api/alerting/rule/{id}/_update_api_key`
+* `GET /api/alerts/{id}/_instance_summary` has been deprecated without replacement. Will be removed in v9.0.0
+* `GET /api/alerts/{id}/state` has been deprecated without replacement. Will be removed in v9.0.0
+--
+
+*Impact* +
+Deprecated endpoints will fail with a 404 status code starting from version 9.0.0
+
+*Action* +
+Remove references to `GET /api/alerts/{id}/_instance_summary` endpoint.
+Remove references to `GET /api/alerts/{id}/state` endpoint.
+Replace references to endpoints listed as deprecated by it's replacement. See `Details` section.
+The updated APIs can be found here https://www.elastic.co/docs/api/doc/kibana/v8/group/endpoint-alerting
+====
+
+[[breaking-201004]]
+.Removed legacy cases endpoints (9.0.0)
+[%collapsible]
+====
+*Details* +
+--
+* `GET /api/cases/status` has been deprecated with no replacement. Deleted in v9.0.0
+* `GET /api/cases/{case_id}/comments` has been replaced by `GET /api/cases/{case_id}/comments/_find` released in v7.13
+* `GET /api/cases/<case_id>/user_actions` has been replaced by `GET /api/cases/<case_id>/user_actions/_find` released in v8.7
+* `includeComments` parameter in `GET /api/cases/{case_id}` has been deprecated. Use `GET /api/cases/{case_id}/comments/_find` instead, released in v7.13
+--
+
+*Impact* +
+Deprecated endpoints will fail with a 404 status code starting from version 9.0.0
+
+*Action* +
+Remove references to `GET /api/cases/status` endpoint.
+Replace references to deprecated endpoints with the replacements listed in the breaking change details.
+====
+
 [[breaking-199656]]
 .Removed all security v1 endpoints (9.0.0)
 [%collapsible]
@@ -108,7 +162,6 @@ Use the **Kibana Upgrade Assistant** to prepare for your upgrade to the next ver
 The assistant identifies deprecated settings in your configuration and guides you through the process of 
 resolving issues if any deprecated features are enabled. 
 To access the assistant, go to **Stack Management** > **Upgrade Assistant**.
-
 
 
 
