@@ -9,7 +9,7 @@ import { createQuery } from '../create_query';
 import { ElasticsearchMetric } from '../metrics';
 import { ElasticsearchResponse } from '../../../common/types/es';
 import { LegacyRequest } from '../../types';
-import { getIndexPatterns, getElasticsearchDataset } from './get_index_patterns';
+import { getIndexPatterns, getElasticsearchDataset } from '../../../common/get_index_patterns';
 import { Globals } from '../../static_globals';
 
 // is this being used anywhere?  not called within the app
