@@ -44,7 +44,6 @@ export const useLogEntryFlyout = (logViewReference: LogViewReference) => {
     services: { http, data, share, uiSettings, application, LogAIAssistant },
     overlays: { openFlyout },
   } = useKibanaContextForPlugin();
-  console.log(useKibanaContextForPlugin());
 
   const closeLogEntryFlyout = useCallback(() => {
     flyoutRef.current?.close();
@@ -115,7 +114,6 @@ export const LogEntryFlyout = ({
     logEntryId,
   });
 
-  const kc = useKibanaContextForPlugin();
   const { LogAIAssistant } = useKibanaContextForPlugin().services;
 
   useEffect(() => {
