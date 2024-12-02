@@ -266,6 +266,108 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-public.Plugin.registerDiscoverSharedFeatures",
+            "type": "Function",
+            "tags": [],
+            "label": "registerDiscoverSharedFeatures",
+            "description": [],
+            "signature": [
+              "(core: ",
+              {
+                "pluginId": "@kbn/core-lifecycle-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                "section": "def-public.CoreSetup",
+                "text": "CoreSetup"
+              },
+              "<",
+              "StartPluginsDependencies",
+              ", ",
+              {
+                "pluginId": "securitySolution",
+                "scope": "public",
+                "docId": "kibSecuritySolutionPluginApi",
+                "section": "def-public.PluginStart",
+                "text": "PluginStart"
+              },
+              ">, plugins: ",
+              "SetupPlugins",
+              ") => Promise<void>"
+            ],
+            "path": "x-pack/plugins/security_solution/public/plugin.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "securitySolution",
+                "id": "def-public.Plugin.registerDiscoverSharedFeatures.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "core",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-lifecycle-browser",
+                    "scope": "public",
+                    "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                    "section": "def-public.CoreSetup",
+                    "text": "CoreSetup"
+                  },
+                  "<",
+                  "StartPluginsDependencies",
+                  ", ",
+                  {
+                    "pluginId": "securitySolution",
+                    "scope": "public",
+                    "docId": "kibSecuritySolutionPluginApi",
+                    "section": "def-public.PluginStart",
+                    "text": "PluginStart"
+                  },
+                  ">"
+                ],
+                "path": "x-pack/plugins/security_solution/public/plugin.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "securitySolution",
+                "id": "def-public.Plugin.registerDiscoverSharedFeatures.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "plugins",
+                "description": [],
+                "signature": [
+                  "SetupPlugins"
+                ],
+                "path": "x-pack/plugins/security_solution/public/plugin.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-public.Plugin.getLazyDiscoverSharedDeps",
+            "type": "Function",
+            "tags": [],
+            "label": "getLazyDiscoverSharedDeps",
+            "description": [],
+            "signature": [
+              "() => Promise<typeof ",
+              "x-pack/plugins/security_solution/public/one_discover/index",
+              ">"
+            ],
+            "path": "x-pack/plugins/security_solution/public/plugin.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -880,8 +982,8 @@
                 "pluginId": "timelines",
                 "scope": "common",
                 "docId": "kibTimelinesPluginApi",
-                "section": "def-common.EqlOptionsSelected",
-                "text": "EqlOptionsSelected"
+                "section": "def-common.EqlOptions",
+                "text": "EqlOptions"
               }
             ],
             "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
@@ -1829,7 +1931,7 @@
           "label": "setComponents",
           "description": [],
           "signature": [
-            "(components: Partial<{ GetStarted: React.ComponentType<{ indicesExist?: boolean | undefined; }>; DashboardsLandingCallout: React.ComponentType<{}>; }>) => void"
+            "(components: Partial<{ GetStarted: React.ComponentType<{ indicesExist?: boolean | undefined; }>; DashboardsLandingCallout: React.ComponentType<{}>; EnablementModalCallout: React.ComponentType<{}>; }>) => void"
           ],
           "path": "x-pack/plugins/security_solution/public/types.ts",
           "deprecated": false,
@@ -1844,7 +1946,7 @@
               "label": "components",
               "description": [],
               "signature": [
-                "{ GetStarted?: React.ComponentType<{ indicesExist?: boolean | undefined; }> | undefined; DashboardsLandingCallout?: React.ComponentType<{}> | undefined; }"
+                "{ GetStarted?: React.ComponentType<{ indicesExist?: boolean | undefined; }> | undefined; DashboardsLandingCallout?: React.ComponentType<{}> | undefined; EnablementModalCallout?: React.ComponentType<{}> | undefined; }"
               ],
               "path": "x-pack/plugins/security_solution/public/contract_components.ts",
               "deprecated": false,
@@ -3267,7 +3369,7 @@
           "\nA list of allowed values that can be used in `xpack.securitySolution.enableExperimental`.\nThis object is then used to validate and parse the value entered."
         ],
         "signature": [
-          "{ readonly excludePoliciesInFilterEnabled: false; readonly kubernetesEnabled: true; readonly donutChartEmbeddablesEnabled: false; readonly previewTelemetryUrlEnabled: false; readonly extendedRuleExecutionLoggingEnabled: false; readonly socTrendsEnabled: false; readonly responseActionUploadEnabled: true; readonly automatedProcessActionsEnabled: true; readonly responseActionsSentinelOneV1Enabled: true; readonly responseActionsSentinelOneV2Enabled: true; readonly responseActionsSentinelOneGetFileEnabled: true; readonly responseActionsSentinelOneKillProcessEnabled: true; readonly responseActionsSentinelOneProcessesEnabled: true; readonly responseActionsCrowdstrikeManualHostIsolationEnabled: true; readonly endpointManagementSpaceAwarenessEnabled: false; readonly securitySolutionNotesDisabled: false; readonly entityAlertPreviewDisabled: false; readonly assistantModelEvaluation: false; readonly newUserDetailsFlyoutManagedUser: false; readonly riskScoringPersistence: true; readonly riskScoringRoutesEnabled: true; readonly esqlRulesDisabled: false; readonly protectionUpdatesEnabled: true; readonly disableTimelineSaveTour: false; readonly riskEnginePrivilegesRouteEnabled: true; readonly sentinelOneDataInAnalyzerEnabled: true; readonly sentinelOneManualHostActionsEnabled: true; readonly crowdstrikeDataInAnalyzerEnabled: true; readonly responseActionsTelemetryEnabled: false; readonly jamfDataInAnalyzerEnabled: true; readonly timelineEsqlTabDisabled: false; readonly analyzerDatePickersAndSourcererDisabled: false; readonly graphVisualizationInFlyoutEnabled: false; readonly prebuiltRulesCustomizationEnabled: false; readonly malwareOnWriteScanOptionAvailable: true; readonly unifiedManifestEnabled: true; readonly valueListItemsModalEnabled: true; readonly filterProcessDescendantsForEventFiltersEnabled: true; readonly dataIngestionHubEnabled: false; readonly entityStoreDisabled: false; readonly siemMigrationsEnabled: false; readonly defendInsights: false; }"
+          "{ readonly excludePoliciesInFilterEnabled: false; readonly kubernetesEnabled: false; readonly donutChartEmbeddablesEnabled: false; readonly previewTelemetryUrlEnabled: false; readonly extendedRuleExecutionLoggingEnabled: false; readonly socTrendsEnabled: false; readonly responseActionUploadEnabled: true; readonly automatedProcessActionsEnabled: true; readonly responseActionsSentinelOneV1Enabled: true; readonly responseActionsSentinelOneV2Enabled: true; readonly responseActionsSentinelOneGetFileEnabled: true; readonly responseActionsSentinelOneKillProcessEnabled: true; readonly responseActionsSentinelOneProcessesEnabled: true; readonly responseActionsCrowdstrikeManualHostIsolationEnabled: true; readonly endpointManagementSpaceAwarenessEnabled: false; readonly securitySolutionNotesDisabled: false; readonly entityAlertPreviewDisabled: false; readonly assistantModelEvaluation: false; readonly newUserDetailsFlyoutManagedUser: false; readonly riskScoringPersistence: true; readonly riskScoringRoutesEnabled: true; readonly esqlRulesDisabled: false; readonly protectionUpdatesEnabled: true; readonly disableTimelineSaveTour: false; readonly riskEnginePrivilegesRouteEnabled: true; readonly sentinelOneDataInAnalyzerEnabled: true; readonly sentinelOneManualHostActionsEnabled: true; readonly crowdstrikeDataInAnalyzerEnabled: true; readonly responseActionsTelemetryEnabled: false; readonly jamfDataInAnalyzerEnabled: true; readonly timelineEsqlTabDisabled: false; readonly analyzerDatePickersAndSourcererDisabled: false; readonly graphVisualizationInFlyoutEnabled: false; readonly prebuiltRulesCustomizationEnabled: false; readonly malwareOnWriteScanOptionAvailable: true; readonly unifiedManifestEnabled: true; readonly valueListItemsModalEnabled: true; readonly filterProcessDescendantsForEventFiltersEnabled: true; readonly dataIngestionHubEnabled: false; readonly entityStoreDisabled: false; readonly siemMigrationsEnabled: false; readonly defendInsights: false; }"
         ],
         "path": "x-pack/plugins/security_solution/common/experimental_features.ts",
         "deprecated": false,

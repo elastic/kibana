@@ -7,16 +7,13 @@
 
 import { orderBy } from 'lodash/fp';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { EuiPopoverTitle, EuiSelectable } from '@elastic/eui';
+import { EuiPopoverTitle, EuiSelectable, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
-import {
-  METRIC_TYPE_API_VALUES_TO_UI_OPTIONS_MAP,
-  type MetricTypes,
-} from '../../../../common/rest_types';
-
-import { UX_LABELS } from '../../translations';
+import { METRIC_TYPE_UI_OPTIONS_VALUES_TO_API_MAP } from '../../../../common/rest_types';
+import { UX_LABELS } from '../../../translations';
 import { ChartsFilterPopover } from './charts_filter_popover';
+import { ToggleAllButton } from './toggle_all_button';
 import { FilterItems, FilterName, useChartsFilter } from '../../hooks';
 
 const getSearchPlaceholder = (filterName: FilterName) => {
@@ -84,6 +81,11 @@ export const ChartsFilter = memo<ChartsFilterProps>(
       },
     });
 
+    const addHeightToPopover = useMemo(
+      () => isDataStreamsFilter && numFilters + numActiveFilters > 15,
+      [isDataStreamsFilter, numFilters, numActiveFilters]
+    );
+
     // track popover state to pin selected options
     const wasPopoverOpen = useRef(isPopoverOpen);
 
@@ -102,7 +104,7 @@ export const ChartsFilter = memo<ChartsFilterProps>(
     );
 
     // augmented options based on the dataStreams filter
-    const sortedHostsFilterOptions = useMemo(() => {
+    const sortedDataStreamsFilterOptions = useMemo(() => {
       if (shouldPinSelectedDataStreams() || areDataStreamsSelectedOnMount) {
         // pin checked items to the top
         return orderBy('checked', 'asc', items);
@@ -116,12 +118,6 @@ export const ChartsFilter = memo<ChartsFilterProps>(
     const onOptionsChange = useCallback(
       (newOptions: FilterItems) => {
         const optionItemsToSet = newOptions.map((option) => option);
-        const currChecks = optionItemsToSet.filter((option) => option.checked === 'on');
-
-        // don't update filter state if trying to uncheck all options
-        if (currChecks.length < 1) {
-          return;
-        }
 
         // update filter UI options state
         setItems(optionItemsToSet);
@@ -136,13 +132,9 @@ export const ChartsFilter = memo<ChartsFilterProps>(
 
         // update URL params
         if (isMetricsFilter) {
-          setUrlMetricTypesFilter(
-            selectedItems
-              .map((item) => METRIC_TYPE_API_VALUES_TO_UI_OPTIONS_MAP[item as MetricTypes])
-              .join()
-          );
+          setUrlMetricTypesFilter(selectedItems.join(','));
         } else if (isDataStreamsFilter) {
-          setUrlDataStreamsFilter(selectedItems.join());
+          setUrlDataStreamsFilter(selectedItems.join(','));
         }
         // reset shouldPinSelectedDataStreams, setAreDataStreamsSelectedOnMount
         shouldPinSelectedDataStreams(false);
@@ -161,6 +153,63 @@ export const ChartsFilter = memo<ChartsFilterProps>(
         setUrlDataStreamsFilter,
       ]
     );
+
+    const onSelectAll = useCallback(() => {
+      const allItems: FilterItems = items.map((item) => {
+        return {
+          ...item,
+          checked: 'on',
+        };
+      });
+      setItems(allItems);
+      const optionsToSelect = allItems.map((i) => i.label);
+      onChangeFilterOptions(optionsToSelect);
+
+      if (isDataStreamsFilter) {
+        setUrlDataStreamsFilter(optionsToSelect.join(','));
+      }
+      if (isMetricsFilter) {
+        setUrlMetricTypesFilter(
+          optionsToSelect
+            .map((option) => METRIC_TYPE_UI_OPTIONS_VALUES_TO_API_MAP[option])
+            .join(',')
+        );
+      }
+    }, [
+      items,
+      isDataStreamsFilter,
+      isMetricsFilter,
+      setItems,
+      onChangeFilterOptions,
+      setUrlDataStreamsFilter,
+      setUrlMetricTypesFilter,
+    ]);
+
+    const onClearAll = useCallback(() => {
+      setItems(
+        items.map((item) => {
+          return {
+            ...item,
+            checked: undefined,
+          };
+        })
+      );
+      onChangeFilterOptions([]);
+      if (isDataStreamsFilter) {
+        setUrlDataStreamsFilter('');
+      }
+      if (isMetricsFilter) {
+        setUrlMetricTypesFilter('');
+      }
+    }, [
+      items,
+      isDataStreamsFilter,
+      isMetricsFilter,
+      setItems,
+      onChangeFilterOptions,
+      setUrlDataStreamsFilter,
+      setUrlMetricTypesFilter,
+    ]);
 
     useEffect(() => {
       return () => {
@@ -182,9 +231,10 @@ export const ChartsFilter = memo<ChartsFilterProps>(
         <EuiSelectable
           aria-label={`${filterName}`}
           emptyMessage={UX_LABELS.filterEmptyMessage(filterName)}
+          height={addHeightToPopover ? 380 : undefined}
           isLoading={isFilterLoading}
           onChange={onOptionsChange}
-          options={sortedHostsFilterOptions}
+          options={sortedDataStreamsFilterOptions}
           searchable={isSearchable ? true : undefined}
           searchProps={{
             placeholder: getSearchPlaceholder(filterName),
@@ -203,6 +253,28 @@ export const ChartsFilter = memo<ChartsFilterProps>(
                   </EuiPopoverTitle>
                 )}
                 {list}
+                <EuiFlexGroup gutterSize="none">
+                  <EuiFlexItem grow={1}>
+                    <ToggleAllButton
+                      color="primary"
+                      data-test-subj={getTestId(`${filterName}-selectAllButton`)}
+                      icon="check"
+                      label={UX_LABELS.filterSelectAll}
+                      isDisabled={hasActiveFilters && numFilters === 0}
+                      onClick={onSelectAll}
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={1}>
+                    <ToggleAllButton
+                      color="danger"
+                      data-test-subj={getTestId(`${filterName}-clearAllButton`)}
+                      icon="cross"
+                      label={UX_LABELS.filterClearAll}
+                      isDisabled={!hasActiveFilters}
+                      onClick={onClearAll}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               </div>
             );
           }}
