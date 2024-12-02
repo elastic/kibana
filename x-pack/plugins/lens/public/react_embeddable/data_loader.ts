@@ -291,8 +291,14 @@ export function loadEmbeddableData(
       waitUntilChanged(),
       map(() => 'savedObjectId' as ReloadReason)
     ),
-    internalApi.overrides$.pipe(waitUntilChanged(), map(() => 'overrides' as ReloadReason)),
-    internalApi.disableTriggers$.pipe(waitUntilChanged(), map(() => 'disableTriggers' as ReloadReason)
+    internalApi.overrides$.pipe(
+      waitUntilChanged(),
+      map(() => 'overrides' as ReloadReason)
+    ),
+    internalApi.disableTriggers$.pipe(
+      waitUntilChanged(),
+      map(() => 'disableTriggers' as ReloadReason)
+    )
   );
 
   const subscriptions: Subscription[] = [
