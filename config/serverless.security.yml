@@ -94,7 +94,7 @@ xpack.fleet.internal.registry.excludePackages: [
     'dga',
 
     # Unsupported in serverless
-    'cloud-defend',
+    'cloud_defend',
   ]
 # fleet_server package installed to publish agent metrics
 xpack.fleet.packages:
