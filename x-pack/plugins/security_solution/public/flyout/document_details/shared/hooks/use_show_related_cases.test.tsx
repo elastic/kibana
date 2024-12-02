@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 
 import { useKibana as mockUseKibana } from '../../../../common/lib/kibana/__mocks__';
 import { useShowRelatedCases } from './use_show_related_cases';

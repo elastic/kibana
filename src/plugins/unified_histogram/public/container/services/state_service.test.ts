@@ -14,10 +14,8 @@ import { lensAdaptersMock } from '../../__mocks__/lens_adapters';
 import {
   getChartHidden,
   getTopPanelHeight,
-  getBreakdownField,
   setChartHidden,
   setTopPanelHeight,
-  setBreakdownField,
 } from '../utils/local_storage_utils';
 import { createStateService, UnifiedHistogramState } from './state_service';
 
@@ -27,10 +25,8 @@ jest.mock('../utils/local_storage_utils', () => {
     ...originalModule,
     getChartHidden: jest.fn(originalModule.getChartHidden),
     getTopPanelHeight: jest.fn(originalModule.getTopPanelHeight),
-    getBreakdownField: jest.fn(originalModule.getBreakdownField),
     setChartHidden: jest.fn(originalModule.setChartHidden),
     setTopPanelHeight: jest.fn(originalModule.setTopPanelHeight),
-    setBreakdownField: jest.fn(originalModule.setBreakdownField),
   };
 });
 
@@ -38,14 +34,11 @@ describe('UnifiedHistogramStateService', () => {
   beforeEach(() => {
     (getChartHidden as jest.Mock).mockClear();
     (getTopPanelHeight as jest.Mock).mockClear();
-    (getBreakdownField as jest.Mock).mockClear();
     (setChartHidden as jest.Mock).mockClear();
     (setTopPanelHeight as jest.Mock).mockClear();
-    (setBreakdownField as jest.Mock).mockClear();
   });
 
   const initialState: UnifiedHistogramState = {
-    breakdownField: 'bytes',
     chartHidden: false,
     lensRequestAdapter: new RequestAdapter(),
     lensAdapters: lensAdaptersMock,
@@ -61,7 +54,6 @@ describe('UnifiedHistogramStateService', () => {
     let state: UnifiedHistogramState | undefined;
     stateService.state$.subscribe((s) => (state = s));
     expect(state).toEqual({
-      breakdownField: undefined,
       chartHidden: false,
       lensRequestAdapter: undefined,
       timeInterval: 'auto',
@@ -97,10 +89,6 @@ describe('UnifiedHistogramStateService', () => {
       unifiedHistogramServicesMock.storage,
       localStorageKeyPrefix
     );
-    expect(getBreakdownField as jest.Mock).toHaveBeenCalledWith(
-      unifiedHistogramServicesMock.storage,
-      localStorageKeyPrefix
-    );
   });
 
   it('should not get values from storage if localStorageKeyPrefix is not provided', () => {
@@ -110,7 +98,6 @@ describe('UnifiedHistogramStateService', () => {
     });
     expect(getChartHidden as jest.Mock).not.toHaveBeenCalled();
     expect(getTopPanelHeight as jest.Mock).not.toHaveBeenCalled();
-    expect(getBreakdownField as jest.Mock).not.toHaveBeenCalled();
   });
 
   it('should update state', () => {
@@ -128,9 +115,6 @@ describe('UnifiedHistogramStateService', () => {
     stateService.setTopPanelHeight(200);
     newState = { ...newState, topPanelHeight: 200 };
     expect(state).toEqual(newState);
-    stateService.setBreakdownField('test');
-    newState = { ...newState, breakdownField: 'test' };
-    expect(state).toEqual(newState);
     stateService.setTimeInterval('test');
     newState = { ...newState, timeInterval: 'test' };
     expect(state).toEqual(newState);
@@ -139,8 +123,8 @@ describe('UnifiedHistogramStateService', () => {
     stateService.setLensAdapters(undefined);
     newState = { ...newState, lensAdapters: undefined };
     expect(state).toEqual(newState);
-    stateService.setLensEmbeddableOutput$(undefined);
-    newState = { ...newState, lensEmbeddableOutput$: undefined };
+    stateService.setLensDataLoading$(undefined);
+    newState = { ...newState, dataLoading$: undefined };
     expect(state).toEqual(newState);
     stateService.setTotalHits({
       totalHitsStatus: UnifiedHistogramFetchStatus.complete,
@@ -166,12 +150,10 @@ describe('UnifiedHistogramStateService', () => {
     expect(state).toEqual(initialState);
     stateService.setChartHidden(true);
     stateService.setTopPanelHeight(200);
-    stateService.setBreakdownField('test');
     expect(state).toEqual({
       ...initialState,
       chartHidden: true,
       topPanelHeight: 200,
-      breakdownField: 'test',
     });
     expect(setChartHidden as jest.Mock).toHaveBeenCalledWith(
       unifiedHistogramServicesMock.storage,
@@ -182,11 +164,6 @@ describe('UnifiedHistogramStateService', () => {
       unifiedHistogramServicesMock.storage,
       localStorageKeyPrefix,
       200
-    );
-    expect(setBreakdownField as jest.Mock).toHaveBeenCalledWith(
-      unifiedHistogramServicesMock.storage,
-      localStorageKeyPrefix,
-      'test'
     );
   });
 
@@ -200,15 +177,12 @@ describe('UnifiedHistogramStateService', () => {
     expect(state).toEqual(initialState);
     stateService.setChartHidden(true);
     stateService.setTopPanelHeight(200);
-    stateService.setBreakdownField('test');
     expect(state).toEqual({
       ...initialState,
       chartHidden: true,
       topPanelHeight: 200,
-      breakdownField: 'test',
     });
     expect(setChartHidden as jest.Mock).not.toHaveBeenCalled();
     expect(setTopPanelHeight as jest.Mock).not.toHaveBeenCalled();
-    expect(setBreakdownField as jest.Mock).not.toHaveBeenCalled();
   });
 });

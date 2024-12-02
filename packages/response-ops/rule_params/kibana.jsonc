@@ -1,5 +1,9 @@
 {
   "type": "shared-common",
   "id": "@kbn/response-ops-rule-params",
-  "owner": "@elastic/response-ops"
+  "owner": [
+    "@elastic/response-ops"
+  ],
+  "group": "platform",
+  "visibility": "private"
 }

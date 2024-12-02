@@ -11,7 +11,7 @@ import { deepExactRt, mergeRt } from '@kbn/io-ts-utils';
 import { isLeft } from 'fp-ts/lib/Either';
 import { Location } from 'history';
 import { PathReporter } from 'io-ts/lib/PathReporter';
-import { compact, findLastIndex, merge, orderBy } from 'lodash';
+import { compact, findLastIndex, mapValues, merge, orderBy } from 'lodash';
 import qs from 'query-string';
 import {
   MatchedRoute,
@@ -139,7 +139,9 @@ export function createRouter<TRoutes extends RouteMap>(routes: TRoutes): Router<
       if (route?.params) {
         const decoded = deepExactRt(route.params).decode(
           merge({}, route.defaults ?? {}, {
-            path: matchedRoute.match.params,
+            path: mapValues(matchedRoute.match.params, (value) => {
+              return decodeURIComponent(value);
+            }),
             query: qs.parse(location.search, { decode: true }),
           })
         );
@@ -179,7 +181,7 @@ export function createRouter<TRoutes extends RouteMap>(routes: TRoutes): Router<
       .split('/')
       .map((part) => {
         const match = part.match(/(?:{([a-zA-Z]+)})/);
-        return match ? paramsWithBuiltInDefaults.path[match[1]] : part;
+        return match ? encodeURIComponent(paramsWithBuiltInDefaults.path[match[1]]) : part;
       })
       .join('/');
 

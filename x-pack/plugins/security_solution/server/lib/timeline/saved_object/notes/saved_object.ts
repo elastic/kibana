@@ -6,7 +6,6 @@
  */
 
 import { failure } from 'io-ts/lib/PathReporter';
-import { getOr } from 'lodash/fp';
 import { v1 as uuidv1 } from 'uuid';
 
 import { pipe } from 'fp-ts/lib/pipeable';
@@ -81,6 +80,11 @@ export const getNotesByTimelineId = async (
   return notesByTimelineId.notes;
 };
 
+export interface InternalNoteResponse extends ResponseNote {
+  message: string;
+  code: number;
+}
+
 export const persistNote = async ({
   request,
   noteId,
@@ -91,35 +95,18 @@ export const persistNote = async ({
   noteId: string | null;
   note: BareNote | BareNoteWithoutExternalRefs;
   overrideOwner?: boolean;
-}): Promise<ResponseNote> => {
-  try {
-    if (noteId == null) {
-      return await createNote({
-        request,
-        noteId,
-        note,
-        overrideOwner,
-      });
-    }
-
-    // Update existing note
-    return await updateNote({ request, noteId, note, overrideOwner });
-  } catch (err) {
-    if (getOr(null, 'output.statusCode', err) === 403) {
-      const noteToReturn: Note = {
-        ...note,
-        noteId: uuidv1(),
-        version: '',
-        timelineId: '',
-      };
-      return {
-        code: 403,
-        message: err.message,
-        note: noteToReturn,
-      };
-    }
-    throw err;
+}): Promise<InternalNoteResponse> => {
+  if (noteId == null) {
+    return createNote({
+      request,
+      noteId,
+      note,
+      overrideOwner,
+    });
   }
+
+  // Update existing note
+  return updateNote({ request, noteId, note, overrideOwner });
 };
 
 export const createNote = async ({
@@ -132,7 +119,7 @@ export const createNote = async ({
   noteId: string | null;
   note: BareNote | BareNoteWithoutExternalRefs;
   overrideOwner?: boolean;
-}): Promise<ResponseNote> => {
+}): Promise<InternalNoteResponse> => {
   const {
     savedObjects: { client: savedObjectsClient },
     uiSettings: { client: uiSettingsClient },
@@ -203,7 +190,7 @@ export const updateNote = async ({
   noteId: string;
   note: BareNote | BareNoteWithoutExternalRefs;
   overrideOwner?: boolean;
-}): Promise<ResponseNote> => {
+}): Promise<InternalNoteResponse> => {
   const savedObjectsClient = (await request.context.core).savedObjects.client;
   const userInfo = request.user;
 

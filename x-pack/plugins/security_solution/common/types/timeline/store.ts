@@ -73,7 +73,7 @@ export type OnColumnRemoved = (columnId: ColumnId) => void;
 export type OnColumnResized = ({ columnId, delta }: { columnId: ColumnId; delta: number }) => void;
 
 /** Invoked when a user clicks to load more item */
-export type OnChangePage = (nextPage: number) => void;
+export type OnFetchMoreRecords = (nextPage: number) => void;
 
 /** Invoked when a user checks/un-checks a row */
 export type OnRowSelected = ({

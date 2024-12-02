@@ -14,8 +14,8 @@ import {
 import { KQLCustomTransformGenerator } from './kql_custom';
 import { dataViewsService } from '@kbn/data-views-plugin/server/mocks';
 
-const generator = new KQLCustomTransformGenerator();
-const spaceId = 'custom-space';
+const SPACE_ID = 'custom-space';
+const generator = new KQLCustomTransformGenerator(SPACE_ID, dataViewsService);
 
 describe('KQL Custom Transform Generator', () => {
   describe('validation', () => {
@@ -23,31 +23,25 @@ describe('KQL Custom Transform Generator', () => {
       const anSLO = createSLO({
         indicator: createKQLCustomIndicator({ good: '{ kql.query: invalid' }),
       });
-      await expect(generator.getTransformParams(anSLO, spaceId, dataViewsService)).rejects.toThrow(
-        /Invalid KQL/
-      );
+      await expect(generator.getTransformParams(anSLO)).rejects.toThrow(/Invalid KQL/);
     });
     it('throws when the KQL denominator is invalid', async () => {
       const anSLO = createSLO({
         indicator: createKQLCustomIndicator({ total: '{ kql.query: invalid' }),
       });
-      await expect(generator.getTransformParams(anSLO, spaceId, dataViewsService)).rejects.toThrow(
-        /Invalid KQL/
-      );
+      await expect(generator.getTransformParams(anSLO)).rejects.toThrow(/Invalid KQL/);
     });
     it('throws when the KQL query_filter is invalid', async () => {
       const anSLO = createSLO({
         indicator: createKQLCustomIndicator({ filter: '{ kql.query: invalid' }),
       });
-      await expect(generator.getTransformParams(anSLO, spaceId, dataViewsService)).rejects.toThrow(
-        /Invalid KQL/
-      );
+      await expect(generator.getTransformParams(anSLO)).rejects.toThrow(/Invalid KQL/);
     });
   });
 
   it('returns the expected transform params with every specified indicator params', async () => {
     const anSLO = createSLO({ id: 'irrelevant', indicator: createKQLCustomIndicator() });
-    const transform = await generator.getTransformParams(anSLO, spaceId, dataViewsService);
+    const transform = await generator.getTransformParams(anSLO);
 
     expect(transform).toMatchSnapshot();
   });
@@ -57,7 +51,7 @@ describe('KQL Custom Transform Generator', () => {
       id: 'irrelevant',
       indicator: createKQLCustomIndicator(),
     });
-    const transform = await generator.getTransformParams(anSLO, spaceId, dataViewsService);
+    const transform = await generator.getTransformParams(anSLO);
 
     expect(transform).toMatchSnapshot();
   });
@@ -72,7 +66,7 @@ describe('KQL Custom Transform Generator', () => {
         timesliceWindow: twoMinute(),
       },
     });
-    const transform = await generator.getTransformParams(anSLO, spaceId, dataViewsService);
+    const transform = await generator.getTransformParams(anSLO);
 
     expect(transform).toMatchSnapshot();
   });
@@ -81,7 +75,7 @@ describe('KQL Custom Transform Generator', () => {
     const anSLO = createSLO({
       indicator: createKQLCustomIndicator({ filter: 'labels.groupId: group-4' }),
     });
-    const transform = await generator.getTransformParams(anSLO, spaceId, dataViewsService);
+    const transform = await generator.getTransformParams(anSLO);
 
     expect(transform.source.query).toMatchSnapshot();
   });
@@ -90,7 +84,7 @@ describe('KQL Custom Transform Generator', () => {
     const anSLO = createSLO({
       indicator: createKQLCustomIndicator({ index: 'my-own-index*' }),
     });
-    const transform = await generator.getTransformParams(anSLO, spaceId, dataViewsService);
+    const transform = await generator.getTransformParams(anSLO);
 
     expect(transform.source.index).toBe('my-own-index*');
   });
@@ -101,7 +95,7 @@ describe('KQL Custom Transform Generator', () => {
         timestampField: 'my-date-field',
       }),
     });
-    const transform = await generator.getTransformParams(anSLO, spaceId, dataViewsService);
+    const transform = await generator.getTransformParams(anSLO);
 
     expect(transform.sync?.time?.field).toBe('my-date-field');
     // @ts-ignore
@@ -114,7 +108,7 @@ describe('KQL Custom Transform Generator', () => {
         good: 'latency < 400 and (http.status_code: 2xx or http.status_code: 3xx or http.status_code: 4xx)',
       }),
     });
-    const transform = await generator.getTransformParams(anSLO, spaceId, dataViewsService);
+    const transform = await generator.getTransformParams(anSLO);
 
     expect(transform.pivot!.aggregations!['slo.numerator']).toMatchSnapshot();
   });
@@ -125,7 +119,7 @@ describe('KQL Custom Transform Generator', () => {
         total: 'http.status_code: *',
       }),
     });
-    const transform = await generator.getTransformParams(anSLO, spaceId, dataViewsService);
+    const transform = await generator.getTransformParams(anSLO);
 
     expect(transform.pivot!.aggregations!['slo.denominator']).toMatchSnapshot();
   });
@@ -140,7 +134,7 @@ describe('KQL Custom Transform Generator', () => {
       },
     });
 
-    const transform = await generator.getTransformParams(slo, spaceId, dataViewsService);
+    const transform = await generator.getTransformParams(slo);
 
     // @ts-ignore
     const rangeFilter = transform.source.query.bool.filter.find((f) => 'range' in f);
