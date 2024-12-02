@@ -23,7 +23,7 @@ describe('getEntityInstancesQuery', () => {
         limit: 5,
         start: '2024-11-20T19:00:00.000Z',
         end: '2024-11-20T20:00:00.000Z',
-        sortBy: { field: 'entity.id', direction: 'DESC' },
+        sort: { field: 'entity.id', direction: 'DESC' },
       });
 
       expect(query).toEqual(
