@@ -52,7 +52,7 @@
     "@kbn/data-views-plugin",
     "@kbn/core-analytics-server",
     "@kbn/llm-tasks-plugin",
-    "@kbn/product-doc-common"
+    "@kbn/product-doc-base-plugin"
   ],
   "exclude": [
     "target/**/*",
