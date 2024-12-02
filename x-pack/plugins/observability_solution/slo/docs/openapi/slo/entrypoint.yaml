@@ -31,17 +31,3 @@ paths:
   #   $ref: "paths/s@{spaceid}@api@slos@_definitions.yaml"
   "/s/{spaceId}/api/observability/slos/_delete_instances":
     $ref: "paths/s@{spaceid}@api@slos@_delete_instances.yaml"
-# Security is defined when files are joined in oas_docs
-# components:
-#   securitySchemes:
-#     basicAuth:
-#       type: http
-#       scheme: basic
-#     apiKeyAuth:
-#       type: apiKey
-#       in: header
-#       name: Authorization
-#       description: 'e.g. Authorization: ApiKey base64AccessApiKey'
-# security:
-#   - basicAuth: []
-#   - apiKeyAuth: []
