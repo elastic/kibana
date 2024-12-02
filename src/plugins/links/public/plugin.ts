@@ -12,9 +12,7 @@ import {
   ContentManagementPublicStart,
 } from '@kbn/content-management-plugin/public';
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import {
-  DashboardStart,
-} from '@kbn/dashboard-plugin/public';
+import { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
@@ -63,7 +61,7 @@ export class LinksPlugin
           container.addNewPanel<LinksRuntimeState>({
             panelType: CONTENT_ID,
             serializedState: {
-              savedObjectId: savedObject.id
+              savedObjectId: savedObject.id,
             },
           });
         },
@@ -99,7 +97,11 @@ export class LinksPlugin
                 title,
                 editor: {
                   onEdit: async (savedObjectId: string) => {
-                    const [{ openEditorFlyout } , { deserializeLinksSavedObject }, linksSavedObject] = await Promise.all([
+                    const [
+                      { openEditorFlyout },
+                      { deserializeLinksSavedObject },
+                      linksSavedObject,
+                    ] = await Promise.all([
                       import('./editor/open_editor_flyout'),
                       import('./lib/deserialize_from_library'),
                       getLinksClient().get(savedObjectId),
@@ -127,7 +129,10 @@ export class LinksPlugin
     untilPluginStartServicesReady().then(() => {
       registerCreateLinksPanelAction();
 
-      plugins.dashboard.registerDashboardPanelPlacementSetting<LinksSerializedState, LinksRuntimeState>(
+      plugins.dashboard.registerDashboardPanelPlacementSetting<
+        LinksSerializedState,
+        LinksRuntimeState
+      >(
         CONTENT_ID,
         async (serializedState?: LinksSerializedState, runtimeState?: LinksRuntimeState) => {
           const { getLinksPanelPlacement } = await import('./get_links_panel_placement');
