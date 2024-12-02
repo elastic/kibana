@@ -8,13 +8,9 @@ import type { ChatFunctionClient } from '@kbn/observability-ai-assistant-plugin/
 import { lensFunctionDefinition } from '../../common/functions/lens';
 
 export function registerLensFunction({ functions }: { functions: ChatFunctionClient }) {
-  functions.registerFunction(
-    lensFunctionDefinition,
-    async () => {
-      return {
-        content: {},
-      };
-    },
-    ['all']
-  );
+  functions.registerFunction(lensFunctionDefinition, async () => {
+    return {
+      content: {},
+    };
+  });
 }

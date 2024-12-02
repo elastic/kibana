@@ -25,7 +25,8 @@ import {
 } from '../../tasks/live_query';
 import { generateRandomStringName, interceptCaseId } from '../../tasks/integrations';
 
-describe('Alert Event Details - Cases', { tags: ['@ess', '@serverless'] }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/197151
+describe.skip('Alert Event Details - Cases', { tags: ['@ess', '@serverless'] }, () => {
   let ruleId: string;
   let packId: string;
   let packName: string;
@@ -84,8 +85,7 @@ describe('Alert Event Details - Cases', { tags: ['@ess', '@serverless'] }, () =>
     });
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/187182
-  describe.skip('Case', () => {
+  describe('Case', () => {
     let caseId: string;
 
     beforeEach(() => {

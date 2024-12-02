@@ -7,72 +7,159 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-import React from 'react';
+import { cloneDeep } from 'lodash';
+import React, { useEffect, useMemo, useState } from 'react';
+import classNames from 'classnames';
+import { combineLatest, distinctUntilChanged, filter, map, pairwise, skip } from 'rxjs';
+
+import { css } from '@emotion/react';
 import { GridHeightSmoother } from './grid_height_smoother';
-import { GridOverlay } from './grid_overlay';
 import { GridRow } from './grid_row';
-import { GridLayoutData, GridSettings } from './types';
+import { GridAccessMode, GridLayoutData, GridSettings } from './types';
 import { useGridLayoutEvents } from './use_grid_layout_events';
 import { useGridLayoutState } from './use_grid_layout_state';
+import { isLayoutEqual } from './utils/equality_checks';
+import { resolveGridRow } from './utils/resolve_grid_row';
+
+interface GridLayoutProps {
+  layout: GridLayoutData;
+  gridSettings: GridSettings;
+  renderPanelContents: (panelId: string) => React.ReactNode;
+  onLayoutChange: (newLayout: GridLayoutData) => void;
+  expandedPanelId?: string;
+  accessMode?: GridAccessMode;
+}
 
 export const GridLayout = ({
-  getCreationOptions,
+  layout,
+  gridSettings,
   renderPanelContents,
-}: {
-  getCreationOptions: () => { initialLayout: GridLayoutData; gridSettings: GridSettings };
-  renderPanelContents: (panelId: string) => React.ReactNode;
-}) => {
+  onLayoutChange,
+  expandedPanelId,
+  accessMode = 'EDIT',
+}: GridLayoutProps) => {
   const { gridLayoutStateManager, setDimensionsRef } = useGridLayoutState({
-    getCreationOptions,
+    layout,
+    gridSettings,
+    expandedPanelId,
+    accessMode,
   });
   useGridLayoutEvents({ gridLayoutStateManager });
 
-  const [gridLayout, runtimeSettings, interactionEvent] = useBatchedPublishingSubjects(
-    gridLayoutStateManager.gridLayout$,
-    gridLayoutStateManager.runtimeSettings$,
-    gridLayoutStateManager.interactionEvent$
+  const [rowCount, setRowCount] = useState<number>(
+    gridLayoutStateManager.gridLayout$.getValue().length
   );
 
-  return (
-    <>
-      <GridHeightSmoother gridLayoutStateManager={gridLayoutStateManager}>
-        <div
-          ref={(divElement) => {
-            setDimensionsRef(divElement);
+  /**
+   * Update the `gridLayout$` behaviour subject in response to the `layout` prop changing
+   */
+  useEffect(() => {
+    if (!isLayoutEqual(layout, gridLayoutStateManager.gridLayout$.getValue())) {
+      const newLayout = cloneDeep(layout);
+      /**
+       * the layout sent in as a prop is not guaranteed to be valid (i.e it may have floating panels) -
+       * so, we need to loop through each row and ensure it is compacted
+       */
+      newLayout.forEach((row, rowIndex) => {
+        newLayout[rowIndex] = resolveGridRow(row);
+      });
+      gridLayoutStateManager.gridLayout$.next(newLayout);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [layout]);
+
+  /**
+   * Set up subscriptions
+   */
+  useEffect(() => {
+    /**
+     * The only thing that should cause the entire layout to re-render is adding a new row;
+     * this subscription ensures this by updating the `rowCount` state when it changes.
+     */
+    const rowCountSubscription = gridLayoutStateManager.gridLayout$
+      .pipe(
+        skip(1), // we initialized `rowCount` above, so skip the initial emit
+        map((newLayout) => newLayout.length),
+        distinctUntilChanged()
+      )
+      .subscribe((newRowCount) => {
+        setRowCount(newRowCount);
+      });
+
+    const onLayoutChangeSubscription = combineLatest([
+      gridLayoutStateManager.gridLayout$,
+      gridLayoutStateManager.interactionEvent$,
+    ])
+      .pipe(
+        // if an interaction event is happening, then ignore any "draft" layout changes
+        filter(([_, event]) => !Boolean(event)),
+        // once no interaction event, create pairs of "old" and "new" layouts for comparison
+        map(([newLayout]) => newLayout),
+        pairwise()
+      )
+      .subscribe(([layoutBefore, layoutAfter]) => {
+        if (!isLayoutEqual(layoutBefore, layoutAfter)) {
+          onLayoutChange(layoutAfter);
+        }
+      });
+
+    return () => {
+      rowCountSubscription.unsubscribe();
+      onLayoutChangeSubscription.unsubscribe();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  /**
+   * Memoize row children components to prevent unnecessary re-renders
+   */
+  const children = useMemo(() => {
+    return Array.from({ length: rowCount }, (_, rowIndex) => {
+      return (
+        <GridRow
+          key={rowIndex}
+          rowIndex={rowIndex}
+          renderPanelContents={renderPanelContents}
+          gridLayoutStateManager={gridLayoutStateManager}
+          toggleIsCollapsed={() => {
+            const newLayout = cloneDeep(gridLayoutStateManager.gridLayout$.value);
+            newLayout[rowIndex].isCollapsed = !newLayout[rowIndex].isCollapsed;
+            gridLayoutStateManager.gridLayout$.next(newLayout);
           }}
-        >
-          {gridLayout.map((rowData, rowIndex) => {
-            return (
-              <GridRow
-                rowData={rowData}
-                key={rowData.title}
-                rowIndex={rowIndex}
-                runtimeSettings={runtimeSettings}
-                activePanelId={interactionEvent?.id}
-                renderPanelContents={renderPanelContents}
-                targetRowIndex={interactionEvent?.targetRowIndex}
-                toggleIsCollapsed={() => {
-                  const currentLayout = gridLayoutStateManager.gridLayout$.value;
-                  currentLayout[rowIndex].isCollapsed = !currentLayout[rowIndex].isCollapsed;
-                  gridLayoutStateManager.gridLayout$.next(currentLayout);
-                }}
-                setInteractionEvent={(nextInteractionEvent) => {
-                  if (!nextInteractionEvent) {
-                    gridLayoutStateManager.hideDragPreview();
-                  }
-                  gridLayoutStateManager.interactionEvent$.next(nextInteractionEvent);
-                }}
-                ref={(element) => (gridLayoutStateManager.rowRefs.current[rowIndex] = element)}
-              />
-            );
-          })}
-        </div>
-      </GridHeightSmoother>
-      <GridOverlay
-        interactionEvent={interactionEvent}
-        gridLayoutStateManager={gridLayoutStateManager}
-      />
-    </>
+          setInteractionEvent={(nextInteractionEvent) => {
+            if (!nextInteractionEvent) {
+              gridLayoutStateManager.activePanel$.next(undefined);
+            }
+            gridLayoutStateManager.interactionEvent$.next(nextInteractionEvent);
+          }}
+          ref={(element: HTMLDivElement | null) =>
+            (gridLayoutStateManager.rowRefs.current[rowIndex] = element)
+          }
+        />
+      );
+    });
+  }, [rowCount, gridLayoutStateManager, renderPanelContents]);
+
+  const gridClassNames = classNames('kbnGrid', {
+    'kbnGrid--static': expandedPanelId || accessMode === 'VIEW',
+    'kbnGrid--hasExpandedPanel': Boolean(expandedPanelId),
+  });
+
+  return (
+    <GridHeightSmoother gridLayoutStateManager={gridLayoutStateManager}>
+      <div
+        ref={(divElement) => {
+          setDimensionsRef(divElement);
+        }}
+        className={gridClassNames}
+        css={css`
+          &.kbnGrid--hasExpandedPanel {
+            height: 100%;
+          }
+        `}
+      >
+        {children}
+      </div>
+    </GridHeightSmoother>
   );
 };

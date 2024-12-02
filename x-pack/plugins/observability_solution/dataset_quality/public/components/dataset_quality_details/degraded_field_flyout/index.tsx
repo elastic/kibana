@@ -6,6 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
 import {
   EuiBadge,
   EuiFlyout,
@@ -20,6 +21,7 @@ import {
   EuiButtonIcon,
   EuiToolTip,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { NavigationSource } from '../../../services/telemetry';
 import {
   useDatasetDetailsRedirectLinkTelemetry,
@@ -38,11 +40,18 @@ import {
 } from '../../../../common/translations';
 import { DegradedFieldInfo } from './field_info';
 import { _IGNORED } from '../../../../common/es_fields';
+import { PossibleMitigations } from './possible_mitigations';
 
 // Allow for lazy loading
 // eslint-disable-next-line import/no-default-export
 export default function DegradedFieldFlyout() {
-  const { closeDegradedFieldFlyout, expandedDegradedField, renderedItems } = useDegradedFields();
+  const {
+    closeDegradedFieldFlyout,
+    expandedDegradedField,
+    renderedItems,
+    isAnalysisInProgress,
+    degradedFieldAnalysisFormattedResult,
+  } = useDegradedFields();
   const { dataStreamSettings, datasetDetails, timeRange } = useDatasetQualityDetailsState();
   const pushedFlyoutTitleId = useGeneratedHtmlId({
     prefix: 'pushedFlyoutTitle',
@@ -118,9 +127,42 @@ export default function DegradedFieldFlyout() {
             </EuiTextColor>
           </>
         )}
+        {isUserViewingTheIssueOnLatestBackingIndex &&
+          !isAnalysisInProgress &&
+          degradedFieldAnalysisFormattedResult &&
+          !degradedFieldAnalysisFormattedResult.identifiedUsingHeuristics && (
+            <>
+              <EuiSpacer size="s" />
+              <EuiTextColor
+                color="danger"
+                data-test-subj="datasetQualityDetailsDegradedFieldFlyoutIssueDoesNotExist"
+              >
+                <FormattedMessage
+                  id="xpack.datasetQuality.details.degradedField.potentialCause.ignoreMalformedWarning"
+                  defaultMessage="If you've recently updated your {field_limit} settings, this quality issue may not be relevant. Rollover the data stream to verify."
+                  values={{
+                    field_limit: (
+                      <strong>
+                        {i18n.translate(
+                          'xpack.datasetQuality.degradedFieldFlyout.strong.fieldLimitLabel',
+                          { defaultMessage: 'field limit' }
+                        )}
+                      </strong>
+                    ),
+                  }}
+                />
+              </EuiTextColor>
+            </>
+          )}
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <DegradedFieldInfo fieldList={fieldList} />
+        {isUserViewingTheIssueOnLatestBackingIndex && (
+          <>
+            <EuiSpacer size="s" />
+            <PossibleMitigations />
+          </>
+        )}
       </EuiFlyoutBody>
     </EuiFlyout>
   );

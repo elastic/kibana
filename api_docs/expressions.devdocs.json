@@ -6135,13 +6135,52 @@
         "children": [
           {
             "parentPluginId": "expressions",
+            "id": "def-public.TablesAdapter.tables",
+            "type": "Object",
+            "tags": [],
+            "label": "#tables",
+            "description": [],
+            "path": "src/plugins/expressions/common/util/tables_adapter.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": []
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.TablesAdapter.allowCsvExport",
+            "type": "boolean",
+            "tags": [],
+            "label": "allowCsvExport",
+            "description": [],
+            "path": "src/plugins/expressions/common/util/tables_adapter.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.TablesAdapter.initialSelectedTable",
+            "type": "string",
+            "tags": [],
+            "label": "initialSelectedTable",
+            "description": [
+              "Key of table to set as initial selection"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/expressions/common/util/tables_adapter.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressions",
             "id": "def-public.TablesAdapter.logDatatable",
             "type": "Function",
             "tags": [],
             "label": "logDatatable",
             "description": [],
             "signature": [
-              "(name: string, datatable: ",
+              "(key: string, datatable: ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -6160,7 +6199,7 @@
                 "id": "def-public.TablesAdapter.logDatatable.$1",
                 "type": "string",
                 "tags": [],
-                "label": "name",
+                "label": "key",
                 "description": [],
                 "signature": [
                   "string"
@@ -9506,7 +9545,7 @@
             "label": "onData$",
             "description": [],
             "signature": [
-              "(<TData, TInspectorAdapters>(data: TData, adapters?: TInspectorAdapters | undefined, partial?: boolean | undefined) => void) | undefined"
+              "(<TData, TInspectorAdapters extends unknown>(data: TData, adapters?: TInspectorAdapters | undefined, partial?: boolean | undefined) => void) | undefined"
             ],
             "path": "src/plugins/expressions/public/react_expression_renderer/use_expression_renderer.ts",
             "deprecated": false,
@@ -28261,13 +28300,52 @@
         "children": [
           {
             "parentPluginId": "expressions",
+            "id": "def-common.TablesAdapter.tables",
+            "type": "Object",
+            "tags": [],
+            "label": "#tables",
+            "description": [],
+            "path": "src/plugins/expressions/common/util/tables_adapter.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": []
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.TablesAdapter.allowCsvExport",
+            "type": "boolean",
+            "tags": [],
+            "label": "allowCsvExport",
+            "description": [],
+            "path": "src/plugins/expressions/common/util/tables_adapter.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.TablesAdapter.initialSelectedTable",
+            "type": "string",
+            "tags": [],
+            "label": "initialSelectedTable",
+            "description": [
+              "Key of table to set as initial selection"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/expressions/common/util/tables_adapter.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressions",
             "id": "def-common.TablesAdapter.logDatatable",
             "type": "Function",
             "tags": [],
             "label": "logDatatable",
             "description": [],
             "signature": [
-              "(name: string, datatable: ",
+              "(key: string, datatable: ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -28286,7 +28364,7 @@
                 "id": "def-common.TablesAdapter.logDatatable.$1",
                 "type": "string",
                 "tags": [],
-                "label": "name",
+                "label": "key",
                 "description": [],
                 "signature": [
                   "string"

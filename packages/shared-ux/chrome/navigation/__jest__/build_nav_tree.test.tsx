@@ -21,6 +21,7 @@ describe('builds navigation tree', () => {
   test('render reference UI and build the navigation tree', async () => {
     const { findByTestId } = renderNavigation({
       navTreeDef: of({
+        id: 'es',
         body: [
           {
             id: 'group1',
@@ -107,6 +108,7 @@ describe('builds navigation tree', () => {
     {
       const { findByTestId, unmount } = renderNavigation({
         navTreeDef: of({
+          id: 'es',
           body: [accordionNode],
         }),
         services: { navigateToUrl },
@@ -121,6 +123,7 @@ describe('builds navigation tree', () => {
     {
       const { findByTestId } = renderNavigation({
         navTreeDef: of({
+          id: 'es',
           body: [
             {
               ...accordionNode,
@@ -165,6 +168,7 @@ describe('builds navigation tree', () => {
       // Side nav is collapsed
       const { queryAllByTestId, unmount } = renderNavigation({
         navTreeDef: of({
+          id: 'es',
           body: [nodes],
         }),
         services: { isSideNavCollapsed: true },
@@ -180,6 +184,7 @@ describe('builds navigation tree', () => {
       // Side nav is not collapsed
       const { queryAllByTestId, unmount } = renderNavigation({
         navTreeDef: of({
+          id: 'es',
           body: [nodes],
         }),
         services: { isSideNavCollapsed: false }, // No conversion to accordion
@@ -195,6 +200,7 @@ describe('builds navigation tree', () => {
       // Panel opener with a link
       const { queryAllByTestId, unmount } = renderNavigation({
         navTreeDef: of({
+          id: 'es',
           body: [
             {
               ...nodes,
@@ -238,6 +244,7 @@ describe('builds navigation tree', () => {
 
     const { findByTestId } = renderNavigation({
       navTreeDef: of({
+        id: 'es',
         body: [node],
       }),
       services: { navigateToUrl, eventTracker: new EventTracker({ reportEvent }) },
@@ -276,6 +283,7 @@ describe('builds navigation tree', () => {
 
     const { findByTestId } = renderNavigation({
       navTreeDef: of({
+        id: 'es',
         body: [node],
       }),
       services: { navigateToUrl },
@@ -290,6 +298,7 @@ describe('builds navigation tree', () => {
 
   test('should not render the group if it does not have children', async () => {
     const navTree: NavigationTreeDefinitionUI = {
+      id: 'es',
       body: [
         {
           id: 'root',
@@ -338,6 +347,7 @@ describe('builds navigation tree', () => {
     ]);
 
     const navTree: NavigationTreeDefinitionUI = {
+      id: 'es',
       body: [{ type: 'recentlyAccessed' }],
     };
 
@@ -364,6 +374,7 @@ describe('builds navigation tree', () => {
     ]);
 
     const navTree: NavigationTreeDefinitionUI = {
+      id: 'es',
       body: [{ type: 'recentlyAccessed' }],
     };
 

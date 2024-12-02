@@ -15,6 +15,7 @@ import { type GlobalVisitorContext, SharedData } from './global_visitor_context'
 import { children, firstItem, singleItems } from './utils';
 import type {
   ESQLAstCommand,
+  ESQLAstExpression,
   ESQLAstItem,
   ESQLAstNodeWithArgs,
   ESQLAstNodeWithChildren,
@@ -28,7 +29,6 @@ import type {
   ESQLList,
   ESQLLiteral,
   ESQLOrderExpression,
-  ESQLSingleAstItem,
   ESQLSource,
   ESQLTimeInterval,
 } from '../types';
@@ -337,7 +337,7 @@ export class LimitCommandVisitorContext<
     if (
       arg &&
       arg.type === 'literal' &&
-      (arg.literalType === 'integer' || arg.literalType === 'decimal')
+      (arg.literalType === 'integer' || arg.literalType === 'double')
     ) {
       return arg;
     }
@@ -541,7 +541,7 @@ export class InlineCastExpressionVisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
   Data extends SharedData = SharedData
 > extends ExpressionVisitorContext<Methods, Data, ESQLInlineCast> {
-  public value(): ESQLSingleAstItem {
+  public value(): ESQLAstExpression {
     this.ctx.assertMethodExists('visitExpression');
 
     const value = firstItem([this.node.value])!;

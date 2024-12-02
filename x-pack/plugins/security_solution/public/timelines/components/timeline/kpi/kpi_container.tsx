@@ -32,7 +32,7 @@ interface KpiExpandedProps {
 }
 
 export const TimelineKpisContainer = ({ timelineId }: KpiExpandedProps) => {
-  const { browserFields, indexPattern, selectedPatterns } = useSourcererDataView(
+  const { browserFields, sourcererDataView, selectedPatterns } = useSourcererDataView(
     SourcererScopeName.timeline
   );
 
@@ -82,13 +82,13 @@ export const TimelineKpisContainer = ({ timelineId }: KpiExpandedProps) => {
       combineQueries({
         config: esQueryConfig,
         dataProviders,
-        indexPattern,
+        indexPattern: sourcererDataView,
         browserFields,
         filters: filters ? filters : [],
         kqlQuery,
         kqlMode,
       }),
-    [browserFields, dataProviders, esQueryConfig, filters, indexPattern, kqlMode, kqlQuery]
+    [browserFields, dataProviders, esQueryConfig, filters, sourcererDataView, kqlMode, kqlQuery]
   );
 
   const isBlankTimeline: boolean = useMemo(

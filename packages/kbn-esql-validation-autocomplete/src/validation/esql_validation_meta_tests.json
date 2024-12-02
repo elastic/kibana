@@ -77,6 +77,10 @@
       "type": "counter_double"
     },
     {
+      "name": "unsupportedField",
+      "type": "unsupported"
+    },
+    {
       "name": "dateNanosField",
       "type": "date_nanos"
     },
@@ -2199,7 +2203,7 @@
       "warning": []
     },
     {
-      "query": "ROW a=1::LONG | LOOKUP t ON a",
+      "query": "ROW a=1::LONG | LOOKUP JOIN t ON a",
       "error": [],
       "warning": []
     },
@@ -2666,8 +2670,7 @@
     {
       "query": "from a_index | dissect textField .",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {'?', NAMED_OR_POSITIONAL_PARAM, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
-        "Unknown column [textField.]"
+        "SyntaxError: mismatched input '<EOF>' expecting {'?', NAMED_OR_POSITIONAL_PARAM, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
       ],
       "warning": []
     },
@@ -2761,8 +2764,7 @@
     {
       "query": "from a_index | grok textField .",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {'?', NAMED_OR_POSITIONAL_PARAM, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
-        "Unknown column [textField.]"
+        "SyntaxError: mismatched input '<EOF>' expecting {'?', NAMED_OR_POSITIONAL_PARAM, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}"
       ],
       "warning": []
     },
@@ -6654,14 +6656,14 @@
     {
       "query": "from a_index | eval 1 * \"1\"",
       "error": [
-        "Argument of [*] must be [double], found value [\"1\"] type [string]"
+        "Argument of [*] must be [double], found value [\"1\"] type [keyword]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval \"1\" * 1",
       "error": [
-        "Argument of [*] must be [double], found value [\"1\"] type [string]"
+        "Argument of [*] must be [double], found value [\"1\"] type [keyword]"
       ],
       "warning": []
     },
@@ -6691,14 +6693,14 @@
     {
       "query": "from a_index | eval 1 / \"1\"",
       "error": [
-        "Argument of [/] must be [double], found value [\"1\"] type [string]"
+        "Argument of [/] must be [double], found value [\"1\"] type [keyword]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval \"1\" / 1",
       "error": [
-        "Argument of [/] must be [double], found value [\"1\"] type [string]"
+        "Argument of [/] must be [double], found value [\"1\"] type [keyword]"
       ],
       "warning": []
     },
@@ -6728,14 +6730,14 @@
     {
       "query": "from a_index | eval 1 % \"1\"",
       "error": [
-        "Argument of [%] must be [double], found value [\"1\"] type [string]"
+        "Argument of [%] must be [double], found value [\"1\"] type [keyword]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | eval \"1\" % 1",
       "error": [
-        "Argument of [%] must be [double], found value [\"1\"] type [string]"
+        "Argument of [%] must be [double], found value [\"1\"] type [keyword]"
       ],
       "warning": []
     },
@@ -9513,7 +9515,7 @@
       "query": "from a_index | eval doubleField = \"5\"",
       "error": [],
       "warning": [
-        "Column [doubleField] of type double has been overwritten as new type: string"
+        "Column [doubleField] of type double has been overwritten as new type: keyword"
       ]
     },
     {
@@ -9655,19 +9657,19 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval true AND \"false\"::boolean",
+      "query": "from a_index | eval true AND 0::boolean",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval true AND \"false\"::bool",
+      "query": "from a_index | eval true AND 0::bool",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | eval true AND \"false\"",
+      "query": "from a_index | eval true AND 0",
       "error": [
-        "Argument of [and] must be [boolean], found value [\"false\"] type [string]"
+        "Argument of [and] must be [boolean], found value [0] type [integer]"
       ],
       "warning": []
     },
@@ -9691,6 +9693,13 @@
         "Argument of [trim] must be [keyword], found value [doubleField] type [double]"
       ],
       "warning": []
+    },
+    {
+      "query": "from a_index | keep unsupportedField",
+      "error": [],
+      "warning": [
+        "Field [unsupportedField] cannot be retrieved, it is unsupported or not indexed; returning null"
+      ]
     },
     {
       "query": "f",
@@ -9948,73 +9957,9 @@
       "warning": []
     },
     {
-      "query": "from index [METADATA _id]",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from index [METADATA _id]",
-      "error": [],
-      "warning": [
-        "Square brackets '[]' need to be removed from FROM METADATA declaration"
-      ]
-    },
-    {
-      "query": "from index [metadata _id]",
-      "error": [],
-      "warning": [
-        "Square brackets '[]' need to be removed from FROM METADATA declaration"
-      ]
-    },
-    {
-      "query": "from index [METADATA _id, _source]",
-      "error": [],
-      "warning": [
-        "Square brackets '[]' need to be removed from FROM METADATA declaration"
-      ]
-    },
-    {
-      "query": "from index [METADATA _id, _source2]",
-      "error": [
-        "Metadata field [_source2] is not available. Available metadata fields are: [_version, _id, _index, _source, _ignored]"
-      ],
-      "warning": [
-        "Square brackets '[]' need to be removed from FROM METADATA declaration"
-      ]
-    },
-    {
-      "query": "from index [metadata _id, _source] [METADATA _id2]",
-      "error": [
-        "SyntaxError: mismatched input '[' expecting <EOF>"
-      ],
-      "warning": [
-        "Square brackets '[]' need to be removed from FROM METADATA declaration"
-      ]
-    },
-    {
-      "query": "from index METADATA _id",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from index METADATA _id",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from index metadata _id",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from index METADATA _id, _source",
-      "error": [],
-      "warning": []
-    },
-    {
       "query": "from index METADATA _id, _source2",
       "error": [
-        "Metadata field [_source2] is not available. Available metadata fields are: [_version, _id, _index, _source, _ignored]"
+        "Metadata field [_source2] is not available. Available metadata fields are: [_version, _id, _index, _source, _ignored, _index_mode]"
       ],
       "warning": []
     },

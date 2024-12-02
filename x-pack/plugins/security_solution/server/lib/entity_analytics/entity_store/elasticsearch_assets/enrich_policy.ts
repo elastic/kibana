@@ -7,6 +7,7 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { EnrichPutPolicyRequest } from '@elastic/elasticsearch/lib/api/types';
+import { EngineComponentResourceEnum } from '../../../../../common/api/entity_analytics';
 import { getEntitiesIndexName } from '../utils';
 import type { UnitedEntityDefinition } from '../united_entity_definitions';
 
@@ -72,10 +73,54 @@ export const executeFieldRetentionEnrichPolicy = async ({
 export const deleteFieldRetentionEnrichPolicy = async ({
   unitedDefinition,
   esClient,
+  logger,
+  attempts = 5,
+  delayMs = 2000,
 }: {
-  esClient: ElasticsearchClient;
   unitedDefinition: DefinitionMetadata;
+  esClient: ElasticsearchClient;
+  logger: Logger;
+  attempts?: number;
+  delayMs?: number;
 }) => {
   const name = getFieldRetentionEnrichPolicyName(unitedDefinition);
-  return esClient.enrich.deletePolicy({ name }, { ignore: [404] });
+  let currentAttempt = 1;
+  while (currentAttempt <= attempts) {
+    try {
+      await esClient.enrich.deletePolicy({ name }, { ignore: [404] });
+      return;
+    } catch (e) {
+      // a 429 status code indicates that the enrich policy is being executed
+      if (currentAttempt === attempts || e.statusCode !== 429) {
+        logger.error(
+          `Error deleting enrich policy ${name}: ${e.message} after ${currentAttempt} attempts`
+        );
+        throw e;
+      }
+
+      logger.info(
+        `Enrich policy ${name} is being executed, waiting for it to finish before deleting`
+      );
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
+      currentAttempt++;
+    }
+  }
+};
+
+export const getFieldRetentionEnrichPolicyStatus = async ({
+  definitionMetadata,
+  esClient,
+}: {
+  definitionMetadata: DefinitionMetadata;
+  esClient: ElasticsearchClient;
+}) => {
+  const name = getFieldRetentionEnrichPolicyName(definitionMetadata);
+  const policy = await esClient.enrich.getPolicy({ name }, { ignore: [404] });
+  const policies = policy.policies;
+
+  return {
+    installed: policies.length > 0,
+    id: name,
+    resource: EngineComponentResourceEnum.enrich_policy,
+  };
 };

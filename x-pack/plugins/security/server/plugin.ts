@@ -338,6 +338,7 @@ export class SecurityPlugin
       getUserProfileService: this.getUserProfileService,
       analyticsService: this.analyticsService.setup({ analytics: core.analytics }),
       buildFlavor: this.initializerContext.env.packageInfo.buildFlavor,
+      docLinks: core.docLinks,
     });
 
     return Object.freeze<SecurityPluginSetup>({

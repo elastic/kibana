@@ -9,7 +9,7 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
-import { AggregateQuery, Query } from '@kbn/es-query';
+import type { AggregateQuery, Query, Filter } from '@kbn/es-query';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import { MAX_DOC_FIELDS_DISPLAYED, SHOW_MULTIFIELDS } from '@kbn/discover-utils';
 import {
@@ -30,17 +30,19 @@ import { useProfileAccessor } from '../../context_awareness';
 interface DiscoverGridEmbeddableProps extends Omit<UnifiedDataTableProps, 'sampleSizeState'> {
   sampleSizeState: number; // a required prop
   totalHitCount?: number;
-  query?: AggregateQuery | Query;
+  query: AggregateQuery | Query | undefined;
+  filters: Filter[] | undefined;
   interceptedWarnings?: SearchResponseWarning[];
   onAddColumn: (column: string) => void;
   onRemoveColumn: (column: string) => void;
   savedSearchId?: string;
+  enableDocumentViewer: boolean;
 }
 
 export const DiscoverGridMemoized = React.memo(DiscoverGrid);
 
 export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
-  const { interceptedWarnings, ...gridProps } = props;
+  const { interceptedWarnings, enableDocumentViewer, ...gridProps } = props;
 
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>(undefined);
 
@@ -65,6 +67,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
         onClose={() => setExpandedDoc(undefined)}
         setExpandedDoc={setExpandedDoc}
         query={props.query}
+        filters={props.filters}
       />
     ),
     [
@@ -73,6 +76,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
       props.onFilter,
       props.onRemoveColumn,
       props.query,
+      props.filters,
       props.savedSearchId,
     ]
   );
@@ -82,10 +86,10 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
       getRenderCustomToolbarWithElements({
         leftSide:
           typeof props.totalHitCount === 'number' ? (
-            <TotalDocuments totalHitCount={props.totalHitCount} />
+            <TotalDocuments totalHitCount={props.totalHitCount} isEsqlMode={props.isPlainRecord} />
           ) : undefined,
       }),
-    [props.totalHitCount]
+    [props.totalHitCount, props.isPlainRecord]
   );
 
   const getCellRenderersAccessor = useProfileAccessor('getCellRenderers');
@@ -128,7 +132,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
         expandedDoc={expandedDoc}
         showMultiFields={props.services.uiSettings.get(SHOW_MULTIFIELDS)}
         maxDocFieldsDisplayed={props.services.uiSettings.get(MAX_DOC_FIELDS_DISPLAYED)}
-        renderDocumentView={renderDocumentView}
+        renderDocumentView={enableDocumentViewer ? renderDocumentView : undefined}
         renderCustomToolbar={renderCustomToolbarWithElements}
         externalCustomRenderers={cellRenderers}
         enableComparisonMode

@@ -38,6 +38,7 @@ import { ConstantDefaultContext } from "./esql_parser.js";
 import { ParenthesizedExpressionContext } from "./esql_parser.js";
 import { FunctionContext } from "./esql_parser.js";
 import { FunctionExpressionContext } from "./esql_parser.js";
+import { FunctionNameContext } from "./esql_parser.js";
 import { ToDataTypeContext } from "./esql_parser.js";
 import { RowCommandContext } from "./esql_parser.js";
 import { FieldsContext } from "./esql_parser.js";
@@ -52,6 +53,8 @@ import { Deprecated_metadataContext } from "./esql_parser.js";
 import { MetricsCommandContext } from "./esql_parser.js";
 import { EvalCommandContext } from "./esql_parser.js";
 import { StatsCommandContext } from "./esql_parser.js";
+import { AggFieldsContext } from "./esql_parser.js";
+import { AggFieldContext } from "./esql_parser.js";
 import { QualifiedNameContext } from "./esql_parser.js";
 import { QualifiedNamePatternContext } from "./esql_parser.js";
 import { QualifiedNamePatternsContext } from "./esql_parser.js";
@@ -95,6 +98,10 @@ import { EnrichCommandContext } from "./esql_parser.js";
 import { EnrichWithClauseContext } from "./esql_parser.js";
 import { LookupCommandContext } from "./esql_parser.js";
 import { InlinestatsCommandContext } from "./esql_parser.js";
+import { JoinCommandContext } from "./esql_parser.js";
+import { JoinTargetContext } from "./esql_parser.js";
+import { JoinConditionContext } from "./esql_parser.js";
+import { JoinPredicateContext } from "./esql_parser.js";
 
 
 /**
@@ -401,6 +408,16 @@ export default class esql_parserListener extends ParseTreeListener {
 	 */
 	exitFunctionExpression?: (ctx: FunctionExpressionContext) => void;
 	/**
+	 * Enter a parse tree produced by `esql_parser.functionName`.
+	 * @param ctx the parse tree
+	 */
+	enterFunctionName?: (ctx: FunctionNameContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.functionName`.
+	 * @param ctx the parse tree
+	 */
+	exitFunctionName?: (ctx: FunctionNameContext) => void;
+	/**
 	 * Enter a parse tree produced by the `toDataType`
 	 * labeled alternative in `esql_parser.dataType`.
 	 * @param ctx the parse tree
@@ -542,6 +559,26 @@ export default class esql_parserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitStatsCommand?: (ctx: StatsCommandContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.aggFields`.
+	 * @param ctx the parse tree
+	 */
+	enterAggFields?: (ctx: AggFieldsContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.aggFields`.
+	 * @param ctx the parse tree
+	 */
+	exitAggFields?: (ctx: AggFieldsContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.aggField`.
+	 * @param ctx the parse tree
+	 */
+	enterAggField?: (ctx: AggFieldContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.aggField`.
+	 * @param ctx the parse tree
+	 */
+	exitAggField?: (ctx: AggFieldContext) => void;
 	/**
 	 * Enter a parse tree produced by `esql_parser.qualifiedName`.
 	 * @param ctx the parse tree
@@ -998,5 +1035,45 @@ export default class esql_parserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitInlinestatsCommand?: (ctx: InlinestatsCommandContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.joinCommand`.
+	 * @param ctx the parse tree
+	 */
+	enterJoinCommand?: (ctx: JoinCommandContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.joinCommand`.
+	 * @param ctx the parse tree
+	 */
+	exitJoinCommand?: (ctx: JoinCommandContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.joinTarget`.
+	 * @param ctx the parse tree
+	 */
+	enterJoinTarget?: (ctx: JoinTargetContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.joinTarget`.
+	 * @param ctx the parse tree
+	 */
+	exitJoinTarget?: (ctx: JoinTargetContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.joinCondition`.
+	 * @param ctx the parse tree
+	 */
+	enterJoinCondition?: (ctx: JoinConditionContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.joinCondition`.
+	 * @param ctx the parse tree
+	 */
+	exitJoinCondition?: (ctx: JoinConditionContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.joinPredicate`.
+	 * @param ctx the parse tree
+	 */
+	enterJoinPredicate?: (ctx: JoinPredicateContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.joinPredicate`.
+	 * @param ctx the parse tree
+	 */
+	exitJoinPredicate?: (ctx: JoinPredicateContext) => void;
 }
 

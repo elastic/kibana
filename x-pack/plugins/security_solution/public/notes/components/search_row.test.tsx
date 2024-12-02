@@ -5,13 +5,18 @@
  * 2.0.
  */
 
-import { fireEvent, render, screen } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { SearchRow } from './search_row';
-import { ASSOCIATED_NOT_SELECT_TEST_ID, SEARCH_BAR_TEST_ID, USER_SELECT_TEST_ID } from './test_ids';
+import {
+  ASSOCIATED_NOT_SELECT_TEST_ID,
+  SEARCH_BAR_TEST_ID,
+  CREATED_BY_SELECT_TEST_ID,
+} from './test_ids';
 import { AssociatedFilter } from '../../../common/notes/constants';
 import { useSuggestUsers } from '../../common/components/user_profiles/use_suggest_users';
+import { TestProviders } from '../../common/mock';
 
 jest.mock('../../common/components/user_profiles/use_suggest_users');
 
@@ -35,15 +40,23 @@ describe('SearchRow', () => {
   });
 
   it('should render the component', () => {
-    const { getByTestId } = render(<SearchRow />);
+    const { getByTestId } = render(
+      <TestProviders>
+        <SearchRow />
+      </TestProviders>
+    );
 
     expect(getByTestId(SEARCH_BAR_TEST_ID)).toBeInTheDocument();
-    expect(getByTestId(USER_SELECT_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(CREATED_BY_SELECT_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(ASSOCIATED_NOT_SELECT_TEST_ID)).toBeInTheDocument();
   });
 
   it('should call the correct action when entering a value in the search bar', async () => {
-    const { getByTestId } = render(<SearchRow />);
+    const { getByTestId } = render(
+      <TestProviders>
+        <SearchRow />
+      </TestProviders>
+    );
 
     const searchBox = getByTestId(SEARCH_BAR_TEST_ID);
 
@@ -53,20 +66,12 @@ describe('SearchRow', () => {
     expect(mockDispatch).toHaveBeenCalled();
   });
 
-  it('should call the correct action when select a user', async () => {
-    const { getByTestId } = render(<SearchRow />);
-
-    const userSelect = getByTestId('comboBoxSearchInput');
-    userSelect.focus();
-
-    const option = await screen.findByText('test');
-    fireEvent.click(option);
-
-    expect(mockDispatch).toHaveBeenCalled();
-  });
-
   it('should call the correct action when select a value in the associated note dropdown', async () => {
-    const { getByTestId } = render(<SearchRow />);
+    const { getByTestId } = render(
+      <TestProviders>
+        <SearchRow />
+      </TestProviders>
+    );
 
     const associatedNoteSelect = getByTestId(ASSOCIATED_NOT_SELECT_TEST_ID);
     await userEvent.selectOptions(associatedNoteSelect, [AssociatedFilter.documentOnly]);

@@ -6,8 +6,10 @@
  */
 
 import * as rt from 'io-ts';
+import { limitedStringSchema, mimeTypeString } from '../../../schema';
 import { jsonValueRt } from '../../../api';
 import { UserRt } from '../user/v1';
+import { MAX_FILENAME_LENGTH } from '../../../constants';
 
 /**
  * Files
@@ -33,6 +35,11 @@ export const AttachmentAttributesBasicRt = rt.strict({
   pushed_by: rt.union([UserRt, rt.null]),
   updated_at: rt.union([rt.string, rt.null]),
   updated_by: rt.union([UserRt, rt.null]),
+});
+
+export const FileAttachmentMetadataPayloadRt = rt.strict({
+  mimeType: mimeTypeString,
+  filename: limitedStringSchema({ fieldName: 'filename', min: 1, max: MAX_FILENAME_LENGTH }),
 });
 
 /**

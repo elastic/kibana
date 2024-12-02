@@ -14,6 +14,7 @@ import {
   NOTES_COUNT_TEST_ID,
   NOTES_LOADING_TEST_ID,
   NOTES_TITLE_TEST_ID,
+  NOTES_VIEW_NOTES_BUTTON_TEST_ID,
 } from './test_ids';
 import { FETCH_NOTES_ERROR, Notes } from './notes';
 import { mockContextValue } from '../../shared/mocks/mock_context';
@@ -23,8 +24,11 @@ import type { Note } from '../../../../../common/api/timeline';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
 import { LeftPanelNotesTab } from '../../left';
+import { getEmptyValue } from '../../../../common/components/empty_value';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 jest.mock('@kbn/expandable-flyout');
+jest.mock('../../../../common/components/user_privileges');
 
 const mockAddError = jest.fn();
 jest.mock('../../../../common/hooks/use_app_toasts', () => ({
@@ -43,6 +47,13 @@ jest.mock('react-redux', () => {
 });
 
 describe('<Notes />', () => {
+  beforeEach(() => {
+    (useUserPrivileges as jest.Mock).mockReturnValue({
+      kibanaSecuritySolutionsPrivileges: { crud: true },
+    });
+    jest.clearAllMocks();
+  });
+
   it('should render loading spinner', () => {
     (useExpandableFlyoutApi as jest.Mock).mockReturnValue({ openLeftPanel: jest.fn() });
 
@@ -99,6 +110,34 @@ describe('<Notes />', () => {
     });
   });
 
+  it('should disabled the Add note button if in preview mode', () => {
+    const contextValue = {
+      ...mockContextValue,
+      isPreviewMode: true,
+    };
+
+    const mockOpenLeftPanel = jest.fn();
+    (useExpandableFlyoutApi as jest.Mock).mockReturnValue({ openLeftPanel: mockOpenLeftPanel });
+
+    const { getByTestId } = render(
+      <TestProviders>
+        <DocumentDetailsContext.Provider value={contextValue}>
+          <Notes />
+        </DocumentDetailsContext.Provider>
+      </TestProviders>
+    );
+
+    expect(mockDispatch).not.toHaveBeenCalled();
+
+    const button = getByTestId(NOTES_ADD_NOTE_BUTTON_TEST_ID);
+    expect(button).toBeInTheDocument();
+    expect(button).toBeDisabled();
+
+    button.click();
+
+    expect(mockOpenLeftPanel).not.toHaveBeenCalled();
+  });
+
   it('should render number of notes and plus button', () => {
     const mockOpenLeftPanel = jest.fn();
     (useExpandableFlyoutApi as jest.Mock).mockReturnValue({ openLeftPanel: mockOpenLeftPanel });
@@ -133,6 +172,38 @@ describe('<Notes />', () => {
         scopeId: mockContextValue.scopeId,
       },
     });
+  });
+
+  it('should disable the plus button if in preview mode', () => {
+    const mockOpenLeftPanel = jest.fn();
+    (useExpandableFlyoutApi as jest.Mock).mockReturnValue({ openLeftPanel: mockOpenLeftPanel });
+
+    const contextValue = {
+      ...mockContextValue,
+      eventId: '1',
+      isPreviewMode: true,
+    };
+
+    const { getByTestId } = render(
+      <TestProviders>
+        <DocumentDetailsContext.Provider value={contextValue}>
+          <Notes />
+        </DocumentDetailsContext.Provider>
+      </TestProviders>
+    );
+
+    expect(getByTestId(NOTES_COUNT_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(NOTES_COUNT_TEST_ID)).toHaveTextContent('1');
+
+    expect(mockDispatch).not.toHaveBeenCalled();
+
+    const button = getByTestId(NOTES_ADD_NOTE_ICON_BUTTON_TEST_ID);
+
+    expect(button).toBeInTheDocument();
+    button.click();
+    expect(button).toBeDisabled();
+
+    expect(mockOpenLeftPanel).not.toHaveBeenCalled();
   });
 
   it('should render number of notes in scientific notation for big numbers', () => {
@@ -180,6 +251,30 @@ describe('<Notes />', () => {
     expect(getByTestId(NOTES_COUNT_TEST_ID)).toHaveTextContent('1k');
   });
 
+  it('should show a - when in rule creation workflow', () => {
+    const contextValue = {
+      ...mockContextValue,
+      isPreview: true,
+    };
+
+    (useExpandableFlyoutApi as jest.Mock).mockReturnValue({ openLeftPanel: jest.fn() });
+
+    const { getByText, queryByTestId } = render(
+      <TestProviders>
+        <DocumentDetailsContext.Provider value={contextValue}>
+          <Notes />
+        </DocumentDetailsContext.Provider>
+      </TestProviders>
+    );
+
+    expect(mockDispatch).not.toHaveBeenCalled();
+
+    expect(queryByTestId(NOTES_ADD_NOTE_ICON_BUTTON_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByTestId(NOTES_ADD_NOTE_BUTTON_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByTestId(NOTES_COUNT_TEST_ID)).not.toBeInTheDocument();
+    expect(getByText(getEmptyValue())).toBeInTheDocument();
+  });
+
   it('should render toast error', () => {
     const store = createMockStore({
       ...mockGlobalState,
@@ -207,5 +302,70 @@ describe('<Notes />', () => {
     expect(mockAddError).toHaveBeenCalledWith(null, {
       title: FETCH_NOTES_ERROR,
     });
+  });
+
+  it('should show View note button if user does not have the correct privileges but notes have already been created', () => {
+    (useUserPrivileges as jest.Mock).mockReturnValue({
+      kibanaSecuritySolutionsPrivileges: { crud: false },
+    });
+
+    const mockOpenLeftPanel = jest.fn();
+    (useExpandableFlyoutApi as jest.Mock).mockReturnValue({ openLeftPanel: mockOpenLeftPanel });
+
+    const contextValue = {
+      ...mockContextValue,
+      eventId: '1',
+    };
+
+    const { getByTestId, queryByTestId } = render(
+      <TestProviders>
+        <DocumentDetailsContext.Provider value={contextValue}>
+          <Notes />
+        </DocumentDetailsContext.Provider>
+      </TestProviders>
+    );
+
+    expect(mockDispatch).toHaveBeenCalled();
+
+    expect(getByTestId(NOTES_COUNT_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(NOTES_COUNT_TEST_ID)).toHaveTextContent('1');
+
+    expect(queryByTestId(NOTES_ADD_NOTE_ICON_BUTTON_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByTestId(NOTES_ADD_NOTE_BUTTON_TEST_ID)).not.toBeInTheDocument();
+    const button = getByTestId(NOTES_VIEW_NOTES_BUTTON_TEST_ID);
+    expect(button).toBeInTheDocument();
+
+    button.click();
+
+    expect(mockOpenLeftPanel).toHaveBeenCalledWith({
+      id: DocumentDetailsLeftPanelKey,
+      path: { tab: LeftPanelNotesTab },
+      params: {
+        id: contextValue.eventId,
+        indexName: mockContextValue.indexName,
+        scopeId: mockContextValue.scopeId,
+      },
+    });
+  });
+
+  it('should show a - if user does not have the correct privileges and no notes have been created', () => {
+    (useUserPrivileges as jest.Mock).mockReturnValue({
+      kibanaSecuritySolutionsPrivileges: { crud: false },
+    });
+
+    const { getByText, queryByTestId } = render(
+      <TestProviders>
+        <DocumentDetailsContext.Provider value={mockContextValue}>
+          <Notes />
+        </DocumentDetailsContext.Provider>
+      </TestProviders>
+    );
+
+    expect(mockDispatch).toHaveBeenCalled();
+
+    expect(queryByTestId(NOTES_ADD_NOTE_ICON_BUTTON_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByTestId(NOTES_ADD_NOTE_BUTTON_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByTestId(NOTES_COUNT_TEST_ID)).not.toBeInTheDocument();
+    expect(getByText(getEmptyValue())).toBeInTheDocument();
   });
 });

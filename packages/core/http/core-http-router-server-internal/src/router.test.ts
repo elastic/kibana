@@ -50,10 +50,18 @@ describe('Router', () => {
           path: '/',
           validate: { body: validation, query: validation, params: validation },
           options: {
-            deprecated: true,
+            deprecated: {
+              documentationUrl: 'https://fake-url.com',
+              reason: { type: 'remove' },
+              severity: 'warning',
+            },
             discontinued: 'post test discontinued',
             summary: 'post test summary',
             description: 'post test description',
+            availability: {
+              since: '1.0.0',
+              stability: 'experimental',
+            },
           },
         },
         (context, req, res) => res.ok()
@@ -68,10 +76,18 @@ describe('Router', () => {
         validationSchemas: { body: validation, query: validation, params: validation },
         isVersioned: false,
         options: {
-          deprecated: true,
+          deprecated: {
+            documentationUrl: 'https://fake-url.com',
+            reason: { type: 'remove' },
+            severity: 'warning',
+          },
           discontinued: 'post test discontinued',
           summary: 'post test summary',
           description: 'post test description',
+          availability: {
+            since: '1.0.0',
+            stability: 'experimental',
+          },
         },
       });
     });
@@ -85,7 +101,7 @@ describe('Router', () => {
           validate: { body: validation, query: validation, params: validation },
         },
         (context, req, res) => res.ok(),
-        { isVersioned: true }
+        { isVersioned: true, events: false }
       );
       router.get(
         {
@@ -286,6 +302,23 @@ describe('Router', () => {
         )
       ).toThrowErrorMatchingInlineSnapshot(
         `"Expected a valid validation logic declared with '@kbn/config-schema' package, '@kbn/zod' package or a RouteValidationFunction at key: [params]."`
+      );
+    });
+
+    it('throws if route has security declared wrong', () => {
+      const router = new Router('', logger, enhanceWithContext, routerOptions);
+      expect(() =>
+        router.get(
+          // we use 'any' because validate requires valid Type or function usage
+          {
+            path: '/',
+            validate: false,
+            options: { security: { authz: { requiredPrivileges: [] } } } as any,
+          },
+          (context, req, res) => res.ok({})
+        )
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"\`options.security\` is not allowed in route config. Use \`security\` instead."`
       );
     });
 

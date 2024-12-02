@@ -120,7 +120,9 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(200);
         const { body } = await supertest
-          .get(`/api/fleet/agent_policies?kuery=ingest-agent-policies.name:TEST`)
+          .get(
+            `/api/fleet/agent_policies?kuery=ingest-agent-policies.name:TEST&withAgentCount=true`
+          )
           .set('kbn-xsrf', 'xxxx')
           .expect(200);
         expect(body.items.length).to.eql(1);

@@ -31,6 +31,11 @@ export const registerAlertStatusRoute = (
     .addVersion(
       {
         version: '1',
+        security: {
+          authz: {
+            requiredPrivileges: ['securitySolution'],
+          },
+        },
         validate: {
           request: {
             query: schema.object({

@@ -38,6 +38,7 @@ export function ConversationViewWithProps() {
           },
         })
       }
+      scopes={['observability']}
     />
   );
 }

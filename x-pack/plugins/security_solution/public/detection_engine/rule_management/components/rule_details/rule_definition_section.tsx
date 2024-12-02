@@ -27,6 +27,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { FilterItems } from '@kbn/unified-search-plugin/public';
 import type {
   AlertSuppressionMissingFieldsStrategy,
+  EqlOptionalFields,
   RequiredFieldArray,
   RuleResponse,
   Threshold as ThresholdType,
@@ -58,7 +59,12 @@ import {
   useRequiredFieldsStyles,
 } from './rule_definition_section.styles';
 import { getQueryLanguageLabel } from './helpers';
-import { useDefaultIndexPattern } from './use_default_index_pattern';
+import { useDefaultIndexPattern } from '../../hooks/use_default_index_pattern';
+import {
+  EQL_OPTIONS_EVENT_CATEGORY_FIELD_LABEL,
+  EQL_OPTIONS_EVENT_TIEBREAKER_FIELD_LABEL,
+  EQL_OPTIONS_EVENT_TIMESTAMP_FIELD_LABEL,
+} from '../../../rule_creation/components/eql_query_edit/translations';
 
 interface SavedQueryNameProps {
   savedQueryName: string;
@@ -179,15 +185,23 @@ interface ThresholdProps {
   threshold: ThresholdType;
 }
 
-export const Threshold = ({ threshold }: ThresholdProps) => (
-  <div data-test-subj="thresholdPropertyValue">
-    {isEmpty(threshold.field[0])
-      ? `${descriptionStepI18n.THRESHOLD_RESULTS_ALL} >= ${threshold.value}`
-      : `${descriptionStepI18n.THRESHOLD_RESULTS_AGGREGATED_BY} ${
-          Array.isArray(threshold.field) ? threshold.field.join(',') : threshold.field
-        } >= ${threshold.value}`}
-  </div>
-);
+export const Threshold = ({ threshold }: ThresholdProps) => {
+  let thresholdDescription = isEmpty(threshold.field[0])
+    ? `${descriptionStepI18n.THRESHOLD_RESULTS_ALL} >= ${threshold.value}`
+    : `${descriptionStepI18n.THRESHOLD_RESULTS_AGGREGATED_BY} ${
+        Array.isArray(threshold.field) ? threshold.field.join(',') : threshold.field
+      } >= ${threshold.value}`;
+
+  if (threshold.cardinality && threshold.cardinality.length > 0) {
+    thresholdDescription = descriptionStepI18n.THRESHOLD_CARDINALITY(
+      thresholdDescription,
+      threshold.cardinality[0].field,
+      threshold.cardinality[0].value
+    );
+  }
+
+  return <div data-test-subj="thresholdPropertyValue">{thresholdDescription}</div>;
+};
 
 interface AnomalyThresholdProps {
   anomalyThreshold: number;
@@ -560,6 +574,51 @@ const prepareDefinitionSectionListItems = (
         }
       );
     }
+  }
+
+  if ((rule as EqlOptionalFields).event_category_override) {
+    definitionSectionListItems.push({
+      title: (
+        <span data-test-subj="eqlOptionsEventCategoryOverrideTitle">
+          {EQL_OPTIONS_EVENT_CATEGORY_FIELD_LABEL}
+        </span>
+      ),
+      description: (
+        <span data-test-subj="eqlOptionsEventCategoryOverrideValue">
+          {(rule as EqlOptionalFields).event_category_override}
+        </span>
+      ),
+    });
+  }
+
+  if ((rule as EqlOptionalFields).tiebreaker_field) {
+    definitionSectionListItems.push({
+      title: (
+        <span data-test-subj="eqlOptionsTiebreakerFieldTitle">
+          {EQL_OPTIONS_EVENT_TIEBREAKER_FIELD_LABEL}
+        </span>
+      ),
+      description: (
+        <span data-test-subj="eqlOptionsEventTiebreakerFieldValue">
+          {(rule as EqlOptionalFields).tiebreaker_field}
+        </span>
+      ),
+    });
+  }
+
+  if ((rule as EqlOptionalFields).timestamp_field) {
+    definitionSectionListItems.push({
+      title: (
+        <span data-test-subj="eqlOptionsTimestampFieldTitle">
+          {EQL_OPTIONS_EVENT_TIMESTAMP_FIELD_LABEL}
+        </span>
+      ),
+      description: (
+        <span data-test-subj="eqlOptionsTimestampFieldValue">
+          {(rule as EqlOptionalFields).timestamp_field}
+        </span>
+      ),
+    });
   }
 
   if (rule.type) {

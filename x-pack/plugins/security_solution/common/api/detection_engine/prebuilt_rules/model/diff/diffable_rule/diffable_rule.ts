@@ -9,7 +9,6 @@ import { z } from '@kbn/zod';
 import {
   AlertSuppression,
   AnomalyThreshold,
-  EventCategoryOverride,
   HistoryWindowStart,
   InvestigationFields,
   InvestigationGuide,
@@ -21,11 +20,8 @@ import {
   RequiredFieldArray,
   RiskScore,
   RiskScoreMapping,
-  RuleAuthorArray,
   RuleDescription,
-  RuleExceptionList,
   RuleFalsePositiveArray,
-  RuleLicense,
   RuleName,
   RuleReferenceArray,
   RuleSignatureId,
@@ -40,8 +36,6 @@ import {
   ThreatMapping,
   Threshold,
   ThresholdAlertSuppression,
-  TiebreakerField,
-  TimestampField,
 } from '../../../../model/rule_schema';
 
 import {
@@ -82,12 +76,9 @@ export const DiffableCommonFields = z.object({
   setup: SetupGuide,
   related_integrations: RelatedIntegrationArray,
   required_fields: RequiredFieldArray,
-  author: RuleAuthorArray,
-  license: RuleLicense,
 
   // Other domain fields
   rule_schedule: RuleSchedule, // NOTE: new field
-  exceptions_list: z.array(RuleExceptionList),
   max_signals: MaxSignals,
 
   // Optional fields
@@ -119,9 +110,6 @@ export const DiffableEqlFields = z.object({
   type: z.literal('eql'),
   eql_query: RuleEqlQuery, // NOTE: new field
   data_source: RuleDataSource.optional(), // NOTE: new field
-  event_category_override: EventCategoryOverride.optional(),
-  timestamp_field: TimestampField.optional(),
-  tiebreaker_field: TiebreakerField.optional(),
   alert_suppression: AlertSuppression.optional(),
 });
 

@@ -48,11 +48,13 @@ import {
   updateLatestExecutedState,
   cleanupLatestExecutedState,
   cleanUpKibanaAssetsStep,
+  cleanUpUnusedKibanaAssetsStep,
   cleanupILMPoliciesStep,
   cleanUpMlModelStep,
   cleanupIndexTemplatePipelinesStep,
   cleanupTransformsStep,
   cleanupArchiveEntriesStep,
+  stepInstallKibanaAssetsWithStreaming,
 } from './steps';
 import type { StateMachineDefinition, StateMachineStates } from './state_machine';
 import { handleState } from './state_machine';
@@ -73,6 +75,7 @@ export interface InstallContext extends StateContext<StateNames> {
   skipDataStreamRollover?: boolean;
   retryFromLastState?: boolean;
   initialState?: INSTALL_STATES;
+  useStreaming?: boolean;
 
   indexTemplates?: IndexTemplateEntry[];
   packageAssetRefs?: PackageAssetReference[];
@@ -83,7 +86,7 @@ export interface InstallContext extends StateContext<StateNames> {
 /**
  * This data structure defines the sequence of the states and the transitions
  */
-const statesDefinition: StateMachineStates<StateNames> = {
+const regularStatesDefinition: StateMachineStates<StateNames> = {
   create_restart_installation: {
     nextState: INSTALL_STATES.INSTALL_KIBANA_ASSETS,
     onTransition: stepCreateRestartInstallation,
@@ -152,6 +155,31 @@ const statesDefinition: StateMachineStates<StateNames> = {
   },
 };
 
+const streamingStatesDefinition: StateMachineStates<string> = {
+  create_restart_installation: {
+    nextState: INSTALL_STATES.INSTALL_KIBANA_ASSETS,
+    onTransition: stepCreateRestartInstallation,
+    onPostTransition: updateLatestExecutedState,
+  },
+  install_kibana_assets: {
+    onTransition: stepInstallKibanaAssetsWithStreaming,
+    nextState: INSTALL_STATES.SAVE_ARCHIVE_ENTRIES,
+    onPostTransition: updateLatestExecutedState,
+  },
+  save_archive_entries_from_assets_map: {
+    onPreTransition: cleanupArchiveEntriesStep,
+    onTransition: stepSaveArchiveEntries,
+    nextState: INSTALL_STATES.UPDATE_SO,
+    onPostTransition: updateLatestExecutedState,
+  },
+  update_so: {
+    onPreTransition: cleanUpUnusedKibanaAssetsStep,
+    onTransition: stepSaveSystemObject,
+    nextState: 'end',
+    onPostTransition: updateLatestExecutedState,
+  },
+};
+
 /*
  * _stateMachineInstallPackage installs packages using the generic state machine in ./state_machine
  * installStates is the data structure providing the state machine definition
@@ -165,6 +193,10 @@ export async function _stateMachineInstallPackage(
   const { installedPkg, retryFromLastState, force } = context;
   const logger = appContextService.getLogger();
   let initialState = INSTALL_STATES.CREATE_RESTART_INSTALLATION;
+
+  const statesDefinition = context.useStreaming
+    ? streamingStatesDefinition
+    : regularStatesDefinition;
 
   // if retryFromLastState, restart install from last install state
   // if force is passed, the install should be executed from the beginning

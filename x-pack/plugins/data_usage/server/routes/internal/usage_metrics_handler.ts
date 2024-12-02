@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { chunk } from 'lodash/fp';
 import { RequestHandler } from '@kbn/core/server';
-import { IndicesGetDataStreamResponse } from '@elastic/elasticsearch/lib/api/types';
-import {
+import { momentDateParser } from '../../../common/utils';
+import type {
   MetricTypes,
-  UsageMetricsAutoOpsResponseSchema,
   UsageMetricsAutoOpsResponseSchemaBody,
   UsageMetricsRequestBody,
   UsageMetricsResponseSchemaBody,
@@ -18,6 +18,7 @@ import { DataUsageContext, DataUsageRequestHandlerContext } from '../../types';
 
 import { errorHandler } from '../error_handler';
 import { CustomHttpRequestError } from '../../utils';
+import { DataUsageService } from '../../services';
 
 const formatStringParams = <T extends string>(value: T | T[]): T[] | MetricTypes[] =>
   typeof value === 'string' ? [value] : value;
@@ -26,15 +27,30 @@ export const getUsageMetricsHandler = (
   dataUsageContext: DataUsageContext
 ): RequestHandler<never, unknown, UsageMetricsRequestBody, DataUsageRequestHandlerContext> => {
   const logger = dataUsageContext.logFactory.get('usageMetricsRoute');
-
   return async (context, request, response) => {
     try {
       const core = await context.core;
+
       const esClient = core.elasticsearch.client.asCurrentUser;
+      const getDataStreams = (name: string[]) =>
+        esClient.indices.getDataStream({ name, expand_wildcards: 'all' });
 
       logger.debug(`Retrieving usage metrics`);
       const { from, to, metricTypes, dataStreams: requestDsNames } = request.body;
 
+      // parse date strings to validate
+      const parsedFrom = momentDateParser(from)?.toISOString();
+      const parsedTo = momentDateParser(to)?.toISOString();
+
+      if (!parsedFrom || !parsedTo) {
+        const customErrorMessage = `[request body.${
+          !parsedTo ? 'to' : 'from'
+        }] Invalid date range ${!parsedTo ? to : from} is out of range`;
+        return errorHandler(logger, response, new CustomHttpRequestError(customErrorMessage, 400));
+      }
+
+      // redundant check as we don't allow making requests via UI without data streams,
+      // but it's here to make sure the request body is validated before requesting metrics from auto-ops
       if (!requestDsNames?.length) {
         return errorHandler(
           logger,
@@ -43,15 +59,35 @@ export const getUsageMetricsHandler = (
         );
       }
 
-      const { data_streams: dataStreamsResponse }: IndicesGetDataStreamResponse =
-        await esClient.indices.getDataStream({
-          name: requestDsNames,
-          expand_wildcards: 'all',
-        });
+      let dataStreamsResponse: Array<{ name: string }>;
 
-      const metrics = await fetchMetricsFromAutoOps({
-        from,
-        to,
+      try {
+        if (requestDsNames.length <= 50) {
+          logger.debug(`Retrieving usage metrics`);
+          const { data_streams: dataStreams } = await getDataStreams(requestDsNames);
+          dataStreamsResponse = dataStreams;
+        } else {
+          logger.debug(`Retrieving usage metrics in chunks of 50`);
+          // Attempt to fetch data streams in chunks of 50
+          const dataStreamsChunks = Math.ceil(requestDsNames.length / 50);
+          const chunkedDsLists = chunk(dataStreamsChunks, requestDsNames);
+          const chunkedDataStreams = await Promise.all(
+            chunkedDsLists.map((dsList) => getDataStreams(dsList))
+          );
+          dataStreamsResponse = chunkedDataStreams.flatMap((ds) => ds.data_streams);
+        }
+      } catch (error) {
+        return errorHandler(
+          logger,
+          response,
+          new CustomHttpRequestError('Failed to retrieve data streams', 400)
+        );
+      }
+
+      const dataUsageService = new DataUsageService(logger);
+      const metrics = await dataUsageService.getMetrics({
+        from: parsedFrom,
+        to: parsedTo,
         metricTypes: formatStringParams(metricTypes) as MetricTypes[],
         dataStreams: formatStringParams(dataStreamsResponse.map((ds) => ds.name)),
       });
@@ -68,175 +104,19 @@ export const getUsageMetricsHandler = (
   };
 };
 
-const fetchMetricsFromAutoOps = async ({
-  from,
-  to,
-  metricTypes,
-  dataStreams,
-}: {
-  from: string;
-  to: string;
-  metricTypes: MetricTypes[];
-  dataStreams: string[];
-}) => {
-  // TODO: fetch data from autoOps using userDsNames
-  /*
-    const response = await axios.post({AUTOOPS_URL}, {
-      from: Date.parse(from),
-      to: Date.parse(to),
-      metric_types: metricTypes,
-      allowed_indices: dataStreams,
-    });
-    const { data } = response;*/
-  // mock data from autoOps https://github.com/elastic/autoops-services/blob/master/monitoring/service/specs/serverless_project_metrics_api.yaml
-  const mockData = {
-    metrics: {
-      ingest_rate: [
-        {
-          name: 'metrics-apache_spark.driver-default',
-          data: [
-            [1726858530000, 13756849],
-            [1726862130000, 14657904],
-            [1726865730000, 12798561],
-            [1726869330000, 13578213],
-            [1726872930000, 14123495],
-            [1726876530000, 13876548],
-            [1726880130000, 12894561],
-            [1726883730000, 14478953],
-            [1726887330000, 14678905],
-            [1726890930000, 13976547],
-            [1726894530000, 14568945],
-            [1726898130000, 13789561],
-            [1726901730000, 14478905],
-            [1726905330000, 13956423],
-            [1726908930000, 14598234],
-          ],
-        },
-        {
-          name: 'logs-apm.app.adservice-default',
-          data: [
-            [1726858530000, 12894623],
-            [1726862130000, 14436905],
-            [1726865730000, 13794805],
-            [1726869330000, 14048532],
-            [1726872930000, 14237495],
-            [1726876530000, 13745689],
-            [1726880130000, 13974562],
-            [1726883730000, 14234653],
-            [1726887330000, 14323479],
-            [1726890930000, 14023945],
-            [1726894530000, 14189673],
-            [1726898130000, 14247895],
-            [1726901730000, 14098324],
-            [1726905330000, 14478905],
-            [1726908930000, 14323894],
-          ],
-        },
-        {
-          name: 'metrics-apm.app.aws-lambdas-default',
-          data: [
-            [1726858530000, 12576413],
-            [1726862130000, 13956423],
-            [1726865730000, 14568945],
-            [1726869330000, 14234856],
-            [1726872930000, 14368942],
-            [1726876530000, 13897654],
-            [1726880130000, 14456989],
-            [1726883730000, 14568956],
-            [1726887330000, 13987562],
-            [1726890930000, 14567894],
-            [1726894530000, 14246789],
-            [1726898130000, 14567895],
-            [1726901730000, 14457896],
-            [1726905330000, 14567895],
-            [1726908930000, 13989456],
-          ],
-        },
-      ],
-      storage_retained: [
-        {
-          name: 'metrics-apache_spark.driver-default',
-          data: [
-            [1726858530000, 12576413],
-            [1726862130000, 13956423],
-            [1726865730000, 14568945],
-            [1726869330000, 14234856],
-            [1726872930000, 14368942],
-            [1726876530000, 13897654],
-            [1726880130000, 14456989],
-            [1726883730000, 14568956],
-            [1726887330000, 13987562],
-            [1726890930000, 14567894],
-            [1726894530000, 14246789],
-            [1726898130000, 14567895],
-            [1726901730000, 14457896],
-            [1726905330000, 14567895],
-            [1726908930000, 13989456],
-          ],
-        },
-        {
-          name: 'logs-apm.app.adservice-default',
-          data: [
-            [1726858530000, 12894623],
-            [1726862130000, 14436905],
-            [1726865730000, 13794805],
-            [1726869330000, 14048532],
-            [1726872930000, 14237495],
-            [1726876530000, 13745689],
-            [1726880130000, 13974562],
-            [1726883730000, 14234653],
-            [1726887330000, 14323479],
-            [1726890930000, 14023945],
-            [1726894530000, 14189673],
-            [1726898130000, 14247895],
-            [1726901730000, 14098324],
-            [1726905330000, 14478905],
-            [1726908930000, 14323894],
-          ],
-        },
-        {
-          name: 'metrics-apm.app.aws-lambdas-default',
-          data: [
-            [1726858530000, 12576413],
-            [1726862130000, 13956423],
-            [1726865730000, 14568945],
-            [1726869330000, 14234856],
-            [1726872930000, 14368942],
-            [1726876530000, 13897654],
-            [1726880130000, 14456989],
-            [1726883730000, 14568956],
-            [1726887330000, 13987562],
-            [1726890930000, 14567894],
-            [1726894530000, 14246789],
-            [1726898130000, 14567895],
-            [1726901730000, 14457896],
-            [1726905330000, 14567895],
-            [1726908930000, 13989456],
-          ],
-        },
-      ],
-    },
-  };
-  // Make sure data is what we expect
-  const validatedData = UsageMetricsAutoOpsResponseSchema.body().validate(mockData);
-
-  return validatedData;
-};
-function transformMetricsData(
+export function transformMetricsData(
   data: UsageMetricsAutoOpsResponseSchemaBody
 ): UsageMetricsResponseSchemaBody {
-  return {
-    metrics: Object.fromEntries(
-      Object.entries(data.metrics).map(([metricType, series]) => [
-        metricType,
-        series.map((metricSeries) => ({
-          name: metricSeries.name,
-          data: (metricSeries.data as Array<[number, number]>).map(([timestamp, value]) => ({
-            x: timestamp,
-            y: value,
-          })),
+  return Object.fromEntries(
+    Object.entries(data).map(([metricType, series]) => [
+      metricType,
+      series.map((metricSeries) => ({
+        name: metricSeries.name,
+        data: (metricSeries.data as Array<[number, number]>).map(([timestamp, value]) => ({
+          x: timestamp,
+          y: value,
         })),
-      ])
-    ),
-  };
+      })),
+    ])
+  ) as UsageMetricsResponseSchemaBody;
 }

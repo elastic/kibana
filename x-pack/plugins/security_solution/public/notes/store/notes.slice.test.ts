@@ -38,7 +38,7 @@ import {
   selectNotesTableSort,
   selectSortedNotesByDocumentId,
   selectSortedNotesBySavedObjectId,
-  selectNotesTableUserFilters,
+  selectNotesTableCreatedByFilter,
   selectNotesTableAssociatedFilter,
   userClosedDeleteModal,
   userFilteredNotes,
@@ -49,7 +49,7 @@ import {
   userSelectedRow,
   userSelectedNotesForDeletion,
   userSortedNotes,
-  userFilterUsers,
+  userFilterCreatedBy,
   userClosedCreateErrorToast,
   userFilterAssociatedNotes,
 } from './notes.slice';
@@ -104,7 +104,7 @@ const initialNonEmptyState: NotesState = {
     direction: 'desc' as const,
   },
   filter: '',
-  userFilter: '',
+  createdByFilter: '',
   associatedFilter: AssociatedFilter.all,
   search: '',
   selectedIds: [],
@@ -508,13 +508,13 @@ describe('notesSlice', () => {
       });
     });
 
-    describe('userFilterUsers', () => {
+    describe('userFilterCreatedBy', () => {
       it('should set correct value to filter users', () => {
-        const action = { type: userFilterUsers.type, payload: 'abc' };
+        const action = { type: userFilterCreatedBy.type, payload: 'abc' };
 
         expect(notesReducer(initalEmptyState, action)).toEqual({
           ...initalEmptyState,
-          userFilter: 'abc',
+          createdByFilter: 'abc',
         });
       });
     });
@@ -866,12 +866,12 @@ describe('notesSlice', () => {
       expect(selectNotesTableSearch(state)).toBe('test search');
     });
 
-    it('should select user filter', () => {
+    it('should select createdBy filter', () => {
       const state = {
         ...mockGlobalState,
-        notes: { ...initialNotesState, userFilter: 'abc' },
+        notes: { ...initialNotesState, createdByFilter: 'abc' },
       };
-      expect(selectNotesTableUserFilters(state)).toBe('abc');
+      expect(selectNotesTableCreatedByFilter(state)).toBe('abc');
     });
 
     it('should select associated filter', () => {

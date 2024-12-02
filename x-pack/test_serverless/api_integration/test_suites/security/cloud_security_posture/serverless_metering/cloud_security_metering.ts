@@ -43,8 +43,7 @@ export default function (providerContext: FtrProviderContext) {
   The task manager is running by default in security serverless project in the background and sending usage API requests to the usage API.
    This test mocks the usage API server and intercepts the usage API request sent by the metering background task manager.
   */
-  // FLAKY: https://github.com/elastic/kibana/issues/188829
-  describe.skip('Intercept the usage API request sent by the metering background task manager', function () {
+  describe('Intercept the usage API request sent by the metering background task manager', function () {
     this.tags(['skipMKI']);
 
     let mockUsageApiServer: http.Server;
@@ -118,16 +117,15 @@ export default function (providerContext: FtrProviderContext) {
 
       let interceptedRequestBody: UsageRecord[] = [];
       await retry.try(async () => {
-        interceptedRequestBody = getInterceptedRequestPayload();
-        expect(interceptedRequestBody.length).to.greaterThan(0);
         if (interceptedRequestBody.length > 0) {
+          interceptedRequestBody = getInterceptedRequestPayload();
+          expect(interceptedRequestBody.length).to.greaterThan(0);
           const usageSubTypes = interceptedRequestBody.map((record) => record.usage.sub_type);
           expect(usageSubTypes).to.contain('cspm');
+          expect(interceptedRequestBody[0].usage.type).to.be('cloud_security');
+          expect(interceptedRequestBody[0].usage.quantity).to.be(billableFindings.length);
         }
       });
-
-      expect(interceptedRequestBody[0].usage.type).to.be('cloud_security');
-      expect(interceptedRequestBody[0].usage.quantity).to.be(billableFindings.length);
     });
 
     it('Should intercept usage API request for KSPM', async () => {
@@ -159,16 +157,15 @@ export default function (providerContext: FtrProviderContext) {
       let interceptedRequestBody: UsageRecord[] = [];
 
       await retry.try(async () => {
-        interceptedRequestBody = getInterceptedRequestPayload();
-        expect(interceptedRequestBody.length).to.greaterThan(0);
         if (interceptedRequestBody.length > 0) {
+          interceptedRequestBody = getInterceptedRequestPayload();
+          expect(interceptedRequestBody.length).to.greaterThan(0);
           const usageSubTypes = interceptedRequestBody.map((record) => record.usage.sub_type);
           expect(usageSubTypes).to.contain('kspm');
+          expect(interceptedRequestBody[0].usage.type).to.be('cloud_security');
+          expect(interceptedRequestBody[0].usage.quantity).to.be(billableFindings.length);
         }
       });
-
-      expect(interceptedRequestBody[0].usage.type).to.be('cloud_security');
-      expect(interceptedRequestBody[0].usage.quantity).to.be(billableFindings.length);
     });
 
     it('Should intercept usage API request for CNVM', async () => {
@@ -199,11 +196,10 @@ export default function (providerContext: FtrProviderContext) {
         if (interceptedRequestBody.length > 0) {
           const usageSubTypes = interceptedRequestBody.map((record) => record.usage.sub_type);
           expect(usageSubTypes).to.contain('cnvm');
+          expect(interceptedRequestBody[0].usage.type).to.be('cloud_security');
+          expect(interceptedRequestBody[0].usage.quantity).to.be(billableFindings.length);
         }
       });
-
-      expect(interceptedRequestBody[0].usage.type).to.be('cloud_security');
-      expect(interceptedRequestBody[0].usage.quantity).to.be(billableFindings.length);
     });
 
     it('Should intercept usage API request for Defend for Containers', async () => {
@@ -237,11 +233,10 @@ export default function (providerContext: FtrProviderContext) {
         if (interceptedRequestBody.length > 0) {
           const usageSubTypes = interceptedRequestBody.map((record) => record.usage.sub_type);
           expect(usageSubTypes).to.contain('cloud_defend');
+          expect(interceptedRequestBody.length).to.be(blockActionEnabledHeartbeats.length);
+          expect(interceptedRequestBody[0].usage.type).to.be('cloud_security');
         }
       });
-
-      expect(interceptedRequestBody.length).to.be(blockActionEnabledHeartbeats.length);
-      expect(interceptedRequestBody[0].usage.type).to.be('cloud_security');
     });
 
     it('Should intercept usage API request with all integrations usage records', async () => {
@@ -329,18 +324,17 @@ export default function (providerContext: FtrProviderContext) {
         expect(usageSubTypes).to.contain('kspm');
         expect(usageSubTypes).to.contain('cnvm');
         expect(usageSubTypes).to.contain('cloud_defend');
+        const totalUsageQuantity = interceptedRequestBody.reduce(
+          (acc, record) => acc + record.usage.quantity,
+          0
+        );
+        expect(totalUsageQuantity).to.be(
+          billableFindingsCSPM.length +
+            billableFindingsKSPM.length +
+            billableFindingsCNVM.length +
+            blockActionEnabledHeartbeats.length
+        );
       });
-
-      const totalUsageQuantity = interceptedRequestBody.reduce(
-        (acc, record) => acc + record.usage.quantity,
-        0
-      );
-      expect(totalUsageQuantity).to.be(
-        billableFindingsCSPM.length +
-          billableFindingsKSPM.length +
-          billableFindingsCNVM.length +
-          blockActionEnabledHeartbeats.length
-      );
     });
   });
 }

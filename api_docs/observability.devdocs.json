@@ -2863,6 +2863,27 @@
             "path": "x-pack/plugins/observability_solution/observability/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.ObservabilityPublicPluginsSetup.streams",
+            "type": "Object",
+            "tags": [],
+            "label": "streams",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "streams",
+                "scope": "public",
+                "docId": "kibStreamsPluginApi",
+                "section": "def-public.StreamsPluginSetup",
+                "text": "StreamsPluginSetup"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3813,6 +3834,27 @@
             "path": "x-pack/plugins/observability_solution/observability/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.ObservabilityPublicPluginsStart.streams",
+            "type": "Object",
+            "tags": [],
+            "label": "streams",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "streams",
+                "scope": "public",
+                "docId": "kibStreamsPluginApi",
+                "section": "def-public.StreamsPluginStart",
+                "text": "StreamsPluginStart"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4541,36 +4583,6 @@
         "description": [],
         "signature": [
           "\"observability:enableComparisonByDefault\""
-        ],
-        "path": "x-pack/plugins/observability_solution/observability/common/ui_settings_keys.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
-        "id": "def-public.enableInfrastructureContainerAssetView",
-        "type": "string",
-        "tags": [],
-        "label": "enableInfrastructureContainerAssetView",
-        "description": [],
-        "signature": [
-          "\"observability:enableInfrastructureContainerAssetView\""
-        ],
-        "path": "x-pack/plugins/observability_solution/observability/common/ui_settings_keys.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
-        "id": "def-public.enableInfrastructureHostsView",
-        "type": "string",
-        "tags": [],
-        "label": "enableInfrastructureHostsView",
-        "description": [],
-        "signature": [
-          "\"observability:enableInfrastructureHostsView\""
         ],
         "path": "x-pack/plugins/observability_solution/observability/common/ui_settings_keys.ts",
         "deprecated": false,
@@ -8622,13 +8634,27 @@
         "children": [
           {
             "parentPluginId": "observability",
-            "id": "def-server.ObservabilityRouteCreateOptions.options",
-            "type": "Object",
+            "id": "def-server.ObservabilityRouteCreateOptions.tags",
+            "type": "Array",
             "tags": [],
-            "label": "options",
+            "label": "tags",
             "description": [],
             "signature": [
-              "{ tags: string[]; access?: \"internal\" | \"public\" | undefined; }"
+              "string[] | undefined"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability/server/routes/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-server.ObservabilityRouteCreateOptions.access",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "access",
+            "description": [],
+            "signature": [
+              "\"internal\" | \"public\" | undefined"
             ],
             "path": "x-pack/plugins/observability_solution/observability/server/routes/types.ts",
             "deprecated": false,
@@ -8747,20 +8773,6 @@
             "path": "x-pack/plugins/observability_solution/observability/server/routes/types.ts",
             "deprecated": false,
             "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-server.ObservabilityRouteHandlerResources.config",
-            "type": "Object",
-            "tags": [],
-            "label": "config",
-            "description": [],
-            "signature": [
-              "{ readonly enabled: boolean; readonly annotations: Readonly<{} & { index: string; enabled: boolean; }>; readonly unsafe: Readonly<{} & { alertDetails: Readonly<{} & { uptime: Readonly<{} & { enabled: boolean; }>; observability: Readonly<{} & { enabled: boolean; }>; metrics: Readonly<{} & { enabled: boolean; }>; logs: Readonly<{} & { enabled: boolean; }>; }>; thresholdRule: Readonly<{} & { enabled: boolean; }>; ruleFormV2: Readonly<{} & { enabled: boolean; }>; }>; readonly customThresholdRule: Readonly<{} & { groupByPageSize: number; }>; readonly createO11yGenericFeatureId: boolean; }"
-            ],
-            "path": "x-pack/plugins/observability_solution/observability/server/routes/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -8792,7 +8804,15 @@
             "section": "def-common.RouteParamsRT",
             "text": "RouteParamsRT"
           },
-          " | undefined, any, any, Record<string, any>>; }"
+          " | undefined, any, any, ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRouteCreateOptions",
+            "text": "ServerRouteCreateOptions"
+          },
+          " | undefined>; }"
         ],
         "path": "x-pack/plugins/observability_solution/observability/server/routes/types.ts",
         "deprecated": false,
@@ -8952,15 +8972,7 @@
             "section": "def-common.ServerRoute",
             "text": "ServerRoute"
           },
-          "<any, any, any, infer TReturnType extends ServerRouteHandlerReturnType, ",
-          {
-            "pluginId": "@kbn/server-route-repository-utils",
-            "scope": "common",
-            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
-            "section": "def-common.ServerRouteCreateOptions",
-            "text": "ServerRouteCreateOptions"
-          },
-          "> ? TReturnType extends ",
+          "<any, any, any, infer TReturnType extends ServerRouteHandlerReturnType, any> ? TReturnType extends ",
           {
             "pluginId": "@kbn/core-http-server",
             "scope": "server",
@@ -9115,9 +9127,9 @@
           "ExplainExplanation",
           " | undefined; fields?: Record<string, any> | undefined; highlight?: Record<string, string[]> | undefined; inner_hits?: Record<string, ",
           "SearchInnerHitsResult",
-          "> | undefined; matched_queries?: string[] | undefined; _nested?: ",
+          "> | undefined; matched_queries?: string[] | Record<string, number> | undefined; _nested?: ",
           "SearchNestedIdentity",
-          " | undefined; _ignored?: string[] | undefined; ignored_field_values?: Record<string, string[]> | undefined; _shard?: string | undefined; _node?: string | undefined; _routing?: string | undefined; _rank?: number | undefined; _seq_no?: number | undefined; _primary_term?: number | undefined; _version?: number | undefined; sort?: ",
+          " | undefined; _ignored?: string[] | undefined; ignored_field_values?: Record<string, any[]> | undefined; _shard?: string | undefined; _node?: string | undefined; _routing?: string | undefined; _rank?: number | undefined; _seq_no?: number | undefined; _primary_term?: number | undefined; _version?: number | undefined; sort?: ",
           "SortResults",
           " | undefined; }>; find: (findParams: { query?: string | undefined; start?: string | undefined; end?: string | undefined; sloId?: string | undefined; sloInstanceId?: string | undefined; serviceName?: string | undefined; filter?: string | undefined; size?: number | undefined; }) => Promise<{ items: { id: string | undefined; annotation: { title: string; type?: string | undefined; style?: { icon?: string | undefined; color?: string | undefined; line?: { width?: number | undefined; style?: \"dashed\" | \"solid\" | \"dotted\" | undefined; iconPosition?: \"top\" | \"bottom\" | undefined; textDecoration?: \"none\" | \"name\" | undefined; } | undefined; rect?: { fill?: \"inside\" | \"outside\" | undefined; } | undefined; } | undefined; }; '@timestamp': string; message: string; event?: ({ start: string; } & { end?: string | undefined; }) | undefined; tags?: string[] | undefined; service?: { name?: string | undefined; environment?: string | undefined; version?: string | undefined; } | undefined; monitor?: { id?: string | undefined; } | undefined; slo?: ({ id: string; } & { instanceId?: string | undefined; }) | undefined; host?: { name?: string | undefined; } | undefined; }[]; total: number; }>; delete: (deleteParams: { id: string; }) => Promise<",
           "DeleteByQueryResponse",
@@ -10237,174 +10249,6 @@
                 "description": [],
                 "signature": [
                   "\"boolean\""
-                ],
-                "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-server.uiSettings.enableInfrastructureHostsView",
-            "type": "Object",
-            "tags": [],
-            "label": "[enableInfrastructureHostsView]",
-            "description": [],
-            "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.enableInfrastructureHostsView.category",
-                "type": "Array",
-                "tags": [],
-                "label": "category",
-                "description": [],
-                "signature": [
-                  "string[]"
-                ],
-                "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.enableInfrastructureHostsView.name",
-                "type": "string",
-                "tags": [],
-                "label": "name",
-                "description": [],
-                "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.enableInfrastructureHostsView.value",
-                "type": "boolean",
-                "tags": [],
-                "label": "value",
-                "description": [],
-                "signature": [
-                  "true"
-                ],
-                "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.enableInfrastructureHostsView.description",
-                "type": "string",
-                "tags": [],
-                "label": "description",
-                "description": [],
-                "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.enableInfrastructureHostsView.schema",
-                "type": "Object",
-                "tags": [],
-                "label": "schema",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/config-schema",
-                    "scope": "common",
-                    "docId": "kibKbnConfigSchemaPluginApi",
-                    "section": "def-common.Type",
-                    "text": "Type"
-                  },
-                  "<boolean>"
-                ],
-                "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-server.uiSettings.enableInfrastructureContainerAssetView",
-            "type": "Object",
-            "tags": [],
-            "label": "[enableInfrastructureContainerAssetView]",
-            "description": [],
-            "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.enableInfrastructureContainerAssetView.category",
-                "type": "Array",
-                "tags": [],
-                "label": "category",
-                "description": [],
-                "signature": [
-                  "string[]"
-                ],
-                "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.enableInfrastructureContainerAssetView.name",
-                "type": "string",
-                "tags": [],
-                "label": "name",
-                "description": [],
-                "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.enableInfrastructureContainerAssetView.value",
-                "type": "boolean",
-                "tags": [],
-                "label": "value",
-                "description": [],
-                "signature": [
-                  "true"
-                ],
-                "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.enableInfrastructureContainerAssetView.description",
-                "type": "string",
-                "tags": [],
-                "label": "description",
-                "description": [],
-                "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observability",
-                "id": "def-server.uiSettings.enableInfrastructureContainerAssetView.schema",
-                "type": "Object",
-                "tags": [],
-                "label": "schema",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/config-schema",
-                    "scope": "common",
-                    "docId": "kibKbnConfigSchemaPluginApi",
-                    "section": "def-common.Type",
-                    "text": "Type"
-                  },
-                  "<boolean>"
                 ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
@@ -13015,9 +12859,9 @@
         "ExplainExplanation",
         " | undefined; fields?: Record<string, any> | undefined; highlight?: Record<string, string[]> | undefined; inner_hits?: Record<string, ",
         "SearchInnerHitsResult",
-        "> | undefined; matched_queries?: string[] | undefined; _nested?: ",
+        "> | undefined; matched_queries?: string[] | Record<string, number> | undefined; _nested?: ",
         "SearchNestedIdentity",
-        " | undefined; _ignored?: string[] | undefined; ignored_field_values?: Record<string, string[]> | undefined; _shard?: string | undefined; _node?: string | undefined; _routing?: string | undefined; _rank?: number | undefined; _seq_no?: number | undefined; _primary_term?: number | undefined; _version?: number | undefined; sort?: ",
+        " | undefined; _ignored?: string[] | undefined; ignored_field_values?: Record<string, any[]> | undefined; _shard?: string | undefined; _node?: string | undefined; _routing?: string | undefined; _rank?: number | undefined; _seq_no?: number | undefined; _primary_term?: number | undefined; _version?: number | undefined; sort?: ",
         "SortResults",
         " | undefined; }>; find: (findParams: { query?: string | undefined; start?: string | undefined; end?: string | undefined; sloId?: string | undefined; sloInstanceId?: string | undefined; serviceName?: string | undefined; filter?: string | undefined; size?: number | undefined; }) => Promise<{ items: { id: string | undefined; annotation: { title: string; type?: string | undefined; style?: { icon?: string | undefined; color?: string | undefined; line?: { width?: number | undefined; style?: \"dashed\" | \"solid\" | \"dotted\" | undefined; iconPosition?: \"top\" | \"bottom\" | undefined; textDecoration?: \"none\" | \"name\" | undefined; } | undefined; rect?: { fill?: \"inside\" | \"outside\" | undefined; } | undefined; } | undefined; }; '@timestamp': string; message: string; event?: ({ start: string; } & { end?: string | undefined; }) | undefined; tags?: string[] | undefined; service?: { name?: string | undefined; environment?: string | undefined; version?: string | undefined; } | undefined; monitor?: { id?: string | undefined; } | undefined; slo?: ({ id: string; } & { instanceId?: string | undefined; }) | undefined; host?: { name?: string | undefined; } | undefined; }[]; total: number; }>; delete: (deleteParams: { id: string; }) => Promise<",
         "DeleteByQueryResponse",
@@ -14431,11 +14275,29 @@
         "parentPluginId": "observability",
         "id": "def-common.casesFeatureId",
         "type": "string",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "casesFeatureId",
         "description": [],
         "signature": [
           "\"observabilityCases\""
+        ],
+        "path": "x-pack/plugins/observability_solution/observability/common/index.ts",
+        "deprecated": true,
+        "trackAdoption": false,
+        "references": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-common.casesFeatureIdV2",
+        "type": "string",
+        "tags": [],
+        "label": "casesFeatureIdV2",
+        "description": [],
+        "signature": [
+          "\"observabilityCasesV2\""
         ],
         "path": "x-pack/plugins/observability_solution/observability/common/index.ts",
         "deprecated": false,
@@ -14526,36 +14388,6 @@
         "description": [],
         "signature": [
           "\"observability:enableInfrastructureAssetCustomDashboards\""
-        ],
-        "path": "x-pack/plugins/observability_solution/observability/common/ui_settings_keys.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
-        "id": "def-common.enableInfrastructureContainerAssetView",
-        "type": "string",
-        "tags": [],
-        "label": "enableInfrastructureContainerAssetView",
-        "description": [],
-        "signature": [
-          "\"observability:enableInfrastructureContainerAssetView\""
-        ],
-        "path": "x-pack/plugins/observability_solution/observability/common/ui_settings_keys.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
-        "id": "def-common.enableInfrastructureHostsView",
-        "type": "string",
-        "tags": [],
-        "label": "enableInfrastructureHostsView",
-        "description": [],
-        "signature": [
-          "\"observability:enableInfrastructureHostsView\""
         ],
         "path": "x-pack/plugins/observability_solution/observability/common/ui_settings_keys.ts",
         "deprecated": false,

@@ -58,6 +58,7 @@ const TestComponent: React.FC<React.PropsWithChildren> = ({ children }) => {
         http={http}
         notifications={notifications}
         overlays={overlays}
+        getIsRoleManagementEnabled={() => Promise.resolve(() => undefined)}
         getPrivilegesAPIClient={getPrivilegeAPIClient}
         getSecurityLicense={getSecurityLicenseMock}
         theme={theme}
@@ -113,7 +114,7 @@ describe('EditSpaceContentTab', () => {
       </TestComponent>
     );
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(getSpaceContentSpy).toHaveBeenCalledTimes(1);
     expect(getSpaceContentSpy).toHaveBeenCalledWith(space.id);

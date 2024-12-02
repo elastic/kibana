@@ -23,8 +23,25 @@ import { deleteKibanaAssets } from '../../remove';
 
 import { KibanaSavedObjectType, type Installation } from '../../../../../types';
 
-import { stepInstallKibanaAssets, cleanUpKibanaAssetsStep } from './step_install_kibana_assets';
+import { createArchiveIteratorFromMap } from '../../../archive/archive_iterator';
 
+import {
+  stepInstallKibanaAssets,
+  cleanUpKibanaAssetsStep,
+  stepInstallKibanaAssetsWithStreaming,
+  cleanUpUnusedKibanaAssetsStep,
+} from './step_install_kibana_assets';
+
+jest.mock('../../../kibana/assets/saved_objects', () => {
+  return {
+    getSpaceAwareSaveobjectsClients: jest.fn().mockReturnValue({
+      savedObjectClientWithSpace: jest.fn(),
+      savedObjectsImporter: jest.fn(),
+      savedObjectTagAssignmentService: jest.fn(),
+      savedObjectTagClient: jest.fn(),
+    }),
+  };
+});
 jest.mock('../../../kibana/assets/install');
 jest.mock('../../remove', () => {
   return {
@@ -58,6 +75,7 @@ const packageInstallContext = {
   } as any,
   paths: ['some/path/1', 'some/path/2'],
   assetsMap: new Map(),
+  archiveIterator: createArchiveIteratorFromMap(new Map()),
 };
 
 describe('stepInstallKibanaAssets', () => {
@@ -82,6 +100,7 @@ describe('stepInstallKibanaAssets', () => {
       logger: loggerMock.create(),
       packageInstallContext: {
         assetsMap: new Map(),
+        archiveIterator: createArchiveIteratorFromMap(new Map()),
         paths: [],
         packageInfo: {
           title: 'title',
@@ -102,7 +121,7 @@ describe('stepInstallKibanaAssets', () => {
     });
 
     await expect(installationPromise).resolves.not.toThrowError();
-    expect(mockedInstallKibanaAssetsAndReferencesMultispace).toBeCalledTimes(1);
+    expect(installKibanaAssetsAndReferencesMultispace).toBeCalledTimes(1);
   });
   esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
   appContextService.start(createAppContextStartContractMock());
@@ -121,6 +140,7 @@ describe('stepInstallKibanaAssets', () => {
       logger: loggerMock.create(),
       packageInstallContext: {
         assetsMap: new Map(),
+        archiveIterator: createArchiveIteratorFromMap(new Map()),
         paths: [],
         packageInfo: {
           title: 'title',
@@ -141,6 +161,60 @@ describe('stepInstallKibanaAssets', () => {
     });
     await expect(installationPromise).resolves.not.toThrowError();
     await expect(installationPromise).resolves.not.toThrowError();
+  });
+});
+
+describe('stepInstallKibanaAssetsWithStreaming', () => {
+  beforeEach(async () => {
+    soClient = savedObjectsClientMock.create();
+    esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    appContextService.start(createAppContextStartContractMock());
+  });
+
+  it('should rely on archiveIterator instead of in-memory assetsMap', async () => {
+    const assetsMap = new Map();
+    assetsMap.get = jest.fn();
+    assetsMap.set = jest.fn();
+
+    const archiveIterator = {
+      traverseEntries: jest.fn(),
+      getPaths: jest.fn(),
+    };
+
+    const result = await stepInstallKibanaAssetsWithStreaming({
+      savedObjectsClient: soClient,
+      esClient,
+      logger: loggerMock.create(),
+      packageInstallContext: {
+        assetsMap,
+        archiveIterator,
+        paths: [],
+        packageInfo: {
+          title: 'title',
+          name: 'xyz',
+          version: '4.5.6',
+          description: 'test',
+          type: 'integration',
+          categories: ['cloud', 'custom'],
+          format_version: 'string',
+          release: 'experimental',
+          conditions: { kibana: { version: 'x.y.z' } },
+          owner: { github: 'elastic/fleet' },
+        },
+      },
+      installType: 'install',
+      installSource: 'registry',
+      spaceId: DEFAULT_SPACE_ID,
+    });
+
+    expect(result).toEqual({ installedKibanaAssetsRefs: [] });
+
+    // Verify that assetsMap was not used
+    expect(assetsMap.get).not.toBeCalled();
+    expect(assetsMap.set).not.toBeCalled();
+
+    // Verify that archiveIterator was used
+    expect(archiveIterator.traverseEntries).toBeCalled();
   });
 });
 
@@ -300,5 +374,86 @@ describe('cleanUpKibanaAssetsStep', () => {
     });
 
     expect(mockedDeleteKibanaAssets).not.toBeCalled();
+  });
+});
+
+describe('cleanUpUnusedKibanaAssetsStep', () => {
+  const mockInstalledPackageSo: SavedObject<Installation> = {
+    id: 'mocked-package',
+    attributes: {
+      name: 'test-package',
+      version: '1.0.0',
+      install_status: 'installing',
+      install_version: '1.0.0',
+      install_started_at: new Date().toISOString(),
+      install_source: 'registry',
+      verification_status: 'verified',
+      installed_kibana: [] as any,
+      installed_es: [] as any,
+      es_index_patterns: {},
+    },
+    type: PACKAGES_SAVED_OBJECT_TYPE,
+    references: [],
+  };
+
+  const installationContext = {
+    savedObjectsClient: soClient,
+    savedObjectsImporter: jest.fn(),
+    esClient,
+    logger: loggerMock.create(),
+    packageInstallContext,
+    installType: 'install' as const,
+    installSource: 'registry' as const,
+    spaceId: DEFAULT_SPACE_ID,
+    retryFromLastState: true,
+    initialState: 'install_kibana_assets' as any,
+  };
+
+  beforeEach(async () => {
+    soClient = savedObjectsClientMock.create();
+    esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    appContextService.start(createAppContextStartContractMock());
+  });
+
+  it('should not clean up assets if they all present in the new package', async () => {
+    const installedAssets = [{ type: KibanaSavedObjectType.dashboard, id: 'dashboard-1' }];
+    await cleanUpUnusedKibanaAssetsStep({
+      ...installationContext,
+      installedPkg: {
+        ...mockInstalledPackageSo,
+        attributes: {
+          ...mockInstalledPackageSo.attributes,
+          installed_kibana: installedAssets,
+        },
+      },
+      installedKibanaAssetsRefs: installedAssets,
+    });
+
+    expect(mockedDeleteKibanaAssets).not.toBeCalled();
+  });
+
+  it('should clean up assets that are not present in the new package', async () => {
+    const installedAssets = [
+      { type: KibanaSavedObjectType.dashboard, id: 'dashboard-1' },
+      { type: KibanaSavedObjectType.dashboard, id: 'dashboard-2' },
+    ];
+    const newAssets = [{ type: KibanaSavedObjectType.dashboard, id: 'dashboard-1' }];
+    await cleanUpUnusedKibanaAssetsStep({
+      ...installationContext,
+      installedPkg: {
+        ...mockInstalledPackageSo,
+        attributes: {
+          ...mockInstalledPackageSo.attributes,
+          installed_kibana: installedAssets,
+        },
+      },
+      installedKibanaAssetsRefs: newAssets,
+    });
+
+    expect(mockedDeleteKibanaAssets).toBeCalledWith({
+      installedObjects: [installedAssets[1]],
+      spaceId: 'default',
+      packageInfo: packageInstallContext.packageInfo,
+    });
   });
 });

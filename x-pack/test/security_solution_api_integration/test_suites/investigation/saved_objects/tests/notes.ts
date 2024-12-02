@@ -7,26 +7,26 @@
 
 import expect from '@kbn/expect';
 import { v4 as uuidv4 } from 'uuid';
-import { Note } from '@kbn/security-solution-plugin/common/api/timeline';
-import { createNote, deleteAllNotes } from './helpers';
-import { FtrProviderContext } from '../../../../../api_integration/ftr_provider_context';
+import { GetNotesResult, Note } from '@kbn/security-solution-plugin/common/api/timeline';
+import { NOTE_URL } from '@kbn/security-solution-plugin/common/constants';
+import TestAgent from 'supertest/lib/agent';
+import { FtrProviderContextWithSpaces } from '../../../../ftr_provider_context_with_spaces';
+import { createNote, deleteNotes } from '../../utils/notes';
 
-export default function ({ getService }: FtrProviderContext) {
-  const kibanaServer = getService('kibanaServer');
-  const supertest = getService('supertest');
+export default function ({ getService }: FtrProviderContextWithSpaces) {
+  const utils = getService('securitySolutionUtils');
+  let supertest: TestAgent;
 
-  // Failing: See https://github.com/elastic/kibana/issues/196492
-  describe.skip('Note - Saved Objects', () => {
-    const es = getService('es');
-
-    before(() => kibanaServer.savedObjects.cleanStandardList());
-    after(() => kibanaServer.savedObjects.cleanStandardList());
+  describe('Note - Saved Objects', () => {
+    before(async () => {
+      supertest = await utils.createSuperTest();
+    });
 
     describe('create a note', () => {
       it('should return a timelineId, noteId and version', async () => {
         const myNote = 'world test';
         const response = await supertest
-          .patch('/api/note')
+          .patch(NOTE_URL)
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '2023-10-31')
           .send({
@@ -35,8 +35,7 @@ export default function ({ getService }: FtrProviderContext) {
             note: { note: myNote, timelineId: 'testTimelineId' },
           });
 
-        const { note, noteId, timelineId, version } =
-          response.body.data && response.body.data.persistNote.note;
+        const { note, noteId, timelineId, version } = response.body && response.body.note;
 
         expect(note).to.be(myNote);
         expect(noteId).to.not.be.empty();
@@ -44,10 +43,10 @@ export default function ({ getService }: FtrProviderContext) {
         expect(version).to.not.be.empty();
       });
 
-      it('if noteId exist update note and return existing noteId and new version', async () => {
+      it('should update note and return existing noteId and new version if noteId exist', async () => {
         const myNote = 'world test';
         const response = await supertest
-          .patch('/api/note')
+          .patch(NOTE_URL)
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '2023-10-31')
           .send({
@@ -56,12 +55,11 @@ export default function ({ getService }: FtrProviderContext) {
             note: { note: myNote, timelineId: 'testTimelineId' },
           });
 
-        const { noteId, timelineId, version } =
-          response.body.data && response.body.data.persistNote.note;
+        const { noteId, timelineId, version } = response.body && response.body.note;
 
         const myNewNote = 'new world test';
         const responseToTest = await supertest
-          .patch('/api/note')
+          .patch(NOTE_URL)
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '2023-10-31')
           .send({
@@ -70,15 +68,15 @@ export default function ({ getService }: FtrProviderContext) {
             note: { note: myNewNote, timelineId },
           });
 
-        expect(responseToTest.body.data!.persistNote.note.note).to.be(myNewNote);
-        expect(responseToTest.body.data!.persistNote.note.noteId).to.be(noteId);
-        expect(responseToTest.body.data!.persistNote.note.version).to.not.be.eql(version);
+        expect(responseToTest.body.note.note).to.be(myNewNote);
+        expect(responseToTest.body.note.noteId).to.be(noteId);
+        expect(responseToTest.body.note.version).to.not.be.eql(version);
       });
     });
 
     describe('get notes', () => {
       beforeEach(async () => {
-        await deleteAllNotes(es);
+        await deleteNotes(supertest);
       });
 
       const eventId1 = uuidv4();
@@ -117,11 +115,10 @@ export default function ({ getService }: FtrProviderContext) {
         ]);
 
         const response = await supertest
-          .get(`/api/note?documentIds=${eventId1}`)
+          .get(`${NOTE_URL}?documentIds=${eventId1}`)
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '2023-10-31');
-
-        const { totalCount, notes } = response.body;
+        const { notes, totalCount } = response.body as GetNotesResult;
 
         expect(totalCount).to.be(2);
         notes.forEach((note: Note) => expect(note.eventId).to.be(eventId1));
@@ -172,11 +169,10 @@ export default function ({ getService }: FtrProviderContext) {
         ]);
 
         const response = await supertest
-          .get(`/api/note?documentIds=${eventId1}&documentIds=${eventId2}`)
+          .get(`${NOTE_URL}?documentIds=${eventId1}&documentIds=${eventId2}`)
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '2023-10-31');
-
-        const { totalCount, notes } = response.body;
+        const { notes, totalCount } = response.body as GetNotesResult;
 
         expect(totalCount).to.be(4);
         notes.forEach((note: Note) => {
@@ -214,11 +210,10 @@ export default function ({ getService }: FtrProviderContext) {
         ]);
 
         const response = await supertest
-          .get(`/api/note?savedObjectIds=${timelineId1}`)
+          .get(`${NOTE_URL}?savedObjectIds=${timelineId1}`)
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '2023-10-31');
-
-        const { totalCount, notes } = response.body;
+        const { notes, totalCount } = response.body as GetNotesResult;
 
         expect(totalCount).to.be(2);
         notes.forEach((note: Note) => expect(note.timelineId).to.be(timelineId1));
@@ -269,11 +264,10 @@ export default function ({ getService }: FtrProviderContext) {
         ]);
 
         const response = await supertest
-          .get(`/api/note?savedObjectIds=${timelineId1}&savedObjectIds=${timelineId2}`)
+          .get(`${NOTE_URL}?savedObjectIds=${timelineId1}&savedObjectIds=${timelineId2}`)
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '2023-10-31');
-
-        const { totalCount, notes } = response.body;
+        const { notes, totalCount } = response.body as GetNotesResult;
 
         expect(totalCount).to.be(4);
         notes.forEach((note: Note) => {
@@ -298,16 +292,15 @@ export default function ({ getService }: FtrProviderContext) {
         ]);
 
         const response = await supertest
-          .get('/api/note')
+          .get(NOTE_URL)
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '2023-10-31');
-
-        const { totalCount } = response.body;
+        const { totalCount } = response.body as GetNotesResult;
 
         expect(totalCount).to.be(4);
       });
 
-      it('should retrieve notes considering perPage query parameter', async () => {
+      it('should retrieve notes considering perPage  and page query parameters', async () => {
         await Promise.all([
           createNote(supertest, { text: 'first note' }),
           createNote(supertest, { text: 'second note' }),
@@ -315,31 +308,13 @@ export default function ({ getService }: FtrProviderContext) {
         ]);
 
         const response = await supertest
-          .get('/api/note?perPage=1')
+          .get(`${NOTE_URL}?perPage=1`)
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '2023-10-31');
-
-        const { totalCount, notes } = response.body;
+        const { notes, totalCount } = response.body as GetNotesResult;
 
         expect(totalCount).to.be(3);
         expect(notes.length).to.be(1);
-      });
-
-      it('should retrieve considering page query parameter', async () => {
-        await createNote(supertest, { text: 'first note' });
-        await createNote(supertest, { text: 'second note' });
-        await createNote(supertest, { text: 'third note' });
-
-        const response = await supertest
-          .get('/api/note?perPage=1&page=2')
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31');
-
-        const { totalCount, notes } = response.body;
-
-        expect(totalCount).to.be(3);
-        expect(notes.length).to.be(1);
-        expect(notes[0].note).to.be('second note');
       });
 
       it('should retrieve considering search query parameter', async () => {
@@ -358,11 +333,10 @@ export default function ({ getService }: FtrProviderContext) {
         ]);
 
         const response = await supertest
-          .get('/api/note?search=event')
+          .get(`${NOTE_URL}?search=event`)
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '2023-10-31');
-
-        const { totalCount } = response.body;
+        const { totalCount } = response.body as GetNotesResult;
 
         expect(totalCount).to.be(2);
       });
@@ -376,11 +350,10 @@ export default function ({ getService }: FtrProviderContext) {
         ]);
 
         const response = await supertest
-          .get('/api/note?sortField=eventId')
+          .get(`${NOTE_URL}?sortField=eventId`)
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '2023-10-31');
-
-        const { totalCount, notes } = response.body;
+        const { notes, totalCount } = response.body as GetNotesResult;
 
         expect(totalCount).to.be(3);
         expect(notes[0].eventId).to.be('1');
@@ -396,11 +369,10 @@ export default function ({ getService }: FtrProviderContext) {
         ]);
 
         const response = await supertest
-          .get('/api/note?sortField=eventId&sortOrder=desc')
+          .get(`${NOTE_URL}?sortField=eventId&sortOrder=desc`)
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '2023-10-31');
-
-        const { totalCount, notes } = response.body;
+        const { notes, totalCount } = response.body as GetNotesResult;
 
         expect(totalCount).to.be(3);
         expect(notes[0].eventId).to.be('3');
@@ -408,37 +380,56 @@ export default function ({ getService }: FtrProviderContext) {
         expect(notes[2].eventId).to.be('1');
       });
 
-      // TODO figure out why this test is failing on CI but not locally
-      it.skip('should retrieve all notes that have been created by a specific user', async () => {
-        await Promise.all([
-          createNote(supertest, { text: 'first note' }),
-          createNote(supertest, { text: 'second note' }),
-        ]);
+      // skipped https://github.com/elastic/kibana/issues/196896
+      describe('@skipInServerless', () => {
+        // TODO we need to figure out how to retrieve the uid of the current user in the test environment
+        it.skip('should retrieve all notes that have been created by a specific user', async () => {
+          await Promise.all([
+            createNote(supertest, { text: 'first note' }),
+            createNote(supertest, { text: 'second note' }),
+          ]);
 
-        const response = await supertest
-          .get('/api/note?userFilter=elastic')
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31');
+          const response = await supertest
+            .get(`${NOTE_URL}?createdByFilter=elastic`)
+            .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31');
+          const { totalCount } = response.body as GetNotesResult;
 
-        const { totalCount } = response.body;
-
-        expect(totalCount).to.be(2);
+          expect(totalCount).to.be(2);
+        });
       });
 
-      it('should return nothing if no notes have been created by that user', async () => {
+      // TODO we need to figure out how to create another user in the test environment
+      it.skip('should return nothing if no notes have been created by that user', async () => {
         await Promise.all([
           createNote(supertest, { text: 'first note' }),
           createNote(supertest, { text: 'second note' }),
         ]);
 
         const response = await supertest
-          .get('/api/note?userFilter=user1')
+          .get(`${NOTE_URL}?createdByFilter=user1`)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31');
+        const { totalCount } = response.body as GetNotesResult;
+
+        expect(totalCount).to.be(0);
+      });
+
+      it('should return error if user does not exist', async () => {
+        await Promise.all([
+          createNote(supertest, { text: 'first note' }),
+          createNote(supertest, { text: 'second note' }),
+        ]);
+
+        const response = await supertest
+          .get(`${NOTE_URL}?createdByFilter=wrong_user`)
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '2023-10-31');
 
-        const { totalCount } = response.body;
-
-        expect(totalCount).to.be(0);
+        expect(response.body).to.not.have.property('totalCount');
+        expect(response.body).to.not.have.property('notes');
+        expect(response.body.message).to.be('User with uid wrong_user not found');
+        expect(response.body.status_code).to.be(500);
       });
 
       it('should retrieve all notes that have an association with a document only', async () => {
@@ -457,11 +448,10 @@ export default function ({ getService }: FtrProviderContext) {
         ]);
 
         const response = await supertest
-          .get('/api/note?associatedFilter=document_only')
+          .get(`${NOTE_URL}?associatedFilter=document_only`)
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '2023-10-31');
-
-        const { totalCount, notes } = response.body;
+        const { notes, totalCount } = response.body as GetNotesResult;
 
         expect(totalCount).to.be(1);
         expect(notes[0].eventId).to.be(eventId1);
@@ -483,11 +473,10 @@ export default function ({ getService }: FtrProviderContext) {
         ]);
 
         const response = await supertest
-          .get('/api/note?associatedFilter=saved_object_only')
+          .get(`${NOTE_URL}?associatedFilter=saved_object_only`)
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '2023-10-31');
-
-        const { totalCount, notes } = response.body;
+        const { notes, totalCount } = response.body as GetNotesResult;
 
         expect(totalCount).to.be(1);
         expect(notes[0].timelineId).to.be(timelineId1);
@@ -509,11 +498,10 @@ export default function ({ getService }: FtrProviderContext) {
         ]);
 
         const response = await supertest
-          .get('/api/note?associatedFilter=document_and_saved_object')
+          .get(`${NOTE_URL}?associatedFilter=document_and_saved_object`)
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '2023-10-31');
-
-        const { totalCount, notes } = response.body;
+        const { notes, totalCount } = response.body as GetNotesResult;
 
         expect(totalCount).to.be(1);
         expect(notes[0].eventId).to.be(eventId1);
@@ -536,11 +524,10 @@ export default function ({ getService }: FtrProviderContext) {
         ]);
 
         const response = await supertest
-          .get('/api/note?associatedFilter=orphan')
+          .get(`${NOTE_URL}?associatedFilter=orphan`)
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', '2023-10-31');
-
-        const { totalCount, notes } = response.body;
+        const { notes, totalCount } = response.body as GetNotesResult;
 
         expect(totalCount).to.be(1);
         expect(notes[0].eventId).to.be('');

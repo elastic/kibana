@@ -23,7 +23,7 @@ export interface FieldValueCountsParams {
   values: FieldHitValue[];
   field: DataViewField;
   count?: number;
-  isTextBased: boolean;
+  isEsqlQuery: boolean;
 }
 
 export function getFieldExampleBuckets(params: FieldValueCountsParams, formatter?: FieldFormat) {
@@ -31,7 +31,7 @@ export function getFieldExampleBuckets(params: FieldValueCountsParams, formatter
     count: DEFAULT_SIMPLE_EXAMPLES_SIZE,
   });
 
-  if (!canProvideExamplesForField(params.field, params.isTextBased)) {
+  if (!canProvideExamplesForField(params.field, params.isEsqlQuery)) {
     throw new Error(
       `Analysis is not available this field type: "${params.field.type}". Field name: "${params.field.name}"`
     );

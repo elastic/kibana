@@ -60,7 +60,7 @@ export function ChatHeader({
   onCopyConversation: () => void;
   onSaveTitle: (title: string) => void;
   onToggleFlyoutPositionMode?: (newFlyoutPositionMode: FlyoutPositionMode) => void;
-  navigateToConversation: (nextConversationId?: string) => void;
+  navigateToConversation?: (nextConversationId?: string) => void;
 }) {
   const theme = useEuiTheme();
   const breakpoint = useCurrentEuiBreakpoint();
@@ -104,7 +104,9 @@ export function ChatHeader({
             size={breakpoint === 'xs' ? 'xs' : 's'}
             value={newTitle}
             className={css`
-              color: ${!!title ? theme.euiTheme.colors.text : theme.euiTheme.colors.subduedText};
+              color: ${!!title
+                ? theme.euiTheme.colors.textParagraph
+                : theme.euiTheme.colors.textSubdued};
             `}
             inputAriaLabel={i18n.translate('xpack.aiAssistant.chatHeader.editConversationInput', {
               defaultMessage: 'Edit conversation',
@@ -142,11 +144,11 @@ export function ChatHeader({
                           flyoutPositionMode === 'overlay'
                             ? i18n.translate(
                                 'xpack.aiAssistant.chatHeader.euiToolTip.flyoutModeLabel.dock',
-                                { defaultMessage: 'Dock chat' }
+                                { defaultMessage: 'Dock conversation' }
                               )
                             : i18n.translate(
                                 'xpack.aiAssistant.chatHeader.euiToolTip.flyoutModeLabel.undock',
-                                { defaultMessage: 'Undock chat' }
+                                { defaultMessage: 'Undock conversation' }
                               )
                         }
                         display="block"
@@ -164,31 +166,32 @@ export function ChatHeader({
                     }
                   />
                 </EuiFlexItem>
-
-                <EuiFlexItem grow={false}>
-                  <EuiPopover
-                    anchorPosition="downLeft"
-                    button={
-                      <EuiToolTip
-                        content={i18n.translate(
-                          'xpack.aiAssistant.chatHeader.euiToolTip.navigateToConversationsLabel',
-                          { defaultMessage: 'Navigate to conversations' }
-                        )}
-                        display="block"
-                      >
-                        <EuiButtonIcon
-                          aria-label={i18n.translate(
-                            'xpack.aiAssistant.chatHeader.euiButtonIcon.navigateToConversationsLabel',
+                {navigateToConversation ? (
+                  <EuiFlexItem grow={false}>
+                    <EuiPopover
+                      anchorPosition="downLeft"
+                      button={
+                        <EuiToolTip
+                          content={i18n.translate(
+                            'xpack.aiAssistant.chatHeader.euiToolTip.navigateToConversationsLabel',
                             { defaultMessage: 'Navigate to conversations' }
                           )}
-                          data-test-subj="observabilityAiAssistantChatHeaderButton"
-                          iconType="discuss"
-                          onClick={() => navigateToConversation(conversationId)}
-                        />
-                      </EuiToolTip>
-                    }
-                  />
-                </EuiFlexItem>
+                          display="block"
+                        >
+                          <EuiButtonIcon
+                            aria-label={i18n.translate(
+                              'xpack.aiAssistant.chatHeader.euiButtonIcon.navigateToConversationsLabel',
+                              { defaultMessage: 'Navigate to conversations' }
+                            )}
+                            data-test-subj="observabilityAiAssistantChatHeaderButton"
+                            iconType="discuss"
+                            onClick={() => navigateToConversation(conversationId)}
+                          />
+                        </EuiToolTip>
+                      }
+                    />
+                  </EuiFlexItem>
+                ) : null}
               </>
             ) : null}
 

@@ -41,7 +41,7 @@ const isApiCompatible = (api: unknown | null): api is ExportCsvActionApi =>
 export class ExportCSVAction implements Action<ExportContext> {
   public readonly id = ACTION_EXPORT_CSV;
   public readonly type = ACTION_EXPORT_CSV;
-  public readonly order = 18; // right after Export in discover which is 19
+  public readonly order = 18;
 
   public getIconType() {
     return 'exportAction';

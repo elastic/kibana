@@ -51,9 +51,16 @@ describe('finishMaintenanceWindowRoute', () => {
     expect(config.options).toMatchInlineSnapshot(`
       Object {
         "access": "internal",
-        "tags": Array [
-          "access:write-maintenance-window",
-        ],
+      }
+    `);
+
+    expect(config.security).toMatchInlineSnapshot(`
+      Object {
+        "authz": Object {
+          "requiredPrivileges": Array [
+            "write-maintenance-window",
+          ],
+        },
       }
     `);
 
@@ -61,7 +68,6 @@ describe('finishMaintenanceWindowRoute', () => {
 
     expect(maintenanceWindowClient.finish).toHaveBeenLastCalledWith({ id: 'test-id' });
     expect(res.ok).toHaveBeenLastCalledWith({
-      // @ts-expect-error upgrade typescript v5.1.6
       body: rewritePartialMaintenanceBodyRes(mockMaintenanceWindow),
     });
   });

@@ -5,13 +5,13 @@
  * 2.0.
  */
 import React from 'react';
-import { renderHook, act } from '@testing-library/react-hooks';
+import { act, waitFor, renderHook } from '@testing-library/react';
 import { useEnableDataFeed } from './use_enable_data_feed';
 import { TestProviders } from '../../../mock';
 
 import type { SecurityJob } from '../types';
 import { createTelemetryServiceMock } from '../../../lib/telemetry/telemetry_service.mock';
-import { ML_JOB_TELEMETRY_STATUS } from '../../../lib/telemetry';
+import { ML_JOB_TELEMETRY_STATUS, EntityEventTypes } from '../../../lib/telemetry';
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <TestProviders>{children}</TestProviders>
@@ -78,21 +78,18 @@ describe('useSecurityJobsHelpers', () => {
           resolvePromiseCb = resolve;
         })
       );
-      const { result, waitForNextUpdate } = renderHook(() => useEnableDataFeed(), {
+      const { result } = renderHook(() => useEnableDataFeed(), {
         wrapper,
       });
       expect(result.current.isLoading).toBe(false);
 
       await act(async () => {
         const enableDataFeedPromise = result.current.enableDatafeed(JOB, TIMESTAMP);
-
-        await waitForNextUpdate();
-        expect(result.current.isLoading).toBe(true);
-
         resolvePromiseCb({});
         await enableDataFeedPromise;
-        expect(result.current.isLoading).toBe(false);
       });
+
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
     });
 
     it('does not call setupMlJob if job is already installed', async () => {
@@ -188,14 +185,14 @@ describe('useSecurityJobsHelpers', () => {
           await result.current.enableDatafeed(JOB, TIMESTAMP);
         });
 
-        expect(mockedTelemetry.reportMLJobUpdate).toHaveBeenCalledWith({
+        expect(mockedTelemetry.reportEvent).toHaveBeenCalledWith(EntityEventTypes.MLJobUpdate, {
           status: ML_JOB_TELEMETRY_STATUS.moduleInstalled,
           isElasticJob: true,
           jobId,
           moduleId,
         });
 
-        expect(mockedTelemetry.reportMLJobUpdate).toHaveBeenCalledWith({
+        expect(mockedTelemetry.reportEvent).toHaveBeenCalledWith(EntityEventTypes.MLJobUpdate, {
           status: ML_JOB_TELEMETRY_STATUS.started,
           isElasticJob: true,
           jobId,
@@ -211,7 +208,7 @@ describe('useSecurityJobsHelpers', () => {
           await result.current.enableDatafeed({ ...JOB, isInstalled: true }, TIMESTAMP);
         });
 
-        expect(mockedTelemetry.reportMLJobUpdate).toHaveBeenCalledWith({
+        expect(mockedTelemetry.reportEvent).toHaveBeenCalledWith(EntityEventTypes.MLJobUpdate, {
           status: ML_JOB_TELEMETRY_STATUS.startError,
           errorMessage: 'Start job failure - test_error',
           isElasticJob: true,
@@ -228,7 +225,7 @@ describe('useSecurityJobsHelpers', () => {
           await result.current.enableDatafeed(JOB, TIMESTAMP);
         });
 
-        expect(mockedTelemetry.reportMLJobUpdate).toHaveBeenCalledWith({
+        expect(mockedTelemetry.reportEvent).toHaveBeenCalledWith(EntityEventTypes.MLJobUpdate, {
           status: ML_JOB_TELEMETRY_STATUS.installationError,
           errorMessage: 'Create job failure - test_error',
           isElasticJob: true,
@@ -295,7 +292,7 @@ describe('useSecurityJobsHelpers', () => {
           await result.current.disableDatafeed({ ...JOB, isInstalled: true });
         });
 
-        expect(mockedTelemetry.reportMLJobUpdate).toHaveBeenCalledWith({
+        expect(mockedTelemetry.reportEvent).toHaveBeenCalledWith(EntityEventTypes.MLJobUpdate, {
           status: ML_JOB_TELEMETRY_STATUS.stopped,
           isElasticJob: true,
           jobId,
@@ -311,7 +308,7 @@ describe('useSecurityJobsHelpers', () => {
           await result.current.disableDatafeed({ ...JOB, isInstalled: true });
         });
 
-        expect(mockedTelemetry.reportMLJobUpdate).toHaveBeenCalledWith({
+        expect(mockedTelemetry.reportEvent).toHaveBeenCalledWith(EntityEventTypes.MLJobUpdate, {
           status: ML_JOB_TELEMETRY_STATUS.stopError,
           errorMessage: 'Stop job failure - test_error',
           isElasticJob: true,

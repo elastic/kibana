@@ -14,15 +14,15 @@ import {
   EuiPopover,
   useEuiShadow,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import React from 'react';
-import styled from 'styled-components';
-import { usePermissions } from '../../../hooks/use_permissions';
 import { useCloneSlo } from '../../../hooks/use_clone_slo';
+import { useKibana } from '../../../hooks/use_kibana';
+import { usePermissions } from '../../../hooks/use_permissions';
 import { BurnRateRuleParams } from '../../../typings';
-import { useKibana } from '../../../utils/kibana_react';
 import { useSloActions } from '../../slo_details/hooks/use_slo_actions';
 
 interface Props {
@@ -37,24 +37,22 @@ interface Props {
   btnProps?: Partial<EuiButtonIconProps>;
   rules?: Array<Rule<BurnRateRuleParams>>;
 }
-const CustomShadowPanel = styled(EuiPanel)<{ shadow: string }>`
-  ${(props) => props.shadow}
-`;
 
-function IconPanel({ children, hasPanel }: { children: JSX.Element; hasPanel: boolean }) {
+function IconPanel({ children }: { children: JSX.Element }) {
   const shadow = useEuiShadow('s');
-  if (!hasPanel) return children;
   return (
-    <CustomShadowPanel
+    <EuiPanel
       color="plain"
       element="button"
       grow={false}
       paddingSize="none"
       hasShadow={false}
-      shadow={shadow}
+      css={css`
+        ${shadow}
+      `}
     >
       {children}
-    </CustomShadowPanel>
+    </EuiPanel>
   );
 }
 
@@ -161,7 +159,7 @@ export function SloItemActions({
   return (
     <EuiPopover
       anchorPosition="downLeft"
-      button={btnProps ? <IconPanel hasPanel={true}>{btn}</IconPanel> : btn}
+      button={btnProps ? <IconPanel>{btn}</IconPanel> : btn}
       panelPaddingSize="m"
       closePopover={handleClickActions}
       isOpen={isActionsPopoverOpen}

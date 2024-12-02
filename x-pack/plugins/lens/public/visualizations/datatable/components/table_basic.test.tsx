@@ -20,9 +20,9 @@ import type { DatatableProps } from '../../../../common/expressions';
 import { LENS_EDIT_PAGESIZE_ACTION } from './constants';
 import { DatatableRenderProps } from './types';
 import { PaletteOutput } from '@kbn/coloring';
+import { getTransposeId } from '@kbn/transpose-utils';
 import { CustomPaletteState } from '@kbn/charts-plugin/common';
 import { getCellColorFn } from '../../../shared_components/coloring/get_cell_color_fn';
-import { getTransposeId } from '../../../../common/expressions/datatable/transpose_helpers';
 
 jest.mock('../../../shared_components/coloring/get_cell_color_fn', () => {
   const mod = jest.requireActual('../../../shared_components/coloring/get_cell_color_fn');

@@ -163,6 +163,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'monitoring.ui.enabled (boolean?)',
         'monitoring.ui.min_interval_seconds (number?)',
         'monitoring.ui.show_license_expiration (boolean?)',
+        'monitoring.ui.logs.index (string?)',
         'newsfeed.fetchInterval (duration?)',
         'newsfeed.mainInterval (duration?)',
         'newsfeed.service.pathTemplate (string?)',
@@ -362,6 +363,9 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.observability_onboarding.ui.enabled (boolean?)',
         'xpack.observabilityLogsExplorer.navigation.showAppLink (boolean?|never)',
         'xpack.observabilityAIAssistant.scope (observability?|search?)',
+        'xpack.observabilityAiAssistantManagement.logSourcesEnabled (boolean?)',
+        'xpack.observabilityAiAssistantManagement.spacesEnabled (boolean?)',
+        'xpack.observabilityAiAssistantManagement.visibilityEnabled (boolean?)',
         'share.new_version.enabled (boolean?)',
         'aiAssistantManagementSelection.preferredAIAssistantType (default?|never?|observability?)',
         /**

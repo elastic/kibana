@@ -24,7 +24,7 @@ import {
   EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID,
   EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID,
   EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID,
-} from '@kbn/security-solution-common';
+} from '../../../shared/components/test_ids';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
 
 const from = '2022-04-05T12:00:00.000Z';

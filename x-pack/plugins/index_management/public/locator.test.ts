@@ -34,4 +34,26 @@ describe('Index Management URL locator', () => {
     });
     expect(path).toBe('/data/index_management/data_streams/test');
   });
+
+  test('locator returns the correct url for index_template', async () => {
+    const indexTemplateName = 'test@custom';
+    const { path } = await locator.getLocation({
+      page: 'index_template',
+      indexTemplate: indexTemplateName,
+    });
+    expect(path).toBe(
+      encodeURI(`/data/index_management/templates/${encodeURIComponent(indexTemplateName)}`)
+    );
+  });
+
+  test('locator returns the correct url for component_template', async () => {
+    const componentTemplateName = 'log@custom';
+    const { path } = await locator.getLocation({
+      page: 'component_template',
+      componentTemplate: componentTemplateName,
+    });
+    expect(path).toBe(
+      `/data/index_management/component_templates/${encodeURIComponent(componentTemplateName)}`
+    );
+  });
 });

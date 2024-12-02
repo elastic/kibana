@@ -8,7 +8,7 @@ import { coreMock } from '@kbn/core/server/mocks';
 import { telemetryEvents } from './events/telemetry_events';
 
 import { TelemetryService } from './telemetry_service';
-import { TelemetryEventTypes } from './constants';
+import { AlertsEventTypes } from './types';
 
 describe('TelemetryService', () => {
   let service: TelemetryService;
@@ -41,17 +41,12 @@ describe('TelemetryService', () => {
   });
 
   describe('#start()', () => {
-    it('should return all the available tracking methods', () => {
+    it('should return the tracking method', () => {
       const setupParams = getSetupParams();
       service.setup(setupParams);
       const telemetry = service.start();
 
-      expect(telemetry).toHaveProperty('reportAlertsGroupingChanged');
-      expect(telemetry).toHaveProperty('reportAlertsGroupingToggled');
-      expect(telemetry).toHaveProperty('reportAlertsGroupingTakeAction');
-
-      expect(telemetry).toHaveProperty('reportDetailsFlyoutOpened');
-      expect(telemetry).toHaveProperty('reportDetailsFlyoutTabClicked');
+      expect(telemetry).toHaveProperty('reportEvent');
     });
   });
 
@@ -61,7 +56,7 @@ describe('TelemetryService', () => {
       service.setup(setupParams);
       const telemetry = service.start();
 
-      telemetry.reportAlertsGroupingTakeAction({
+      telemetry.reportEvent(AlertsEventTypes.AlertsGroupingTakeAction, {
         tableId: 'test-groupingId',
         groupNumber: 0,
         status: 'closed',
@@ -70,7 +65,7 @@ describe('TelemetryService', () => {
 
       expect(setupParams.analytics.reportEvent).toHaveBeenCalledTimes(1);
       expect(setupParams.analytics.reportEvent).toHaveBeenCalledWith(
-        TelemetryEventTypes.AlertsGroupingTakeAction,
+        AlertsEventTypes.AlertsGroupingTakeAction,
         {
           tableId: 'test-groupingId',
           groupNumber: 0,

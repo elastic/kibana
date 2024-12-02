@@ -8,6 +8,8 @@
 import React, { useEffect } from 'react';
 import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { EuiLoadingSpinner } from '@elastic/eui';
+import { useEntityCentricExperienceSetting } from '../../../hooks/use_entity_centric_experience_setting';
+import { isPending } from '../../../hooks/use_fetcher';
 import { SYSTEM_INTEGRATION } from '../../../../common/constants';
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
 import { useParentBreadcrumbResolver } from '../../../hooks/use_parent_breadcrumb_resolver';
@@ -24,7 +26,7 @@ import { InfraPageTemplate } from '../../shared/templates/infra_page_template';
 import { OnboardingFlow } from '../../shared/templates/no_data_config';
 import { PageTitleWithPopover } from '../header/page_title_with_popover';
 import { useEntitySummary } from '../hooks/use_entity_summary';
-import { isMetricsSignal } from '../utils/get_data_stream_types';
+import { isLogsSignal, isMetricsSignal } from '../utils/get_data_stream_types';
 
 const DATA_AVAILABILITY_PER_TYPE: Partial<Record<InventoryItemType, string[]>> = {
   host: [SYSTEM_INTEGRATION],
@@ -36,10 +38,11 @@ export const Page = ({ tabs = [], links = [] }: ContentTemplateProps) => {
   const { rightSideItems, tabEntries, breadcrumbs: headerBreadcrumbs } = usePageHeader(tabs, links);
   const { asset } = useAssetDetailsRenderPropsContext();
   const trackOnlyOnce = React.useRef(false);
-  const { dataStreams } = useEntitySummary({
+  const { dataStreams, status: entitySummaryStatus } = useEntitySummary({
     entityType: asset.type,
     entityId: asset.id,
   });
+  const { isEntityCentricExperienceEnabled } = useEntityCentricExperienceSetting();
   const { activeTabId } = useTabSwitcherContext();
   const {
     services: { telemetry },
@@ -47,18 +50,15 @@ export const Page = ({ tabs = [], links = [] }: ContentTemplateProps) => {
 
   const parentBreadcrumbResolver = useParentBreadcrumbResolver();
   const breadcrumbOptions = parentBreadcrumbResolver.getBreadcrumbOptions(asset.type);
-  useMetricsBreadcrumbs(
-    [
-      {
-        ...breadcrumbOptions.link,
-        text: breadcrumbOptions.text,
-      },
-      {
-        text: asset.name,
-      },
-    ],
-    { deeperContextServerless: true }
-  );
+  useMetricsBreadcrumbs([
+    {
+      ...breadcrumbOptions.link,
+      text: breadcrumbOptions.text,
+    },
+    {
+      text: asset.name,
+    },
+  ]);
 
   useEffect(() => {
     if (trackOnlyOnce.current) {
@@ -85,10 +85,18 @@ export const Page = ({ tabs = [], links = [] }: ContentTemplateProps) => {
   }, [activeTabId, asset.type, metadata, metadataLoading, telemetry]);
 
   const showPageTitleWithPopover = asset.type === 'host' && !isMetricsSignal(dataStreams);
+  const shouldBypassOnboarding =
+    isEntityCentricExperienceEnabled && (isLogsSignal(dataStreams) || isMetricsSignal(dataStreams));
 
   return (
     <InfraPageTemplate
-      onboardingFlow={asset.type === 'host' ? OnboardingFlow.Hosts : OnboardingFlow.Infra}
+      onboardingFlow={
+        isPending(entitySummaryStatus) || shouldBypassOnboarding
+          ? undefined
+          : asset.type === 'host'
+          ? OnboardingFlow.Hosts
+          : OnboardingFlow.Infra
+      }
       dataAvailabilityModules={DATA_AVAILABILITY_PER_TYPE[asset.type] || undefined}
       pageHeader={{
         pageTitle: loading ? (

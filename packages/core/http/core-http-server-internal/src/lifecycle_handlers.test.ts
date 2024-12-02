@@ -417,6 +417,33 @@ describe('restrictInternal post-auth handler', () => {
     const request = createForgeRequest('public', { 'x-elastic-internal-origin': 'Kibana' });
     createForwardSuccess(handler, request);
   });
+
+  it('overrides internal api when elasticInternalOrigin=false is set explicitly', () => {
+    const handler = createRestrictInternalRoutesPostAuthHandler(
+      { ...config, restrictInternalApis: true },
+      logger
+    );
+
+    // Will be treated as external
+    const request = createForgeRequest(
+      'internal',
+      { 'x-elastic-internal-origin': 'Kibana' },
+      { elasticInternalOrigin: 'false' }
+    );
+
+    responseFactory.badRequest.mockReturnValue('badRequest' as any);
+
+    const result = handler(request, responseFactory, toolkit);
+
+    expect(toolkit.next).not.toHaveBeenCalled();
+    expect(responseFactory.badRequest).toHaveBeenCalledTimes(1);
+    expect(responseFactory.badRequest.mock.calls[0][0]).toMatchInlineSnapshot(`
+      Object {
+        "body": "uri [/internal/some-path] with method [get] exists but is not available with the current configuration",
+      }
+    `);
+    expect(result).toEqual('badRequest');
+  });
 });
 
 describe('customHeaders pre-response handler', () => {

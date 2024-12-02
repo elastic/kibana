@@ -23,7 +23,7 @@ import {
 
 import { flattenPanelTree } from '../../../../lib/flatten_panel_tree';
 import { INDEX_OPEN, IndexDetailsSection } from '../../../../../../common/constants';
-import { getIndexDetailsLink } from '../../../../services/routing';
+import { getIndexDetailsLink, navigateToIndexDetailsPage } from '../../../../services/routing';
 import { AppContext } from '../../../../app_context';
 
 export class IndexActionsContextMenu extends Component {
@@ -50,7 +50,7 @@ export class IndexActionsContextMenu extends Component {
   panels() {
     const {
       services: { extensionsService },
-      core: { getUrlForApp },
+      core: { getUrlForApp, application, http },
       history,
       config: { enableIndexActions },
     } = this.context;
@@ -83,8 +83,13 @@ export class IndexActionsContextMenu extends Component {
           defaultMessage: 'Show index overview',
         }),
         onClick: () => {
-          history.push(
-            getIndexDetailsLink(indexNames[0], indicesListURLParams, IndexDetailsSection.Overview)
+          navigateToIndexDetailsPage(
+            indexNames[0],
+            indicesListURLParams,
+            extensionsService,
+            application,
+            http,
+            IndexDetailsSection.Overview
           );
         },
       });
@@ -94,8 +99,13 @@ export class IndexActionsContextMenu extends Component {
           defaultMessage: 'Show index settings',
         }),
         onClick: () => {
-          history.push(
-            getIndexDetailsLink(indexNames[0], indicesListURLParams, IndexDetailsSection.Settings)
+          navigateToIndexDetailsPage(
+            indexNames[0],
+            indicesListURLParams,
+            extensionsService,
+            application,
+            http,
+            IndexDetailsSection.Settings
           );
         },
       });
@@ -105,8 +115,13 @@ export class IndexActionsContextMenu extends Component {
           defaultMessage: 'Show index mapping',
         }),
         onClick: () => {
-          history.push(
-            getIndexDetailsLink(indexNames[0], indicesListURLParams, IndexDetailsSection.Mappings)
+          navigateToIndexDetailsPage(
+            indexNames[0],
+            indicesListURLParams,
+            extensionsService,
+            application,
+            http,
+            IndexDetailsSection.Mappings
           );
         },
       });

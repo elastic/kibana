@@ -1,12 +1,16 @@
 {
   "type": "plugin",
   "id": "@kbn/vis-type-vislib-plugin",
-  "owner": "@elastic/kibana-visualizations",
+  "owner": [
+    "@elastic/kibana-visualizations"
+  ],
+  "group": "platform",
+  "visibility": "private",
   "description": "Contains the vislib visualizations. These are the classical area/line/bar, gauge/goal and heatmap charts. We want to replace them with elastic-charts.",
   "plugin": {
     "id": "visTypeVislib",
-    "server": true,
     "browser": true,
+    "server": true,
     "requiredPlugins": [
       "charts",
       "data",

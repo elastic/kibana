@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import type { PropsWithChildren } from 'react';
 import React from 'react';
 
@@ -61,6 +61,7 @@ const SUTProvider = ({
           spacesManager,
           serverBasePath: '',
           getUrlForApp: (_) => _,
+          getIsRoleManagementEnabled: () => Promise.resolve(() => undefined),
           getRolesAPIClient: getRolesAPIClientMock,
           getPrivilegesAPIClient: getPrivilegeAPIClientMock,
           getSecurityLicense: getSecurityLicenseMock,
@@ -87,10 +88,8 @@ describe('EditSpaceProvider', () => {
     });
 
     it('throws when the hook is used within a tree that does not have the provider', () => {
-      const { result } = renderHook(useEditSpaceServices);
-      expect(result.error).toBeDefined();
-      expect(result.error?.message).toEqual(
-        expect.stringMatching('EditSpaceService Context is missing.')
+      expect(() => renderHook(useEditSpaceServices)).toThrow(
+        /EditSpaceService Context is missing./
       );
     });
   });
@@ -108,12 +107,7 @@ describe('EditSpaceProvider', () => {
     });
 
     it('throws when the hook is used within a tree that does not have the provider', () => {
-      const { result } = renderHook(useEditSpaceStore);
-
-      expect(result.error).toBeDefined();
-      expect(result.error?.message).toEqual(
-        expect.stringMatching('EditSpaceStore Context is missing.')
-      );
+      expect(() => renderHook(useEditSpaceStore)).toThrow(/EditSpaceStore Context is missing./);
     });
   });
 });

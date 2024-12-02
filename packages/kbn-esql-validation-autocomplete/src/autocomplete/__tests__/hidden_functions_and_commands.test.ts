@@ -50,6 +50,7 @@ describe('hidden functions', () => {
     expect(suggestedFunctions).toContain('VISIBLE_FUNCTION($0)');
     expect(suggestedFunctions).not.toContain('HIDDEN_FUNCTION($0)');
   });
+
   it('does not suggest hidden agg functions', async () => {
     setTestFunctions([
       {

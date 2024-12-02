@@ -20,8 +20,10 @@ if [[ "$BUILDKITE_BRANCH" == "main" ]]; then
 steps:
   - label: "Builds Kibana VM images for cache update"
     trigger: kibana-vm-images
+    async: true
     build:
       env:
-        IMAGES_CONFIG="kibana/images.yml"
+        IMAGES_CONFIG: "kibana/images.yml"
+        RETRY: "1"
 EOF
 fi

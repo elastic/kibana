@@ -20,7 +20,7 @@ import { FilterManager } from '@kbn/data-plugin/public';
 import { CspClientPluginStartDeps } from '@kbn/cloud-security-posture';
 import * as statusHandlers from '../../../server/routes/status/status.handlers.mock';
 import {
-  bsearchFindingsHandler,
+  searchFindingsHandler,
   generateCspFinding,
   generateMultipleCspFindings,
   rulesGetStatesHandler,
@@ -58,7 +58,7 @@ describe('<Findings />', () => {
     const finding2 = generateCspFinding('0004', 'passed');
 
     server.use(statusHandlers.notInstalledHasMisconfigurationsFindingsHandler);
-    server.use(bsearchFindingsHandler([finding1, finding2]));
+    server.use(searchFindingsHandler([finding1, finding2]));
     renderFindingsPage();
 
     // Loading while checking the status API and fetching the findings
@@ -89,7 +89,7 @@ describe('<Findings />', () => {
     const finding2 = generateCspFinding('0002', 'passed');
 
     server.use(statusHandlers.indexedHandler);
-    server.use(bsearchFindingsHandler([finding1, finding2]));
+    server.use(searchFindingsHandler([finding1, finding2]));
     renderFindingsPage();
 
     // Loading while checking the status API
@@ -118,7 +118,7 @@ describe('<Findings />', () => {
       const finding2 = generateCspFinding('0002', 'passed');
 
       server.use(statusHandlers.indexedHandler);
-      server.use(bsearchFindingsHandler([finding1, finding2]));
+      server.use(searchFindingsHandler([finding1, finding2]));
 
       renderFindingsPage();
 
@@ -148,7 +148,7 @@ describe('<Findings />', () => {
       const finding2 = generateCspFinding('0002', 'passed');
 
       server.use(statusHandlers.indexedHandler);
-      server.use(bsearchFindingsHandler([finding1, finding2]));
+      server.use(searchFindingsHandler([finding1, finding2]));
 
       renderFindingsPage();
 
@@ -180,7 +180,7 @@ describe('<Findings />', () => {
       const finding2 = generateCspFinding('0002', 'passed');
 
       server.use(statusHandlers.indexedHandler);
-      server.use(bsearchFindingsHandler([finding1, finding2]));
+      server.use(searchFindingsHandler([finding1, finding2]));
 
       renderFindingsPage();
 
@@ -259,7 +259,7 @@ describe('<Findings />', () => {
       };
 
       server.use(statusHandlers.indexedHandler);
-      server.use(bsearchFindingsHandler([finding1, finding2]));
+      server.use(searchFindingsHandler([finding1, finding2]));
 
       renderFindingsPage(mockDependenciesWithFilter);
 
@@ -286,7 +286,7 @@ describe('<Findings />', () => {
     it('renders the distribution bar', async () => {
       server.use(statusHandlers.indexedHandler);
       server.use(
-        bsearchFindingsHandler(
+        searchFindingsHandler(
           generateMultipleCspFindings({
             count: 10,
             failedCount: 3,
@@ -316,7 +316,7 @@ describe('<Findings />', () => {
     it('filters by passed findings when clicking on the passed findings button', async () => {
       server.use(statusHandlers.indexedHandler);
       server.use(
-        bsearchFindingsHandler(
+        searchFindingsHandler(
           generateMultipleCspFindings({
             count: 2,
             failedCount: 1,
@@ -352,7 +352,7 @@ describe('<Findings />', () => {
     it('filters by failed findings when clicking on the failed findings button', async () => {
       server.use(statusHandlers.indexedHandler);
       server.use(
-        bsearchFindingsHandler(
+        searchFindingsHandler(
           generateMultipleCspFindings({
             count: 2,
             failedCount: 1,

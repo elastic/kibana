@@ -35,6 +35,8 @@ export const CHAT_BUTTON_TEST_ID = 'newChatByTitle' as const;
 
 export const NOTES_TITLE_TEST_ID = `${FLYOUT_HEADER_TEST_ID}NotesTitle` as const;
 export const NOTES_ADD_NOTE_BUTTON_TEST_ID = `${FLYOUT_HEADER_TEST_ID}NotesAddNoteButton` as const;
+export const NOTES_VIEW_NOTES_BUTTON_TEST_ID =
+  `${FLYOUT_HEADER_TEST_ID}NotesViewNotesButton` as const;
 export const NOTES_ADD_NOTE_ICON_BUTTON_TEST_ID =
   `${FLYOUT_HEADER_TEST_ID}NotesAddNoteIconButton` as const;
 export const NOTES_COUNT_TEST_ID = `${FLYOUT_HEADER_TEST_ID}NotesCount` as const;
@@ -104,8 +106,9 @@ export const INSIGHTS_CONTENT_TEST_ID = INSIGHTS_TEST_ID + CONTENT_TEST_ID;
 /* Summary row */
 
 export const SUMMARY_ROW_LOADING_TEST_ID = (dataTestSubj: string) => `${dataTestSubj}Loading`;
-export const SUMMARY_ROW_ICON_TEST_ID = (dataTestSubj: string) => `${dataTestSubj}Icon`;
+export const SUMMARY_ROW_TEXT_TEST_ID = (dataTestSubj: string) => `${dataTestSubj}Text`;
 export const SUMMARY_ROW_VALUE_TEST_ID = (dataTestSubj: string) => `${dataTestSubj}Value`;
+export const SUMMARY_ROW_BUTTON_TEST_ID = (dataTestSubj: string) => `${dataTestSubj}Button`;
 
 /* Entities */
 
@@ -146,6 +149,10 @@ export const ENTITIES_HOST_OVERVIEW_VULNERABILITIES_TEST_ID =
 /* Threat intelligence */
 
 export const INSIGHTS_THREAT_INTELLIGENCE_TEST_ID = `${PREFIX}InsightsThreatIntelligence` as const;
+export const INSIGHTS_THREAT_INTELLIGENCE_THREAT_MATCHES_TEST_ID =
+  `${INSIGHTS_THREAT_INTELLIGENCE_TEST_ID}ThreatMatches` as const;
+export const INSIGHTS_THREAT_INTELLIGENCE_ENRICHED_WITH_THREAT_INTELLIGENCE_TEST_ID =
+  `${INSIGHTS_THREAT_INTELLIGENCE_TEST_ID}EnrichedWithThreatIntelligence` as const;
 
 /* Correlations */
 
@@ -177,6 +184,9 @@ export const ANALYZER_PREVIEW_LOADING_TEST_ID = `${ANALYZER_PREVIEW_TEST_ID}Load
 export const SESSION_PREVIEW_TEST_ID = `${PREFIX}SessionPreview` as const;
 export const SESSION_PREVIEW_RULE_DETAILS_LINK_TEST_ID =
   `${SESSION_PREVIEW_TEST_ID}RuleDetailsLink` as const;
+
+export const GRAPH_PREVIEW_TEST_ID = `${PREFIX}GraphPreview` as const;
+export const GRAPH_PREVIEW_LOADING_TEST_ID = `${GRAPH_PREVIEW_TEST_ID}Loading` as const;
 
 /* Response section */
 

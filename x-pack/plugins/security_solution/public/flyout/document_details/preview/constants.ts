@@ -8,12 +8,17 @@
 import { i18n } from '@kbn/i18n';
 
 export const ALERT_PREVIEW_BANNER = {
-  title: i18n.translate(
-    'xpack.securitySolution.flyout.left.insights.correlations.alertPreviewTitle',
-    {
-      defaultMessage: 'Preview alert details',
-    }
-  ),
+  title: i18n.translate('xpack.securitySolution.flyout.preview.alertPreviewTitle', {
+    defaultMessage: 'Preview alert details',
+  }),
+  backgroundColor: 'warning',
+  textColor: 'warning',
+};
+
+export const EVENT_PREVIEW_BANNER = {
+  title: i18n.translate('xpack.securitySolution.flyout.preview.eventPreviewTitle', {
+    defaultMessage: 'Preview event details',
+  }),
   backgroundColor: 'warning',
   textColor: 'warning',
 };

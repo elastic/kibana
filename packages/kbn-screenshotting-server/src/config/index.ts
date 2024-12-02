@@ -35,11 +35,6 @@ export const config: PluginConfigDescriptor<ConfigType> = {
       { level: 'warning' }
     ),
     renameFromRoot(
-      'xpack.reporting.capture.browser.chromium.inspect',
-      'xpack.screenshotting.browser.chromium.inspect',
-      { level: 'warning' }
-    ),
-    renameFromRoot(
       'xpack.reporting.capture.browser.chromium.disableSandbox',
       'xpack.screenshotting.browser.chromium.disableSandbox',
       { level: 'warning' }

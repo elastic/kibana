@@ -22,14 +22,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const filterBar = getService('filterBar');
   const dataGrid = getService('dataGrid');
   const testSubjects = getService('testSubjects');
-  const { common, discover, timePicker, dashboard, header, unifiedFieldList } = getPageObjects([
-    'common',
-    'discover',
-    'timePicker',
-    'dashboard',
-    'header',
-    'unifiedFieldList',
-  ]);
+  const { common, discover, timePicker, dashboard, header, unifiedFieldList, context } =
+    getPageObjects([
+      'common',
+      'discover',
+      'timePicker',
+      'dashboard',
+      'header',
+      'unifiedFieldList',
+      'context',
+    ]);
   const defaultSettings = {
     defaultIndex: 'logstash-*',
     'discover:rowHeightOption': 0, // single line
@@ -40,8 +42,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const security = getService('security');
 
-  // Failing: See https://github.com/elastic/kibana/issues/196120
-  describe.skip('discover data grid context tests', () => {
+  describe('discover data grid context tests', () => {
     before(async () => {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
@@ -70,22 +71,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should open the context view with the selected document as anchor', async () => {
-      // check the anchor timestamp in the context view
-      await retry.waitFor('selected document timestamp matches anchor timestamp ', async () => {
-        // get the timestamp of the first row
-        const discoverFields = await dataGrid.getFields();
-        const firstTimestamp = discoverFields[0][0];
+      // get the timestamp of the first row
+      const discoverFields = await dataGrid.getFields();
+      const firstTimestamp = discoverFields[0][0];
 
-        // navigate to the context view
-        await dataGrid.clickRowToggle({ rowIndex: 0 });
-        const rowActions = await dataGrid.getRowActions({ rowIndex: 0 });
-        await rowActions[1].click();
+      // navigate to the context view
+      await dataGrid.clickRowToggle({ rowIndex: 0 });
+      const rowActions = await dataGrid.getRowActions({ rowIndex: 0 });
+      await rowActions[1].click();
+      await context.waitUntilContextLoadingHasFinished();
 
-        const contextFields = await dataGrid.getFields();
-        const anchorTimestamp = contextFields[0][0];
+      await dataGrid.clickRowToggle({ isAnchorRow: true });
+      await dataGrid.isShowingDocViewer();
+      const anchorTimestamp = await testSubjects.getVisibleText('tableDocViewRow-@timestamp-value');
 
-        return anchorTimestamp === firstTimestamp;
-      });
+      expect(anchorTimestamp).to.be(firstTimestamp);
     });
 
     it('should open the context view with the filters disabled', async () => {
@@ -104,6 +104,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('navigates to context view from embeddable', async () => {
       await common.navigateToApp('discover');
+      await header.waitUntilLoadingHasFinished();
+      await filterBar.addFilter({ field: 'extension.raw', operation: 'is', value: 'jpg' });
+      await header.waitUntilLoadingHasFinished();
       await discover.saveSearch('my search');
       await header.waitUntilLoadingHasFinished();
 
@@ -134,6 +137,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         log.debug('document table length', nrOfDocs);
         return nrOfDocs === 6;
       });
+      await filterBar.hasFilter('extension.raw', 'jpg', false);
     });
   });
 }

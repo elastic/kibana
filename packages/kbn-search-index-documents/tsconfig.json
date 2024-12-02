@@ -18,7 +18,6 @@
   "kbn_references": [
     "@kbn/i18n",
     "@kbn/i18n-react",
-    "@kbn/ui-theme",
     "@kbn/core",
     "@kbn/core-elasticsearch-server",
   ]

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { EntitiesList } from './entities_list';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
@@ -15,6 +15,7 @@ import { useErrorToast } from '../../../common/hooks/use_error_toast';
 import type { ListEntitiesResponse } from '../../../../common/api/entity_analytics/entity_store/entities/list_entities.gen';
 import { useGlobalFilterQuery } from '../../../common/hooks/use_global_filter_query';
 import { TestProviders } from '../../../common/mock';
+import { times } from 'lodash/fp';
 
 jest.mock('../../../common/containers/use_global_time');
 jest.mock('../../../common/containers/query_toggle');
@@ -22,21 +23,23 @@ jest.mock('./hooks/use_entities_list_query');
 jest.mock('../../../common/hooks/use_error_toast');
 jest.mock('../../../common/hooks/use_global_filter_query');
 
-const entityName = 'Entity Name';
+const secondPageTestId = 'pagination-button-1';
+const entityName = 'Entity Name 1';
 const responseData: ListEntitiesResponse = {
   page: 1,
   per_page: 10,
-  total: 1,
-  records: [
-    {
+  total: 20,
+  records: times(
+    (index) => ({
       '@timestamp': '2021-08-02T14:00:00.000Z',
-      user: { name: entityName },
+      user: { name: `Entity Name ${index}` },
       entity: {
-        name: entityName,
-        source: ['source'],
+        name: `Entity Name ${index}`,
+        source: 'test-index',
       },
-    },
-  ],
+    }),
+    10
+  ),
   inspect: undefined,
 };
 
@@ -81,7 +84,7 @@ describe('EntitiesList', () => {
 
   it('displays the correct number of rows', () => {
     render(<EntitiesList />, { wrapper: TestProviders });
-    expect(screen.getAllByRole('row')).toHaveLength(2);
+    expect(screen.getAllByRole('row')).toHaveLength(10 + 1);
   });
 
   it('calls refetch on time range change', () => {
@@ -106,10 +109,25 @@ describe('EntitiesList', () => {
     fireEvent.click(columnHeader);
     expect(mockUseEntitiesListQuery).toHaveBeenCalledWith(
       expect.objectContaining({
-        sortField: 'entity.displayName.keyword',
+        sortField: 'entity.name',
         sortOrder: 'asc',
       })
     );
+  });
+
+  it('should reset the page when sort order changes ', async () => {
+    render(<EntitiesList />, { wrapper: TestProviders });
+
+    const secondPageButton = screen.getByTestId(secondPageTestId);
+    fireEvent.click(secondPageButton);
+
+    const columnHeader = screen.getByText('Name');
+    fireEvent.click(columnHeader);
+
+    await waitFor(() => {
+      const firstPageButton = screen.getByTestId('pagination-button-0');
+      expect(firstPageButton).toHaveAttribute('aria-current', 'true');
+    });
   });
 
   it('displays error toast when there is an error', () => {

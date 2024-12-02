@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ChatCompleteAPI } from '../common/chat_complete';
+
+import type { ChatCompleteAPI, OutputAPI } from '@kbn/inference-common';
 import type { InferenceConnector } from '../common/connectors';
-import type { OutputAPI } from '../common/output';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 

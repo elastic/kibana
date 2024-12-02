@@ -239,13 +239,13 @@ export class KibanaClient {
     evaluationConnectorId,
     persist,
     suite,
-    scope,
+    scopes,
   }: {
     connectorId: string;
     evaluationConnectorId: string;
     persist: boolean;
     suite?: Mocha.Suite;
-    scope: AssistantScope;
+    scopes: AssistantScope[];
   }): ChatClient {
     function getMessages(message: string | Array<Message['message']>): Array<Message['message']> {
       if (typeof message === 'string') {
@@ -373,7 +373,7 @@ export class KibanaClient {
             connectorId: connectorIdOverride || connectorId,
             functions: functions.map((fn) => pick(fn, 'name', 'description', 'parameters')),
             functionCall,
-            scope,
+            scopes,
           };
 
         return that.axios.post(
@@ -463,7 +463,7 @@ export class KibanaClient {
                 connectorId,
                 persist,
                 title: currentTitle,
-                scope,
+                scopes,
               },
               { responseType: 'stream', timeout: NaN }
             )

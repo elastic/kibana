@@ -23,6 +23,8 @@ export function createVisToADJobAction(
   return {
     id: 'create-ml-ad-job-action',
     type: CREATE_LENS_VIS_TO_ML_AD_JOB_ACTION,
+    order: 8,
+    grouping: [{ id: 'ml', order: 3 }],
     getIconType(context): string {
       return 'machineLearningApp';
     },

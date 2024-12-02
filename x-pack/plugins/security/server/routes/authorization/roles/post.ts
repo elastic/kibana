@@ -52,6 +52,12 @@ export function defineBulkCreateOrUpdateRolesRoutes({
     .addVersion(
       {
         version: API_VERSIONS.roles.public.v1,
+        security: {
+          authz: {
+            enabled: false,
+            reason: `This route delegates authorization to Core's scoped ES cluster client`,
+          },
+        },
         validate: {
           request: {
             body: getBulkCreateOrUpdatePayloadSchema(() => {
@@ -61,6 +67,11 @@ export function defineBulkCreateOrUpdateRolesRoutes({
                 space: Object.keys(privileges.space),
               };
             }),
+          },
+          response: {
+            200: {
+              description: 'Indicates a successful call.',
+            },
           },
         },
       },

@@ -23,10 +23,10 @@ export const markdownVisDefinition: VisTypeDefinition<MarkdownVisParams> = {
   icon: 'visText',
   group: VisGroups.TOOLS,
   titleInWizard: i18n.translate('visTypeMarkdown.markdownTitleInWizard', {
-    defaultMessage: 'Text',
+    defaultMessage: 'Markdown text',
   }),
   description: i18n.translate('visTypeMarkdown.markdownDescription', {
-    defaultMessage: 'Add text and images to your dashboard.',
+    defaultMessage: 'Add custom text or images to dashboards.',
   }),
   order: 30,
   toExpressionAst,

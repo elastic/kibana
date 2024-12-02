@@ -75,6 +75,13 @@ export const InstallIntegrationsStepPayloadSchema = schema.arrayOf(
         id: schema.string(),
       })
     ),
+    metadata: schema.maybe(
+      schema.oneOf([
+        schema.object({
+          hostname: schema.string(),
+        }),
+      ])
+    ),
   })
 );
 

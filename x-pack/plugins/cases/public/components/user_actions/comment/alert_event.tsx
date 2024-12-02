@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import { isEmpty } from 'lodash';
 import { EuiLoadingSpinner } from '@elastic/eui';
 
@@ -38,12 +38,18 @@ const RuleLink: React.FC<SingleAlertProps> = memo(
 
     const ruleDetailsHref = getRuleDetailsHref?.(ruleId);
     const finalRuleName = ruleName ?? i18n.UNKNOWN_RULE;
+    const isValidLink = useMemo(() => {
+      if (!onRuleDetailsClick && !ruleDetailsHref) {
+        return false;
+      }
+      return !isEmpty(ruleId);
+    }, [onRuleDetailsClick, ruleDetailsHref, ruleId]);
 
     if (loadingAlertData) {
       return <EuiLoadingSpinner size="m" data-test-subj={`alert-loading-spinner-${actionId}`} />;
     }
 
-    if (!isEmpty(ruleId) && ruleDetailsHref != null) {
+    if (isValidLink) {
       return (
         <LinkAnchor
           onClick={onLinkClick}

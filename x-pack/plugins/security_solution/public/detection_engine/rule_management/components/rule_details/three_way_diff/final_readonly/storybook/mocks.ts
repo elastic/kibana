@@ -137,14 +137,10 @@ const commonDiffableRuleFields: DiffableCommonFields = {
   setup: '',
   related_integrations: [],
   required_fields: [],
-  author: [],
-  license: '',
-
   rule_schedule: {
     interval: '5m',
     lookback: '360s',
   },
-  exceptions_list: [],
   max_signals: DEFAULT_MAX_SIGNALS,
 };
 

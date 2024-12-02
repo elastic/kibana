@@ -46,6 +46,9 @@ export const getThresholdSignalHistory = async ({
   const response = await esClient.search({
     ...request,
     index: indexPattern,
+    // If alerts index is not yet created,
+    // do not throw a 404
+    ignore_unavailable: true,
   });
   return {
     signalHistory: buildThresholdSignalHistory({ alerts: response.hits.hits }),

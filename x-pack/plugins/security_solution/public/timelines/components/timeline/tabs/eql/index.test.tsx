@@ -5,20 +5,16 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
-import React from 'react';
+import type { ComponentProps } from 'react';
+import React, { useEffect } from 'react';
 import useResizeObserver from 'use-resize-observer/polyfilled';
-import type { Dispatch } from 'redux';
 
-import { defaultRowRenderers } from '../../body/renderers';
-import { DefaultCellRenderer } from '../../cell_rendering/default_cell_renderer';
-import { defaultHeaders, mockTimelineData } from '../../../../../common/mock';
+import { createMockStore, mockGlobalState, mockTimelineData } from '../../../../../common/mock';
 import { TestProviders } from '../../../../../common/mock/test_providers';
 
 import type { Props as EqlTabContentComponentProps } from '.';
-import { EqlTabContentComponent } from '.';
-import { useMountAppended } from '../../../../../common/utils/use_mount_appended';
-import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
+import EqlTabContentComponent from '.';
+import { TimelineId } from '../../../../../../common/types/timeline';
 import { useTimelineEvents } from '../../../../containers';
 import { useTimelineEventsDetails } from '../../../../containers/details';
 import { useSourcererDataView } from '../../../../../sourcerer/containers';
@@ -26,6 +22,15 @@ import { mockSourcererScope } from '../../../../../sourcerer/containers/mocks';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import type { ExperimentalFeatures } from '../../../../../../common';
 import { allowedExperimentalValues } from '../../../../../../common';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import * as notesApi from '../../../../../notes/api/api';
+import { timelineActions } from '../../../../store';
+import { DefaultCellRenderer } from '../../cell_rendering/default_cell_renderer';
+import { defaultRowRenderers } from '../../body/renderers';
+import { useDispatch } from 'react-redux';
+import { TimelineTabs } from '@kbn/securitysolution-data-table';
+
+const SPECIAL_TEST_TIMEOUT = 30000;
 
 jest.mock('../../../../containers', () => ({
   useTimelineEvents: jest.fn(),
@@ -35,9 +40,6 @@ jest.mock('../../../../containers/details', () => ({
 }));
 jest.mock('../../../fields_browser', () => ({
   useFieldBrowserOptions: jest.fn(),
-}));
-jest.mock('../../body/events', () => ({
-  Events: () => <></>,
 }));
 
 jest.mock('../../../../../sourcerer/containers');
@@ -54,184 +56,290 @@ mockUseResizeObserver.mockImplementation(() => ({}));
 
 jest.mock('../../../../../common/lib/kibana');
 
-describe('Timeline', () => {
-  let props = {} as EqlTabContentComponentProps;
-  const startDate = '2018-03-23T18:49:23.132Z';
-  const endDate = '2018-03-24T03:33:52.253Z';
+let useTimelineEventsMock = jest.fn();
 
-  const mount = useMountAppended();
+const loadPageMock = jest.fn();
+
+const mockState = {
+  ...structuredClone(mockGlobalState),
+};
+mockState.timeline.timelineById[TimelineId.test].activeTab = TimelineTabs.eql;
+
+const TestComponent = (props: Partial<ComponentProps<typeof EqlTabContentComponent>>) => {
+  const testComponentDefaultProps: ComponentProps<typeof EqlTabContentComponent> = {
+    timelineId: TimelineId.test,
+    renderCellValue: DefaultCellRenderer,
+    rowRenderers: defaultRowRenderers,
+  };
+
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    // Unified field list can be a culprit for long load times, so we wait for the timeline to be interacted with to load
+    dispatch(timelineActions.showTimeline({ id: TimelineId.test, show: true }));
+
+    // populating timeline so that it is not blank
+    dispatch(
+      timelineActions.updateEqlOptions({
+        id: TimelineId.test,
+        field: 'query',
+        value: 'any where true',
+      })
+    );
+  }, [dispatch]);
+
+  return <EqlTabContentComponent {...testComponentDefaultProps} {...props} />;
+};
+
+describe('EQL Tab', () => {
+  const props = {} as EqlTabContentComponentProps;
+
+  beforeAll(() => {
+    // https://github.com/atlassian/react-beautiful-dnd/blob/4721a518356f72f1dac45b5fd4ee9d466aa2996b/docs/guides/setup-problem-detection-and-error-recovery.md#disable-logging
+    Object.defineProperty(window, '__@hello-pangea/dnd-disable-dev-warnings', {
+      get() {
+        return true;
+      },
+    });
+  });
 
   beforeEach(() => {
-    (useTimelineEvents as jest.Mock).mockReturnValue([
+    useTimelineEventsMock = jest.fn(() => [
       false,
       {
-        events: mockTimelineData,
+        events: mockTimelineData.slice(0, 1),
         pageInfo: {
           activePage: 0,
           totalPages: 10,
         },
       },
     ]);
+    (useTimelineEvents as jest.Mock).mockImplementation(useTimelineEventsMock);
     (useTimelineEventsDetails as jest.Mock).mockReturnValue([false, {}]);
 
     (useSourcererDataView as jest.Mock).mockReturnValue(mockSourcererScope);
 
     (useIsExperimentalFeatureEnabledMock as jest.Mock).mockImplementation(
       (feature: keyof ExperimentalFeatures) => {
-        if (feature === 'unifiedComponentsInTimelineDisabled') {
-          return true;
-        }
         return allowedExperimentalValues[feature];
       }
     );
 
-    props = {
-      dispatch: {} as Dispatch,
-      activeTab: TimelineTabs.eql,
-      columns: defaultHeaders,
-      end: endDate,
-      eqlOptions: {},
-      isLive: false,
-      itemsPerPage: 5,
-      itemsPerPageOptions: [5, 10, 20],
-      renderCellValue: DefaultCellRenderer,
-      rowRenderers: defaultRowRenderers,
-      start: startDate,
-      timelineId: TimelineId.test,
-      timerangeKind: 'absolute',
-      pinnedEventIds: {},
-      eventIdToNoteIds: {},
-    };
+    HTMLElement.prototype.getBoundingClientRect = jest.fn(() => {
+      return {
+        width: 1000,
+        height: 1000,
+        x: 0,
+        y: 0,
+      } as DOMRect;
+    });
   });
 
   describe('rendering', () => {
-    test('renders correctly against snapshot', () => {
-      const wrapper = shallow(
-        <TestProviders>
-          <EqlTabContentComponent {...props} />
+    const fetchNotesMock = jest.spyOn(notesApi, 'fetchNotesByDocumentIds');
+    test('should render the timeline table', async () => {
+      fetchNotesMock.mockImplementation(jest.fn());
+      render(
+        <TestProviders store={createMockStore(mockState)}>
+          <TestComponent />
         </TestProviders>
       );
 
-      expect(wrapper.find('EqlTabContentComponent')).toMatchSnapshot();
+      expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
     });
 
-    test('it renders the timeline header', () => {
-      const wrapper = mount(
-        <TestProviders>
-          <EqlTabContentComponent {...props} />
+    test('it renders the timeline column headers', async () => {
+      render(
+        <TestProviders store={createMockStore(mockState)}>
+          <TestComponent />
         </TestProviders>
       );
 
-      expect(wrapper.find('[data-test-subj="timelineHeader"]').exists()).toEqual(true);
+      expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
     });
 
-    test('it renders the timeline table', () => {
-      const wrapper = mount(
-        <TestProviders>
-          <EqlTabContentComponent {...props} />
+    test('should render correct placeholder when there are not results', async () => {
+      (useTimelineEvents as jest.Mock).mockReturnValue([
+        false,
+        {
+          events: [],
+          pageInfo: {
+            activePage: 0,
+            totalPages: 10,
+          },
+        },
+      ]);
+
+      render(
+        <TestProviders store={createMockStore(mockState)}>
+          <TestComponent />
         </TestProviders>
       );
 
-      expect(wrapper.find(`[data-test-subj="${TimelineTabs.eql}-events-table"]`).exists()).toEqual(
-        true
-      );
+      expect(await screen.findByText('No results found')).toBeVisible();
     });
 
-    test('it renders the timeline column headers', () => {
-      const wrapper = mount(
-        <TestProviders>
-          <EqlTabContentComponent {...props} />
-        </TestProviders>
-      );
+    describe('pagination', () => {
+      beforeEach(() => {
+        // pagination tests need more than 1 record so here
+        // we return 5 records instead of just 1.
+        useTimelineEventsMock = jest.fn(() => [
+          false,
+          {
+            events: structuredClone(mockTimelineData.slice(0, 5)),
+            pageInfo: {
+              activePage: 0,
+              totalPages: 5,
+            },
+            refreshedAt: Date.now(),
+            /*
+             * `totalCount` could be any number w.r.t this test
+             * and actually means total hits on elastic search
+             * and not the fecthed number of records.
+             *
+             * This helps in testing `sampleSize` and `loadMore`
+             */
+            totalCount: 50,
+            loadPage: loadPageMock,
+          },
+        ]);
 
-      expect(
-        wrapper
-          .find(
-            `[data-test-subj="${TimelineTabs.eql}-events-table"] [data-test-subj="column-headers"]`
-          )
-          .exists()
-      ).toEqual(true);
-    });
-
-    test('it does NOT renders the timeline global sorting icon in headers', () => {
-      const wrapper = mount(
-        <TestProviders>
-          <EqlTabContentComponent {...props} />
-        </TestProviders>
-      );
-      expect(
-        wrapper
-          .find(
-            `[data-test-subj="${TimelineTabs.eql}-events-table"] [data-test-subj="column-headers"] [data-test-subj="timeline-sorting-fields"]`
-          )
-          .exists()
-      ).toEqual(false);
-    });
-
-    test('it does render the timeline table when the source is loading with no events', () => {
-      (useSourcererDataView as jest.Mock).mockReturnValue({
-        browserFields: {},
-        loading: true,
-        indexPattern: {},
-        selectedPatterns: [],
-        missingPatterns: [],
+        (useTimelineEvents as jest.Mock).mockImplementation(useTimelineEventsMock);
       });
-      const wrapper = mount(
-        <TestProviders>
-          <EqlTabContentComponent {...props} />
-        </TestProviders>
+
+      afterEach(() => {
+        jest.clearAllMocks();
+      });
+
+      it(
+        'should load notes for current page only',
+        async () => {
+          const mockStateWithNoteInTimeline = {
+            ...mockGlobalState,
+            timeline: {
+              ...mockGlobalState.timeline,
+              timelineById: {
+                [TimelineId.test]: {
+                  ...mockGlobalState.timeline.timelineById[TimelineId.test],
+                  /* 1 record for each page */
+                  activeTab: TimelineTabs.eql,
+                  itemsPerPage: 1,
+                  itemsPerPageOptions: [1, 2, 3, 4, 5],
+                  savedObjectId: 'timeline-1', // match timelineId in mocked notes data
+                  pinnedEventIds: { '1': true },
+                },
+              },
+            },
+          };
+
+          render(
+            <TestProviders
+              store={createMockStore({
+                ...structuredClone(mockStateWithNoteInTimeline),
+              })}
+            >
+              <TestComponent {...props} />
+            </TestProviders>
+          );
+
+          expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
+
+          expect(screen.getByTestId('pagination-button-previous')).toBeVisible();
+
+          expect(screen.getByTestId('pagination-button-0')).toHaveAttribute('aria-current', 'true');
+          expect(fetchNotesMock).toHaveBeenCalledWith(['1']);
+
+          // Page : 2
+
+          fetchNotesMock.mockClear();
+          expect(screen.getByTestId('pagination-button-1')).toBeVisible();
+
+          fireEvent.click(screen.getByTestId('pagination-button-1'));
+
+          await waitFor(() => {
+            expect(screen.getByTestId('pagination-button-1')).toHaveAttribute(
+              'aria-current',
+              'true'
+            );
+
+            expect(fetchNotesMock).toHaveBeenNthCalledWith(1, [mockTimelineData[1]._id]);
+          });
+
+          // Page : 3
+
+          fetchNotesMock.mockClear();
+          expect(screen.getByTestId('pagination-button-2')).toBeVisible();
+          fireEvent.click(screen.getByTestId('pagination-button-2'));
+
+          await waitFor(() => {
+            expect(screen.getByTestId('pagination-button-2')).toHaveAttribute(
+              'aria-current',
+              'true'
+            );
+
+            expect(fetchNotesMock).toHaveBeenNthCalledWith(1, [mockTimelineData[2]._id]);
+          });
+        },
+        SPECIAL_TEST_TIMEOUT
       );
 
-      expect(wrapper.find(`[data-test-subj="${TimelineTabs.eql}-events-table"]`).exists()).toEqual(
-        true
+      it(
+        'should load notes for correct page size',
+        async () => {
+          const mockStateWithNoteInTimeline = {
+            ...mockGlobalState,
+            timeline: {
+              ...mockGlobalState.timeline,
+              timelineById: {
+                [TimelineId.test]: {
+                  ...mockGlobalState.timeline.timelineById[TimelineId.test],
+                  /* 1 record for each page */
+                  itemsPerPage: 1,
+                  pageIndex: 0,
+                  itemsPerPageOptions: [1, 2, 3, 4, 5],
+                  savedObjectId: 'timeline-1', // match timelineId in mocked notes data
+                  pinnedEventIds: { '1': true },
+                },
+              },
+            },
+          };
+
+          render(
+            <TestProviders
+              store={createMockStore({
+                ...structuredClone(mockStateWithNoteInTimeline),
+              })}
+            >
+              <TestComponent {...props} />
+            </TestProviders>
+          );
+
+          expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
+
+          expect(screen.getByTestId('pagination-button-previous')).toBeVisible();
+
+          expect(screen.getByTestId('pagination-button-0')).toHaveAttribute('aria-current', 'true');
+          expect(screen.getByTestId('tablePaginationPopoverButton')).toHaveTextContent(
+            'Rows per page: 1'
+          );
+          fireEvent.click(screen.getByTestId('tablePaginationPopoverButton'));
+
+          await waitFor(() => {
+            expect(screen.getByTestId('tablePagination-2-rows')).toBeVisible();
+          });
+
+          fetchNotesMock.mockClear();
+          fireEvent.click(screen.getByTestId('tablePagination-2-rows'));
+
+          await waitFor(() => {
+            expect(fetchNotesMock).toHaveBeenNthCalledWith(1, [
+              mockTimelineData[0]._id,
+              mockTimelineData[1]._id,
+            ]);
+          });
+        },
+        SPECIAL_TEST_TIMEOUT
       );
-      expect(wrapper.find('[data-test-subj="events"]').exists()).toEqual(false);
-    });
-
-    test('it does NOT render the timeline table when start is empty', () => {
-      const wrapper = mount(
-        <TestProviders>
-          <EqlTabContentComponent {...props} start={''} />
-        </TestProviders>
-      );
-
-      expect(wrapper.find(`[data-test-subj="${TimelineTabs.eql}-events-table"]`).exists()).toEqual(
-        true
-      );
-      expect(wrapper.find('[data-test-subj="events"]').exists()).toEqual(false);
-    });
-
-    test('it does NOT render the timeline table when end is empty', () => {
-      const wrapper = mount(
-        <TestProviders>
-          <EqlTabContentComponent {...props} end={''} />
-        </TestProviders>
-      );
-
-      expect(wrapper.find(`[data-test-subj="${TimelineTabs.eql}-events-table"]`).exists()).toEqual(
-        true
-      );
-      expect(wrapper.find('[data-test-subj="events"]').exists()).toEqual(false);
-    });
-
-    it('it does NOT render the timeline footer when query is empty', () => {
-      const wrapper = mount(
-        <TestProviders>
-          <EqlTabContentComponent {...props} />
-        </TestProviders>
-      );
-
-      expect(wrapper.find('[data-test-subj="timeline-footer"]').exists()).toEqual(false);
-    });
-
-    it('it shows the timeline footer when query is non-empty', () => {
-      const wrapper = mount(
-        <TestProviders>
-          <EqlTabContentComponent {...{ ...props, eqlOptions: { query: 'query' } }} />
-        </TestProviders>
-      );
-
-      expect(wrapper.find('[data-test-subj="timeline-footer"]').exists()).toEqual(true);
     });
   });
 });

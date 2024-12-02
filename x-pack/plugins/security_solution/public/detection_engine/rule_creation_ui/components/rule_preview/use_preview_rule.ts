@@ -18,6 +18,7 @@ import { transformOutput } from '../../../../detections/containers/detection_eng
 import type { TimeframePreviewOptions } from '../../../../detections/pages/detection_engine/rules/types';
 import { usePreviewInvocationCount } from './use_preview_invocation_count';
 import * as i18n from './translations';
+import { PreviewRuleEventTypes } from '../../../../common/lib/telemetry';
 
 const emptyPreviewRule: RulePreviewResponse = {
   previewId: undefined,
@@ -58,7 +59,7 @@ export const usePreviewRule = ({
     const createPreviewId = async () => {
       if (rule != null) {
         try {
-          telemetry.reportPreviewRule({
+          telemetry.reportEvent(PreviewRuleEventTypes.PreviewRule, {
             loggedRequestsEnabled: enableLoggedRequests ?? false,
             ruleType: rule.type,
           });

@@ -10,10 +10,10 @@ import React from 'react';
 import { TestProviders } from '../../../../../../common/mock/test_providers';
 import { AgentlessAvailableCallout } from './agentless_available_callout';
 import { useKibana } from '../../../../../../common/lib/kibana';
+import { trackOnboardingLinkClick } from '../../../../lib/telemetry';
 
-jest.mock('../../../../../../common/lib/kibana', () => ({
-  useKibana: jest.fn(),
-}));
+jest.mock('../../../../../../common/lib/kibana');
+jest.mock('../../../../lib/telemetry');
 
 describe('AgentlessAvailableCallout', () => {
   const mockUseKibana = useKibana as jest.Mock;
@@ -61,5 +61,15 @@ describe('AgentlessAvailableCallout', () => {
       )
     ).toBeInTheDocument();
     expect(getByTestId('agentlessLearnMoreLink')).toBeInTheDocument();
+  });
+
+  it('should track the agentless learn more link click', () => {
+    const { getByTestId } = render(<AgentlessAvailableCallout />, {
+      wrapper: TestProviders,
+    });
+
+    getByTestId('agentlessLearnMoreLink').click();
+
+    expect(trackOnboardingLinkClick).toHaveBeenCalledWith('agentless_learn_more');
   });
 });

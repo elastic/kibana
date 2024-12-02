@@ -14,13 +14,14 @@ import type {
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import { useGetDataUsageMetrics } from '../../../hooks/use_get_usage_metrics';
 import { DateRangePickerValues, UsageMetricsDateRangePicker } from './date_picker';
-import { ChartsFilter } from './charts_filter';
+import { ChartsFilter, ChartsFilterProps } from './charts_filter';
+import { FilterName } from '../../hooks';
 
-interface ChartFiltersProps {
+export interface ChartFiltersProps {
   dateRangePickerState: DateRangePickerValues;
   isDataLoading: boolean;
-  onChangeDataStreamsFilter: (selectedDataStreams: string[]) => void;
-  onChangeMetricTypesFilter?: (selectedMetricTypes: string[]) => void;
+  isUpdateDisabled: boolean;
+  filterOptions: Record<FilterName, ChartsFilterProps['filterOptions']>;
   onRefresh: () => void;
   onRefreshChange: (evt: OnRefreshChangeProps) => void;
   onTimeChange: ({ start, end }: DurationRange) => void;
@@ -33,9 +34,9 @@ export const ChartFilters = memo<ChartFiltersProps>(
   ({
     dateRangePickerState,
     isDataLoading,
+    isUpdateDisabled,
+    filterOptions,
     onClick,
-    onChangeMetricTypesFilter,
-    onChangeDataStreamsFilter,
     onRefresh,
     onRefreshChange,
     onTimeChange,
@@ -48,23 +49,20 @@ export const ChartFilters = memo<ChartFiltersProps>(
       return (
         <>
           {showMetricsTypesFilter && (
-            <ChartsFilter
-              filterName={'metricTypes'}
-              onChangeFilterOptions={onChangeMetricTypesFilter}
-            />
+            <ChartsFilter filterOptions={filterOptions.metricTypes} data-test-subj={dataTestSubj} />
           )}
-          <ChartsFilter
-            filterName={'dataStreams'}
-            onChangeFilterOptions={onChangeDataStreamsFilter}
-          />
+          {!filterOptions.dataStreams.isFilterLoading && (
+            <ChartsFilter filterOptions={filterOptions.dataStreams} data-test-subj={dataTestSubj} />
+          )}
         </>
       );
-    }, [onChangeDataStreamsFilter, onChangeMetricTypesFilter, showMetricsTypesFilter]);
+    }, [dataTestSubj, filterOptions, showMetricsTypesFilter]);
 
     const onClickRefreshButton = useCallback(() => onClick(), [onClick]);
 
     return (
-      <EuiFlexGroup responsive gutterSize="m">
+      <EuiFlexGroup responsive gutterSize="m" alignItems="center" justifyContent="flexEnd">
+        <EuiFlexItem grow={2} />
         <EuiFlexItem grow={1}>
           <EuiFilterGroup>{filters}</EuiFilterGroup>
         </EuiFlexItem>
@@ -75,6 +73,7 @@ export const ChartFilters = memo<ChartFiltersProps>(
             onRefresh={onRefresh}
             onRefreshChange={onRefreshChange}
             onTimeChange={onTimeChange}
+            data-test-subj={dataTestSubj}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -82,6 +81,7 @@ export const ChartFilters = memo<ChartFiltersProps>(
             data-test-subj={getTestId('super-refresh-button')}
             fill={false}
             isLoading={isDataLoading}
+            isDisabled={isUpdateDisabled}
             onClick={onClickRefreshButton}
           />
         </EuiFlexItem>

@@ -32,10 +32,11 @@ import { ClickTriggerEvent } from '@kbn/charts-plugin/public';
 import { IconChartDatatable } from '@kbn/chart-icons';
 import useObservable from 'react-use/lib/useObservable';
 import { getColorCategories } from '@kbn/chart-expressions-common';
+import { getOriginalId, isTransposeId } from '@kbn/transpose-utils';
 import type { LensTableRowContextMenuEvent } from '../../../types';
 import type { FormatFactory } from '../../../../common/types';
 import { RowHeightMode } from '../../../../common/types';
-import { getOriginalId, isTransposeId, LensGridDirection } from '../../../../common/expressions';
+import { LensGridDirection } from '../../../../common/expressions';
 import { VisualizationContainer } from '../../../visualization_container';
 import { findMinMaxByColumnId, shouldColorByTerms } from '../../../shared_components';
 import type {
@@ -69,7 +70,8 @@ export const DataContext = React.createContext<DataContextType>({});
 
 const gridStyle: EuiDataGridStyle = {
   border: 'horizontal',
-  header: 'underline',
+  header: 'shade',
+  footer: 'shade',
 };
 
 export const DEFAULT_PAGE_SIZE = 10;
@@ -79,7 +81,10 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
   const dataGridRef = useRef<EuiDataGridRefProps>(null);
 
   const isInteractive = props.interactive;
-  const isDarkMode = useObservable(props.theme.theme$, { darkMode: false }).darkMode;
+  const isDarkMode = useObservable(props.theme.theme$, {
+    darkMode: false,
+    name: 'amsterdam',
+  }).darkMode;
 
   const [columnConfig, setColumnConfig] = useState({
     columns: props.args.columns,
@@ -288,8 +293,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
       columnConfig.columns
         .filter(({ columnId }) => isNumericMap.get(columnId))
         .map(({ columnId }) => columnId),
-      props.data,
-      getOriginalId
+      props.data
     );
   }, [props.data, isNumericMap, columnConfig]);
 

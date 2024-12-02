@@ -32,10 +32,15 @@ export const ConsoleCreateIndexExamples: CreateIndexLanguageExamples = {
 };
 
 export const ConsoleVectorsIngestDataExample: IngestDataCodeDefinition = {
-  ingestCommand: ({ indexName, sampleDocument }) => `POST /_bulk?pretty
-{ "index": { "_index": "${indexName}" } }
-${JSON.stringify(sampleDocument)}
-`,
+  ingestCommand: ({ indexName, sampleDocuments }) => {
+    let result = 'POST /_bulk?pretty\n';
+    sampleDocuments.forEach((document) => {
+      result += `{ "index": { "_index": "${indexName}" } }
+${JSON.stringify(document)}\n`;
+    });
+    result += '\n';
+    return result;
+  },
   updateMappingsCommand: ({ indexName, mappingProperties }) => `PUT /${indexName}/_mapping
 ${JSON.stringify({ properties: mappingProperties }, null, 2)}`,
 };

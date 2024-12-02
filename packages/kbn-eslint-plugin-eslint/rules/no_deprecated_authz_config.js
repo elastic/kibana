@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const routeMethods = ['get', 'put', 'delete', 'post'];
+const routeMethods = ['get', 'put', 'delete', 'post', 'patch'];
 const ACCESS_TAG_PREFIX = 'access:';
 
 const isStringLiteral = (el) => el.type === 'Literal' && typeof el.value === 'string';
@@ -39,6 +39,33 @@ const maybeReportDisabledSecurityConfig = (node, context, isVersionedRoute = fal
     return;
   }
 
+  const hasSecurityInRoot = (config) => {
+    const securityInRoot = config.properties.find(
+      (property) => property.key && property.key.name === 'security'
+    );
+
+    if (securityInRoot) {
+      return true;
+    }
+
+    const optionsProperty = config.properties.find(
+      (prop) => prop.key && prop.key.name === 'options'
+    );
+
+    if (optionsProperty?.value?.properties) {
+      const tagsProperty = optionsProperty.value.properties.find(
+        (prop) => prop.key.name === 'tags'
+      );
+
+      const accessTagsFilter = (el) => isLiteralAccessTag(el) || isTemplateLiteralAccessTag(el);
+      const accessTags = tagsProperty?.value?.elements?.filter(accessTagsFilter) ?? [];
+
+      return accessTags.length > 0;
+    }
+
+    return false;
+  };
+
   if (isVersionedRoute) {
     const [versionConfig] = node.arguments;
 
@@ -52,33 +79,6 @@ const maybeReportDisabledSecurityConfig = (node, context, isVersionedRoute = fal
       }
 
       let currentNode = node;
-
-      const hasSecurityInRoot = (config) => {
-        const securityInRoot = config.properties.find(
-          (property) => property.key && property.key.name === 'security'
-        );
-
-        if (securityInRoot) {
-          return true;
-        }
-
-        const optionsProperty = config.properties.find(
-          (prop) => prop.key && prop.key.name === 'options'
-        );
-
-        if (optionsProperty?.value?.properties) {
-          const tagsProperty = optionsProperty.value.properties.find(
-            (prop) => prop.key.name === 'tags'
-          );
-
-          const accessTagsFilter = (el) => isLiteralAccessTag(el) || isTemplateLiteralAccessTag(el);
-          const accessTags = tagsProperty.value.elements.filter(accessTagsFilter);
-
-          return accessTags.length > 0;
-        }
-
-        return false;
-      };
 
       while (
         currentNode &&
@@ -126,11 +126,14 @@ const maybeReportDisabledSecurityConfig = (node, context, isVersionedRoute = fal
     }
   } else {
     const [routeConfig] = node.arguments;
-    const securityProperty = routeConfig.properties.find(
-      (property) => property.key && property.key.name === 'security'
-    );
 
-    if (!securityProperty) {
+    const pathProperty = routeConfig.properties?.find((prop) => prop?.key?.name === 'path');
+
+    if (!pathProperty) {
+      return;
+    }
+
+    if (!hasSecurityInRoot(routeConfig)) {
       const pathProperty = routeConfig.properties.find((prop) => prop.key.name === 'path');
       context.report({
         node: routeConfig,
@@ -181,7 +184,14 @@ const handleRouteConfig = (node, context, isVersionedRoute = false) => {
             const staticPart = firstQuasi.split(ACCESS_TAG_PREFIX)[1] || '';
 
             const dynamicParts = el.expressions.map((expression, index) => {
-              const dynamicPlaceholder = `\${${expression.name}}`;
+              let dynamicPlaceholder;
+              if (expression.property) {
+                // Case: object.property
+                dynamicPlaceholder = `\${${expression.object.name}.${expression.property.name}}`;
+              } else {
+                // Case: simple variable
+                dynamicPlaceholder = `\${${expression.name}}`;
+              }
               const nextQuasi = el.quasis[index + 1].value.raw || '';
               return `${dynamicPlaceholder}${nextQuasi}`;
             });
@@ -290,13 +300,25 @@ module.exports = {
       CallExpression(node) {
         const callee = node.callee;
 
+        // Skipping by default if any of env vars is not set
+        const shouldSkipMigration =
+          !process.env.MIGRATE_ENABLED_AUTHZ && !process.env.MIGRATE_DISABLED_AUTHZ;
+
+        if (shouldSkipMigration) {
+          return;
+        }
+
         if (
           callee.type === 'MemberExpression' &&
           callee.object &&
           callee.object.name === 'router' &&
           routeMethods.includes(callee.property.name)
         ) {
-          handleRouteConfig(node, context, false);
+          if (process.env.MIGRATE_ENABLED_AUTHZ === 'false') {
+            maybeReportDisabledSecurityConfig(node, context, false);
+          } else {
+            handleRouteConfig(node, context, false);
+          }
         }
 
         if (
@@ -310,7 +332,11 @@ module.exports = {
           const versionConfig = node.arguments[0];
 
           if (versionConfig && versionConfig.type === 'ObjectExpression') {
-            handleRouteConfig(node, context, true);
+            if (process.env.MIGRATE_ENABLED_AUTHZ === 'false') {
+              maybeReportDisabledSecurityConfig(node, context, true);
+            } else {
+              handleRouteConfig(node, context, true);
+            }
           }
         }
       },

@@ -128,6 +128,7 @@ export {
   getDataViewFieldSubtypeNested,
   isDataViewFieldSubtypeMulti,
   isDataViewFieldSubtypeNested,
+  isCCSRemoteIndexName,
 } from './src/utils';
 
 export type { ExecutionContextSearch } from './src/expressions/types';

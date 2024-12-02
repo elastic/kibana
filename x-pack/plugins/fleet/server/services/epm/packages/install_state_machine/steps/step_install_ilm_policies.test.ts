@@ -24,6 +24,8 @@ import { installIlmForDataStream } from '../../../elasticsearch/datastream_ilm/i
 import { ElasticsearchAssetType } from '../../../../../types';
 import { deleteILMPolicies, deletePrerequisiteAssets } from '../../remove';
 
+import { createArchiveIteratorFromMap } from '../../../archive/archive_iterator';
+
 import { stepInstallILMPolicies, cleanupILMPoliciesStep } from './step_install_ilm_policies';
 
 jest.mock('../../../archive/storage');
@@ -56,6 +58,7 @@ const packageInstallContext = {
     owner: { github: 'elastic/fleet' },
   } as any,
   assetsMap: new Map(),
+  archiveIterator: createArchiveIteratorFromMap(new Map()),
   paths: [],
 };
 let soClient: jest.Mocked<SavedObjectsClientContract>;
@@ -239,6 +242,7 @@ describe('stepInstallILMPolicies', () => {
           owner: { github: 'elastic/fleet' },
         } as any,
         assetsMap: new Map(),
+        archiveIterator: createArchiveIteratorFromMap(new Map()),
         paths: [],
       },
       installType: 'install',

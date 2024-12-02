@@ -30,8 +30,10 @@ export const riskScorePreviewRoute = (
     .post({
       access: 'internal',
       path: RISK_SCORE_PREVIEW_URL,
-      options: {
-        tags: ['access:securitySolution', `access:${APP_ID}-entity-analytics`],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],
+        },
       },
     })
     .addVersion(

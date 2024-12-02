@@ -16,19 +16,19 @@ import { SaveTimelineButton } from '../modal/actions/save_timeline_button';
 export const SAVE_TIMELINE_CALLOUT_TITLE = i18n.translate(
   'xpack.securitySolution.timeline.notes.saveTimeline.calloutTitle',
   {
-    defaultMessage: 'Save timeline',
+    defaultMessage: 'Save Timeline',
   }
 );
 export const SAVE_TIMELINE_CALLOUT_CONTENT = i18n.translate(
   'xpack.securitySolution.timeline.notes.saveTimeline.calloutContent',
   {
-    defaultMessage: 'You need to save your timeline before creating notes for it.',
+    defaultMessage: 'You must save this Timeline before attaching notes to it.',
   }
 );
 export const SAVE_TIMELINE_BUTTON = i18n.translate(
-  'xpack.securitySolution.flyout.left.notes.savedTimelineButtonLabel',
+  'xpack.securitySolution.flyout.left.notes.saveTimeline.buttonLabel',
   {
-    defaultMessage: 'Save timeline',
+    defaultMessage: 'Save Timeline',
   }
 );
 

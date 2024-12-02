@@ -3055,7 +3055,7 @@
         "label": "EntityFields",
         "description": [],
         "signature": [
-          "{ '@timestamp'?: number | undefined; } & Partial<{ [key: string]: any; 'agent.name': string[]; 'source_data_stream.type': string | string[]; 'source_data_stream.dataset': string | string[]; 'event.ingested': string; sourceIndex: string; 'entity.lastSeenTimestamp': string; 'entity.schemaVersion': string; 'entity.definitionVersion': string; 'entity.displayName': string; 'entity.identityFields': string | string[]; 'entity.id': string; 'entity.type': string; 'entity.definitionId': string; }>"
+          "{ '@timestamp'?: number | undefined; } & Partial<{ [key: string]: any; 'agent.name': string[]; 'source_data_stream.type': string | string[]; 'source_data_stream.dataset': string | string[]; 'event.ingested': string; source_index: string; 'entity.last_seen_timestamp': string; 'entity.schema_version': string; 'entity.definition_version': string; 'entity.display_name': string; 'entity.identity_fields': string | string[]; 'entity.id': string; 'entity.type': string; 'entity.definition_id': string; }>"
         ],
         "path": "packages/kbn-apm-synthtrace-client/src/lib/entities/index.ts",
         "deprecated": false,
@@ -3133,7 +3133,7 @@
         "label": "LogDocument",
         "description": [],
         "signature": [
-          "{ '@timestamp'?: number | undefined; } & Partial<{ 'input.type': string; 'log.file.path'?: string | undefined; 'service.name'?: string | undefined; 'service.environment'?: string | undefined; 'data_stream.namespace': string; 'data_stream.type': string; 'data_stream.dataset': string; message?: string | undefined; 'error.message'?: string | undefined; 'event.original'?: string | undefined; 'event.dataset': string; 'log.level'?: string | undefined; 'host.name'?: string | undefined; 'container.id'?: string | undefined; 'trace.id'?: string | undefined; 'transaction.id'?: string | undefined; 'agent.id'?: string | undefined; 'agent.name'?: string | undefined; 'orchestrator.cluster.name'?: string | undefined; 'orchestrator.cluster.id'?: string | undefined; 'orchestrator.resource.id'?: string | undefined; 'kubernetes.pod.uid'?: string | undefined; 'aws.s3.bucket.name'?: string | undefined; 'aws.kinesis.name'?: string | undefined; 'orchestrator.namespace'?: string | undefined; 'container.name'?: string | undefined; 'cloud.provider'?: string | undefined; 'cloud.region'?: string | undefined; 'cloud.availability_zone'?: string | undefined; 'cloud.project.id'?: string | undefined; 'cloud.instance.id'?: string | undefined; 'error.stack_trace'?: string | undefined; 'error.exception.stacktrace'?: string | undefined; 'error.log.stacktrace'?: string | undefined; 'log.custom': Record<string, unknown>; 'host.geo.location': number[]; 'host.ip': string; 'network.bytes': number; 'tls.established': boolean; 'event.duration': number; 'event.start': Date; 'event.end': Date; labels?: Record<string, string> | undefined; test_field: string | string[]; date: Date; severity: string; msg: string; svc: string; hostname: string; thisisaverylongfieldnamethatevendoesnotcontainanyspaceswhyitcouldpotentiallybreakouruiinseveralplaces: string; }>"
+          "{ '@timestamp'?: number | undefined; } & Partial<{ _index?: string | undefined; 'input.type': string; 'log.file.path'?: string | undefined; 'service.name'?: string | undefined; 'service.environment'?: string | undefined; 'data_stream.namespace': string; 'data_stream.type': string; 'data_stream.dataset': string; message?: string | undefined; 'error.message'?: string | undefined; 'event.original'?: string | undefined; 'event.dataset': string; 'log.level'?: string | undefined; 'host.name'?: string | undefined; 'container.id'?: string | undefined; 'trace.id'?: string | undefined; 'transaction.id'?: string | undefined; 'agent.id'?: string | undefined; 'agent.name'?: string | undefined; 'orchestrator.cluster.name'?: string | undefined; 'orchestrator.cluster.id'?: string | undefined; 'orchestrator.resource.id'?: string | undefined; 'kubernetes.pod.uid'?: string | undefined; 'aws.s3.bucket.name'?: string | undefined; 'aws.kinesis.name'?: string | undefined; 'orchestrator.namespace'?: string | undefined; 'container.name'?: string | undefined; 'cloud.provider'?: string | undefined; 'cloud.region'?: string | undefined; 'cloud.availability_zone'?: string | undefined; 'cloud.project.id'?: string | undefined; 'cloud.instance.id'?: string | undefined; 'error.stack_trace'?: string | undefined; 'error.exception.stacktrace'?: string | undefined; 'error.log.stacktrace'?: string | undefined; 'log.custom': Record<string, unknown>; 'host.geo.location': number[]; 'host.ip': string; 'network.bytes': number; 'tls.established': boolean; 'event.duration': number; 'event.start': Date; 'event.end': Date; labels?: Record<string, string> | undefined; test_field: string | string[]; date: Date; severity: string; msg: string; svc: string; hostname: string; 'http.status_code'?: number | undefined; 'http.request.method'?: string | undefined; 'url.path'?: string | undefined; 'process.name'?: string | undefined; 'kubernetes.namespace'?: string | undefined; 'kubernetes.pod.name'?: string | undefined; 'kubernetes.container.name'?: string | undefined; 'orchestrator.resource.name'?: string | undefined; thisisaverylongfieldnamethatevendoesnotcontainanyspaceswhyitcouldpotentiallybreakouruiinseveralplaces: string; }>"
         ],
         "path": "packages/kbn-apm-synthtrace-client/src/lib/logs/index.ts",
         "deprecated": false,
@@ -3415,9 +3415,9 @@
             "label": "hostEntity",
             "description": [],
             "signature": [
-              "({ agentName, dataStreamType, dataStreamDataset, hostName, entityId, }: { agentName: string[]; dataStreamType: ",
+              "({ agentName, dataStreamType, hostName, entityId, }: { agentName: string[]; dataStreamType: ",
               "EntityDataStreamType",
-              "[]; dataStreamDataset: string; hostName: string; entityId: string; }) => HostEntity"
+              "[]; hostName: string; entityId: string; }) => HostEntity"
             ],
             "path": "packages/kbn-apm-synthtrace-client/src/lib/entities/index.ts",
             "deprecated": false,
@@ -3434,7 +3434,7 @@
                 "signature": [
                   "{ agentName: string[]; dataStreamType: ",
                   "EntityDataStreamType",
-                  "[]; dataStreamDataset: string; hostName: string; entityId: string; }"
+                  "[]; hostName: string; entityId: string; }"
                 ],
                 "path": "packages/kbn-apm-synthtrace-client/src/lib/entities/host_entity.ts",
                 "deprecated": false,
@@ -3450,9 +3450,9 @@
             "label": "containerEntity",
             "description": [],
             "signature": [
-              "({ agentName, dataStreamType, dataStreamDataset, containerId, entityId, }: { agentName: string[]; dataStreamType: ",
+              "({ agentName, dataStreamType, containerId, entityId, }: { agentName: string[]; dataStreamType: ",
               "EntityDataStreamType",
-              "[]; dataStreamDataset: string; containerId: string; entityId: string; }) => ContainerEntity"
+              "[]; containerId: string; entityId: string; }) => ContainerEntity"
             ],
             "path": "packages/kbn-apm-synthtrace-client/src/lib/entities/index.ts",
             "deprecated": false,
@@ -3469,11 +3469,420 @@
                 "signature": [
                   "{ agentName: string[]; dataStreamType: ",
                   "EntityDataStreamType",
-                  "[]; dataStreamDataset: string; containerId: string; entityId: string; }"
+                  "[]; containerId: string; entityId: string; }"
                 ],
                 "path": "packages/kbn-apm-synthtrace-client/src/lib/entities/container_entity.ts",
                 "deprecated": false,
                 "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/apm-synthtrace-client",
+            "id": "def-common.entities.k8s",
+            "type": "Object",
+            "tags": [],
+            "label": "k8s",
+            "description": [],
+            "path": "packages/kbn-apm-synthtrace-client/src/lib/entities/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/apm-synthtrace-client",
+                "id": "def-common.entities.k8s.k8sClusterJobEntity",
+                "type": "Function",
+                "tags": [],
+                "label": "k8sClusterJobEntity",
+                "description": [],
+                "signature": [
+                  "({ schema, name, entityId, ...others }: { [key: string]: any; schema: ",
+                  "Schema",
+                  "; name: string; entityId: string; }) => ",
+                  "K8sEntity"
+                ],
+                "path": "packages/kbn-apm-synthtrace-client/src/lib/entities/index.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "returnComment": [],
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/apm-synthtrace-client",
+                    "id": "def-common.entities.k8s.k8sClusterJobEntity.$1",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "__0",
+                    "description": [],
+                    "signature": [
+                      "{ [key: string]: any; schema: ",
+                      "Schema",
+                      "; name: string; entityId: string; }"
+                    ],
+                    "path": "packages/kbn-apm-synthtrace-client/src/lib/entities/kubernetes/cluster_entity.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              },
+              {
+                "parentPluginId": "@kbn/apm-synthtrace-client",
+                "id": "def-common.entities.k8s.k8sCronJobEntity",
+                "type": "Function",
+                "tags": [],
+                "label": "k8sCronJobEntity",
+                "description": [],
+                "signature": [
+                  "({ schema, name, uid, clusterName, entityId, ...others }: { [key: string]: any; schema: ",
+                  "Schema",
+                  "; name: string; uid?: string | undefined; clusterName?: string | undefined; entityId: string; }) => ",
+                  "K8sEntity"
+                ],
+                "path": "packages/kbn-apm-synthtrace-client/src/lib/entities/index.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "returnComment": [],
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/apm-synthtrace-client",
+                    "id": "def-common.entities.k8s.k8sCronJobEntity.$1",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "__0",
+                    "description": [],
+                    "signature": [
+                      "{ [key: string]: any; schema: ",
+                      "Schema",
+                      "; name: string; uid?: string | undefined; clusterName?: string | undefined; entityId: string; }"
+                    ],
+                    "path": "packages/kbn-apm-synthtrace-client/src/lib/entities/kubernetes/cron_job_entity.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              },
+              {
+                "parentPluginId": "@kbn/apm-synthtrace-client",
+                "id": "def-common.entities.k8s.k8sDaemonSetEntity",
+                "type": "Function",
+                "tags": [],
+                "label": "k8sDaemonSetEntity",
+                "description": [],
+                "signature": [
+                  "({ schema, name, uid, clusterName, entityId, ...others }: { [key: string]: any; schema: ",
+                  "Schema",
+                  "; name: string; uid?: string | undefined; clusterName?: string | undefined; entityId: string; }) => ",
+                  "K8sEntity"
+                ],
+                "path": "packages/kbn-apm-synthtrace-client/src/lib/entities/index.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "returnComment": [],
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/apm-synthtrace-client",
+                    "id": "def-common.entities.k8s.k8sDaemonSetEntity.$1",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "__0",
+                    "description": [],
+                    "signature": [
+                      "{ [key: string]: any; schema: ",
+                      "Schema",
+                      "; name: string; uid?: string | undefined; clusterName?: string | undefined; entityId: string; }"
+                    ],
+                    "path": "packages/kbn-apm-synthtrace-client/src/lib/entities/kubernetes/daemon_set_entity.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              },
+              {
+                "parentPluginId": "@kbn/apm-synthtrace-client",
+                "id": "def-common.entities.k8s.k8sDeploymentEntity",
+                "type": "Function",
+                "tags": [],
+                "label": "k8sDeploymentEntity",
+                "description": [],
+                "signature": [
+                  "({ schema, name, uid, clusterName, entityId, ...others }: { [key: string]: any; schema: ",
+                  "Schema",
+                  "; name: string; uid?: string | undefined; clusterName?: string | undefined; entityId: string; }) => ",
+                  "K8sEntity"
+                ],
+                "path": "packages/kbn-apm-synthtrace-client/src/lib/entities/index.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "returnComment": [],
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/apm-synthtrace-client",
+                    "id": "def-common.entities.k8s.k8sDeploymentEntity.$1",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "__0",
+                    "description": [],
+                    "signature": [
+                      "{ [key: string]: any; schema: ",
+                      "Schema",
+                      "; name: string; uid?: string | undefined; clusterName?: string | undefined; entityId: string; }"
+                    ],
+                    "path": "packages/kbn-apm-synthtrace-client/src/lib/entities/kubernetes/deployment_entity.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              },
+              {
+                "parentPluginId": "@kbn/apm-synthtrace-client",
+                "id": "def-common.entities.k8s.k8sJobEntity",
+                "type": "Function",
+                "tags": [],
+                "label": "k8sJobEntity",
+                "description": [],
+                "signature": [
+                  "({ schema, name, uid, clusterName, entityId, ...others }: { [key: string]: any; schema: ",
+                  "Schema",
+                  "; name: string; uid?: string | undefined; clusterName?: string | undefined; entityId: string; }) => ",
+                  "K8sEntity"
+                ],
+                "path": "packages/kbn-apm-synthtrace-client/src/lib/entities/index.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "returnComment": [],
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/apm-synthtrace-client",
+                    "id": "def-common.entities.k8s.k8sJobEntity.$1",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "__0",
+                    "description": [],
+                    "signature": [
+                      "{ [key: string]: any; schema: ",
+                      "Schema",
+                      "; name: string; uid?: string | undefined; clusterName?: string | undefined; entityId: string; }"
+                    ],
+                    "path": "packages/kbn-apm-synthtrace-client/src/lib/entities/kubernetes/job_entity.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              },
+              {
+                "parentPluginId": "@kbn/apm-synthtrace-client",
+                "id": "def-common.entities.k8s.k8sNodeEntity",
+                "type": "Function",
+                "tags": [],
+                "label": "k8sNodeEntity",
+                "description": [],
+                "signature": [
+                  "({ schema, name, uid, clusterName, entityId, ...others }: { [key: string]: any; schema: ",
+                  "Schema",
+                  "; name: string; uid?: string | undefined; clusterName?: string | undefined; entityId: string; }) => ",
+                  "K8sEntity"
+                ],
+                "path": "packages/kbn-apm-synthtrace-client/src/lib/entities/index.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "returnComment": [],
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/apm-synthtrace-client",
+                    "id": "def-common.entities.k8s.k8sNodeEntity.$1",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "__0",
+                    "description": [],
+                    "signature": [
+                      "{ [key: string]: any; schema: ",
+                      "Schema",
+                      "; name: string; uid?: string | undefined; clusterName?: string | undefined; entityId: string; }"
+                    ],
+                    "path": "packages/kbn-apm-synthtrace-client/src/lib/entities/kubernetes/node_entity.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              },
+              {
+                "parentPluginId": "@kbn/apm-synthtrace-client",
+                "id": "def-common.entities.k8s.k8sPodEntity",
+                "type": "Function",
+                "tags": [],
+                "label": "k8sPodEntity",
+                "description": [],
+                "signature": [
+                  "({ schema, name, uid, clusterName, entityId, ...others }: { [key: string]: any; schema: ",
+                  "Schema",
+                  "; name: string; uid?: string | undefined; clusterName?: string | undefined; entityId: string; }) => ",
+                  "K8sEntity"
+                ],
+                "path": "packages/kbn-apm-synthtrace-client/src/lib/entities/index.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "returnComment": [],
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/apm-synthtrace-client",
+                    "id": "def-common.entities.k8s.k8sPodEntity.$1",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "__0",
+                    "description": [],
+                    "signature": [
+                      "{ [key: string]: any; schema: ",
+                      "Schema",
+                      "; name: string; uid?: string | undefined; clusterName?: string | undefined; entityId: string; }"
+                    ],
+                    "path": "packages/kbn-apm-synthtrace-client/src/lib/entities/kubernetes/pod_entity.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              },
+              {
+                "parentPluginId": "@kbn/apm-synthtrace-client",
+                "id": "def-common.entities.k8s.k8sReplicaSetEntity",
+                "type": "Function",
+                "tags": [],
+                "label": "k8sReplicaSetEntity",
+                "description": [],
+                "signature": [
+                  "({ schema, name, uid, clusterName, entityId, ...others }: { [key: string]: any; schema: ",
+                  "Schema",
+                  "; name: string; uid?: string | undefined; clusterName?: string | undefined; entityId: string; }) => ",
+                  "K8sEntity"
+                ],
+                "path": "packages/kbn-apm-synthtrace-client/src/lib/entities/index.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "returnComment": [],
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/apm-synthtrace-client",
+                    "id": "def-common.entities.k8s.k8sReplicaSetEntity.$1",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "__0",
+                    "description": [],
+                    "signature": [
+                      "{ [key: string]: any; schema: ",
+                      "Schema",
+                      "; name: string; uid?: string | undefined; clusterName?: string | undefined; entityId: string; }"
+                    ],
+                    "path": "packages/kbn-apm-synthtrace-client/src/lib/entities/kubernetes/replica_set.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              },
+              {
+                "parentPluginId": "@kbn/apm-synthtrace-client",
+                "id": "def-common.entities.k8s.k8sStatefulSetEntity",
+                "type": "Function",
+                "tags": [],
+                "label": "k8sStatefulSetEntity",
+                "description": [],
+                "signature": [
+                  "({ schema, name, uid, clusterName, entityId, ...others }: { [key: string]: any; schema: ",
+                  "Schema",
+                  "; name: string; uid?: string | undefined; clusterName?: string | undefined; entityId: string; }) => ",
+                  "K8sEntity"
+                ],
+                "path": "packages/kbn-apm-synthtrace-client/src/lib/entities/index.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "returnComment": [],
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/apm-synthtrace-client",
+                    "id": "def-common.entities.k8s.k8sStatefulSetEntity.$1",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "__0",
+                    "description": [],
+                    "signature": [
+                      "{ [key: string]: any; schema: ",
+                      "Schema",
+                      "; name: string; uid?: string | undefined; clusterName?: string | undefined; entityId: string; }"
+                    ],
+                    "path": "packages/kbn-apm-synthtrace-client/src/lib/entities/kubernetes/stateful_set.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              },
+              {
+                "parentPluginId": "@kbn/apm-synthtrace-client",
+                "id": "def-common.entities.k8s.k8sServiceEntity",
+                "type": "Function",
+                "tags": [],
+                "label": "k8sServiceEntity",
+                "description": [],
+                "signature": [
+                  "({ schema, name, uid, clusterName, entityId, ...others }: { [key: string]: any; schema: ",
+                  "Schema",
+                  "; name: string; uid?: string | undefined; clusterName?: string | undefined; entityId: string; }) => ",
+                  "K8sEntity"
+                ],
+                "path": "packages/kbn-apm-synthtrace-client/src/lib/entities/index.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "returnComment": [],
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/apm-synthtrace-client",
+                    "id": "def-common.entities.k8s.k8sServiceEntity.$1",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "__0",
+                    "description": [],
+                    "signature": [
+                      "{ [key: string]: any; schema: ",
+                      "Schema",
+                      "; name: string; uid?: string | undefined; clusterName?: string | undefined; entityId: string; }"
+                    ],
+                    "path": "packages/kbn-apm-synthtrace-client/src/lib/entities/kubernetes/service.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              },
+              {
+                "parentPluginId": "@kbn/apm-synthtrace-client",
+                "id": "def-common.entities.k8s.k8sContainerEntity",
+                "type": "Function",
+                "tags": [],
+                "label": "k8sContainerEntity",
+                "description": [],
+                "signature": [
+                  "({ schema, id, entityId, ...others }: { [key: string]: any; schema: ",
+                  "Schema",
+                  "; id: string; entityId: string; }) => ",
+                  "K8sEntity"
+                ],
+                "path": "packages/kbn-apm-synthtrace-client/src/lib/entities/index.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "returnComment": [],
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/apm-synthtrace-client",
+                    "id": "def-common.entities.k8s.k8sContainerEntity.$1",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "__0",
+                    "description": [],
+                    "signature": [
+                      "{ [key: string]: any; schema: ",
+                      "Schema",
+                      "; id: string; entityId: string; }"
+                    ],
+                    "path": "packages/kbn-apm-synthtrace-client/src/lib/entities/kubernetes/container_entity.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
               }
             ]
           }
@@ -3788,6 +4197,34 @@
                 "signature": [
                   "LogsOptions"
                 ],
+                "path": "packages/kbn-apm-synthtrace-client/src/lib/logs/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/apm-synthtrace-client",
+            "id": "def-common.log.createForIndex",
+            "type": "Function",
+            "tags": [],
+            "label": "createForIndex",
+            "description": [],
+            "signature": [
+              "(index: string) => Log"
+            ],
+            "path": "packages/kbn-apm-synthtrace-client/src/lib/logs/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/apm-synthtrace-client",
+                "id": "def-common.log.createForIndex.$1",
+                "type": "string",
+                "tags": [],
+                "label": "index",
+                "description": [],
                 "path": "packages/kbn-apm-synthtrace-client/src/lib/logs/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
