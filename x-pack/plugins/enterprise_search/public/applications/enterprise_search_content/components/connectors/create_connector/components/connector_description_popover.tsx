@@ -214,7 +214,7 @@ export const ConnectorDescriptionPopover: React.FC<ConnectorDescriptionPopoverPr
               <EuiFlexItem grow={false}>
                 <EuiButton
                   data-test-subj="enterpriseSearchConnectorStartFreeTrialButton"
-                  href="https://cloud.elastic.co/registration?onboarding_token=search&cta=cloudregistration&tech=trial&plcmt=cross%20module&pg=search-labs"
+                  href="https://cloud.elastic.co/registration?onboarding_token=connectors"
                   target="_blank"
                 >
                   {i18n.translate('xpack.enterpriseSearch.createConnector.startTrialButtonLabel', {
