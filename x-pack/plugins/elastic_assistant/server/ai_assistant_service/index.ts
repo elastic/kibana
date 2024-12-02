@@ -196,7 +196,7 @@ export class AIAssistantService {
 
       if (this.productDocManager) {
         // install product documentation without blocking other resources
-        ensureProductDocumentationInstalled(this.productDocManager, this.options.logger);
+        void ensureProductDocumentationInstalled(this.productDocManager, this.options.logger);
       }
 
       await this.conversationsDataStream.install({
