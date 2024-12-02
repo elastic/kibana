@@ -18,7 +18,7 @@ import { HELP_GROUPS } from '../console_commands_definition';
 import { ExperimentalFeaturesService } from '../../../../../common/experimental_features_service';
 import type { CommandDefinition } from '../../../console';
 import type { HostMetadataInterface } from '../../../../../../common/endpoint/types';
-import { TESTING_CONSOLE_RESPONSE_ACTION_COMMANDS } from '../../../../../../common/endpoint/service/response_actions/constants';
+import { CONSOLE_RESPONSE_ACTION_COMMANDS } from '../../../../../../common/endpoint/service/response_actions/constants';
 
 jest.mock('../../../../../common/experimental_features_service');
 
@@ -46,6 +46,7 @@ describe('When displaying Endpoint Response Actions', () => {
     beforeEach(() => {
       (ExperimentalFeaturesService.get as jest.Mock).mockReturnValue({
         responseActionUploadEnabled: true,
+        crowdstrikeRunScriptEnabled: true,
       });
       commands = getEndpointConsoleCommands({
         agentType: 'endpoint',
@@ -72,7 +73,7 @@ describe('When displaying Endpoint Response Actions', () => {
         HELP_GROUPS.responseActions.label
       );
 
-      const expectedCommands: string[] = [...TESTING_CONSOLE_RESPONSE_ACTION_COMMANDS];
+      const expectedCommands: string[] = [...CONSOLE_RESPONSE_ACTION_COMMANDS];
       // add status to the list of expected commands in that order
       expectedCommands.splice(2, 0, 'status');
 
@@ -124,6 +125,7 @@ describe('When displaying Endpoint Response Actions', () => {
     beforeEach(() => {
       (ExperimentalFeaturesService.get as jest.Mock).mockReturnValue({
         responseActionsCrowdstrikeManualHostIsolationEnabled: true,
+        crowdstrikeRunScriptEnabled: true,
       });
       commands = getEndpointConsoleCommands({
         agentType: 'crowdstrike',
@@ -150,7 +152,7 @@ describe('When displaying Endpoint Response Actions', () => {
         HELP_GROUPS.responseActions.label
       );
 
-      expect(commandsInPanel).toEqual(['isolate', 'release']);
+      expect(commandsInPanel).toEqual(['isolate', 'release', 'runscript --']);
     });
   });
 });

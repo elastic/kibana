@@ -15,7 +15,7 @@ const TEST_SUBJ = Object.freeze({
 });
 
 export const getConsoleHelpPanelResponseActionTestSubj = (): Record<
-  Exclude<ConsoleResponseActionCommands, 'runscript'>,
+  ConsoleResponseActionCommands,
   string
 > => {
   return {
@@ -28,7 +28,7 @@ export const getConsoleHelpPanelResponseActionTestSubj = (): Record<
     execute: 'endpointResponseActionsConsole-commandList-Responseactions-execute',
     upload: 'endpointResponseActionsConsole-commandList-Responseactions-upload',
     scan: 'endpointResponseActionsConsole-commandList-Responseactions-scan',
-    // runscript: 'endpointResponseActionsConsole-commandList-Responseactions-runscript',
+    runscript: 'endpointResponseActionsConsole-commandList-Responseactions-runscript',
   };
 };
 

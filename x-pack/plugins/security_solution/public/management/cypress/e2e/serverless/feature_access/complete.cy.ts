@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { ensureResponseActionAuthzAccess } from '../../../tasks/response_actions';
 import { login, ROLE } from '../../../tasks/login';
-import { TESTING_RESPONSE_ACTION_API_COMMANDS_NAMES } from '../../../../../../common/endpoint/service/response_actions/constants';
+import { RESPONSE_ACTION_API_COMMANDS_NAMES } from '../../../../../../common/endpoint/service/response_actions/constants';
 import { getNoPrivilegesPage } from '../../../screens/common';
 import { getEndpointManagementPageList } from '../../../screens';
 
@@ -20,11 +22,11 @@ describe(
         productTypes: [{ product_line: 'security', product_tier: 'complete' }],
         // This is not needed for this test, but it's a good example of
         // how to enable experimental features in the Cypress tests.
-        // kbnServerArgs: [
-        //   `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-        //     'featureFlagName',
-        //   ])}`,
-        // ],
+        kbnServerArgs: [
+          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+            'crowdstrikeRunScriptEnabled',
+          ])}`,
+        ],
       },
     },
   },
@@ -62,7 +64,7 @@ describe(
       }
 
       // No access to response actions (except `unisolate`)
-      for (const actionName of TESTING_RESPONSE_ACTION_API_COMMANDS_NAMES.filter(
+      for (const actionName of RESPONSE_ACTION_API_COMMANDS_NAMES.filter(
         (apiName) => apiName !== 'unisolate'
       )) {
         it(`should not allow access to Response Action: ${actionName}`, () => {
@@ -87,7 +89,7 @@ describe(
       });
 
       // No access to response actions (except `unisolate`)
-      for (const actionName of TESTING_RESPONSE_ACTION_API_COMMANDS_NAMES.filter(
+      for (const actionName of RESPONSE_ACTION_API_COMMANDS_NAMES.filter(
         (apiName) => apiName !== 'unisolate'
       )) {
         it(`should not allow access to Response Action: ${actionName}`, () => {

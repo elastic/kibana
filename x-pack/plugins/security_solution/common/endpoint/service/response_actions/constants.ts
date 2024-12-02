@@ -31,11 +31,6 @@ export const RESPONSE_ACTION_API_COMMANDS_NAMES = [
   'runscript',
 ] as const;
 
-// since runscript is only available in CrowdStrike - we do not need it for the Endpoint testing
-export const TESTING_RESPONSE_ACTION_API_COMMANDS_NAMES = RESPONSE_ACTION_API_COMMANDS_NAMES.filter(
-  (command) => command !== 'runscript'
-);
-
 export type ResponseActionsApiCommandNames = (typeof RESPONSE_ACTION_API_COMMANDS_NAMES)[number];
 
 export const ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS: ResponseActionsApiCommandNames[] = [
@@ -81,10 +76,6 @@ export const CONSOLE_RESPONSE_ACTION_COMMANDS = [
   'scan',
   'runscript',
 ] as const;
-
-export const TESTING_CONSOLE_RESPONSE_ACTION_COMMANDS = CONSOLE_RESPONSE_ACTION_COMMANDS.filter(
-  (command) => command !== 'runscript'
-);
 
 export type ConsoleResponseActionCommands = (typeof CONSOLE_RESPONSE_ACTION_COMMANDS)[number];
 

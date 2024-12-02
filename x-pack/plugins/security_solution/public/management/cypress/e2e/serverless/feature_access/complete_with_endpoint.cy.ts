@@ -7,7 +7,7 @@
 
 import { ensureResponseActionAuthzAccess } from '../../../tasks/response_actions';
 import { login, ROLE } from '../../../tasks/login';
-import { TESTING_RESPONSE_ACTION_API_COMMANDS_NAMES } from '../../../../../../common/endpoint/service/response_actions/constants';
+import { RESPONSE_ACTION_API_COMMANDS_NAMES } from '../../../../../../common/endpoint/service/response_actions/constants';
 import {
   getEndpointManagementPageList,
   getFleetAgentListTable,
@@ -26,11 +26,11 @@ describe(
         ],
         // This is not needed for this test, but it's a good example of
         // how to enable experimental features in the Cypress tests.
-        // kbnServerArgs: [
-        //   `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-        //     'featureFlagName',
-        //   ])}`,
-        // ],
+        kbnServerArgs: [
+          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+            'crowdstrikeRunScriptEnabled',
+          ])}`,
+        ],
       },
     },
   },
@@ -54,7 +54,7 @@ describe(
         });
       }
 
-      for (const actionName of TESTING_RESPONSE_ACTION_API_COMMANDS_NAMES) {
+      for (const actionName of RESPONSE_ACTION_API_COMMANDS_NAMES) {
         it(`should allow access to Response Action: ${actionName}`, () => {
           ensureResponseActionAuthzAccess('all', actionName, username, password);
         });
@@ -77,7 +77,7 @@ describe(
         });
       });
 
-      for (const actionName of TESTING_RESPONSE_ACTION_API_COMMANDS_NAMES) {
+      for (const actionName of RESPONSE_ACTION_API_COMMANDS_NAMES) {
         it(`should allow access to Response Action: ${actionName}`, () => {
           ensureResponseActionAuthzAccess('all', actionName, username, password);
         });

@@ -528,7 +528,7 @@ export const getEndpointConsoleCommands = ({
         aboutInfo: CROWDSTRIKE_CONSOLE_COMMANDS.execute.about,
         isSupported: doesEndpointSupportCommand('runscript'),
       }),
-      RenderComponent: ExecuteActionResult,
+      RenderComponent: () => null,
       meta: {
         agentType,
         endpointId: endpointAgentId,
@@ -581,7 +581,7 @@ Run a script from a path on the remote host with the specified command line argu
       },
       helpGroupLabel: HELP_GROUPS.responseActions.label,
       helpGroupPosition: HELP_GROUPS.responseActions.position,
-      helpCommandPosition: 6,
+      helpCommandPosition: 9,
       helpDisabled: !doesEndpointSupportCommand('runscript'),
       helpHidden: !getRbacControl({
         commandName: 'runscript',

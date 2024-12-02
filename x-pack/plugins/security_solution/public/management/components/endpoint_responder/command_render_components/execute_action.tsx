@@ -41,8 +41,7 @@ export const ExecuteActionResult = memo<
       agent_type: agentType,
       endpoint_ids: [endpointId],
       parameters: {
-        // TODO temporary optional chaining until the work on RunScript is done and can be migrated to using a new component
-        command: command.args.args.command?.[0],
+        command: command.args.args.command[0],
         timeout: parsedExecuteTimeout(command.args.args.timeout?.[0]),
       },
       comment: command.args.args?.comment?.[0],
