@@ -8,14 +8,9 @@
 import { EuiFlexGroup } from '@elastic/eui';
 import type { Dispatch, SetStateAction } from 'react';
 import React, { useCallback } from 'react';
-import styled from 'styled-components';
 import * as i18n from './translations';
 import { RuleSearchField } from '../../../../detection_engine/rule_management_ui/components/rules_table/rules_table_filters/rule_search_field';
 import type { TableFilterOptions } from '../../hooks/use_filter_rules_to_install';
-
-const FilterWrapper = styled(EuiFlexGroup)`
-  margin-bottom: ${({ theme }) => theme.eui.euiSizeM};
-`;
 
 export interface FiltersComponentProps {
   /**
@@ -45,13 +40,13 @@ const FiltersComponent: React.FC<FiltersComponentProps> = ({ filterOptions, setF
   );
 
   return (
-    <FilterWrapper gutterSize="m" justifyContent="flexEnd" wrap>
+    <EuiFlexGroup gutterSize="m" justifyContent="flexEnd" wrap>
       <RuleSearchField
         initialValue={filterOptions.filter}
         onSearch={handleOnSearch}
         placeholder={i18n.SEARCH_PLACEHOLDER}
       />
-    </FilterWrapper>
+    </EuiFlexGroup>
   );
 };
 
