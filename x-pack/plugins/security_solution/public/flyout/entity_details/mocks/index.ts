@@ -96,7 +96,7 @@ export const mockUserRiskScoreState: RiskScoreState<RiskScoreEntity.user> = {
   refetch: () => {},
   totalCount: 0,
   isAuthorized: true,
-  isEngineEnabled: true,
+  hasEngineBeenInstalled: true,
   loading: false,
   error: undefined,
 };
@@ -111,7 +111,7 @@ export const mockHostRiskScoreState: RiskScoreState<RiskScoreEntity.host> = {
   refetch: () => {},
   totalCount: 0,
   isAuthorized: true,
-  isEngineEnabled: true,
+  hasEngineBeenInstalled: true,
   loading: false,
   error: undefined,
 };

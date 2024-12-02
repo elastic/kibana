@@ -34,7 +34,7 @@ export interface RiskScoreState<T extends RiskScoreEntity.host | RiskScoreEntity
   refetch: inputsModel.Refetch;
   totalCount: number;
   isAuthorized: boolean;
-  isEngineEnabled: boolean;
+  hasEngineBeenInstalled: boolean;
   loading: boolean;
   error: unknown;
 }
@@ -85,7 +85,7 @@ export const useRiskScore = <T extends RiskScoreEntity.host | RiskScoreEntity.us
   const hasEntityAnalyticsCapability = useHasSecurityCapability('entity-analytics');
   const isAuthorized = isPlatinumOrTrialLicense && hasEntityAnalyticsCapability;
   const { data: riskEngineStatus, isFetching: isStatusLoading } = useRiskEngineStatus();
-  const isEngineEnabled = riskEngineStatus?.risk_engine_status === 'ENABLED';
+  const hasEngineBeenInstalled = riskEngineStatus?.risk_engine_status !== 'NOT_INSTALLED';
   const {
     loading,
     result: response,
@@ -96,7 +96,7 @@ export const useRiskScore = <T extends RiskScoreEntity.host | RiskScoreEntity.us
   } = useSearchStrategy<RiskQueries.hostsRiskScore | RiskQueries.usersRiskScore>({
     factoryQueryType,
     initialResult,
-    abort: skip,
+    abort: skip || !hasEngineBeenInstalled || isStatusLoading || !isAuthorized,
     showErrorToast: false,
   });
   const refetchAll = useCallback(() => {
@@ -113,10 +113,18 @@ export const useRiskScore = <T extends RiskScoreEntity.host | RiskScoreEntity.us
       totalCount: response.totalCount,
       isAuthorized,
       isInspected: false,
-      isEngineEnabled,
+      hasEngineBeenInstalled,
       error,
     }),
-    [response.data, response.totalCount, inspect, refetchAll, isAuthorized, isEngineEnabled, error]
+    [
+      response.data,
+      response.totalCount,
+      inspect,
+      refetchAll,
+      isAuthorized,
+      hasEngineBeenInstalled,
+      error,
+    ]
   );
 
   const requestTimerange = useMemo(

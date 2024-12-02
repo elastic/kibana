@@ -31,7 +31,7 @@ export const mockRiskScoreState = {
   isInspected: false,
   refetch: () => {},
   totalCount: 0,
-  isEngineEnabled: true,
+  hasEngineBeenInstalled: true,
   isAuthorized: true,
   isDeprecated: false,
   loading: false,

@@ -69,7 +69,7 @@ const RiskDetailsTabBodyComponent: React.FC<
     [entityName, riskEntity]
   );
 
-  const { data, loading, refetch, inspect, isEngineEnabled } = useRiskScore({
+  const { data, loading, refetch, inspect, hasEngineBeenInstalled } = useRiskScore({
     filterQuery,
     onlyLatest: false,
     riskEntity,
@@ -109,7 +109,7 @@ const RiskDetailsTabBodyComponent: React.FC<
   }
 
   const status = {
-    isDisabled: !isEngineEnabled && !loading,
+    isDisabled: !hasEngineBeenInstalled && !loading,
   };
 
   if (status.isDisabled) {
@@ -123,7 +123,7 @@ const RiskDetailsTabBodyComponent: React.FC<
     );
   }
 
-  if (isEngineEnabled && severitySelectionRedux.length === 0 && data && data.length === 0) {
+  if (hasEngineBeenInstalled && severitySelectionRedux.length === 0 && data && data.length === 0) {
     return <RiskScoresNoDataDetected entityType={riskEntity} />;
   }
 

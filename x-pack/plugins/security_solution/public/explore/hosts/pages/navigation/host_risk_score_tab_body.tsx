@@ -64,7 +64,7 @@ export const HostRiskScoreQueryTabBody = ({
   const timerange = useMemo(() => ({ from, to }), [from, to]);
 
   const privileges = useMissingRiskEnginePrivileges();
-  const { data, inspect, isInspected, isEngineEnabled, loading, refetch, totalCount } =
+  const { data, inspect, isInspected, hasEngineBeenInstalled, loading, refetch, totalCount } =
     useRiskScore({
       filterQuery,
       pagination,
@@ -80,7 +80,7 @@ export const HostRiskScoreQueryTabBody = ({
     riskEntity: RiskScoreEntity.host,
   });
 
-  const isDisabled = !isEngineEnabled && !loading;
+  const isDisabled = !hasEngineBeenInstalled && !loading;
   const RiskScoreUpsell = useUpsellingComponent('entity_analytics_panel');
 
   if (RiskScoreUpsell) {
@@ -110,7 +110,7 @@ export const HostRiskScoreQueryTabBody = ({
 
   if (
     !loading &&
-    isEngineEnabled &&
+    hasEngineBeenInstalled &&
     severitySelectionRedux.length === 0 &&
     data &&
     data.length === 0

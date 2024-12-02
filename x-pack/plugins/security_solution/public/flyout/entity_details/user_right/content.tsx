@@ -57,7 +57,7 @@ export const UserPanelContent = ({
 
   return (
     <FlyoutBody>
-      {riskScoreState.isEngineEnabled && riskScoreState.data?.length !== 0 && (
+      {riskScoreState.hasEngineBeenInstalled && riskScoreState.data?.length !== 0 && (
         <>
           <FlyoutRiskSummary
             riskScoreData={riskScoreState}

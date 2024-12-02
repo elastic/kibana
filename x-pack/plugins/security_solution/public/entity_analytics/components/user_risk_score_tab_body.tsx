@@ -66,7 +66,7 @@ export const UserRiskScoreQueryTabBody = ({
 
   const privileges = useMissingRiskEnginePrivileges();
 
-  const { data, inspect, isInspected, isEngineEnabled, loading, refetch, totalCount } =
+  const { data, inspect, isInspected, hasEngineBeenInstalled, loading, refetch, totalCount } =
     useRiskScore({
       filterQuery,
       pagination,
@@ -82,7 +82,7 @@ export const UserRiskScoreQueryTabBody = ({
     skip: querySkip,
   });
 
-  const isDisabled = !isEngineEnabled && !loading;
+  const isDisabled = !hasEngineBeenInstalled && !loading;
 
   const RiskScoreUpsell = useUpsellingComponent('entity_analytics_panel');
   if (RiskScoreUpsell) {
@@ -110,7 +110,12 @@ export const UserRiskScoreQueryTabBody = ({
     );
   }
 
-  if (isEngineEnabled && userSeveritySelectionRedux.length === 0 && data && data.length === 0) {
+  if (
+    hasEngineBeenInstalled &&
+    userSeveritySelectionRedux.length === 0 &&
+    data &&
+    data.length === 0
+  ) {
     return <RiskScoresNoDataDetected entityType={RiskScoreEntity.user} />;
   }
 

@@ -132,7 +132,7 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
     inspect,
     refetch,
     isAuthorized,
-    isEngineEnabled,
+    hasEngineBeenInstalled,
   } = useRiskScore({
     filterQuery,
     skip: !toggleStatus,
@@ -166,7 +166,7 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
     return null;
   }
 
-  const isDisabled = !isEngineEnabled && !isTableLoading;
+  const isDisabled = !hasEngineBeenInstalled && !isTableLoading;
 
   if (!privileges.isLoading && !privileges.hasAllRequiredPrivileges) {
     return (
@@ -187,7 +187,7 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
     );
   }
 
-  if (isEngineEnabled && selectedSeverity.length === 0 && data && data.length === 0) {
+  if (hasEngineBeenInstalled && selectedSeverity.length === 0 && data && data.length === 0) {
     return <RiskScoresNoDataDetected entityType={riskEntity} />;
   }
 
