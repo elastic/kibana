@@ -64,7 +64,7 @@ describe('Threshold', () => {
 
     expect((Metric as jest.Mock).mock.calls[0][0].data[0][0]).toMatchInlineSnapshot(`
       Object {
-        "color": "#f8e9e9",
+        "color": "#BD271E",
         "extra": <React.Fragment>
           Alert when &gt;= 7%
           <br />
