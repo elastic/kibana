@@ -12,17 +12,8 @@
  */
 
 import type { OnboardingContextValue } from '../onboarding_context';
-import {
-  mockReportCardOpen,
-  mockReportCardComplete,
-  mockReportCardLinkClicked,
-} from './onboarding_context_mocks';
+import { mockOnboardingContext } from './mocks';
 
 export const useOnboardingContext = (): OnboardingContextValue => {
-  return {
-    spaceId: 'default',
-    reportCardOpen: mockReportCardOpen,
-    reportCardComplete: mockReportCardComplete,
-    reportCardLinkClicked: mockReportCardLinkClicked,
-  };
+  return mockOnboardingContext();
 };

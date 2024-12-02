@@ -226,8 +226,8 @@ export function loadEmbeddableData(
         handleEvent,
         disableTriggers,
         updateBlockingErrors,
-        renderCount: internalApi.renderCount$.getValue(),
         forceDSL: (parentApi as { forceDSL?: boolean }).forceDSL,
+        getDisplayOptions: internalApi.getDisplayOptions,
       }),
       getUsedDataViews(
         currentState.attributes.references,

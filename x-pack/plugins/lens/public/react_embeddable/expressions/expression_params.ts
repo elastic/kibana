@@ -24,6 +24,7 @@ import {
   IndexPatternMap,
   IndexPatternRef,
   UserMessage,
+  VisualizationDisplayOptions,
   isLensFilterEvent,
   isLensMultiFilterEvent,
   isLensTableRowContextMenuClickEvent,
@@ -61,8 +62,8 @@ interface GetExpressionRendererPropsParams {
   api: LensApi;
   addUserMessages: (messages: UserMessage[]) => void;
   updateBlockingErrors: (error: Error) => void;
-  renderCount: number;
   forceDSL?: boolean;
+  getDisplayOptions: () => VisualizationDisplayOptions;
 }
 
 async function getExpressionFromDocument(
@@ -151,8 +152,8 @@ export async function getExpressionRendererParams(
     addUserMessages,
     updateBlockingErrors,
     searchContext,
-    renderCount,
     forceDSL,
+    getDisplayOptions,
   }: GetExpressionRendererPropsParams
 ): Promise<{
   params: ExpressionWrapperProps | null;
@@ -221,7 +222,7 @@ export async function getExpressionRendererParams(
       variables: getVariables(api, state),
       style: state.style,
       className: state.className,
-      noPadding: state.noPadding,
+      noPadding: getDisplayOptions().noPadding,
     };
     return {
       indexPatterns,
