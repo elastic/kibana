@@ -6,9 +6,9 @@
  */
 
 import type { CellAction, CellActionFactory } from '@kbn/cell-actions';
+import { isInSecurityApp } from '../../../../common/hooks/is_in_security_app';
 import type { SecurityAppStore } from '../../../../common/store';
 import { extractTimelineCapabilities } from '../../../../common/utils/timeline_capabilities';
-import { isInSecurityApp } from '../../utils';
 import type { StartServices } from '../../../../types';
 import { createAddToTimelineCellActionFactory } from '../cell_action/add_to_timeline';
 
