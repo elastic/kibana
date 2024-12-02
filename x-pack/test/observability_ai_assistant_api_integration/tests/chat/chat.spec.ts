@@ -104,7 +104,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               await simulator.next(`Part: ${i}\n`);
             }
 
-            simulator.tokenCount({ completion: 20, prompt: 33, total: 53 });
+            await simulator.tokenCount({ completion: 20, prompt: 33, total: 53 });
 
             await simulator.complete();
 
