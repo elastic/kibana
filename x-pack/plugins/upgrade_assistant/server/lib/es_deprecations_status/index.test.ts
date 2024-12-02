@@ -6,142 +6,22 @@
  */
 
 import _ from 'lodash';
-import { elasticsearchServiceMock, ScopedClusterClientMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { getESUpgradeStatus, getHealthIndicators } from './es_deprecations_status';
-import fakeDeprecations from './__fixtures__/fake_deprecations.json';
-import * as healthIndicatorsMock from './__fixtures__/health_indicators';
-
-import type { FeatureSet } from '../../common/types';
+import fakeDeprecations from '../__fixtures__/fake_deprecations.json';
+import * as healthIndicatorsMock from '../__fixtures__/health_indicators';
+import * as esMigrationsMock from '../__fixtures__/es_deprecations';
+import type { FeatureSet } from '../../../common/types';
+import { getESUpgradeStatus } from '.';
 const fakeIndexNames = Object.keys(fakeDeprecations.index_settings);
-
-describe('getHealthIndicators', () => {
-  let esClient: ScopedClusterClientMock;
-  beforeEach(() => {
-    esClient = elasticsearchServiceMock.createScopedClusterClient();
-  });
-
-  it('returns empty array on green indicators', async () => {
-    esClient.asCurrentUser.healthReport.mockResponse({
-      cluster_name: 'mock',
-      indicators: {
-        disk: healthIndicatorsMock.diskIndicatorGreen,
-        // @ts-ignore
-        shards_capacity: healthIndicatorsMock.shardCapacityIndicatorGreen,
-      },
-    });
-
-    const result = await getHealthIndicators(esClient);
-    expect(result).toEqual([]);
-  });
-
-  it('returns unknown indicators', async () => {
-    esClient.asCurrentUser.healthReport.mockResponse({
-      cluster_name: 'mock',
-      indicators: {
-        disk: healthIndicatorsMock.diskIndicatorUnknown,
-        // @ts-ignore
-        shards_capacity: healthIndicatorsMock.shardCapacityIndicatorGreen,
-      },
-    });
-
-    const result = await getHealthIndicators(esClient);
-    expect(result[0]).toEqual(
-      expect.objectContaining({
-        details: 'No disk usage data.',
-      })
-    );
-  });
-
-  it('returns unhealthy shards_capacity indicator', async () => {
-    esClient.asCurrentUser.healthReport.mockResponse({
-      cluster_name: 'mock',
-      indicators: {
-        disk: healthIndicatorsMock.diskIndicatorGreen,
-        // @ts-ignore
-        shards_capacity: healthIndicatorsMock.shardCapacityIndicatorRed,
-      },
-    });
-
-    const result = await getHealthIndicators(esClient);
-    expect(result).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "correctiveAction": Object {
-            "action": "Increase the value of [cluster.max_shards_per_node] cluster setting or remove data indices to clear up resources.",
-            "cause": "Elasticsearch is about to reach the maximum number of shards it can host, based on your current settings.",
-            "impacts": Array [
-              Object {
-                "description": "The cluster has too many used shards to be able to upgrade.",
-                "id": "elasticsearch:health:shards_capacity:impact:upgrade_blocked",
-                "impact_areas": "[Array]",
-                "severity": 1,
-              },
-              Object {
-                "description": "The cluster is running low on room to add new shards. Adding data to new indices is at risk",
-                "id": "elasticsearch:health:shards_capacity:impact:creation_of_new_indices_blocked",
-                "impact_areas": "[Array]",
-                "severity": 1,
-              },
-            ],
-            "type": "healthIndicator",
-          },
-          "details": "Cluster is close to reaching the configured maximum number of shards for data nodes.",
-          "isCritical": true,
-          "message": "Elasticsearch is about to reach the maximum number of shards it can host, based on your current settings.",
-          "resolveDuringUpgrade": false,
-          "type": "health_indicator",
-          "url": "https://ela.st/fix-shards-capacity",
-        },
-      ]
-    `);
-  });
-
-  it('returns unhealthy disk indicator', async () => {
-    esClient.asCurrentUser.healthReport.mockResponse({
-      cluster_name: 'mock',
-      indicators: {
-        disk: healthIndicatorsMock.diskIndicatorRed,
-        // @ts-ignore
-        shards_capacity: healthIndicatorsMock.shardCapacityIndicatorGreen,
-      },
-    });
-
-    const result = await getHealthIndicators(esClient);
-    expect(result).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "correctiveAction": Object {
-            "cause": "The number of indices the system enforced a read-only index block (\`index.blocks.read_only_allow_delete\`) on because the cluster is running out of space.
-      The number of nodes that are running low on disk and it is likely that they will run out of space. Their disk usage has tripped the <<cluster-routing-watermark-high, high watermark threshold>>.
-      The number of nodes that have run out of disk. Their disk usage has tripped the <<cluster-routing-flood-stage, flood stagewatermark threshold>>.",
-            "impacts": Object {
-              "indices_with_readonly_block": 1,
-              "nodes_over_flood_stage_watermark": 1,
-              "nodes_over_high_watermark": 1,
-              "nodes_with_enough_disk_space": 1,
-              "nodes_with_unknown_disk_status": 1,
-            },
-            "type": "healthIndicator",
-          },
-          "details": "The cluster does not have enough available disk space.",
-          "isCritical": true,
-          "message": "The cluster does not have enough available disk space.",
-          "resolveDuringUpgrade": false,
-          "type": "health_indicator",
-          "url": null,
-        },
-      ]
-    `);
-  });
-});
 
 describe('getESUpgradeStatus', () => {
   const featureSet: FeatureSet = {
     reindexCorrectiveActions: true,
     migrateSystemIndices: true,
     mlSnapshots: true,
+    migrateDataStreams: true,
   };
 
   const resolvedIndices = {
@@ -200,6 +80,7 @@ describe('getESUpgradeStatus', () => {
       node_settings: [],
       ml_settings: [],
       index_settings: {},
+      data_streams: {},
     });
 
     await expect(getESUpgradeStatus(esClient, featureSet)).resolves.toHaveProperty(
@@ -215,6 +96,7 @@ describe('getESUpgradeStatus', () => {
       node_settings: [],
       ml_settings: [],
       index_settings: {},
+      data_streams: {},
     });
 
     await expect(getESUpgradeStatus(esClient, featureSet)).resolves.toHaveProperty(
@@ -240,6 +122,7 @@ describe('getESUpgradeStatus', () => {
           },
         ],
       },
+      data_streams: {},
     });
 
     const upgradeStatus = await getESUpgradeStatus(esClient, featureSet);
@@ -249,38 +132,44 @@ describe('getESUpgradeStatus', () => {
   });
 
   it('filters out ml_settings if featureSet.mlSnapshots is set to false', async () => {
-    esClient.asCurrentUser.migration.deprecations.mockResponse({
-      cluster_settings: [],
-      node_settings: [],
-      ml_settings: [
-        {
-          level: 'warning',
-          message: 'Datafeed [deprecation-datafeed] uses deprecated query options',
-          url: 'https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes-7.0.html#breaking_70_search_changes',
-          details:
-            '[Deprecated field [use_dis_max] used, replaced by [Set [tie_breaker] to 1 instead]]',
-          // @ts-ignore
-          resolve_during_rolling_upgrade: false,
-        },
-        {
-          level: 'critical',
-          message:
-            'model snapshot [1] for job [deprecation_check_job] needs to be deleted or upgraded',
-          url: '',
-          details: 'details',
-          // @ts-ignore
-          _meta: { snapshot_id: '1', job_id: 'deprecation_check_job' },
-          // @ts-ignore
-          resolve_during_rolling_upgrade: false,
-        },
-      ],
-      index_settings: {},
+    const mockResponse = {
+      ...esMigrationsMock.getMockEsDeprecations(),
+      ...esMigrationsMock.getMockMlSettingsDeprecations(),
+    };
+    // @ts-ignore missing property definitions in ES resolve_during_rolling_upgrade and _meta
+    esClient.asCurrentUser.migration.deprecations.mockResponse(mockResponse);
+
+    const enabledUpgradeStatus = await getESUpgradeStatus(esClient, { ...featureSet });
+    expect(enabledUpgradeStatus.deprecations).toHaveLength(2);
+    expect(enabledUpgradeStatus.totalCriticalDeprecations).toBe(1);
+
+    const disabledUpgradeStatus = await getESUpgradeStatus(esClient, {
+      ...featureSet,
+      mlSnapshots: false,
     });
 
-    const upgradeStatus = await getESUpgradeStatus(esClient, { ...featureSet, mlSnapshots: false });
+    expect(disabledUpgradeStatus.deprecations).toHaveLength(0);
+    expect(disabledUpgradeStatus.totalCriticalDeprecations).toBe(0);
+  });
 
-    expect(upgradeStatus.deprecations).toHaveLength(0);
-    expect(upgradeStatus.totalCriticalDeprecations).toBe(0);
+  it('filters out data_streams if featureSet.migrateDataStreams is set to false', async () => {
+    const mockResponse = {
+      ...esMigrationsMock.getMockEsDeprecations(),
+      ...esMigrationsMock.getMockDataStreamDeprecations(),
+    };
+    esClient.asCurrentUser.migration.deprecations.mockResponse(mockResponse);
+
+    const enabledUpgradeStatus = await getESUpgradeStatus(esClient, { ...featureSet });
+    expect(enabledUpgradeStatus.deprecations).toHaveLength(1);
+    expect(enabledUpgradeStatus.totalCriticalDeprecations).toBe(1);
+
+    const disabledUpgradeStatus = await getESUpgradeStatus(esClient, {
+      ...featureSet,
+      migrateDataStreams: false,
+    });
+
+    expect(disabledUpgradeStatus.deprecations).toHaveLength(0);
+    expect(disabledUpgradeStatus.totalCriticalDeprecations).toBe(0);
   });
 
   it('filters out reindex corrective actions if featureSet.reindexCorrectiveActions is set to false', async () => {
@@ -306,6 +195,7 @@ describe('getESUpgradeStatus', () => {
       ],
       ml_settings: [],
       index_settings: {},
+      data_streams: {},
     });
 
     const upgradeStatus = await getESUpgradeStatus(esClient, {
@@ -332,6 +222,7 @@ describe('getESUpgradeStatus', () => {
       ],
       ml_settings: [],
       index_settings: {},
+      data_streams: {},
     });
 
     esClient.asCurrentUser.healthReport.mockResponse({
@@ -380,6 +271,7 @@ describe('getESUpgradeStatus', () => {
             "type": "reindex",
           },
           "details": "This index was created using version: 6.8.13",
+          "index": undefined,
           "isCritical": true,
           "message": "Index created before 7.0",
           "resolveDuringUpgrade": false,
