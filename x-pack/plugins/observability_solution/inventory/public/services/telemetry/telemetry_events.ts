@@ -58,6 +58,30 @@ const searchQuerySubmittedEventType: TelemetryEvent = {
   },
 };
 
+const entityInventoryEntityTypeFilteredEventType: TelemetryEvent = {
+  eventType: TelemetryEventTypes.ENTITY_INVENTORY_ENTITY_TYPE_FILTERED,
+  schema: {
+    include_entity_types: {
+      type: 'array',
+      items: {
+        type: 'keyword',
+        _meta: {
+          description: 'List of Entity types used to filter for.',
+        },
+      },
+    },
+    exclude_entity_types: {
+      type: 'array',
+      items: {
+        type: 'keyword',
+        _meta: {
+          description: 'List of Entity types used to filter out.',
+        },
+      },
+    },
+  },
+};
+
 const entityViewClickedEventType: TelemetryEvent = {
   eventType: TelemetryEventTypes.ENTITY_VIEW_CLICKED,
   schema: {
@@ -81,4 +105,5 @@ export const inventoryTelemetryEventBasedTypes = [
   entityInventoryViewedEventType,
   searchQuerySubmittedEventType,
   entityViewClickedEventType,
+  entityInventoryEntityTypeFilteredEventType,
 ];
