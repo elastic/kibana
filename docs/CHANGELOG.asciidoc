@@ -96,6 +96,8 @@ Elastic Observability solution::
 * Changes the order of the errors shown on Infrastructure applications to be more relevant ({kibana-pull}200531[#200531]).
 * Fixes the summary calculation for a calendar-aligned and occurrences-based SLO ({kibana-pull}199873[#199873]).
 * Fixes the `kustomize` command ({kibana-pull}199758[#199758]).
+* Fixes the issue with Stack Monitoring showing an "Unable to load page" error ({kibana-pull}200043[#200043]). 
+* Fixes the issue with the APM and OpenTelemetry tutorial showing an "Unable to load page" error ({kibana-pull}199301[#199301]).
 Elastic Security solution::
 For the Elastic Security 8.16.1 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
 Platform::
