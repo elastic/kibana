@@ -20,7 +20,29 @@ export interface AssetLink {
   assetId: string;
 }
 
+export interface DashboardLink extends AssetLink {
+  type: typeof ASSET_TYPES.Dashboard;
+}
+
+export interface SloLink extends AssetLink {
+  type: typeof ASSET_TYPES.Slo;
+}
+
 export interface Asset extends AssetLink {
   label: string;
   tags: string[];
+}
+
+export interface Dashboard extends Asset {
+  type: typeof ASSET_TYPES.Dashboard;
+}
+
+export interface Slo extends Asset {
+  type: typeof ASSET_TYPES.Slo;
+}
+
+export interface AssetTypeToAssetMap {
+  [ASSET_TYPES.Dashboard]: Dashboard;
+  [ASSET_TYPES.Slo]: Slo;
+  [ASSET_TYPES.Rule]: Asset;
 }

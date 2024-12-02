@@ -12,40 +12,35 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { AbortableAsyncState } from '@kbn/observability-utils-browser/hooks/use_abortable_async';
-import type { Asset } from '@kbn/streams-plugin/common';
-import React, { useEffect, useMemo, useState } from 'react';
-import { AssetTypeDisplay } from './asset_type_display';
+import { Dashboard } from '@kbn/streams-plugin/common/assets';
+import React, { useMemo } from 'react';
 
-export function AssetTable({
-  assetsFetch,
+export function DashboardsTable({
+  dashboards,
   compact = false,
+  selecedDashboards: selectedDashboards,
+  setSelectedDashboards,
+  loading,
 }: {
-  assetsFetch: AbortableAsyncState<{ assets: Asset[] } | undefined>;
+  loading: boolean;
+  dashboards: Dashboard[] | undefined;
   compact?: boolean;
+  selecedDashboards: Dashboard[];
+  setSelectedDashboards: (dashboards: Dashboard[]) => void;
 }) {
-  const columns = useMemo((): Array<EuiBasicTableColumn<Asset>> => {
+  const columns = useMemo((): Array<EuiBasicTableColumn<Dashboard>> => {
     return [
       {
         field: 'label',
-        name: i18n.translate('xpack.streams.assetTable.assetNameColumnTitle', {
-          defaultMessage: 'Asset name',
+        name: i18n.translate('xpack.streams.dashboardTable.dashboardNameColumnTitle', {
+          defaultMessage: 'Dashboard name',
         }),
-      },
-      {
-        field: 'type',
-        name: i18n.translate('xpack.streams.assetTable.assetTypeColumnTitle', {
-          defaultMessage: 'Type',
-        }),
-        render: (_, { type }) => {
-          return <AssetTypeDisplay type={type} />;
-        },
       },
       ...(!compact
         ? ([
             {
               field: 'tags',
-              name: i18n.translate('xpack.streams.assetTable.tagsColumnTitle', {
+              name: i18n.translate('xpack.streams.dashboardTable.tagsColumnTitle', {
                 defaultMessage: 'Tags',
               }),
               render: (_, { tags }) => {
@@ -60,33 +55,28 @@ export function AssetTable({
                 );
               },
             },
-          ] satisfies Array<EuiBasicTableColumn<Asset>>)
+          ] satisfies Array<EuiBasicTableColumn<Dashboard>>)
         : []),
     ];
   }, [compact]);
 
-  const [selectedAssets, setSelectedAssets] = useState<Asset[]>([]);
-
   const items = useMemo(() => {
-    return assetsFetch.value?.assets ?? [];
-  }, [assetsFetch.value]);
-
-  useEffect(() => {
-    setSelectedAssets([]);
-  }, [assetsFetch.value?.assets]);
+    return dashboards ?? [];
+  }, [dashboards]);
 
   return (
     <EuiFlexGroup direction="column">
       <EuiFlexItem grow={false} />
       <EuiBasicTable
         columns={columns}
+        itemId="assetId"
         items={items}
-        loading={assetsFetch.loading}
+        loading={loading}
         selection={{
-          onSelectionChange: (selection) => {
-            setSelectedAssets(selection);
+          onSelectionChange: (newSelection: Dashboard[]) => {
+            setSelectedDashboards(newSelection);
           },
-          selected: selectedAssets,
+          selected: selectedDashboards,
         }}
       />
     </EuiFlexGroup>

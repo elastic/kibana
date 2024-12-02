@@ -13,13 +13,20 @@ import { keyBy } from 'lodash';
 import objectHash from 'object-hash';
 import { SanitizedRule } from '@kbn/alerting-plugin/common';
 import { AssetStorageSettings } from './storage_settings';
-import { ASSET_TYPES, Asset, AssetType } from '../../../../common/assets';
+import {
+  ASSET_TYPES,
+  Asset,
+  AssetType,
+  AssetTypeToAssetMap,
+  Dashboard,
+  Slo,
+} from '../../../../common/assets';
 import { ASSET_ENTITY_ID, ASSET_ENTITY_TYPE } from './fields';
 
 function sloSavedObjectToAsset(
   sloId: string,
   savedObject: SavedObject<{ name: string; tags: string[] }>
-): Asset {
+): Slo {
   return {
     assetId: sloId,
     label: savedObject.attributes.name,
@@ -33,7 +40,7 @@ function sloSavedObjectToAsset(
 function dashboardSavedObjectToAsset(
   dashboardId: string,
   savedObject: SavedObject<{ title: string }>
-): Asset {
+): Dashboard {
   return {
     assetId: dashboardId,
     label: savedObject.attributes.title,
@@ -198,40 +205,43 @@ export class AssetClient {
     return [...dashboards, ...rules, ...slos];
   }
 
-  async getSuggestions({
+  async getSuggestions<T extends keyof AssetTypeToAssetMap>({
     entityId,
     entityType,
     query,
+    assetType,
   }: {
     entityId: string;
     entityType: string;
     query: string;
-  }): Promise<Array<{ asset: Asset }>> {
-    const [suggestionsFromSlosAndDashboards, ruleResponse] = await Promise.all([
-      this.clients.soClient
-        .find({
-          type: ['dashboard', 'slo'],
-          search: query,
-        })
-        .then((results) => {
-          return results.saved_objects.map((savedObject) => {
-            if (savedObject.type === 'slo') {
-              const sloSavedObject = savedObject as SavedObject<{
-                id: string;
-                name: string;
-                tags: string[];
-              }>;
-              return sloSavedObjectToAsset(sloSavedObject.attributes.id, sloSavedObject);
-            }
+    assetType: T;
+  }): Promise<Array<{ asset: AssetTypeToAssetMap[T] }>> {
+    if (assetType === 'dashboard') {
+      const dashboardSavedObjects = await this.clients.soClient.find<{ title: string }>({
+        type: 'dashboard',
+        search: query,
+      });
 
-            const dashboardSavedObject = savedObject as SavedObject<{ title: string }>;
+      return dashboardSavedObjects.saved_objects.map((dashboardSavedObject) => {
+        return {
+          asset: dashboardSavedObjectToAsset(dashboardSavedObject.id, dashboardSavedObject),
+        };
+      }) as Array<{ asset: AssetTypeToAssetMap[T] }>;
+    }
+    if (assetType === 'rule') {
+      return [];
+    }
+    if (assetType === 'slo') {
+      const sloSavedObjects = await this.clients.soClient.find<{ name: string; tags: string[] }>({
+        type: 'slo',
+        search: query,
+      });
 
-            return dashboardSavedObjectToAsset(dashboardSavedObject.id, dashboardSavedObject);
-          });
-        }),
-      [],
-    ]);
+      return sloSavedObjects.saved_objects.map((sloSavedObject) => {
+        return { asset: sloSavedObjectToAsset(sloSavedObject.id, sloSavedObject) };
+      }) as Array<{ asset: AssetTypeToAssetMap[T] }>;
+    }
 
-    return suggestionsFromSlosAndDashboards.map((asset) => ({ asset }));
+    throw new Error(`Unsupported asset type: ${assetType}`);
   }
 }

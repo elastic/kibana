@@ -46,6 +46,7 @@ export class StorageClient<TStorageSettings extends StorageSettings> {
     await this.esClient.client.index({
       index: this.storage.getSearchIndexPattern(),
       document,
+      refresh: 'wait_for',
       id,
     });
   }
@@ -53,6 +54,7 @@ export class StorageClient<TStorageSettings extends StorageSettings> {
   async delete(id: string) {
     await this.esClient.client.delete({
       id,
+      refresh: 'wait_for',
       index: this.storage.getSearchIndexPattern(),
     });
   }

@@ -96,13 +96,6 @@ export const forkStreamsRoute = createServerRoute({
         logger,
       });
 
-      await syncStream({
-        scopedClusterClient,
-        definition: childDefinition,
-        rootDefinition,
-        logger,
-      });
-
       return { acknowledged: true };
     } catch (e) {
       if (e instanceof IndexTemplateNotFound || e instanceof DefinitionNotFound) {

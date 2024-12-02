@@ -6,8 +6,6 @@
  */
 import {
   EuiButton,
-  EuiFilterButton,
-  EuiFilterGroup,
   EuiFlexGroup,
   EuiFlyout,
   EuiFlyoutBody,
@@ -18,22 +16,22 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { Asset } from '@kbn/streams-plugin/common';
+import type { Dashboard } from '@kbn/streams-plugin/common/assets';
 import { debounce } from 'lodash';
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
-import { AssetTable } from './asset_table';
+import { DashboardsTable } from './dashboard_table';
 
-export function AddAssetFlyout({
+export function AddDashboardFlyout({
   entityId,
-  onAssetsChange,
-  selectedAssets,
+  onAddDashboards,
+  linkedDashboards,
   onClose,
 }: {
   entityId: string;
-  onAssetsChange: (asset: Asset[]) => void;
-  selectedAssets: Asset[];
+  onAddDashboards: (dashboard: Dashboard[]) => void;
+  linkedDashboards: Dashboard[];
   onClose: () => void;
 }) {
   const {
@@ -52,10 +50,10 @@ export function AddAssetFlyout({
     return debounce(setSubmittedQuery, 150);
   }, []);
 
-  const assetSuggestionsFetch = useStreamsAppFetch(
+  const dashboardSuggestionsFetch = useStreamsAppFetch(
     ({ signal }) => {
       return streamsRepositoryClient
-        .fetch('GET /api/streams/{id}/assets/_suggestions', {
+        .fetch('GET /api/streams/{id}/dashboards/_suggestions', {
           signal,
           params: {
             path: {
@@ -68,27 +66,36 @@ export function AddAssetFlyout({
         })
         .then(({ suggestions }) => {
           return {
-            assets: suggestions
-              .map((suggestion) => suggestion.asset)
-              .filter((asset) => {
-                return !selectedAssets.find(
-                  (selectedAsset) =>
-                    selectedAsset.assetId === asset.assetId && selectedAsset.type === asset.type
+            dashboards: suggestions
+              .map((suggestion) => suggestion.dashboard)
+              .filter((dashboard) => {
+                return !linkedDashboards.find(
+                  (linkedDashboard) => linkedDashboard.assetId === dashboard.assetId
                 );
               }),
           };
         });
     },
-    [streamsRepositoryClient, entityId, submittedQuery, selectedAssets]
+    [streamsRepositoryClient, entityId, submittedQuery, linkedDashboards]
   );
+
+  const [selectedDashboards, setSelectedDashboards] = useState<Dashboard[]>([]);
+
+  useEffect(() => {
+    setSelectedDashboards([]);
+  }, [linkedDashboards]);
+
+  const allDashboards = useMemo(() => {
+    return dashboardSuggestionsFetch.value?.dashboards || [];
+  }, [dashboardSuggestionsFetch.value]);
 
   return (
     <EuiFlyout onClose={onClose}>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle>
           <h2>
-            {i18n.translate('xpack.streams.addAssetFlyout.flyoutHeaderLabel', {
-              defaultMessage: 'Add assets',
+            {i18n.translate('xpack.streams.addDashboardFlyout.flyoutHeaderLabel', {
+              defaultMessage: 'Add dashboards',
             })}
           </h2>
         </EuiTitle>
@@ -96,9 +103,9 @@ export function AddAssetFlyout({
       <EuiFlyoutBody>
         <EuiFlexGroup direction="column" gutterSize="m">
           <EuiText size="s">
-            {i18n.translate('xpack.streams.addAssetFlyout.helpLabel', {
+            {i18n.translate('xpack.streams.addDashboardFlyout.helpLabel', {
               defaultMessage:
-                'Select assets which you want to add and assign to the {stream} stream',
+                'Select dashboards which you want to add and assign to the {stream} stream',
               values: {
                 stream: entityId,
               },
@@ -115,21 +122,24 @@ export function AddAssetFlyout({
                 setSubmittedQueryDebounced(queryText);
               }}
             />
-            <EuiFilterGroup>
-              <EuiFilterButton>
-                {i18n.translate('xpack.streams.addAssetFlyout.typeFilterButtonLabel', {
-                  defaultMessage: 'Type',
-                })}
-              </EuiFilterButton>
-            </EuiFilterGroup>
           </EuiFlexGroup>
-          <AssetTable assetsFetch={assetSuggestionsFetch} compact />
+          <DashboardsTable
+            dashboards={allDashboards}
+            loading={dashboardSuggestionsFetch.loading}
+            selecedDashboards={selectedDashboards}
+            setSelectedDashboards={setSelectedDashboards}
+          />
         </EuiFlexGroup>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
-        <EuiButton data-test-subj="streamsAppAddAssetFlyoutAddAssetsButton" onClick={() => {}}>
-          {i18n.translate('xpack.streams.addAssetFlyout.addAssetsButtonLabel', {
-            defaultMessage: 'Add assets',
+        <EuiButton
+          data-test-subj="streamsAppAddDashboardFlyoutAddDashboardsButton"
+          onClick={() => {
+            onAddDashboards(selectedDashboards);
+          }}
+        >
+          {i18n.translate('xpack.streams.addDashboardFlyout.addDashboardsButtonLabel', {
+            defaultMessage: 'Add dashboards',
           })}
         </EuiButton>
       </EuiFlyoutFooter>
