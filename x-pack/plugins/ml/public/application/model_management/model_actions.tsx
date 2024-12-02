@@ -585,16 +585,16 @@ export function useModelActions({
         type: 'icon',
         isPrimary: true,
         available: (item) => {
-          // TODO check what if indices are actually needed.
-          return isDFAModelItem(item);
-          // || (Array.isArray(item.indices) && item.indices.length > 0)
+          // TODO: check if only supported by DFA jobs
+          return (
+            isDFAModelItem(item) ||
+            (isExistingModel(item) && Array.isArray(item.indices) && item.indices.length > 0)
+          );
         },
         onClick: async (item) => {
           if (!isDFAModelItem(item) || !isNLPModelItem(item)) return;
 
-          let indexPatterns: string[] | undefined = item?.indices
-            ?.map((o) => Object.keys(o))
-            .flat();
+          let indexPatterns: string[] | undefined = item.indices;
 
           if (isDFAModelItem(item) && item?.metadata?.analytics_config?.dest?.index !== undefined) {
             const destIndex = item.metadata.analytics_config.dest?.index;

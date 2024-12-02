@@ -8,7 +8,7 @@
 import Boom from '@hapi/boom';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import { JOB_MAP_NODE_TYPES, type MapElements } from '@kbn/ml-data-frame-analytics-utils';
-import { flatten, groupBy } from 'lodash';
+import { flatten, groupBy, isEmpty } from 'lodash';
 import type {
   InferenceInferenceEndpoint,
   InferenceTaskType,
@@ -45,6 +45,7 @@ import type {
   NLPModelItem,
   TrainedModelItem,
   TrainedModelUIItem,
+  TrainedModelWithPipelines,
 } from '../../../common/types/trained_models';
 import {
   isElasticModel,
@@ -288,86 +289,66 @@ export class ModelsProvider {
     return [...resultItems, ...notDownloaded];
   }
 
-  // async assignPipelines(trainedModels: TrainedModelUIItem[]): Promise<TrainedModelUIItem[]> {
-  //   // Also need to retrieve the list of deployment IDs from stats
-  //   const stats = await this._mlClient.getTrainedModelsStats({
-  //     ...(modelId ? { model_id: modelId } : {}),
-  //     size: 10000,
-  //   });
+  /**
+   * Assigns pipelines to trained models
+   */
+  async assignPipelines(trainedModels: TrainedModelItem[]): Promise<TrainedModelUIItem[]> {
+    // For each model create a dict with model aliases and deployment ids for faster lookup
+    const modelToAliasesAndDeployments: Record<string, Set<string>> = Object.fromEntries(
+      trainedModels.map((model) => [
+        model.model_id,
+        new Set([
+          model.model_id,
+          ...(model.metadata?.model_aliases ?? []),
+          ...(isNLPModelItem(model) ? model.deployment_ids : []),
+        ]),
+      ])
+    );
 
-  //   const modelDeploymentsMap = stats.trained_model_stats.reduce((acc, curr) => {
-  //     if (!curr.deployment_stats) return acc;
-  //     // @ts-ignore elasticsearch-js client is missing deployment_id
-  //     const deploymentId = curr.deployment_stats.deployment_id;
-  //     if (acc[curr.model_id]) {
-  //       acc[curr.model_id].push(deploymentId);
-  //     } else {
-  //       acc[curr.model_id] = [deploymentId];
-  //     }
-  //     return acc;
-  //   }, {} as Record<string, string[]>);
+    // Set of unique model ids, aliases, and deployment ids.
+    const modelIdsAndAliases: string[] = Object.values(modelToAliasesAndDeployments).flatMap((s) =>
+      Array.from(s)
+    );
 
-  //   const modelIdsAndAliases: string[] = Array.from(
-  //     new Set([
-  //       ...result
-  //         .map(({ model_id: id, metadata }) => {
-  //           return [id, ...(metadata?.model_aliases ?? [])];
-  //         })
-  //         .flat(),
-  //       ...Object.values(modelDeploymentsMap).flat(),
-  //     ])
-  //   );
+    // Get all pipelines first in one call:
+    const modelPipelinesMap = await this.getModelsPipelines(modelIdsAndAliases);
 
-  //   const modelsPipelinesAndIndices = await Promise.all(
-  //     modelIdsAndAliases.map(async (modelIdOrAlias) => {
-  //       return {
-  //         modelIdOrAlias,
-  //         result: await this.getModelsPipelinesAndIndicesMap(modelIdOrAlias, {
-  //           withIndices,
-  //         }),
-  //       };
-  //     })
-  //   );
+    return trainedModels.map((model) => {
+      const modelAliasesAndDeployments = modelToAliasesAndDeployments[model.model_id];
+      // Check model pipelines map for any pipelines associated with the model
+      for (const [modelEntityId, pipelines] of modelPipelinesMap) {
+        if (modelAliasesAndDeployments.has(modelEntityId)) {
+          // Merge pipeline definitions into the model
+          model.pipelines = model.pipelines ? Object.assign(model.pipelines, pipelines) : pipelines;
+        }
+      }
+      return model;
+    });
+  }
 
-  //   for (const model of result) {
-  //     const modelAliases = model.metadata?.model_aliases ?? [];
-  //     const modelMap = modelsPipelinesAndIndices.find(
-  //       (d) => d.modelIdOrAlias === model.model_id
-  //     )?.result;
+  /**
+   * Assigns indices to trained models
+   */
+  async assignModelIndices(trainedModels: TrainedModelItem[]): Promise<TrainedModelItem[]> {
+    // Get a list of all uniquer pipeline ids to retrieve mapping with indices
+    const pipelineIds = new Set<string>(
+      trainedModels
+        .filter((model): model is TrainedModelWithPipelines => isDefined(model.pipelines))
+        .flatMap((model) => Object.keys(model.pipelines))
+    );
 
-  //     const allRelatedModels = modelsPipelinesAndIndices
-  //       .filter(
-  //         (m) =>
-  //           [
-  //             model.model_id,
-  //             ...modelAliases,
-  //             ...(modelDeploymentsMap[model.model_id] ?? []),
-  //           ].findIndex((alias) => alias === m.modelIdOrAlias) > -1
-  //       )
-  //       .map((r) => r?.result)
-  //       .filter(isDefined);
+    const pipelineToIndicesMap = await this.getPipelineToIndicesMap(pipelineIds);
 
-  //     const ingestPipelinesFromModelAliases = allRelatedModels
-  //       .map((r) => r?.ingestPipelines)
-  //       .filter(isDefined) as Array<Map<string, Record<string, PipelineDefinition>>>;
-
-  //     model.pipelines = ingestPipelinesFromModelAliases.reduce<Record<string, PipelineDefinition>>(
-  //       (allPipelines, modelsToPipelines) => {
-  //         for (const [, pipelinesObj] of modelsToPipelines?.entries()) {
-  //           Object.entries(pipelinesObj).forEach(([pipelineId, pipelineInfo]) => {
-  //             allPipelines[pipelineId] = pipelineInfo;
-  //           });
-  //         }
-  //         return allPipelines;
-  //       },
-  //       {}
-  //     );
-
-  //     if (modelMap && withIndices) {
-  //       model.indices = modelMap.indices;
-  //     }
-  //   }
-  // }
+    return trainedModels.map((model) => {
+      if (isEmpty(model.pipelines)) {
+        return model;
+      }
+      model.indices = Object.entries(pipelineToIndicesMap)
+        .filter(([pipelineId]) => !isEmpty(model.pipelines?.[pipelineId]))
+        .flatMap(([_, indices]) => indices);
+      return model;
+    });
+  }
 
   /**
    * Returns a complete list of entities for the Trained Models UI
@@ -410,8 +391,12 @@ export class ModelsProvider {
       resultItems = await this.includeModelDownloads(resultItems);
     }
 
-    // @ts-ignore FIXME: fix assignPipelines type
-    // models = await this.assignPipelines(models);
+    resultItems = await this.assignPipelines(resultItems);
+
+    // Assign indices
+    resultItems = await this.assignModelIndices(resultItems);
+
+    // TODO complete DFA list
 
     return resultItems;
   }
@@ -476,12 +461,13 @@ export class ModelsProvider {
   }
 
   /**
-   * Retrieves the map of model ids and aliases with associated pipelines.
+   * Retrieves the map of model ids and aliases with associated pipelines,
+   * where key is a model, alias or deployment id, and value is a map of pipeline ids and pipeline definitions.
    * @param modelIds - Array of models ids and model aliases.
    */
   async getModelsPipelines(modelIds: string[]) {
-    const modelIdsMap = new Map<string, Record<string, PipelineDefinition> | null>(
-      modelIds.map((id: string) => [id, null])
+    const modelIdsMap = new Map<string, Record<string, PipelineDefinition>>(
+      modelIds.map((id: string) => [id, {}])
     );
 
     try {
@@ -512,6 +498,53 @@ export class ModelsProvider {
     }
 
     return modelIdsMap;
+  }
+
+  /**
+   * Match pipelines to indices based on the default_pipeline setting in the index settings.
+   */
+  async getPipelineToIndicesMap(pipelineIds: Set<string>): Promise<Record<string, string[]>> {
+    const pipelineIdsToDestinationIndices: Record<string, string[]> = {};
+
+    let indicesPermissions;
+    let indicesSettings;
+
+    try {
+      indicesSettings = await this._client.asInternalUser.indices.getSettings();
+      const hasPrivilegesResponse = await this._client.asCurrentUser.security.hasPrivileges({
+        index: [
+          {
+            names: Object.keys(indicesSettings),
+            privileges: ['read'],
+          },
+        ],
+      });
+      indicesPermissions = hasPrivilegesResponse.index;
+    } catch (e) {
+      // Possible that the user doesn't have permissions to view
+      if (e.meta?.statusCode !== 403) {
+        mlLog.error(e);
+      }
+      return pipelineIdsToDestinationIndices;
+    }
+
+    // From list of model pipelines, find all indices that have pipeline set as index.default_pipeline
+    for (const [indexName, { settings }] of Object.entries(indicesSettings)) {
+      const defaultPipeline = settings?.index?.default_pipeline;
+      if (
+        defaultPipeline &&
+        pipelineIds.has(defaultPipeline) &&
+        indicesPermissions[indexName]?.read === true
+      ) {
+        if (Array.isArray(pipelineIdsToDestinationIndices[defaultPipeline])) {
+          pipelineIdsToDestinationIndices[defaultPipeline].push(indexName);
+        } else {
+          pipelineIdsToDestinationIndices[defaultPipeline] = [indexName];
+        }
+      }
+    }
+
+    return pipelineIdsToDestinationIndices;
   }
 
   /**
@@ -570,44 +603,8 @@ export class ModelsProvider {
         }
 
         if (withIndices === true) {
-          const pipelineIdsToDestinationIndices: Record<string, string[]> = {};
-
-          let indicesPermissions;
-          try {
-            indicesSettings = await this._client.asInternalUser.indices.getSettings();
-            const hasPrivilegesResponse = await this._client.asCurrentUser.security.hasPrivileges({
-              index: [
-                {
-                  names: Object.keys(indicesSettings),
-                  privileges: ['read'],
-                },
-              ],
-            });
-            indicesPermissions = hasPrivilegesResponse.index;
-          } catch (e) {
-            // Possible that the user doesn't have permissions to view
-            // If so, gracefully exit
-            if (e.meta?.statusCode !== 403) {
-              // eslint-disable-next-line no-console
-              console.error(e);
-            }
-            return result;
-          }
-
-          // 2. From list of model pipelines, find all indices that have pipeline set as index.default_pipeline
-          for (const [indexName, { settings }] of Object.entries(indicesSettings)) {
-            if (
-              settings?.index?.default_pipeline &&
-              pipelineIds.has(settings.index.default_pipeline) &&
-              indicesPermissions[indexName]?.read === true
-            ) {
-              if (Array.isArray(pipelineIdsToDestinationIndices[settings.index.default_pipeline])) {
-                pipelineIdsToDestinationIndices[settings.index.default_pipeline].push(indexName);
-              } else {
-                pipelineIdsToDestinationIndices[settings.index.default_pipeline] = [indexName];
-              }
-            }
-          }
+          const pipelineIdsToDestinationIndices: Record<string, string[]> =
+            await this.getPipelineToIndicesMap(pipelineIds);
 
           // 3. Grab index information for all the indices found, and add their info to the map
           for (const [pipelineId, indexIds] of Object.entries(pipelineIdsToDestinationIndices)) {

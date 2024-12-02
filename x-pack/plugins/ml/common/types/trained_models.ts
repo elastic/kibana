@@ -21,7 +21,6 @@ import type {
   FeatureImportanceBaseline,
   TotalFeatureImportance,
 } from '@kbn/ml-data-frame-analytics-utils';
-// import type { IndexName, IndicesIndexState } from '@elastic/elasticsearch/lib/api/types';
 import type { XOR } from './common';
 import type { MlSavedObjectType } from './saved_objects';
 
@@ -104,11 +103,6 @@ export type PutTrainedModelConfig = {
 >; // compressed_definition and definition are mutually exclusive
 
 export type TrainedModelConfigResponse = estypes.MlTrainedModelConfig & {
-  /**
-   * Associated pipelines. Extends response from the ES endpoint.
-   */
-  // ONLY IF INCLUDE PIPELINES
-  // pipelines?: Record<string, PipelineDefinition> | null;
   // PART OF THE DFA
   // origin_job_exists?: boolean;
 
@@ -118,12 +112,6 @@ export type TrainedModelConfigResponse = estypes.MlTrainedModelConfig & {
     // total_feature_importance?: TotalFeatureImportance[];
     // feature_importance_baseline?: FeatureImportanceBaseline;
   } & Record<string, unknown>;
-
-  /**
-   * Indices with associated pipelines that have inference processors utilizing the model deployments.
-   * ONLY IF INCLUDE INDICES
-   */
-  // indices?: Array<Record<IndexName, IndicesIndexState | null>>;
 
   /**
    * Whether the model has inference services
@@ -323,7 +311,9 @@ export interface ModelDownloadState {
 
 export type Stats = Omit<TrainedModelStat, 'model_id' | 'deployment_stats'>;
 
-/** Common properties for all items in the Trained models table */
+/**
+ * Additional properties for all items in the Trained models table
+ * */
 interface BaseModelItem {
   type?: string[];
   tags: string[];
@@ -382,7 +372,20 @@ export const isElasticModel = (item: TrainedModelConfigResponse) =>
 export type ExistingModelBase = TrainedModelConfigResponse & BaseModelItem;
 
 /** Any model returned by the trained_models API, e.g. lang_ident, elser, dfa model */
-export type TrainedModelItem = ExistingModelBase & { stats: Stats };
+export type TrainedModelItem = ExistingModelBase & { stats: Stats } & {
+  /**
+   * Associated pipelines. Extends response from the ES endpoint.
+   */
+  pipelines?: Record<string, PipelineDefinition>;
+  /**
+   * Indices with associated pipelines that have inference processors utilizing the model deployments.
+   */
+  indices?: string[];
+};
+
+export type TrainedModelWithPipelines = TrainedModelItem & {
+  pipelines: Record<string, PipelineDefinition>;
+};
 
 export function isExistingModel(item: unknown): item is TrainedModelItem {
   return (
