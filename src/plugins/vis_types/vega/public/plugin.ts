@@ -80,15 +80,6 @@ export class VegaPlugin implements Plugin<void, void> {
       enableExternalUrls: this.initializerContext.config.get().enableExternalUrls,
     });
 
-    core.theme.theme$
-      .subscribe({
-        next(theme) {
-          const palettes = getKbnPalettes(theme);
-          scheme('elastic', palettes.get(KbnPalette.Default).colors());
-        },
-      })
-      .unsubscribe();
-
     const visualizationDependencies: Readonly<VegaVisualizationDependencies> = {
       core,
       plugins: {
@@ -109,6 +100,15 @@ export class VegaPlugin implements Plugin<void, void> {
     core: CoreStart,
     { data, mapsEms, dataViews, usageCollection }: VegaPluginStartDependencies
   ) {
+    core.theme.theme$
+      .subscribe({
+        next(theme) {
+          const palettes = getKbnPalettes(theme);
+          scheme('elastic', palettes.get(KbnPalette.Default).colors());
+        },
+      })
+      .unsubscribe();
+
     setNotifications(core.notifications);
     setData(data);
     setDataViews(dataViews);
