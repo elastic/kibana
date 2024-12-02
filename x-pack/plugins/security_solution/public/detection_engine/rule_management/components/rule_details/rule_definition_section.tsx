@@ -56,12 +56,12 @@ import {
   useRequiredFieldsStyles,
 } from './rule_definition_section.styles';
 import { getQueryLanguageLabel } from './helpers';
+import { useDefaultIndexPattern } from '../../hooks/use_default_index_pattern';
 import {
   EQL_OPTIONS_EVENT_CATEGORY_FIELD_LABEL,
   EQL_OPTIONS_EVENT_TIEBREAKER_FIELD_LABEL,
   EQL_OPTIONS_EVENT_TIMESTAMP_FIELD_LABEL,
 } from '../../../rule_creation/components/eql_query_edit/translations';
-import type { UseDataViewParams } from './three_way_diff/final_edit/fields/hooks/use_data_view';
 import { useDataView } from './three_way_diff/final_edit/fields/hooks/use_data_view';
 
 interface SavedQueryNameProps {
@@ -87,17 +87,11 @@ export const Filters = ({
   index,
   'data-test-subj': dataTestSubj,
 }: FiltersProps) => {
-  let dataViewArg: UseDataViewParams;
-  if (index) {
-    dataViewArg = { indexPatterns: index };
-  } else {
-    if (dataViewId) {
-      dataViewArg = { dataViewId };
-    } else {
-      dataViewArg = { indexPatterns: [] };
-    }
-  }
-  const { dataView } = useDataView(dataViewArg);
+  const defaultIndexPattern = useDefaultIndexPattern();
+  const useDataViewParams = dataViewId
+    ? { dataViewId }
+    : { indexPatterns: index ?? defaultIndexPattern };
+  const { dataView } = useDataView(useDataViewParams);
 
   const flattenedFilters = mapAndFlattenFilters(filters);
   const styles = filtersStyles;
