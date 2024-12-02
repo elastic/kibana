@@ -146,6 +146,7 @@ export const StartStep: React.FC<StartStepProps> = ({
                         generateConnectorName({
                           connectorName: rawName,
                           connectorType: selectedConnector.serviceType,
+                          isManagedConnector: selectedConnector.isNative,
                         });
                       }
                     }}
