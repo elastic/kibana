@@ -33,10 +33,13 @@ export const INTERNAL_PLUGIN_LOCATIONS: Array<{ name: string; value: string }> =
     value: Path.resolve(REPO_ROOT, 'src/plugins'),
   },
   {
-    name: 'Kibana Platform OSS',
-    value: Path.resolve(REPO_ROOT, 'src/platform/plugins'),
+    name: 'Kibana Platform OSS (private)',
+    value: Path.resolve(REPO_ROOT, 'src/platform/plugins/private'),
   },
-
+  {
+    name: 'Kibana Platform OSS (shared)',
+    value: Path.resolve(REPO_ROOT, 'src/platform/plugins/shared'),
+  },
   {
     name: 'Kibana OSS Functional Testing',
     value: Path.resolve(REPO_ROOT, 'test/plugin_functional/plugins'),
@@ -46,8 +49,12 @@ export const INTERNAL_PLUGIN_LOCATIONS: Array<{ name: string; value: string }> =
     value: Path.resolve(REPO_ROOT, 'x-pack/plugins'),
   },
   {
-    name: 'X-Pack Platform',
-    value: Path.resolve(REPO_ROOT, 'x-pack/platform/plugins'),
+    name: 'X-Pack Platform (private)',
+    value: Path.resolve(REPO_ROOT, 'x-pack/platform/plugins/private'),
+  },
+  {
+    name: 'X-Pack Platform (shared)',
+    value: Path.resolve(REPO_ROOT, 'x-pack/platform/plugins/shared'),
   },
   {
     name: 'X-Pack Observability',
@@ -88,7 +95,7 @@ export const QUESTIONS = [
   {
     name: 'ui',
     type: 'confirm',
-    message: 'Should an UI plugin be generated?',
+    message: 'Should a UI plugin be generated?',
     default: true,
   },
   {
