@@ -9,7 +9,13 @@ import React from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiComboBox, EuiFormRow, EuiHorizontalRule, EuiRadioGroup } from '@elastic/eui';
+import {
+  EuiComboBox,
+  EuiFormRow,
+  EuiHorizontalRule,
+  EuiRadioGroup,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 
 import { RoleOptionLabel } from '../../../shared/role_mapping';
 
@@ -31,6 +37,8 @@ export const GroupAssignmentSelector: React.FC = () => {
   const { includeInAllGroups, availableGroups, selectedGroups, selectedOptions } =
     useValues(RoleMappingsLogic);
 
+  const groupAssigmentLabelId = useGeneratedHtmlId();
+
   const hasGroupAssignment = selectedGroups.size > 0 || includeInAllGroups;
 
   const groupOptions = [
@@ -51,11 +59,12 @@ export const GroupAssignmentSelector: React.FC = () => {
       <EuiHorizontalRule />
       <EuiFormRow>
         <EuiRadioGroup
+          data-test-subj="enterpriseSearchGroupAssignmentSelectorRadioGroup"
           options={groupOptions}
           idSelected={includeInAllGroups ? 'all' : 'specific'}
           onChange={(id) => handleAllGroupsSelectionChange(id === 'all')}
           legend={{
-            children: <span>{GROUP_ASSIGNMENT_LABEL}</span>,
+            children: <span id={groupAssigmentLabelId}>{GROUP_ASSIGNMENT_LABEL}</span>,
           }}
         />
       </EuiFormRow>
@@ -69,6 +78,7 @@ export const GroupAssignmentSelector: React.FC = () => {
           }}
           fullWidth
           isDisabled={includeInAllGroups}
+          aria-labelledby={groupAssigmentLabelId}
         />
       </EuiFormRow>
     </>
