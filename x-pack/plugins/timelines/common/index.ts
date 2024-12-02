@@ -42,8 +42,8 @@ export type {
   BeatFields,
   BrowserFields,
   CursorType,
-  EqlOptionsData,
-  EqlOptionsSelected,
+  EqlFieldsComboBoxOptions,
+  EqlOptions,
   FieldsEqlOptions,
   FieldInfo,
   IndexField,
@@ -67,3 +67,5 @@ export type {
 } from './search_strategy';
 
 export { Direction, EntityType, EMPTY_BROWSER_FIELDS } from './search_strategy';
+
+export { getDataFromFieldsHits, toArray, isGeoField, toObjectArrayOfStrings } from './utils';

@@ -131,8 +131,6 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
     scheduleStepData,
     actionsStepForm,
     actionsStepData,
-    eqlOptionsSelected,
-    setEqlOptionsSelected,
   } = useRuleForms({
     defineStepDefault: defineRuleData,
     aboutStepDefault: aboutRuleData,
@@ -232,15 +230,12 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
                   threatIndicesConfig={threatIndicesConfig}
                   defaultSavedQuery={savedQuery}
                   form={defineStepForm}
-                  optionsSelected={eqlOptionsSelected}
-                  setOptionsSelected={setEqlOptionsSelected}
                   key="defineStep"
                   indexPattern={indexPattern}
                   isIndexPatternLoading={isIndexPatternLoading}
                   isQueryBarValid={isQueryBarValid}
                   setIsQueryBarValid={setIsQueryBarValid}
                   setIsThreatQueryBarValid={setIsThreatQueryBarValid}
-                  ruleType={defineStepData.ruleType}
                   index={memoizedIndex}
                   threatIndex={defineStepData.threatIndex}
                   alertSuppressionFields={defineStepData[ALERT_SUPPRESSION_FIELDS_FIELD_NAME]}
@@ -355,8 +350,6 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
       threatIndicesConfig,
       savedQuery,
       defineStepForm,
-      eqlOptionsSelected,
-      setEqlOptionsSelected,
       indexPattern,
       isIndexPatternLoading,
       isQueryBarValid,

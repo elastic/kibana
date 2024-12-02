@@ -58,16 +58,8 @@ describe('Timeline save middleware', () => {
 
   it('should persist a timeline', async () => {
     (persistTimeline as jest.Mock).mockResolvedValue({
-      data: {
-        persistTimeline: {
-          code: 200,
-          message: 'success',
-          timeline: {
-            savedObjectId: 'soid',
-            version: 'newVersion',
-          },
-        },
-      },
+      savedObjectId: 'soid',
+      version: 'newVersion',
     });
     await store.dispatch(setChanged({ id: TimelineId.test, changed: true }));
     expect(selectTimelineById(store.getState(), TimelineId.test)).toEqual(
@@ -92,16 +84,8 @@ describe('Timeline save middleware', () => {
 
   it('should copy a timeline', async () => {
     (copyTimeline as jest.Mock).mockResolvedValue({
-      data: {
-        persistTimeline: {
-          code: 200,
-          message: 'success',
-          timeline: {
-            savedObjectId: 'soid',
-            version: 'newVersion',
-          },
-        },
-      },
+      savedObjectId: 'soid',
+      version: 'newVersion',
     });
     await store.dispatch(setChanged({ id: TimelineId.test, changed: true }));
     expect(selectTimelineById(store.getState(), TimelineId.test)).toEqual(
