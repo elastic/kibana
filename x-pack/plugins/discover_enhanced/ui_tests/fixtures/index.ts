@@ -32,4 +32,4 @@ export const test = base.extend<ExtendedScoutTestFixtures, ScoutWorkerFixtures>(
 });
 
 export * as testData from './constants';
-export * as errorMessages from './assertion_messages';
+export * as assertionMessages from './assertion_messages';

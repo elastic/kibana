@@ -6,7 +6,7 @@
  */
 
 import { expect } from '@kbn/scout';
-import { test, testData, errorMessages } from '../fixtures';
+import { test, testData, assertionMessages } from '../fixtures';
 
 test.describe(
   'Discover app - value suggestions non-time based',
@@ -37,7 +37,7 @@ test.describe(
       await page.testSubj.fill('queryInput', 'type.keyword : ');
       await expect(
         page.testSubj.locator('autoCompleteSuggestionText'),
-        errorMessages.QUERY_BAR_VALIDATION.SUGGESTIONS_COUNT
+        assertionMessages.QUERY_BAR_VALIDATION.SUGGESTIONS_COUNT
       ).toHaveCount(1);
       const actualSuggestions = await page.testSubj
         .locator('autoCompleteSuggestionText')
