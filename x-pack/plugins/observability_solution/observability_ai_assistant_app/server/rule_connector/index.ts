@@ -23,7 +23,6 @@ import {
   JiraParamsSchema,
   PagerdutyParamsSchema,
   SlackApiParamsSchema,
-  SlackParamsSchema,
   WebhookParamsSchema,
 } from '@kbn/stack-connectors-plugin/server';
 import { ObservabilityAIAssistantRouteHandlerResources } from '@kbn/observability-ai-assistant-plugin/server/routes/types';
@@ -37,14 +36,26 @@ import { CompatibleJSONSchema } from '@kbn/observability-ai-assistant-plugin/com
 import { AlertDetailsContextualInsightsService } from '@kbn/observability-plugin/server/services';
 import { getSystemMessageFromInstructions } from '@kbn/observability-ai-assistant-plugin/server/service/util/get_system_message_from_instructions';
 import { AdHocInstruction } from '@kbn/observability-ai-assistant-plugin/common/types';
+import { EXECUTE_CONNECTOR_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server/functions/execute_connector';
 import { convertSchemaToOpenApi } from './convert_schema_to_open_api';
 import { OBSERVABILITY_AI_ASSISTANT_CONNECTOR_ID } from '../../common/rule_connector';
 
 const CONNECTOR_PRIVILEGES = ['api:observabilityAIAssistant', 'app:observabilityAIAssistant'];
 
 const connectorParamsSchemas: Record<string, CompatibleJSONSchema> = {
+  '.slack': {
+    type: 'object',
+    properties: {
+      id: { type: 'string' },
+      params: {
+        type: 'object',
+        properties: {
+          message: { type: 'string' },
+        },
+      },
+    },
+  },
   '.slack_api': convertSchemaToOpenApi(SlackApiParamsSchema),
-  '.slack': convertSchemaToOpenApi(SlackParamsSchema),
   '.email': convertSchemaToOpenApi(EmailParamsSchema),
   '.webhook': convertSchemaToOpenApi(WebhookParamsSchema),
   '.jira': convertSchemaToOpenApi(JiraParamsSchema),
@@ -189,6 +200,24 @@ If available, include the link of the conversation at the end of your answer.`
     ),
   };
 
+  const hasSlackConnector = !!connectorsList.filter(
+    (connector) => connector.actionTypeId === '.slack'
+  ).length;
+
+  if (hasSlackConnector && functionClient.hasFunction(EXECUTE_CONNECTOR_FUNCTION_NAME)) {
+    const slackConnectorInstruction: AdHocInstruction = {
+      instruction_type: 'application_instruction',
+      text: dedent(
+        `The execute_connector function can be used to invoke Kibana connectors.
+        To send to the Slack connector, you need the following arguments:
+          - the "id" of the connector
+          - the "params" parameter that you will fill with the message
+        Please include both "id" and "params.message" in the function arguments when executing the Slack connector..`
+      ),
+    };
+    functionClient.registerAdhocInstruction(slackConnectorInstruction);
+  }
+
   const alertsContext = await getAlertsContext(
     execOptions.params.rule,
     execOptions.params.alerts,
@@ -219,7 +248,7 @@ If available, include the link of the conversation at the end of your answer.`
       isPublic: true,
       connectorId: execOptions.params.connector,
       signal: new AbortController().signal,
-      kibanaPublicUrl: (await resources.context.core).coreStart.http.basePath.publicBaseUrl,
+      kibanaPublicUrl: (await resources.plugins.core.start()).http.basePath.publicBaseUrl,
       instructions: [backgroundInstruction],
       messages: [
         {

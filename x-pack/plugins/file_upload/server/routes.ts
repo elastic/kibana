@@ -109,12 +109,16 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
     .post({
       path: '/internal/file_upload/analyze_file',
       access: 'internal',
+      security: {
+        authz: {
+          requiredPrivileges: ['fileUpload:analyzeFile'],
+        },
+      },
       options: {
         body: {
           accepts: ['text/*', 'application/json'],
           maxBytes: MAX_FILE_SIZE_BYTES,
         },
-        tags: ['access:fileUpload:analyzeFile'],
       },
     })
     .addVersion(
@@ -260,8 +264,10 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
     .post({
       path: '/internal/file_upload/time_field_range',
       access: 'internal',
-      options: {
-        tags: ['access:fileUpload:analyzeFile'],
+      security: {
+        authz: {
+          requiredPrivileges: ['fileUpload:analyzeFile'],
+        },
       },
     })
     .addVersion(
@@ -313,8 +319,10 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
     .post({
       path: '/internal/file_upload/preview_index_time_range',
       access: 'internal',
-      options: {
-        tags: ['access:fileUpload:analyzeFile'],
+      security: {
+        authz: {
+          requiredPrivileges: ['fileUpload:analyzeFile'],
+        },
       },
     })
     .addVersion(
@@ -356,8 +364,12 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
     .post({
       path: '/internal/file_upload/preview_tika_contents',
       access: 'internal',
+      security: {
+        authz: {
+          requiredPrivileges: ['fileUpload:analyzeFile'],
+        },
+      },
       options: {
-        tags: ['access:fileUpload:analyzeFile'],
         body: {
           accepts: ['application/json'],
           maxBytes: MAX_TIKA_FILE_SIZE_BYTES,

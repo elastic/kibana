@@ -750,6 +750,9 @@ function getPatternFiringAutoRecoverFalseRuleType() {
           } else if (scheduleByPattern === 'timeout') {
             // delay longer than the timeout
             await new Promise((r) => setTimeout(r, 12000));
+          } else if (scheduleByPattern === 'run_long') {
+            // delay so rule runs a little longer
+            await new Promise((r) => setTimeout(r, 4000));
           } else {
             services.alertFactory.create(instanceId).scheduleActions('default', scheduleByPattern);
           }

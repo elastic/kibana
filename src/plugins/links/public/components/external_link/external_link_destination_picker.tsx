@@ -54,6 +54,7 @@ export const ExternalLinkDestinationPicker = ({
   return (
     <div {...other}>
       <EuiFieldText
+        compressed
         value={currentUrl}
         placeholder={ExternalLinkStrings.getPlaceholder()}
         isInvalid={!validUrl}

@@ -81,6 +81,7 @@ import { NextStep } from '../../components/next_step';
 import { useRuleForms, useRuleFormsErrors, useRuleIndexPattern } from '../form';
 import { CustomHeaderPageMemo } from '..';
 import { SaveWithErrorsModal } from '../../components/save_with_errors_confirmation';
+import { ALERT_SUPPRESSION_FIELDS_FIELD_NAME } from '../../../rule_creation/components/alert_suppression_edit';
 
 const MyEuiPanel = styled(EuiPanel)<{
   zindex?: number;
@@ -170,8 +171,6 @@ const CreateRulePageComponent: React.FC = () => {
     scheduleStepData,
     actionsStepForm,
     actionsStepData,
-    eqlOptionsSelected,
-    setEqlOptionsSelected,
   } = useRuleForms({
     defineStepDefault,
     aboutStepDefault: stepAboutDefaultValue,
@@ -391,10 +390,9 @@ const CreateRulePageComponent: React.FC = () => {
 
   const createRuleFromFormData = useCallback(
     async (enabled: boolean) => {
-      const localDefineStepData: DefineStepRule = defineFieldsTransform({
-        ...defineStepForm.getFormData(),
-        eqlOptions: eqlOptionsSelected,
-      });
+      const localDefineStepData: DefineStepRule = defineFieldsTransform(
+        defineStepForm.getFormData()
+      );
       const localAboutStepData = aboutStepForm.getFormData();
       const localScheduleStepData = scheduleStepForm.getFormData();
       const localActionsStepData = actionsStepForm.getFormData();
@@ -434,7 +432,6 @@ const CreateRulePageComponent: React.FC = () => {
       createRule,
       defineFieldsTransform,
       defineStepForm,
-      eqlOptionsSelected,
       navigateToApp,
       ruleType,
       scheduleStepForm,
@@ -555,23 +552,19 @@ const CreateRulePageComponent: React.FC = () => {
             indicesConfig={indicesConfig}
             threatIndicesConfig={threatIndicesConfig}
             form={defineStepForm}
-            optionsSelected={eqlOptionsSelected}
-            setOptionsSelected={setEqlOptionsSelected}
             indexPattern={indexPattern}
             isIndexPatternLoading={isIndexPatternLoading}
             isQueryBarValid={isQueryBarValid}
             setIsQueryBarValid={setIsQueryBarValid}
             setIsThreatQueryBarValid={setIsThreatQueryBarValid}
-            ruleType={defineStepData.ruleType}
             index={memoizedIndex}
             threatIndex={defineStepData.threatIndex}
-            groupByFields={defineStepData.groupByFields}
+            alertSuppressionFields={defineStepData[ALERT_SUPPRESSION_FIELDS_FIELD_NAME]}
             dataSourceType={defineStepData.dataSourceType}
             shouldLoadQueryDynamically={defineStepData.shouldLoadQueryDynamically}
             queryBarTitle={defineStepData.queryBar.title}
             queryBarSavedId={defineStepData.queryBar.saved_id}
             thresholdFields={defineStepData.threshold.field}
-            enableThresholdSuppression={defineStepData.enableThresholdSuppression}
           />
           <NextStep
             dataTestSubj="define-continue"
@@ -585,16 +578,9 @@ const CreateRulePageComponent: React.FC = () => {
     [
       activeStep,
       defineRuleNextStep,
-      defineStepData.dataSourceType,
-      defineStepData.groupByFields,
+      defineStepData,
       memoizedIndex,
-      defineStepData.queryBar.saved_id,
-      defineStepData.queryBar.title,
-      defineStepData.ruleType,
-      defineStepData.shouldLoadQueryDynamically,
-      defineStepData.threatIndex,
       defineStepForm,
-      eqlOptionsSelected,
       indexPattern,
       indicesConfig,
       isCreateRuleLoading,
@@ -602,10 +588,7 @@ const CreateRulePageComponent: React.FC = () => {
       isQueryBarValid,
       loading,
       memoDefineStepReadOnly,
-      setEqlOptionsSelected,
       threatIndicesConfig,
-      defineStepData.threshold.field,
-      defineStepData.enableThresholdSuppression,
     ]
   );
   const memoDefineStepExtraAction = useMemo(

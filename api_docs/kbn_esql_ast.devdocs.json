@@ -896,7 +896,9 @@
         "type": "Class",
         "tags": [],
         "label": "EsqlQuery",
-        "description": [],
+        "description": [
+          "\nRepresents a parsed or programmatically created ES|QL query. Keeps track of\nthe AST, source code, and optionally lexer tokens."
+        ],
         "path": "packages/kbn-esql-ast/src/query/query.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2085,6 +2087,103 @@
                 "description": [],
                 "signature": [
                   "ESQLList"
+                ],
+                "path": "packages/kbn-esql-ast/src/walker/walker.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.Walker.walkColumn",
+            "type": "Function",
+            "tags": [],
+            "label": "walkColumn",
+            "description": [],
+            "signature": [
+              "(node: ",
+              {
+                "pluginId": "@kbn/esql-ast",
+                "scope": "common",
+                "docId": "kibKbnEsqlAstPluginApi",
+                "section": "def-common.ESQLColumn",
+                "text": "ESQLColumn"
+              },
+              ") => void"
+            ],
+            "path": "packages/kbn-esql-ast/src/walker/walker.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/esql-ast",
+                "id": "def-common.Walker.walkColumn.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "node",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/esql-ast",
+                    "scope": "common",
+                    "docId": "kibKbnEsqlAstPluginApi",
+                    "section": "def-common.ESQLColumn",
+                    "text": "ESQLColumn"
+                  }
+                ],
+                "path": "packages/kbn-esql-ast/src/walker/walker.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.Walker.walkInlineCast",
+            "type": "Function",
+            "tags": [],
+            "label": "walkInlineCast",
+            "description": [],
+            "signature": [
+              "(node: ",
+              "ESQLInlineCast",
+              "<",
+              {
+                "pluginId": "@kbn/esql-ast",
+                "scope": "common",
+                "docId": "kibKbnEsqlAstPluginApi",
+                "section": "def-common.ESQLAstItem",
+                "text": "ESQLAstItem"
+              },
+              ">) => void"
+            ],
+            "path": "packages/kbn-esql-ast/src/walker/walker.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/esql-ast",
+                "id": "def-common.Walker.walkInlineCast.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "node",
+                "description": [],
+                "signature": [
+                  "ESQLInlineCast",
+                  "<",
+                  {
+                    "pluginId": "@kbn/esql-ast",
+                    "scope": "common",
+                    "docId": "kibKbnEsqlAstPluginApi",
+                    "section": "def-common.ESQLAstItem",
+                    "text": "ESQLAstItem"
+                  },
+                  ">"
                 ],
                 "path": "packages/kbn-esql-ast/src/walker/walker.ts",
                 "deprecated": false,
@@ -17698,6 +17797,26 @@
           },
           {
             "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.ESQLColumn.args",
+            "type": "Array",
+            "tags": [],
+            "label": "args",
+            "description": [
+              "\nA ES|QL column name can be composed of multiple parts,\ne.g: part1.part2.`part``3️⃣`.?param. Where parts can be quoted, or not\nquoted, or even be a parameter.\n\nThe args list contains the parts of the column name."
+            ],
+            "signature": [
+              "(",
+              "ESQLIdentifier",
+              " | ",
+              "ESQLParam",
+              ")[]"
+            ],
+            "path": "packages/kbn-esql-ast/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
             "id": "def-common.ESQLColumn.parts",
             "type": "Array",
             "tags": [],
@@ -18453,18 +18572,6 @@
               {
                 "plugin": "@kbn/esql-utils",
                 "path": "packages/kbn-esql-utils/src/utils/append_to_query.ts"
-              },
-              {
-                "plugin": "@kbn/securitysolution-utils",
-                "path": "packages/kbn-securitysolution-utils/src/esql/compute_if_esql_query_aggregating.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/detection_engine/rule_creation/logic/esql_validator.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/detection_engine/rule_creation/logic/esql_validator.test.ts"
               }
             ]
           },
@@ -19088,6 +19195,40 @@
                 "description": [],
                 "signature": [
                   "ESQLUnknownItem"
+                ],
+                "path": "packages/kbn-esql-ast/src/walker/walker.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.WalkerOptions.visitIdentifier",
+            "type": "Function",
+            "tags": [],
+            "label": "visitIdentifier",
+            "description": [],
+            "signature": [
+              "((node: ",
+              "ESQLIdentifier",
+              ") => void) | undefined"
+            ],
+            "path": "packages/kbn-esql-ast/src/walker/walker.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/esql-ast",
+                "id": "def-common.WalkerOptions.visitIdentifier.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "node",
+                "description": [],
+                "signature": [
+                  "ESQLIdentifier"
                 ],
                 "path": "packages/kbn-esql-ast/src/walker/walker.ts",
                 "deprecated": false,
@@ -19809,6 +19950,40 @@
           },
           {
             "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.LeafPrinter.identifier",
+            "type": "Function",
+            "tags": [],
+            "label": "identifier",
+            "description": [],
+            "signature": [
+              "(node: ",
+              "ESQLIdentifier",
+              ") => string"
+            ],
+            "path": "packages/kbn-esql-ast/src/pretty_print/leaf_printer.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/esql-ast",
+                "id": "def-common.LeafPrinter.identifier.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "node",
+                "description": [],
+                "signature": [
+                  "ESQLIdentifier"
+                ],
+                "path": "packages/kbn-esql-ast/src/pretty_print/leaf_printer.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
             "id": "def-common.LeafPrinter.column",
             "type": "Function",
             "tags": [],
@@ -19890,6 +20065,53 @@
                     "section": "def-common.ESQLLiteral",
                     "text": "ESQLLiteral"
                   }
+                ],
+                "path": "packages/kbn-esql-ast/src/pretty_print/leaf_printer.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.LeafPrinter.param",
+            "type": "Function",
+            "tags": [],
+            "label": "param",
+            "description": [],
+            "signature": [
+              "(node: ",
+              {
+                "pluginId": "@kbn/esql-ast",
+                "scope": "common",
+                "docId": "kibKbnEsqlAstPluginApi",
+                "section": "def-common.ESQLParamLiteral",
+                "text": "ESQLParamLiteral"
+              },
+              "<string>) => string"
+            ],
+            "path": "packages/kbn-esql-ast/src/pretty_print/leaf_printer.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/esql-ast",
+                "id": "def-common.LeafPrinter.param.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "node",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/esql-ast",
+                    "scope": "common",
+                    "docId": "kibKbnEsqlAstPluginApi",
+                    "section": "def-common.ESQLParamLiteral",
+                    "text": "ESQLParamLiteral"
+                  },
+                  "<string>"
                 ],
                 "path": "packages/kbn-esql-ast/src/pretty_print/leaf_printer.ts",
                 "deprecated": false,
@@ -20005,6 +20227,40 @@
                 "signature": [
                   "ESQLAstCommentMultiLine",
                   "[]"
+                ],
+                "path": "packages/kbn-esql-ast/src/pretty_print/leaf_printer.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.LeafPrinter.print",
+            "type": "Function",
+            "tags": [],
+            "label": "print",
+            "description": [],
+            "signature": [
+              "(node: ",
+              "ESQLProperNode",
+              ") => string"
+            ],
+            "path": "packages/kbn-esql-ast/src/pretty_print/leaf_printer.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/esql-ast",
+                "id": "def-common.LeafPrinter.print.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "node",
+                "description": [],
+                "signature": [
+                  "ESQLProperNode"
                 ],
                 "path": "packages/kbn-esql-ast/src/pretty_print/leaf_printer.ts",
                 "deprecated": false,

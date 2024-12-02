@@ -16,6 +16,8 @@ export const plugin: PluginInitializer<
   return new Plugin(context);
 };
 
+export { EntityClient } from './lib/entity_client';
+
 export type { EntityManagerPublicPluginSetup, EntityManagerPublicPluginStart };
 export type EntityManagerAppId = 'entityManager';
 

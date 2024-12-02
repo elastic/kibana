@@ -630,6 +630,10 @@ export function findPreviousWord(text: string) {
   return words[words.length - 2];
 }
 
+export function endsInWhitespace(text: string) {
+  return /\s$/.test(text);
+}
+
 /**
  * Returns the word at the end of the text if there is one.
  * @param text
@@ -805,10 +809,14 @@ export function getParamAtPosition(
  * Determines the type of the expression
  */
 export function getExpressionType(
-  root: ESQLAstItem,
+  root: ESQLAstItem | undefined,
   fields?: Map<string, ESQLRealField>,
   variables?: Map<string, ESQLVariable[]>
 ): SupportedDataType | 'unknown' {
+  if (!root) {
+    return 'unknown';
+  }
+
   if (!isSingleItem(root)) {
     if (root.length === 0) {
       return 'unknown';
@@ -905,7 +913,8 @@ export function getExpressionType(
         const param = getParamAtPosition(signature, i);
         return (
           param &&
-          (param.type === argType ||
+          (param.type === 'any' ||
+            param.type === argType ||
             (argType === 'keyword' && ['date', 'date_period'].includes(param.type)))
         );
       });

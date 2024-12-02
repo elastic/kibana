@@ -22,21 +22,6 @@ export const ALERT_SUMMARIZATION_PROMPT = i18n.translate(
   }
 );
 
-export const ESQL_QUERY_GENERATION_TITLE = i18n.translate(
-  'xpack.securitySolution.assistant.quickPrompts.esqlQueryGenerationTitle',
-  {
-    defaultMessage: 'ES|QL Query Generation',
-  }
-);
-
-export const ESQL_QUERY_GENERATION_PROMPT = i18n.translate(
-  'xpack.securitySolution.assistant.quickPrompts.esqlQueryGenerationPrompt',
-  {
-    defaultMessage:
-      "As an expert user of Elastic Security, please generate an accurate and valid ESQL query to detect the use case below. Your response should be formatted to be able to use immediately in an Elastic Security timeline or detection rule. Take your time with the answer, check your knowledge really well on all the functions I am asking for. For ES|QL answers specifically, you should only ever answer with what's available in your private knowledge. I cannot afford for queries to be inaccurate. Assume I am using the Elastic Common Schema and Elastic Agent.\n\nEnsure the answers are formatted in a way which is easily copyable as a separate code block in markdown.",
-  }
-);
-
 export const RULE_CREATION_TITLE = i18n.translate(
   'xpack.securitySolution.assistant.quickPrompts.ruleCreationTitle',
   {

@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import { SettingsForm } from './settings_form';
-import { useKibana } from '../../utils/kibana_react';
+import { useKibana } from '../../hooks/use_kibana';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { paths } from '../../../common/locators/paths';
 import { HeaderMenu } from '../../components/header_menu/header_menu';

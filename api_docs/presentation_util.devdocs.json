@@ -2632,30 +2632,6 @@
     "objects": [
       {
         "parentPluginId": "presentationUtil",
-        "id": "def-common.defaultTheme$",
-        "type": "Object",
-        "tags": [],
-        "label": "defaultTheme$",
-        "description": [],
-        "signature": [
-          "Observable",
-          "<",
-          {
-            "pluginId": "@kbn/core-theme-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreThemeBrowserPluginApi",
-            "section": "def-public.CoreTheme",
-            "text": "CoreTheme"
-          },
-          ">"
-        ],
-        "path": "src/plugins/presentation_util/common/lib/utils/default_theme.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "presentationUtil",
         "id": "def-common.environmentNames",
         "type": "Object",
         "tags": [],

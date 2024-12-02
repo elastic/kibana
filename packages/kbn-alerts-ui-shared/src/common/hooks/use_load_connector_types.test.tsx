@@ -9,8 +9,7 @@
 
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { renderHook } from '@testing-library/react-hooks/dom';
-import { waitFor } from '@testing-library/react';
+import { waitFor, renderHook } from '@testing-library/react';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 
 import { useLoadConnectorTypes } from './use_load_connector_types';
@@ -49,6 +48,7 @@ describe('useLoadConnectorTypes', () => {
         useLoadConnectorTypes({
           http,
           includeSystemActions: true,
+          featureId: 'alerting',
         }),
       { wrapper }
     );
@@ -69,6 +69,11 @@ describe('useLoadConnectorTypes', () => {
         supportedFeatureIds: ['alerting'],
       },
     ]);
+    expect(http.get).toHaveBeenCalledWith('/internal/actions/connector_types', {
+      query: {
+        feature_id: 'alerting',
+      },
+    });
   });
 
   test('should call the correct endpoint if system actions is true', async () => {

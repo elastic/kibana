@@ -15780,7 +15780,15 @@
             "section": "def-common.IKibanaSearchResponse",
             "text": "IKibanaSearchResponse"
           },
-          "<any> | undefined) => boolean"
+          "<any> | { response: ",
+          {
+            "pluginId": "@kbn/search-types",
+            "scope": "common",
+            "docId": "kibKbnSearchTypesPluginApi",
+            "section": "def-common.IKibanaSearchResponse",
+            "text": "IKibanaSearchResponse"
+          },
+          "<any>; } | undefined) => boolean"
         ],
         "path": "src/plugins/data/common/search/utils.ts",
         "deprecated": false,
@@ -15789,7 +15797,7 @@
           {
             "parentPluginId": "data",
             "id": "def-common.isAbortResponse.$1",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "response",
             "description": [],
@@ -15801,7 +15809,15 @@
                 "section": "def-common.IKibanaSearchResponse",
                 "text": "IKibanaSearchResponse"
               },
-              "<any> | undefined"
+              "<any> | { response: ",
+              {
+                "pluginId": "@kbn/search-types",
+                "scope": "common",
+                "docId": "kibKbnSearchTypesPluginApi",
+                "section": "def-common.IKibanaSearchResponse",
+                "text": "IKibanaSearchResponse"
+              },
+              "<any>; } | undefined"
             ],
             "path": "src/plugins/data/common/search/utils.ts",
             "deprecated": false,

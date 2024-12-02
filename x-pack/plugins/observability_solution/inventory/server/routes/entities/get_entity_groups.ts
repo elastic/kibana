@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import type { ObservabilityElasticsearchClient } from '@kbn/observability-utils/es/client/create_observability_es_client';
-import { kqlQuery } from '@kbn/observability-utils/es/queries/kql_query';
-import { esqlResultToPlainObjects } from '@kbn/observability-utils/es/utils/esql_result_to_plain_objects';
+import type { ScalarValue } from '@elastic/elasticsearch/lib/api/types';
+import { kqlQuery } from '@kbn/observability-plugin/server';
 import { ENTITY_TYPE } from '@kbn/observability-shared-plugin/common';
-import { ScalarValue } from '@elastic/elasticsearch/lib/api/types';
+import type { ObservabilityElasticsearchClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
 import {
   ENTITIES_LATEST_ALIAS,
-  type EntityGroup,
   MAX_NUMBER_OF_ENTITIES,
+  type EntityGroup,
 } from '../../../common/entities';
 import { getBuiltinEntityDefinitionIdESQLWhereClause } from './query_helper';
 
@@ -21,38 +20,43 @@ export async function getEntityGroupsBy({
   inventoryEsClient,
   field,
   kuery,
-  entityTypes,
+  includeEntityTypes = [],
+  excludeEntityTypes = [],
 }: {
   inventoryEsClient: ObservabilityElasticsearchClient;
   field: string;
+  includeEntityTypes?: string[];
+  excludeEntityTypes?: string[];
   kuery?: string;
-  entityTypes?: string[];
-}) {
+}): Promise<EntityGroup[]> {
   const from = `FROM ${ENTITIES_LATEST_ALIAS}`;
   const where = [getBuiltinEntityDefinitionIdESQLWhereClause()];
   const params: ScalarValue[] = [];
 
-  if (entityTypes) {
-    where.push(`WHERE ${ENTITY_TYPE} IN (${entityTypes.map(() => '?').join()})`);
-    params.push(...entityTypes);
+  if (includeEntityTypes.length) {
+    where.push(`WHERE ${ENTITY_TYPE} IN (${includeEntityTypes.map(() => '?').join()})`);
+    params.push(...includeEntityTypes);
   }
 
-  // STATS doesn't support parameterisation.
+  if (excludeEntityTypes.length) {
+    where.push(`WHERE ${ENTITY_TYPE} NOT IN (${excludeEntityTypes.map(() => '?').join()})`);
+    params.push(...excludeEntityTypes);
+  }
+
   const group = `STATS count = COUNT(*) by ${field}`;
   const sort = `SORT ${field} asc`;
-  // LIMIT doesn't support parameterisation.
   const limit = `LIMIT ${MAX_NUMBER_OF_ENTITIES}`;
   const query = [from, ...where, group, sort, limit].join(' | ');
 
-  const groups = await inventoryEsClient.esql('get_entities_groups', {
-    query,
-    filter: {
-      bool: {
-        filter: kqlQuery(kuery),
-      },
+  const { hits } = await inventoryEsClient.esql<EntityGroup, { transform: 'plain' }>(
+    'get_entities_groups',
+    {
+      query,
+      filter: { bool: { filter: kqlQuery(kuery) } },
+      params,
     },
-    params,
-  });
+    { transform: 'plain' }
+  );
 
-  return esqlResultToPlainObjects<EntityGroup>(groups);
+  return hits;
 }

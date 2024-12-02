@@ -39,7 +39,7 @@
           },
           ", parameterDefinition: { name: string; type: ",
           "FunctionParameterType",
-          "; optional?: boolean | undefined; supportsWildcard?: boolean | undefined; constantOnly?: boolean | undefined; acceptedValues?: string[] | undefined; literalSuggestions?: string[] | undefined; }, references: ",
+          "; optional?: boolean | undefined; supportsWildcard?: boolean | undefined; constantOnly?: boolean | undefined; fieldsOnly?: boolean | undefined; acceptedValues?: string[] | undefined; literalSuggestions?: string[] | undefined; }, references: ",
           "ReferenceMaps",
           ", parentCommand: string | undefined) => boolean | undefined"
         ],
@@ -78,7 +78,7 @@
             "signature": [
               "{ name: string; type: ",
               "FunctionParameterType",
-              "; optional?: boolean | undefined; supportsWildcard?: boolean | undefined; constantOnly?: boolean | undefined; acceptedValues?: string[] | undefined; literalSuggestions?: string[] | undefined; }"
+              "; optional?: boolean | undefined; supportsWildcard?: boolean | undefined; constantOnly?: boolean | undefined; fieldsOnly?: boolean | undefined; acceptedValues?: string[] | undefined; literalSuggestions?: string[] | undefined; }"
             ],
             "path": "packages/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
             "deprecated": false,
@@ -1041,7 +1041,7 @@
           "\nThis function returns the variable or field matching a column"
         ],
         "signature": [
-          "(column: ",
+          "(node: ",
           {
             "pluginId": "@kbn/esql-ast",
             "scope": "common",
@@ -1049,6 +1049,8 @@
             "section": "def-common.ESQLColumn",
             "text": "ESQLColumn"
           },
+          " | ",
+          "ESQLIdentifier",
           ", { fields, variables }: Pick<",
           "ReferenceMaps",
           ", \"fields\" | \"variables\">) => ",
@@ -1076,9 +1078,9 @@
           {
             "parentPluginId": "@kbn/esql-validation-autocomplete",
             "id": "def-common.getColumnForASTNode.$1",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
-            "label": "column",
+            "label": "node",
             "description": [],
             "signature": [
               {
@@ -1087,7 +1089,9 @@
                 "docId": "kibKbnEsqlAstPluginApi",
                 "section": "def-common.ESQLColumn",
                 "text": "ESQLColumn"
-              }
+              },
+              " | ",
+              "ESQLIdentifier"
             ],
             "path": "packages/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
             "deprecated": false,
@@ -3320,6 +3324,20 @@
           },
           {
             "parentPluginId": "@kbn/esql-validation-autocomplete",
+            "id": "def-common.FunctionDefinition.preview",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "preview",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-esql-validation-autocomplete/src/definitions/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-validation-autocomplete",
             "id": "def-common.FunctionDefinition.ignoreAsSuggestion",
             "type": "CompoundType",
             "tags": [],
@@ -3406,7 +3424,7 @@
             "signature": [
               "{ params: { name: string; type: ",
               "FunctionParameterType",
-              "; optional?: boolean | undefined; supportsWildcard?: boolean | undefined; constantOnly?: boolean | undefined; acceptedValues?: string[] | undefined; literalSuggestions?: string[] | undefined; }[]; minParams?: number | undefined; returnType: ",
+              "; optional?: boolean | undefined; supportsWildcard?: boolean | undefined; constantOnly?: boolean | undefined; fieldsOnly?: boolean | undefined; acceptedValues?: string[] | undefined; literalSuggestions?: string[] | undefined; }[]; minParams?: number | undefined; returnType: ",
               "FunctionReturnType",
               "; }[]"
             ],
@@ -4034,6 +4052,20 @@
           },
           {
             "parentPluginId": "@kbn/esql-validation-autocomplete",
+            "id": "def-common.ValidationErrors.fnUnsupportedAfterCommand",
+            "type": "Object",
+            "tags": [],
+            "label": "fnUnsupportedAfterCommand",
+            "description": [],
+            "signature": [
+              "{ message: string; type: { function: string; command: string; }; }"
+            ],
+            "path": "packages/kbn-esql-validation-autocomplete/src/validation/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-validation-autocomplete",
             "id": "def-common.ValidationErrors.expectedConstant",
             "type": "Object",
             "tags": [],
@@ -4125,6 +4157,20 @@
             "description": [],
             "signature": [
               "{ message: string; type: { nestedAgg: string; }; }"
+            ],
+            "path": "packages/kbn-esql-validation-autocomplete/src/validation/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-validation-autocomplete",
+            "id": "def-common.ValidationErrors.onlyWhereCommandSupported",
+            "type": "Object",
+            "tags": [],
+            "label": "onlyWhereCommandSupported",
+            "description": [],
+            "signature": [
+              "{ message: string; type: { fn: string; }; }"
             ],
             "path": "packages/kbn-esql-validation-autocomplete/src/validation/types.ts",
             "deprecated": false,

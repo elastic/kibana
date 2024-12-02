@@ -48,9 +48,10 @@ NOTE: If you use the default settings, you can still create a custom role that g
 
 . Create the reporting role.
 
-.. Open the main menu, then click *Stack Management*.
+.. Go to the *Roles* management page using the navigation menu or the 
+<<kibana-navigation-search,global search field>>.
 
-.. Click *Roles > Create role*.
+.. Click *Create role*.
 
 . Specify the role settings.
 
@@ -86,9 +87,10 @@ NOTE: If the *Reporting* options for application features are unavailable, and t
 
 . Assign the reporting role to a user.
 
-.. Open the main menu, then click *Stack Management*.
+.. Go to the *Users* management page using the navigation menu or the 
+<<kibana-navigation-search,global search field>>.
 
-.. Click *Users*, then click the user you want to assign the reporting role to.
+.. Select the user you want to assign the reporting role to.
 
 .. From the *Roles* dropdown, select *custom_reporting_user*.
 

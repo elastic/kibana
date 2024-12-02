@@ -93,7 +93,9 @@ export type {
   IRouter,
   RouteRegistrar,
   RouterRoute,
-  RouterDeprecatedRouteDetails,
+  RouterDeprecatedApiDetails,
+  RouterAccessDeprecatedApiDetails,
+  RouterRouteDeprecatedApiDetails,
   IKibanaSocket,
   KibanaErrorResponseFactory,
   KibanaRedirectionResponseFactory,
@@ -121,6 +123,7 @@ export type {
   RouteSecurityGetter,
   InternalRouteSecurity,
   RouteDeprecationInfo,
+  PostValidationMetadata,
 } from './src/router';
 export {
   validBodyOutput,

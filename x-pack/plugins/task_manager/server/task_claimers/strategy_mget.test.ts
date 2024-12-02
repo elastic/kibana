@@ -11,6 +11,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { filter, take } from 'rxjs';
 
 import { CLAIM_STRATEGY_MGET, DEFAULT_KIBANAS_PER_PARTITION } from '../config';
+import { NO_ASSIGNED_PARTITIONS_WARNING_INTERVAL } from './strategy_mget';
 
 import {
   TaskStatus,
@@ -189,7 +190,6 @@ describe('TaskClaiming', () => {
         definitions,
         taskStore: store,
         excludedTaskTypes,
-        unusedTypes: unusedTaskTypes,
         maxAttempts: taskClaimingOpts.maxAttempts ?? 2,
         getAvailableCapacity: taskClaimingOpts.getAvailableCapacity ?? (() => 10),
         taskPartitioner,
@@ -205,20 +205,17 @@ describe('TaskClaiming', () => {
       claimingOpts,
       hits = [generateFakeTasks(1)],
       excludedTaskTypes = [],
-      unusedTaskTypes = [],
     }: {
       storeOpts: Partial<StoreOpts>;
       taskClaimingOpts: Partial<TaskClaimingOpts>;
       claimingOpts: Omit<OwnershipClaimingOpts, 'size' | 'taskTypes'>;
       hits?: ConcreteTaskInstance[][];
       excludedTaskTypes?: string[];
-      unusedTaskTypes?: string[];
     }) {
       const { taskClaiming, store } = initialiseTestClaiming({
         storeOpts,
         taskClaimingOpts,
         excludedTaskTypes,
-        unusedTaskTypes,
         hits,
       });
 
@@ -354,7 +351,6 @@ describe('TaskClaiming', () => {
         definitions: taskDefinitions,
         taskStore: store,
         excludedTaskTypes: [],
-        unusedTypes: [],
         maxAttempts: 2,
         getAvailableCapacity: () => 10,
         taskPartitioner,
@@ -377,7 +373,7 @@ describe('TaskClaiming', () => {
       expect(mockApmTrans.end).toHaveBeenCalledWith('success');
 
       expect(taskManagerLogger.debug).toHaveBeenCalledWith(
-        'task claimer claimed: 3; stale: 0; conflicts: 0; missing: 0; capacity reached: 3; updateErrors: 0; getErrors: 0; removed: 0;',
+        'task claimer claimed: 3; stale: 0; conflicts: 0; missing: 0; capacity reached: 3; updateErrors: 0; getErrors: 0;',
         { tags: ['taskClaiming', 'claimAvailableTasksMget'] }
       );
 
@@ -439,312 +435,6 @@ describe('TaskClaiming', () => {
       expect(result.docs.length).toEqual(3);
     });
 
-    test('should not claim tasks of removed type', async () => {
-      const store = taskStoreMock.create({ taskManagerId: 'test-test' });
-      store.convertToSavedObjectIds.mockImplementation((ids) => ids.map((id) => `task:${id}`));
-
-      const fetchedTasks = [
-        mockInstance({ id: `id-1`, taskType: 'report' }),
-        mockInstance({ id: `id-2`, taskType: 'report' }),
-        mockInstance({ id: `id-3`, taskType: 'yawn' }),
-      ];
-
-      const { versionMap, docLatestVersions } = getVersionMapsFromTasks(fetchedTasks);
-      store.msearch.mockResolvedValueOnce({ docs: fetchedTasks, versionMap });
-      store.getDocVersions.mockResolvedValueOnce(docLatestVersions);
-
-      store.bulkGet.mockResolvedValueOnce([fetchedTasks[2]].map(asOk));
-      store.bulkPartialUpdate.mockResolvedValueOnce([fetchedTasks[2]].map(getPartialUpdateResult));
-      store.bulkPartialUpdate.mockResolvedValueOnce(
-        [fetchedTasks[0], fetchedTasks[1]].map(getPartialUpdateResult)
-      );
-
-      const taskClaiming = new TaskClaiming({
-        logger: taskManagerLogger,
-        strategy: CLAIM_STRATEGY_MGET,
-        definitions: taskDefinitions,
-        taskStore: store,
-        excludedTaskTypes: [],
-        unusedTypes: ['report'],
-        maxAttempts: 2,
-        getAvailableCapacity: () => 10,
-        taskPartitioner,
-      });
-
-      const resultOrErr = await taskClaiming.claimAvailableTasksIfCapacityIsAvailable({
-        claimOwnershipUntil: new Date(),
-      });
-
-      if (!isOk<ClaimOwnershipResult, FillPoolResult>(resultOrErr)) {
-        expect(resultOrErr).toBe(undefined);
-      }
-
-      const result = unwrap(resultOrErr) as ClaimOwnershipResult;
-
-      expect(apm.startTransaction).toHaveBeenCalledWith(
-        TASK_MANAGER_MARK_AS_CLAIMED,
-        TASK_MANAGER_TRANSACTION_TYPE
-      );
-      expect(mockApmTrans.end).toHaveBeenCalledWith('success');
-
-      expect(taskManagerLogger.debug).toHaveBeenCalledWith(
-        'task claimer claimed: 1; stale: 0; conflicts: 0; missing: 0; capacity reached: 0; updateErrors: 0; getErrors: 0; removed: 2;',
-        { tags: ['taskClaiming', 'claimAvailableTasksMget'] }
-      );
-
-      expect(store.msearch.mock.calls[0][0]?.[0]).toMatchObject({
-        size: 40,
-        seq_no_primary_term: true,
-      });
-      expect(store.getDocVersions).toHaveBeenCalledWith(['task:id-1', 'task:id-2', 'task:id-3']);
-      expect(store.bulkPartialUpdate).toHaveBeenCalledTimes(2);
-      expect(store.bulkPartialUpdate).toHaveBeenNthCalledWith(1, [
-        {
-          id: fetchedTasks[2].id,
-          version: fetchedTasks[2].version,
-          scheduledAt: fetchedTasks[2].runAt,
-          attempts: 1,
-          ownerId: 'test-test',
-          retryAt: new Date('1970-01-01T00:05:30.000Z'),
-          status: 'running',
-          startedAt: new Date('1970-01-01T00:00:00.000Z'),
-        },
-      ]);
-      expect(store.bulkPartialUpdate).toHaveBeenNthCalledWith(2, [
-        {
-          id: fetchedTasks[0].id,
-          version: fetchedTasks[0].version,
-          status: 'unrecognized',
-        },
-        {
-          id: fetchedTasks[1].id,
-          version: fetchedTasks[1].version,
-          status: 'unrecognized',
-        },
-      ]);
-      expect(store.bulkGet).toHaveBeenCalledWith(['id-3']);
-
-      expect(result.stats).toEqual({
-        tasksClaimed: 1,
-        tasksConflicted: 0,
-        tasksErrors: 0,
-        tasksUpdated: 1,
-        tasksLeftUnclaimed: 0,
-        staleTasks: 0,
-      });
-      expect(result.docs.length).toEqual(1);
-    });
-
-    test('should log warning if error updating single removed task as unrecognized', async () => {
-      const store = taskStoreMock.create({ taskManagerId: 'test-test' });
-      store.convertToSavedObjectIds.mockImplementation((ids) => ids.map((id) => `task:${id}`));
-
-      const fetchedTasks = [
-        mockInstance({ id: `id-1`, taskType: 'report' }),
-        mockInstance({ id: `id-2`, taskType: 'report' }),
-        mockInstance({ id: `id-3`, taskType: 'yawn' }),
-      ];
-
-      const { versionMap, docLatestVersions } = getVersionMapsFromTasks(fetchedTasks);
-      store.msearch.mockResolvedValueOnce({ docs: fetchedTasks, versionMap });
-      store.getDocVersions.mockResolvedValueOnce(docLatestVersions);
-
-      store.bulkGet.mockResolvedValueOnce([fetchedTasks[2]].map(asOk));
-      store.bulkPartialUpdate.mockResolvedValueOnce([fetchedTasks[2]].map(getPartialUpdateResult));
-      store.bulkPartialUpdate.mockResolvedValueOnce([
-        asOk(fetchedTasks[0]),
-        asErr({
-          type: 'task',
-          id: fetchedTasks[1].id,
-          status: 404,
-          error: {
-            type: 'document_missing_exception',
-            reason: '[5]: document missing',
-            index_uuid: 'aAsFqTI0Tc2W0LCWgPNrOA',
-            shard: '0',
-            index: '.kibana_task_manager_8.16.0_001',
-          },
-        }),
-      ]);
-
-      const taskClaiming = new TaskClaiming({
-        logger: taskManagerLogger,
-        strategy: CLAIM_STRATEGY_MGET,
-        definitions: taskDefinitions,
-        taskStore: store,
-        excludedTaskTypes: [],
-        unusedTypes: ['report'],
-        maxAttempts: 2,
-        getAvailableCapacity: () => 10,
-        taskPartitioner,
-      });
-
-      const resultOrErr = await taskClaiming.claimAvailableTasksIfCapacityIsAvailable({
-        claimOwnershipUntil: new Date(),
-      });
-
-      if (!isOk<ClaimOwnershipResult, FillPoolResult>(resultOrErr)) {
-        expect(resultOrErr).toBe(undefined);
-      }
-
-      const result = unwrap(resultOrErr) as ClaimOwnershipResult;
-
-      expect(apm.startTransaction).toHaveBeenCalledWith(
-        TASK_MANAGER_MARK_AS_CLAIMED,
-        TASK_MANAGER_TRANSACTION_TYPE
-      );
-      expect(mockApmTrans.end).toHaveBeenCalledWith('success');
-
-      expect(taskManagerLogger.warn).toHaveBeenCalledWith(
-        'Error updating task id-2:task to mark as unrecognized during claim: {"type":"document_missing_exception","reason":"[5]: document missing","index_uuid":"aAsFqTI0Tc2W0LCWgPNrOA","shard":"0","index":".kibana_task_manager_8.16.0_001"}',
-        { tags: ['taskClaiming', 'claimAvailableTasksMget'] }
-      );
-      expect(taskManagerLogger.debug).toHaveBeenCalledWith(
-        'task claimer claimed: 1; stale: 0; conflicts: 0; missing: 0; capacity reached: 0; updateErrors: 0; getErrors: 0; removed: 1;',
-        { tags: ['taskClaiming', 'claimAvailableTasksMget'] }
-      );
-
-      expect(store.msearch.mock.calls[0][0]?.[0]).toMatchObject({
-        size: 40,
-        seq_no_primary_term: true,
-      });
-      expect(store.getDocVersions).toHaveBeenCalledWith(['task:id-1', 'task:id-2', 'task:id-3']);
-      expect(store.bulkPartialUpdate).toHaveBeenCalledTimes(2);
-      expect(store.bulkPartialUpdate).toHaveBeenNthCalledWith(1, [
-        {
-          id: fetchedTasks[2].id,
-          version: fetchedTasks[2].version,
-          scheduledAt: fetchedTasks[2].runAt,
-          attempts: 1,
-          ownerId: 'test-test',
-          retryAt: new Date('1970-01-01T00:05:30.000Z'),
-          status: 'running',
-          startedAt: new Date('1970-01-01T00:00:00.000Z'),
-        },
-      ]);
-      expect(store.bulkPartialUpdate).toHaveBeenNthCalledWith(2, [
-        {
-          id: fetchedTasks[0].id,
-          version: fetchedTasks[0].version,
-          status: 'unrecognized',
-        },
-        {
-          id: fetchedTasks[1].id,
-          version: fetchedTasks[1].version,
-          status: 'unrecognized',
-        },
-      ]);
-      expect(store.bulkGet).toHaveBeenCalledWith(['id-3']);
-
-      expect(result.stats).toEqual({
-        tasksClaimed: 1,
-        tasksConflicted: 0,
-        tasksErrors: 0,
-        tasksUpdated: 1,
-        tasksLeftUnclaimed: 0,
-        staleTasks: 0,
-      });
-      expect(result.docs.length).toEqual(1);
-    });
-
-    test('should log warning if error updating all removed tasks as unrecognized', async () => {
-      const store = taskStoreMock.create({ taskManagerId: 'test-test' });
-      store.convertToSavedObjectIds.mockImplementation((ids) => ids.map((id) => `task:${id}`));
-
-      const fetchedTasks = [
-        mockInstance({ id: `id-1`, taskType: 'report' }),
-        mockInstance({ id: `id-2`, taskType: 'report' }),
-        mockInstance({ id: `id-3`, taskType: 'yawn' }),
-      ];
-
-      const { versionMap, docLatestVersions } = getVersionMapsFromTasks(fetchedTasks);
-      store.msearch.mockResolvedValueOnce({ docs: fetchedTasks, versionMap });
-      store.getDocVersions.mockResolvedValueOnce(docLatestVersions);
-
-      store.bulkGet.mockResolvedValueOnce([fetchedTasks[2]].map(asOk));
-      store.bulkPartialUpdate.mockResolvedValueOnce([fetchedTasks[2]].map(getPartialUpdateResult));
-      store.bulkPartialUpdate.mockRejectedValueOnce(new Error('Oh no'));
-
-      const taskClaiming = new TaskClaiming({
-        logger: taskManagerLogger,
-        strategy: CLAIM_STRATEGY_MGET,
-        definitions: taskDefinitions,
-        taskStore: store,
-        excludedTaskTypes: [],
-        unusedTypes: ['report'],
-        maxAttempts: 2,
-        getAvailableCapacity: () => 10,
-        taskPartitioner,
-      });
-
-      const resultOrErr = await taskClaiming.claimAvailableTasksIfCapacityIsAvailable({
-        claimOwnershipUntil: new Date(),
-      });
-
-      if (!isOk<ClaimOwnershipResult, FillPoolResult>(resultOrErr)) {
-        expect(resultOrErr).toBe(undefined);
-      }
-
-      const result = unwrap(resultOrErr) as ClaimOwnershipResult;
-
-      expect(apm.startTransaction).toHaveBeenCalledWith(
-        TASK_MANAGER_MARK_AS_CLAIMED,
-        TASK_MANAGER_TRANSACTION_TYPE
-      );
-      expect(mockApmTrans.end).toHaveBeenCalledWith('success');
-
-      expect(taskManagerLogger.warn).toHaveBeenCalledWith(
-        'Error updating tasks to mark as unrecognized during claim: Error: Oh no',
-        { tags: ['taskClaiming', 'claimAvailableTasksMget'] }
-      );
-      expect(taskManagerLogger.debug).toHaveBeenCalledWith(
-        'task claimer claimed: 1; stale: 0; conflicts: 0; missing: 0; capacity reached: 0; updateErrors: 0; getErrors: 0; removed: 0;',
-        { tags: ['taskClaiming', 'claimAvailableTasksMget'] }
-      );
-
-      expect(store.msearch.mock.calls[0][0]?.[0]).toMatchObject({
-        size: 40,
-        seq_no_primary_term: true,
-      });
-      expect(store.getDocVersions).toHaveBeenCalledWith(['task:id-1', 'task:id-2', 'task:id-3']);
-      expect(store.bulkGet).toHaveBeenCalledWith(['id-3']);
-      expect(store.bulkPartialUpdate).toHaveBeenCalledTimes(2);
-      expect(store.bulkPartialUpdate).toHaveBeenNthCalledWith(1, [
-        {
-          id: fetchedTasks[2].id,
-          version: fetchedTasks[2].version,
-          scheduledAt: fetchedTasks[2].runAt,
-          attempts: 1,
-          ownerId: 'test-test',
-          retryAt: new Date('1970-01-01T00:05:30.000Z'),
-          status: 'running',
-          startedAt: new Date('1970-01-01T00:00:00.000Z'),
-        },
-      ]);
-      expect(store.bulkPartialUpdate).toHaveBeenNthCalledWith(2, [
-        {
-          id: fetchedTasks[0].id,
-          version: fetchedTasks[0].version,
-          status: 'unrecognized',
-        },
-        {
-          id: fetchedTasks[1].id,
-          version: fetchedTasks[1].version,
-          status: 'unrecognized',
-        },
-      ]);
-
-      expect(result.stats).toEqual({
-        tasksClaimed: 1,
-        tasksConflicted: 0,
-        tasksErrors: 0,
-        tasksUpdated: 1,
-        tasksLeftUnclaimed: 0,
-        staleTasks: 0,
-      });
-      expect(result.docs.length).toEqual(1);
-    });
-
     test('should handle no tasks to claim', async () => {
       const store = taskStoreMock.create({ taskManagerId: 'test-test' });
       store.convertToSavedObjectIds.mockImplementation((ids) => ids.map((id) => `task:${id}`));
@@ -760,7 +450,6 @@ describe('TaskClaiming', () => {
         definitions: taskDefinitions,
         taskStore: store,
         excludedTaskTypes: [],
-        unusedTypes: [],
         maxAttempts: 2,
         getAvailableCapacity: () => 10,
         taskPartitioner,
@@ -827,7 +516,6 @@ describe('TaskClaiming', () => {
         definitions: taskDefinitions,
         taskStore: store,
         excludedTaskTypes: [],
-        unusedTypes: [],
         maxAttempts: 2,
         getAvailableCapacity: () => 10,
         taskPartitioner,
@@ -850,7 +538,7 @@ describe('TaskClaiming', () => {
       expect(mockApmTrans.end).toHaveBeenCalledWith('success');
 
       expect(taskManagerLogger.debug).toHaveBeenCalledWith(
-        'task claimer claimed: 2; stale: 0; conflicts: 0; missing: 1; capacity reached: 0; updateErrors: 0; getErrors: 0; removed: 0;',
+        'task claimer claimed: 2; stale: 0; conflicts: 0; missing: 1; capacity reached: 0; updateErrors: 0; getErrors: 0;',
         { tags: ['taskClaiming', 'claimAvailableTasksMget'] }
       );
 
@@ -921,7 +609,6 @@ describe('TaskClaiming', () => {
         definitions: taskDefinitions,
         taskStore: store,
         excludedTaskTypes: [],
-        unusedTypes: [],
         maxAttempts: 2,
         getAvailableCapacity: () => 10,
         taskPartitioner,
@@ -944,7 +631,7 @@ describe('TaskClaiming', () => {
       expect(mockApmTrans.end).toHaveBeenCalledWith('success');
 
       expect(taskManagerLogger.debug).toHaveBeenCalledWith(
-        'task claimer claimed: 2; stale: 0; conflicts: 0; missing: 1; capacity reached: 0; updateErrors: 0; getErrors: 0; removed: 0;',
+        'task claimer claimed: 2; stale: 0; conflicts: 0; missing: 1; capacity reached: 0; updateErrors: 0; getErrors: 0;',
         { tags: ['taskClaiming', 'claimAvailableTasksMget'] }
       );
 
@@ -1015,7 +702,6 @@ describe('TaskClaiming', () => {
         definitions: taskDefinitions,
         taskStore: store,
         excludedTaskTypes: [],
-        unusedTypes: [],
         maxAttempts: 2,
         getAvailableCapacity: () => 10,
         taskPartitioner,
@@ -1038,7 +724,7 @@ describe('TaskClaiming', () => {
       expect(mockApmTrans.end).toHaveBeenCalledWith('success');
 
       expect(taskManagerLogger.debug).toHaveBeenCalledWith(
-        'task claimer claimed: 2; stale: 1; conflicts: 0; missing: 0; capacity reached: 0; updateErrors: 0; getErrors: 0; removed: 0;',
+        'task claimer claimed: 2; stale: 1; conflicts: 0; missing: 0; capacity reached: 0; updateErrors: 0; getErrors: 0;',
         { tags: ['taskClaiming', 'claimAvailableTasksMget'] }
       );
 
@@ -1115,7 +801,6 @@ describe('TaskClaiming', () => {
         definitions: taskDefinitions,
         taskStore: store,
         excludedTaskTypes: [],
-        unusedTypes: [],
         maxAttempts: 2,
         getAvailableCapacity: () => 10,
         taskPartitioner,
@@ -1138,7 +823,7 @@ describe('TaskClaiming', () => {
       expect(mockApmTrans.end).toHaveBeenCalledWith('success');
 
       expect(taskManagerLogger.debug).toHaveBeenCalledWith(
-        'task claimer claimed: 4; stale: 0; conflicts: 0; missing: 0; capacity reached: 0; updateErrors: 0; getErrors: 0; removed: 0;',
+        'task claimer claimed: 4; stale: 0; conflicts: 0; missing: 0; capacity reached: 0; updateErrors: 0; getErrors: 0;',
         { tags: ['taskClaiming', 'claimAvailableTasksMget'] }
       );
 
@@ -1247,7 +932,6 @@ describe('TaskClaiming', () => {
         definitions: taskDefinitions,
         taskStore: store,
         excludedTaskTypes: [],
-        unusedTypes: [],
         maxAttempts: 2,
         getAvailableCapacity: () => 10,
         taskPartitioner,
@@ -1270,7 +954,7 @@ describe('TaskClaiming', () => {
       expect(mockApmTrans.end).toHaveBeenCalledWith('success');
 
       expect(taskManagerLogger.debug).toHaveBeenCalledWith(
-        'task claimer claimed: 3; stale: 0; conflicts: 0; missing: 0; capacity reached: 0; updateErrors: 0; getErrors: 1; removed: 0;',
+        'task claimer claimed: 3; stale: 0; conflicts: 0; missing: 0; capacity reached: 0; updateErrors: 0; getErrors: 1;',
         { tags: ['taskClaiming', 'claimAvailableTasksMget'] }
       );
       expect(taskManagerLogger.error).toHaveBeenCalledWith(
@@ -1376,7 +1060,6 @@ describe('TaskClaiming', () => {
         definitions: taskDefinitions,
         taskStore: store,
         excludedTaskTypes: [],
-        unusedTypes: [],
         maxAttempts: 2,
         getAvailableCapacity: () => 10,
         taskPartitioner,
@@ -1399,7 +1082,7 @@ describe('TaskClaiming', () => {
       expect(mockApmTrans.end).toHaveBeenCalledWith('success');
 
       expect(taskManagerLogger.debug).toHaveBeenCalledWith(
-        'task claimer claimed: 3; stale: 0; conflicts: 1; missing: 0; capacity reached: 0; updateErrors: 0; getErrors: 0; removed: 0;',
+        'task claimer claimed: 3; stale: 0; conflicts: 1; missing: 0; capacity reached: 0; updateErrors: 0; getErrors: 0;',
         { tags: ['taskClaiming', 'claimAvailableTasksMget'] }
       );
       expect(taskManagerLogger.warn).toHaveBeenCalledWith(
@@ -1503,7 +1186,6 @@ describe('TaskClaiming', () => {
         definitions: taskDefinitions,
         taskStore: store,
         excludedTaskTypes: [],
-        unusedTypes: [],
         maxAttempts: 2,
         getAvailableCapacity: () => 10,
         taskPartitioner,
@@ -1618,7 +1300,6 @@ describe('TaskClaiming', () => {
         definitions: taskDefinitions,
         taskStore: store,
         excludedTaskTypes: [],
-        unusedTypes: [],
         maxAttempts: 2,
         getAvailableCapacity: () => 10,
         taskPartitioner,
@@ -1641,7 +1322,7 @@ describe('TaskClaiming', () => {
       expect(mockApmTrans.end).toHaveBeenCalledWith('success');
 
       expect(taskManagerLogger.debug).toHaveBeenCalledWith(
-        'task claimer claimed: 3; stale: 0; conflicts: 0; missing: 0; capacity reached: 0; updateErrors: 1; getErrors: 0; removed: 0;',
+        'task claimer claimed: 3; stale: 0; conflicts: 0; missing: 0; capacity reached: 0; updateErrors: 1; getErrors: 0;',
         { tags: ['taskClaiming', 'claimAvailableTasksMget'] }
       );
       expect(taskManagerLogger.error).toHaveBeenCalledWith(
@@ -1752,7 +1433,6 @@ describe('TaskClaiming', () => {
         definitions: taskDefinitions,
         taskStore: store,
         excludedTaskTypes: [],
-        unusedTypes: [],
         maxAttempts: 2,
         getAvailableCapacity: () => 10,
         taskPartitioner,
@@ -1775,7 +1455,7 @@ describe('TaskClaiming', () => {
       expect(mockApmTrans.end).toHaveBeenCalledWith('success');
 
       expect(taskManagerLogger.debug).toHaveBeenCalledWith(
-        'task claimer claimed: 3; stale: 0; conflicts: 1; missing: 0; capacity reached: 0; updateErrors: 0; getErrors: 0; removed: 0;',
+        'task claimer claimed: 3; stale: 0; conflicts: 1; missing: 0; capacity reached: 0; updateErrors: 0; getErrors: 0;',
         { tags: ['taskClaiming', 'claimAvailableTasksMget'] }
       );
       expect(taskManagerLogger.error).not.toHaveBeenCalled();
@@ -1869,7 +1549,6 @@ describe('TaskClaiming', () => {
         definitions: taskDefinitions,
         taskStore: store,
         excludedTaskTypes: [],
-        unusedTypes: [],
         maxAttempts: 2,
         getAvailableCapacity: () => 10,
         taskPartitioner,
@@ -2260,6 +1939,129 @@ describe('TaskClaiming', () => {
         }
       `);
     });
+
+    test(`it should log warning on interval when the node has no assigned partitions`, async () => {
+      // Reset the warning timer by advancing more
+      fakeTimer.tick(NO_ASSIGNED_PARTITIONS_WARNING_INTERVAL);
+
+      jest.spyOn(taskPartitioner, 'getPartitions').mockResolvedValue([]);
+      const taskManagerId = uuidv4();
+      const definitions = new TaskTypeDictionary(mockLogger());
+      definitions.registerTaskDefinitions({
+        foo: {
+          title: 'foo',
+          createTaskRunner: jest.fn(),
+        },
+        bar: {
+          title: 'bar',
+          createTaskRunner: jest.fn(),
+        },
+      });
+      await testClaimAvailableTasks({
+        storeOpts: {
+          taskManagerId,
+          definitions,
+        },
+        taskClaimingOpts: {},
+        claimingOpts: {
+          claimOwnershipUntil: new Date(),
+        },
+      });
+
+      expect(taskManagerLogger.warn).toHaveBeenCalledWith(
+        'Background task node "test" has no assigned partitions, claiming against all partitions',
+        { tags: ['taskClaiming', 'claimAvailableTasksMget'] }
+      );
+
+      taskManagerLogger.warn.mockReset();
+      fakeTimer.tick(NO_ASSIGNED_PARTITIONS_WARNING_INTERVAL - 500);
+
+      await testClaimAvailableTasks({
+        storeOpts: {
+          taskManagerId,
+          definitions,
+        },
+        taskClaimingOpts: {},
+        claimingOpts: {
+          claimOwnershipUntil: new Date(),
+        },
+      });
+
+      expect(taskManagerLogger.warn).not.toHaveBeenCalled();
+
+      fakeTimer.tick(500);
+
+      await testClaimAvailableTasks({
+        storeOpts: {
+          taskManagerId,
+          definitions,
+        },
+        taskClaimingOpts: {},
+        claimingOpts: {
+          claimOwnershipUntil: new Date(),
+        },
+      });
+
+      expect(taskManagerLogger.warn).toHaveBeenCalledWith(
+        'Background task node "test" has no assigned partitions, claiming against all partitions',
+        { tags: ['taskClaiming', 'claimAvailableTasksMget'] }
+      );
+    });
+
+    test(`it should log a message after the node no longer has no assigned partitions`, async () => {
+      // Reset the warning timer by advancing more
+      fakeTimer.tick(NO_ASSIGNED_PARTITIONS_WARNING_INTERVAL);
+
+      jest.spyOn(taskPartitioner, 'getPartitions').mockResolvedValue([]);
+      const taskManagerId = uuidv4();
+      const definitions = new TaskTypeDictionary(mockLogger());
+      definitions.registerTaskDefinitions({
+        foo: {
+          title: 'foo',
+          createTaskRunner: jest.fn(),
+        },
+        bar: {
+          title: 'bar',
+          createTaskRunner: jest.fn(),
+        },
+      });
+      await testClaimAvailableTasks({
+        storeOpts: {
+          taskManagerId,
+          definitions,
+        },
+        taskClaimingOpts: {},
+        claimingOpts: {
+          claimOwnershipUntil: new Date(),
+        },
+      });
+
+      expect(taskManagerLogger.warn).toHaveBeenCalledWith(
+        'Background task node "test" has no assigned partitions, claiming against all partitions',
+        { tags: ['taskClaiming', 'claimAvailableTasksMget'] }
+      );
+
+      taskManagerLogger.warn.mockReset();
+      jest.spyOn(taskPartitioner, 'getPartitions').mockResolvedValue([1, 2, 3]);
+      fakeTimer.tick(500);
+
+      await testClaimAvailableTasks({
+        storeOpts: {
+          taskManagerId,
+          definitions,
+        },
+        taskClaimingOpts: {},
+        claimingOpts: {
+          claimOwnershipUntil: new Date(),
+        },
+      });
+
+      expect(taskManagerLogger.warn).not.toHaveBeenCalled();
+      expect(taskManagerLogger.info).toHaveBeenCalledWith(
+        `Background task node "${taskPartitioner.getPodName()}" now claiming with assigned partitions`,
+        { tags: ['taskClaiming', 'claimAvailableTasksMget'] }
+      );
+    });
   });
 
   describe('task events', () => {
@@ -2364,7 +2166,6 @@ describe('TaskClaiming', () => {
         strategy: CLAIM_STRATEGY_MGET,
         definitions,
         excludedTaskTypes: [],
-        unusedTypes: [],
         taskStore,
         maxAttempts: 2,
         getAvailableCapacity,

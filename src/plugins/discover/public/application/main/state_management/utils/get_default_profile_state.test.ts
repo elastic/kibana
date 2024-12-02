@@ -22,82 +22,119 @@ const { profilesManagerMock } = createContextAwarenessMocks();
 profilesManagerMock.resolveDataSourceProfile({});
 
 describe('getDefaultProfileState', () => {
-  it('should return expected columns', () => {
-    let appState = getDefaultProfileState({
-      profilesManager: profilesManagerMock,
-      resetDefaultProfileState: {
-        columns: true,
-        rowHeight: false,
-      },
-      defaultColumns: ['messsage', 'bytes'],
-      dataView: dataViewWithTimefieldMock,
-      esqlQueryColumns: undefined,
-    });
-    expect(appState).toEqual({
-      columns: ['message', 'extension', 'bytes'],
-      grid: {
-        columns: {
-          extension: {
-            width: 200,
-          },
-          message: {
-            width: 100,
-          },
+  describe('getPreFetchState', () => {
+    it('should return expected breakdownField', () => {
+      let appState = getDefaultProfileState({
+        profilesManager: profilesManagerMock,
+        resetDefaultProfileState: {
+          columns: false,
+          rowHeight: false,
+          breakdownField: true,
         },
-      },
-    });
-    appState = getDefaultProfileState({
-      profilesManager: profilesManagerMock,
-      resetDefaultProfileState: {
-        columns: true,
-        rowHeight: false,
-      },
-      defaultColumns: ['messsage', 'bytes'],
-      dataView: emptyDataView,
-      esqlQueryColumns: [
-        { id: '1', name: 'foo', meta: { type: 'string' } },
-        { id: '2', name: 'bar', meta: { type: 'string' } },
-      ],
-    });
-    expect(appState).toEqual({
-      columns: ['foo', 'bar'],
-      grid: {
-        columns: {
-          foo: {
-            width: 300,
-          },
+        dataView: dataViewWithTimefieldMock,
+      }).getPreFetchState();
+      expect(appState).toEqual({
+        breakdownField: 'extension',
+      });
+      appState = getDefaultProfileState({
+        profilesManager: profilesManagerMock,
+        resetDefaultProfileState: {
+          columns: false,
+          rowHeight: false,
+          breakdownField: true,
         },
-      },
+        dataView: emptyDataView,
+      }).getPreFetchState();
+      expect(appState).toEqual(undefined);
     });
   });
 
-  it('should return expected rowHeight', () => {
-    const appState = getDefaultProfileState({
-      profilesManager: profilesManagerMock,
-      resetDefaultProfileState: {
-        columns: false,
-        rowHeight: true,
-      },
-      defaultColumns: [],
-      dataView: dataViewWithTimefieldMock,
-      esqlQueryColumns: undefined,
+  describe('getPostFetchState', () => {
+    it('should return expected columns', () => {
+      let appState = getDefaultProfileState({
+        profilesManager: profilesManagerMock,
+        resetDefaultProfileState: {
+          columns: true,
+          rowHeight: false,
+          breakdownField: false,
+        },
+        dataView: dataViewWithTimefieldMock,
+      }).getPostFetchState({
+        defaultColumns: ['messsage', 'bytes'],
+        esqlQueryColumns: undefined,
+      });
+      expect(appState).toEqual({
+        columns: ['message', 'extension', 'bytes'],
+        grid: {
+          columns: {
+            extension: {
+              width: 200,
+            },
+            message: {
+              width: 100,
+            },
+          },
+        },
+      });
+      appState = getDefaultProfileState({
+        profilesManager: profilesManagerMock,
+        resetDefaultProfileState: {
+          columns: true,
+          rowHeight: false,
+          breakdownField: false,
+        },
+        dataView: emptyDataView,
+      }).getPostFetchState({
+        defaultColumns: ['messsage', 'bytes'],
+        esqlQueryColumns: [
+          { id: '1', name: 'foo', meta: { type: 'string' } },
+          { id: '2', name: 'bar', meta: { type: 'string' } },
+        ],
+      });
+      expect(appState).toEqual({
+        columns: ['foo', 'bar'],
+        grid: {
+          columns: {
+            foo: {
+              width: 300,
+            },
+          },
+        },
+      });
     });
-    expect(appState).toEqual({
-      rowHeight: 3,
-    });
-  });
 
-  it('should return undefined', () => {
-    const appState = getDefaultProfileState({
-      profilesManager: profilesManagerMock,
-      resetDefaultProfileState: {
-        columns: false,
-        rowHeight: false,
-      },
-      defaultColumns: [],
-      dataView: dataViewWithTimefieldMock,
-      esqlQueryColumns: undefined,
+    it('should return expected rowHeight', () => {
+      const appState = getDefaultProfileState({
+        profilesManager: profilesManagerMock,
+        resetDefaultProfileState: {
+          columns: false,
+          rowHeight: true,
+          breakdownField: false,
+        },
+        dataView: dataViewWithTimefieldMock,
+      }).getPostFetchState({
+        defaultColumns: [],
+        esqlQueryColumns: undefined,
+      });
+      expect(appState).toEqual({
+        rowHeight: 3,
+      });
     });
-    expect(appState).toEqual(undefined);
+
+    it('should return undefined', () => {
+      const appState = getDefaultProfileState({
+        profilesManager: profilesManagerMock,
+        resetDefaultProfileState: {
+          columns: false,
+          rowHeight: false,
+          breakdownField: false,
+        },
+        dataView: dataViewWithTimefieldMock,
+      }).getPostFetchState({
+        defaultColumns: [],
+        esqlQueryColumns: undefined,
+      });
+      expect(appState).toEqual(undefined);
+    });
   });
 });

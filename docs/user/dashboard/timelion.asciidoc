@@ -88,7 +88,7 @@ Set up Metricbeat, then create the dashboard.
 
 . To set up Metricbeat, go to {metricbeat-ref}/metricbeat-installation-configuration.html[Metricbeat quick start: installation and configuration]
 
-. From {kib}, open the main menu, then click *Dashboard*.
+. Go to *Dashboards*.
 
 . On the *Dashboards* page, click *Create dashboard*.
 

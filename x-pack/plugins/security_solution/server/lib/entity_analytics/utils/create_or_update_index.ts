@@ -51,7 +51,16 @@ export const createOrUpdateIndex = async ({
         );
       }
     } else {
-      return esClient.indices.create(options);
+      try {
+        await esClient.indices.create(options);
+      } catch (err) {
+        // If the index already exists, we can ignore the error
+        if (err?.meta?.body?.error?.type === 'resource_already_exists_exception') {
+          logger.info(`${options.index} already exists`);
+        } else {
+          throw err;
+        }
+      }
     }
   } catch (err) {
     const error = transformError(err);

@@ -12,8 +12,6 @@ import { getFleetServerHost } from '../../services/fleet_server_host';
 
 import type { FleetRequestHandler, PostHealthCheckRequestSchema } from '../../types';
 
-import { defaultFleetErrorHandler } from '../../errors';
-
 export const postHealthCheckHandler: FleetRequestHandler<
   undefined,
   undefined,
@@ -72,6 +70,6 @@ export const postHealthCheckHandler: FleetRequestHandler<
         body: { status: `OFFLINE`, host_id: request.body.id },
       });
     }
-    return defaultFleetErrorHandler({ error, response });
+    throw error;
   }
 };
