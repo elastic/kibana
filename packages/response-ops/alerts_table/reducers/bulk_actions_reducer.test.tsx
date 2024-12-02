@@ -17,7 +17,7 @@ import { AlertsDataGrid } from '../components/alerts_data_grid';
 import { AlertsField, BulkActionsConfig, BulkActionsState } from '../types';
 import { RenderContext, AdditionalContext } from '../types';
 import { bulkActionsReducer } from './bulk_actions_reducer';
-import { mockBulkActionsState, mockRenderContext } from '../mocks/context.mock';
+import { createMockBulkActionsState, mockRenderContext } from '../mocks/context.mock';
 import {
   TestAlertsDataGridProps,
   BaseAlertsDataGridProps,
@@ -139,10 +139,10 @@ describe('AlertsDataGrid bulk actions', () => {
     ],
   };
 
-  const defaultBulkActionsState = {
-    ...mockBulkActionsState,
+  const createDefaultBulkActionsState = () => ({
+    ...createMockBulkActionsState(),
     rowCount: 2,
-  };
+  });
 
   const TestComponent = ({
     initialBulkActionsState,
@@ -151,7 +151,7 @@ describe('AlertsDataGrid bulk actions', () => {
   }: AlertsTableWithBulkActionsContextProps) => {
     const bulkActionsStore = useReducer(
       bulkActionsReducer,
-      initialBulkActionsState || defaultBulkActionsState
+      initialBulkActionsState || createDefaultBulkActionsState()
     );
     const renderContext = useMemo(
       () => ({
@@ -244,7 +244,7 @@ describe('AlertsDataGrid bulk actions', () => {
       const props: AlertsTableWithBulkActionsContextProps = {
         ...dataGridPropsWithBulkActions,
         initialBulkActionsState: {
-          ...defaultBulkActionsState,
+          ...createDefaultBulkActionsState(),
           isAllSelected: true,
           rowCount: 1,
           rowSelection: new Map([[0, { isLoading: false }]]),
@@ -338,7 +338,7 @@ describe('AlertsDataGrid bulk actions', () => {
         const props = {
           ...dataGridPropsWithBulkActions,
           initialBulkActionsState: {
-            ...defaultBulkActionsState,
+            ...createDefaultBulkActionsState(),
             areAllVisibleRowsSelected: true,
             rowSelection: new Map([
               [0, { isLoading: false }],
@@ -357,7 +357,7 @@ describe('AlertsDataGrid bulk actions', () => {
           const props = {
             ...dataGridPropsWithBulkActions,
             initialBulkActionsState: {
-              ...defaultBulkActionsState,
+              ...createDefaultBulkActionsState(),
               areAllVisibleRowsSelected: true,
               rowSelection: new Map([
                 [0, { isLoading: false }],
@@ -400,7 +400,7 @@ describe('AlertsDataGrid bulk actions', () => {
               pageSize: 2,
             },
             initialBulkActionsState: {
-              ...defaultBulkActionsState,
+              ...createDefaultBulkActionsState(),
               areAllVisibleRowsSelected: true,
               rowSelection: new Map([[0, { isLoading: false }]]),
             },
@@ -419,7 +419,7 @@ describe('AlertsDataGrid bulk actions', () => {
         const props = {
           ...dataGridPropsWithBulkActions,
           initialBulkActionsState: {
-            ...defaultBulkActionsState,
+            ...createDefaultBulkActionsState(),
             areAllVisibleRowsSelected: true,
             rowSelection: new Map([
               [0, { isLoading: false }],
@@ -450,16 +450,16 @@ describe('AlertsDataGrid bulk actions', () => {
       it('should show the toolbar', async () => {
         render(<TestComponent {...dataGridPropsWithBulkActions} />);
 
-        expect(screen.queryByTestId('selectedShowBulkActionsButton')).toBeNull();
-        expect(screen.queryByTestId('selectAllAlertsButton')).toBeNull();
+        expect(screen.queryByTestId('selectedShowBulkActionsButton')).not.toBeInTheDocument();
+        expect(screen.queryByTestId('selectAllAlertsButton')).not.toBeInTheDocument();
 
         const bulkActionsCells = screen.getAllByTestId(
           'bulk-actions-row-cell'
         ) as HTMLInputElement[];
         await userEvent.click(bulkActionsCells[0]);
 
-        expect(await screen.findByTestId('selectedShowBulkActionsButton')).toBeDefined();
-        expect(await screen.findByTestId('selectAllAlertsButton')).toBeDefined();
+        expect(await screen.findByTestId('selectedShowBulkActionsButton')).toBeInTheDocument();
+        expect(await screen.findByTestId('selectAllAlertsButton')).toBeInTheDocument();
       });
 
       describe('and the last remaining row is unchecked', () => {
@@ -468,22 +468,22 @@ describe('AlertsDataGrid bulk actions', () => {
           const props = {
             ...dataGridPropsWithBulkActions,
             initialBulkActionsState: {
-              ...defaultBulkActionsState,
+              ...createDefaultBulkActionsState(),
               rowSelection: new Map([[0, { isLoading: false }]]),
             },
           };
-          const { queryByTestId, getAllByTestId, getByTestId } = render(
-            <TestComponent {...props} />
-          );
+          render(<TestComponent {...props} />);
 
-          expect(getByTestId('selectedShowBulkActionsButton')).toBeDefined();
-          expect(getByTestId('selectAllAlertsButton')).toBeDefined();
+          expect(screen.getByTestId('selectedShowBulkActionsButton')).toBeDefined();
+          expect(screen.getByTestId('selectAllAlertsButton')).toBeDefined();
 
-          const bulkActionsCells = getAllByTestId('bulk-actions-row-cell') as HTMLInputElement[];
+          const bulkActionsCells = screen.getAllByTestId(
+            'bulk-actions-row-cell'
+          ) as HTMLInputElement[];
           await userEvent.click(bulkActionsCells[0]);
 
-          expect(queryByTestId('selectAllAlertsButton')).toBeNull();
-          expect(queryByTestId('selectedShowBulkActionsButton')).toBeNull();
+          expect(screen.queryByTestId('selectAllAlertsButton')).toBeNull();
+          expect(screen.queryByTestId('selectedShowBulkActionsButton')).toBeNull();
         });
       });
     });
@@ -495,7 +495,7 @@ describe('AlertsDataGrid bulk actions', () => {
           const props = {
             ...dataGridPropsWithBulkActions,
             initialBulkActionsState: {
-              ...defaultBulkActionsState,
+              ...createDefaultBulkActionsState(),
               rowSelection: new Map([[1, { isLoading: false }]]),
             },
             getBulkActions: () => [
@@ -578,7 +578,7 @@ describe('AlertsDataGrid bulk actions', () => {
 
           it('should show the loading state on each selected row', async () => {
             const initialBulkActionsState = {
-              ...defaultBulkActionsState,
+              ...createDefaultBulkActionsState(),
               rowSelection: new Map([[1, { isLoading: false }]]),
             };
             render(<TestComponent {...props} initialBulkActionsState={initialBulkActionsState} />);
@@ -607,7 +607,7 @@ describe('AlertsDataGrid bulk actions', () => {
 
           it('should hide the loading state on each selected row', async () => {
             const initialBulkActionsState = {
-              ...defaultBulkActionsState,
+              ...createDefaultBulkActionsState(),
               rowSelection: new Map([[1, { isLoading: true }]]),
             };
             render(<TestComponent {...props} initialBulkActionsState={initialBulkActionsState} />);
@@ -629,7 +629,7 @@ describe('AlertsDataGrid bulk actions', () => {
           const props = {
             ...dataGridPropsWithBulkActions,
             initialBulkActionsState: {
-              ...defaultBulkActionsState,
+              ...createDefaultBulkActionsState(),
               rowSelection: new Map([[0, { isLoading: false }]]),
             },
           };
@@ -662,7 +662,7 @@ describe('AlertsDataGrid bulk actions', () => {
             const props = {
               ...dataGridPropsWithBulkActions,
               initialBulkActionsState: {
-                ...defaultBulkActionsState,
+                ...createDefaultBulkActionsState(),
                 areAllVisibleRowsSelected: true,
                 isAllSelected: true,
                 rowSelection: new Map([
@@ -702,7 +702,7 @@ describe('AlertsDataGrid bulk actions', () => {
             const props = {
               ...dataGridPropsWithBulkActions,
               initialBulkActionsState: {
-                ...defaultBulkActionsState,
+                ...createDefaultBulkActionsState(),
                 isAllSelected: true,
                 rowCount: 2,
                 rowSelection: new Map([
@@ -803,7 +803,7 @@ describe('AlertsDataGrid bulk actions', () => {
               ...dataGridPropsWithBulkActions,
 
               initialBulkActionsState: {
-                ...defaultBulkActionsState,
+                ...createDefaultBulkActionsState(),
                 areAllVisibleRowsSelected: true,
                 rowSelection: new Map(),
               },
@@ -839,7 +839,7 @@ describe('AlertsDataGrid bulk actions', () => {
             const props = {
               ...dataGridPropsWithBulkActions,
               initialBulkActionsState: {
-                ...defaultBulkActionsState,
+                ...createDefaultBulkActionsState(),
                 areAllVisibleRowsSelected: false,
                 rowSelection: new Map(),
               },
@@ -875,7 +875,7 @@ describe('AlertsDataGrid bulk actions', () => {
               ...dataGridPropsWithBulkActions,
 
               initialBulkActionsState: {
-                ...defaultBulkActionsState,
+                ...createDefaultBulkActionsState(),
                 areAllVisibleRowsSelected: true,
                 rowSelection: new Map([[0, { isLoading: true }]]),
               },
