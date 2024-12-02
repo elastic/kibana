@@ -42,7 +42,7 @@ const SuggestionItemContainer = styled.div<{
 }>`
   display: flex;
   flex-direction: row;
-  font-size: ${({ theme }) => theme.euiTheme.size.s};
+  font-size: ${({ theme }) => theme.euiTheme.size.m};
   height: ${({ theme }) => theme.euiTheme.size.xl};
   white-space: nowrap;
   background-color: ${(props) =>

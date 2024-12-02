@@ -12,7 +12,6 @@ import {
   withEuiTheme,
   WithEuiThemeProps,
   type EuiThemeComputed,
-  useEuiShadow,
 } from '@elastic/eui';
 import React, { ReactNode } from 'react';
 import { KubernetesTour } from './kubernetes_tour';
@@ -50,7 +49,6 @@ export const DropdownButton = withEuiTheme((props: PropsWithTheme) => {
       gutterSize="none"
       style={{
         border: theme?.euiTheme.border.thin,
-        boxShadow: `0px 3px 2px ${useEuiShadow('xs')}, 0px 1px 1px ${useEuiShadow('xs')}`,
       }}
     >
       {showKubernetesInfo ? (
