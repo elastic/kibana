@@ -45,6 +45,7 @@
     "@kbn/search-index-documents",
     "@kbn/search-navigation",
     "@kbn/features-plugin",
+    "@kbn/security-plugin",
   ],
   "exclude": [
     "target/**/*",
