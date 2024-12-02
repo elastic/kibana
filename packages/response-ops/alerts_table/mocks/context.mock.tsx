@@ -175,13 +175,13 @@ export const mockMaintenanceWindows = getMaintenanceWindowsMock().reduce(
   new Map()
 );
 
-export const mockBulkActionsState = {
+export const createMockBulkActionsState = () => ({
   rowSelection: new Map<number, RowSelectionState>(),
   isAllSelected: false,
   areAllVisibleRowsSelected: false,
   rowCount: 4,
   updatedAt: Date.now(),
-};
+});
 
 export const mockRenderContext = createPartialObjectMock<RenderContext<AdditionalContext>>({
   tableId: 'test-table',
@@ -206,7 +206,7 @@ export const mockRenderContext = createPartialObjectMock<RenderContext<Additiona
   pageSize: 1,
   openAlertInFlyout: jest.fn(),
   bulkActionsStore: [
-    mockBulkActionsState,
+    createMockBulkActionsState(),
     jest.fn(),
   ] as unknown as RenderContext<AdditionalContext>['bulkActionsStore'],
   renderCellValue: jest.fn().mockImplementation((props) => {

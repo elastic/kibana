@@ -16,7 +16,6 @@ import { CaseViewAlerts } from './case_view_alerts';
 import * as api from '../../../containers/api';
 import type { FeatureIdsResponse } from '../../../containers/types';
 import { SECURITY_SOLUTION_RULE_TYPE_IDS } from '@kbn/securitysolution-rules';
-import { AlertsTable } from '@kbn/response-ops-alerts-table';
 
 jest.mock('../../../containers/api');
 
