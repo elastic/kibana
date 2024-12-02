@@ -37,6 +37,7 @@ export function getESQLForLayer(
 
   const timeZone = getUserTimeZone((key) => uiSettings.get(key), true);
   if (timeZone !== 'UTC') return;
+  if (Object.values(layer.columns).find((col) => col.operationType === 'formula')) return;
 
   let esql = `FROM ${indexPattern.title} | `;
   if (indexPattern.timeFieldName) {
