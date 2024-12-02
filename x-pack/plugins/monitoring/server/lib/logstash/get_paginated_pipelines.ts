@@ -11,7 +11,7 @@ import { getLogstashPipelineIds } from './get_pipeline_ids';
 import { sortPipelines } from './sort_pipelines';
 import { paginate } from '../pagination/paginate';
 import { getMetrics } from '../details/get_metrics';
-import { getLogstashDataset } from '../cluster/get_index_patterns';
+import { getLogstashDataset } from '../../../common/get_index_patterns';
 import {
   LegacyRequest,
   Pipeline,
