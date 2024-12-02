@@ -296,16 +296,19 @@ export const OBSERVABLE_TYPE_IPV6 = {
   label: 'IPv6',
   key: 'observable-type-ipv6',
 } as const;
+
+export const OBSERVABLE_TYPE_URL = {
+  label: 'URL',
+  key: 'observable-type-url',
+} as const;
+
 /**
  * Exporting an array of built-in observable types for use in the application
  */
 export const OBSERVABLE_TYPES_BUILTIN = [
   OBSERVABLE_TYPE_IPV4,
   OBSERVABLE_TYPE_IPV6,
-  {
-    label: 'URL',
-    key: 'observable-type-url',
-  },
+  OBSERVABLE_TYPE_URL,
   {
     label: 'Hostname',
     key: 'observable-type-hostname',

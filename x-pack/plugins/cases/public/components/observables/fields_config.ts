@@ -12,6 +12,7 @@ import {
   OBSERVABLE_TYPE_EMAIL,
   OBSERVABLE_TYPE_IPV4,
   OBSERVABLE_TYPE_IPV6,
+  OBSERVABLE_TYPE_URL,
 } from '../../../common/constants';
 
 export const normalizeValueType = (value: string): keyof typeof fieldsConfig.value | 'generic' => {
@@ -25,6 +26,7 @@ export const normalizeValueType = (value: string): keyof typeof fieldsConfig.val
 const DOMAIN_REGEX = /^(?!-)[A-Za-z0-9-]{1,63}(?<!-)\.[A-Za-z]{2,}$/;
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const GENERIC_REGEX = /^[a-zA-Z0-9._:/\\]+$/;
+const URL_REGEX = /^(https?:\/\/)?([\w\-]+(\.[\w\-]+)+)(:[0-9]{1,5})?(\/.*)?$/;
 
 // NOTE: consider if making this more sophisitcated makes sense
 const IPV4_SIMPLIFIED = /^(\d{1,3}\.){3}\d{1,3}$/;
@@ -71,6 +73,7 @@ export const genericValidator = validatorFactory(GENERIC_REGEX);
 export const domainValidator = validatorFactory(DOMAIN_REGEX);
 export const ipv4Validator = validatorFactory(IPV4_SIMPLIFIED);
 export const ipv6Validator = validatorFactory(IPV6_SIMPLIFIED);
+export const urlValidator = validatorFactory(URL_REGEX);
 
 export const fieldsConfig = {
   value: {
@@ -128,6 +131,17 @@ export const fieldsConfig = {
         },
       ],
       label: 'IPv6',
+    },
+    [OBSERVABLE_TYPE_URL.key]: {
+      validations: [
+        {
+          validator: emptyField('Value is required'),
+        },
+        {
+          validator: urlValidator,
+        },
+      ],
+      label: 'URL',
     },
   },
   typeKey: {
