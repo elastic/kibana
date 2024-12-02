@@ -146,6 +146,7 @@ export interface RuleTypeRunnerContext {
   ruleLogPrefix: string;
   ruleRunMetricsStore: RuleRunMetricsStore;
   spaceId: string;
+  isServerless: boolean;
 }
 
 export interface RuleRunnerErrorStackTraceLog {
@@ -180,4 +181,5 @@ export interface TaskRunnerContext {
   supportsEphemeralTasks: boolean;
   uiSettings: UiSettingsServiceStart;
   usageCounter?: UsageCounter;
+  isServerless: boolean;
 }

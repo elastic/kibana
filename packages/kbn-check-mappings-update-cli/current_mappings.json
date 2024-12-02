@@ -1597,6 +1597,7 @@
     }
   },
   "fleet-agent-policies": {
+    "dynamic": false,
     "properties": {
       "advanced_settings": {
         "index": false,
@@ -1790,6 +1791,9 @@
           }
         }
       },
+      "supports_agentless": {
+        "type": "boolean"
+      },
       "updated_at": {
         "type": "date"
       },
@@ -1963,6 +1967,7 @@
     "properties": {}
   },
   "ingest-agent-policies": {
+    "dynamic": false,
     "properties": {
       "advanced_settings": {
         "index": false,
@@ -2377,6 +2382,9 @@
             "type": "keyword"
           }
         }
+      },
+      "supports_agentless": {
+        "type": "boolean"
       },
       "updated_at": {
         "type": "date"

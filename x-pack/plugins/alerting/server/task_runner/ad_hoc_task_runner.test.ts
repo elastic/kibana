@@ -133,6 +133,7 @@ const alertsService = new AlertsService({
   elasticsearchClientPromise: Promise.resolve(clusterClient),
   dataStreamAdapter: getDataStreamAdapter({ useDataStreamForAlerts }),
   elasticsearchAndSOAvailability$,
+  isServerless: false,
 });
 const alertsClient = alertsClientMock.create();
 const actionsClient = actionsClientMock.create();
@@ -180,6 +181,7 @@ const taskRunnerFactoryInitializerParams: TaskRunnerFactoryInitializerParamsType
   supportsEphemeralTasks: false,
   uiSettings: uiSettingsService,
   usageCounter: mockUsageCounter,
+  isServerless: false,
 };
 
 const mockedTaskInstance: ConcreteTaskInstance = {
@@ -475,7 +477,7 @@ describe('Ad Hoc Task Runner', () => {
 
     expect(clusterClient.bulk).toHaveBeenCalledWith({
       index: '.alerts-test.alerts-default',
-      refresh: true,
+      refresh: 'wait_for',
       require_alias: !useDataStreamForAlerts,
       body: [
         {

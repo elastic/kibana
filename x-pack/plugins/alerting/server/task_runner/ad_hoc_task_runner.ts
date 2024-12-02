@@ -187,6 +187,7 @@ export class AdHocTaskRunner implements CancellableTask {
       ruleLogPrefix: ruleLabel,
       ruleRunMetricsStore,
       spaceId: adHocRunData.spaceId,
+      isServerless: this.context.isServerless,
     };
     const alertsClient = await initializeAlertsClient<
       RuleTypeParams,
