@@ -26,15 +26,29 @@ import {
   EuiSpacer,
   EuiSwitch,
 } from '@elastic/eui';
+import type { WindowParameters } from '@kbn/aiops-log-rate-analysis/window_parameters';
+import type { SignificantItem } from '@kbn/ml-agg-utils';
+import { useCasesModal } from '../../../hooks/use_cases_modal';
 import { useDataSource } from '../../../hooks/use_data_source';
 import type { LogRateAnalysisEmbeddableState } from '../../../embeddables/log_rate_analysis/types';
 import { useAiopsAppContext } from '../../../hooks/use_aiops_app_context';
 
 const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
 
-export const LogRateAnalysisAttachmentsMenu = () => {
+interface LogRateAnalysisAttachmentsMenuProps {
+  windowParameters?: WindowParameters;
+  showLogRateAnalysisResults: boolean;
+  significantItems: SignificantItem[];
+}
+
+export const LogRateAnalysisAttachmentsMenu = ({
+  windowParameters,
+  showLogRateAnalysisResults,
+  significantItems,
+}: LogRateAnalysisAttachmentsMenuProps) => {
   const {
     application: { capabilities },
+    cases,
     embeddable,
   } = useAiopsAppContext();
   const { dataView } = useDataSource();
@@ -44,8 +58,18 @@ export const LogRateAnalysisAttachmentsMenu = () => {
   const [dashboardAttachmentReady, setDashboardAttachmentReady] = useState(false);
 
   const timeRange = useTimeRangeUpdates();
+  const absoluteTimeRange = useTimeRangeUpdates(true);
+
+  const openCasesModalCallback = useCasesModal(EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE);
 
   const canEditDashboards = capabilities.dashboard.createNew;
+
+  const { create: canCreateCase, update: canUpdateCase } = cases?.helpers?.canUseCases() ?? {
+    create: false,
+    update: false,
+  };
+
+  const isCasesAttachmentEnabled = showLogRateAnalysisResults && significantItems.length > 0;
 
   const onSave: SaveModalDashboardProps['onSave'] = useCallback(
     ({ dashboardId, newTitle, newDescription }) => {
@@ -71,6 +95,19 @@ export const LogRateAnalysisAttachmentsMenu = () => {
     [dataView.id, embeddable, applyTimeRange, timeRange]
   );
 
+  const caseAttachmentTooltipContent = useMemo(() => {
+    if (!showLogRateAnalysisResults) {
+      return i18n.translate('xpack.aiops.logRateAnalysis.attachToCaseTooltipNoAnalysis', {
+        defaultMessage: 'Run the analysis first to add results to a case.',
+      });
+    }
+    if (significantItems.length === 0) {
+      return i18n.translate('xpack.aiops.logRateAnalysis.attachToCaseTooltipNoResults', {
+        defaultMessage: 'Cannot add to case because the analysis did not produce any results.',
+      });
+    }
+  }, [showLogRateAnalysisResults, significantItems.length]);
+
   const panels = useMemo<Exclude<EuiContextMenuProps['panels'], undefined>>(() => {
     return [
       {
@@ -85,6 +122,31 @@ export const LogRateAnalysisAttachmentsMenu = () => {
                   }),
                   panel: 'attachToDashboardPanel',
                   'data-test-subj': 'aiopsLogRateAnalysisAttachToDashboardButton',
+                },
+              ]
+            : []),
+          ...(canUpdateCase || canCreateCase
+            ? [
+                {
+                  name: i18n.translate('xpack.aiops.logRateAnalysis.attachToCaseLabel', {
+                    defaultMessage: 'Add to case',
+                  }),
+                  'data-test-subj': 'aiopsLogRateAnalysisAttachToCaseButton',
+                  disabled: !isCasesAttachmentEnabled,
+                  ...(!isCasesAttachmentEnabled
+                    ? {
+                        toolTipProps: { position: 'left' as const },
+                        toolTipContent: caseAttachmentTooltipContent,
+                      }
+                    : {}),
+                  onClick: () => {
+                    setIsActionMenuOpen(false);
+                    openCasesModalCallback({
+                      dataViewId: dataView.id,
+                      timeRange: absoluteTimeRange,
+                      ...(windowParameters && { windowParameters }),
+                    });
+                  },
                 },
               ]
             : []),
@@ -131,7 +193,18 @@ export const LogRateAnalysisAttachmentsMenu = () => {
         ),
       },
     ];
-  }, [canEditDashboards, applyTimeRange]);
+  }, [
+    canEditDashboards,
+    canUpdateCase,
+    canCreateCase,
+    isCasesAttachmentEnabled,
+    caseAttachmentTooltipContent,
+    applyTimeRange,
+    openCasesModalCallback,
+    dataView.id,
+    absoluteTimeRange,
+    windowParameters,
+  ]);
 
   return (
     <>
