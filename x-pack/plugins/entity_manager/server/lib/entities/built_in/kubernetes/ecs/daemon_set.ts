@@ -13,7 +13,7 @@ import { commonEcsMetadata } from '../common/ecs_metadata';
 export const builtInKubernetesDaemonSetEcsEntityDefinition: EntityDefinition =
   entityDefinitionSchema.parse({
     id: `${BUILT_IN_ID_PREFIX}kubernetes_daemon_set_ecs`,
-    filter: 'kubernetes.daemonset.uid : *',
+    filter: 'kubernetes.daemonset.name : *',
     managed: true,
     version: '0.1.0',
     name: 'Kubernetes DaemonSet from ECS data',

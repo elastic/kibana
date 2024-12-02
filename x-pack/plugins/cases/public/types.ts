@@ -40,7 +40,7 @@ import type { GetCasesContextProps } from './client/ui/get_cases_context';
 import type { GetCasesProps } from './client/ui/get_cases';
 import type { GetAllCasesSelectorModalProps } from './client/ui/get_all_cases_selector_modal';
 import type { GetRecentCasesProps } from './client/ui/get_recent_cases';
-import type { CasesStatus, CasesMetrics, CasesFindResponseUI } from '../common/ui';
+import type { CasesMetrics, CasesFindResponseUI } from '../common/ui';
 import type { GroupAlertsByRule } from './client/helpers/group_alerts_by_rule';
 import type { getUICapabilities } from './client/helpers/capabilities';
 import type { AttachmentFramework } from './client/attachment_framework/types';
@@ -50,7 +50,6 @@ import type {
   CasesByAlertIDRequest,
   GetRelatedCasesByAlertResponse,
   CasesFindRequest,
-  CasesStatusRequest,
   CasesBulkGetRequest,
   CasesBulkGetResponse,
   CasesMetricsRequest,
@@ -125,7 +124,6 @@ export interface CasesPublicStart {
     ) => Promise<GetRelatedCasesByAlertResponse>;
     cases: {
       find: (query: CasesFindRequest, signal?: AbortSignal) => Promise<CasesFindResponseUI>;
-      getCasesStatus: (query: CasesStatusRequest, signal?: AbortSignal) => Promise<CasesStatus>;
       getCasesMetrics: (query: CasesMetricsRequest, signal?: AbortSignal) => Promise<CasesMetrics>;
       bulkGet: (params: CasesBulkGetRequest, signal?: AbortSignal) => Promise<CasesBulkGetResponse>;
     };
