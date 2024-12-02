@@ -9,6 +9,7 @@ import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { Logger } from '@kbn/core/server';
 import { ALL_VALUE, Paginated, Pagination, sloDefinitionSchema } from '@kbn/slo-schema';
 import { isLeft } from 'fp-ts/lib/Either';
+import { merge } from 'lodash';
 import { SLO_MODEL_VERSION } from '../../common/constants';
 import { SLODefinition, StoredSLODefinition } from '../domain/models';
 import { SLONotFound } from '../errors';
@@ -155,10 +156,10 @@ export class KibanaSavedObjectsSLORepository implements SLORepository {
       // We would need to call the _reset api on this SLO.
       version: storedSLO.version ?? 1,
       // settings.preventInitialBackfill was added in 8.15.0
-      settings: {
-        ...storedSLO.settings,
-        preventInitialBackfill: storedSLO.settings?.preventInitialBackfill ?? false,
-      },
+      settings: merge(
+        { preventInitialBackfill: false, syncDelay: '1m', frequency: '1m' },
+        storedSLO.settings
+      ),
     });
 
     if (isLeft(result)) {

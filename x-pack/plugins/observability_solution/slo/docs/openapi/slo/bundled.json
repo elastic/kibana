@@ -1647,20 +1647,25 @@
         "description": "Defines properties for SLO settings.",
         "type": "object",
         "properties": {
+          "syncField": {
+            "description": "The date field that is used to identify new documents in the source. It is strongly recommended to use a field that contains the ingest timestamp. If you use a different field, you might need to set the delay such that it accounts for data transmission delays. When unspecified, we use the indicator timestamp field.",
+            "type": "string",
+            "example": "event.ingested"
+          },
           "syncDelay": {
-            "description": "The synch delay to apply to the transform. Default 1m",
+            "description": "The time delay in minutes between the current time and the latest source data time. Increasing the value will delay any alerting. The default value is 1 minute. The minimum value is 1m and the maximum is 359m. It should always be greater then source index refresh interval.",
             "type": "string",
             "default": "1m",
             "example": "5m"
           },
           "frequency": {
-            "description": "Configure how often the transform runs, default 1m",
+            "description": "The interval between checks for changes in the source data. The minimum value is 1m and the maximum is 59m. The default value is 1 minute.",
             "type": "string",
             "default": "1m",
             "example": "5m"
           },
           "preventInitialBackfill": {
-            "description": "Prevents the transform from backfilling data when it starts.",
+            "description": "Start aggregating data from the time the SLO is created, instead of backfilling data from the beginning of the time window.",
             "type": "boolean",
             "default": false,
             "example": true
