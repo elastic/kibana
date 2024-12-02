@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { conditionToPainless } from './condition_to_painless';
+import { conditionToPainless, conditionToStatement } from './condition_to_painless';
 
 const operatorConditionAndResults = [
   {
@@ -55,87 +55,118 @@ const operatorConditionAndResults = [
 ];
 
 describe('conditionToPainless', () => {
-  describe('operators', () => {
-    operatorConditionAndResults.forEach((setup) => {
-      test(`${setup.condition.operator}`, () => {
-        expect(conditionToPainless(setup.condition)).toEqual(setup.result);
+  describe('conditionToStatement', () => {
+    describe('operators', () => {
+      operatorConditionAndResults.forEach((setup) => {
+        test(`${setup.condition.operator}`, () => {
+          expect(conditionToStatement(setup.condition)).toEqual(setup.result);
+        });
+      });
+    });
+
+    describe('and', () => {
+      test('simple', () => {
+        const condition = {
+          and: [
+            { field: 'log.logger', operator: 'eq' as const, value: 'nginx_proxy' },
+            { field: 'log.level', operator: 'eq' as const, value: 'error' },
+          ],
+        };
+        expect(
+          expect(conditionToStatement(condition)).toEqual(
+            '(ctx.log?.logger !== null && ctx.log?.logger == "nginx_proxy") && (ctx.log?.level !== null && ctx.log?.level == "error")'
+          )
+        );
+      });
+    });
+
+    describe('or', () => {
+      test('simple', () => {
+        const condition = {
+          or: [
+            { field: 'log.logger', operator: 'eq' as const, value: 'nginx_proxy' },
+            { field: 'log.level', operator: 'eq' as const, value: 'error' },
+          ],
+        };
+        expect(
+          expect(conditionToStatement(condition)).toEqual(
+            '(ctx.log?.logger !== null && ctx.log?.logger == "nginx_proxy") || (ctx.log?.level !== null && ctx.log?.level == "error")'
+          )
+        );
+      });
+    });
+
+    describe('nested', () => {
+      test('and with a filter and or with 2 filters', () => {
+        const condition = {
+          and: [
+            { field: 'log.logger', operator: 'eq' as const, value: 'nginx_proxy' },
+            {
+              or: [
+                { field: 'log.level', operator: 'eq' as const, value: 'error' },
+                { field: 'log.level', operator: 'eq' as const, value: 'ERROR' },
+              ],
+            },
+          ],
+        };
+        expect(
+          expect(conditionToStatement(condition)).toEqual(
+            '(ctx.log?.logger !== null && ctx.log?.logger == "nginx_proxy") && ((ctx.log?.level !== null && ctx.log?.level == "error") || (ctx.log?.level !== null && ctx.log?.level == "ERROR"))'
+          )
+        );
+      });
+      test('and with 2 or with filters', () => {
+        const condition = {
+          and: [
+            {
+              or: [
+                { field: 'log.logger', operator: 'eq' as const, value: 'nginx_proxy' },
+                { field: 'service.name', operator: 'eq' as const, value: 'nginx' },
+              ],
+            },
+            {
+              or: [
+                { field: 'log.level', operator: 'eq' as const, value: 'error' },
+                { field: 'log.level', operator: 'eq' as const, value: 'ERROR' },
+              ],
+            },
+          ],
+        };
+        expect(
+          expect(conditionToStatement(condition)).toEqual(
+            '((ctx.log?.logger !== null && ctx.log?.logger == "nginx_proxy") || (ctx.service?.name !== null && ctx.service?.name == "nginx")) && ((ctx.log?.level !== null && ctx.log?.level == "error") || (ctx.log?.level !== null && ctx.log?.level == "ERROR"))'
+          )
+        );
       });
     });
   });
 
-  describe('and', () => {
-    test('simple', () => {
-      const condition = {
-        and: [
-          { field: 'log.logger', operator: 'eq' as const, value: 'nginx_proxy' },
-          { field: 'log.level', operator: 'eq' as const, value: 'error' },
-        ],
-      };
-      expect(
-        expect(conditionToPainless(condition)).toEqual(
-          '(ctx.log?.logger !== null && ctx.log?.logger == "nginx_proxy") && (ctx.log?.level !== null && ctx.log?.level == "error")'
-        )
-      );
-    });
-  });
-
-  describe('or', () => {
-    test('simple', () => {
-      const condition = {
-        or: [
-          { field: 'log.logger', operator: 'eq' as const, value: 'nginx_proxy' },
-          { field: 'log.level', operator: 'eq' as const, value: 'error' },
-        ],
-      };
-      expect(
-        expect(conditionToPainless(condition)).toEqual(
-          '(ctx.log?.logger !== null && ctx.log?.logger == "nginx_proxy") || (ctx.log?.level !== null && ctx.log?.level == "error")'
-        )
-      );
-    });
-  });
-
-  describe('nested', () => {
-    test('and with a filter and or with 2 filters', () => {
-      const condition = {
-        and: [
-          { field: 'log.logger', operator: 'eq' as const, value: 'nginx_proxy' },
-          {
-            or: [
-              { field: 'log.level', operator: 'eq' as const, value: 'error' },
-              { field: 'log.level', operator: 'eq' as const, value: 'ERROR' },
-            ],
-          },
-        ],
-      };
-      expect(
-        expect(conditionToPainless(condition)).toEqual(
-          '(ctx.log?.logger !== null && ctx.log?.logger == "nginx_proxy") && ((ctx.log?.level !== null && ctx.log?.level == "error") || (ctx.log?.level !== null && ctx.log?.level == "ERROR"))'
-        )
-      );
-    });
-    test('and with 2 or with filters', () => {
-      const condition = {
-        and: [
-          {
-            or: [
-              { field: 'log.logger', operator: 'eq' as const, value: 'nginx_proxy' },
-              { field: 'service.name', operator: 'eq' as const, value: 'nginx' },
-            ],
-          },
-          {
-            or: [
-              { field: 'log.level', operator: 'eq' as const, value: 'error' },
-              { field: 'log.level', operator: 'eq' as const, value: 'ERROR' },
-            ],
-          },
-        ],
-      };
-      expect(
-        expect(conditionToPainless(condition)).toEqual(
-          '((ctx.log?.logger !== null && ctx.log?.logger == "nginx_proxy") || (ctx.service?.name !== null && ctx.service?.name == "nginx")) && ((ctx.log?.level !== null && ctx.log?.level == "error") || (ctx.log?.level !== null && ctx.log?.level == "ERROR"))'
-        )
-      );
-    });
+  test('wrapped with typechecks and try/catch', () => {
+    const condition = {
+      and: [
+        { field: 'log.logger', operator: 'eq' as const, value: 'nginx_proxy' },
+        {
+          or: [
+            { field: 'log.level', operator: 'eq' as const, value: 'error' },
+            { field: 'log.level', operator: 'eq' as const, value: 'ERROR' },
+          ],
+        },
+      ],
+    };
+    expect(
+      expect(conditionToPainless(condition)).toEqual(`
+if (ctx.log?.logger instanceof Map || ctx.log?.level instanceof Map) {
+  return false;
+}
+try {
+  if ((ctx.log?.logger !== null && ctx.log?.logger == "nginx_proxy") && ((ctx.log?.level !== null && ctx.log?.level == "error") || (ctx.log?.level !== null && ctx.log?.level == "ERROR"))) {
+    return true;
+  }
+  return false;
+} catch (Exception e) {
+  return false;
+}
+`)
+    );
   });
 });

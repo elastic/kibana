@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isBoolean, isString } from 'lodash';
+import { isBoolean, isString, uniq } from 'lodash';
 import {
   AndCondition,
   BinaryFilterCondition,
@@ -32,8 +32,11 @@ function isOrCondition(subject: any): subject is RerouteOrCondition {
   return result.success && subject.or != null;
 }
 
-function safePainlessField(condition: FilterCondition) {
-  return `ctx.${condition.field.split('.').join('?.')}`;
+function safePainlessField(conditionOrField: FilterCondition | string) {
+  if (isFilterCondition(conditionOrField)) {
+    return `ctx.${conditionOrField.field.split('.').join('?.')}`;
+  }
+  return `ctx.${conditionOrField.split('.').join('?.')}`;
 }
 
 function encodeValue(value: string | number | boolean) {
@@ -82,7 +85,18 @@ function isUnaryFilterCondition(subject: FilterCondition): subject is UnaryFilte
   return !('value' in subject);
 }
 
-export function conditionToPainless(condition: Condition, nested = false): string {
+function extractAllFields(condition: Condition, fields: string[] = []): string[] {
+  if (isFilterCondition(condition)) {
+    return uniq([...fields, condition.field]);
+  } else if (isAndCondition(condition)) {
+    return uniq(condition.and.map((cond) => extractAllFields(cond, fields)).flat());
+  } else if (isOrCondition(condition)) {
+    return uniq(condition.or.map((cond) => extractAllFields(cond, fields)).flat());
+  }
+  return uniq(fields);
+}
+
+export function conditionToStatement(condition: Condition, nested = false): string {
   if (isFilterCondition(condition)) {
     if (isUnaryFilterCondition(condition)) {
       return unaryToPainless(condition);
@@ -90,12 +104,29 @@ export function conditionToPainless(condition: Condition, nested = false): strin
     return `(${safePainlessField(condition)} !== null && ${binaryToPainless(condition)})`;
   }
   if (isAndCondition(condition)) {
-    const and = condition.and.map((filter) => conditionToPainless(filter, true)).join(' && ');
+    const and = condition.and.map((filter) => conditionToStatement(filter, true)).join(' && ');
     return nested ? `(${and})` : and;
   }
   if (isOrCondition(condition)) {
-    const or = condition.or.map((filter) => conditionToPainless(filter, true)).join(' || ');
+    const or = condition.or.map((filter) => conditionToStatement(filter, true)).join(' || ');
     return nested ? `(${or})` : or;
   }
   return 'false';
+}
+
+export function conditionToPainless(condition: Condition): string {
+  const fields = extractAllFields(condition);
+  return `
+if (${fields.map((field) => `${safePainlessField(field)} instanceof Map`).join(' || ')}) {
+  return false;
+}
+try {
+  if (${conditionToStatement(condition)}) {
+    return true;
+  }
+  return false;
+} catch (Exception e) {
+  return false;
+}
+`;
 }
