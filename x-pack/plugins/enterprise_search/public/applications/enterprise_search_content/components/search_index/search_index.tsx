@@ -18,7 +18,6 @@ import { i18n } from '@kbn/i18n';
 import { ClientConfigType } from '../../../../../common/types';
 
 import { generateEncodedPath } from '../../../shared/encode_path_params';
-import { ErrorStatePrompt } from '../../../shared/error_state';
 import { HttpLogic } from '../../../shared/http';
 import { KibanaLogic } from '../../../shared/kibana';
 import { SEARCH_INDEX_PATH, SEARCH_INDEX_TAB_PATH } from '../../routes';
@@ -305,13 +304,7 @@ interface ContentProps {
   tabs: EuiTabbedContentTab[];
 }
 
-const Content: React.FC<ContentProps> = ({
-  config,
-  errorConnectingMessage,
-  index,
-  tabs,
-  tabId,
-}) => {
+const Content: React.FC<ContentProps> = ({ index, tabs, tabId }) => {
   const selectedTab = useMemo(() => tabs.find((tab) => tab.id === tabId), [tabId]);
 
   const onTabClick = (tab: EuiTabbedContentTab) => {
@@ -328,9 +321,6 @@ const Content: React.FC<ContentProps> = ({
 
   if (isCrawlerIndex(index) && !index.connector) {
     return <NoConnectorRecord />;
-  }
-  if (isCrawlerIndex(index) && (Boolean(errorConnectingMessage) || !config?.host)) {
-    return <ErrorStatePrompt />;
   }
   return (
     <>
