@@ -41,6 +41,7 @@ export const GridPanel = forwardRef<
     // const resizeHandleRef = useRef<HTMLDivElement | null>(null);
     const removeEventListenersRef = useRef<(() => void) | null>(null);
     const [dragHandleCount, setDragHandleCount] = useState<number>(0);
+    const dragHandleRefs = useRef<Array<HTMLElement | null>>([]);
 
     const { euiTheme } = useEuiTheme();
 
@@ -80,7 +81,10 @@ export const GridPanel = forwardRef<
      */
     const onMouseDown = useCallback(
       (e: MouseEvent) => {
-        if (e.button !== 0) return; // ignore anything but left clicks
+        if (gridLayoutStateManager.accessMode$.getValue() !== 'EDIT' || e.button !== 0) {
+          // ignore anything but left clicks, and ignore clicks when not in edit mode
+          return;
+        }
         e.stopPropagation();
         interactionStart(panelId, 'drag', e);
       },
@@ -90,6 +94,7 @@ export const GridPanel = forwardRef<
     const setDragHandles = useCallback(
       (dragHandles: Array<HTMLElement | null>) => {
         setDragHandleCount(dragHandles.length);
+        dragHandleRefs.current = dragHandles;
 
         for (const handle of dragHandles) {
           if (handle === null) return;
@@ -252,21 +257,10 @@ export const GridPanel = forwardRef<
             ref.style.gridRowEnd = `${responsiveGridRowStart + panel.height}`;
           });
 
-        const accessModeSubscription = gridLayoutStateManager.accessMode$.subscribe(
-          (accessMode) => {
-            if (accessMode !== 'EDIT') {
-              if (removeEventListenersRef.current) {
-                removeEventListenersRef.current();
-              }
-            }
-          }
-        );
-
         return () => {
           expandedPanelStyleSubscription.unsubscribe();
           mobileViewStyleSubscription.unsubscribe();
           activePanelStyleSubscription.unsubscribe();
-          accessModeSubscription.unsubscribe();
         };
       },
       // eslint-disable-next-line react-hooks/exhaustive-deps
