@@ -25,7 +25,6 @@
       "dashboard",
       "data",
       "dataViews",
-      "discover",
       "ecsDataQualityDashboard",
       "elasticAssistant",
       "embeddable",
@@ -59,7 +58,8 @@
       "unifiedDocViewer",
       "charts",
       "entityManager",
-      "inference"
+      "inference",
+      "discoverShared"
     ],
     "optionalPlugins": [
       "encryptedSavedObjects",
