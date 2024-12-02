@@ -24,6 +24,7 @@ import {
   EuiKeyPadMenuItem,
   EuiPopover,
   EuiSpacer,
+  EuiSwitch,
   EuiText,
   EuiToolTip,
   useEuiTheme,
@@ -49,7 +50,11 @@ import {
   useFormChangesContext,
 } from '@kbn/security-form-components';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import type { DarkModeValue, UserProfileData } from '@kbn/user-profile-components';
+import type {
+  ContrastModeValue,
+  DarkModeValue,
+  UserProfileData,
+} from '@kbn/user-profile-components';
 import { UserAvatar, useUpdateUserProfile } from '@kbn/user-profile-components';
 
 import { createImageHandler, getRandomColor, VALID_HEX_COLOR } from './utils';
@@ -104,6 +109,7 @@ export interface UserProfileFormValues {
     };
     userSettings: {
       darkMode: DarkModeValue;
+      contrastMode: ContrastModeValue;
     };
   };
   avatarType: 'initials' | 'image';
@@ -230,7 +236,7 @@ const UserSettingsEditor: FunctionComponent<UserSettingsEditorProps> = ({
             <FormLabel for="data.userSettings.darkMode">
               <FormattedMessage
                 id="xpack.security.accountManagement.userProfile.userSettings.theme"
-                defaultMessage="Mode"
+                defaultMessage="Color mode"
               />
             </FormLabel>
           ),
@@ -276,6 +282,24 @@ const UserSettingsEditor: FunctionComponent<UserSettingsEditorProps> = ({
     );
   };
 
+  const idSelectedContrast = formik.values.data.userSettings.contrastMode;
+  const contrastModeMenu = () => {
+    return (
+      <EuiSwitch
+        id="contrastMode"
+        label={i18n.translate(
+          'xpack.security.accountManagement.userProfile.highContrastModeButton',
+          { defaultMessage: 'High contrast' }
+        )}
+        checked={idSelectedContrast === 'high'}
+        onChange={({ target }) => {
+          const value = target.checked ? 'high' : 'standard';
+          return formik.setFieldValue('data.userSettings.contrastMode', value);
+        }}
+      />
+    );
+  };
+
   return (
     <EuiDescribedFormGroup
       fullWidth
@@ -284,7 +308,7 @@ const UserSettingsEditor: FunctionComponent<UserSettingsEditorProps> = ({
         <h2>
           <FormattedMessage
             id="xpack.security.accountManagement.userProfile.userSettingsTitle"
-            defaultMessage="Theme"
+            defaultMessage="Appearance"
           />
         </h2>
       }
@@ -297,6 +321,22 @@ const UserSettingsEditor: FunctionComponent<UserSettingsEditorProps> = ({
     >
       <FormRow name="data.userSettings.darkMode" fullWidth>
         {themeMenu(isThemeOverridden)}
+      </FormRow>
+
+      <FormRow
+        name="data.userSettings.contrastMode"
+        fullWidth
+        label={
+          <FormLabel for="data.userSettings.contrastMode">
+            <FormattedMessage
+              id="xpack.security.accountManagement.userProfile.userSettings.contrastMode"
+              defaultMessage="Accessibility"
+            />
+          </FormLabel>
+        }
+        hasChildLabel={false}
+      >
+        {contrastModeMenu()}
       </FormRow>
     </EuiDescribedFormGroup>
   );
@@ -876,6 +916,7 @@ export function useUserProfileForm({ user, data }: UserProfileProps) {
           },
           userSettings: {
             darkMode: data.userSettings?.darkMode || '',
+            contrastMode: data.userSettings?.contrastMode || 'standard',
           },
         }
       : undefined,
@@ -928,7 +969,10 @@ export function useUserProfileForm({ user, data }: UserProfileProps) {
       resetInitialValues(values);
 
       let isRefreshRequired = false;
-      if (initialValues.data?.userSettings.darkMode !== values.data?.userSettings.darkMode) {
+      if (
+        initialValues.data?.userSettings.darkMode !== values.data?.userSettings.darkMode ||
+        initialValues.data?.userSettings.contrastMode !== values.data?.userSettings.contrastMode
+      ) {
         isRefreshRequired = true;
       }
       showSuccessNotification({ isRefreshRequired });
