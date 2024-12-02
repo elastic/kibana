@@ -132,10 +132,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('generates a large export', async () => {
-        await PageObjects.discover.loadSavedSearch('Ecommerce Data');
+        await PageObjects.discover.clickNewSearchButton();
         const fromTime = 'Apr 27, 2019 @ 23:56:51.374';
         const toTime = 'Aug 23, 2019 @ 16:18:51.821';
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.unifiedFieldList.clickFieldListItemAdd('order_id');
+        await PageObjects.discover.clickFieldSort('order_id', 'Sort A-Z');
 
         await retry.try(async () => {
           expect(await PageObjects.discover.getHitCount()).to.equal('4,675');
@@ -144,7 +146,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         // match file length, the beginning and the end of the csv file contents
         const { text: csvFile } = await getReport({ timeout: 80 * 1000 });
-        expect(csvFile.length).to.be(782100);
+        expect(csvFile.length).to.be(171599);
         expectSnapshot(csvFile.slice(0, 5000)).toMatch();
         expectSnapshot(csvFile.slice(-5000)).toMatch();
       });
