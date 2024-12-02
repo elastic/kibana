@@ -405,7 +405,7 @@ export class KnowledgeBaseService {
         document: {
           '@timestamp': new Date().toISOString(),
           ...doc,
-          semantic_text: doc.text,
+          ...(doc.text ? { semantic_text: doc.text } : {}),
           user,
           namespace,
         },
