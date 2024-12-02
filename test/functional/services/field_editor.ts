@@ -90,9 +90,11 @@ export class FieldEditorService extends FtrService {
   public async setColorFormat(value: string, color: string, backgroundColor?: string) {
     await this.testSubjects.click('colorEditorAddColor');
     await this.testSubjects.setValue('~colorEditorKeyPattern', value);
-    await this.testSubjects.setValue('~colorEditorColorPicker', color);
+    await this.testSubjects.click('~colorEditorColorPicker');
+    await this.testSubjects.setValue('~euiColorPickerInput_bottom', color);
     if (backgroundColor) {
-      await this.testSubjects.setValue('~colorEditorBackgroundPicker', backgroundColor);
+      await this.testSubjects.click('~colorEditorBackgroundPicker');
+      await this.testSubjects.setValue('~euiColorPickerInput_bottom', backgroundColor);
     }
   }
 

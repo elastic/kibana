@@ -61,7 +61,6 @@ import type { PluginSetup as UnifiedSearchServerPluginSetup } from '@kbn/unified
 import { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/server';
 import { SharePluginStart } from '@kbn/share-plugin/server';
-import { ServerlessPluginSetup } from '@kbn/serverless/server';
 
 import { RuleTypeRegistry } from './rule_type_registry';
 import { TaskRunnerFactory } from './task_runner';
@@ -199,7 +198,6 @@ export interface AlertingPluginsSetup {
   data: DataPluginSetup;
   features: FeaturesPluginSetup;
   unifiedSearch: UnifiedSearchServerPluginSetup;
-  serverless?: ServerlessPluginSetup;
 }
 
 export interface AlertingPluginsStart {
@@ -214,7 +212,6 @@ export interface AlertingPluginsStart {
   data: DataPluginStart;
   dataViews: DataViewsPluginStart;
   share: SharePluginStart;
-  serverless?: ServerlessPluginSetup;
 }
 
 export class AlertingPlugin {
@@ -240,6 +237,7 @@ export class AlertingPlugin {
   private pluginStop$: Subject<void>;
   private dataStreamAdapter?: DataStreamAdapter;
   private backfillClient?: BackfillClient;
+  private readonly isServerless: boolean;
   private nodeRoles: PluginInitializerContext['node']['roles'];
   private readonly connectorAdapterRegistry = new ConnectorAdapterRegistry();
 
@@ -257,6 +255,7 @@ export class AlertingPlugin {
     this.kibanaVersion = initializerContext.env.packageInfo.version;
     this.inMemoryMetrics = new InMemoryMetrics(initializerContext.logger.get('in_memory_metrics'));
     this.pluginStop$ = new ReplaySubject(1);
+    this.isServerless = initializerContext.env.packageInfo.buildFlavor === 'serverless';
   }
 
   public setup(
@@ -269,7 +268,7 @@ export class AlertingPlugin {
 
     const elasticsearchAndSOAvailability$ = getElasticsearchAndSOAvailability(core.status.core$);
 
-    const useDataStreamForAlerts = !!plugins.serverless;
+    const useDataStreamForAlerts = this.isServerless;
     this.dataStreamAdapter = getDataStreamAdapter({ useDataStreamForAlerts });
 
     core.capabilities.registerProvider(() => {
@@ -283,7 +282,7 @@ export class AlertingPlugin {
       };
     });
 
-    plugins.features.registerKibanaFeature(getRulesSettingsFeature(!!plugins.serverless));
+    plugins.features.registerKibanaFeature(getRulesSettingsFeature(this.isServerless));
 
     plugins.features.registerKibanaFeature(maintenanceWindowFeature);
 
@@ -331,6 +330,7 @@ export class AlertingPlugin {
             .getStartServices()
             .then(([{ elasticsearch }]) => elasticsearch.client.asInternalUser),
           elasticsearchAndSOAvailability$,
+          isServerless: this.isServerless,
         });
       }
     }
@@ -411,7 +411,8 @@ export class AlertingPlugin {
       getAlertIndicesAlias: createGetAlertIndicesAliasFn(this.ruleTypeRegistry!),
       encryptedSavedObjects: plugins.encryptedSavedObjects,
       config$: plugins.unifiedSearch.autocomplete.getInitializerContextConfig().create(),
-      isServerless: !!plugins.serverless,
+      isServerless: this.isServerless,
+      docLinks: core.docLinks,
     });
 
     return {
@@ -562,7 +563,7 @@ export class AlertingPlugin {
       logger: this.logger,
       savedObjectsService: core.savedObjects,
       securityService: core.security,
-      isServerless: !!plugins.serverless,
+      isServerless: this.isServerless,
     });
 
     maintenanceWindowClientFactory.initialize({
@@ -620,7 +621,7 @@ export class AlertingPlugin {
       rulesSettingsService: new RulesSettingsService({
         cacheInterval: this.config.rulesSettings.cacheInterval,
         getRulesSettingsClientWithRequest,
-        isServerless: !!plugins.serverless,
+        isServerless: this.isServerless,
         logger,
       }),
       savedObjects: core.savedObjects,
@@ -629,6 +630,7 @@ export class AlertingPlugin {
       supportsEphemeralTasks: plugins.taskManager.supportsEphemeralTasks(),
       uiSettings: core.uiSettings,
       usageCounter: this.usageCounter,
+      isServerless: this.isServerless,
     });
 
     this.eventLogService!.registerSavedObjectProvider(RULE_SAVED_OBJECT_TYPE, (request) => {

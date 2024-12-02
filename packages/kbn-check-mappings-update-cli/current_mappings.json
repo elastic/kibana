@@ -1606,6 +1606,7 @@
     }
   },
   "fleet-agent-policies": {
+    "dynamic": false,
     "properties": {
       "advanced_settings": {
         "index": false,
@@ -1975,6 +1976,7 @@
     "properties": {}
   },
   "ingest-agent-policies": {
+    "dynamic": false,
     "properties": {
       "advanced_settings": {
         "index": false,
