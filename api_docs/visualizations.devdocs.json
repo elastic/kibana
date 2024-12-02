@@ -7050,7 +7050,7 @@
             "section": "def-common.AggregateQuery",
             "text": "AggregateQuery"
           },
-          " | undefined; getFilters: () => ",
+          " | undefined; canLinkToLibrary: (() => Promise<boolean>) | undefined; canUnlinkFromLibrary: (() => Promise<boolean>) | undefined; onEdit: () => Promise<void>; isEditingEnabled: () => boolean; getEditHref: () => Promise<string | undefined>; getTypeDisplayName: () => string; getFilters: () => ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -7058,7 +7058,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[]; canLinkToLibrary: (() => Promise<boolean>) | undefined; canUnlinkFromLibrary: (() => Promise<boolean>) | undefined; setTimeRange: (timeRange: ",
+          "[]; setTimeRange: (timeRange: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -7074,7 +7074,7 @@
             "section": "def-public.VisualizeInput",
             "text": "VisualizeInput"
           },
-          "; getDescription: () => string; onEdit: () => Promise<void>; phase$: ",
+          "; getDescription: () => string; phase$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -7090,7 +7090,7 @@
             "section": "def-public.PhaseEvent",
             "text": "PhaseEvent"
           },
-          " | undefined>; setPanelTitle: (newTitle: string | undefined) => void; isEditingEnabled: () => boolean; setHidePanelTitle: (hide: boolean | undefined) => void; getTypeDisplayName: () => string; setPanelDescription: (newTitle: string | undefined) => void; render: (domNode: HTMLElement) => Promise<void>; getEditHref: () => Promise<string | undefined>; supportedTriggers: () => string[]; getInspectorAdapters: () => ",
+          " | undefined>; setPanelTitle: (newTitle: string | undefined) => void; setHidePanelTitle: (hide: boolean | undefined) => void; setPanelDescription: (newTitle: string | undefined) => void; render: (domNode: HTMLElement) => Promise<void>; supportedTriggers: () => string[]; getInspectorAdapters: () => ",
           {
             "pluginId": "inspector",
             "scope": "common",
