@@ -11,7 +11,6 @@ import deepEqual from 'fast-deep-equal';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import ReactDOM from 'react-dom';
 import { combineLatest, debounceTime } from 'rxjs';
-import { v4 as uuidv4 } from 'uuid';
 
 import {
   EuiBadge,
@@ -24,6 +23,7 @@ import {
   EuiPageTemplate,
   EuiSpacer,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { AppMountParameters } from '@kbn/core-application-browser';
 import { CoreStart } from '@kbn/core-lifecycle-browser';
 import {
@@ -33,10 +33,11 @@ import {
 import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { GridAccessMode, GridLayout, GridLayoutData } from '@kbn/grid-layout';
 import { i18n } from '@kbn/i18n';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
-import { getPanelId } from './get_panel_id';
+import { AddButton } from './add_button';
 import {
   clearSerializedDashboardState,
   getSerializedDashboardState,
@@ -50,7 +51,13 @@ const DASHBOARD_MARGIN_SIZE = 8;
 const DASHBOARD_GRID_HEIGHT = 20;
 const DASHBOARD_GRID_COLUMN_COUNT = 48;
 
-export const GridExample = ({ coreStart }: { coreStart: CoreStart }) => {
+export const GridExample = ({
+  coreStart,
+  uiActions,
+}: {
+  coreStart: CoreStart;
+  uiActions: UiActionsStart;
+}) => {
   const savedState = useRef<MockSerializedDashboardState>(getSerializedDashboardState());
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState<boolean>(false);
   const [accessMode, setAccessMode] = useState<GridAccessMode>('EDIT');
@@ -113,19 +120,19 @@ export const GridExample = ({ coreStart }: { coreStart: CoreStart }) => {
           min-block-size: 0px !important;
         `}
       >
-        {/* <EuiPageTemplate.Header
+        <EuiPageTemplate.Header
           iconType={'dashboardApp'}
           pageTitle={i18n.translate('examples.gridExample.pageTitle', {
             defaultMessage: 'Grid Layout Example',
           })}
-        /> */}
+        />
         <EuiPageTemplate.Section
           color="subdued"
           contentProps={{
             css: { flexGrow: 1 },
           }}
         >
-          {/* <EuiCallOut
+          <EuiCallOut
             title={i18n.translate('examples.gridExample.sessionStorageCallout', {
               defaultMessage:
                 'This example uses session storage to persist saved state and unsaved changes',
@@ -143,24 +150,11 @@ export const GridExample = ({ coreStart }: { coreStart: CoreStart }) => {
                 defaultMessage: 'Reset example',
               })}
             </EuiButton>
-          </EuiCallOut> */}
-          {/* <EuiSpacer size="m" /> */}
-          {/* <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+          </EuiCallOut>
+          <EuiSpacer size="m" />
+          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
             <EuiFlexItem grow={false}>
-              <EuiButton
-                onClick={async () => {
-                  mockDashboardApi.expandedPanelId.next(undefined);
-                  const panelId = await getPanelId({
-                    coreStart,
-                    suggestion: uuidv4(),
-                  });
-                  if (panelId) mockDashboardApi.addNewPanel({ id: panelId });
-                }}
-              >
-                {i18n.translate('examples.gridExample.addPanelButton', {
-                  defaultMessage: 'Add a panel',
-                })}
-              </EuiButton>
+              <AddButton dashboardApi={mockDashboardApi} uiActions={uiActions} />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiFlexGroup gutterSize="xs" alignItems="center">
@@ -234,7 +228,7 @@ export const GridExample = ({ coreStart }: { coreStart: CoreStart }) => {
               </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
-          <EuiSpacer size="m" /> */}
+          <EuiSpacer size="m" />
           <GridLayout
             accessMode={accessMode}
             expandedPanelId={expandedPanelId}
@@ -262,9 +256,9 @@ export const GridExample = ({ coreStart }: { coreStart: CoreStart }) => {
 
 export const renderGridExampleApp = (
   element: AppMountParameters['element'],
-  coreStart: CoreStart
+  deps: { uiActions: UiActionsStart; coreStart: CoreStart }
 ) => {
-  ReactDOM.render(<GridExample coreStart={coreStart} />, element);
+  ReactDOM.render(<GridExample {...deps} />, element);
 
   return () => ReactDOM.unmountComponentAtNode(element);
 };

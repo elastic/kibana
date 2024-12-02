@@ -17,6 +17,7 @@
     "@kbn/embeddable-examples-plugin",
     "@kbn/react-kibana-context-render",
     "@kbn/presentation-publishing",
-    "@kbn/es-query"
+    "@kbn/es-query",
+    "@kbn/ui-actions-plugin"
   ]
 }

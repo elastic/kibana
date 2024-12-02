@@ -10,8 +10,10 @@
 import { cloneDeep } from 'lodash';
 import { useMemo } from 'react';
 import { BehaviorSubject } from 'rxjs';
+import { v4 } from 'uuid';
 
 import { TimeRange } from '@kbn/es-query';
+import { PanelPackage } from '@kbn/presentation-containers';
 
 import {
   MockSerializedDashboardState,
@@ -29,20 +31,24 @@ export const useMockDashboardApi = ({
   savedState: MockSerializedDashboardState;
 }) => {
   const mockDashboardApi = useMemo(() => {
+    const panels$ = new BehaviorSubject<MockedDashboardPanelMap>(savedState.panels);
     const expandedPanelId$ = new BehaviorSubject<string | undefined>(undefined);
 
     return {
-      getSerializedStateForChild: (id: string) => ({
-        rawState: savedState.panels[id].explicitInput,
-        references: [],
-      }),
+      getSerializedStateForChild: (id: string) => {
+        return {
+          rawState: panels$.getValue()[id].explicitInput,
+          references: [],
+        };
+      },
+      children$: new BehaviorSubject({}),
+
       timeRange$: new BehaviorSubject<TimeRange>({
         from: 'now-24h',
         to: 'now',
       }),
-      children$: new BehaviorSubject({}),
       viewMode: new BehaviorSubject('edit'),
-      panels$: new BehaviorSubject<MockedDashboardPanelMap>(savedState.panels),
+      panels$,
       rows$: new BehaviorSubject<MockedDashboardRowMap>(savedState.rows),
 
       expandedPanelId: expandedPanelId$,
@@ -67,7 +73,7 @@ export const useMockDashboardApi = ({
         otherPanels[newId] = { id: newId, gridData: { ...oldPanel.gridData, i: newId } };
         mockDashboardApi.panels$.next(otherPanels);
       },
-      addNewPanel: ({ id: newId }: { id: string }) => {
+      addNewPanel: async (panelPackage: PanelPackage) => {
         // we are only implementing "place at top" here, for demo purposes
         const currentPanels = mockDashboardApi.panels$.getValue();
         const otherPanels = { ...currentPanels };
@@ -76,17 +82,22 @@ export const useMockDashboardApi = ({
           currentPanel.gridData.y = currentPanel.gridData.y + DEFAULT_PANEL_HEIGHT;
           otherPanels[id] = currentPanel;
         }
+        const newId = v4();
         mockDashboardApi.panels$.next({
           ...otherPanels,
           [newId]: {
-            id: newId,
+            type: panelPackage.panelType,
             gridData: {
-              i: newId,
               row: 0,
               x: 0,
               y: 0,
               w: DEFAULT_PANEL_WIDTH,
               h: DEFAULT_PANEL_HEIGHT,
+              i: newId,
+            },
+            explicitInput: {
+              ...panelPackage.initialState,
+              id: newId,
             },
           },
         });

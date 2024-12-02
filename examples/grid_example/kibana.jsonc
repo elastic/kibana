@@ -7,7 +7,7 @@
     "id": "gridExample",
     "server": false,
     "browser": true,
-    "requiredPlugins": ["developerExamples", "embeddable"],
+    "requiredPlugins": ["developerExamples", "embeddable", "uiActions"],
     "requiredBundles": []
   }
 }
