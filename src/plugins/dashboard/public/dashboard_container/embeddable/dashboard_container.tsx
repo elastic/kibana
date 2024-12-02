@@ -461,11 +461,7 @@ export class DashboardContainer
     this.domNode.className = 'dashboardContainer';
 
     ReactDOM.render(
-      <KibanaRenderContextProvider
-        analytics={coreServices.analytics}
-        i18n={coreServices.i18n}
-        theme={coreServices.theme}
-      >
+      <KibanaRenderContextProvider {...coreServices}>
         <ExitFullScreenButtonKibanaProvider
           coreStart={{ chrome: coreServices.chrome, customBranding: coreServices.customBranding }}
         >

@@ -47,6 +47,7 @@ import type {
   IUiSettingsClient,
   ThemeServiceStart,
   ToastsSetup,
+  UserProfileService,
 } from '@kbn/core/public';
 
 import { BatchedFunc, BfetchPublicSetup, DISABLE_BFETCH } from '@kbn/bfetch-plugin/public';
@@ -135,6 +136,7 @@ export class SearchInterceptor {
     analytics: Pick<AnalyticsServiceStart, 'reportEvent'>;
     i18n: I18nStart;
     theme: Pick<ThemeServiceStart, 'theme$'>;
+    userProfile: UserProfileService;
   };
 
   /*
@@ -144,10 +146,10 @@ export class SearchInterceptor {
     this.deps.http.addLoadingCountSource(this.pendingCount$);
 
     this.deps.startServices.then(([coreStart, depsStart]) => {
-      const { application, docLinks, analytics, i18n: i18nStart, theme } = coreStart;
+      const { application, docLinks, analytics, i18n: i18nStart, theme, userProfile } = coreStart;
       this.application = application;
       this.docLinks = docLinks;
-      this.startRenderServices = { analytics, i18n: i18nStart, theme };
+      this.startRenderServices = { analytics, i18n: i18nStart, theme, userProfile };
       this.inspector = (depsStart as SearchServiceStartDependencies).inspector;
     });
 

@@ -9,9 +9,8 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Observable } from 'rxjs';
 
-import { CoreSetup, CoreTheme } from '@kbn/core/public';
+import { CoreStart } from '@kbn/core/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -38,7 +37,7 @@ const errorStrings = {
 const ErrorComponent = withSuspense(LazyErrorRenderComponent);
 
 export const getErrorRenderer =
-  (theme$: Observable<CoreTheme>) => (): ExpressionRenderDefinition<ErrorRendererConfig> => ({
+  (core: CoreStart) => (): ExpressionRenderDefinition<ErrorRendererConfig> => ({
     name: 'error',
     displayName: errorStrings.getDisplayName(),
     help: errorStrings.getHelpDescription(),
@@ -55,7 +54,7 @@ export const getErrorRenderer =
       render(
         <KibanaErrorBoundaryProvider analytics={undefined}>
           <KibanaErrorBoundary>
-            <KibanaThemeProvider theme={{ theme$ }}>
+            <KibanaThemeProvider {...core}>
               <I18nProvider>
                 <ErrorComponent onLoaded={handlers.done} {...config} parentNode={domNode} />
               </I18nProvider>
@@ -67,4 +66,4 @@ export const getErrorRenderer =
     },
   });
 
-export const errorRendererFactory = (core: CoreSetup) => getErrorRenderer(core.theme.theme$);
+export const errorRendererFactory = (core: CoreStart) => getErrorRenderer(core);

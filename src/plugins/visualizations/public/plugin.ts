@@ -105,6 +105,7 @@ import {
   setAnalytics,
   setI18n,
   setTheme,
+  setUserProfile,
   setExecutionContext,
   setFieldFormats,
   setSavedObjectTagging,
@@ -465,6 +466,7 @@ export class VisualizationsPlugin
     const types = this.types.start();
     setTypes(types);
     setI18n(core.i18n);
+    setUserProfile(core.userProfile);
     setEmbeddable(embeddable);
     setApplication(core.application);
     setCapabilities(core.application.capabilities);

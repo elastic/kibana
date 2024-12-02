@@ -15,7 +15,7 @@ import type { KibanaExecutionContext } from '@kbn/core-execution-context-common'
 import { ChartSizeEvent } from '@kbn/chart-expressions-common';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { MapsPluginStartDependencies } from '../../plugin';
-import { getAnalytics, getCoreI18n, getTheme } from '../../kibana_services';
+import { getAnalytics, getCoreI18n, getTheme, getUserProfile } from '../../kibana_services';
 import type { ChoroplethChartProps } from './types';
 
 export const RENDERER_ID = 'lens_choropleth_chart_renderer';
@@ -103,6 +103,7 @@ export function getExpressionRenderer(coreSetup: CoreSetup<MapsPluginStartDepend
           analytics={getAnalytics()}
           i18n={getCoreI18n()}
           theme={getTheme()}
+          userProfile={getUserProfile()}
         >
           <ChoroplethChart
             {...config}

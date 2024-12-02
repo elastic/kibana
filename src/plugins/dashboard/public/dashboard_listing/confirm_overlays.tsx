@@ -112,7 +112,7 @@ export const confirmCreateWithUnsaved = (
           </div>
         </EuiOutsideClickDetector>
       </EuiFocusTrap>,
-      { analytics: coreServices.analytics, i18n: coreServices.i18n, theme: coreServices.theme }
+      coreServices
     ),
     {
       'data-test-subj': 'dashboardCreateConfirmModal',

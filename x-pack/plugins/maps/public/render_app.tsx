@@ -21,6 +21,7 @@ import {
   getAnalytics,
   getCoreI18n,
   getTheme,
+  getUserProfile,
   getMapsCapabilities,
   getEmbeddableService,
   getDocLinks,
@@ -110,7 +111,12 @@ export async function renderApp(
   }
 
   render(
-    <KibanaRenderContextProvider analytics={getAnalytics()} i18n={getCoreI18n()} theme={getTheme()}>
+    <KibanaRenderContextProvider
+      analytics={getAnalytics()}
+      i18n={getCoreI18n()}
+      theme={getTheme()}
+      userProfile={getUserProfile()}
+    >
       <AppUsageTracker>
         <TableListViewKibanaProvider
           {...{

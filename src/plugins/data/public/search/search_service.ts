@@ -231,6 +231,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       http,
       theme,
       uiSettings,
+      userProfile,
       chrome,
       application,
       notifications,
@@ -259,6 +260,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       inspector,
       notifications,
       theme,
+      userProfile,
     };
 
     const searchSourceDependencies: SearchSourceDependencies = {
@@ -314,7 +316,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
               tourDisabled: screenshotMode.isScreenshotMode(),
             })
           ),
-          { analytics, i18n: i18nStart, theme }
+          { analytics, i18n: i18nStart, theme, userProfile }
         ),
       });
     }

@@ -14,6 +14,7 @@ import type {
   AnalyticsServiceStart,
   NotificationsStart,
   ThemeServiceStart,
+  UserProfileService,
 } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { I18nStart } from '@kbn/core-i18n-browser';
@@ -36,6 +37,7 @@ interface Services {
   inspector: InspectorStart;
   notifications: NotificationsStart;
   theme: ThemeServiceStart;
+  userProfile: UserProfileService;
 }
 
 /**

@@ -33,7 +33,7 @@ import { SharePluginStart } from '@kbn/share-plugin/public';
 import type { IndexPatternManagementStart } from '.';
 import type { DataViewMgmtService } from './management_app/data_view_management_service';
 
-export type StartServices = Pick<CoreStart, 'analytics' | 'i18n' | 'theme'>;
+export type StartServices = Pick<CoreStart, 'analytics' | 'i18n' | 'theme' | 'userProfile'>;
 
 export interface IndexPatternManagmentContext extends StartServices {
   dataViewMgmtService: DataViewMgmtService;

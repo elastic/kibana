@@ -9,9 +9,8 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Observable } from 'rxjs';
 
-import { CoreSetup, CoreTheme } from '@kbn/core/public';
+import { CoreStart } from '@kbn/core/public';
 import {
   ExpressionRenderDefinition,
   IInterpreterRenderHandlers,
@@ -34,7 +33,7 @@ const strings = {
 };
 
 export const getProgressRenderer =
-  (theme$: Observable<CoreTheme>) => (): ExpressionRenderDefinition<ProgressRendererConfig> => ({
+  (core: CoreStart) => (): ExpressionRenderDefinition<ProgressRendererConfig> => ({
     name: 'progress',
     displayName: strings.getDisplayName(),
     help: strings.getHelpDescription(),
@@ -52,7 +51,7 @@ export const getProgressRenderer =
       render(
         <KibanaErrorBoundaryProvider analytics={undefined}>
           <KibanaErrorBoundary>
-            <KibanaThemeProvider theme={{ theme$ }}>
+            <KibanaThemeProvider {...core}>
               <I18nProvider>
                 <ProgressComponent {...config} parentNode={domNode} onLoaded={handlers.done} />
               </I18nProvider>
@@ -64,4 +63,4 @@ export const getProgressRenderer =
     },
   });
 
-export const progressRendererFactory = (core: CoreSetup) => getProgressRenderer(core.theme.theme$);
+export const progressRendererFactory = (core: CoreStart) => getProgressRenderer(core);

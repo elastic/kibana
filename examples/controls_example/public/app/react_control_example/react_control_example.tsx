@@ -315,10 +315,7 @@ export const ReactControlExample = ({
                   <EuiCodeBlock language="json">
                     {JSON.stringify(controlGroupApi?.serializeState(), null, 2)}
                   </EuiCodeBlock>,
-                  {
-                    theme: core.theme,
-                    i18n: core.i18n,
-                  }
+                  core
                 )
               );
             }}
