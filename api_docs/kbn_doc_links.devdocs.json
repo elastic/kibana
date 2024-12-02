@@ -669,7 +669,7 @@
             "label": "alerting",
             "description": [],
             "signature": [
-              "{ readonly guide: string; readonly actionTypes: string; readonly apmRulesErrorCount: string; readonly apmRulesTransactionDuration: string; readonly apmRulesTransactionError: string; readonly apmRulesAnomaly: string; readonly emailAction: string; readonly emailActionConfig: string; readonly emailExchangeClientSecretConfig: string; readonly emailExchangeClientIdConfig: string; readonly generalSettings: string; readonly indexAction: string; readonly esQuery: string; readonly indexThreshold: string; readonly maintenanceWindows: string; readonly pagerDutyAction: string; readonly preconfiguredConnectors: string; readonly preconfiguredAlertHistoryConnector: string; readonly serviceNowAction: string; readonly serviceNowSIRAction: string; readonly setupPrerequisites: string; readonly slackAction: string; readonly slackApiAction: string; readonly teamsAction: string; readonly connectors: string; }"
+              "{ readonly guide: string; readonly actionTypes: string; readonly apmRulesErrorCount: string; readonly apmRulesTransactionDuration: string; readonly apmRulesTransactionError: string; readonly apmRulesAnomaly: string; readonly emailAction: string; readonly emailActionConfig: string; readonly emailExchangeClientSecretConfig: string; readonly emailExchangeClientIdConfig: string; readonly generalSettings: string; readonly indexAction: string; readonly esQuery: string; readonly indexThreshold: string; readonly maintenanceWindows: string; readonly pagerDutyAction: string; readonly preconfiguredConnectors: string; readonly preconfiguredAlertHistoryConnector: string; readonly serviceNowAction: string; readonly serviceNowSIRAction: string; readonly setupPrerequisites: string; readonly slackAction: string; readonly slackApiAction: string; readonly teamsAction: string; readonly connectors: string; readonly legacyRuleApiDeprecations: string; }"
             ],
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false,
@@ -1034,6 +1034,20 @@
             "description": [],
             "signature": [
               "{ readonly inferenceAPIDocumentation: string; }"
+            ],
+            "path": "packages/kbn-doc-links/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/doc-links",
+            "id": "def-common.DocLinks.cases",
+            "type": "Object",
+            "tags": [],
+            "label": "cases",
+            "description": [],
+            "signature": [
+              "{ readonly legacyApiDeprecations: string; }"
             ],
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false,
