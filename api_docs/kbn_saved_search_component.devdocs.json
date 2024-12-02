@@ -1,0 +1,301 @@
+{
+  "id": "@kbn/saved-search-component",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/saved-search-component",
+        "id": "def-public.LazySavedSearchComponent",
+        "type": "Function",
+        "tags": [],
+        "label": "LazySavedSearchComponent",
+        "description": [],
+        "signature": [
+          "React.ForwardRefExoticComponent<",
+          {
+            "pluginId": "@kbn/saved-search-component",
+            "scope": "public",
+            "docId": "kibKbnSavedSearchComponentPluginApi",
+            "section": "def-public.SavedSearchComponentProps",
+            "text": "SavedSearchComponentProps"
+          },
+          " & React.RefAttributes<{}>>"
+        ],
+        "path": "packages/kbn-saved-search-component/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/saved-search-component",
+            "id": "def-public.LazySavedSearchComponent.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/saved-search-component",
+        "id": "def-public.SavedSearchComponentDependencies",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedSearchComponentDependencies",
+        "description": [],
+        "path": "packages/kbn-saved-search-component/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/saved-search-component",
+            "id": "def-public.SavedSearchComponentDependencies.embeddable",
+            "type": "Object",
+            "tags": [],
+            "label": "embeddable",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "embeddable",
+                "scope": "public",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-public.EmbeddableStart",
+                "text": "EmbeddableStart"
+              }
+            ],
+            "path": "packages/kbn-saved-search-component/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/saved-search-component",
+            "id": "def-public.SavedSearchComponentDependencies.searchSource",
+            "type": "Object",
+            "tags": [],
+            "label": "searchSource",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.ISearchStartSearchSource",
+                "text": "ISearchStartSearchSource"
+              }
+            ],
+            "path": "packages/kbn-saved-search-component/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/saved-search-component",
+            "id": "def-public.SavedSearchComponentDependencies.dataViews",
+            "type": "Object",
+            "tags": [],
+            "label": "dataViews",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "public",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-public.DataViewsServicePublic",
+                "text": "DataViewsServicePublic"
+              }
+            ],
+            "path": "packages/kbn-saved-search-component/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/saved-search-component",
+        "id": "def-public.SavedSearchComponentProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedSearchComponentProps",
+        "description": [],
+        "path": "packages/kbn-saved-search-component/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/saved-search-component",
+            "id": "def-public.SavedSearchComponentProps.dependencies",
+            "type": "Object",
+            "tags": [],
+            "label": "dependencies",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/saved-search-component",
+                "scope": "public",
+                "docId": "kibKbnSavedSearchComponentPluginApi",
+                "section": "def-public.SavedSearchComponentDependencies",
+                "text": "SavedSearchComponentDependencies"
+              }
+            ],
+            "path": "packages/kbn-saved-search-component/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/saved-search-component",
+            "id": "def-public.SavedSearchComponentProps.index",
+            "type": "string",
+            "tags": [],
+            "label": "index",
+            "description": [],
+            "path": "packages/kbn-saved-search-component/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/saved-search-component",
+            "id": "def-public.SavedSearchComponentProps.timeRange",
+            "type": "Object",
+            "tags": [],
+            "label": "timeRange",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.TimeRange",
+                "text": "TimeRange"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-saved-search-component/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/saved-search-component",
+            "id": "def-public.SavedSearchComponentProps.query",
+            "type": "Object",
+            "tags": [],
+            "label": "query",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-saved-search-component/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/saved-search-component",
+            "id": "def-public.SavedSearchComponentProps.filters",
+            "type": "Array",
+            "tags": [],
+            "label": "filters",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[] | undefined"
+            ],
+            "path": "packages/kbn-saved-search-component/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/saved-search-component",
+            "id": "def-public.SavedSearchComponentProps.timestampField",
+            "type": "string",
+            "tags": [],
+            "label": "timestampField",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-saved-search-component/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/saved-search-component",
+            "id": "def-public.SavedSearchComponentProps.height",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "height",
+            "description": [],
+            "signature": [
+              "Property",
+              ".Height<string | number> | undefined"
+            ],
+            "path": "packages/kbn-saved-search-component/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/saved-search-component",
+            "id": "def-public.SavedSearchComponentProps.displayOptions",
+            "type": "Object",
+            "tags": [],
+            "label": "displayOptions",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "discover",
+                "scope": "public",
+                "docId": "kibDiscoverPluginApi",
+                "section": "def-public.NonPersistedDisplayOptions",
+                "text": "NonPersistedDisplayOptions"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-saved-search-component/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}
