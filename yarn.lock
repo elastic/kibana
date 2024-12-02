@@ -2295,25 +2295,25 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui-theme-borealis@0.0.2":
-  version "0.0.2"
-  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-borealis/-/eui-theme-borealis-0.0.2.tgz#4b65f13073b1887a12641063ace96539fa923674"
-  integrity sha512-ekePJ+V9UMCUDqjNLECjM+Vi/qHkJcu6lhm1GenUFs3awPxaLhvasb3pN++qnWYkXWo90vmZER62MTHpxlQyQA==
+"@elastic/eui-theme-borealis@0.0.3":
+  version "0.0.3"
+  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-borealis/-/eui-theme-borealis-0.0.3.tgz#a84c59009a331acd711ed14729237a9f348a14b5"
+  integrity sha512-aO+41iq3igDC852ZUiCkbI44TAt44buxaw3bQS1/Cy50oYlG7TAGEm4f7WZbEnMRK6EeqCNs3Hj+rU5HMDi9vA==
 
-"@elastic/eui-theme-common@0.0.2":
-  version "0.0.2"
-  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-common/-/eui-theme-common-0.0.2.tgz#3da6078a5d255c5740423d26409e5e06536a5db3"
-  integrity sha512-tIyXrylrLhmOWiRbxuJSiHHVJpt4fVd5frzhUGoSN2frobOT9RLh8Klzyd4kmHasZ7bB1vETPR5fytqgocRvdA==
+"@elastic/eui-theme-common@0.0.3":
+  version "0.0.3"
+  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-common/-/eui-theme-common-0.0.3.tgz#55b916229bed02276d4cf8dc9dfb1f72fc47c482"
+  integrity sha512-I7x5/Z1xxhNvlWj4oUKbbExUBD3tbfIPMvcijeGy44uXOa10Bs0duAcuOdDsQZqQdB7V44KyT5rH2dTqU5ogQw==
   dependencies:
     "@types/lodash" "^4.14.202"
     lodash "^4.17.21"
 
-"@elastic/eui@97.3.1-borealis.2":
-  version "97.3.1-borealis.2"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-97.3.1-borealis.2.tgz#32d9616ddbab11ef6e97739cf728a667220ca74c"
-  integrity sha512-j0WsE+WWtV3eEbRqyjr8hJ1swQIbCEGc9iViMtDK/XeVCVqs++dJE/+jPdjharMjXLrstOr0cx0uvtsH6OWTUw==
+"@elastic/eui@98.0.0-borealis.1":
+  version "98.0.0-borealis.1"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-98.0.0-borealis.1.tgz#0f4e6a1a0afc3270ad1419f540e0d6d709899d63"
+  integrity sha512-npPTj62wkG2Hvqi/4bkWGi9R8LYsa6cjNBbwj60u9GQbovzR45ZGSjxWfRxrgR3ajqLqf22MnqCKab5hnu/7Mg==
   dependencies:
-    "@elastic/eui-theme-common" "0.0.2"
+    "@elastic/eui-theme-common" "0.0.3"
     "@hello-pangea/dnd" "^16.6.0"
     "@types/lodash" "^4.14.202"
     "@types/numeral" "^2.0.5"
@@ -2394,10 +2394,10 @@
     "@elastic/react-search-ui-views" "1.20.2"
     "@elastic/search-ui" "1.20.2"
 
-"@elastic/request-converter@^8.16.1":
-  version "8.16.1"
-  resolved "https://registry.yarnpkg.com/@elastic/request-converter/-/request-converter-8.16.1.tgz#fad73db1a2ed0448501c389cf543fb77c6ffff57"
-  integrity sha512-lg2qCJ4kyxsP/0NpZo0+NsJfaY4JwyxGIVqD2l2Vmx9tv7ZNaZMn/TjHKBo2+jN0laJBInpxpnkPUgVWo5kw1g==
+"@elastic/request-converter@^8.16.2":
+  version "8.16.2"
+  resolved "https://registry.yarnpkg.com/@elastic/request-converter/-/request-converter-8.16.2.tgz#e82c5c794adf8da37795cb8656e2f0334460cb08"
+  integrity sha512-bljPrXbXkImBglTz5N8Rrpmzc64ahpZxOkBIKFBX1mnU3kv/JDeMjsv1rvfHXrkuhtQQ4kRRZqfwmqzJIwzlag==
   dependencies:
     child-process-promise "^2.2.1"
     commander "^12.1.0"
@@ -5320,6 +5320,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/dependency-ownership@link:packages/kbn-dependency-ownership":
+  version "0.0.0"
+  uid ""
+
 "@kbn/dependency-usage@link:packages/kbn-dependency-usage":
   version "0.0.0"
   uid ""
@@ -6872,6 +6876,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/saved-search-component@link:packages/kbn-saved-search-component":
+  version "0.0.0"
+  uid ""
+
 "@kbn/saved-search-plugin@link:src/plugins/saved_search":
   version "0.0.0"
   uid ""
@@ -8058,20 +8066,20 @@
   resolved "https://registry.yarnpkg.com/@launchdarkly/js-sdk-common/-/js-sdk-common-2.12.0.tgz#c22eb9fead687260d916a75f693c7d399f085b05"
   integrity sha512-HIDxvgo1vksC9hsYy3517sgW0Ql+iW3fgwlq/CEigeBNmaa9/J1Pxo7LrKPzezEA0kaGedmt/DCzVVxVBmxSsQ==
 
-"@launchdarkly/js-server-sdk-common@2.9.1":
-  version "2.9.1"
-  resolved "https://registry.yarnpkg.com/@launchdarkly/js-server-sdk-common/-/js-server-sdk-common-2.9.1.tgz#a683d682897c20a6967f5454d932663e4da6fc5c"
-  integrity sha512-BGIjcfel1hURvX4hM4iVruWecWMntRzh1UuPtV0uOYnXLuETp5lfpqBB6KzFoERnEZoCyX6Tmo+tPFVwteIUGA==
+"@launchdarkly/js-server-sdk-common@2.10.0":
+  version "2.10.0"
+  resolved "https://registry.yarnpkg.com/@launchdarkly/js-server-sdk-common/-/js-server-sdk-common-2.10.0.tgz#5bb0de97d86d66ffb0a92018bab7def289af1b46"
+  integrity sha512-zbqpmEFQW/ZElZnRYX6N4gMZMpviE0F75/IyxcifLAFsjGNouxllpOOPbdtrLiJnJ0ixzt5vbtnem4tbhlYNOw==
   dependencies:
     "@launchdarkly/js-sdk-common" "2.12.0"
     semver "7.5.4"
 
-"@launchdarkly/node-server-sdk@^9.7.1":
-  version "9.7.1"
-  resolved "https://registry.yarnpkg.com/@launchdarkly/node-server-sdk/-/node-server-sdk-9.7.1.tgz#bb228e5f8c4c7ca52579f909e4150b9a749b04a9"
-  integrity sha512-razZ/ine5hfHiS7ZNfM1r/G7GNDQ+wHV0pRN2A0Yk5spZTmT/ecu67e+aXu/KAfEQyL0V4ofEkXJpeGl7TYJ5Q==
+"@launchdarkly/node-server-sdk@^9.7.2":
+  version "9.7.2"
+  resolved "https://registry.yarnpkg.com/@launchdarkly/node-server-sdk/-/node-server-sdk-9.7.2.tgz#23929639f4b09da1f4c5bb77ca858d32c56505a4"
+  integrity sha512-gcRarEh0yQrlwbWDORwbfTk19M/FtZje60EIo/c4298D/sqJ906MYq0J2MmyklEuIdQx/V4qPK+ss9LCCLpm/Q==
   dependencies:
-    "@launchdarkly/js-server-sdk-common" "2.9.1"
+    "@launchdarkly/js-server-sdk-common" "2.10.0"
     https-proxy-agent "^5.0.1"
     launchdarkly-eventsource "2.0.3"
 
@@ -9105,12 +9113,12 @@
     require-from-string "^2.0.2"
     uri-js-replace "^1.0.1"
 
-"@redocly/cli@^1.25.11":
-  version "1.25.11"
-  resolved "https://registry.yarnpkg.com/@redocly/cli/-/cli-1.25.11.tgz#8ec17a6535aebfd166e8cab8ffcc9d768af1b014"
-  integrity sha512-dttBsmLnnbTlJCTa+s7Sy+qtXDq692n7Ru3nUUIHp9XdCbhXIHWhpc8uAl+GmR4MGbVe8ohATl3J+zX3aFy82A==
+"@redocly/cli@^1.25.13":
+  version "1.25.14"
+  resolved "https://registry.yarnpkg.com/@redocly/cli/-/cli-1.25.14.tgz#05810916bac2193137020ffbfa0bd766caca2258"
+  integrity sha512-HRDOoN3YpFe4+2rWrL/uTqRUDqqyrRtj1MVHFJ0heKTfBLOFEEfXXUYExw7R6yoiY3+GnptR96wePeFpH1gheg==
   dependencies:
-    "@redocly/openapi-core" "1.25.11"
+    "@redocly/openapi-core" "1.25.14"
     abort-controller "^3.0.0"
     chokidar "^3.5.1"
     colorette "^1.2.0"
@@ -9135,10 +9143,10 @@
   resolved "https://registry.yarnpkg.com/@redocly/config/-/config-0.16.0.tgz#4b7700a5cb6e04bc6d6fdb94b871c9e260a1fba6"
   integrity sha512-t9jnODbUcuANRSl/K4L9nb12V+U5acIHnVSl26NWrtSdDZVtoqUXk2yGFPZzohYf62cCfEQUT8ouJ3bhPfpnJg==
 
-"@redocly/openapi-core@1.25.11", "@redocly/openapi-core@^1.4.0":
-  version "1.25.11"
-  resolved "https://registry.yarnpkg.com/@redocly/openapi-core/-/openapi-core-1.25.11.tgz#93f168284986da6809363b001e9aa7c2104c2fc0"
-  integrity sha512-bH+a8izQz4fnKROKoX3bEU8sQ9rjvEIZOqU6qTmxlhOJ0NsKa5e+LmU18SV0oFeg5YhWQhhEDihXkvKJ1wMMNQ==
+"@redocly/openapi-core@1.25.14", "@redocly/openapi-core@^1.4.0":
+  version "1.25.14"
+  resolved "https://registry.yarnpkg.com/@redocly/openapi-core/-/openapi-core-1.25.14.tgz#2c0c33e0226923ed428e8d43f37f80d48b26c8d1"
+  integrity sha512-B9ewI0KVC1yqyeoQzErVnV4kdnxaYfwRMctxk/YwJxZZc/nVZ3VOVE+r2kXIFaGbUgc4ZHFn+aE2qvzCRXTXHw==
   dependencies:
     "@redocly/ajv" "^8.11.2"
     "@redocly/config" "^0.16.0"
