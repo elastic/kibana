@@ -43,7 +43,7 @@
           "OpenAPIV3",
           ".Document<{}>"
         ],
-        "path": "packages/kbn-router-to-openapispec/src/generate_oas.ts",
+        "path": "src/platform/packages/shared/kbn-router-to-openapispec/src/generate_oas.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -54,7 +54,7 @@
             "tags": [],
             "label": "appRouters",
             "description": [],
-            "path": "packages/kbn-router-to-openapispec/src/generate_oas.ts",
+            "path": "src/platform/packages/shared/kbn-router-to-openapispec/src/generate_oas.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -77,7 +77,7 @@
                   },
                   ">[]"
                 ],
-                "path": "packages/kbn-router-to-openapispec/src/generate_oas.ts",
+                "path": "src/platform/packages/shared/kbn-router-to-openapispec/src/generate_oas.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -98,7 +98,7 @@
                   },
                   "[]"
                 ],
-                "path": "packages/kbn-router-to-openapispec/src/generate_oas.ts",
+                "path": "src/platform/packages/shared/kbn-router-to-openapispec/src/generate_oas.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -114,7 +114,7 @@
             "signature": [
               "GenerateOpenApiDocumentOptions"
             ],
-            "path": "packages/kbn-router-to-openapispec/src/generate_oas.ts",
+            "path": "src/platform/packages/shared/kbn-router-to-openapispec/src/generate_oas.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -132,7 +132,7 @@
         "tags": [],
         "label": "GenerateOpenApiDocumentOptionsFilters",
         "description": [],
-        "path": "packages/kbn-router-to-openapispec/src/generate_oas.ts",
+        "path": "src/platform/packages/shared/kbn-router-to-openapispec/src/generate_oas.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -146,7 +146,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "packages/kbn-router-to-openapispec/src/generate_oas.ts",
+            "path": "src/platform/packages/shared/kbn-router-to-openapispec/src/generate_oas.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -160,7 +160,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "packages/kbn-router-to-openapispec/src/generate_oas.ts",
+            "path": "src/platform/packages/shared/kbn-router-to-openapispec/src/generate_oas.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -174,7 +174,7 @@
             "signature": [
               "\"internal\" | \"public\" | undefined"
             ],
-            "path": "packages/kbn-router-to-openapispec/src/generate_oas.ts",
+            "path": "src/platform/packages/shared/kbn-router-to-openapispec/src/generate_oas.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -188,7 +188,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-router-to-openapispec/src/generate_oas.ts",
+            "path": "src/platform/packages/shared/kbn-router-to-openapispec/src/generate_oas.ts",
             "deprecated": false,
             "trackAdoption": false
           }

@@ -10821,7 +10821,7 @@
               },
               {
                 "plugin": "savedObjectsManagement",
-                "path": "src/plugins/saved_objects_management/server/services/management.test.ts"
+                "path": "src/platform/plugins/shared/saved_objects_management/server/services/management.test.ts"
               },
               {
                 "plugin": "share",

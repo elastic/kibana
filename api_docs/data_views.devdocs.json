@@ -13992,11 +13992,11 @@
               },
               {
                 "plugin": "savedObjectsManagement",
-                "path": "src/plugins/saved_objects_management/public/management_section/objects_table/components/flyout.tsx"
+                "path": "src/platform/plugins/shared/saved_objects_management/public/management_section/objects_table/components/flyout.tsx"
               },
               {
                 "plugin": "savedObjectsManagement",
-                "path": "src/plugins/saved_objects_management/public/management_section/objects_table/components/flyout.tsx"
+                "path": "src/platform/plugins/shared/saved_objects_management/public/management_section/objects_table/components/flyout.tsx"
               },
               {
                 "plugin": "unifiedSearch",

@@ -3723,7 +3723,7 @@
               },
               {
                 "plugin": "usageCollection",
-                "path": "src/plugins/usage_collection/server/routes/stats/stats.ts"
+                "path": "src/platform/plugins/shared/usage_collection/server/routes/stats/stats.ts"
               },
               {
                 "plugin": "@kbn/content-management-favorites-server",
@@ -3743,11 +3743,11 @@
               },
               {
                 "plugin": "licensing",
-                "path": "x-pack/plugins/licensing/server/routes/info.ts"
+                "path": "x-pack/platform/plugins/shared/licensing/server/routes/info.ts"
               },
               {
                 "plugin": "licensing",
-                "path": "x-pack/plugins/licensing/server/routes/feature_usage.ts"
+                "path": "x-pack/platform/plugins/shared/licensing/server/routes/feature_usage.ts"
               },
               {
                 "plugin": "@kbn/content-management-content-insights-server",
@@ -3755,7 +3755,7 @@
               },
               {
                 "plugin": "features",
-                "path": "x-pack/plugins/features/server/routes/index.ts"
+                "path": "x-pack/platform/plugins/shared/features/server/routes/index.ts"
               },
               {
                 "plugin": "customIntegrations",
@@ -5063,11 +5063,11 @@
               },
               {
                 "plugin": "ftrApis",
-                "path": "src/plugins/ftr_apis/server/routes/kbn_client_so/find.ts"
+                "path": "src/platform/plugins/private/ftr_apis/server/routes/kbn_client_so/find.ts"
               },
               {
                 "plugin": "ftrApis",
-                "path": "src/plugins/ftr_apis/server/routes/kbn_client_so/get.ts"
+                "path": "src/platform/plugins/private/ftr_apis/server/routes/kbn_client_so/get.ts"
               },
               {
                 "plugin": "interactiveSetup",
@@ -5075,15 +5075,15 @@
               },
               {
                 "plugin": "savedObjectsManagement",
-                "path": "src/plugins/saved_objects_management/server/routes/find.ts"
+                "path": "src/platform/plugins/shared/saved_objects_management/server/routes/find.ts"
               },
               {
                 "plugin": "savedObjectsManagement",
-                "path": "src/plugins/saved_objects_management/server/routes/relationships.ts"
+                "path": "src/platform/plugins/shared/saved_objects_management/server/routes/relationships.ts"
               },
               {
                 "plugin": "savedObjectsManagement",
-                "path": "src/plugins/saved_objects_management/server/routes/get_allowed_types.ts"
+                "path": "src/platform/plugins/shared/saved_objects_management/server/routes/get_allowed_types.ts"
               },
               {
                 "plugin": "visTypeTimelion",
@@ -5307,7 +5307,7 @@
               },
               {
                 "plugin": "features",
-                "path": "x-pack/plugins/features/server/routes/index.test.ts"
+                "path": "x-pack/platform/plugins/shared/features/server/routes/index.test.ts"
               },
               {
                 "plugin": "globalSearch",
@@ -5907,19 +5907,19 @@
               },
               {
                 "plugin": "savedObjectsManagement",
-                "path": "src/plugins/saved_objects_management/server/routes/index.test.ts"
+                "path": "src/platform/plugins/shared/saved_objects_management/server/routes/index.test.ts"
               },
               {
                 "plugin": "savedObjectsManagement",
-                "path": "src/plugins/saved_objects_management/server/routes/index.test.ts"
+                "path": "src/platform/plugins/shared/saved_objects_management/server/routes/index.test.ts"
               },
               {
                 "plugin": "savedObjectsManagement",
-                "path": "src/plugins/saved_objects_management/server/routes/index.test.ts"
+                "path": "src/platform/plugins/shared/saved_objects_management/server/routes/index.test.ts"
               },
               {
                 "plugin": "savedObjectsManagement",
-                "path": "src/plugins/saved_objects_management/server/routes/index.test.ts"
+                "path": "src/platform/plugins/shared/saved_objects_management/server/routes/index.test.ts"
               },
               {
                 "plugin": "@kbn/core-deprecations-server-internal",
@@ -6401,7 +6401,7 @@
               },
               {
                 "plugin": "usageCollection",
-                "path": "src/plugins/usage_collection/server/routes/ui_counters.ts"
+                "path": "src/platform/plugins/shared/usage_collection/server/routes/ui_counters.ts"
               },
               {
                 "plugin": "@kbn/content-management-favorites-server",
@@ -6417,11 +6417,11 @@
               },
               {
                 "plugin": "licensing",
-                "path": "x-pack/plugins/licensing/server/routes/internal/notify_feature_usage.ts"
+                "path": "x-pack/platform/plugins/shared/licensing/server/routes/internal/notify_feature_usage.ts"
               },
               {
                 "plugin": "licensing",
-                "path": "x-pack/plugins/licensing/server/routes/internal/register_feature.ts"
+                "path": "x-pack/platform/plugins/shared/licensing/server/routes/internal/register_feature.ts"
               },
               {
                 "plugin": "@kbn/content-management-content-insights-server",
@@ -7617,15 +7617,15 @@
               },
               {
                 "plugin": "ftrApis",
-                "path": "src/plugins/ftr_apis/server/routes/kbn_client_so/bulk_delete.ts"
+                "path": "src/platform/plugins/private/ftr_apis/server/routes/kbn_client_so/bulk_delete.ts"
               },
               {
                 "plugin": "ftrApis",
-                "path": "src/plugins/ftr_apis/server/routes/kbn_client_so/create.ts"
+                "path": "src/platform/plugins/private/ftr_apis/server/routes/kbn_client_so/create.ts"
               },
               {
                 "plugin": "ftrApis",
-                "path": "src/plugins/ftr_apis/server/routes/kbn_client_so/clean.ts"
+                "path": "src/platform/plugins/private/ftr_apis/server/routes/kbn_client_so/clean.ts"
               },
               {
                 "plugin": "interactiveSetup",
@@ -7645,15 +7645,15 @@
               },
               {
                 "plugin": "savedObjectsManagement",
-                "path": "src/plugins/saved_objects_management/server/routes/bulk_delete.ts"
+                "path": "src/platform/plugins/shared/saved_objects_management/server/routes/bulk_delete.ts"
               },
               {
                 "plugin": "savedObjectsManagement",
-                "path": "src/plugins/saved_objects_management/server/routes/bulk_get.ts"
+                "path": "src/platform/plugins/shared/saved_objects_management/server/routes/bulk_get.ts"
               },
               {
                 "plugin": "savedObjectsManagement",
-                "path": "src/plugins/saved_objects_management/server/routes/scroll_count.ts"
+                "path": "src/platform/plugins/shared/saved_objects_management/server/routes/scroll_count.ts"
               },
               {
                 "plugin": "visTypeTimelion",
@@ -8449,19 +8449,19 @@
               },
               {
                 "plugin": "savedObjectsManagement",
-                "path": "src/plugins/saved_objects_management/server/routes/index.test.ts"
+                "path": "src/platform/plugins/shared/saved_objects_management/server/routes/index.test.ts"
               },
               {
                 "plugin": "savedObjectsManagement",
-                "path": "src/plugins/saved_objects_management/server/routes/index.test.ts"
+                "path": "src/platform/plugins/shared/saved_objects_management/server/routes/index.test.ts"
               },
               {
                 "plugin": "savedObjectsManagement",
-                "path": "src/plugins/saved_objects_management/server/routes/index.test.ts"
+                "path": "src/platform/plugins/shared/saved_objects_management/server/routes/index.test.ts"
               },
               {
                 "plugin": "savedObjectsManagement",
-                "path": "src/plugins/saved_objects_management/server/routes/index.test.ts"
+                "path": "src/platform/plugins/shared/saved_objects_management/server/routes/index.test.ts"
               },
               {
                 "plugin": "@kbn/core-capabilities-server-internal",
@@ -9123,7 +9123,7 @@
               },
               {
                 "plugin": "ftrApis",
-                "path": "src/plugins/ftr_apis/server/routes/kbn_client_so/update.ts"
+                "path": "src/platform/plugins/private/ftr_apis/server/routes/kbn_client_so/update.ts"
               },
               {
                 "plugin": "@kbn/core-http-router-server-internal",
@@ -10027,7 +10027,7 @@
               },
               {
                 "plugin": "ftrApis",
-                "path": "src/plugins/ftr_apis/server/routes/kbn_client_so/delete.ts"
+                "path": "src/platform/plugins/private/ftr_apis/server/routes/kbn_client_so/delete.ts"
               },
               {
                 "plugin": "@kbn/core-http-router-server-internal",
@@ -15251,11 +15251,11 @@
               },
               {
                 "plugin": "cloud",
-                "path": "x-pack/plugins/cloud/server/routes/elasticsearch_route.ts"
+                "path": "x-pack/platform/plugins/shared/cloud/server/routes/elasticsearch_route.ts"
               },
               {
                 "plugin": "cloud",
-                "path": "x-pack/plugins/cloud/server/routes/get_cloud_data_route.ts"
+                "path": "x-pack/platform/plugins/shared/cloud/server/routes/get_cloud_data_route.ts"
               },
               {
                 "plugin": "dataViews",
@@ -15387,15 +15387,15 @@
               },
               {
                 "plugin": "telemetry",
-                "path": "src/plugins/telemetry/server/routes/telemetry_config.ts"
+                "path": "src/platform/plugins/shared/telemetry/server/routes/telemetry_config.ts"
               },
               {
                 "plugin": "telemetry",
-                "path": "src/plugins/telemetry/server/routes/telemetry_config.ts"
+                "path": "src/platform/plugins/shared/telemetry/server/routes/telemetry_config.ts"
               },
               {
                 "plugin": "telemetry",
-                "path": "src/plugins/telemetry/server/routes/telemetry_last_reported.ts"
+                "path": "src/platform/plugins/shared/telemetry/server/routes/telemetry_last_reported.ts"
               },
               {
                 "plugin": "fieldsMetadata",
@@ -16498,11 +16498,11 @@
               },
               {
                 "plugin": "telemetry",
-                "path": "src/plugins/telemetry/server/routes/telemetry_user_has_seen_notice.ts"
+                "path": "src/platform/plugins/shared/telemetry/server/routes/telemetry_user_has_seen_notice.ts"
               },
               {
                 "plugin": "telemetry",
-                "path": "src/plugins/telemetry/server/routes/telemetry_last_reported.ts"
+                "path": "src/platform/plugins/shared/telemetry/server/routes/telemetry_last_reported.ts"
               },
               {
                 "plugin": "fleet",
@@ -16773,7 +16773,7 @@
             "references": [
               {
                 "plugin": "cloud",
-                "path": "x-pack/plugins/cloud/server/routes/set_cloud_data_route.ts"
+                "path": "x-pack/platform/plugins/shared/cloud/server/routes/set_cloud_data_route.ts"
               },
               {
                 "plugin": "dataViews",
@@ -16909,15 +16909,15 @@
               },
               {
                 "plugin": "telemetry",
-                "path": "src/plugins/telemetry/server/routes/telemetry_opt_in_stats.ts"
+                "path": "src/platform/plugins/shared/telemetry/server/routes/telemetry_opt_in_stats.ts"
               },
               {
                 "plugin": "telemetry",
-                "path": "src/plugins/telemetry/server/routes/telemetry_opt_in.ts"
+                "path": "src/platform/plugins/shared/telemetry/server/routes/telemetry_opt_in.ts"
               },
               {
                 "plugin": "telemetry",
-                "path": "src/plugins/telemetry/server/routes/telemetry_usage_stats.ts"
+                "path": "src/platform/plugins/shared/telemetry/server/routes/telemetry_usage_stats.ts"
               },
               {
                 "plugin": "fleet",
@@ -17777,19 +17777,19 @@
               },
               {
                 "plugin": "telemetry",
-                "path": "src/plugins/telemetry/server/routes/telemetry_usage_stats.test.ts"
+                "path": "src/platform/plugins/shared/telemetry/server/routes/telemetry_usage_stats.test.ts"
               },
               {
                 "plugin": "telemetry",
-                "path": "src/plugins/telemetry/server/routes/telemetry_usage_stats.test.ts"
+                "path": "src/platform/plugins/shared/telemetry/server/routes/telemetry_usage_stats.test.ts"
               },
               {
                 "plugin": "telemetry",
-                "path": "src/plugins/telemetry/server/routes/telemetry_usage_stats.test.ts"
+                "path": "src/platform/plugins/shared/telemetry/server/routes/telemetry_usage_stats.test.ts"
               },
               {
                 "plugin": "telemetry",
-                "path": "src/plugins/telemetry/server/routes/telemetry_usage_stats.test.ts"
+                "path": "src/platform/plugins/shared/telemetry/server/routes/telemetry_usage_stats.test.ts"
               },
               {
                 "plugin": "@kbn/core-http-router-server-internal",
@@ -17837,7 +17837,7 @@
               },
               {
                 "plugin": "cloud",
-                "path": "x-pack/plugins/cloud/server/routes/set_cloud_data_route.test.ts"
+                "path": "x-pack/platform/plugins/shared/cloud/server/routes/set_cloud_data_route.test.ts"
               },
               {
                 "plugin": "ecsDataQualityDashboard",

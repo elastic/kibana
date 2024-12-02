@@ -61,6 +61,7 @@ const IGNORE_PATTERNS = [
 
   // ignore packages with "babel" in their names
   /[\/\\]packages[\/\\]([^\/\\]+-)?babel(-[^\/\\]+)?[\/\\]/,
+  /[\/\\]packages[\/\\](private|shared)[\/\\]([^\/\\]+-)?babel(-[^\/\\]+)?[\/\\]/,
 
   // ignore paths matching `/canvas/canvas_plugin/`
   /[\/\\]canvas[\/\\]canvas_plugin[\/\\]/,

@@ -3940,7 +3940,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/analytics-collection-utils@link:packages/analytics/utils/analytics_collection_utils":
+"@kbn/analytics-collection-utils@link:src/platform/packages/private/analytics/utils/analytics_collection_utils":
   version "0.0.0"
   uid ""
 
@@ -3952,11 +3952,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/analytics@link:packages/kbn-analytics":
+"@kbn/analytics@link:src/platform/packages/shared/kbn-analytics":
   version "0.0.0"
   uid ""
 
-"@kbn/apm-config-loader@link:packages/kbn-apm-config-loader":
+"@kbn/apm-config-loader@link:src/platform/packages/private/kbn-apm-config-loader":
   version "0.0.0"
   uid ""
 
@@ -4120,7 +4120,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/cloud-chat-plugin@link:x-pack/plugins/cloud_integrations/cloud_chat":
+"@kbn/cloud-chat-plugin@link:x-pack/platform/plugins/private/cloud_integrations/cloud_chat":
   version "0.0.0"
   uid ""
 
@@ -4132,11 +4132,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/cloud-experiments-plugin@link:x-pack/plugins/cloud_integrations/cloud_experiments":
+"@kbn/cloud-experiments-plugin@link:x-pack/platform/plugins/shared/cloud_integrations/cloud_experiments":
   version "0.0.0"
   uid ""
 
-"@kbn/cloud-full-story-plugin@link:x-pack/plugins/cloud_integrations/cloud_full_story":
+"@kbn/cloud-full-story-plugin@link:x-pack/platform/plugins/private/cloud_integrations/cloud_full_story":
   version "0.0.0"
   uid ""
 
@@ -4144,11 +4144,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/cloud-links-plugin@link:x-pack/plugins/cloud_integrations/cloud_links":
+"@kbn/cloud-links-plugin@link:x-pack/platform/plugins/private/cloud_integrations/cloud_links":
   version "0.0.0"
   uid ""
 
-"@kbn/cloud-plugin@link:x-pack/plugins/cloud":
+"@kbn/cloud-plugin@link:x-pack/platform/plugins/shared/cloud":
   version "0.0.0"
   uid ""
 
@@ -4168,7 +4168,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/cloud@link:packages/cloud":
+"@kbn/cloud@link:src/platform/packages/shared/cloud":
   version "0.0.0"
   uid ""
 
@@ -4188,15 +4188,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/config-mocks@link:packages/kbn-config-mocks":
+"@kbn/config-mocks@link:src/platform/packages/private/kbn-config-mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/config-schema@link:packages/kbn-config-schema":
+"@kbn/config-schema@link:src/platform/packages/shared/kbn-config-schema":
   version "0.0.0"
   uid ""
 
-"@kbn/config@link:packages/kbn-config":
+"@kbn/config@link:src/platform/packages/shared/kbn-config":
   version "0.0.0"
   uid ""
 
@@ -5168,7 +5168,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/crypto-browser@link:packages/kbn-crypto-browser":
+"@kbn/crypto-browser@link:src/platform/packages/shared/kbn-crypto-browser":
   version "0.0.0"
   uid ""
 
@@ -5388,7 +5388,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ebt-tools@link:packages/kbn-ebt-tools":
+"@kbn/ebt-tools@link:src/platform/packages/shared/kbn-ebt-tools":
   version "0.0.0"
   uid ""
 
@@ -5476,7 +5476,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/es-errors@link:packages/kbn-es-errors":
+"@kbn/es-errors@link:src/platform/packages/shared/kbn-es-errors":
   version "0.0.0"
   uid ""
 
@@ -5484,7 +5484,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/es-types@link:packages/kbn-es-types":
+"@kbn/es-types@link:src/platform/packages/shared/kbn-es-types":
   version "0.0.0"
   uid ""
 
@@ -5680,7 +5680,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/features-plugin@link:x-pack/plugins/features":
+"@kbn/features-plugin@link:x-pack/platform/plugins/shared/features":
   version "0.0.0"
   uid ""
 
@@ -5748,7 +5748,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ftr-apis-plugin@link:src/plugins/ftr_apis":
+"@kbn/ftr-apis-plugin@link:src/platform/plugins/private/ftr_apis":
   version "0.0.0"
   uid ""
 
@@ -5840,7 +5840,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/hapi-mocks@link:packages/kbn-hapi-mocks":
+"@kbn/hapi-mocks@link:src/platform/packages/private/kbn-hapi-mocks":
   version "0.0.0"
   uid ""
 
@@ -5848,7 +5848,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/health-gateway-server@link:packages/kbn-health-gateway-server":
+"@kbn/health-gateway-server@link:src/platform/packages/private/kbn-health-gateway-server":
   version "0.0.0"
   uid ""
 
@@ -5872,11 +5872,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/i18n-react@link:packages/kbn-i18n-react":
+"@kbn/i18n-react@link:src/platform/packages/shared/kbn-i18n-react":
   version "0.0.0"
   uid ""
 
-"@kbn/i18n@link:packages/kbn-i18n":
+"@kbn/i18n@link:src/platform/packages/shared/kbn-i18n":
   version "0.0.0"
   uid ""
 
@@ -6052,7 +6052,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/kibana-usage-collection-plugin@link:src/plugins/kibana_usage_collection":
+"@kbn/kibana-usage-collection-plugin@link:src/platform/plugins/private/kibana_usage_collection":
   version "0.0.0"
   uid ""
 
@@ -6100,7 +6100,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/licensing-plugin@link:x-pack/plugins/licensing":
+"@kbn/licensing-plugin@link:x-pack/platform/plugins/shared/licensing":
   version "0.0.0"
   uid ""
 
@@ -6132,11 +6132,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/logging-mocks@link:packages/kbn-logging-mocks":
+"@kbn/logging-mocks@link:src/platform/packages/shared/kbn-logging-mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/logging@link:packages/kbn-logging":
+"@kbn/logging@link:src/platform/packages/shared/kbn-logging":
   version "0.0.0"
   uid ""
 
@@ -6408,7 +6408,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/newsfeed-plugin@link:src/plugins/newsfeed":
+"@kbn/newsfeed-plugin@link:src/platform/plugins/shared/newsfeed":
   version "0.0.0"
   uid ""
 
@@ -6788,7 +6788,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/router-to-openapispec@link:packages/kbn-router-to-openapispec":
+"@kbn/router-to-openapispec@link:src/platform/packages/shared/kbn-router-to-openapispec":
   version "0.0.0"
   uid ""
 
@@ -6856,7 +6856,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/saved-objects-management-plugin@link:src/plugins/saved_objects_management":
+"@kbn/saved-objects-management-plugin@link:src/platform/plugins/shared/saved_objects_management":
   version "0.0.0"
   uid ""
 
@@ -7156,7 +7156,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/server-http-tools@link:packages/kbn-server-http-tools":
+"@kbn/server-http-tools@link:src/platform/packages/shared/kbn-server-http-tools":
   version "0.0.0"
   uid ""
 
@@ -7504,7 +7504,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/std@link:packages/kbn-std":
+"@kbn/std@link:src/platform/packages/shared/kbn-std":
   version "0.0.0"
   uid ""
 
@@ -7548,19 +7548,19 @@
   version "0.0.0"
   uid ""
 
-"@kbn/telemetry-collection-manager-plugin@link:src/plugins/telemetry_collection_manager":
+"@kbn/telemetry-collection-manager-plugin@link:src/platform/plugins/shared/telemetry_collection_manager":
   version "0.0.0"
   uid ""
 
-"@kbn/telemetry-collection-xpack-plugin@link:x-pack/plugins/telemetry_collection_xpack":
+"@kbn/telemetry-collection-xpack-plugin@link:x-pack/platform/plugins/private/telemetry_collection_xpack":
   version "0.0.0"
   uid ""
 
-"@kbn/telemetry-management-section-plugin@link:src/plugins/telemetry_management_section":
+"@kbn/telemetry-management-section-plugin@link:src/platform/plugins/shared/telemetry_management_section":
   version "0.0.0"
   uid ""
 
-"@kbn/telemetry-plugin@link:src/plugins/telemetry":
+"@kbn/telemetry-plugin@link:src/platform/plugins/shared/telemetry":
   version "0.0.0"
   uid ""
 
@@ -7780,7 +7780,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/usage-collection-plugin@link:src/plugins/usage_collection":
+"@kbn/usage-collection-plugin@link:src/platform/plugins/shared/usage_collection":
   version "0.0.0"
   uid ""
 
@@ -7808,7 +7808,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/utility-types@link:packages/kbn-utility-types":
+"@kbn/utility-types@link:src/platform/packages/shared/kbn-utility-types":
   version "0.0.0"
   uid ""
 
@@ -7916,7 +7916,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/zod@link:packages/kbn-zod":
+"@kbn/zod@link:src/platform/packages/shared/kbn-zod":
   version "0.0.0"
   uid ""
 

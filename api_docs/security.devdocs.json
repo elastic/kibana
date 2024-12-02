@@ -1901,7 +1901,7 @@
               },
               {
                 "plugin": "telemetry",
-                "path": "src/plugins/telemetry/server/routes/telemetry_usage_stats.ts"
+                "path": "src/platform/plugins/shared/telemetry/server/routes/telemetry_usage_stats.ts"
               },
               {
                 "plugin": "fleet",

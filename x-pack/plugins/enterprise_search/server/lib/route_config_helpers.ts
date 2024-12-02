@@ -19,8 +19,8 @@ type Config<Method extends DestructiveRouteMethod> = RouteConfig<unknown, unknow
 // We disallow options to set 'body' because we override them.
 interface ConfigWithoutBodyOptions<P, Q, B, Method extends RouteMethod>
   extends RouteConfig<P, Q, B, Method> {
-  validate: Omit<RouteValidatorFullConfigRequest<P, Q, B>, 'body'>;
   options?: Omit<RouteConfigOptions<Method>, 'body'>;
+  validate: Omit<RouteValidatorFullConfigRequest<P, Q, B>, 'body'>;
 }
 
 /**
@@ -33,7 +33,7 @@ interface ConfigWithoutBodyOptions<P, Q, B, Method extends RouteMethod>
  * is enabled to to use `body: schema.buffer()`.
  *
  * @see https://github.com/elastic/kibana/blob/main/docs/development/core/server/kibana-plugin-core-server.routeconfigoptionsbody.md
- * @see https://github.com/elastic/kibana/blob/main/packages/kbn-config-schema/README.md#schemabuffer
+ * @see https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/kbn-config-schema/README.md#schemabuffer
  *
  * Example:
  *  router.put({
@@ -67,15 +67,15 @@ export const skipBodyValidation = <Method extends DestructiveRouteMethod>(
 ): Config<Method> => {
   return {
     ...config,
-    validate: {
-      ...config.validate,
-      body: schema.buffer(),
-    },
     options: {
       ...(config.options || {}),
       body: {
         parse: false,
       } as RouteConfigOptions<Method>['body'],
+    },
+    validate: {
+      ...config.validate,
+      body: schema.buffer(),
     },
   };
 };
