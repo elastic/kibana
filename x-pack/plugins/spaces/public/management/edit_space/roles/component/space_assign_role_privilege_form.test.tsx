@@ -6,7 +6,7 @@
  */
 
 import { EuiThemeProvider } from '@elastic/eui';
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import crypto from 'crypto';
 import React from 'react';
@@ -142,13 +142,22 @@ describe('PrivilegesRolesForm', () => {
     jest.clearAllMocks();
   });
 
+  it("would open the 'manage roles' link in a new tab", () => {
+    getRolesSpy.mockResolvedValue([]);
+    getAllKibanaPrivilegeSpy.mockResolvedValue(createRawKibanaPrivileges(kibanaFeatures));
+
+    renderPrivilegeRolesForm();
+
+    expect(screen.getByText('Manage roles')).toHaveAttribute('target', '_blank');
+  });
+
   it('does not display the privilege selection buttons or customization form when no role is selected', async () => {
     getRolesSpy.mockResolvedValue([]);
     getAllKibanaPrivilegeSpy.mockResolvedValue(createRawKibanaPrivileges(kibanaFeatures));
 
     renderPrivilegeRolesForm();
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     ['all', 'read', 'custom'].forEach((privilege) => {
       expect(screen.queryByTestId(`${privilege}-privilege-button`)).not.toBeInTheDocument();
@@ -165,9 +174,26 @@ describe('PrivilegesRolesForm', () => {
 
     renderPrivilegeRolesForm();
 
-    await waitFor(() => null);
+    await waitFor(() =>
+      expect(screen.getByTestId('space-assign-role-create-roles-privilege-button')).toBeDisabled()
+    );
+  });
 
-    expect(screen.getByTestId('space-assign-role-create-roles-privilege-button')).toBeDisabled();
+  it('makes a request to refetch available roles if page transitions back from a user interaction page visibility change', () => {
+    getRolesSpy.mockResolvedValue([]);
+    getAllKibanaPrivilegeSpy.mockResolvedValue(createRawKibanaPrivileges(kibanaFeatures));
+
+    renderPrivilegeRolesForm();
+
+    expect(getRolesSpy).toHaveBeenCalledTimes(1);
+
+    // trigger click on manage roles link, which is perquisite for page visibility handler to trigger role refetch
+    fireEvent.click(screen.getByText(/manage roles/i));
+
+    // trigger page visibility change
+    fireEvent(document, new Event('visibilitychange'));
+
+    expect(getRolesSpy).toHaveBeenCalledTimes(2);
   });
 
   it('renders with the assign roles button disabled when no base privileges or feature privileges are selected', async () => {
@@ -182,7 +208,7 @@ describe('PrivilegesRolesForm', () => {
       preSelectedRoles: roles,
     });
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(screen.getByTestId(`${FEATURE_PRIVILEGES_READ}-privilege-button`)).toHaveAttribute(
       'aria-pressed',
@@ -208,11 +234,11 @@ describe('PrivilegesRolesForm', () => {
       ],
     });
 
-    await waitFor(() => null);
-
-    expect(screen.getByTestId(`${FEATURE_PRIVILEGES_ALL}-privilege-button`)).toHaveAttribute(
-      'aria-pressed',
-      String(true)
+    await waitFor(() =>
+      expect(screen.getByTestId(`${FEATURE_PRIVILEGES_ALL}-privilege-button`)).toHaveAttribute(
+        'aria-pressed',
+        String(true)
+      )
     );
   });
 
@@ -230,7 +256,7 @@ describe('PrivilegesRolesForm', () => {
       preSelectedRoles: roles,
     });
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(screen.getByTestId(`${FEATURE_PRIVILEGES_READ}-privilege-button`)).toHaveAttribute(
       'aria-pressed',
@@ -264,9 +290,9 @@ describe('PrivilegesRolesForm', () => {
         preSelectedRoles: roles,
       });
 
-      await waitFor(() => null);
-
-      expect(screen.getByTestId('privilege-conflict-callout')).toBeInTheDocument();
+      await waitFor(() =>
+        expect(screen.getByTestId('privilege-conflict-callout')).toBeInTheDocument()
+      );
     });
 
     it('does not display the permission conflict message when roles with the same privilege levels are selected', async () => {
@@ -286,9 +312,9 @@ describe('PrivilegesRolesForm', () => {
         preSelectedRoles: roles,
       });
 
-      await waitFor(() => null);
-
-      expect(screen.queryByTestId('privilege-conflict-callout')).not.toBeInTheDocument();
+      await waitFor(() =>
+        expect(screen.queryByTestId('privilege-conflict-callout')).not.toBeInTheDocument()
+      );
     });
   });
 
@@ -322,7 +348,7 @@ describe('PrivilegesRolesForm', () => {
         preSelectedRoles: roles,
       });
 
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
 
       await userEvent.click(screen.getByTestId('custom-privilege-button'));
 

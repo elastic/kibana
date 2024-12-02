@@ -25,7 +25,6 @@
       "dashboard",
       "data",
       "dataViews",
-      "discover",
       "ecsDataQualityDashboard",
       "elasticAssistant",
       "embeddable",
@@ -60,6 +59,7 @@
       "charts",
       "entityManager",
       "inference",
+      "discoverShared",
       "productDocBase"
     ],
     "optionalPlugins": [

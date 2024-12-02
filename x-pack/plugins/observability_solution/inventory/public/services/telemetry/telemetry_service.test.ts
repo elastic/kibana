@@ -13,7 +13,7 @@ import {
   type EntityViewClickedParams,
   type EntityInventorySearchQuerySubmittedParams,
   TelemetryEventTypes,
-  type EntityInventoryEntityTypeFilteredParams,
+  EntityInventoryEntityTypeFilteredParams,
 } from './types';
 
 describe('TelemetryService', () => {
@@ -115,7 +115,6 @@ describe('TelemetryService', () => {
       const params: EntityInventorySearchQuerySubmittedParams = {
         kuery_fields: ['_index'],
         action: 'submit',
-        entity_types: ['container'],
       };
 
       telemetry.reportEntityInventorySearchQuerySubmitted(params);
@@ -123,26 +122,6 @@ describe('TelemetryService', () => {
       expect(setupParams.analytics.reportEvent).toHaveBeenCalledTimes(1);
       expect(setupParams.analytics.reportEvent).toHaveBeenCalledWith(
         TelemetryEventTypes.ENTITY_INVENTORY_SEARCH_QUERY_SUBMITTED,
-        params
-      );
-    });
-  });
-
-  describe('#reportEntityInventoryEntityTypeFiltered', () => {
-    it('should report entity type filtered with properties', async () => {
-      const setupParams = getSetupParams();
-      service.setup(setupParams);
-      const telemetry = service.start();
-      const params: EntityInventoryEntityTypeFilteredParams = {
-        kuery_fields: ['_index'],
-        entity_types: ['container'],
-      };
-
-      telemetry.reportEntityInventoryEntityTypeFiltered(params);
-
-      expect(setupParams.analytics.reportEvent).toHaveBeenCalledTimes(1);
-      expect(setupParams.analytics.reportEvent).toHaveBeenCalledWith(
-        TelemetryEventTypes.ENTITY_INVENTORY_ENTITY_TYPE_FILTERED,
         params
       );
     });
@@ -163,6 +142,26 @@ describe('TelemetryService', () => {
       expect(setupParams.analytics.reportEvent).toHaveBeenCalledTimes(1);
       expect(setupParams.analytics.reportEvent).toHaveBeenCalledWith(
         TelemetryEventTypes.ENTITY_VIEW_CLICKED,
+        params
+      );
+    });
+  });
+
+  describe('#reportEntityInventoryEntityTypeFiltered', () => {
+    it('should report entity type filtered with properties', async () => {
+      const setupParams = getSetupParams();
+      service.setup(setupParams);
+      const telemetry = service.start();
+      const params: EntityInventoryEntityTypeFilteredParams = {
+        include_entity_types: ['container'],
+        exclude_entity_types: ['service'],
+      };
+
+      telemetry.reportEntityInventoryEntityTypeFiltered(params);
+
+      expect(setupParams.analytics.reportEvent).toHaveBeenCalledTimes(1);
+      expect(setupParams.analytics.reportEvent).toHaveBeenCalledWith(
+        TelemetryEventTypes.ENTITY_INVENTORY_ENTITY_TYPE_FILTERED,
         params
       );
     });

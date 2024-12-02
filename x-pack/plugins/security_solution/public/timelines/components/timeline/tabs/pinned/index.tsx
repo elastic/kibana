@@ -6,13 +6,14 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import React, { useMemo, useCallback, memo } from 'react';
+import React, { useMemo, useCallback, memo, useState, useEffect } from 'react';
 import type { ConnectedProps } from 'react-redux';
 import { connect } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 import type { EuiDataGridControlColumn } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
+import { useFetchNotes } from '../../../../../notes/hooks/use_fetch_notes';
 import {
   DocumentDetailsLeftPanelKey,
   DocumentDetailsRightPanelKey,
@@ -36,6 +37,7 @@ import { useTimelineControlColumn } from '../shared/use_timeline_control_columns
 import { LeftPanelNotesTab } from '../../../../../flyout/document_details/left';
 import { useNotesInFlyout } from '../../properties/use_notes_in_flyout';
 import { NotesFlyout } from '../../properties/notes_flyout';
+import { NotesEventTypes, DocumentEventTypes } from '../../../../../common/lib/telemetry';
 import { defaultUdtHeaders } from '../../body/column_headers/default_headers';
 
 interface PinnedFilter {
@@ -67,6 +69,14 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
   sort,
   eventIdToNoteIds,
 }) => {
+  /*
+   * Needs to be maintained for each table in each tab independently
+   * and consequently it cannot be the part of common redux state
+   * of the timeline.
+   *
+   */
+  const [pageIndex, setPageIndex] = useState(0);
+
   const { telemetry } = useKibana().services;
   const { dataViewId, sourcererDataView, selectedPatterns } = useSourcererDataView(
     SourcererScopeName.timeline
@@ -129,7 +139,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
   );
   const { augmentedColumnHeaders } = useTimelineColumns(columns);
 
-  const [queryLoadingState, { events, totalCount, pageInfo, loadPage, refreshedAt, refetch }] =
+  const [queryLoadingState, { events, totalCount, loadPage, refreshedAt, refetch }] =
     useTimelineEvents({
       endDate: '',
       id: `pinned-${timelineId}`,
@@ -144,6 +154,26 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
       sort: timelineQuerySortField,
       timerangeKind: undefined,
     });
+
+  const { onLoad: loadNotesOnEventsLoad } = useFetchNotes();
+
+  useEffect(() => {
+    // This useEffect loads the notes only for the events on the current
+    // page.
+    const eventsOnCurrentPage = events.slice(
+      itemsPerPage * pageIndex,
+      itemsPerPage * (pageIndex + 1)
+    );
+
+    loadNotesOnEventsLoad(eventsOnCurrentPage);
+  }, [events, pageIndex, itemsPerPage, loadNotesOnEventsLoad]);
+
+  /**
+   *
+   * Triggers on Datagrid page change
+   *
+   */
+  const onUpdatePageIndex = useCallback((newPageIndex: number) => setPageIndex(newPageIndex), []);
 
   const { openFlyout } = useExpandableFlyoutApi();
   const securitySolutionNotesDisabled = useIsExperimentalFeatureEnabled(
@@ -190,10 +220,10 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
             },
           },
         });
-        telemetry.reportOpenNoteInExpandableFlyoutClicked({
+        telemetry.reportEvent(NotesEventTypes.OpenNoteInExpandableFlyoutClicked, {
           location: timelineId,
         });
-        telemetry.reportDetailsFlyoutOpened({
+        telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
           location: timelineId,
           panel: 'left',
         });
@@ -256,13 +286,13 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
         refetch={refetch}
         dataLoadingState={queryLoadingState}
         totalCount={totalCount}
-        onChangePage={loadPage}
+        onFetchMoreRecords={loadPage}
         activeTab={TimelineTabs.pinned}
         updatedAt={refreshedAt}
         isTextBasedQuery={false}
-        pageInfo={pageInfo}
         leadingControlColumns={leadingControlColumns as EuiDataGridControlColumn[]}
         trailingControlColumns={rowDetailColumn}
+        onUpdatePageIndex={onUpdatePageIndex}
       />
     </>
   );

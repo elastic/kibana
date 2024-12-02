@@ -101,7 +101,7 @@ const baseNavItems = [
     items: [
       {
         'data-test-subj': 'searchSideNav-InferenceEndpoints',
-        href: '/app/enterprise_search/relevance/inference_endpoints',
+        href: '/app/elasticsearch/relevance/inference_endpoints',
         id: 'inference_endpoints',
         items: undefined,
         name: 'Inference Endpoints',
@@ -205,7 +205,7 @@ const mockNavLinks = [
   {
     id: 'searchInferenceEndpoints:inferenceEndpoints',
     title: 'Inference Endpoints',
-    url: '/app/enterprise_search/relevance/inference_endpoints',
+    url: '/app/elasticsearch/relevance/inference_endpoints',
   },
   {
     id: 'appSearch:engines',

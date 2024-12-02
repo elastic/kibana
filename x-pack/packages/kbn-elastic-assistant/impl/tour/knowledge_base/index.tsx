@@ -28,10 +28,7 @@ const KnowledgeBaseTourComp: React.FC<{
   children?: EuiTourStepProps['children'];
   isKbSettingsPage?: boolean;
 }> = ({ children, isKbSettingsPage = false }) => {
-  const {
-    navigateToApp,
-    assistantFeatures: { assistantKnowledgeBaseByDefault: enableKnowledgeBaseByDefault },
-  } = useAssistantContext();
+  const { navigateToApp } = useAssistantContext();
 
   const [tourState, setTourState] = useLocalStorage<TourState>(
     NEW_FEATURES_TOUR_STORAGE_KEYS.KNOWLEDGE_BASE,
@@ -106,7 +103,7 @@ const KnowledgeBaseTourComp: React.FC<{
     return () => clearTimeout(timer);
   }, []);
 
-  if (!enableKnowledgeBaseByDefault || isTestAutomation || !tourState?.isTourActive) {
+  if (isTestAutomation || !tourState?.isTourActive) {
     return children ?? null;
   }
 

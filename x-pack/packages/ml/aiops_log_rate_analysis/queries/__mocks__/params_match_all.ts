@@ -14,6 +14,5 @@ export const paramsMock = {
   baselineMax: 20,
   deviationMin: 30,
   deviationMax: 40,
-  includeFrozen: false,
   searchQuery: '{ "match_all": {} }',
 };

@@ -896,7 +896,9 @@
         "type": "Class",
         "tags": [],
         "label": "EsqlQuery",
-        "description": [],
+        "description": [
+          "\nRepresents a parsed or programmatically created ES|QL query. Keeps track of\nthe AST, source code, and optionally lexer tokens."
+        ],
         "path": "packages/kbn-esql-ast/src/query/query.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2131,6 +2133,57 @@
                     "section": "def-common.ESQLColumn",
                     "text": "ESQLColumn"
                   }
+                ],
+                "path": "packages/kbn-esql-ast/src/walker/walker.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.Walker.walkInlineCast",
+            "type": "Function",
+            "tags": [],
+            "label": "walkInlineCast",
+            "description": [],
+            "signature": [
+              "(node: ",
+              "ESQLInlineCast",
+              "<",
+              {
+                "pluginId": "@kbn/esql-ast",
+                "scope": "common",
+                "docId": "kibKbnEsqlAstPluginApi",
+                "section": "def-common.ESQLAstItem",
+                "text": "ESQLAstItem"
+              },
+              ">) => void"
+            ],
+            "path": "packages/kbn-esql-ast/src/walker/walker.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/esql-ast",
+                "id": "def-common.Walker.walkInlineCast.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "node",
+                "description": [],
+                "signature": [
+                  "ESQLInlineCast",
+                  "<",
+                  {
+                    "pluginId": "@kbn/esql-ast",
+                    "scope": "common",
+                    "docId": "kibKbnEsqlAstPluginApi",
+                    "section": "def-common.ESQLAstItem",
+                    "text": "ESQLAstItem"
+                  },
+                  ">"
                 ],
                 "path": "packages/kbn-esql-ast/src/walker/walker.ts",
                 "deprecated": false,
@@ -18519,18 +18572,6 @@
               {
                 "plugin": "@kbn/esql-utils",
                 "path": "packages/kbn-esql-utils/src/utils/append_to_query.ts"
-              },
-              {
-                "plugin": "@kbn/securitysolution-utils",
-                "path": "packages/kbn-securitysolution-utils/src/esql/compute_if_esql_query_aggregating.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/detection_engine/rule_creation/logic/esql_validator.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/detection_engine/rule_creation/logic/esql_validator.test.ts"
               }
             ]
           },
@@ -19909,6 +19950,40 @@
           },
           {
             "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.LeafPrinter.identifier",
+            "type": "Function",
+            "tags": [],
+            "label": "identifier",
+            "description": [],
+            "signature": [
+              "(node: ",
+              "ESQLIdentifier",
+              ") => string"
+            ],
+            "path": "packages/kbn-esql-ast/src/pretty_print/leaf_printer.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/esql-ast",
+                "id": "def-common.LeafPrinter.identifier.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "node",
+                "description": [],
+                "signature": [
+                  "ESQLIdentifier"
+                ],
+                "path": "packages/kbn-esql-ast/src/pretty_print/leaf_printer.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
             "id": "def-common.LeafPrinter.column",
             "type": "Function",
             "tags": [],
@@ -20152,6 +20227,40 @@
                 "signature": [
                   "ESQLAstCommentMultiLine",
                   "[]"
+                ],
+                "path": "packages/kbn-esql-ast/src/pretty_print/leaf_printer.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.LeafPrinter.print",
+            "type": "Function",
+            "tags": [],
+            "label": "print",
+            "description": [],
+            "signature": [
+              "(node: ",
+              "ESQLProperNode",
+              ") => string"
+            ],
+            "path": "packages/kbn-esql-ast/src/pretty_print/leaf_printer.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/esql-ast",
+                "id": "def-common.LeafPrinter.print.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "node",
+                "description": [],
+                "signature": [
+                  "ESQLProperNode"
                 ],
                 "path": "packages/kbn-esql-ast/src/pretty_print/leaf_printer.ts",
                 "deprecated": false,

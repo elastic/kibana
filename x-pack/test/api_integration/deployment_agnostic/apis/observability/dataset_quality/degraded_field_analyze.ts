@@ -10,7 +10,7 @@ import { log, timerange } from '@kbn/apm-synthtrace-client';
 import { LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { SupertestWithRoleScopeType } from '../../../services';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
-import { createBackingIndexNameWithoutVersion, setDataStreamSettings } from './utils/es_utils';
+import { createBackingIndexNameWithoutVersion, setDataStreamSettings } from './utils';
 import { logsSynthMappings } from './custom_mappings/custom_synth_mappings';
 
 const MORE_THAN_1024_CHARS =

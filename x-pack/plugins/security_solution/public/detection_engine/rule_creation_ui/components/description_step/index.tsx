@@ -19,7 +19,7 @@ import type {
 } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { buildRelatedIntegrationsDescription } from '../../../../detections/components/rules/related_integrations/integrations_description';
 import { DEFAULT_TIMELINE_TITLE } from '../../../../timelines/components/timeline/translations';
-import type { EqlOptionsSelected } from '../../../../../common/search_strategy';
+import type { EqlOptions } from '../../../../../common/search_strategy';
 import { useKibana } from '../../../../common/lib/kibana';
 import type {
   AboutStepRiskScore,
@@ -65,6 +65,14 @@ import {
   isSuppressionRuleConfiguredWithGroupBy,
   isSuppressionRuleConfiguredWithDuration,
 } from '../../../../../common/detection_engine/utils';
+import {
+  ALERT_SUPPRESSION_DURATION_FIELD_NAME,
+  ALERT_SUPPRESSION_DURATION_TYPE_FIELD_NAME,
+  ALERT_SUPPRESSION_FIELDS_FIELD_NAME,
+  ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME,
+} from '../../../rule_creation/components/alert_suppression_edit';
+import { THRESHOLD_ALERT_SUPPRESSION_ENABLED } from '../../../rule_creation/components/threshold_alert_suppression_edit';
+import type { FieldValueQueryBar } from '../query_bar_field';
 
 const DescriptionListContainer = styled(EuiDescriptionList)`
   max-width: 600px;
@@ -199,11 +207,12 @@ export const getDescriptionItem = (
   indexPatterns?: DataViewBase
 ): ListItems[] => {
   if (field === 'queryBar') {
-    const filters = addFilterStateIfNotThere(get('queryBar.filters', data) ?? []);
-    const query = get('queryBar.query.query', data);
-    const savedId = get('queryBar.saved_id', data);
-    const savedQueryName = get('queryBar.title', data);
-    const ruleType: Type = get('ruleType', data);
+    const queryBar = get('queryBar', data) as FieldValueQueryBar;
+    const filters = addFilterStateIfNotThere(queryBar.filters ?? []);
+    const query = queryBar.query.query as string;
+    const savedId = queryBar.saved_id ?? '';
+    const savedQueryName = queryBar.title;
+    const ruleType: Type = get('ruleType', data) as Type;
     const queryLabel = getQueryLabel(ruleType);
     return buildQueryBarDescription({
       field,
@@ -217,7 +226,7 @@ export const getDescriptionItem = (
     });
   } else if (field === 'responseActions') {
     return [];
-  } else if (field === 'groupByFields') {
+  } else if (field === ALERT_SUPPRESSION_FIELDS_FIELD_NAME) {
     const ruleType: Type = get('ruleType', data);
 
     const ruleCanHaveGroupByFields = isSuppressionRuleConfiguredWithGroupBy(ruleType);
@@ -226,9 +235,9 @@ export const getDescriptionItem = (
     }
     const values: string[] = get(field, data);
     return buildAlertSuppressionDescription(label, values, ruleType);
-  } else if (field === 'groupByRadioSelection') {
+  } else if (field === ALERT_SUPPRESSION_DURATION_TYPE_FIELD_NAME) {
     return [];
-  } else if (field === 'groupByDuration') {
+  } else if (field === ALERT_SUPPRESSION_DURATION_FIELD_NAME) {
     const ruleType: Type = get('ruleType', data);
 
     const ruleCanHaveDuration = isSuppressionRuleConfiguredWithDuration(ruleType);
@@ -239,21 +248,21 @@ export const getDescriptionItem = (
     // threshold rule has suppression duration without grouping fields, but suppression should be explicitly enabled by user
     // query rule have suppression duration only if group by fields selected
     const showDuration = isThresholdRule(ruleType)
-      ? get('enableThresholdSuppression', data) === true
-      : get('groupByFields', data).length > 0;
+      ? get(THRESHOLD_ALERT_SUPPRESSION_ENABLED, data) === true
+      : get(ALERT_SUPPRESSION_FIELDS_FIELD_NAME, data).length > 0;
 
     if (showDuration) {
       const value: Duration = get(field, data);
       return buildAlertSuppressionWindowDescription(
         label,
         value,
-        get('groupByRadioSelection', data),
+        get(ALERT_SUPPRESSION_DURATION_TYPE_FIELD_NAME, data),
         ruleType
       );
     } else {
       return [];
     }
-  } else if (field === 'suppressionMissingFields') {
+  } else if (field === ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME) {
     const ruleType: Type = get('ruleType', data);
     const ruleCanHaveSuppressionMissingFields =
       isSuppressionRuleConfiguredWithMissingFields(ruleType);
@@ -261,14 +270,14 @@ export const getDescriptionItem = (
     if (!ruleCanHaveSuppressionMissingFields) {
       return [];
     }
-    if (get('groupByFields', data).length > 0) {
+    if (get(ALERT_SUPPRESSION_FIELDS_FIELD_NAME, data).length > 0) {
       const value = get(field, data);
       return buildAlertSuppressionMissingFieldsDescription(label, value, ruleType);
     } else {
       return [];
     }
   } else if (field === 'eqlOptions') {
-    const eqlOptions: EqlOptionsSelected = get(field, data);
+    const eqlOptions: EqlOptions = get(field, data);
     return buildEqlOptionsDescription(eqlOptions);
   } else if (field === 'threat') {
     const threats: Threats = get(field, data);

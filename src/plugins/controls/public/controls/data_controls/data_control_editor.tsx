@@ -15,7 +15,6 @@ import {
   EuiButtonEmpty,
   EuiButtonGroup,
   EuiCallOut,
-  EuiDescribedFormGroup,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -250,20 +249,8 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
     if (!CustomSettings) return;
 
     return (
-      <EuiDescribedFormGroup
-        ratio="third"
-        title={
-          <h2>
-            {DataControlEditorStrings.manageControl.controlTypeSettings.getFormGroupTitle(
-              controlFactory.getDisplayName()
-            )}
-          </h2>
-        }
-        description={DataControlEditorStrings.manageControl.controlTypeSettings.getFormGroupDescription(
-          controlFactory.getDisplayName()
-        )}
-        data-test-subj="control-editor-custom-settings"
-      >
+      <div data-test-subj="control-editor-custom-settings">
+        <EuiSpacer size="m" />
         <CustomSettings
           initialState={initialState}
           field={fieldRegistry[editorState.fieldName].field}
@@ -271,14 +258,14 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
           setControlEditorValid={setControlOptionsValid}
           controlGroupApi={controlGroupApi}
         />
-      </EuiDescribedFormGroup>
+      </div>
     );
   }, [fieldRegistry, controlFactory, initialState, editorState, controlGroupApi]);
 
   return (
     <>
       <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="m">
+        <EuiTitle size="s">
           <h2>
             {!controlId // if no ID, then we are creating a new control
               ? DataControlEditorStrings.manageControl.getFlyoutCreateTitle()
@@ -288,156 +275,144 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
       </EuiFlyoutHeader>
       <EuiFlyoutBody data-test-subj="control-editor-flyout">
         <EuiForm fullWidth>
-          <EuiDescribedFormGroup
-            ratio="third"
-            title={<h2>{DataControlEditorStrings.manageControl.dataSource.getFormGroupTitle()}</h2>}
-            description={DataControlEditorStrings.manageControl.dataSource.getFormGroupDescription()}
-          >
-            {!editorConfig?.hideDataViewSelector && (
-              <EuiFormRow
-                data-test-subj="control-editor-data-view-picker"
-                label={DataControlEditorStrings.manageControl.dataSource.getDataViewTitle()}
-              >
-                {dataViewListError ? (
-                  <EuiCallOut
-                    color="danger"
-                    iconType="error"
-                    title={DataControlEditorStrings.manageControl.dataSource.getDataViewListErrorTitle()}
-                  >
-                    <p>{dataViewListError.message}</p>
-                  </EuiCallOut>
-                ) : (
-                  <DataViewPicker
-                    dataViews={dataViewListItems}
-                    selectedDataViewId={editorState.dataViewId}
-                    onChangeDataViewId={(newDataViewId) => {
-                      setEditorState({ ...editorState, dataViewId: newDataViewId });
-                      setSelectedControlType(undefined);
-                    }}
-                    trigger={{
-                      label:
-                        selectedDataView?.getName() ??
-                        DataControlEditorStrings.manageControl.dataSource.getSelectDataViewMessage(),
-                    }}
-                    selectableProps={{ isLoading: dataViewListLoading }}
-                  />
-                )}
-              </EuiFormRow>
-            )}
-
-            <EuiFormRow label={DataControlEditorStrings.manageControl.dataSource.getFieldTitle()}>
-              {fieldListError ? (
+          {!editorConfig?.hideDataViewSelector && (
+            <EuiFormRow
+              data-test-subj="control-editor-data-view-picker"
+              label={DataControlEditorStrings.manageControl.dataSource.getDataViewTitle()}
+            >
+              {dataViewListError ? (
                 <EuiCallOut
                   color="danger"
                   iconType="error"
-                  title={DataControlEditorStrings.manageControl.dataSource.getFieldListErrorTitle()}
+                  title={DataControlEditorStrings.manageControl.dataSource.getDataViewListErrorTitle()}
                 >
-                  <p>{fieldListError.message}</p>
+                  <p>{dataViewListError.message}</p>
                 </EuiCallOut>
               ) : (
-                <FieldPicker
-                  filterPredicate={(field: DataViewField) => {
-                    const customPredicate = editorConfig?.fieldFilterPredicate?.(field) ?? true;
-                    return Boolean(fieldRegistry?.[field.name]) && customPredicate;
+                <DataViewPicker
+                  dataViews={dataViewListItems}
+                  selectedDataViewId={editorState.dataViewId}
+                  onChangeDataViewId={(newDataViewId) => {
+                    setEditorState({ ...editorState, dataViewId: newDataViewId });
+                    setSelectedControlType(undefined);
                   }}
-                  selectedFieldName={editorState.fieldName}
-                  dataView={selectedDataView}
-                  onSelectField={(field) => {
-                    setEditorState({ ...editorState, fieldName: field.name });
-
-                    /**
-                     * make sure that the new field is compatible with the selected control type and, if it's not,
-                     * reset the selected control type to the **first** compatible control type
-                     */
-                    const newCompatibleControlTypes =
-                      fieldRegistry?.[field.name]?.compatibleControlTypes ?? [];
-                    if (
-                      !selectedControlType ||
-                      !newCompatibleControlTypes.includes(selectedControlType!)
-                    ) {
-                      setSelectedControlType(newCompatibleControlTypes[0]);
-                    }
-
-                    /**
-                     * set the control title (i.e. the one set by the user) + default title (i.e. the field display name)
-                     */
-                    const newDefaultTitle = field.displayName ?? field.name;
-                    setDefaultPanelTitle(newDefaultTitle);
-                    const currentTitle = editorState.title;
-                    if (!currentTitle || currentTitle === newDefaultTitle) {
-                      setPanelTitle(newDefaultTitle);
-                    }
-
-                    setControlOptionsValid(true); // reset options state
+                  trigger={{
+                    label:
+                      selectedDataView?.getName() ??
+                      DataControlEditorStrings.manageControl.dataSource.getSelectDataViewMessage(),
                   }}
-                  selectableProps={{ isLoading: dataViewListLoading || dataViewLoading }}
+                  selectableProps={{ isLoading: dataViewListLoading }}
                 />
               )}
             </EuiFormRow>
+          )}
+
+          <EuiFormRow label={DataControlEditorStrings.manageControl.dataSource.getFieldTitle()}>
+            {fieldListError ? (
+              <EuiCallOut
+                color="danger"
+                iconType="error"
+                title={DataControlEditorStrings.manageControl.dataSource.getFieldListErrorTitle()}
+              >
+                <p>{fieldListError.message}</p>
+              </EuiCallOut>
+            ) : (
+              <FieldPicker
+                filterPredicate={(field: DataViewField) => {
+                  const customPredicate = editorConfig?.fieldFilterPredicate?.(field) ?? true;
+                  return Boolean(fieldRegistry?.[field.name]) && customPredicate;
+                }}
+                selectedFieldName={editorState.fieldName}
+                dataView={selectedDataView}
+                onSelectField={(field) => {
+                  setEditorState({ ...editorState, fieldName: field.name });
+
+                  /**
+                   * make sure that the new field is compatible with the selected control type and, if it's not,
+                   * reset the selected control type to the **first** compatible control type
+                   */
+                  const newCompatibleControlTypes =
+                    fieldRegistry?.[field.name]?.compatibleControlTypes ?? [];
+                  if (
+                    !selectedControlType ||
+                    !newCompatibleControlTypes.includes(selectedControlType!)
+                  ) {
+                    setSelectedControlType(newCompatibleControlTypes[0]);
+                  }
+
+                  /**
+                   * set the control title (i.e. the one set by the user) + default title (i.e. the field display name)
+                   */
+                  const newDefaultTitle = field.displayName ?? field.name;
+                  setDefaultPanelTitle(newDefaultTitle);
+                  const currentTitle = editorState.title;
+                  if (!currentTitle || currentTitle === newDefaultTitle) {
+                    setPanelTitle(newDefaultTitle);
+                  }
+
+                  setControlOptionsValid(true); // reset options state
+                }}
+                selectableProps={{ isLoading: dataViewListLoading || dataViewLoading }}
+              />
+            )}
+          </EuiFormRow>
+          <EuiFormRow
+            label={DataControlEditorStrings.manageControl.dataSource.getControlTypeTitle()}
+          >
+            {/* wrapping in `div` so that focus gets passed properly to the form row */}
+            <div>
+              <CompatibleControlTypesComponent
+                fieldRegistry={fieldRegistry}
+                selectedFieldName={editorState.fieldName}
+                selectedControlType={selectedControlType}
+                setSelectedControlType={setSelectedControlType}
+              />
+            </div>
+          </EuiFormRow>
+          <EuiFormRow
+            label={DataControlEditorStrings.manageControl.displaySettings.getTitleInputTitle()}
+          >
+            <EuiFieldText
+              data-test-subj="control-editor-title-input"
+              placeholder={defaultPanelTitle}
+              value={panelTitle}
+              compressed
+              onChange={(e) => {
+                setPanelTitle(e.target.value ?? '');
+                setEditorState({
+                  ...editorState,
+                  title: e.target.value === '' ? undefined : e.target.value,
+                });
+              }}
+            />
+          </EuiFormRow>
+          {!editorConfig?.hideWidthSettings && (
             <EuiFormRow
-              label={DataControlEditorStrings.manageControl.dataSource.getControlTypeTitle()}
+              data-test-subj="control-editor-width-settings"
+              label={DataControlEditorStrings.manageControl.displaySettings.getWidthInputTitle()}
             >
-              {/* wrapping in `div` so that focus gets passed properly to the form row */}
               <div>
-                <CompatibleControlTypesComponent
-                  fieldRegistry={fieldRegistry}
-                  selectedFieldName={editorState.fieldName}
-                  selectedControlType={selectedControlType}
-                  setSelectedControlType={setSelectedControlType}
+                <EuiButtonGroup
+                  buttonSize="compressed"
+                  legend={DataControlEditorStrings.management.controlWidth.getWidthSwitchLegend()}
+                  options={CONTROL_WIDTH_OPTIONS}
+                  idSelected={editorState.width ?? DEFAULT_CONTROL_WIDTH}
+                  onChange={(newWidth: string) =>
+                    setEditorState({ ...editorState, width: newWidth as ControlWidth })
+                  }
+                />
+                <EuiSpacer size="s" />
+                <EuiSwitch
+                  compressed
+                  label={DataControlEditorStrings.manageControl.displaySettings.getGrowSwitchTitle()}
+                  color="primary"
+                  checked={editorState.grow ?? DEFAULT_CONTROL_GROW}
+                  onChange={() => setEditorState({ ...editorState, grow: !editorState.grow })}
+                  data-test-subj="control-editor-grow-switch"
                 />
               </div>
             </EuiFormRow>
-          </EuiDescribedFormGroup>
-          <EuiDescribedFormGroup
-            ratio="third"
-            title={
-              <h2>{DataControlEditorStrings.manageControl.displaySettings.getFormGroupTitle()}</h2>
-            }
-            description={DataControlEditorStrings.manageControl.displaySettings.getFormGroupDescription()}
-          >
-            <EuiFormRow
-              label={DataControlEditorStrings.manageControl.displaySettings.getTitleInputTitle()}
-            >
-              <EuiFieldText
-                data-test-subj="control-editor-title-input"
-                placeholder={defaultPanelTitle}
-                value={panelTitle}
-                onChange={(e) => {
-                  setPanelTitle(e.target.value ?? '');
-                  setEditorState({
-                    ...editorState,
-                    title: e.target.value === '' ? undefined : e.target.value,
-                  });
-                }}
-              />
-            </EuiFormRow>
-            {!editorConfig?.hideWidthSettings && (
-              <EuiFormRow
-                data-test-subj="control-editor-width-settings"
-                label={DataControlEditorStrings.manageControl.displaySettings.getWidthInputTitle()}
-              >
-                <div>
-                  <EuiButtonGroup
-                    color="primary"
-                    legend={DataControlEditorStrings.management.controlWidth.getWidthSwitchLegend()}
-                    options={CONTROL_WIDTH_OPTIONS}
-                    idSelected={editorState.width ?? DEFAULT_CONTROL_WIDTH}
-                    onChange={(newWidth: string) =>
-                      setEditorState({ ...editorState, width: newWidth as ControlWidth })
-                    }
-                  />
-                  <EuiSpacer size="s" />
-                  <EuiSwitch
-                    label={DataControlEditorStrings.manageControl.displaySettings.getGrowSwitchTitle()}
-                    color="primary"
-                    checked={editorState.grow ?? DEFAULT_CONTROL_GROW}
-                    onChange={() => setEditorState({ ...editorState, grow: !editorState.grow })}
-                    data-test-subj="control-editor-grow-switch"
-                  />
-                </div>
-              </EuiFormRow>
-            )}
-          </EuiDescribedFormGroup>
+          )}
           {!editorConfig?.hideAdditionalSettings && CustomSettingsComponent}
           {controlId && (
             <>
@@ -464,7 +439,6 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
             <EuiButtonEmpty
               aria-label={`cancel-${editorState.title ?? editorState.fieldName}`}
               data-test-subj="control-editor-cancel"
-              iconType="cross"
               onClick={() => {
                 onCancel(editorState);
               }}
@@ -476,7 +450,7 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
             <EuiButton
               aria-label={`save-${editorState.title ?? editorState.fieldName}`}
               data-test-subj="control-editor-save"
-              iconType="check"
+              fill
               color="primary"
               disabled={
                 !(

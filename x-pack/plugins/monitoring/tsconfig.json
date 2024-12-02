@@ -40,7 +40,6 @@
     "@kbn/shared-ux-router",
     "@kbn/observability-shared-plugin",
     "@kbn/shared-ux-link-redirect-app",
-    "@kbn/logs-shared-plugin",
     "@kbn/alerts-as-data-utils",
     "@kbn/rule-data-utils",
     "@kbn/react-kibana-mount",
@@ -48,6 +47,7 @@
     "@kbn/flot-charts",
     "@kbn/ui-theme",
     "@kbn/core-elasticsearch-server",
+    "@kbn/share-plugin",
   ],
   "exclude": [
     "target/**/*",

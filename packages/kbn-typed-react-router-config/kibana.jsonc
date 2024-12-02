@@ -1,5 +1,10 @@
 {
-  "type": "shared-common",
+  "type": "shared-browser",
   "id": "@kbn/typed-react-router-config",
-  "owner": ["@elastic/obs-knowledge-team", "@elastic/obs-ux-infra_services-team"]
+  "owner": [
+    "@elastic/obs-knowledge-team",
+    "@elastic/obs-ux-infra_services-team"
+  ],
+  "group": "platform",
+  "visibility": "shared"
 }

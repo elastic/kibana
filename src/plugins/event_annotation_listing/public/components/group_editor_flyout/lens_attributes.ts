@@ -72,6 +72,7 @@ export const getLensAttributes = (group: EventAnnotationGroupConfig, timeField: 
         language: 'kuery',
       },
       filters: [],
+      showBorder: false,
       datasourceStates: {
         formBased: {
           layers: {

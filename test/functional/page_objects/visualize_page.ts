@@ -41,6 +41,7 @@ export class VisualizePageObject extends FtrService {
   private readonly elasticChart = this.ctx.getService('elasticChart');
   private readonly common = this.ctx.getPageObject('common');
   private readonly header = this.ctx.getPageObject('header');
+  private readonly timePicker = this.ctx.getPageObject('timePicker');
   private readonly visChart = this.ctx.getPageObject('visChart');
   private readonly toasts = this.ctx.getService('toasts');
 
@@ -63,6 +64,7 @@ export class VisualizePageObject extends FtrService {
       [FORMATS_UI_SETTINGS.FORMAT_BYTES_DEFAULT_PATTERN]: '0,0.[000]b',
       'visualization:visualize:legacyHeatmapChartsLibrary': isLegacyChart,
       'histogram:maxBars': 100,
+      'timepicker:timeDefaults': `{ "from": "${this.timePicker.defaultStartTimeUTC}", "to": "${this.timePicker.defaultEndTimeUTC}"}`,
     });
   }
 

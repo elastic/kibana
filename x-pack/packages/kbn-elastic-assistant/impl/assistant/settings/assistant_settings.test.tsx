@@ -38,11 +38,6 @@ const mockContext = {
   basePromptContexts: MOCK_QUICK_PROMPTS,
   setSelectedSettingsTab,
   http: {},
-  assistantFeatures: {
-    assistantProductDocumentation: true,
-    assistantModelEvaluation: true,
-    assistantKnowledgeBaseByDefault: false,
-  },
   selectedSettingsTab: 'CONVERSATIONS_TAB',
   assistantAvailability: {
     isAssistantEnabled: true,
@@ -140,17 +135,6 @@ describe('AssistantSettings', () => {
     QUICK_PROMPTS_TAB,
     SYSTEM_PROMPTS_TAB,
   ])('%s', (tab) => {
-    it('Opens the tab on button click', () => {
-      (useAssistantContext as jest.Mock).mockImplementation(() => ({
-        ...mockContext,
-        selectedSettingsTab: tab === CONVERSATIONS_TAB ? ANONYMIZATION_TAB : CONVERSATIONS_TAB,
-      }));
-      const { getByTestId } = render(<AssistantSettings {...testProps} />, {
-        wrapper,
-      });
-      fireEvent.click(getByTestId(`${tab}-button`));
-      expect(setSelectedSettingsTab).toHaveBeenCalledWith(tab);
-    });
     it('renders with the correct tab open', () => {
       (useAssistantContext as jest.Mock).mockImplementation(() => ({
         ...mockContext,

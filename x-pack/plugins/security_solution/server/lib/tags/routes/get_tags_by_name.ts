@@ -21,8 +21,10 @@ export const getTagsByNameRoute = (router: SecuritySolutionPluginRouter, logger:
     .get({
       path: INTERNAL_TAGS_URL,
       access: 'internal',
-      options: {
-        tags: ['access:securitySolution'],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
       },
     })
     .addVersion(

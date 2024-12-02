@@ -11,6 +11,7 @@ import { camelCase } from 'lodash';
 import { parse } from '@kbn/esql-ast';
 import { scalarFunctionDefinitions } from '../../definitions/generated/scalar_functions';
 import { builtinFunctions } from '../../definitions/builtin';
+import { NOT_SUGGESTED_TYPES } from '../../shared/resources_helpers';
 import { aggregationFunctionDefinitions } from '../../definitions/generated/aggregation_functions';
 import { timeUnitsToSuggest } from '../../definitions/literals';
 import { groupingFunctionDefinitions } from '../../definitions/grouping';
@@ -121,7 +122,7 @@ export const policies = [
  * @returns
  */
 export function getFunctionSignaturesByReturnType(
-  command: string,
+  command: string | string[],
   _expectedReturnType: Readonly<FunctionReturnType | 'any' | Array<FunctionReturnType | 'any'>>,
   {
     agg,
@@ -165,12 +166,16 @@ export function getFunctionSignaturesByReturnType(
 
   const deduped = Array.from(new Set(list));
 
+  const commands = Array.isArray(command) ? command : [command];
   return deduped
     .filter(({ signatures, ignoreAsSuggestion, supportedCommands, supportedOptions, name }) => {
       if (ignoreAsSuggestion) {
         return false;
       }
-      if (!supportedCommands.includes(command) && !supportedOptions?.includes(option || '')) {
+      if (
+        !commands.some((c) => supportedCommands.includes(c)) &&
+        !supportedOptions?.includes(option || '')
+      ) {
         return false;
       }
       const filteredByReturnType = signatures.filter(
@@ -225,7 +230,11 @@ export function getFieldNamesByType(
 ) {
   const requestedType = Array.isArray(_requestedType) ? _requestedType : [_requestedType];
   return fields
-    .filter(({ type }) => requestedType.includes('any') || requestedType.includes(type))
+    .filter(
+      ({ type }) =>
+        (requestedType.includes('any') || requestedType.includes(type)) &&
+        !NOT_SUGGESTED_TYPES.includes(type)
+    )
     .map(({ name, suggestedAs }) => suggestedAs || name);
 }
 
@@ -263,7 +272,9 @@ export function createCustomCallbackMocks(
     enrichFields: string[];
   }>
 ) {
-  const finalColumnsSinceLastCommand = customColumnsSinceLastCommand || fields;
+  const finalColumnsSinceLastCommand =
+    customColumnsSinceLastCommand ||
+    fields.filter(({ type }) => !NOT_SUGGESTED_TYPES.includes(type));
   const finalSources = customSources || indexes;
   const finalPolicies = customPolicies || policies;
   return {

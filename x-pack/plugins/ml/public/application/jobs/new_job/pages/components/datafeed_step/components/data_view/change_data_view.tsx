@@ -146,6 +146,7 @@ export const ChangeDataViewModal: FC<Props> = ({ onClose }) => {
               <EuiSpacer size="s" />
 
               <SavedObjectFinder
+                id="mlJobsDatafeedDataView"
                 key="searchSavedObjectFinder"
                 onChoose={onDataViewSelected}
                 showFilter

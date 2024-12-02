@@ -30,7 +30,7 @@ import type { TimelineItem } from '../../../../../../common/search_strategy';
 import { useKibana } from '../../../../../common/lib/kibana';
 import type {
   ColumnHeaderOptions,
-  OnChangePage,
+  OnFetchMoreRecords,
   RowRenderer,
   TimelineTabs,
 } from '../../../../../../common/types/timeline';
@@ -48,6 +48,7 @@ import { transformTimelineItemToUnifiedRows } from '../utils';
 import { TimelineEventDetailRow } from './timeline_event_detail_row';
 import { CustomTimelineDataGridBody } from './custom_timeline_data_grid_body';
 import { TIMELINE_EVENT_DETAIL_ROW_ID } from '../../body/constants';
+import { DocumentEventTypes } from '../../../../../common/lib/telemetry/types';
 
 export const SAMPLE_SIZE_SETTING = 500;
 const DataGridMemoized = React.memo(UnifiedDataTable);
@@ -63,7 +64,7 @@ type CommonDataTableProps = {
   refetch: inputsModel.Refetch;
   onFieldEdited: () => void;
   totalCount: number;
-  onChangePage: OnChangePage;
+  onFetchMoreRecords: OnFetchMoreRecords;
   activeTab: TimelineTabs;
   dataLoadingState: DataLoadingState;
   updatedAt: number;
@@ -78,6 +79,7 @@ type CommonDataTableProps = {
   | 'renderCustomGridBody'
   | 'trailingControlColumns'
   | 'isSortEnabled'
+  | 'onUpdatePageIndex'
 >;
 
 interface DataTableProps extends CommonDataTableProps {
@@ -101,13 +103,14 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
     refetch,
     dataLoadingState,
     totalCount,
-    onChangePage,
+    onFetchMoreRecords,
     updatedAt,
     isTextBasedQuery = false,
     onSetColumns,
     onSort,
     onFilter,
     leadingControlColumns,
+    onUpdatePageIndex,
   }) {
     const dispatch = useDispatch();
 
@@ -165,7 +168,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
             },
           },
         });
-        telemetry.reportDetailsFlyoutOpened({
+        telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
           location: timelineId,
           panel: 'right',
         });
@@ -234,9 +237,9 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
     );
 
     const handleFetchMoreRecords = useCallback(() => {
-      onChangePage(fetchedPage + 1);
+      onFetchMoreRecords(fetchedPage + 1);
       setFechedPage(fetchedPage + 1);
-    }, [fetchedPage, onChangePage]);
+    }, [fetchedPage, onFetchMoreRecords]);
 
     const additionalControls = useMemo(
       () => <ToolbarAdditionalControls timelineId={timelineId} updatedAt={updatedAt} />,
@@ -423,6 +426,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
             renderCustomGridBody={finalRenderCustomBodyCallback}
             trailingControlColumns={finalTrailControlColumns}
             externalControlColumns={leadingControlColumns}
+            onUpdatePageIndex={onUpdatePageIndex}
           />
         </StyledTimelineUnifiedDataTable>
       </StatefulEventContext.Provider>
