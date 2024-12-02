@@ -11,8 +11,6 @@ import { EuiPageTemplate, EuiTitle } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 
-import { PLUGIN_ID } from '../../common';
-
 interface AssetInventoryAppDeps {
   basename: string;
   notifications: CoreStart['notifications'];
@@ -20,17 +18,11 @@ interface AssetInventoryAppDeps {
   navigation: NavigationPublicPluginStart;
 }
 
-export const AssetInventoryApp = ({ basename, navigation }: AssetInventoryAppDeps) => {
-  // Note that `navigation.ui.TopNavMenu` is a stateful component exported on the `navigation` plugin's start contract.
+export const AssetInventoryApp = ({ basename }: AssetInventoryAppDeps) => {
   return (
     <Router basename={basename}>
       <I18nProvider>
         <>
-          <navigation.ui.TopNavMenu
-            appName={PLUGIN_ID}
-            showSearchBar={true}
-            useDefaultBehaviors={true}
-          />
           <EuiPageTemplate restrictWidth="1000px">
             <EuiPageTemplate.Header>
               <EuiTitle size="l">

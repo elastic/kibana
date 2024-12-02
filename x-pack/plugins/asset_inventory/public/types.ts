@@ -6,9 +6,9 @@
  */
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 
-export interface AssetInventoryPluginSetup {
-  getGreeting: () => string;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface AssetInventoryPluginSetup {}
+
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AssetInventoryPluginStart {}
 
