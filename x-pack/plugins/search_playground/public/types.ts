@@ -20,7 +20,8 @@ import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { ConsolePluginStart } from '@kbn/console-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { SearchNavigationPluginStart } from '@kbn/search-navigation';
+import type { SearchNavigationPluginStart } from '@kbn/search-navigation/public';
+import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { ChatRequestData, MessageRole } from '../common/types';
 
 export * from '../common/types';
@@ -49,6 +50,7 @@ export interface AppPluginStartDependencies {
   console?: ConsolePluginStart;
   data: DataPublicPluginStart;
   searchNavigation?: SearchNavigationPluginStart;
+  security: SecurityPluginStart;
 }
 
 export type AppServicesContext = CoreStart & AppPluginStartDependencies;
