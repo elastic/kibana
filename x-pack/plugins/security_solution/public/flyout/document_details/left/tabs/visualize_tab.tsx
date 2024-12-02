@@ -13,7 +13,10 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { useWhichFlyout } from '../../shared/hooks/use_which_flyout';
-import { DocumentDetailsAnalyzerPanelKey } from '../../shared/constants/panel_keys';
+import {
+  DocumentDetailsAnalyzerPanelKey,
+  VisualizationTabGraphKey,
+} from '../../shared/constants/panel_keys';
 import {
   VISUALIZE_TAB_BUTTON_GROUP_TEST_ID,
   VISUALIZE_TAB_GRAPH_ANALYZER_BUTTON_TEST_ID,
@@ -28,7 +31,7 @@ import {
 import { SESSION_VIEW_ID, SessionView } from '../components/session_view';
 import { ALERTS_ACTIONS } from '../../../../common/lib/apm/user_actions';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
-import { GRAPH_VISUALIZATION_ID, GraphVisualization } from '../components/graph_visualization';
+import { GraphVisualization } from '../components/graph_visualization';
 import { useGraphPreview } from '../../shared/hooks/use_graph_preview';
 
 const visualizeButtons: EuiButtonGroupOptionProps[] = [
@@ -55,7 +58,7 @@ const visualizeButtons: EuiButtonGroupOptionProps[] = [
 ];
 
 const graphVisualizationButton: EuiButtonGroupOptionProps = {
-  id: GRAPH_VISUALIZATION_ID,
+  id: VisualizationTabGraphKey,
   iconType: 'beaker',
   iconSide: 'right',
   toolTipProps: {
@@ -150,7 +153,7 @@ export const VisualizeTab = memo(() => {
       <EuiSpacer size="m" />
       {activeVisualizationId === SESSION_VIEW_ID && <SessionView />}
       {activeVisualizationId === ANALYZE_GRAPH_ID && <AnalyzeGraph />}
-      {activeVisualizationId === GRAPH_VISUALIZATION_ID && <GraphVisualization />}
+      {activeVisualizationId === VisualizationTabGraphKey && <GraphVisualization />}
     </>
   );
 });

@@ -10,8 +10,11 @@ import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { Maybe } from '@kbn/timelines-plugin/common/search_strategy/common';
 import { useKibana } from '../../../../common/lib/kibana';
-import { DocumentDetailsLeftPanelKey, DocumentDetailsRightPanelKey } from '../constants/panel_keys';
-import { GRAPH_VISUALIZATION_ID } from '../../left/components/graph_visualization';
+import {
+  DocumentDetailsLeftPanelKey,
+  DocumentDetailsRightPanelKey,
+  VisualizationTabGraphKey,
+} from '../constants/panel_keys';
 import { DocumentEventTypes } from '../../../../common/lib/telemetry';
 
 export interface UseNavigateToGraphVisualizationParams {
@@ -75,7 +78,7 @@ export const useNavigateToGraphVisualization = ({
       },
       path: {
         tab: 'visualize',
-        subTab: GRAPH_VISUALIZATION_ID,
+        subTab: VisualizationTabGraphKey,
       },
     }),
     [eventId, indexName, scopeId]

@@ -27,7 +27,6 @@ import { useFetchGraphData } from '../../shared/hooks/use_fetch_graph_data';
 import { useGraphPreview } from '../../shared/hooks/use_graph_preview';
 import { useGraphNodeExpandPopover } from './use_graph_node_expand_popover';
 
-export const GRAPH_VISUALIZATION_ID = 'graph_visualization';
 const CONTROLLED_BY_GRAPH_VISUALIZATION_FILTER = 'graph-visualization';
 
 const GraphLazy = React.lazy(() =>
@@ -223,8 +222,8 @@ export const GraphVisualization: React.FC = memo(() => {
             showQueryInput: false,
             isLoading: isFetching,
             isAutoRefreshDisabled: true,
-            dateRangeFrom: timeRange.from.split('/')[0],
-            dateRangeTo: timeRange.to.split('/')[0],
+            dateRangeFrom: timeRange.from,
+            dateRangeTo: timeRange.to,
             query: { query: '', language: 'kuery' },
             indexPatterns: [dataView],
             filters: searchFilters,
