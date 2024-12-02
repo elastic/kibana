@@ -9,8 +9,10 @@ info:
     name: Elastic License 2.0
     url: https://www.elastic.co/licensing/elastic-license
 servers:
-  - url: http://localhost:5601
-    description: local
+  - url: https://{kibana_url}
+    variables:
+      kibana_url:
+        default: localhost:5601
 tags:
   - name: slo
     description: SLO APIs enable you to define, manage and track service-level objectives
@@ -63,8 +65,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/409_response'
-      servers:
-        - url: https://localhost:5601
     get:
       summary: Get a paginated list of SLOs
       operationId: findSlosOp
@@ -448,8 +448,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/403_response'
-      servers:
-        - url: https://localhost:5601
 components:
   parameters:
     kbn_xsrf:
