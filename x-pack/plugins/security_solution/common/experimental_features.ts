@@ -21,7 +21,7 @@ export const allowedExperimentalValues = Object.freeze({
    * Turned: on (TBD)
    * Expires: on (TBD)
    */
-  alertSuppressionForSequenceEqlRuleEnabled: false,
+  alertSuppressionForSequenceEqlRuleEnabled: true,
 
   // FIXME:PT delete?
   excludePoliciesInFilterEnabled: false,
