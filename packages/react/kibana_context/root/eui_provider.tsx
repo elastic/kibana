@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import * as Rx from 'rxjs';
 import React, { FC, PropsWithChildren, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import createCache from '@emotion/cache';
@@ -21,11 +22,20 @@ import {
 } from '@kbn/react-kibana-context-common';
 import { ThemeServiceStart } from '@kbn/react-kibana-context-common';
 
+interface IUserProfile {
+  getUserProfile$: () => Rx.Observable<Record<string, unknown> | null>;
+}
+
+interface UserSettings {
+  contrastMode: 'high' | 'standard';
+}
+
 /**
  * Props for the KibanaEuiProvider.
  */
 export interface KibanaEuiProviderProps extends Pick<EuiProviderProps<{}>, 'modify' | 'colorMode'> {
   theme: ThemeServiceStart;
+  userProfile?: IUserProfile;
   globalStyles?: boolean;
 }
 
@@ -64,6 +74,7 @@ const cache = { default: emotionCache, global: globalCache, utility: utilitiesCa
  */
 export const KibanaEuiProvider: FC<PropsWithChildren<KibanaEuiProviderProps>> = ({
   theme: { theme$ },
+  userProfile,
   globalStyles: globalStylesProp,
   colorMode: colorModeProp,
   modify,
@@ -81,13 +92,27 @@ export const KibanaEuiProvider: FC<PropsWithChildren<KibanaEuiProviderProps>> = 
   // colorMode provided by the `theme`.
   const colorMode = colorModeProp || themeColorMode;
 
+  const getUserProfile$ = userProfile?.getUserProfile$ ?? Rx.of;
+  const userProfileData = useObservable(getUserProfile$());
+
+  const userSettings = userProfileData?.userSettings as UserSettings | undefined;
+  const highContrastMode = userSettings?.contrastMode === 'high';
+
   // This logic was drawn from the Core theme provider, and wasn't present (or even used)
   // elsewhere.  Should be a passive addition to anyone using the older theme provider(s).
   const globalStyles = globalStylesProp === false ? false : undefined;
 
   return (
     <EuiProvider
-      {...{ cache, modify, colorMode, globalStyles, utilityClasses: globalStyles, theme }}
+      {...{
+        cache,
+        modify,
+        colorMode,
+        globalStyles,
+        utilityClasses: globalStyles,
+        highContrastMode,
+        theme,
+      }}
     >
       {children}
     </EuiProvider>

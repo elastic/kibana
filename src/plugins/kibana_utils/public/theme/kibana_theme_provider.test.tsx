@@ -14,6 +14,7 @@ import React, { useEffect } from 'react';
 import { act } from 'react-dom/test-utils';
 import { BehaviorSubject, of } from 'rxjs';
 
+import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import type { CoreTheme } from '@kbn/core/public';
 
@@ -21,6 +22,7 @@ import { KibanaThemeProvider } from './kibana_theme_provider';
 
 describe('KibanaThemeProvider', () => {
   let euiTheme: ReturnType<typeof useEuiTheme> | undefined;
+  const userProfile = userProfileServiceMock.createStart();
 
   beforeEach(() => {
     euiTheme = undefined;
@@ -55,7 +57,7 @@ describe('KibanaThemeProvider', () => {
     const coreTheme: CoreTheme = { darkMode: true, name: 'amsterdam' };
 
     const wrapper = mountWithIntl(
-      <KibanaThemeProvider theme$={of(coreTheme)}>
+      <KibanaThemeProvider theme$={of(coreTheme)} userProfile={userProfile}>
         <InnerComponent />
       </KibanaThemeProvider>
     );
@@ -69,7 +71,7 @@ describe('KibanaThemeProvider', () => {
     const coreTheme$ = new BehaviorSubject<CoreTheme>({ darkMode: true, name: 'amsterdam' });
 
     const wrapper = mountWithIntl(
-      <KibanaThemeProvider theme$={coreTheme$}>
+      <KibanaThemeProvider theme$={coreTheme$} userProfile={userProfile}>
         <InnerComponent />
       </KibanaThemeProvider>
     );

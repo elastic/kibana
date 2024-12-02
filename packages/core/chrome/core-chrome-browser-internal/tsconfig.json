@@ -55,6 +55,7 @@
     "@kbn/core-theme-browser-mocks",
     "@kbn/react-kibana-context-render",
     "@kbn/recently-accessed",
+    "@kbn/core-user-profile-browser-mocks",
   ],
   "exclude": [
     "target/**/*",

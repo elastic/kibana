@@ -21,6 +21,7 @@ export type StartServices = [
     | 'analytics'
     | 'i18n'
     | 'theme'
+    | 'userProfile'
     // used extensively in Reporting share context menus and modal
     | 'notifications'
   >,

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import * as Rx from 'rxjs';
 import React, { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 
@@ -40,6 +41,8 @@ interface EuiProps<T = {}> extends Omit<EuiThemeProviderProps<T>, 'theme' | 'col
 export interface KibanaThemeProviderProps extends EuiProps {
   /** The `ThemeServiceStart` API. */
   theme: ThemeServiceStart;
+  /** The `UserProfileService` start API. */
+  userProfile?: { getUserProfile$: () => Rx.Observable<Record<string, unknown> | null> };
 }
 
 /**
@@ -70,12 +73,17 @@ const KibanaThemeProviderOnly = ({
  * TODO: clintandrewhall - We can remove this and revert to only exporting the above component
  * once all out-of-band renders are using `KibanaRenderContextProvider`.
  */
-const KibanaThemeProviderCheck = ({ theme, children, ...props }: KibanaThemeProviderProps) => {
+const KibanaThemeProviderCheck = ({
+  theme,
+  userProfile,
+  children,
+  ...props
+}: KibanaThemeProviderProps) => {
   const hasEuiProvider = useIsNestedEuiProvider();
 
   if (hasEuiProvider) {
     return (
-      <KibanaThemeProviderOnly theme={theme} {...props}>
+      <KibanaThemeProviderOnly theme={theme} userProfile={userProfile} {...props}>
         {children}
       </KibanaThemeProviderOnly>
     );
@@ -84,7 +92,7 @@ const KibanaThemeProviderCheck = ({ theme, children, ...props }: KibanaThemeProv
       'KibanaThemeProvider requires a parent KibanaRenderContextProvider.  Check your React tree and ensure that they are wrapped in a KibanaRenderContextProvider.'
     );
     return (
-      <KibanaEuiProvider theme={theme} globalStyles={false}>
+      <KibanaEuiProvider theme={theme} userProfile={userProfile} globalStyles={false}>
         {children}
       </KibanaEuiProvider>
     );

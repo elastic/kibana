@@ -40,7 +40,9 @@
     "@kbn/react-kibana-context-render",
     "@kbn/core-analytics-browser-mocks",
     "@kbn/core-i18n-browser-mocks",
-    "@kbn/core-theme-browser-mocks"
+    "@kbn/core-theme-browser-mocks",
+    "@kbn/core-user-profile-browser",
+    "@kbn/core-user-profile-browser-mocks"
   ],
   "exclude": [
     "target/**/*"

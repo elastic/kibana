@@ -13,19 +13,32 @@ import {
   KibanaThemeProviderProps as KbnThemeProviderProps,
   wrapWithTheme as kbnWrapWithTheme,
 } from '@kbn/react-kibana-context-theme';
+import type { UserProfileService } from '@kbn/core-user-profile-browser';
 
 /** @deprecated Use `KibanaThemeProviderProps` from `@kbn/react-kibana-context-theme`  */
-export type KibanaThemeProviderProps = Pick<KbnThemeProviderProps, 'children' | 'modify'> &
+export type KibanaThemeProviderProps = Pick<
+  KbnThemeProviderProps,
+  'children' | 'modify' | 'userProfile'
+> &
   KbnThemeProviderProps['theme'];
 
 /** @deprecated Use `KibanaThemeProvider` from `@kbn/react-kibana-context-theme`  */
-export const KibanaThemeProvider = ({ children, theme$, modify }: KibanaThemeProviderProps) => (
-  <KbnThemeProvider theme={{ theme$ }} {...modify}>
+export const KibanaThemeProvider = ({
+  children,
+  theme$,
+  userProfile,
+  modify,
+}: KibanaThemeProviderProps) => (
+  <KbnThemeProvider theme={{ theme$ }} {...modify} userProfile={userProfile}>
     {children}
   </KbnThemeProvider>
 );
 
 type Theme = KbnThemeProviderProps['theme']['theme$'];
 
-export const wrapWithTheme = (node: React.ReactNode, theme$: Theme) =>
-  kbnWrapWithTheme(node, { theme$ });
+/** @deprecated Use `wrapWithTheme` from `@kbn/react-kibana-context-theme`  */
+export const wrapWithTheme = (
+  node: React.ReactNode,
+  theme$: Theme,
+  userProfile: UserProfileService
+) => kbnWrapWithTheme(node, { theme$ }, userProfile);

@@ -16,6 +16,7 @@ import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
+import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import type { InternalHttpStart } from '@kbn/core-http-browser-internal';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import { mountReactNode } from '@kbn/core-mount-utils-browser-internal';
@@ -35,6 +36,7 @@ interface Deps {
   analytics: AnalyticsServiceStart;
   i18n: I18nStart;
   theme: ThemeServiceStart;
+  userProfile: UserProfileService;
 }
 
 export const setupPublicBaseUrlConfigWarning = ({

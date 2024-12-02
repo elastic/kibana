@@ -10,7 +10,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { CoreStart, ThemeServiceStart, ToastsSetup } from '@kbn/core/public';
+import { CoreStart, ThemeServiceStart, ToastsSetup, UserProfileService } from '@kbn/core/public';
 import { ShowShareMenuOptions } from '../types';
 import { ShareMenuRegistryStart } from './share_menu_registry';
 import { AnonymousAccessServiceContract } from '../../common/anonymous_access';
@@ -49,10 +49,11 @@ export class ShareMenuManager {
           menuItems,
           urlService,
           anonymousAccess,
-          theme: core.theme,
-          i18n: core.i18n,
           toasts: core.notifications.toasts,
           publicAPIEnabled: !disableEmbed,
+          userProfile: core.userProfile,
+          theme: core.theme,
+          i18n: core.i18n,
         });
       },
     };
@@ -75,28 +76,28 @@ export class ShareMenuManager {
     shareableUrl,
     shareableUrlLocatorParams,
     embedUrlParamExtensions,
-    theme,
     showPublicUrlSwitch,
     urlService,
     anonymousAccess,
     snapshotShareWarning,
     onClose,
     disabledShareUrl,
-    i18n,
     isDirty,
     toasts,
     delegatedShareUrlHandler,
     publicAPIEnabled,
+    ...startServices
   }: ShowShareMenuOptions & {
     anchorElement: HTMLElement;
     menuItems: ShareMenuItemV2[];
     urlService: BrowserUrlService;
     anonymousAccess: AnonymousAccessServiceContract | undefined;
-    theme: ThemeServiceStart;
     onClose: () => void;
-    i18n: CoreStart['i18n'];
     isDirty: boolean;
     toasts: ToastsSetup;
+    userProfile: UserProfileService;
+    theme: ThemeServiceStart;
+    i18n: CoreStart['i18n'];
   }) {
     if (this.isOpen) {
       onClose();
@@ -135,11 +136,10 @@ export class ShareMenuManager {
             onClose();
             unmount();
           },
-          theme,
-          i18n,
+          ...startServices,
         }}
       />,
-      { i18n, theme }
+      startServices
     );
 
     const openModal = () => {

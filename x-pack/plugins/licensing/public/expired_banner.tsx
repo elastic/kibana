@@ -47,7 +47,7 @@ const ExpiredBanner: React.FunctionComponent<Props> = (props) => (
   </EuiCallOut>
 );
 
-type MountProps = Props & Pick<CoreStart, 'analytics' | 'i18n' | 'theme'>;
+type MountProps = Props & Pick<CoreStart, 'analytics' | 'i18n' | 'theme' | 'userProfile'>;
 
 export const mountExpiredBanner = ({ type, uploadUrl, ...startServices }: MountProps) =>
   toMountPoint(<ExpiredBanner type={type!} uploadUrl={uploadUrl} />, startServices);
