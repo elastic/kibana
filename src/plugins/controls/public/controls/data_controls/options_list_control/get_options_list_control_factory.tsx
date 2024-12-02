@@ -269,6 +269,9 @@ export const getOptionsListControlFactory = (): DataControlFactory<
             if (selections.existsSelected$.getValue()) selections.setExistsSelected(false);
             if (invalidSelections$.getValue().size) invalidSelections$.next(new Set([]));
           },
+          clearVariables: () => {
+            // no variables to clear
+          },
         },
         {
           ...dataControl.comparators,

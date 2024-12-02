@@ -225,6 +225,7 @@ export const getTimesliderControlFactory = (): ControlFactory<
           clearSelections: () => {
             setTimeslice(undefined);
           },
+          clearVariables: () => {},
           CustomPrependComponent: () => {
             const [autoApplySelections, viewMode] = useBatchedPublishingSubjects(
               controlGroupApi.autoApplySelections$,

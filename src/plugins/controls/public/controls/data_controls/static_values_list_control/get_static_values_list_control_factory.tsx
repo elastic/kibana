@@ -80,6 +80,9 @@ export const getStaticValuesListControlFactory = (): DataControlFactory<
           clearSelections: () => {
             if (selections.selectedOptions$.getValue()?.length) selections.setSelectedOptions([]);
           },
+          clearVariables: () => {
+            esqlVariablesService.removeVariable(initialState.variableName);
+          },
         },
         {
           ...dataControl.comparators,
