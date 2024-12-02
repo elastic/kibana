@@ -73,7 +73,7 @@ const DensityChartPositiveBackground = styled.rect`
 
 const PositiveAreaPath = styled.path`
   fill: ${(props) =>
-    props.theme.colorMode === 'dark'
+    props.theme.darkMode
       ? props.theme.euiTheme.colors.mediumShade
       : props.theme.euiTheme.colors.lightShade};
 `;

@@ -12,6 +12,7 @@ import {
   withEuiTheme,
   WithEuiThemeProps,
   type EuiThemeComputed,
+  useEuiShadow,
 } from '@elastic/eui';
 import React, { ReactNode } from 'react';
 import { KubernetesTour } from './kubernetes_tour';
@@ -31,10 +32,10 @@ const ButtonLabel = ({ label, theme }: { label: string; theme?: EuiThemeComputed
     grow={false}
     style={{
       padding: 12,
-      background: theme?.euiFormInputGroupLabelBackground,
+      background: theme?.colors.backgroundBaseFormsPrepend,
       fontSize: '0.75em',
       fontWeight: 600,
-      color: theme?.euiTitleColor,
+      color: theme?.colors.textHeading,
     }}
   >
     {label}
@@ -48,8 +49,8 @@ export const DropdownButton = withEuiTheme((props: PropsWithTheme) => {
       alignItems="center"
       gutterSize="none"
       style={{
-        border: theme?.euiTheme.euiFormInputGroupBorder,
-        boxShadow: `0px 3px 2px ${theme?.euiTheme.euiTableActionsBorderColor}, 0px 1px 1px ${theme?.euiTheme.euiTableActionsBorderColor}`,
+        border: theme?.euiTheme.border.thin,
+        boxShadow: `0px 3px 2px ${useEuiShadow('xs')}, 0px 1px 1px ${useEuiShadow('xs')}`,
       }}
     >
       {showKubernetesInfo ? (

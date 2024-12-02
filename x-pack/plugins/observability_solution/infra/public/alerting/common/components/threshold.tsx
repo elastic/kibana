@@ -6,15 +6,14 @@
  */
 
 import React from 'react';
-import type { Theme as EuiTheme } from '@emotion/react';
 import { Chart, Metric, Settings } from '@elastic/charts';
-import { EuiIcon, EuiPanel } from '@elastic/eui';
-import type { Theme } from '@elastic/charts';
+import { EuiIcon, EuiPanel, useEuiTheme } from '@elastic/eui';
+import type { PartialTheme, Theme } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 
 export interface ChartProps {
-  theme?: EuiTheme;
+  theme?: PartialTheme;
   baseTheme: Theme;
 }
 
@@ -42,7 +41,8 @@ export const Threshold = ({
   valueFormatter,
   warning,
 }: Props) => {
-  const color = theme?.euiTheme.colors.danger;
+  const { euiTheme } = useEuiTheme();
+  const color = euiTheme.colors.danger;
 
   return (
     <EuiPanel

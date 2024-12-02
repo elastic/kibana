@@ -299,7 +299,7 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
 };
 
 const TimelineContainer = styled.div`
-  background-color: ${(props) => props.theme.euiTheme.colors.euiPageBackgroundColor};
+  background-color: ${(props) => props.theme.euiTheme.colors.body};
   border-top: 1px solid ${(props) => props.theme.euiTheme.colors.lightShade};
   height: 220px;
   width: 100%;

@@ -71,13 +71,13 @@ interface InnerProps {
 }
 
 const Inner = styled.div<InnerProps>`
-  border: 1px solid ${(props) => props.theme.eui.euiBorderColor};
+  border: 1px solid ${(props) => props.theme.euiTheme.border.color};
   background-color: ${(props) =>
     props.isChild
       ? props.theme.euiTheme.colors.lightestShade
       : props.theme.euiTheme.colors.emptyShade};
   border-radius: 4px;
-  box-shadow: 0px 2px 0px 0px ${(props) => props.theme.eui.euiBorderColor};
+  box-shadow: 0px 2px 0px 0px ${(props) => props.theme.euiTheme.border.color};
   display: flex;
   align-items: center;
   justify-content: center;
@@ -94,7 +94,7 @@ const Name = styled.div`
 
 const Count = styled.div`
   flex: 0 0 auto;
-  border-left: 1px solid ${(props) => props.theme.eui.euiBorderColor};
+  border-left: 1px solid ${(props) => props.theme.euiTheme.border.color};
   padding: 6px 10px;
   font-size: 0.85em;
   font-weight: normal;

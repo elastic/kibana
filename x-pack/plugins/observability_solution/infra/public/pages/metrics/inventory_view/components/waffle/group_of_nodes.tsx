@@ -98,6 +98,6 @@ const Nodes = styled.div`
   justify-content: center;
   padding: 20px 10px 10px;
   border-radius: 4px;
-  border: 1px solid ${(props) => props.theme.euiTheme.euiBorderColor};
+  border: 1px solid ${(props) => props.theme.euiTheme.border.color};
   box-shadow: 0 1px 7px rgba(0, 0, 0, 0.1);
 `;

@@ -68,7 +68,7 @@ const GradientLegendTick = styled.div`
 
 const GradientLegendTickLine = styled.div`
   position: absolute;
-  background-color: ${(props) => props.theme.euiTheme.colors.border.euiBorderColor};
+  background-color: ${(props) => props.theme.euiTheme.border.color};
   width: 1px;
   left: 0;
   top: 15px;

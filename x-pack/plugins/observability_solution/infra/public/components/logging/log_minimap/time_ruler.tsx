@@ -8,6 +8,7 @@
 import { scaleTime } from 'd3-scale';
 import * as React from 'react';
 import styled from '@emotion/styled';
+import { useEuiFontSize } from '@elastic/eui';
 import { useKibanaTimeZoneSetting } from '../../../hooks/use_kibana_time_zone_setting';
 import { getTimeLabelFormat } from './time_label_formatter';
 
@@ -60,7 +61,7 @@ TimeRuler.displayName = 'TimeRuler';
 
 const TimeRulerTickLabel = styled.text`
   font-size: 9px;
-  line-height: ${(props) => props.theme.euiTheme.euiLineHeight};
+  line-height: ${() => useEuiFontSize('s').lineHeight};
   fill: ${(props) => props.theme.euiTheme.colors.textSubdued};
   user-select: none;
   pointer-events: none;

@@ -6,6 +6,7 @@
  */
 
 import React, { useContext, useState, useCallback, useMemo } from 'react';
+import { get } from 'lodash';
 import { EuiButtonIcon, EuiFlexGrid, EuiFlexItem, EuiTitle, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from '@emotion/styled';
@@ -166,9 +167,9 @@ export const MetadataDetails = (props: Props) => {
 
 const MetadataContainer = styled.div`
   border-top: ${(props) => props.theme.euiTheme.border.thin} solid
-    ${(props) => props.theme.eui.euiBorderColor};
+    ${(props) => props.theme.euiTheme.border.color};
   border-bottom: ${(props) => props.theme.euiTheme.border.thin} solid
-    ${(props) => props.theme.eui.euiBorderColor};
+    ${(props) => props.theme.euiTheme.border.color};
   padding: ${(props) => props.theme.euiTheme.size.m} 0;
   margin-bottom: ${(props) => props.theme.euiTheme.size.m};
   display: flex;

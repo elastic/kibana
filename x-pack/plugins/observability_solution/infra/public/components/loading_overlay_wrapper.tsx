@@ -42,5 +42,5 @@ const OverlayDiv = styled.div`
   position: absolute;
   top: 0;
   width: 100%;
-  z-index: ${(props) => props.theme.euiTheme.euiZLevel1};
+  z-index: ${(props) => props.theme.euiTheme.levels.maskBelowHeader};
 `;
