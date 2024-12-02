@@ -1346,6 +1346,9 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /x-pack/test/api_integration/deployment_agnostic/apis/observability/slo/ @elastic/obs-ux-management-team
 /x-pack/test/api_integration/deployment_agnostic/services/alerting_api @elastic/obs-ux-management-team
 /x-pack/test/api_integration/deployment_agnostic/services/slo_api @elastic/obs-ux-management-team
+/x-pack/test/api_integration/deployment_agnostic/apis/observability/synthetics/ @elastic/obs-ux-management-team
+/x-pack/test/api_integration/deployment_agnostic/services/synthetics_monitors @elastic/obs-ux-management-team
+/x-pack/test/api_integration/deployment_agnostic/services/synthetics_private_location @elastic/obs-ux-management-team
 
 # Elastic Stack Monitoring
 /x-pack/test/monitoring_api_integration @elastic/stack-monitoring
