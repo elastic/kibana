@@ -71,7 +71,7 @@ export const EditServiceType: React.FC<EditServiceTypeProps> = ({ connector, isD
       if (inputServiceType === null || inputServiceType === '') {
         return inputServiceType;
       }
-      
+
       const body = { service_type: inputServiceType };
       await http.post(`/internal/serverless_search/connectors/${connector.id}/service_type`, {
         body: JSON.stringify(body),
