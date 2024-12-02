@@ -20,8 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const toasts = getService('toasts');
   const deployment = getService('deployment');
 
-  // Failing: See https://github.com/elastic/kibana/issues/196627
-  describe.skip('shared links', function describeIndexTests() {
+  describe('shared links', function describeIndexTests() {
     let baseUrl: string;
 
     async function setup({ storeStateInSessionStorage }: { storeStateInSessionStorage: boolean }) {
@@ -179,7 +178,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.waitFor('discover to open', async () => {
           const resolvedUrl = await browser.getCurrentUrl();
           expect(resolvedUrl).to.match(/discover/);
-          const { message } = await toasts.getErrorToast();
+          // the toast we aiming to check is usually the 2nd one, but it can also be the first one
+          // there are 3 same toasts here which was resolved in the next major version
+          // the workaround to check for the 2nd toast, which allows the test to always pass
+          const { message } = await toasts.getErrorToast(2);
           expect(message).to.contain(
             'Unable to completely restore the URL, be sure to use the share functionality.'
           );
