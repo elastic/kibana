@@ -927,6 +927,7 @@ test/server_integration/plugins/status_plugin_b @elastic/kibana-core
 packages/kbn-std @elastic/kibana-core
 packages/kbn-stdio-dev-helpers @elastic/kibana-operations
 packages/kbn-storybook @elastic/kibana-operations
+x-pack/plugins/streams_app @simianhacker @flash1293 @dgieselaar
 x-pack/plugins/streams @simianhacker @flash1293 @dgieselaar
 x-pack/plugins/observability_solution/synthetics/e2e @elastic/obs-ux-management-team
 x-pack/plugins/observability_solution/synthetics @elastic/obs-ux-management-team
