@@ -12,7 +12,9 @@ import { ObservabilityAIAssistantTelemetryEventType } from '../telemetry_event_t
 
 export interface ChatFeedback {
   feedback: Feedback;
-  conversation: Omit<Conversation, 'messages'>;
+  conversation: Omit<Conversation, 'messages'> & {
+    conversation: Omit<Conversation['conversation'], 'title'>;
+  };
 }
 
 export const chatFeedbackEventSchema: EventTypeOpts<ChatFeedback> = {
