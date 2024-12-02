@@ -179,6 +179,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       await simulator.rawWrite(`data: ${chunk.substring(0, 10)}`);
       await simulator.rawWrite(`${chunk.substring(10)}\n\n`);
+      await simulator.tokenCount({ completion: 20, prompt: 33, total: 53 });
       await simulator.complete();
 
       await new Promise<void>((resolve) => passThrough.on('end', () => resolve()));
@@ -193,6 +194,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         StreamingChatResponseEventType.MessageAdd,
         StreamingChatResponseEventType.MessageAdd,
         StreamingChatResponseEventType.ChatCompletionChunk,
+        StreamingChatResponseEventType.ChatCompletionMessage,
         StreamingChatResponseEventType.MessageAdd,
       ]);
 
@@ -259,6 +261,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         events = await getEvents({}, async (conversationSimulator) => {
           await conversationSimulator.next('Hello');
           await conversationSimulator.next(' again');
+          await conversationSimulator.tokenCount({ completion: 1, prompt: 1, total: 2 });
           await conversationSimulator.complete();
         });
       });
@@ -277,6 +280,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           },
         });
         expect(omit(events[2], 'id', 'message.@timestamp')).to.eql({
+          type: StreamingChatResponseEventType.ChatCompletionMessage,
+          message: {
+            content: 'Hello again',
+          },
+        });
+        expect(omit(events[3], 'id', 'message.@timestamp')).to.eql({
           type: StreamingChatResponseEventType.MessageAdd,
           message: {
             message: {
@@ -293,7 +302,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(
           omit(
-            events[3],
+            events[4],
             'conversation.id',
             'conversation.last_updated',
             'conversation.token_count'
@@ -305,7 +314,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           },
         });
 
-        const tokenCount = (events[3] as ConversationCreateEvent).conversation.token_count!;
+        const tokenCount = (events[4] as ConversationCreateEvent).conversation.token_count!;
 
         expect(tokenCount.completion).to.be.greaterThan(0);
         expect(tokenCount.prompt).to.be.greaterThan(0);
@@ -372,6 +381,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 },
               ],
             });
+            await conversationSimulator.tokenCount({ completion: 1, prompt: 1, total: 1 });
             await conversationSimulator.complete();
           }
         );
