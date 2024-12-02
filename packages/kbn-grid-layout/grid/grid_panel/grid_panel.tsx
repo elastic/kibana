@@ -18,7 +18,7 @@ import { getKeysInOrder } from '../utils/resolve_grid_row';
 import { DragHandle } from './drag_handle';
 import { ResizeHandle } from './resize_handle';
 
-interface GridPanelProps {
+export interface GridPanelProps {
   panelId: string;
   rowIndex: number;
   renderPanelContents: (panelId: string) => React.ReactNode;

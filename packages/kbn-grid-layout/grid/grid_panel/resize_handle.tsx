@@ -12,6 +12,7 @@ import React from 'react';
 import { transparentize } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
+import { i18n } from '@kbn/i18n';
 import { PanelInteractionEvent } from '../types';
 
 export const ResizeHandle = ({
@@ -31,6 +32,9 @@ export const ResizeHandle = ({
       onMouseUp={(e) => {
         interactionStart('drop', e);
       }}
+      aria-label={i18n.translate('xpack.kbnGrid.resizeHandle.ariaLabel', {
+        defaultMessage: 'Resize panel',
+      })}
       css={css`
         right: 0;
         bottom: 0;

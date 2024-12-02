@@ -12,6 +12,7 @@ import React from 'react';
 import { EuiIcon, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
+import { i18n } from '@kbn/i18n';
 import { PanelInteractionEvent } from '../types';
 
 export const DragHandle = ({
@@ -25,6 +26,9 @@ export const DragHandle = ({
   const { euiTheme } = useEuiTheme();
   return (
     <button
+      aria-label={i18n.translate('xpack.kbnGrid.dragHandle.ariaLabel', {
+        defaultMessage: 'Drag to move',
+      })}
       className="kbnGridPanel__dragHandle"
       css={css`
         opacity: 0;
