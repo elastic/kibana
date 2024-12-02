@@ -20,7 +20,7 @@ import {
   ALERT_RULE_PRODUCER,
 } from '@kbn/rule-data-utils';
 import { EuiBadge, EuiLink } from '@elastic/eui';
-import type { GetAlertsTableProp } from '../types';
+import { AlertsTableSupportedConsumers, GetAlertsTableProp } from '../types';
 import { alertProducersData, observabilityFeatureIds } from '../constants';
 import { useFieldFormatter } from '../hooks/use_field_formatter';
 
@@ -70,7 +70,7 @@ export const DefaultCellValue: GetAlertsTableProp<'renderCellValue'> = (props) =
 
     case ALERT_RULE_CONSUMER:
       const producer = alert?.[ALERT_RULE_PRODUCER]?.[0] as AlertConsumers;
-      const consumer: AlertConsumers = observabilityFeatureIds.includes(producer)
+      const consumer: AlertsTableSupportedConsumers = observabilityFeatureIds.includes(producer)
         ? 'observability'
         : producer && (value === 'alerts' || value === 'stackAlerts' || value === 'discover')
         ? producer
