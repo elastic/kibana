@@ -80,6 +80,7 @@ export const GridPanel = forwardRef<
      */
     const onMouseDown = useCallback(
       (e: MouseEvent) => {
+        if (e.button !== 0) return; // ignore anything but left clicks
         e.stopPropagation();
         interactionStart(panelId, 'drag', e);
       },
@@ -251,10 +252,21 @@ export const GridPanel = forwardRef<
             ref.style.gridRowEnd = `${responsiveGridRowStart + panel.height}`;
           });
 
+        const accessModeSubscription = gridLayoutStateManager.accessMode$.subscribe(
+          (accessMode) => {
+            if (accessMode !== 'EDIT') {
+              if (removeEventListenersRef.current) {
+                removeEventListenersRef.current();
+              }
+            }
+          }
+        );
+
         return () => {
           expandedPanelStyleSubscription.unsubscribe();
           mobileViewStyleSubscription.unsubscribe();
           activePanelStyleSubscription.unsubscribe();
+          accessModeSubscription.unsubscribe();
         };
       },
       // eslint-disable-next-line react-hooks/exhaustive-deps

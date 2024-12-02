@@ -32,9 +32,9 @@ import {
   SearchSerializedState,
 } from '@kbn/embeddable-examples-plugin/public/react_embeddables/search/types';
 import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
-import { GridAccessMode, GridLayout, GridLayoutData } from '@kbn/grid-layout';
+import { GridLayout, GridLayoutData } from '@kbn/grid-layout';
 import { i18n } from '@kbn/i18n';
-import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
+import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
@@ -60,13 +60,15 @@ export const GridExample = ({
 }) => {
   const savedState = useRef<MockSerializedDashboardState>(getSerializedDashboardState());
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState<boolean>(false);
-  const [accessMode, setAccessMode] = useState<GridAccessMode>('EDIT');
   const [currentLayout, setCurrentLayout] = useState<GridLayoutData>(
     dashboardInputToGridLayout(savedState.current)
   );
 
   const mockDashboardApi = useMockDashboardApi({ savedState: savedState.current });
-  const expandedPanelId = useStateFromPublishingSubject(mockDashboardApi.expandedPanelId);
+  const [viewMode, expandedPanelId] = useBatchedPublishingSubjects(
+    mockDashboardApi.viewMode,
+    mockDashboardApi.expandedPanelId
+  );
 
   useEffect(() => {
     combineLatest([mockDashboardApi.panels$, mockDashboardApi.rows$])
@@ -165,7 +167,7 @@ export const GridExample = ({
                     })}
                     options={[
                       {
-                        id: 'VIEW',
+                        id: 'view',
                         label: i18n.translate('examples.gridExample.viewOption', {
                           defaultMessage: 'View',
                         }),
@@ -173,16 +175,16 @@ export const GridExample = ({
                           'The layout adjusts when the window is resized. Panel interactivity, such as moving and resizing within the grid, is disabled.',
                       },
                       {
-                        id: 'EDIT',
+                        id: 'edit',
                         label: i18n.translate('examples.gridExample.editOption', {
                           defaultMessage: 'Edit',
                         }),
                         toolTipContent: 'The layout does not adjust when the window is resized.',
                       },
                     ]}
-                    idSelected={accessMode}
+                    idSelected={viewMode}
                     onChange={(id) => {
-                      setAccessMode(id as GridAccessMode);
+                      mockDashboardApi.viewMode.next(id);
                     }}
                   />
                 </EuiFlexItem>
@@ -230,7 +232,7 @@ export const GridExample = ({
           </EuiFlexGroup>
           <EuiSpacer size="m" />
           <GridLayout
-            accessMode={accessMode}
+            accessMode={viewMode === 'view' ? 'VIEW' : 'EDIT'}
             expandedPanelId={expandedPanelId}
             layout={currentLayout}
             gridSettings={{

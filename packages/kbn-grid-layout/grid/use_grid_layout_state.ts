@@ -77,6 +77,7 @@ export const useGridLayoutState = ({
       panelIds$,
       gridLayout$,
       activePanel$,
+      accessMode$,
       gridDimensions$,
       runtimeSettings$,
       interactionEvent$,
