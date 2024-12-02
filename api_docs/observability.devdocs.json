@@ -2863,6 +2863,27 @@
             "path": "x-pack/plugins/observability_solution/observability/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.ObservabilityPublicPluginsSetup.streams",
+            "type": "Object",
+            "tags": [],
+            "label": "streams",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "streams",
+                "scope": "public",
+                "docId": "kibStreamsPluginApi",
+                "section": "def-public.StreamsPluginSetup",
+                "text": "StreamsPluginSetup"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3807,6 +3828,27 @@
                 "docId": "kibInvestigatePluginApi",
                 "section": "def-public.InvestigatePublicStart",
                 "text": "InvestigatePublicStart"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.ObservabilityPublicPluginsStart.streams",
+            "type": "Object",
+            "tags": [],
+            "label": "streams",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "streams",
+                "scope": "public",
+                "docId": "kibStreamsPluginApi",
+                "section": "def-public.StreamsPluginStart",
+                "text": "StreamsPluginStart"
               },
               " | undefined"
             ],
@@ -8592,13 +8634,27 @@
         "children": [
           {
             "parentPluginId": "observability",
-            "id": "def-server.ObservabilityRouteCreateOptions.options",
-            "type": "Object",
+            "id": "def-server.ObservabilityRouteCreateOptions.tags",
+            "type": "Array",
             "tags": [],
-            "label": "options",
+            "label": "tags",
             "description": [],
             "signature": [
-              "{ tags: string[]; access?: \"internal\" | \"public\" | undefined; }"
+              "string[] | undefined"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability/server/routes/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-server.ObservabilityRouteCreateOptions.access",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "access",
+            "description": [],
+            "signature": [
+              "\"internal\" | \"public\" | undefined"
             ],
             "path": "x-pack/plugins/observability_solution/observability/server/routes/types.ts",
             "deprecated": false,
@@ -8717,20 +8773,6 @@
             "path": "x-pack/plugins/observability_solution/observability/server/routes/types.ts",
             "deprecated": false,
             "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
-            "id": "def-server.ObservabilityRouteHandlerResources.config",
-            "type": "Object",
-            "tags": [],
-            "label": "config",
-            "description": [],
-            "signature": [
-              "{ readonly enabled: boolean; readonly annotations: Readonly<{} & { index: string; enabled: boolean; }>; readonly unsafe: Readonly<{} & { alertDetails: Readonly<{} & { uptime: Readonly<{} & { enabled: boolean; }>; observability: Readonly<{} & { enabled: boolean; }>; metrics: Readonly<{} & { enabled: boolean; }>; logs: Readonly<{} & { enabled: boolean; }>; }>; thresholdRule: Readonly<{} & { enabled: boolean; }>; ruleFormV2: Readonly<{} & { enabled: boolean; }>; }>; readonly customThresholdRule: Readonly<{} & { groupByPageSize: number; }>; readonly createO11yGenericFeatureId: boolean; }"
-            ],
-            "path": "x-pack/plugins/observability_solution/observability/server/routes/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -8762,7 +8804,15 @@
             "section": "def-common.RouteParamsRT",
             "text": "RouteParamsRT"
           },
-          " | undefined, any, any, Record<string, any>>; }"
+          " | undefined, any, any, ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRouteCreateOptions",
+            "text": "ServerRouteCreateOptions"
+          },
+          " | undefined>; }"
         ],
         "path": "x-pack/plugins/observability_solution/observability/server/routes/types.ts",
         "deprecated": false,
@@ -8922,15 +8972,7 @@
             "section": "def-common.ServerRoute",
             "text": "ServerRoute"
           },
-          "<any, any, any, infer TReturnType extends ServerRouteHandlerReturnType, ",
-          {
-            "pluginId": "@kbn/server-route-repository-utils",
-            "scope": "common",
-            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
-            "section": "def-common.ServerRouteCreateOptions",
-            "text": "ServerRouteCreateOptions"
-          },
-          "> ? TReturnType extends ",
+          "<any, any, any, infer TReturnType extends ServerRouteHandlerReturnType, any> ? TReturnType extends ",
           {
             "pluginId": "@kbn/core-http-server",
             "scope": "server",

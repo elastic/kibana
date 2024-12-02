@@ -21,6 +21,12 @@ import {
 import { visitWithTimeRange } from './navigation';
 import { GET_DATE_PICKER_APPLY_BUTTON, GLOBAL_FILTERS_CONTAINER } from '../screens/date_picker';
 import { REFRESH_BUTTON } from '../screens/security_header';
+import {
+  ENABLEMENT_MODAL_CONFIRM_BUTTON,
+  ENTITIES_LIST_PANEL,
+  ENTITY_STORE_ENABLEMENT_BUTTON,
+  ENTITY_STORE_ENABLEMENT_MODAL,
+} from '../screens/entity_analytics/dashboard';
 
 export const updateDashboardTimeRange = () => {
   // eslint-disable-next-line cypress/no-force
@@ -68,3 +74,17 @@ export const previewErrorButtonClick = () => {
 };
 
 export const openRiskInformationFlyout = () => cy.get(OPEN_RISK_INFORMATION_FLYOUT_BUTTON).click();
+
+export const openEntityStoreEnablementModal = () => {
+  cy.get(ENTITY_STORE_ENABLEMENT_BUTTON).click();
+  cy.get(ENTITY_STORE_ENABLEMENT_MODAL).contains('Entity Analytics Enablement');
+};
+
+export const confirmEntityStoreEnablement = () => {
+  cy.get(ENABLEMENT_MODAL_CONFIRM_BUTTON).click();
+};
+
+export const waitForEntitiesListToAppear = () => {
+  cy.get(ENTITIES_LIST_PANEL, { timeout: 30000 }).scrollIntoView();
+  cy.get(ENTITIES_LIST_PANEL).contains('Entities');
+};

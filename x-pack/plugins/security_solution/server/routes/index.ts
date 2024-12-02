@@ -66,7 +66,8 @@ export const initRoutes = (
   getStartServices: StartServicesAccessor<StartPlugins>,
   securityRuleTypeOptions: CreateSecurityRuleTypeWrapperProps,
   previewRuleDataClient: IRuleDataClient,
-  previewTelemetryReceiver: ITelemetryReceiver
+  previewTelemetryReceiver: ITelemetryReceiver,
+  isServerless: boolean
 ) => {
   registerFleetIntegrationsRoutes(router);
   registerLegacyRuleActionsRoutes(router, logger);
@@ -84,7 +85,8 @@ export const initRoutes = (
     securityRuleTypeOptions,
     previewRuleDataClient,
     getStartServices,
-    logger
+    logger,
+    isServerless
   );
 
   registerResolverRoutes(router, getStartServices, config);
