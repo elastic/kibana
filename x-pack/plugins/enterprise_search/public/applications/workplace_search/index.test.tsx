@@ -54,6 +54,7 @@ describe('WorkplaceSearch', () => {
 
     expect(wrapper.find(WorkplaceSearchConfigured)).toHaveLength(1);
   });
+});
 
 describe('WorkplaceSearchUnconfigured', () => {
   it('renders the Setup Guide and redirects to the Setup Guide', () => {
