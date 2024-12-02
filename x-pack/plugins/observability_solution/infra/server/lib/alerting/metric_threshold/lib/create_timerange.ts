@@ -11,21 +11,29 @@ import { Aggregators } from '../../../../../common/alerting/metrics';
 export const createTimerange = (
   interval: number,
   aggType: Aggregators,
-  timeframe: { end: string; start: string },
+  timeframe?: { end: number; start?: number },
   lastPeriodEnd?: number
 ) => {
-  const end = moment(timeframe.end).valueOf();
-  let start = moment(timeframe.start).valueOf();
+  const to = moment(timeframe ? timeframe.end : Date.now()).valueOf();
 
   // Rate aggregations need 5 buckets worth of data
   const minimumBuckets = aggType === Aggregators.RATE ? 2 : 1;
 
   interval = interval * minimumBuckets;
-  start = start - interval;
+  let calculatedFrom = to - interval;
 
-  // Use lastPeriodEnd - interval when it's less than start
-  if (lastPeriodEnd && lastPeriodEnd - interval < start) {
-    start = lastPeriodEnd - interval;
+  if (lastPeriodEnd) {
+    const maxAllowedLookBack = moment(calculatedFrom).subtract(3 * interval, 'ms');
+    // Calculate the maximum allowable look-back time (3 intervals before the current 'calculatedFrom' time).
+    if (moment(lastPeriodEnd).isAfter(maxAllowedLookBack)) {
+      // Ensure lastPeriodEnd is within the allowable look-back range.
+      calculatedFrom = lastPeriodEnd - interval;
+    }
   }
-  return { start, end };
+
+  const from =
+    timeframe && timeframe.start && timeframe.start <= calculatedFrom
+      ? timeframe.start
+      : calculatedFrom;
+  return { start: from, end: to };
 };
