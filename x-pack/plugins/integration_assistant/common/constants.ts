@@ -36,6 +36,7 @@ export enum GenerationErrorCode {
   RECURSION_LIMIT_ANALYZE_LOGS = 'recursion-limit-analyze-logs',
   UNSUPPORTED_LOG_SAMPLES_FORMAT = 'unsupported-log-samples-format',
   UNPARSEABLE_CSV_DATA = 'unparseable-csv-data',
+  CEF_ERROR = 'cef-not-supported',
 }
 
 // Size limits
