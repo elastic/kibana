@@ -23,6 +23,7 @@ import moment from 'moment';
 import type { EntityDefinitionWithState } from '@kbn/entityManager-plugin/server/lib/entities/types';
 import type { EntityDefinition } from '@kbn/entities-schema';
 import type { estypes } from '@elastic/elasticsearch';
+import type { ExperimentalFeatures } from '../../../../common';
 import type {
   GetEntityStoreStatusRequestQuery,
   GetEntityStoreStatusResponse,
@@ -32,7 +33,10 @@ import type {
   InitEntityStoreResponse,
 } from '../../../../common/api/entity_analytics/entity_store/enable.gen';
 import type { AppClient } from '../../..';
-import { EngineComponentResourceEnum, EntityType } from '../../../../common/api/entity_analytics';
+import {
+  EngineComponentResourceEnum,
+  EntityTypeEnum,
+} from '../../../../common/api/entity_analytics';
 import type {
   Entity,
   EngineDataviewUpdateResult,
@@ -42,6 +46,7 @@ import type {
   ListEntityEnginesResponse,
   EngineComponentStatus,
   EngineComponentResource,
+  EntityType,
 } from '../../../../common/api/entity_analytics';
 import { EngineDescriptorClient } from './saved_object/engine_descriptor';
 import { ENGINE_STATUS, ENTITY_STORE_STATUS, MAX_SEARCH_RESPONSE_SIZE } from './constants';
@@ -108,6 +113,7 @@ interface EntityStoreClientOpts {
   dataViewsService: DataViewsService;
   appClient: AppClient;
   config: EntityStoreConfig;
+  experimentalFeatures: ExperimentalFeatures;
   telemetry?: AnalyticsServiceSetup;
 }
 
@@ -204,7 +210,13 @@ export class EntityStoreDataClient {
     // Immediately defer the initialization to the next tick. This way we don't block on the init preflight checks
     const run = <T>(fn: () => Promise<T>) =>
       new Promise<T>((resolve) => setTimeout(() => fn().then(resolve), 0));
-    const promises = Object.values(EntityType.Values).map((entity) =>
+
+    const { experimentalFeatures } = this.options;
+    const enginesTypes = experimentalFeatures.serviceEntityStoreEnabled
+      ? [EntityTypeEnum.host, EntityTypeEnum.user, EntityTypeEnum.service]
+      : [EntityTypeEnum.host, EntityTypeEnum.user];
+
+    const promises = enginesTypes.map((entity) =>
       run(() =>
         this.init(entity, { indexPattern, filter, fieldHistoryLength }, { pipelineDebugMode })
       )
