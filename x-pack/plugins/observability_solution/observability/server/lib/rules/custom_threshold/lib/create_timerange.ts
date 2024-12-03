@@ -19,9 +19,9 @@ export const createTimerange = (
   const minimumBuckets = isRateAgg ? 2 : 1;
 
   interval = interval * minimumBuckets;
-  start = start - interval;
+  start = end - interval;
 
-  if (lastPeriodEnd) {
+  if (lastPeriodEnd && lastPeriodEnd - interval < start) {
     const maxAllowedLookBack = moment(start).subtract(3 * interval, 'ms');
     // Calculate the maximum allowable look-back time (3 intervals before the current 'start' time).
     if (moment(lastPeriodEnd).isAfter(maxAllowedLookBack)) {

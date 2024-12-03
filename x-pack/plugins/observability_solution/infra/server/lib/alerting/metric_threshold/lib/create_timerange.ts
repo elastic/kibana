@@ -14,26 +14,27 @@ export const createTimerange = (
   timeframe?: { end: number; start?: number },
   lastPeriodEnd?: number
 ) => {
-  const to = moment(timeframe ? timeframe.end : Date.now()).valueOf();
+  const end = moment(timeframe && timeframe.end ? timeframe.end : Date.now()).valueOf();
+  const start = moment(timeframe && timeframe.start ? timeframe.start : end).valueOf();
 
   // Rate aggregations need 5 buckets worth of data
   const minimumBuckets = aggType === Aggregators.RATE ? 2 : 1;
 
   interval = interval * minimumBuckets;
-  let calculatedFrom = to - interval;
 
-  if (lastPeriodEnd) {
-    const maxAllowedLookBack = moment(calculatedFrom).subtract(3 * interval, 'ms');
-    // Calculate the maximum allowable look-back time (3 intervals before the current 'calculatedFrom' time).
+  let calculatedFrom = end - interval;
+
+  if (lastPeriodEnd && lastPeriodEnd - interval < start) {
+    const maxAllowedLookBack = moment(start).subtract(3 * interval, 'ms');
+    // Calculate the maximum allowable look-back time (3 intervals before the current 'from' time).
     if (moment(lastPeriodEnd).isAfter(maxAllowedLookBack)) {
       // Ensure lastPeriodEnd is within the allowable look-back range.
       calculatedFrom = lastPeriodEnd - interval;
     }
   }
-
   const from =
     timeframe && timeframe.start && timeframe.start <= calculatedFrom
       ? timeframe.start
       : calculatedFrom;
-  return { start: from, end: to };
+  return { start: from, end };
 };
