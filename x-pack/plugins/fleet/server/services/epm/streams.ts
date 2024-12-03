@@ -13,7 +13,10 @@ export function bufferToStream(buffer: Buffer): PassThrough {
   return stream;
 }
 
-export function streamToString(stream: NodeJS.ReadableStream | Buffer): Promise<string> {
+export function streamToString(stream: NodeJS.ReadableStream | Buffer | null): Promise<string> {
+  // handle isAirGapped case, which returns an empty string
+  if (!stream) return Promise.resolve('');
+
   if (stream instanceof Buffer) return Promise.resolve(stream.toString());
   return new Promise((resolve, reject) => {
     const body: string[] = [];
@@ -23,7 +26,10 @@ export function streamToString(stream: NodeJS.ReadableStream | Buffer): Promise<
   });
 }
 
-export function streamToBuffer(stream: NodeJS.ReadableStream): Promise<Buffer> {
+export function streamToBuffer(stream: NodeJS.ReadableStream | null): Promise<Buffer> {
+  // handle isAirGapped case, which returns an empty string
+  if (!stream) throw new Error('No stream found');
+
   return new Promise((resolve, reject) => {
     const chunks: Buffer[] = [];
     stream.on('data', (chunk) => chunks.push(Buffer.from(chunk)));

@@ -67,6 +67,8 @@ export const pkgToPkgKey = ({ name, version }: { name: string; version: string }
 export async function fetchList(
   params?: GetPackagesRequest['query']
 ): Promise<RegistrySearchResults> {
+  if (appContextService.getConfig()?.isAirGapped) return [];
+
   const registryUrl = getRegistryUrl();
   const url = new URL(`${registryUrl}/search`);
   if (params) {
@@ -223,12 +225,12 @@ export async function getFile(
   pkgName: string,
   pkgVersion: string,
   relPath: string
-): Promise<Response> {
+): Promise<Response | null> {
   const filePath = `/package/${pkgName}/${pkgVersion}/${relPath}`;
   return fetchFile(filePath);
 }
 
-export async function fetchFile(filePath: string): Promise<Response> {
+export async function fetchFile(filePath: string): Promise<Response | null> {
   const registryUrl = getRegistryUrl();
   return getResponse(`${registryUrl}${filePath}`);
 }
@@ -336,48 +338,58 @@ export async function getPackage(
   archiveIterator: ArchiveIterator;
   verificationResult?: PackageVerificationResult;
 }> {
+  const logger = appContextService.getLogger();
   const verifyPackage = appContextService.getExperimentalFeatures().packageVerification;
   let packageInfo: ArchivePackage | undefined = getPackageInfo({ name, version });
   let verificationResult: PackageVerificationResult | undefined = verifyPackage
     ? getVerificationResult({ name, version })
     : undefined;
+  try {
+    const {
+      archiveBuffer,
+      archivePath,
+      verificationResult: latestVerificationResult,
+    } = await withPackageSpan('Fetch package archive from archive buffer', () =>
+      fetchArchiveBuffer({
+        pkgName: name,
+        pkgVersion: version,
+        shouldVerify: verifyPackage,
+        ignoreUnverified: options?.ignoreUnverified,
+      })
+    );
 
-  const {
-    archiveBuffer,
-    archivePath,
-    verificationResult: latestVerificationResult,
-  } = await withPackageSpan('Fetch package archive from archive buffer', () =>
-    fetchArchiveBuffer({
-      pkgName: name,
-      pkgVersion: version,
-      shouldVerify: verifyPackage,
-      ignoreUnverified: options?.ignoreUnverified,
-    })
-  );
+    if (latestVerificationResult) {
+      verificationResult = latestVerificationResult;
+      setVerificationResult({ name, version }, latestVerificationResult);
+    }
 
-  if (latestVerificationResult) {
-    verificationResult = latestVerificationResult;
-    setVerificationResult({ name, version }, latestVerificationResult);
+    const contentType = ensureContentType(archivePath);
+    const { paths, assetsMap, archiveIterator } = await unpackBufferToAssetsMap({
+      archiveBuffer,
+      contentType,
+      useStreaming: options?.useStreaming,
+    });
+
+    if (!packageInfo) {
+      packageInfo = await getPackageInfoFromArchiveOrCache(
+        name,
+        version,
+        archiveBuffer,
+        archivePath
+      );
+    }
+
+    return { paths, packageInfo, assetsMap, archiveIterator, verificationResult };
+  } catch (error) {
+    logger.error(`getPackage error: ${error}`);
+    throw error;
   }
-
-  const contentType = ensureContentType(archivePath);
-  const { paths, assetsMap, archiveIterator } = await unpackBufferToAssetsMap({
-    archiveBuffer,
-    contentType,
-    useStreaming: options?.useStreaming,
-  });
-
-  if (!packageInfo) {
-    packageInfo = await getPackageInfoFromArchiveOrCache(name, version, archiveBuffer, archivePath);
-  }
-
-  return { paths, packageInfo, assetsMap, archiveIterator, verificationResult };
 }
 
 export async function getPackageFieldsMetadata(
   params: { packageName: string; datasetName?: string },
   options: { excludedFieldsAssets?: string[] } = {}
-): Promise<ExtractedIntegrationFields> {
+): Promise<ExtractedIntegrationFields | null> {
   const { packageName, datasetName } = params;
   const { excludedFieldsAssets = ['ecs.yml'] } = options;
 
@@ -391,9 +403,11 @@ export async function getPackageFieldsMetadata(
   // We need to collect all the available data streams for the package.
   // In case a dataset is specified from the parameter, it will load the fields only for that specific dataset.
   // As a fallback case, we'll try to read the fields for all the data streams in the package.
-  const dataStreamsMap = resolveDataStreamsMap(resolvedPackage.packageInfo.data_streams);
+  const dataStreamsMap = resolveDataStreamsMap(resolvedPackage?.packageInfo.data_streams);
 
-  const { assetsMap } = resolvedPackage;
+  // resolvedPackage can be null in case of airGapped installs
+  const assetsMap = resolvedPackage?.assetsMap;
+  if (!assetsMap) return null;
 
   const dataStream = datasetName ? dataStreamsMap.get(datasetName) : null;
 
@@ -453,22 +467,31 @@ export async function fetchArchiveBuffer({
   }
   const registryUrl = getRegistryUrl();
   const archiveUrl = `${registryUrl}${archivePath}`;
-  const archiveBuffer = await getResponseStream(archiveUrl).then(streamToBuffer);
-
-  if (shouldVerify) {
-    const verificationResult = await verifyPackageArchiveSignature({
-      pkgName,
-      pkgVersion,
-      pkgArchiveBuffer: archiveBuffer,
-      logger,
-    });
-
-    if (verificationResult.verificationStatus === 'unverified' && !ignoreUnverified) {
-      throw new PackageFailedVerificationError(pkgName, pkgVersion);
+  try {
+    const archiveBuffer = await getResponseStream(archiveUrl).then(streamToBuffer);
+    if (!archiveBuffer) {
+      logger.error(`Archive Buffer not found`);
+      throw new Error('Archive Buffer not found');
     }
-    return { archiveBuffer, archivePath, verificationResult };
+
+    if (shouldVerify) {
+      const verificationResult = await verifyPackageArchiveSignature({
+        pkgName,
+        pkgVersion,
+        pkgArchiveBuffer: archiveBuffer,
+        logger,
+      });
+
+      if (verificationResult.verificationStatus === 'unverified' && !ignoreUnverified) {
+        throw new PackageFailedVerificationError(pkgName, pkgVersion);
+      }
+      return { archiveBuffer, archivePath, verificationResult };
+    }
+    return { archiveBuffer, archivePath };
+  } catch (error) {
+    logger.error(`fetchArchiveBuffer error: ${error}`);
+    throw error;
   }
-  return { archiveBuffer, archivePath };
 }
 
 export async function getPackageArchiveSignatureOrUndefined({
@@ -490,9 +513,10 @@ export async function getPackageArchiveSignatureOrUndefined({
   }
 
   try {
-    const { body } = await fetchFile(signaturePath);
+    const res = await fetchFile(signaturePath);
 
-    return streamToString(body);
+    if (res?.body) return streamToString(res.body);
+    return undefined;
   } catch (e) {
     logger.error(`Error retrieving package signature at '${signaturePath}' : ${e}`);
     return undefined;

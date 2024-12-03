@@ -81,19 +81,19 @@ export async function getResponseStream(
 ): Promise<NodeJS.ReadableStream | null> {
   const res = await getResponse(url, retries);
   if (res) {
-    return res.body;
+    return res?.body;
   }
-  return null;
+  throw new Error('Response stream not found');
 }
 
-export async function fetchUrl(url: string, retries?: number): Promise<string | null> {
-  const stream = getResponseStream(url, retries);
-
-  if (appContextService.getConfig()?.isAirGapped || stream === null) {
-    return null;
+export async function fetchUrl(url: string, retries?: number): Promise<string> {
+  const logger = appContextService.getLogger();
+  try {
+    return getResponseStream(url, retries).then(streamToString);
+  } catch (error) {
+    logger.error('getResponseStream failed: no stream found');
+    throw error;
   }
-
-  return stream.then(streamToString);
 }
 
 // node-fetch throws a FetchError for those types of errors and

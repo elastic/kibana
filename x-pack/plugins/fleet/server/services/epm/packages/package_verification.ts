@@ -75,7 +75,7 @@ export async function verifyPackageArchiveSignature({
 }: {
   pkgName: string;
   pkgVersion: string;
-  pkgArchiveBuffer: Buffer;
+  pkgArchiveBuffer: Buffer | undefined;
   logger: Logger;
 }): Promise<PackageVerificationResult> {
   const verificationKey = await getGpgKeyOrUndefined();
@@ -94,6 +94,11 @@ export async function verifyPackageArchiveSignature({
     logger.warn(
       `Package ${pkgName}-${pkgVersion} has no corresponding signature. Skipping verification.`
     );
+    return result;
+  }
+
+  if (!pkgArchiveBuffer) {
+    logger.warn(`Archive not found for package ${pkgName}-${pkgVersion}. Skipping verification.`);
     return result;
   }
 
