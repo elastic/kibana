@@ -19,7 +19,6 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { euiThemeVars } from '@kbn/ui-theme';
 import dateMath from '@kbn/datemath';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../common/lib/kibana/kibana_react';
@@ -243,7 +242,7 @@ const FlyoutRiskSummaryComponent = <T extends RiskScoreEntity>({
                   css={css`
                     position: absolute;
                     right: 0;
-                    top: -${euiThemeVars.euiSize};
+                    top: -${euiTheme.size};
                   `}
                 >
                   <InspectButton

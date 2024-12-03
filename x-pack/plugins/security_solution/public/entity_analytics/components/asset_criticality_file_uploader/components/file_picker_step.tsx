@@ -13,13 +13,14 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  useEuiFontSize,
   useEuiTheme,
 } from '@elastic/eui';
+
 import { css } from '@emotion/css';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { euiThemeVars } from '@kbn/ui-theme';
 import {
   CRITICALITY_CSV_MAX_SIZE_BYTES,
   ValidCriticalityLevels,
@@ -35,17 +36,18 @@ interface AssetCriticalityFilePickerStepProps {
 
 const sampleCSVContent = `user,user-001,low_impact\nuser,user-002,medium_impact\nhost,host-001,extreme_impact`;
 
-const listStyle = css`
-  list-style-type: disc;
-  margin-bottom: ${euiThemeVars.euiSizeL};
-  margin-left: ${euiThemeVars.euiSizeL};
-  line-height: ${euiThemeVars.euiLineHeight};
-`;
-
 export const AssetCriticalityFilePickerStep: React.FC<AssetCriticalityFilePickerStepProps> =
   React.memo(({ onFileChange, errorMessage, isLoading }) => {
     const formatBytes = useFormatBytes();
     const { euiTheme } = useEuiTheme();
+
+    const listStyle = css`
+      list-style-type: disc;
+      margin-bottom: ${euiTheme.size.l};
+      margin-left: ${euiTheme.size.l};
+      line-height: ${useEuiFontSize('s').lineHeight};
+    `;
+
     return (
       <>
         <EuiSpacer size="m" />
@@ -94,7 +96,7 @@ export const AssetCriticalityFilePickerStep: React.FC<AssetCriticalityFilePicker
           <ul className={listStyle}>
             <li>
               <FormattedMessage
-                defaultMessage="Entity type: Indicate whether the entity is a {host} or a {user}."
+                defaultMessage="Entity: Indicate whether the entity is a {host} or a {user}."
                 id="xpack.securitySolution.entityAnalytics.assetCriticalityUploadPage.assetTypeDescription"
                 values={{
                   host: <b>{'host'}</b>,
