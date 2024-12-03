@@ -34,7 +34,8 @@ export const findBackfillRoute = (
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
-        const rulesClient = (await context.alerting).getRulesClient();
+        const alertingContext = await context.alerting;
+        const rulesClient = await alertingContext.getRulesClient();
         const query: FindBackfillRequestQueryV1 = req.query;
 
         const result = await rulesClient.findBackfill(transformRequestV1(query));
