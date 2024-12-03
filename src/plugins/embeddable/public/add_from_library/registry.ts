@@ -47,7 +47,7 @@ export const registerAddFromLibraryType = <
     throw new Error(
       i18n.translate('embeddableApi.embeddableSavedObjectRegistry.keyAlreadyExistsError', {
         defaultMessage: `Embeddable type {embeddableType} already exists in the registry.`,
-        values: { savedObjectType },
+        values: { embeddableType: savedObjectType },
       })
     );
   }
