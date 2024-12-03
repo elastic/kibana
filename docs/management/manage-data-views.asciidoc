@@ -170,7 +170,7 @@ Edit the settings for runtime fields, or remove runtime fields from data views.
 [[scripted-fields]]
 === Add scripted fields to data views
 
-deprecated::[7.13,Use {ref}/runtime.html[runtime fields] instead of scripted fields. Runtime fields support Painless scripts and provide greater flexibility.]
+deprecated::[7.13,Use {ref}/runtime.html[runtime fields] instead of scripted fields. Runtime fields support Painless scripts and provide greater flexibility. You can also use the {ref}/esql.html[Elasticsearch Query Language (ES|QL)] to compute values directly at query time.]
 
 Scripted fields compute data on the fly from the data in your {es} indices. The data is shown on
 the Discover tab as part of the document data, and you can use scripted fields in your visualizations. You query scripted fields with the <<kuery-query, {kib} query language>>, and can filter them using the filter bar. The scripted field values are computed at query time, so they aren't indexed and cannot be searched using the {kib} default
@@ -193,10 +193,114 @@ For more information on scripted fields and additional examples, refer to
 https://www.elastic.co/blog/using-painless-kibana-scripted-fields[Using Painless in {kib} scripted fields]
 
 [float]
+[[migrate-off-scripted-fields]]
+==== Migrate off scripted fields
+
+The following code snippets demonstrate how an example scripted field called `computed_values` on the Kibana Sample Data Logs data view could be migrated to either a runtime field or an ES|QL query, highlighting the differences between each approach such as multi-value field handling.
+
+[float]
+[[scripted-field-example]]
+===== Scripted field
+
+In the scripted field example, variables are created to track all values the script will need to access or return. Since scripted fields can only return a single value, the created variables must be returned together as an array at the end of the script.
+
+[source,text]
+----
+def hour_of_day = $('@timestamp', ZonedDateTime.parse('1970-01-01T00:00:00Z')).getHour();
+def time_of_day = '';
+
+if (hour_of_day >= 22 || hour_of_day < 5)
+  time_of_day = 'Night';
+else if (hour_of_day < 12)
+  time_of_day = 'Morning';
+else if (hour_of_day < 18)
+  time_of_day = 'Afternoon';
+else
+  time_of_day = 'Evening';
+
+def response_int = Integer.parseInt($('response.keyword', '200'));
+def response_category = '';
+
+if (response_int < 200)
+  response_category = 'Informational';
+else if (response_int < 300)
+  response_category = 'Successful';
+else if (response_int < 400)
+  response_category = 'Redirection';
+else if (response_int < 500)
+  response_category = 'Client Error';
+else
+  response_category = 'Server Error';
+
+return [time_of_day, response_category];
+----
+
+[float]
+[[runtime-field-example]]
+===== Runtime field
+
+Unlike scripted fields, runtime fields do not need to return a single value and can emit values at any point in the script, which will be combined and returned as a multi-value field. This allows for more flexibility in the script logic and removes the need to manually manage an array of values. Otherwise the scripts are essentially identical since they both use the Painless language and the same APIs.
+
+[source,text]
+----
+def hour_of_day = $('@timestamp', ZonedDateTime.parse('1970-01-01T00:00:00Z')).getHour();
+
+if (hour_of_day >= 22 || hour_of_day < 5)
+  emit('Night');
+else if (hour_of_day < 12)
+  emit('Morning');
+else if (hour_of_day < 18)
+  emit('Afternoon');
+else
+  emit('Evening');
+
+def response_int = Integer.parseInt($('response.keyword', '200'));
+
+if (response_int < 200)
+  emit('Informational');
+else if (response_int < 300)
+  emit('Successful');
+else if (response_int < 400)
+  emit('Redirection');
+else if (response_int < 500)
+  emit('Client Error');
+else
+  emit('Server Error');
+----
+
+[float]
+[[esql-example]]
+===== ES|QL query
+
+Alternatively, ES|QL can be used to skip the need for data view management entirely and simply compute the values you need at query time. ES|QL supports computing multiple field values in a single query, using computed values with its rich set of commands and functions, and even aggregations against computed values. This makes it an excellent solution for one-off queries and realtime data analysis.
+
+[source,esql]
+----
+FROM kibana_sample_data_logs
+  | EVAL hour_of_day = DATE_EXTRACT("HOUR_OF_DAY", @timestamp)
+  | EVAL time_of_day = CASE(
+      hour_of_day >= 22 OR hour_of_day < 5, "Night",
+      hour_of_day < 12, "Morning",
+      hour_of_day < 18, "Afternoon",
+      "Evening"
+    )
+  | EVAL response_int = TO_INTEGER(response)
+  | EVAL response_category = CASE(
+      response_int < 200, "Informational",
+      response_int < 300, "Successful",
+      response_int < 400, "Redirection",
+      response_int < 500, "Client Error",
+      "Server Error"
+    )
+  | EVAL computed_values = MV_APPEND(time_of_day, response_category)
+  | DROP hour_of_day, time_of_day, response_int, response_category
+----
+
+[float]
 [[update-scripted-field]]
 ==== Manage scripted fields
 
-WARNING: The ability to create new scripted fields has been removed from the *Data Views* management page in 9.0. Existing scripted fields can still be edited or deleted, and the creation UI can be accessed by navigating directly to the `/app/management/kibana/dataViews/dataView/{dataViewId}/create-field` path, but it is recommended to migrate to runtime fields or the Elasticsearch Query Language (ES|QL) to prepare for removal.
+WARNING: The ability to create new scripted fields has been removed from the *Data Views* management page in 9.0. Existing scripted fields can still be edited or deleted, and the creation UI can be accessed by navigating directly to `/app/management/kibana/dataViews/dataView/{dataViewId}/create-field`, but it is recommended to migrate to runtime fields or ES|QL instead to prepare for removal.
 
 . Go to the *Data Views* management page using the navigation menu or the <<kibana-navigation-search,global search field>>.
 

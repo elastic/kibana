@@ -98,7 +98,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       urlDrilldownVariables: `${KIBANA_DOCS}drilldowns.html#url-template-variable`,
     },
     dataViews: {
-      manage: `${KIBANA_DOCS}managing-data-views.html`,
+      migrateOffScriptedFields: `${KIBANA_DOCS}managing-data-views.html#migrate-off-scripted-fields`,
     },
     discover: {
       guide: `${KIBANA_DOCS}discover.html`,

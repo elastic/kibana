@@ -64,7 +64,7 @@ export interface DocLinks {
     readonly urlDrilldownVariables: string;
   };
   readonly dataViews: {
-    readonly manage: string;
+    readonly migrateOffScriptedFields: string;
   };
   readonly discover: Record<string, string>;
   readonly filebeat: {

@@ -47,8 +47,6 @@ export const createScriptedFieldsDeprecationsConfig: (
       return [];
     }
 
-    const dataViewTitles = dataViewsWithScriptedFields.map((so) => so.attributes.title);
-
     return [
       {
         title: i18n.translate('dataViews.deprecations.scriptedFieldsTitle', {
@@ -58,7 +56,7 @@ export const createScriptedFieldsDeprecationsConfig: (
           dataViewsWithScriptedFields,
           docLinks: core.docLinks.links,
         }),
-        documentationUrl: core.docLinks.links.dataViews.manage,
+        documentationUrl: core.docLinks.links.dataViews.migrateOffScriptedFields,
         deprecationType: 'feature',
         level: 'warning', // warning because it is not set in stone WHEN we remove scripted fields, hence this deprecation is not a blocker for 9.0 upgrade
         correctiveActions: {
@@ -68,8 +66,7 @@ export const createScriptedFieldsDeprecationsConfig: (
             }),
             i18n.translate('dataViews.deprecations.scriptedFields.manualStepTwoMessage', {
               defaultMessage:
-                'Update data views that have scripted fields to use runtime fields instead. In most cases, to migrate existing scripts, you will need to change "return <value>;" to "emit(<value>);". Data views with at least one scripted field: {allTitles}.',
-              values: { allTitles: dataViewTitles.join('; ') },
+                'Update data views that have scripted fields to use runtime fields instead. In most cases, you will only need to change "return <value>;" to "emit(<value>);".',
               ignoreTag: true,
             }),
             i18n.translate('dataViews.deprecations.scriptedFields.manualStepThreeMessage', {
@@ -95,6 +92,30 @@ export function hasScriptedField(dataView: DataViewAttributesWithFields) {
   }
 }
 
+const dataViewIdLabel = i18n.translate('dataViews.deprecations.scriptedFields.dataViewIdLabel', {
+  defaultMessage: 'ID',
+});
+
+const dataViewTitleLabel = i18n.translate(
+  'dataViews.deprecations.scriptedFields.dataViewTitleLabel',
+  {
+    defaultMessage: 'Title',
+  }
+);
+
+const dataViewSpacesLabel = i18n.translate(
+  'dataViews.deprecations.scriptedFields.dataViewSpacesLabel',
+  {
+    defaultMessage: 'Spaces',
+  }
+);
+
+const buildDataViewsListEntry = (
+  so: SavedObjectsFindResult<DataViewAttributesWithFields>
+) => `- **${dataViewIdLabel}:** ${so.id}
+  - **${dataViewTitleLabel}:** ${so.attributes.title}
+  - **${dataViewSpacesLabel}:** ${so.namespaces?.join(', ')}`;
+
 const buildMessage = ({
   dataViewsWithScriptedFields,
   docLinks,
@@ -114,13 +135,7 @@ The following is a list of all data views with scripted fields and their associa
       numberOfDataViewsWithScriptedFields: dataViewsWithScriptedFields.length,
       runtimeFieldsLink: docLinks.runtimeFields.overview,
       esqlLink: docLinks.query.queryESQL,
-      dataViewsList: dataViewsWithScriptedFields
-        .map(
-          (so) => `- **ID:** ${so.id}
-  - **Title:** ${so.attributes.title}
-  - **Spaces:** ${so.namespaces?.join(', ')}`
-        )
-        .join('\n'),
+      dataViewsList: dataViewsWithScriptedFields.map(buildDataViewsListEntry).join('\n'),
     },
   }),
 });
