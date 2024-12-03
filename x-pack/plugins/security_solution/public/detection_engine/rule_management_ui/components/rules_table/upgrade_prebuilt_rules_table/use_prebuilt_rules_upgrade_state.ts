@@ -59,6 +59,10 @@ export function usePrebuiltRulesUpgradeState(
 
     for (const ruleUpgradeInfo of ruleUpgradeInfos) {
       const customizableFieldsDiff = calcCustomizableFieldsDiff(ruleUpgradeInfo.diff);
+      const fieldsUpgradeState = calcFieldsState(
+        customizableFieldsDiff,
+        rulesResolvedConflicts[ruleUpgradeInfo.rule_id] ?? {}
+      );
 
       state[ruleUpgradeInfo.rule_id] = {
         ...ruleUpgradeInfo,
@@ -67,15 +71,11 @@ export function usePrebuiltRulesUpgradeState(
           ruleUpgradeInfo,
           rulesResolvedConflicts[ruleUpgradeInfo.rule_id] ?? {}
         ),
-        fieldsUpgradeState: calcFieldsState(
-          customizableFieldsDiff,
-          rulesResolvedConflicts[ruleUpgradeInfo.rule_id] ?? {}
-        ),
+        fieldsUpgradeState,
         hasUnresolvedConflicts: isPrebuiltRulesCustomizationEnabled
-          ? getUnacceptedConflictsCount(
-              ruleUpgradeInfo.diff.fields,
-              rulesResolvedConflicts[ruleUpgradeInfo.rule_id] ?? {}
-            ) > 0
+          ? Object.values(fieldsUpgradeState).some(
+              (x) => x !== FieldUpgradeState.NoConflict && x !== FieldUpgradeState.Accepted
+            )
           : false,
       };
     }
@@ -181,23 +181,4 @@ function calcFieldsState(
   }
 
   return fieldsState;
-}
-
-function getUnacceptedConflictsCount(
-  ruleFieldsDiff: FieldsDiff<Record<string, unknown>>,
-  ruleResolvedConflicts: RuleResolvedConflicts
-): number {
-  const fieldNames = Object.keys(ruleFieldsDiff);
-  const fieldNamesWithConflict = fieldNames.filter(
-    (fieldName) => ruleFieldsDiff[fieldName].conflict !== ThreeWayDiffConflict.NONE
-  );
-  const fieldNamesWithConflictSet = new Set(fieldNamesWithConflict);
-
-  for (const resolvedConflictField of Object.keys(ruleResolvedConflicts)) {
-    if (fieldNamesWithConflictSet.has(resolvedConflictField)) {
-      fieldNamesWithConflictSet.delete(resolvedConflictField);
-    }
-  }
-
-  return fieldNamesWithConflictSet.size;
 }
