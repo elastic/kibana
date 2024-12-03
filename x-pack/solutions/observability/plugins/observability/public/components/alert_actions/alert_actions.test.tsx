@@ -7,13 +7,7 @@
 import React, { ComponentProps } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
-import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
-import { AlertActions } from './alert_actions';
-import { inventoryThresholdAlertEs } from '../../rules/fixtures/example_alerts';
-import { RULE_DETAILS_PAGE_ID } from '../../pages/rule_details/constants';
-import * as pluginContext from '../../hooks/use_plugin_context';
-import { ConfigSchema, ObservabilityPublicPluginsStart } from '../../plugin';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { allCasesPermissions, noCasesPermissions } from '@kbn/observability-shared-plugin/public';
@@ -21,10 +15,18 @@ import { noop } from 'lodash';
 import { EuiDataGridCellValueElementProps } from '@elastic/eui/src/components/datagrid/data_grid_types';
 import { waitFor, act } from '@testing-library/react';
 import { Router } from '@kbn/shared-ux-router';
+import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
+import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
+import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
+import { kibanaStartMock } from '../../utils/kibana_react.mock';
+import { AlertActions } from './alert_actions';
+import { inventoryThresholdAlertEs } from '../../rules/fixtures/example_alerts';
+import { RULE_DETAILS_PAGE_ID } from '../../pages/rule_details/constants';
+import * as pluginContext from '../../hooks/use_plugin_context';
+import { ConfigSchema, ObservabilityPublicPluginsStart } from '../../plugin';
 import { createMemoryHistory } from 'history';
 import { ObservabilityRuleTypeRegistry } from '../../rules/create_observability_rule_type_registry';
-import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
-import type { GetObservabilityAlertsTableProp } from '../alerts_table/types';
+import type { GetObservabilityAlertsTableProp } from '../..';
 
 const refresh = jest.fn();
 const caseHooksReturnedValue = {
@@ -34,34 +36,21 @@ const caseHooksReturnedValue = {
   close: jest.fn(),
 };
 
-const mockUseKibanaReturnValue = kibanaStartMock.startContract();
-mockUseKibanaReturnValue.services.cases.hooks.useCasesAddToNewCaseFlyout.mockReturnValue(
+const mockKibana = kibanaStartMock.startContract();
+mockKibana.services.cases.hooks.useCasesAddToNewCaseFlyout.mockReturnValue(caseHooksReturnedValue);
+
+mockKibana.services.cases.hooks.useCasesAddToExistingCaseModal.mockReturnValue(
   caseHooksReturnedValue
 );
 
-mockUseKibanaReturnValue.services.cases.hooks.useCasesAddToExistingCaseModal.mockReturnValue(
-  caseHooksReturnedValue
-);
-
-mockUseKibanaReturnValue.services.cases.helpers.canUseCases.mockReturnValue(allCasesPermissions());
+mockKibana.services.cases.helpers.canUseCases.mockReturnValue(allCasesPermissions());
+const mockLicensing = licensingMock.createStart();
 
 const { ObservabilityAIAssistantContextualInsight } =
   observabilityAIAssistantPluginMock.createStartContract();
 
-jest.mock('../../utils/kibana_react', () => ({
-  __esModule: true,
-  useKibana: jest.fn(() => mockUseKibanaReturnValue),
-}));
 const prependMock = jest.fn().mockImplementation((args) => args);
-mockUseKibanaReturnValue.services.http.basePath.prepend = prependMock;
-jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana/kibana_react', () => ({
-  useKibana: jest.fn(() => ({
-    services: {
-      notifications: { toasts: { addDanger: jest.fn(), addSuccess: jest.fn() } },
-      http: mockUseKibanaReturnValue.services.http,
-    },
-  })),
-}));
+mockKibana.services.http.basePath.prepend = prependMock;
 
 const config: ConfigSchema = {
   unsafe: {
@@ -112,7 +101,21 @@ describe('ObservabilityActions component', () => {
       },
     });
 
-    const props = {
+    const props: Pick<
+      ComponentProps<GetObservabilityAlertsTableProp<'renderActionsCell'>>,
+      | 'tableId'
+      | 'config'
+      | 'alert'
+      | 'ecsAlert'
+      | 'nonEcsData'
+      | 'rowIndex'
+      | 'cveProps'
+      | 'clearSelection'
+      | 'observabilityRuleTypeRegistry'
+      | 'openAlertInFlyout'
+      | 'refresh'
+      | 'services'
+    > = {
       tableId: pageId,
       config,
       alert: inventoryThresholdAlertEs,
@@ -124,12 +127,26 @@ describe('ObservabilityActions component', () => {
       observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
       openAlertInFlyout: jest.fn(),
       refresh,
-    } as unknown as ComponentProps<GetObservabilityAlertsTableProp<'renderActionsCell'>>;
+      services: {
+        http: mockKibana.services.http,
+        data: mockKibana.services.data,
+        notifications: mockKibana.services.notifications,
+        application: mockKibana.services.application,
+        settings: mockKibana.services.settings,
+        cases: mockKibana.services.cases,
+        licensing: mockLicensing,
+        fieldFormats: fieldFormatsMock,
+      },
+    };
 
     const wrapper = mountWithIntl(
       <Router history={createMemoryHistory()}>
         <QueryClientProvider client={queryClient} context={AlertsQueryContext}>
-          <AlertActions {...props} />
+          <AlertActions
+            {...(props as unknown as ComponentProps<
+              GetObservabilityAlertsTableProp<'renderActionsCell'>
+            >)}
+          />
         </QueryClientProvider>
       </Router>
     );
@@ -192,7 +209,7 @@ describe('ObservabilityActions component', () => {
     await setup('nothing');
 
     // @ts-expect-error: The object will always be defined
-    mockUseKibanaReturnValue.services.cases.hooks.useCasesAddToNewCaseFlyout.mock.calls[0][0].onSuccess();
+    mockKibana.services.cases.hooks.useCasesAddToNewCaseFlyout.mock.calls[0][0].onSuccess();
 
     expect(refresh).toHaveBeenCalled();
   });
@@ -214,15 +231,13 @@ describe('ObservabilityActions component', () => {
     await setup('nothing');
 
     // @ts-expect-error: The object will always be defined
-    mockUseKibanaReturnValue.services.cases.hooks.useCasesAddToExistingCaseModal.mock.calls[0][0].onSuccess();
+    mockKibana.services.cases.hooks.useCasesAddToExistingCaseModal.mock.calls[0][0].onSuccess();
 
     expect(refresh).toHaveBeenCalled();
   });
 
   it('should hide the case actions without permissions', async () => {
-    mockUseKibanaReturnValue.services.cases.helpers.canUseCases.mockReturnValue(
-      noCasesPermissions()
-    );
+    mockKibana.services.cases.helpers.canUseCases.mockReturnValue(noCasesPermissions());
 
     const wrapper = await setup('nothing');
     wrapper.find('[data-test-subj="alertsTableRowActionMore"]').hostNodes().simulate('click');

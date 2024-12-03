@@ -11,7 +11,11 @@ import { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { AlertsTable } from '@kbn/response-ops-alerts-table';
 import { useKibana } from '../../utils/kibana_react';
 import { casesFeatureId, observabilityFeatureId } from '../../../common';
-import { ObservabilityAlertsTableContext, ObservabilityAlertsTableProps } from './types';
+import {
+  GetObservabilityAlertsTableProp,
+  ObservabilityAlertsTableContext,
+  ObservabilityAlertsTableProps,
+} from './types';
 import { AlertsTableCellValue } from './common/cell_value';
 import { AlertsFlyoutBody } from '../alerts_flyout/alerts_flyout_body';
 import { AlertsFlyoutHeader } from '../alerts_flyout/alerts_flyout_header';
@@ -29,6 +33,11 @@ const initialSort = [
   },
 ];
 
+const caseConfiguration: GetObservabilityAlertsTableProp<'casesConfiguration'> = {
+  featureId: casesFeatureId,
+  owner: [observabilityFeatureId],
+};
+
 export function ObservabilityAlertsTable(props: Omit<ObservabilityAlertsTableProps, 'services'>) {
   const { data, http, notifications, fieldFormats, application, licensing, cases, settings } =
     useKibana().services;
@@ -37,8 +46,9 @@ export function ObservabilityAlertsTable(props: Omit<ObservabilityAlertsTablePro
   return (
     <AlertsTable<ObservabilityAlertsTableContext>
       columns={columns}
-      ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES}initialSort={initialSort}
-      casesConfiguration={{ featureId: casesFeatureId, owner: [observabilityFeatureId] }}
+      ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES}
+      initialSort={initialSort}
+      casesConfiguration={caseConfiguration}
       additionalContext={{ observabilityRuleTypeRegistry, config }}
       renderCellValue={AlertsTableCellValue}
       renderFlyoutHeader={AlertsFlyoutHeader}
@@ -60,8 +70,7 @@ export function ObservabilityAlertsTable(props: Omit<ObservabilityAlertsTablePro
   );
 }
 
-// Default export used for lazy loading
+// Lazy loading helpers
 // eslint-disable-next-line import/no-default-export
 export default ObservabilityAlertsTable;
-
 export type ObservabilityAlertsTable = typeof ObservabilityAlertsTable;
