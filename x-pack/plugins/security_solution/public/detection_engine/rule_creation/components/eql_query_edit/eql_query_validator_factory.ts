@@ -8,8 +8,8 @@
 import { isEmpty } from 'lodash';
 import type { FormData, ValidationError, ValidationFunc } from '../../../../shared_imports';
 import { KibanaServices } from '../../../../common/lib/kibana';
+import type { FieldValueQueryBar } from '../../../rule_creation_ui/components/query_bar_field';
 import type { EqlOptions } from '../../../../../common/search_strategy';
-import type { FieldValueQueryBar } from '../../../rule_creation_ui/components/query_bar';
 import type { EqlResponseError } from '../../../../common/hooks/eql/api';
 import { EQL_ERROR_CODES, validateEql } from '../../../../common/hooks/eql/api';
 import { EQL_VALIDATION_REQUEST_ERROR } from './translations';

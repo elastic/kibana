@@ -63,6 +63,7 @@ function mockRuleType(overwrites: Partial<RuleType> = {}): RuleType {
     producer: 'alerts',
     minimumLicenseRequired: 'basic',
     enabledInLicense: true,
+    category: 'my-category',
     ...overwrites,
   };
 }
