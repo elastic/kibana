@@ -20,11 +20,13 @@ import { useGetCase } from '../../containers/use_get_case';
 import { CaseViewTabs } from './case_view_tabs';
 import { caseData, defaultGetCase } from './mocks';
 import { useGetCaseFileStats } from '../../containers/use_get_case_file_stats';
+import { useLicense } from '../../common/use_license';
 
 jest.mock('../../containers/use_get_case');
 jest.mock('../../common/navigation/hooks');
 jest.mock('../../common/hooks');
 jest.mock('../../containers/use_get_case_file_stats');
+jest.mock('../../common/use_license');
 
 const useFetchCaseMock = useGetCase as jest.Mock;
 const useCaseViewNavigationMock = useCaseViewNavigation as jest.Mock;
@@ -61,6 +63,8 @@ describe('CaseViewTabs', () => {
     mockGetCase();
 
     appMockRenderer = createAppMockRenderer();
+
+    (useLicense as jest.Mock).mockReturnValue({ isAtLeastPlatinum: () => false });
   });
 
   afterEach(() => {
@@ -231,23 +235,40 @@ describe('CaseViewTabs', () => {
     ).toBeInTheDocument();
   });
 
-  it('should show the observables tab', async () => {
+  it('should not show observable tabs in non-platinum tiers', async () => {
     appMockRenderer = createAppMockRenderer();
 
     appMockRenderer.render(
       <CaseViewTabs {...casePropsWithAlerts} activeTab={CASE_VIEW_PAGE_TABS.ALERTS} />
     );
 
-    expect(await screen.findByTestId('case-view-tab-title-observables')).toBeInTheDocument();
+    expect(screen.queryByTestId('case-view-tab-title-observables')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('case-view-tab-title-similar_cases')).not.toBeInTheDocument();
   });
 
-  it('should show the similar cases tab', async () => {
-    appMockRenderer = createAppMockRenderer();
+  describe('show observable tabs in platinum tier or higher', () => {
+    beforeEach(() => {
+      (useLicense as jest.Mock).mockReturnValue({ isAtLeastPlatinum: () => true });
+    });
 
-    appMockRenderer.render(
-      <CaseViewTabs {...casePropsWithAlerts} activeTab={CASE_VIEW_PAGE_TABS.ALERTS} />
-    );
+    it('should show the observables tab', async () => {
+      appMockRenderer = createAppMockRenderer();
 
-    expect(await screen.findByTestId('case-view-tab-title-similar_cases')).toBeInTheDocument();
+      appMockRenderer.render(
+        <CaseViewTabs {...casePropsWithAlerts} activeTab={CASE_VIEW_PAGE_TABS.ALERTS} />
+      );
+
+      expect(await screen.findByTestId('case-view-tab-title-observables')).toBeInTheDocument();
+    });
+
+    it('should show the similar cases tab', async () => {
+      appMockRenderer = createAppMockRenderer();
+
+      appMockRenderer.render(
+        <CaseViewTabs {...casePropsWithAlerts} activeTab={CASE_VIEW_PAGE_TABS.ALERTS} />
+      );
+
+      expect(await screen.findByTestId('case-view-tab-title-similar_cases')).toBeInTheDocument();
+    });
   });
 });
