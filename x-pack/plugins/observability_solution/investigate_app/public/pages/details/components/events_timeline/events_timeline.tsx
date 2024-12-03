@@ -67,57 +67,55 @@ export const EventsTimeLine = () => {
   const annotations = events?.filter((evt) => evt.eventType === 'annotation');
 
   return (
-    <>
-      <Chart size={['100%', 100]} ref={chartRef}>
-        <Settings
-          xDomain={{
-            min: moment(globalParams.timeRange.from).valueOf(),
-            max: moment(globalParams.timeRange.to).valueOf(),
-          }}
-          theme={TIME_LINE_THEME}
-          baseTheme={baseTheme}
-          onPointerUpdate={handleCursorUpdate}
-          externalPointerEvents={{
-            tooltip: { visible: true },
-          }}
-          onBrushEnd={(brush) => {
-            const { from, to } = getBrushData(brush);
-            updateInvestigationParams({
-              timeRange: { from, to },
-            });
-          }}
-        />
-        <Axis id="y" position={Position.Left} hide />
-        <Axis
-          id="x"
-          position={Position.Bottom}
-          tickFormat={(d) => moment(d).format('LTS')}
-          style={{
-            tickLine: {
-              visible: true,
-              strokeWidth: 1,
-              stroke: '#98A2B3',
-            },
-          }}
-        />
+    <Chart size={['100%', 100]} ref={chartRef}>
+      <Settings
+        xDomain={{
+          min: moment(globalParams.timeRange.from).valueOf(),
+          max: moment(globalParams.timeRange.to).valueOf(),
+        }}
+        theme={TIME_LINE_THEME}
+        baseTheme={baseTheme}
+        onPointerUpdate={handleCursorUpdate}
+        externalPointerEvents={{
+          tooltip: { visible: true },
+        }}
+        onBrushEnd={(brush) => {
+          const { from, to } = getBrushData(brush);
+          updateInvestigationParams({
+            timeRange: { from, to },
+          });
+        }}
+      />
+      <Axis id="y" position={Position.Left} hide />
+      <Axis
+        id="x"
+        position={Position.Bottom}
+        tickFormat={(d) => moment(d).format('LTS')}
+        style={{
+          tickLine: {
+            visible: true,
+            strokeWidth: 1,
+            stroke: '#98A2B3',
+          },
+        }}
+      />
 
-        {alertEvents?.map((event) => (
-          <AlertEvent key={event.id} event={event} />
-        ))}
+      {alertEvents?.map((event) => (
+        <AlertEvent key={event.id} event={event} />
+      ))}
 
-        {annotations?.map((annotation) => (
-          <AnnotationEvent key={annotation.id} event={annotation} />
-        ))}
+      {annotations?.map((annotation) => (
+        <AnnotationEvent key={annotation.id} event={annotation} />
+      ))}
 
-        <AreaSeries
-          id="Time"
-          xScaleType={ScaleType.Time}
-          xAccessor="x"
-          yAccessors={['y']}
-          data={data}
-          filterSeriesInTooltip={() => false}
-        />
-      </Chart>
-    </>
+      <AreaSeries
+        id="Time"
+        xScaleType={ScaleType.Time}
+        xAccessor="x"
+        yAccessors={['y']}
+        data={data}
+        filterSeriesInTooltip={() => false}
+      />
+    </Chart>
   );
 };
