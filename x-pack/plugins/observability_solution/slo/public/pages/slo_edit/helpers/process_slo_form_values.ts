@@ -9,13 +9,14 @@ import { CreateSLOInput, GetSLOResponse, Indicator, UpdateSLOInput } from '@kbn/
 import { assertNever } from '@kbn/std';
 import { RecursivePartial } from '@kbn/utility-types';
 import { cloneDeep } from 'lodash';
-import { toDuration } from '../../../utils/slo/duration';
+import { toDuration, toMinutes } from '../../../utils/slo/duration';
 import {
   APM_AVAILABILITY_DEFAULT_VALUES,
   APM_LATENCY_DEFAULT_VALUES,
   CUSTOM_KQL_DEFAULT_VALUES,
   CUSTOM_METRIC_DEFAULT_VALUES,
   HISTOGRAM_DEFAULT_VALUES,
+  SETTINGS_DEFAULT_VALUES,
   SLO_EDIT_FORM_DEFAULT_VALUES,
   SLO_EDIT_FORM_DEFAULT_VALUES_SYNTHETICS_AVAILABILITY,
   SYNTHETICS_AVAILABILITY_DEFAULT_VALUES,
@@ -52,6 +53,13 @@ export function transformSloResponseToCreateSloForm(
     tags: values.tags,
     settings: {
       preventInitialBackfill: values.settings?.preventInitialBackfill ?? false,
+      syncDelay: values.settings?.syncDelay
+        ? toMinutes(toDuration(values.settings.syncDelay))
+        : SETTINGS_DEFAULT_VALUES.syncDelay,
+      frequency: values.settings?.frequency
+        ? toMinutes(toDuration(values.settings.frequency))
+        : SETTINGS_DEFAULT_VALUES.frequency,
+      syncField: values.settings?.syncField ?? null,
     },
   };
 }
@@ -80,7 +88,10 @@ export function transformCreateSLOFormToCreateSLOInput(values: CreateSLOForm): C
     tags: values.tags,
     groupBy: [values.groupBy].flat(),
     settings: {
-      preventInitialBackfill: values.settings?.preventInitialBackfill ?? false,
+      preventInitialBackfill: values.settings.preventInitialBackfill,
+      syncDelay: `${values.settings.syncDelay ?? SETTINGS_DEFAULT_VALUES.syncDelay}m`,
+      frequency: `${values.settings.frequency ?? SETTINGS_DEFAULT_VALUES.frequency}m`,
+      syncField: values.settings.syncField,
     },
   };
 }
@@ -109,7 +120,10 @@ export function transformValuesToUpdateSLOInput(values: CreateSLOForm): UpdateSL
     tags: values.tags,
     groupBy: [values.groupBy].flat(),
     settings: {
-      preventInitialBackfill: values.settings?.preventInitialBackfill ?? false,
+      preventInitialBackfill: values.settings.preventInitialBackfill,
+      syncDelay: `${values.settings.syncDelay ?? SETTINGS_DEFAULT_VALUES.syncDelay}m`,
+      frequency: `${values.settings.frequency ?? SETTINGS_DEFAULT_VALUES.frequency}m`,
+      syncField: values.settings.syncField,
     },
   };
 }
@@ -165,7 +179,7 @@ function transformPartialIndicatorState(
   }
 }
 
-export function transformPartialUrlStateToFormState(
+export function transformPartialSLOStateToFormState(
   values: RecursivePartial<CreateSLOInput>
 ): CreateSLOForm {
   let state: CreateSLOForm;
@@ -189,8 +203,8 @@ export function transformPartialUrlStateToFormState(
   if (values.description) {
     state.description = values.description;
   }
-  if (!!values.tags) {
-    state.tags = values.tags as string[];
+  if (values.tags) {
+    state.tags = [values.tags].flat().filter((tag) => !!tag) as string[];
   }
 
   if (values.objective) {
@@ -220,8 +234,19 @@ export function transformPartialUrlStateToFormState(
     state.timeWindow = { duration: values.timeWindow.duration, type: values.timeWindow.type };
   }
 
-  if (!!values.settings?.preventInitialBackfill) {
-    state.settings = { preventInitialBackfill: values.settings.preventInitialBackfill };
+  if (!!values.settings) {
+    if (values.settings.preventInitialBackfill) {
+      state.settings.preventInitialBackfill = values.settings.preventInitialBackfill;
+    }
+    if (values.settings.syncDelay) {
+      state.settings.syncDelay = toMinutes(toDuration(values.settings.syncDelay));
+    }
+    if (values.settings.frequency) {
+      state.settings.frequency = toMinutes(toDuration(values.settings.frequency));
+    }
+    if (values.settings.syncField) {
+      state.settings.syncField = values.settings.syncField;
+    }
   }
 
   return state;

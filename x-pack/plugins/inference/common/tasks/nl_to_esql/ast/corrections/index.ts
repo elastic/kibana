@@ -7,12 +7,14 @@
 
 import type { ESQLAstQueryExpression } from '@kbn/esql-ast';
 import type { QueryCorrection } from './types';
-import { applyTimespanLiteralsCorrections } from './timespan_literals';
+import { correctTimespanLiterals } from './timespan_literals';
+import { correctLikeWildcards } from './like';
 
 export type { QueryCorrection } from './types';
 
 export const correctAll = (query: ESQLAstQueryExpression): QueryCorrection[] => {
   const corrections: QueryCorrection[] = [];
-  corrections.push(...applyTimespanLiteralsCorrections(query));
+  corrections.push(...correctTimespanLiterals(query));
+  corrections.push(...correctLikeWildcards(query));
   return corrections;
 };

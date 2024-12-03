@@ -187,5 +187,6 @@
     "@kbn/core-deprecations-common",
     "@kbn/usage-collection-plugin",
     "@kbn/palettes",
+    "@kbn/integration-assistant-plugin"
   ]
 }
