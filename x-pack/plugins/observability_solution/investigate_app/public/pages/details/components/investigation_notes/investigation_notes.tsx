@@ -18,12 +18,13 @@ import { i18n } from '@kbn/i18n';
 import { InvestigationNoteResponse } from '@kbn/investigation-shared';
 import { AuthenticatedUser } from '@kbn/security-plugin/common';
 import React, { useState } from 'react';
+import { useAddInvestigationNote } from '../../../../hooks/use_add_investigation_note';
+import { useFetchInvestigationNotes } from '../../../../hooks/use_fetch_investigation_notes';
 import { useFetchUserProfiles } from '../../../../hooks/use_fetch_user_profiles';
 import { useTheme } from '../../../../hooks/use_theme';
 import { useInvestigation } from '../../contexts/investigation_context';
 import { Note } from './note';
 import { ResizableTextInput } from './resizable_text_input';
-import { useAddInvestigationNote } from '../../../../hooks/use_add_investigation_note';
 
 export interface Props {
   user: AuthenticatedUser;
@@ -32,8 +33,10 @@ export interface Props {
 export function InvestigationNotes({ user }: Props) {
   const theme = useTheme();
   const { investigation } = useInvestigation();
+  const { data: notes, isLoading } = useFetchInvestigationNotes({
+    investigationId: investigation!.id,
+  });
   const { mutate: addNote, isLoading: isAddingNote } = useAddInvestigationNote();
-
   const { data: userProfiles, isLoading: isLoadingUserProfiles } = useFetchUserProfiles({
     profileIds: new Set(investigation?.notes.map((note) => note.createdBy)),
   });
@@ -67,17 +70,19 @@ export function InvestigationNotes({ user }: Props) {
       </EuiSplitPanel.Inner>
       <EuiSplitPanel.Inner>
         <EuiFlexGroup direction="column" gutterSize="m">
-          {investigation?.notes.map((currNote: InvestigationNoteResponse) => {
-            return (
-              <Note
-                key={currNote.id}
-                note={currNote}
-                userProfile={userProfiles?.[currNote.createdBy]}
-                userProfileLoading={isLoadingUserProfiles}
-                isOwner={currNote.createdBy === user.profile_uid}
-              />
-            );
-          })}
+          {isLoading || notes === undefined
+            ? 'Loading...'
+            : notes.map((currNote: InvestigationNoteResponse) => {
+                return (
+                  <Note
+                    key={currNote.id}
+                    note={currNote}
+                    userProfile={userProfiles?.[currNote.createdBy]}
+                    userProfileLoading={isLoadingUserProfiles}
+                    isOwner={currNote.createdBy === user.profile_uid}
+                  />
+                );
+              })}
         </EuiFlexGroup>
       </EuiSplitPanel.Inner>
       <EuiSplitPanel.Inner>

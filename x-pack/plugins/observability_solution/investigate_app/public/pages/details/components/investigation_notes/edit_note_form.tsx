@@ -11,6 +11,7 @@ import { InvestigationNoteResponse } from '@kbn/investigation-shared';
 import React, { useState } from 'react';
 import { ResizableTextInput } from './resizable_text_input';
 import { useInvestigation } from '../../contexts/investigation_context';
+import { useUpdateInvestigationNote } from '../../../../hooks/use_update_investigation_note';
 
 interface Props {
   note: InvestigationNoteResponse;
@@ -19,11 +20,22 @@ interface Props {
 
 export function EditNoteForm({ note, onClose }: Props) {
   const [noteInput, setNoteInput] = useState(note.content);
-  const { updateNote, isUpdatingNote } = useInvestigation();
+  const { investigation } = useInvestigation();
+  const { mutate: updateNote, isLoading: isUpdatingNote } = useUpdateInvestigationNote();
 
-  const onUpdate = async () => {
-    await updateNote(note.id, noteInput.trim());
-    onClose();
+  const onUpdate = () => {
+    updateNote(
+      {
+        investigationId: investigation!.id,
+        noteId: note.id,
+        note: { content: noteInput.trim() },
+      },
+      {
+        onSuccess: () => {
+          onClose();
+        },
+      }
+    );
   };
 
   return (

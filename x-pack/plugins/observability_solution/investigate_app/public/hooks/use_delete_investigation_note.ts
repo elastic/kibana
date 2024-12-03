@@ -6,13 +6,15 @@
  */
 
 import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from './use_kibana';
+import { investigationKeys } from './query_key_factory';
 
 type ServerError = IHttpFetchError<ResponseErrorBody>;
 
 export function useDeleteInvestigationNote() {
+  const queryClient = useQueryClient();
   const {
     core: {
       http,
@@ -34,7 +36,12 @@ export function useDeleteInvestigationNote() {
       );
     },
     {
-      onSuccess: (response, {}) => {
+      onSuccess: (response, { investigationId }) => {
+        queryClient.invalidateQueries({
+          queryKey: investigationKeys.detailNotes(investigationId),
+          exact: false,
+        });
+
         toasts.addSuccess(
           i18n.translate('xpack.investigateApp.useDeleteInvestigationNote.successMessage', {
             defaultMessage: 'Note deleted',
