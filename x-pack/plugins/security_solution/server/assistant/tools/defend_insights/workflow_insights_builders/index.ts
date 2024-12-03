@@ -23,7 +23,7 @@ export interface BuildWorkflowInsightParams {
 export function buildWorkflowInsights(
   params: BuildWorkflowInsightParams
 ): SecurityWorkflowInsight[] {
-  if (params.request.body.insightType == DefendInsightType.Enum.incompatible_antivirus) {
+  if (params.request.body.insightType === DefendInsightType.Enum.incompatible_antivirus) {
     return buildIncompatibleAntivirusWorkflowInsight(params);
   }
 
