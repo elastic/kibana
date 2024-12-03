@@ -221,7 +221,6 @@ export default function ({
       });
 
       it('downloads a PDF file with saved search given EuiDataGrid enabled', async function () {
-        await kibanaServer.uiSettings.update({ 'doc_table:legacy': false });
         this.timeout(300000);
         await dashboard.navigateToApp();
         await dashboard.loadSavedDashboard('Ecom Dashboard');
