@@ -6,60 +6,74 @@
  */
 
 import expect from '@kbn/expect';
-import { escapeKuery } from '.';
+import { escapeQueryValue } from '.';
+
+const TEST_QUERIES = [
+  {
+    description: 'should not remove white spaces quotes',
+    value: ' netcat',
+    expected: ' netcat',
+  },
+  {
+    description: 'should escape quotes',
+    value: 'I said, "Hello."',
+    expected: 'I said, \\"Hello.\\"',
+  },
+  {
+    description: 'should escape special characters',
+    value: `This \\ has (a lot of) <special> characters, don't you *think*? "Yes."`,
+    expected: `This \\\\ has \\(a lot of\\) \\<special\\> characters, don't you \\*think\\*? \\"Yes.\\"`,
+  },
+  {
+    description: 'should escape keywords',
+    value: 'foo and bar or baz not qux',
+    expected: 'foo \\and bar \\or baz \\not qux',
+  },
+  {
+    description: 'should escape keywords next to each other',
+    value: 'foo and bar or not baz',
+    expected: 'foo \\and bar \\or \\not baz',
+  },
+  {
+    description: 'should NOT escape keywords without surrounding spaces',
+    value: 'And this has keywords, or does it not?',
+    expected: 'And this has keywords, \\or does it not?',
+  },
+  {
+    description: 'should escape uppercase keywords',
+    value: 'foo AND bar',
+    expected: 'foo \\AND bar',
+  },
+  {
+    description: 'should escape special characters and NOT keywords',
+    value: 'Hello, "world", and <nice> to meet you!',
+    expected: 'Hello, \\"world\\", \\and \\<nice\\> to meet you!',
+  },
+  {
+    description: 'should escape newlines and tabs',
+    value: 'This\nhas\tnewlines\r\nwith\ttabs',
+    expected: 'This\\nhas\\tnewlines\\r\\nwith\\ttabs',
+  },
+  {
+    description: 'should escape backslashes',
+    value: 'This\\has\\backslashes',
+    expected: 'This\\\\has\\\\backslashes',
+  },
+  {
+    description: 'should escape multiple backslashes and quotes',
+    value: 'This\\ has 2" quotes & \\ 2 "backslashes',
+    expected: 'This\\\\ has 2\\" quotes & \\\\ 2 \\"backslashes',
+  },
+  {
+    description: 'should escape all special character according to kuery.peg SpecialCharacter rule',
+    value: '\\():"*',
+    expected: '\\\\\\(\\)\\:\\"\\*',
+  },
+];
 
 describe('Kuery escape', () => {
-  it('should not remove white spaces quotes', () => {
-    const value = ' netcat';
-    const expected = ' netcat';
-    expect(escapeKuery(value)).to.be(expected);
-  });
-
-  it('should escape quotes', () => {
-    const value = 'I said, "Hello."';
-    const expected = 'I said, \\"Hello.\\"';
-    expect(escapeKuery(value)).to.be(expected);
-  });
-
-  it('should escape special characters', () => {
-    const value = `This \\ has (a lot of) <special> characters, don't you *think*? "Yes."`;
-    const expected = `This \\ has (a lot of) <special> characters, don't you *think*? \\"Yes.\\"`;
-    expect(escapeKuery(value)).to.be(expected);
-  });
-
-  it('should NOT escape keywords', () => {
-    const value = 'foo and bar or baz not qux';
-    const expected = 'foo and bar or baz not qux';
-    expect(escapeKuery(value)).to.be(expected);
-  });
-
-  it('should NOT escape keywords next to each other', () => {
-    const value = 'foo and bar or not baz';
-    const expected = 'foo and bar or not baz';
-    expect(escapeKuery(value)).to.be(expected);
-  });
-
-  it('should not escape keywords without surrounding spaces', () => {
-    const value = 'And this has keywords, or does it not?';
-    const expected = 'And this has keywords, or does it not?';
-    expect(escapeKuery(value)).to.be(expected);
-  });
-
-  it('should NOT escape uppercase keywords', () => {
-    const value = 'foo AND bar';
-    const expected = 'foo AND bar';
-    expect(escapeKuery(value)).to.be(expected);
-  });
-
-  it('should escape special characters and NOT keywords', () => {
-    const value = 'Hello, "world", and <nice> to meet you!';
-    const expected = 'Hello, \\"world\\", and <nice> to meet you!';
-    expect(escapeKuery(value)).to.be(expected);
-  });
-
-  it('should escape newlines and tabs', () => {
-    const value = 'This\nhas\tnewlines\r\nwith\ttabs';
-    const expected = 'This\\nhas\\tnewlines\\r\\nwith\\ttabs';
-    expect(escapeKuery(value)).to.be(expected);
+  it.each(TEST_QUERIES)('$description', ({ description, value, expected }) => {
+    const result = escapeQueryValue(value);
+    expect(result).to.be(`"${expected}"`);
   });
 });
