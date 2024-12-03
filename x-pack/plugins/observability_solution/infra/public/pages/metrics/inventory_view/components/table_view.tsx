@@ -53,9 +53,8 @@ export const TableView = (props: Props) => {
   const [_, setFlyoutUrlState] = useAssetDetailsFlyoutState();
   const isFlyoutMode = nodeType === 'host' || nodeType === 'container';
 
-  const toggleAssetPopover = (uniqueID: string) => {
+  const toggleAssetPopover = (uniqueID: string, nodeId: string) => {
     if (isFlyoutMode) {
-      const [nodeId] = uniqueID.split(':');
       setFlyoutUrlState({ detailsItemId: nodeId, assetType: nodeType });
     } else {
       setOpenPopoverId(uniqueID);
@@ -81,7 +80,7 @@ export const TableView = (props: Props) => {
           <EuiToolTip content={tooltipText}>
             <EuiButtonEmpty
               data-test-subj="infraColumnsButton"
-              onClick={() => toggleAssetPopover(uniqueID)}
+              onClick={() => toggleAssetPopover(uniqueID, item.node.id)}
             >
               {value}
             </EuiButtonEmpty>
