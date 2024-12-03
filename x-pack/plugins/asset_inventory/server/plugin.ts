@@ -59,6 +59,8 @@ export class AssetInventoryPlugin
     deleteKeywordBuilderPipeline({
       logger: this.logger,
       esClient: this.esClient!,
+    }).catch((err) => {
+      this.logger.error('Error on deleting keyword builder pipeline', err);
     });
   }
 
@@ -70,7 +72,7 @@ export class AssetInventoryPlugin
     this.esClient = core.elasticsearch.client.asInternalUser;
     // await initializeTransforms(esClient, this.logger);
 
-    createKeywordBuilderPipeline({
+    await createKeywordBuilderPipeline({
       logger: this.logger,
       esClient: this.esClient,
     });
