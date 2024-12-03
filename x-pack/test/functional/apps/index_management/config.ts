@@ -9,6 +9,7 @@ import { FtrConfigProviderContext } from '@kbn/test';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const functionalConfig = await readConfigFile(require.resolve('../../config.base.js'));
+
   const baseConfig = functionalConfig.getAll();
 
   baseConfig.security.roles.index_management_manage_index_templates = {

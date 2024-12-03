@@ -22,7 +22,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   describe('Index component templates', function () {
     before(async () => {
       await security.testUser.setRoles(['index_management_manage_index_templates']);
-      await pageObjects.svlCommonPage.loginAsAdmin();
     });
 
     beforeEach(async () => {
@@ -107,7 +106,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     describe('no access', () => {
       before(async () => {
         await security.testUser.setRoles(['index_management_monitor_only']);
-        await browser.refresh();
+        await pageObjects.common.navigateToApp('indexManagement');
         await pageObjects.header.waitUntilLoadingHasFinished();
       });
 
