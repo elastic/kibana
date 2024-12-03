@@ -68,8 +68,6 @@ export const Footer = React.memo<FooterProps>(
     const { setStep, setIsGenerating } = useActions();
     const navigate = useNavigate();
 
-    // const { generateCel: isGenerateCelEnabled } = ExperimentalFeaturesService.get();
-
     const onBack = useCallback(() => {
       if (currentStep === 1) {
         navigate(Page.landing);
@@ -94,15 +92,6 @@ export const Footer = React.memo<FooterProps>(
       if (currentStep === 4) {
         return i18n.ADD_TO_ELASTIC;
       }
-      // if (currentStep === 5 && isGenerateCelEnabled && hasCelInput) {
-      //   return <AnalyzeApiButtonText isGenerating={isGenerating} />;
-      // }
-      // if (currentStep === 6 && isGenerateCelEnabled && hasCelInput) {
-      //   return <AnalyzeCelButtonText isGenerating={isGenerating} />;
-      // }
-      // if (currentStep === 7 && isGenerateCelEnabled) {
-      //   return i18n.ADD_TO_ELASTIC;
-      // }
     }, [currentStep, isGenerating]);
 
     if (currentStep === 5) {

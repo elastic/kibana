@@ -21,8 +21,6 @@ import type {
   IntegrationAssistantPluginStart,
   IntegrationAssistantPluginStartDependencies,
 } from './types';
-import { parseExperimentalConfigValue } from '../common/experimental_features';
-import { IntegrationAssistantConfigType } from './config';
 
 export type IntegrationAssistantRouteHandlerContext = CustomRequestHandlerContext<{
   integrationAssistant: {
@@ -38,13 +36,11 @@ export class IntegrationAssistantPlugin
   implements Plugin<IntegrationAssistantPluginSetup, IntegrationAssistantPluginStart>
 {
   private readonly logger: Logger;
-  private readonly config: IntegrationAssistantConfigType;
   private isAvailable: boolean;
   private hasLicense: boolean;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
-    this.config = initializerContext.config.get();
     this.isAvailable = true;
     this.hasLicense = false;
   }
@@ -63,11 +59,10 @@ export class IntegrationAssistantPlugin
       logger: this.logger,
     }));
     const router = core.http.createRouter<IntegrationAssistantRouteHandlerContext>();
-    const experimentalFeatures = parseExperimentalConfigValue(this.config.enableExperimental ?? []);
 
     this.logger.debug('integrationAssistant api: Setup');
 
-    registerRoutes(router, experimentalFeatures);
+    registerRoutes(router);
 
     return {
       setIsAvailable: (isAvailable: boolean) => {

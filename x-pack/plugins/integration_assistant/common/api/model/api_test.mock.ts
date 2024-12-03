@@ -67,7 +67,7 @@ export const getCategorizationRequestMock = (): CategorizationRequestBody => ({
 });
 
 export const getCelRequestMock = (): CelInputRequestBody => ({
-  dataStreamName: 'test-data-stream-name',
+  dataStreamTitle: 'test-data-stream-title',
   connectorId: 'test-connector-id',
   celDetails: {
     path: 'test-cel-path',
