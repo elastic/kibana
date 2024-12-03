@@ -18,9 +18,10 @@ import {
   StreamingChatResponseEventType,
 } from '../../../../common';
 
-export function convertInferenceEventsToStreamingEvents<
-  T extends InferenceChatCompletionEvent
->(): OperatorFunction<T, ChatCompletionChunkEvent | TokenCountEvent | ChatCompletionMessageEvent> {
+export function convertInferenceEventsToStreamingEvents(): OperatorFunction<
+  InferenceChatCompletionEvent,
+  ChatCompletionChunkEvent | TokenCountEvent | ChatCompletionMessageEvent
+> {
   return (events$) => {
     return events$.pipe(
       map((event) => {
