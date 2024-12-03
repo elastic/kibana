@@ -65,13 +65,11 @@ export const registerAddFromLibraryType = <
 };
 
 export function useAddFromLibraryTypes() {
-  const types = useMemo(() => {
+  return useMemo(() => {
     return [...registry.entries()]
     .map(([type, registryItem]) => registryItem.savedObjectMetaData)
     .sort((a, b) => a.type.localeCompare(b.type));
   }, []);
-
-  return { types, getAddFromLibraryType };
 }
 
 export const getAddFromLibraryType = (type: string) => {

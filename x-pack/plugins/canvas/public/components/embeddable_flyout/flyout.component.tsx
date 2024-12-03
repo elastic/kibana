@@ -40,19 +40,16 @@ export const AddEmbeddableFlyout: FC<Props> = ({
   onClose,
   isByValueEnabled,
 }) => {
-  const { types, getAddFromLibraryType } = useAddFromLibraryTypes();
+  const libraryTypes = useAddFromLibraryTypes();
 
-  const canvasOnlyTypes = useMemo(() => {
+  const canvasOnlyLibraryTypes = useMemo(() => {
     // Links panels are not supported in Canvas
-    return types.filter(({ type }) => type !== 'links');
-  }, [types])
+    return libraryTypes.filter(({ type }) => type !== 'links');
+  }, [libraryTypes])
 
   const onAddPanel = useCallback(
     (id: string, savedObjectType: string) => {
-        const factory = getAddFromLibraryType(savedObjectType);
-        if (!factory) return;
         onSelect(id, savedObjectType, isByValueEnabled);
-        return;
     },
     [isByValueEnabled, onSelect]
   );
@@ -68,7 +65,7 @@ export const AddEmbeddableFlyout: FC<Props> = ({
         <SavedObjectFinder
           id="canvasEmbeddableFlyout"
           onChoose={onAddPanel}
-          savedObjectMetaData={canvasOnlyTypes}
+          savedObjectMetaData={canvasOnlyLibraryTypes}
           showFilter={true}
           noItemsMessage={strings.getNoItemsText()}
           services={{

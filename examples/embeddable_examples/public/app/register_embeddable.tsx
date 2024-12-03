@@ -81,7 +81,7 @@ export const RegisterEmbeddable = () => {
       <EuiSpacer size="l" />
 
       <EuiText>
-        <h2>Show saved object type in Add from library menu</h2>
+        <h2>Show saved object type in <em>Add from library</em> menu</h2>
         <p>
           Embeddable factories, such as Lens, Maps, Links, that can reference saved objects should
           register their saved object types using{' '}

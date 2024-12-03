@@ -54,7 +54,7 @@ export const AddFromLibraryFlyout = ({
   onAddPanel?: (id: string) => void;
   modalTitleId?: string;
 }) => {
-  const { types } = useAddFromLibraryTypes();
+  const libraryTypes = useAddFromLibraryTypes();
 
   const onChoose: SavedObjectFinderProps['onChoose'] = useCallback(
     async (
@@ -93,7 +93,7 @@ export const AddFromLibraryFlyout = ({
             uiSettings: core.uiSettings,
           }}
           onChoose={onChoose}
-          savedObjectMetaData={types}
+          savedObjectMetaData={libraryTypes}
           showFilter={true}
           noItemsMessage={i18n.translate('embeddableApi.addPanel.noMatchingObjectsMessage', {
             defaultMessage: 'No matching objects found.',
