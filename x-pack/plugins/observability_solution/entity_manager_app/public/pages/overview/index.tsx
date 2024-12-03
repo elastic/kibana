@@ -101,17 +101,29 @@ function EntitySourceForm({
           />
         </EuiFormRow>
       </EuiFlexItem>
+
+      <EuiFlexItem>
+        <EuiFormRow label="Display name">
+          <EuiFieldText
+            data-test-subj="entityManagerFormDisplayName"
+            name="display_name"
+            defaultValue={source.display_name}
+            onChange={(e) => onFieldChange(index, 'display_name', e.target.value)}
+          />
+        </EuiFormRow>
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 }
 
 interface EntitySource {
   id: string;
-  index_patterns?: string[];
-  identity_fields?: string[];
-  metadata_fields?: string[];
-  filters?: string[];
+  index_patterns: string[];
+  identity_fields: string[];
+  metadata_fields: string[];
+  filters: string[];
   timestamp_field?: string;
+  display_name?: string;
 }
 
 const newEntitySource = ({
@@ -126,7 +138,7 @@ const newEntitySource = ({
   metadataFields?: string[];
   filters?: string[];
   timestampField?: string;
-}) => ({
+}): EntitySource => ({
   id: uuid(),
   index_patterns: indexPatterns,
   identity_fields: identityFields,
@@ -321,6 +333,10 @@ export function EntityManagerOverviewPage() {
             name: 'entity.id',
           },
           {
+            field: 'entity.display_name',
+            name: 'entity.display_name',
+          },
+          {
             field: 'entity.type',
             name: 'entity.type',
           },
@@ -329,16 +345,10 @@ export function EntityManagerOverviewPage() {
             name: 'entity.last_seen_timestamp',
           },
           ...Array.from(new Set(entitySources.flatMap((source) => source.identity_fields))).map(
-            (field) => ({
-              field,
-              name: field,
-            })
+            (field) => ({ field, name: field })
           ),
           ...Array.from(new Set(entitySources.flatMap((source) => source.metadata_fields))).map(
-            (field) => ({
-              field: `metadata.${field}`,
-              name: `metadata.${field}`,
-            })
+            (field) => ({ field, name: field })
           ),
         ]}
       />

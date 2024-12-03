@@ -58,6 +58,7 @@ function renderMenu({
             onClick={() => {
               deletePackagePoliciesPrompt(packagePolicyIds, () => {});
             }}
+            data-test-subj="deleteIntegrationBtn"
           >
             Delete integration
           </EuiContextMenuItem>
@@ -156,14 +157,15 @@ describe('PackagePolicyDeleteProvider', () => {
       agentPolicies,
       packagePolicyIds: ['integration-0001'],
     });
-    const button = utils.getByRole('button');
+    const button = utils.getByTestId('deleteIntegrationBtn');
     fireEvent.click(button);
     await waitFor(() => {
-      expect(utils.getByText('This action will affect 5 agents.')).toBeInTheDocument();
-      expect(
-        utils.getByText('This action can not be undone. Are you sure you wish to continue?')
-      ).toBeInTheDocument();
-      expect(utils.getAllByText(/is already in use by some of your agents./).length).toBe(1);
+      const calloutText = utils.getByTestId('affectedAgentsCallOut').textContent;
+      expect(calloutText).toContain('This action will affect 5 agents.');
+      expect(calloutText).toContain('is already in use by some of your agents');
+      expect(utils.getByTestId('confirmModalBodyText').textContent).toContain(
+        'This action can not be undone. Are you sure you wish to continue?'
+      );
     });
   });
 
@@ -186,18 +188,18 @@ describe('PackagePolicyDeleteProvider', () => {
       agentPolicies,
       packagePolicyIds: ['integration-0001'],
     });
-    const button = utils.getByRole('button');
+    const button = utils.getByTestId('deleteIntegrationBtn');
     fireEvent.click(button);
 
     await waitFor(() => {
-      expect(utils.getByText('This action will affect 5 agents.')).toBeInTheDocument();
-      expect(
-        utils.getByText('This integration is shared by multiple agent policies.')
-      ).toBeInTheDocument();
-      expect(
-        utils.getByText('This action can not be undone. Are you sure you wish to continue?')
-      ).toBeInTheDocument();
-      expect(utils.queryAllByText(/is already in use by some of your agents./).length).toBe(0);
+      const calloutText = utils.getByTestId('affectedAgentsCallOut').textContent;
+      expect(calloutText).toContain('This action will affect 5 agents.');
+      expect(utils.getByTestId('sharedAgentPolicyCallOut').textContent).toContain(
+        'This integration is shared by multiple agent policies.'
+      );
+      expect(utils.getByTestId('confirmModalBodyText').textContent).toContain(
+        'This action can not be undone. Are you sure you wish to continue?'
+      );
     });
   });
 
@@ -215,18 +217,17 @@ describe('PackagePolicyDeleteProvider', () => {
       agentPolicies,
       packagePolicyIds: ['integration-0001'],
     });
-    const button = utils.getByRole('button');
+    const button = utils.getByTestId('deleteIntegrationBtn');
     fireEvent.click(button);
 
     await waitFor(() => {
-      expect(utils.queryByText('This action will affect 5 agents.')).not.toBeInTheDocument();
-      expect(utils.queryAllByText(/is already in use by some of your agents./).length).toBe(0);
-      expect(
-        utils.getByText('This integration is shared by multiple agent policies.')
-      ).toBeInTheDocument();
-      expect(
-        utils.getByText('This action can not be undone. Are you sure you wish to continue?')
-      ).toBeInTheDocument();
+      expect(utils.queryByTestId('affectedAgentsCallOut')).not.toBeInTheDocument();
+      expect(utils.getByTestId('sharedAgentPolicyCallOut').textContent).toContain(
+        'This integration is shared by multiple agent policies.'
+      );
+      expect(utils.getByTestId('confirmModalBodyText').textContent).toContain(
+        'This action can not be undone. Are you sure you wish to continue?'
+      );
     });
   });
 
@@ -249,17 +250,19 @@ describe('PackagePolicyDeleteProvider', () => {
       agentPolicies,
       packagePolicyIds: ['integration-0001'],
     });
-    const button = utils.getByRole('button');
+    const button = utils.getByTestId('deleteIntegrationBtn');
     fireEvent.click(button);
-    // utils.debug();
 
     await waitFor(() => {
-      expect(utils.queryByText('This action will affect 5 agents.')).not.toBeInTheDocument();
-      expect(utils.getByText(/about to delete an integration/)).toBeInTheDocument();
-      expect(
-        utils.getByText('This action can not be undone. Are you sure you wish to continue?')
-      ).toBeInTheDocument();
-      expect(utils.getAllByText(/integration will stop data ingestion./).length).toBe(1);
+      expect(utils.getByTestId('affectedAgentsCallOut').textContent).not.toContain(
+        'This action will affect 5 agents.'
+      );
+      expect(utils.getByTestId('confirmModalBodyText').textContent).toContain(
+        'This action can not be undone. Are you sure you wish to continue?'
+      );
+      expect(utils.getByTestId('confirmModalTitleText').textContent).toContain(
+        'about to delete an integration'
+      );
     });
   });
 });

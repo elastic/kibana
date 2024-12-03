@@ -18,11 +18,12 @@ export type EntityTypeDefinition = z.TypeOf<typeof entityTypeDefinitionRt>;
 export const entitySourceDefinitionRt = z.object({
   id: z.string(),
   type_id: z.string(),
-  timestamp_field: z.optional(z.string()).default('@timestamp'),
   index_patterns: z.array(z.string()),
   identity_fields: z.array(z.string()),
   metadata_fields: z.array(z.string()),
   filters: z.array(z.string()),
+  timestamp_field: z.optional(z.string()),
+  display_name: z.optional(z.string()),
 });
 
 export type EntitySourceDefinition = z.TypeOf<typeof entitySourceDefinitionRt>;
@@ -42,4 +43,11 @@ export interface StoredEntityTypeDefinition extends BaseEntityDefinition {
 
 export interface StoredEntitySourceDefinition extends BaseEntityDefinition {
   source: EntitySourceDefinition;
+}
+
+// API parameters
+
+export interface SortBy {
+  field: string;
+  direction: 'ASC' | 'DESC';
 }
