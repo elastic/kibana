@@ -233,6 +233,11 @@ export const allowedExperimentalValues = Object.freeze({
   entityStoreDisabled: false,
 
   /**
+   * Enables the Service Entity Store. The Entity Store feature will install the service engine by default.
+   */
+  serviceEntityStoreEnabled: true,
+
+  /**
    * Enables the siem migrations feature
    */
   siemMigrationsEnabled: false,
