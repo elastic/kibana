@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 import { EuiFormRow, EuiIconTip, EuiSuperSelect, EuiSwitch, EuiText } from '@elastic/eui';
 import type { FittingFunction, EndValue } from '@kbn/expression-xy-plugin/common';
 import { FittingFunctions } from '@kbn/expression-xy-plugin/public';
@@ -88,6 +89,9 @@ export const MissingValuesOptions: React.FC<MissingValuesOptionProps> = ({
           {fittingFunction && fittingFunction !== FittingFunctions.NONE && (
             <>
               <EuiFormRow
+                css={css`
+                  max-inline-size: none !important;
+                `}
                 display="columnCompressed"
                 label={i18n.translate('xpack.lens.xyChart.endValuesLabel', {
                   defaultMessage: 'End values',
@@ -117,6 +121,9 @@ export const MissingValuesOptions: React.FC<MissingValuesOptionProps> = ({
                 />
               </EuiFormRow>
               <EuiFormRow
+                css={css`
+                  max-inline-size: none !important;
+                `}
                 label={i18n.translate('xpack.lens.xyChart.missingValuesStyle', {
                   defaultMessage: 'Show as dotted line',
                 })}
