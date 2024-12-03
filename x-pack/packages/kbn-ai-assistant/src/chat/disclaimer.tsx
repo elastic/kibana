@@ -19,7 +19,7 @@ export function Disclaimer() {
     >
       {i18n.translate('xpack.aiAssistant.disclaimer.disclaimerLabel', {
         defaultMessage:
-          "This chat is powered by an integration with your LLM provider. LLMs are known to sometimes present incorrect information as if it's correct. Elastic supports configuration and connection to the LLM provider and your knowledge base, but is not responsible for the LLM's responses.",
+          "This conversation is powered by an integration with your LLM provider. LLMs are known to sometimes present incorrect information as if it's correct. Elastic supports configuration and connection to the LLM provider and your knowledge base, but is not responsible for the LLM's responses.",
       })}
     </EuiText>
   );

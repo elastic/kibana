@@ -20,8 +20,10 @@ export const getPrebuiltRulesStatusRoute = (router: SecuritySolutionPluginRouter
     .get({
       access: 'internal',
       path: GET_PREBUILT_RULES_STATUS_URL,
-      options: {
-        tags: ['access:securitySolution'],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
       },
     })
     .addVersion(
@@ -35,7 +37,7 @@ export const getPrebuiltRulesStatusRoute = (router: SecuritySolutionPluginRouter
         try {
           const ctx = await context.resolve(['core', 'alerting']);
           const soClient = ctx.core.savedObjects.client;
-          const rulesClient = ctx.alerting.getRulesClient();
+          const rulesClient = await ctx.alerting.getRulesClient();
           const ruleAssetsClient = createPrebuiltRuleAssetsClient(soClient);
           const ruleObjectsClient = createPrebuiltRuleObjectsClient(rulesClient);
 

@@ -27,6 +27,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -68,13 +69,16 @@ export const ManualConfigurationFlyout: React.FC<ManualConfigurationFlyoutProps>
 
   const { connectorName } = useValues(NewConnectorLogic);
   const { setRawName, createConnector } = useActions(NewConnectorLogic);
-
+  const { euiTheme } = useEuiTheme();
   return (
     <EuiFlyout
       ownFocus
       onClose={() => setIsFlyoutVisible(false)}
       aria-labelledby={simpleFlyoutTitleId}
       size="s"
+      // This fixes an a11y issue where the flyout was rendered below the Popover
+      // Now we let get the focus back to the Popover is we close the Flyout
+      maskProps={{ style: `z-index: ${Number(euiTheme.levels.menu) + 1}` }}
     >
       {flyoutContent === 'manual_config' && (
         <>

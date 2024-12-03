@@ -6,11 +6,11 @@
  */
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React, { Fragment } from 'react';
-import { AlertConsumers } from '@kbn/rule-data-utils';
+import { AlertConsumers, SLO_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 
 import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { SLO_ALERTS_TABLE_ID } from '@kbn/observability-shared-plugin/common';
-import { useKibana } from '../../../utils/kibana_react';
+import { useKibana } from '../../../hooks/use_kibana';
 
 export interface Props {
   slo: SLOWithSummaryResponse;
@@ -32,7 +32,8 @@ export function SloDetailsAlerts({ slo }: Props) {
             configurationId={AlertConsumers.OBSERVABILITY}
             id={SLO_ALERTS_TABLE_ID}
             data-test-subj="alertTable"
-            featureIds={[AlertConsumers.SLO, AlertConsumers.OBSERVABILITY]}
+            ruleTypeIds={SLO_RULE_TYPE_IDS}
+            consumers={[AlertConsumers.SLO, AlertConsumers.ALERTS, AlertConsumers.OBSERVABILITY]}
             query={{
               bool: {
                 filter: [

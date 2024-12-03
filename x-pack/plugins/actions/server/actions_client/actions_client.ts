@@ -10,7 +10,7 @@ import url from 'url';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
 import { i18n } from '@kbn/i18n';
-import { compact, uniq } from 'lodash';
+import { uniq } from 'lodash';
 import {
   IScopedClusterClient,
   SavedObjectsClientContract,
@@ -18,7 +18,6 @@ import {
   Logger,
 } from '@kbn/core/server';
 import { AuditLogger } from '@kbn/security-plugin/server';
-import { RunNowResult } from '@kbn/task-manager-plugin/server';
 import { IEventLogClient } from '@kbn/event-log-plugin/server';
 import { KueryNode } from '@kbn/es-query';
 import { Connector, ConnectorWithExtraFindData } from '../application/connector/types';
@@ -35,7 +34,7 @@ import {
   IExecutionLogResult,
 } from '../../common';
 import { ActionTypeRegistry } from '../action_type_registry';
-import { ActionExecutorContract, ActionExecutionSource, parseDate } from '../lib';
+import { ActionExecutorContract, parseDate } from '../lib';
 import {
   ActionResult,
   RawAction,
@@ -46,19 +45,12 @@ import {
 } from '../types';
 import { PreconfiguredActionDisabledModificationError } from '../lib/errors/preconfigured_action_disabled_modification';
 import {
-  ExecutionEnqueuer,
   ExecuteOptions as EnqueueExecutionOptions,
   BulkExecutionEnqueuer,
   ExecutionResponse,
 } from '../create_execute_function';
 import { ActionsAuthorization } from '../authorization/actions_authorization';
-import {
-  getAuthorizationModeBySource,
-  bulkGetAuthorizationModeBySource,
-  AuthorizationMode,
-} from '../authorization/get_authorization_mode_by_source';
 import { connectorAuditEvent, ConnectorAuditAction } from '../lib/audit_events';
-import { trackLegacyRBACExemption } from '../lib/track_legacy_rbac_exemption';
 import { ActionsConfigurationUtilities } from '../actions_config';
 import {
   OAuthClientCredentialsParams,
@@ -98,7 +90,6 @@ export interface ConstructorOptions {
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
   inMemoryConnectors: InMemoryConnector[];
   actionExecutor: ActionExecutorContract;
-  ephemeralExecutionEnqueuer: ExecutionEnqueuer<RunNowResult>;
   bulkExecutionEnqueuer: BulkExecutionEnqueuer<ExecutionResponse>;
   request: KibanaRequest;
   authorization: ActionsAuthorization;
@@ -118,7 +109,6 @@ export interface ActionsClientContext {
   actionExecutor: ActionExecutorContract;
   request: KibanaRequest;
   authorization: ActionsAuthorization;
-  ephemeralExecutionEnqueuer: ExecutionEnqueuer<RunNowResult>;
   bulkExecutionEnqueuer: BulkExecutionEnqueuer<ExecutionResponse>;
   auditLogger?: AuditLogger;
   usageCounter?: UsageCounter;
@@ -137,7 +127,6 @@ export class ActionsClient {
     unsecuredSavedObjectsClient,
     inMemoryConnectors,
     actionExecutor,
-    ephemeralExecutionEnqueuer,
     bulkExecutionEnqueuer,
     request,
     authorization,
@@ -154,7 +143,6 @@ export class ActionsClient {
       kibanaIndices,
       inMemoryConnectors,
       actionExecutor,
-      ephemeralExecutionEnqueuer,
       bulkExecutionEnqueuer,
       request,
       authorization,
@@ -496,55 +484,18 @@ export class ActionsClient {
   public async bulkEnqueueExecution(
     options: EnqueueExecutionOptions[]
   ): Promise<ExecutionResponse> {
-    const sources: Array<ActionExecutionSource<unknown>> = compact(
-      (options ?? []).map((option) => option.source)
+    /**
+     * For scheduled executions the additional authorization check
+     * for system actions (kibana privileges) will be performed
+     * inside the ActionExecutor at execution time
+     */
+    await this.context.authorization.ensureAuthorized({ operation: 'execute' });
+    await Promise.all(
+      uniq(options.map((o) => o.actionTypeId)).map((actionTypeId) =>
+        this.context.authorization.ensureAuthorized({ operation: 'execute', actionTypeId })
+      )
     );
-
-    const authModes = await bulkGetAuthorizationModeBySource(
-      this.context.logger,
-      this.context.unsecuredSavedObjectsClient,
-      sources
-    );
-    if (authModes[AuthorizationMode.RBAC] > 0) {
-      /**
-       * For scheduled executions the additional authorization check
-       * for system actions (kibana privileges) will be performed
-       * inside the ActionExecutor at execution time
-       */
-      await this.context.authorization.ensureAuthorized({ operation: 'execute' });
-      await Promise.all(
-        uniq(options.map((o) => o.actionTypeId)).map((actionTypeId) =>
-          this.context.authorization.ensureAuthorized({ operation: 'execute', actionTypeId })
-        )
-      );
-    }
-    if (authModes[AuthorizationMode.Legacy] > 0) {
-      trackLegacyRBACExemption(
-        'bulkEnqueueExecution',
-        this.context.usageCounter,
-        authModes[AuthorizationMode.Legacy]
-      );
-    }
     return this.context.bulkExecutionEnqueuer(this.context.unsecuredSavedObjectsClient, options);
-  }
-
-  public async ephemeralEnqueuedExecution(options: EnqueueExecutionOptions): Promise<RunNowResult> {
-    const { source } = options;
-    if (
-      (await getAuthorizationModeBySource(this.context.unsecuredSavedObjectsClient, source)) ===
-      AuthorizationMode.RBAC
-    ) {
-      await this.context.authorization.ensureAuthorized({
-        operation: 'execute',
-        actionTypeId: options.actionTypeId,
-      });
-    } else {
-      trackLegacyRBACExemption('ephemeralEnqueuedExecution', this.context.usageCounter);
-    }
-    return this.context.ephemeralExecutionEnqueuer(
-      this.context.unsecuredSavedObjectsClient,
-      options
-    );
   }
 
   public async listTypes({

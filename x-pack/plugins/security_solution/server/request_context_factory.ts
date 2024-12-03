@@ -107,6 +107,8 @@ export class RequestContextFactory implements IRequestContextFactory {
     // time it is requested (see `getEndpointAuthz()` below)
     let endpointAuthz: Immutable<EndpointAuthz>;
 
+    const rulesClient = await startPlugins.alerting.getRulesClientWithRequest(request);
+
     return {
       core: coreContext,
 
@@ -135,6 +137,8 @@ export class RequestContextFactory implements IRequestContextFactory {
 
       getAuditLogger,
 
+      getDataViewsService: () => dataViewsService,
+
       getDetectionRulesClient: memoize(() => {
         const mlAuthz = buildMlAuthz({
           license: licensing.license,
@@ -144,16 +148,17 @@ export class RequestContextFactory implements IRequestContextFactory {
         });
 
         return createDetectionRulesClient({
+          rulesClient,
           actionsClient,
-          rulesClient: startPlugins.alerting.getRulesClientWithRequest(request),
           savedObjectsClient: coreContext.savedObjects.client,
           mlAuthz,
+          isRuleCustomizationEnabled: config.experimentalFeatures.prebuiltRulesCustomizationEnabled,
         });
       }),
 
       getDetectionEngineHealthClient: memoize(() =>
         ruleMonitoringService.createDetectionEngineHealthClient({
-          rulesClient: startPlugins.alerting.getRulesClientWithRequest(request),
+          rulesClient,
           eventLogClient: startPlugins.eventLog.getClient(request),
           currentSpaceId: getSpaceId(),
         })
@@ -166,9 +171,15 @@ export class RequestContextFactory implements IRequestContextFactory {
         })
       ),
 
-      getSiemMigrationsClient: memoize(() =>
-        siemMigrationsService.createClient({ request, spaceId: getSpaceId() })
+      getSiemRuleMigrationsClient: memoize(() =>
+        siemMigrationsService.createRulesClient({
+          request,
+          currentUser: coreContext.security.authc.getCurrentUser(),
+          spaceId: getSpaceId(),
+        })
       ),
+
+      getInferenceClient: memoize(() => startPlugins.inference.getClient({ request })),
 
       getExceptionListClient: () => {
         if (!lists) {
@@ -225,6 +236,7 @@ export class RequestContextFactory implements IRequestContextFactory {
           taskManager: startPlugins.taskManager,
           auditLogger: getAuditLogger(),
           kibanaVersion: options.kibanaVersion,
+          config: config.entityAnalytics.entityStore,
           telemetry: core.analytics,
         });
       }),

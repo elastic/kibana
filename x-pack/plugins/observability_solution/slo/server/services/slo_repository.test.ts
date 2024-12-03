@@ -88,7 +88,7 @@ describe('KibanaSavedObjectsSLORepository', () => {
       soClientMock.create.mockResolvedValueOnce(aStoredSLO(slo));
       const repository = new KibanaSavedObjectsSLORepository(soClientMock, loggerMock);
 
-      await repository.checkIfSLOExists(slo);
+      await repository.exists(slo.id);
 
       expect(soClientMock.find).toHaveBeenCalledWith({
         type: SO_SLO_TYPE,
@@ -117,7 +117,7 @@ describe('KibanaSavedObjectsSLORepository', () => {
       soClientMock.find.mockResolvedValueOnce(soFindResponse([slo]));
       const repository = new KibanaSavedObjectsSLORepository(soClientMock, loggerMock);
 
-      await expect(await repository.checkIfSLOExists(slo)).toEqual(true);
+      await expect(await repository.exists(slo.id)).toEqual(true);
       expect(soClientMock.find).toHaveBeenCalledWith({
         type: SO_SLO_TYPE,
         perPage: 0,

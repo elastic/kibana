@@ -170,6 +170,7 @@ export const config: PluginConfigDescriptor = {
       proxies: PreconfiguredFleetProxiesSchema,
       spaceSettings: PreconfiguredSpaceSettingsSchema,
       agentIdVerificationEnabled: schema.boolean({ defaultValue: true }),
+      eventIngestedEnabled: schema.boolean({ defaultValue: false }),
       setup: schema.maybe(
         schema.object({
           agentPolicySchemaUpgradeBatchSize: schema.maybe(schema.number()),
@@ -201,64 +202,71 @@ export const config: PluginConfigDescriptor = {
         defaultValue: () => [],
       }),
 
-      internal: schema.maybe(
-        schema.object({
-          disableILMPolicies: schema.boolean({
-            defaultValue: false,
-          }),
-          fleetServerStandalone: schema.boolean({
-            defaultValue: false,
-          }),
-          onlyAllowAgentUpgradeToKnownVersions: schema.boolean({
-            defaultValue: false,
-          }),
-          activeAgentsSoftLimit: schema.maybe(
-            schema.number({
-              min: 0,
-            })
-          ),
-          retrySetupOnBoot: schema.boolean({ defaultValue: false }),
-          registry: schema.object(
-            {
-              kibanaVersionCheckEnabled: schema.boolean({ defaultValue: true }),
-              excludePackages: schema.arrayOf(schema.string(), { defaultValue: [] }),
-              spec: schema.object(
-                {
-                  min: schema.maybe(schema.string()),
-                  max: schema.string({ defaultValue: REGISTRY_SPEC_MAX_VERSION }),
-                },
-                {
-                  defaultValue: {
-                    max: REGISTRY_SPEC_MAX_VERSION,
-                  },
-                }
-              ),
-              capabilities: schema.arrayOf(
-                schema.oneOf([
-                  // See package-spec for the list of available capiblities https://github.com/elastic/package-spec/blob/dcc37b652690f8a2bca9cf8a12fc28fd015730a0/spec/integration/manifest.spec.yml#L113
-                  schema.literal('apm'),
-                  schema.literal('enterprise_search'),
-                  schema.literal('observability'),
-                  schema.literal('security'),
-                  schema.literal('serverless_search'),
-                  schema.literal('uptime'),
-                ]),
-                { defaultValue: [] }
-              ),
-            },
-            {
-              defaultValue: {
-                kibanaVersionCheckEnabled: true,
-                capabilities: [],
-                excludePackages: [],
-                spec: {
+      internal: schema.object({
+        useMeteringApi: schema.boolean({
+          defaultValue: false,
+        }),
+        disableILMPolicies: schema.boolean({
+          defaultValue: false,
+        }),
+        fleetServerStandalone: schema.boolean({
+          defaultValue: false,
+        }),
+        onlyAllowAgentUpgradeToKnownVersions: schema.boolean({
+          defaultValue: false,
+        }),
+        activeAgentsSoftLimit: schema.maybe(
+          schema.number({
+            min: 0,
+          })
+        ),
+        retrySetupOnBoot: schema.boolean({ defaultValue: false }),
+        registry: schema.object(
+          {
+            // Must be set back to `true`  before v9 release
+            // Requires all registry packages to add v9 as a compatible semver range
+            // https://github.com/elastic/kibana/issues/192624
+            kibanaVersionCheckEnabled: schema.boolean({ defaultValue: false }),
+            excludePackages: schema.arrayOf(schema.string(), { defaultValue: [] }),
+            spec: schema.object(
+              {
+                min: schema.maybe(schema.string()),
+                max: schema.string({ defaultValue: REGISTRY_SPEC_MAX_VERSION }),
+              },
+              {
+                defaultValue: {
                   max: REGISTRY_SPEC_MAX_VERSION,
                 },
+              }
+            ),
+            capabilities: schema.arrayOf(
+              schema.oneOf([
+                // See package-spec for the list of available capiblities https://github.com/elastic/package-spec/blob/dcc37b652690f8a2bca9cf8a12fc28fd015730a0/spec/integration/manifest.spec.yml#L113
+                schema.literal('apm'),
+                schema.literal('enterprise_search'),
+                schema.literal('observability'),
+                schema.literal('security'),
+                schema.literal('serverless_search'),
+                schema.literal('uptime'),
+              ]),
+              { defaultValue: [] }
+            ),
+          },
+          {
+            defaultValue: {
+              // Must be set back to `true`  before v9 release
+              // Requires all registry packages to add v9 as a compatible semver range
+              // https://github.com/elastic/kibana/issues/192624
+              kibanaVersionCheckEnabled: false,
+              capabilities: [],
+              excludePackages: [],
+              spec: {
+                max: REGISTRY_SPEC_MAX_VERSION,
               },
-            }
-          ),
-        })
-      ),
+            },
+          }
+        ),
+      }),
       enabled: schema.boolean({ defaultValue: true }),
       /**
        * The max size of the artifacts encoded_size sum in a batch when more than one (there is at least one artifact in a batch).

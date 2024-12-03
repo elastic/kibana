@@ -28,7 +28,8 @@ export default ({ getService }: FtrProviderContext): void => {
   const log = getService('log');
   const es = getService('es');
 
-  describe('@ess delete_rules_bulk_legacy', () => {
+  // TODO: https://github.com/elastic/kibana/issues/193184 Unskip and rewrite using the _bulk_action API endpoint
+  describe.skip('@ess delete_rules_bulk_legacy', () => {
     describe('deleting rules bulk using POST', () => {
       beforeEach(async () => {
         await createAlertsIndex(supertest, log);

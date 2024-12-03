@@ -70,6 +70,9 @@ describe('mergeSourceMonitor', () => {
     const result = mapSavedObjectToMonitor({ monitor: { attributes: testMonitor } } as any);
 
     expect(result).toEqual({
+      __ui: {
+        is_tls_enabled: false,
+      },
       alert: {
         status: {
           enabled: true,
@@ -78,53 +81,48 @@ describe('mergeSourceMonitor', () => {
           enabled: true,
         },
       },
+      'check.request.method': 'GET',
+      'check.response.status': ['404'],
       config_id: 'ae88f0aa-9c7d-4a5f-96dc-89d65a0ca947',
       custom_heartbeat_id: 'todos-lightweight-test-projects-default',
       enabled: true,
       id: 'todos-lightweight-test-projects-default',
       ipv4: true,
       ipv6: true,
-      locations: ['us_central', 'us_east'],
-      private_locations: ['pvt_us_east'],
-      max_redirects: 0,
+      locations: [
+        {
+          geo: {
+            lat: 41.25,
+            lon: -95.86,
+          },
+          id: 'us_central',
+          isServiceManaged: true,
+          label: 'North America - US Central',
+        },
+      ],
+      max_attempts: 2,
+      max_redirects: '0',
       mode: 'any',
       name: 'Todos Lightweight',
       namespace: 'default',
+      origin: 'project',
       original_space: 'default',
-      proxy_url: '',
+      project_id: 'test-projects',
+      'response.include_body': 'on_error',
+      'response.include_body_max_bytes': '1024',
+      'response.include_headers': true,
       retest_on_failure: true,
       revision: 21,
       schedule: {
         number: '3',
         unit: 'm',
       },
-      'service.name': '',
-      tags: [],
+      'ssl.key': 'test-key',
+      'ssl.supported_protocols': ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'],
+      'ssl.verification_mode': 'full',
       timeout: '16',
       type: 'http',
       url: '${devUrl}',
-      'url.port': null,
-      ssl: {
-        certificate: '',
-        certificate_authorities: '',
-        supported_protocols: ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'],
-        verification_mode: 'full',
-        key: 'test-key',
-      },
-      response: {
-        include_body: 'on_error',
-        include_body_max_bytes: '1024',
-        include_headers: true,
-      },
-      check: {
-        request: {
-          method: 'GET',
-        },
-        response: {
-          status: ['404'],
-        },
-      },
-      params: {},
     });
   });
 
@@ -157,30 +155,12 @@ describe('mergeSourceMonitor', () => {
       locations: [
         {
           geo: {
-            lon: -95.86,
             lat: 41.25,
+            lon: -95.86,
           },
-          isServiceManaged: true,
           id: 'us_central',
-          label: 'North America - US Central',
-        },
-        {
-          geo: {
-            lon: -95.86,
-            lat: 41.25,
-          },
           isServiceManaged: true,
-          id: 'us-east4-a',
-          label: 'US East',
-        },
-        {
-          geo: {
-            lon: -95.86,
-            lat: 41.25,
-          },
-          isServiceManaged: false,
-          id: 'pvt_us_east',
-          label: 'US East (Private)',
+          label: 'North America - US Central',
         },
       ],
       max_redirects: '0',
@@ -248,24 +228,6 @@ const testMonitor = {
       isServiceManaged: true,
       id: 'us_central',
       label: 'North America - US Central',
-    },
-    {
-      geo: {
-        lon: -95.86,
-        lat: 41.25,
-      },
-      isServiceManaged: true,
-      id: 'us-east4-a',
-      label: 'US East',
-    },
-    {
-      geo: {
-        lon: -95.86,
-        lat: 41.25,
-      },
-      isServiceManaged: false,
-      id: 'pvt_us_east',
-      label: 'US East (Private)',
     },
   ],
   namespace: 'default',

@@ -187,6 +187,7 @@
     "@kbn/alerting-types",
     "@kbn/ai-assistant-common",
     "@kbn/core-deprecations-common",
-    "@kbn/usage-collection-plugin"
+    "@kbn/usage-collection-plugin",
+    "@kbn/integration-assistant-plugin"
   ]
 }

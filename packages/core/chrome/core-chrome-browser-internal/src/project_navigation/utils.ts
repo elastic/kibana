@@ -22,6 +22,7 @@ import type {
   CloudLinkId,
   CloudLinks,
   ItemDefinition,
+  SolutionId,
 } from '@kbn/core-chrome-browser/src';
 import type { Location } from 'history';
 import type { MouseEventHandler } from 'react';
@@ -364,6 +365,7 @@ const isRecentlyAccessedDefinition = (
 };
 
 export const parseNavigationTree = (
+  id: SolutionId,
   navigationTreeDef: NavigationTreeDefinition,
   { deepLinks, cloudLinks }: { deepLinks: Record<string, ChromeNavLink>; cloudLinks: CloudLinks }
 ): {
@@ -376,7 +378,7 @@ export const parseNavigationTree = (
   const navigationTree: ChromeProjectNavigationNode[] = [];
 
   // Contains UI layout information (body, footer) and render "special" blocks like recently accessed.
-  const navigationTreeUI: NavigationTreeDefinitionUI = { body: [] };
+  const navigationTreeUI: NavigationTreeDefinitionUI = { id, body: [] };
 
   const initNodeAndChildren = (
     node: GroupDefinition | ItemDefinition | NodeDefinition,

@@ -31,6 +31,13 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        security: {
+          authz: {
+            enabled: false,
+            reason:
+              'We do the check for 2 different scenarios below (const isInvalid): writeLiveQueries and runSavedQueries with saved_query_id, or pack_id',
+          },
+        },
         validate: {
           request: {
             body: buildRouteValidation<

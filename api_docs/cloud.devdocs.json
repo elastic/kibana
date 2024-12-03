@@ -893,11 +893,11 @@
           "signature": [
             "{ defaultSolution?: ",
             {
-              "pluginId": "cloud",
-              "scope": "common",
-              "docId": "kibCloudPluginApi",
-              "section": "def-common.OnBoardingDefaultSolution",
-              "text": "OnBoardingDefaultSolution"
+              "pluginId": "@kbn/core-chrome-browser",
+              "scope": "public",
+              "docId": "kibKbnCoreChromeBrowserPluginApi",
+              "section": "def-public.SolutionId",
+              "text": "SolutionId"
             },
             " | undefined; }"
           ],
@@ -1212,11 +1212,11 @@
           "signature": [
             "{ defaultSolution?: ",
             {
-              "pluginId": "cloud",
-              "scope": "common",
-              "docId": "kibCloudPluginApi",
-              "section": "def-common.OnBoardingDefaultSolution",
-              "text": "OnBoardingDefaultSolution"
+              "pluginId": "@kbn/core-chrome-browser",
+              "scope": "public",
+              "docId": "kibKbnCoreChromeBrowserPluginApi",
+              "section": "def-public.SolutionId",
+              "text": "SolutionId"
             },
             " | undefined; }"
           ],
@@ -1327,23 +1327,7 @@
     "functions": [],
     "interfaces": [],
     "enums": [],
-    "misc": [
-      {
-        "parentPluginId": "cloud",
-        "id": "def-common.OnBoardingDefaultSolution",
-        "type": "Type",
-        "tags": [],
-        "label": "OnBoardingDefaultSolution",
-        "description": [],
-        "signature": [
-          "\"security\" | \"es\" | \"oblt\""
-        ],
-        "path": "x-pack/plugins/cloud/common/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      }
-    ],
+    "misc": [],
     "objects": []
   }
 }

@@ -18,7 +18,6 @@ import { extractAuthzDescription } from './extract_authz_description';
 import type { GenerateOpenApiDocumentOptionsFilters } from './generate_oas';
 import type { OasConverter } from './oas_converter';
 import { isReferenceObject } from './oas_converter/common';
-import type { OperationIdCounter } from './operation_id_counter';
 import {
   prepareRoutes,
   getPathParameters,
@@ -30,12 +29,13 @@ import {
   mergeResponseContent,
   getXsrfHeaderForMethod,
   setXState,
+  GetOpId,
 } from './util';
 
 export const processVersionedRouter = (
   appRouter: CoreVersionedRouter,
   converter: OasConverter,
-  getOpId: OperationIdCounter,
+  getOpId: GetOpId,
   filters?: GenerateOpenApiDocumentOptionsFilters
 ) => {
   const routes = prepareRoutes(appRouter.getRoutes(), filters);
@@ -90,12 +90,13 @@ export const processVersionedRouter = (
           ...queryObjects,
         ];
       }
-
-      let description = '';
+      let description = `${route.options.description ?? ''}`;
       if (route.options.security) {
         const authzDescription = extractAuthzDescription(route.options.security);
 
-        description = `${route.options.description ?? ''}${authzDescription ?? ''}`;
+        description += `${route.options.description && authzDescription ? '<br/><br/>' : ''}${
+          authzDescription ?? ''
+        }`;
       }
 
       const hasBody = Boolean(extractValidationSchemaFromVersionedHandler(handler)?.request?.body);
@@ -107,7 +108,6 @@ export const processVersionedRouter = (
         summary: route.options.summary ?? '',
         tags: route.options.options?.tags ? extractTags(route.options.options.tags) : [],
         ...(description ? { description } : {}),
-        ...(route.options.description ? { description: route.options.description } : {}),
         ...(hasDeprecations ? { deprecated: true } : {}),
         ...(route.options.discontinued ? { 'x-discontinued': route.options.discontinued } : {}),
         requestBody: hasBody
@@ -121,7 +121,7 @@ export const processVersionedRouter = (
           ? extractVersionedResponse(handler, converter, contentType)
           : extractVersionedResponses(route, converter, contentType),
         parameters,
-        operationId: getOpId(route.path),
+        operationId: getOpId({ path: route.path, method: route.method }),
       };
 
       setXState(route.options.options?.availability, operation);

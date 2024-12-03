@@ -10,11 +10,20 @@
 import { EuiButton, EuiCallOut, useEuiTheme, EuiText, EuiSpacer } from '@elastic/eui';
 import React, { FC, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import type { SolutionId } from '@kbn/core-chrome-browser';
 
-const feedbackUrl = 'https://ela.st/nav-feedback';
+const feedbackUrls: { [id in SolutionId]: string } = {
+  es: 'https://ela.st/search-nav-feedback',
+  oblt: 'https://ela.st/o11y-nav-feedback',
+  security: 'https://ela.st/security-nav-feedback',
+};
 const FEEDBACK_BTN_KEY = 'core.chrome.sideNav.feedbackBtn';
 
-export const FeedbackBtn: FC = () => {
+interface Props {
+  solutionId: SolutionId;
+}
+
+export const FeedbackBtn: FC<Props> = ({ solutionId }) => {
   const { euiTheme } = useEuiTheme();
   const [showCallOut, setShowCallOut] = useState(
     sessionStorage.getItem(FEEDBACK_BTN_KEY) !== 'hidden'
@@ -26,7 +35,7 @@ export const FeedbackBtn: FC = () => {
   };
 
   const onClick = () => {
-    window.open(feedbackUrl, '_blank');
+    window.open(feedbackUrls[solutionId], '_blank');
     onDismiss();
   };
 
@@ -41,7 +50,7 @@ export const FeedbackBtn: FC = () => {
       onDismiss={onDismiss}
       data-test-subj="sideNavfeedbackCallout"
     >
-      <EuiText size="s" color="dimgrey">
+      <EuiText size="s">
         {i18n.translate('sharedUXPackages.chrome.sideNavigation.feedbackCallout.title', {
           defaultMessage: `How's the navigation working for you? Missing anything?`,
         })}

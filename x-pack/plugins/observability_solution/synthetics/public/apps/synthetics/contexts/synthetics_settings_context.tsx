@@ -38,7 +38,6 @@ export interface SyntheticsAppProps {
   setBadge: (badge?: ChromeBadge) => void;
   renderGlobalHelpControls(): void;
   commonlyUsedRanges: CommonlyUsedDateRange[];
-  setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
   appMountParameters: AppMountParameters;
   isDev: boolean;
   isServerless: boolean;
@@ -46,6 +45,7 @@ export interface SyntheticsAppProps {
 
 export interface SyntheticsSettingsContextValues {
   canSave: boolean;
+  canManagePrivateLocations: boolean;
   basePath: string;
   dateRangeStart: string;
   dateRangeEnd: string;
@@ -75,6 +75,7 @@ const defaultContext: SyntheticsSettingsContextValues = {
   isLogsAvailable: true,
   isDev: false,
   canSave: false,
+  canManagePrivateLocations: false,
 };
 export const SyntheticsSettingsContext = createContext(defaultContext);
 
@@ -89,7 +90,6 @@ export const SyntheticsSettingsContextProvider: React.FC<PropsWithChildren<Synth
     isLogsAvailable,
     commonlyUsedRanges,
     isDev,
-    setBreadcrumbs,
     isServerless,
   } = props;
 
@@ -98,6 +98,8 @@ export const SyntheticsSettingsContextProvider: React.FC<PropsWithChildren<Synth
   const { application } = useKibana().services;
 
   const canSave = (application?.capabilities.uptime.save ?? false) as boolean;
+  const canManagePrivateLocations = (application?.capabilities.uptime.canManagePrivateLocations ??
+    false) as boolean;
 
   const value = useMemo(() => {
     return {
@@ -110,8 +112,8 @@ export const SyntheticsSettingsContextProvider: React.FC<PropsWithChildren<Synth
       commonlyUsedRanges,
       dateRangeStart: dateRangeStart ?? DATE_RANGE_START,
       dateRangeEnd: dateRangeEnd ?? DATE_RANGE_END,
-      setBreadcrumbs,
       isServerless,
+      canManagePrivateLocations,
     };
   }, [
     canSave,
@@ -123,8 +125,8 @@ export const SyntheticsSettingsContextProvider: React.FC<PropsWithChildren<Synth
     dateRangeStart,
     dateRangeEnd,
     commonlyUsedRanges,
-    setBreadcrumbs,
     isServerless,
+    canManagePrivateLocations,
   ]);
 
   return <SyntheticsSettingsContext.Provider value={value} children={children} />;

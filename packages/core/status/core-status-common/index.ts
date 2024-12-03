@@ -7,5 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { ServiceStatusLevels } from './src';
-export type { ServiceStatus, ServiceStatusLevel, ServiceStatusLevelId, CoreStatus } from './src';
+export { ServiceStatusLevels } from './src/service_status';
+export type { CoreStatus } from './src/core_status';
+export type { ServiceStatus, ServiceStatusLevel, ServiceStatusLevelId } from './src/service_status';
+export type {
+  StatusInfo,
+  StatusInfoCoreStatus,
+  StatusInfoServiceStatus,
+  StatusResponse,
+  ServerVersion,
+  ServerMetrics,
+} from './src/status';

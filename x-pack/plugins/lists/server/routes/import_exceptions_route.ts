@@ -35,9 +35,13 @@ export const importExceptionsRoute = (router: ListsPluginRouter, config: ConfigT
           maxBytes: config.maxImportPayloadBytes,
           output: 'stream',
         },
-        tags: ['access:lists-all'],
       },
       path: `${EXCEPTION_LIST_URL}/_import`,
+      security: {
+        authz: {
+          requiredPrivileges: ['lists-all'],
+        },
+      },
     })
     .addVersion(
       {

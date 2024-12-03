@@ -1,0 +1,19 @@
+{
+  "name": "oas_docs",
+  "version": "1.0.0",
+  "description": "Documentation about our OpenAPI bundling workflow and configuration. See Kibana's hosted [stateful](https://www.elastic.co/docs/api/doc/kibana) and [serverless](https://www.elastic.co/docs/api/doc/serverless) docs.",
+  "main": "index.js",
+  "directories": {
+    "example": "examples"
+  },
+  "dependencies": {
+    "bump-cli": "^2.8.4",
+    "@redocly/cli": "^1.25.14"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

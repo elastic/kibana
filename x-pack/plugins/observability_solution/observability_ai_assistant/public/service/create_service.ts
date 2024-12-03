@@ -36,7 +36,11 @@ export function createService({
   const screenContexts$ = new BehaviorSubject<ObservabilityAIAssistantScreenContext[]>([
     { starterPrompts: defaultStarterPrompts },
   ]);
-  const predefinedConversation$ = new Subject<{ messages: Message[]; title?: string }>();
+  const predefinedConversation$ = new Subject<{
+    messages: Message[];
+    title?: string;
+    hideConversationList?: boolean;
+  }>();
 
   const scope$ = new BehaviorSubject<AssistantScope[]>(scopes);
 
@@ -104,8 +108,16 @@ export function createService({
       );
     },
     conversations: {
-      openNewConversation: ({ messages, title }: { messages: Message[]; title?: string }) => {
-        predefinedConversation$.next({ messages, title });
+      openNewConversation: ({
+        messages,
+        title,
+        hideConversationList = false,
+      }: {
+        messages: Message[];
+        title?: string;
+        hideConversationList?: boolean;
+      }) => {
+        predefinedConversation$.next({ messages, title, hideConversationList });
       },
       predefinedConversation$: predefinedConversation$.asObservable(),
     },

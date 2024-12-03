@@ -9,6 +9,7 @@
 
 import React from 'react';
 import { render, screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { RuleTypeList } from './rule_type_list';
 import { RuleTypeWithDescription } from '../types';
 
@@ -30,6 +31,7 @@ const ruleTypes: RuleTypeWithDescription[] = [
       name: 'default',
     },
     defaultActionGroupId: '1',
+    category: 'my-category-1',
   },
   {
     id: '2',
@@ -48,6 +50,7 @@ const ruleTypes: RuleTypeWithDescription[] = [
       name: 'default',
     },
     defaultActionGroupId: '2',
+    category: 'my-category-2',
   },
   {
     id: '3',
@@ -66,6 +69,7 @@ const ruleTypes: RuleTypeWithDescription[] = [
       name: 'default',
     },
     defaultActionGroupId: '3',
+    category: 'my-category-3',
   },
 ];
 
@@ -93,5 +97,8 @@ describe('RuleTypeList', () => {
     expect(secondRuleInList).not.toBeDisabled();
     const thirdRuleInList = within(ruleListEl[2]).getByRole('button', { name: 'Rule Type 2' });
     expect(thirdRuleInList).toBeDisabled();
+
+    await userEvent.hover(ruleListEl[2]);
+    expect(await screen.findByText('This rule requires a platinum license.')).toBeInTheDocument();
   });
 });

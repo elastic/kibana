@@ -9,9 +9,9 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { serverMock } from '../../__mocks__/server';
 import { requestContextMock } from '../../__mocks__/request_context';
 import { getPromptsBulkActionRequest, requestMock } from '../../__mocks__/request';
+import { authenticatedUser } from '../../__mocks__/user';
 import { ELASTIC_AI_ASSISTANT_PROMPTS_URL_BULK_ACTION } from '@kbn/elastic-assistant-common';
 import { getEmptyFindResult, getFindPromptsResultWithSingleHit } from '../../__mocks__/response';
-import { AuthenticatedUser } from '@kbn/core-security-common';
 import { bulkPromptsRoute } from './bulk_actions_route';
 import {
   getCreatePromptSchemaMock,
@@ -25,14 +25,7 @@ describe('Perform bulk action route', () => {
   let { clients, context } = requestContextMock.createTools();
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   const mockPrompt = getPromptMock(getUpdatePromptSchemaMock());
-  const mockUser1 = {
-    profile_uid: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
-    username: 'my_username',
-    authentication_realm: {
-      type: 'my_realm_type',
-      name: 'my_realm_name',
-    },
-  } as AuthenticatedUser;
+  const mockUser1 = authenticatedUser;
 
   beforeEach(async () => {
     server = serverMock.create();

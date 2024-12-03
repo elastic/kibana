@@ -106,7 +106,7 @@ describe('Navigation Plugin', () => {
       await new Promise((resolve) => setTimeout(resolve));
 
       const definition = {
-        id: 'es',
+        id: 'es' as const,
         title: 'Elasticsearch',
         navigationTree$: of({ body: [] }),
       };

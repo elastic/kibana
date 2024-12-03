@@ -21,7 +21,6 @@ import {
   EVENT_FILTERS_PATH,
   HOST_ISOLATION_EXCEPTIONS_PATH,
   MANAGE_PATH,
-  NOTES_PATH,
   POLICIES_PATH,
   RESPONSE_ACTIONS_HISTORY_PATH,
   SecurityPageName,
@@ -38,13 +37,13 @@ import {
   RESPONSE_ACTIONS_HISTORY,
   TRUSTED_APPLICATIONS,
   ENTITY_ANALYTICS_RISK_SCORE,
-  NOTES,
   ENTITY_STORE,
 } from '../app/translations';
 import { licenseService } from '../common/hooks/use_license';
 import type { LinkItem } from '../common/links/types';
 import type { StartPlugins } from '../types';
 import { cloudDefendLink } from '../cloud_defend/links';
+import { links as notesLink } from '../notes/links';
 import { IconConsole } from '../common/icons/console';
 import { IconShield } from '../common/icons/shield';
 import { IconEndpoints } from '../common/icons/endpoints';
@@ -218,19 +217,7 @@ export const links: LinkItem = {
       hideTimeline: true,
     },
     cloudDefendLink,
-    {
-      id: SecurityPageName.notes,
-      title: NOTES,
-      description: i18n.translate('xpack.securitySolution.appLinks.notesDescription', {
-        defaultMessage:
-          'Oversee, revise, and revisit the notes attached to alerts, events and Timelines.',
-      }),
-      landingIcon: 'filebeatApp',
-      path: NOTES_PATH,
-      skipUrlState: true,
-      hideTimeline: true,
-      experimentalKey: 'securitySolutionNotesEnabled',
-    },
+    notesLink,
   ],
 };
 

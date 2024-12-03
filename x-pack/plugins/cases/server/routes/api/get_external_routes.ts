@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { DocLinksServiceSetup } from '@kbn/core/server';
 import { getCasesByAlertIdRoute } from './cases/alerts/get_cases';
 import { deleteCaseRoute } from './cases/delete_cases';
 import { findCaseRoute } from './cases/find_cases';
@@ -30,19 +31,26 @@ import { patchCaseConfigureRoute } from './configure/patch_configure';
 import { postCaseConfigureRoute } from './configure/post_configure';
 import { getAllAlertsAttachedToCaseRoute } from './comments/get_alerts';
 import { findUserActionsRoute } from './user_actions/find_user_actions';
+import { postFileRoute } from './files/post_file';
 
-export const getExternalRoutes = () =>
+export const getExternalRoutes = ({
+  isServerless,
+  docLinks,
+}: {
+  isServerless?: boolean;
+  docLinks: DocLinksServiceSetup;
+}) =>
   [
     deleteCaseRoute,
     findCaseRoute,
-    getCaseRoute,
+    getCaseRoute({ isServerless }),
     resolveCaseRoute,
     patchCaseRoute,
     postCaseRoute,
     pushCaseRoute,
     findUserActionsRoute,
-    getUserActionsRoute,
-    getStatusRoute,
+    getUserActionsRoute({ isServerless, docLinks }),
+    getStatusRoute({ isServerless, docLinks }),
     getCasesByAlertIdRoute,
     getReportersRoute,
     getTagsRoute,
@@ -50,7 +58,7 @@ export const getExternalRoutes = () =>
     deleteAllCommentsRoute,
     findCommentsRoute,
     getCommentRoute,
-    getAllCommentsRoute,
+    getAllCommentsRoute({ isServerless, docLinks }),
     patchCommentRoute,
     postCommentRoute,
     getCaseConfigureRoute,
@@ -58,4 +66,5 @@ export const getExternalRoutes = () =>
     patchCaseConfigureRoute,
     postCaseConfigureRoute,
     getAllAlertsAttachedToCaseRoute,
+    postFileRoute,
   ] as CaseRoute[];

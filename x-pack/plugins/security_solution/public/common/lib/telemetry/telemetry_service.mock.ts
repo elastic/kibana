@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-import { createTelemetryClientMock } from './telemetry_client.mock';
-
-export const createTelemetryServiceMock = () => createTelemetryClientMock();
+export const createTelemetryServiceMock = () => ({ reportEvent: jest.fn() });

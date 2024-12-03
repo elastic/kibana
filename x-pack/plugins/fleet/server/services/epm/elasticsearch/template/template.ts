@@ -15,7 +15,11 @@ import type {
 import pMap from 'p-map';
 import { isResponseError } from '@kbn/es-errors';
 
-import { STACK_COMPONENT_TEMPLATE_LOGS_MAPPINGS } from '../../../../constants/fleet_es_assets';
+import {
+  FLEET_EVENT_INGESTED_COMPONENT_TEMPLATE_NAME,
+  STACK_COMPONENT_TEMPLATE_LOGS_MAPPINGS,
+} from '../../../../constants/fleet_es_assets';
+import { MAX_CONCURRENT_DATASTREAM_OPERATIONS } from '../../../../constants';
 
 import type { Field, Fields } from '../../fields/field';
 import type {
@@ -27,6 +31,7 @@ import type {
 } from '../../../../types';
 import { appContextService } from '../../..';
 import { getRegistryDataStreamAssetBaseName } from '../../../../../common/services';
+import type { FleetConfigType } from '../../../../../common/types';
 import {
   STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS,
   FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
@@ -61,6 +66,7 @@ export interface CurrentDataStream {
   dataStreamName: string;
   replicated: boolean;
   indexTemplate: IndexTemplate;
+  currentWriteIndex: string;
 }
 
 const DEFAULT_IGNORE_ABOVE = 1024;
@@ -115,6 +121,9 @@ export function getTemplate({
 
   const esBaseComponents = getBaseEsComponents(type, !!isIndexModeTimeSeries);
 
+  const isEventIngestedEnabled = (config?: FleetConfigType): boolean =>
+    Boolean(!config?.agentIdVerificationEnabled && config?.eventIngestedEnabled);
+
   template.composed_of = [
     ...esBaseComponents,
     ...(template.composed_of || []),
@@ -122,6 +131,9 @@ export function getTemplate({
     FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
     ...(appContextService.getConfig()?.agentIdVerificationEnabled
       ? [FLEET_AGENT_ID_VERIFY_COMPONENT_TEMPLATE_NAME]
+      : []),
+    ...(isEventIngestedEnabled(appContextService.getConfig())
+      ? [FLEET_EVENT_INGESTED_COMPONENT_TEMPLATE_NAME]
       : []),
   ];
 
@@ -920,10 +932,15 @@ const queryDataStreamsFromTemplates = async (
   esClient: ElasticsearchClient,
   templates: IndexTemplateEntry[]
 ): Promise<CurrentDataStream[]> => {
-  const dataStreamPromises = templates.map((template) => {
-    return getDataStreams(esClient, template);
-  });
-  const dataStreamObjects = await Promise.all(dataStreamPromises);
+  const dataStreamObjects = await pMap(
+    templates,
+    (template) => {
+      return getDataStreams(esClient, template);
+    },
+    {
+      concurrency: MAX_CONCURRENT_DATASTREAM_OPERATIONS,
+    }
+  );
   return dataStreamObjects.filter(isCurrentDataStream).flat();
 };
 
@@ -944,6 +961,7 @@ const getDataStreams = async (
     dataStreamName: dataStream.name,
     replicated: dataStream.replicated,
     indexTemplate,
+    currentWriteIndex: dataStream.indices?.at(-1)?.index_name,
   }));
 };
 
@@ -979,24 +997,26 @@ const updateAllDataStreams = async (
       return updateExistingDataStream({
         esClient,
         logger,
+        currentWriteIndex: templateEntry.currentWriteIndex,
         dataStreamName: templateEntry.dataStreamName,
         options,
       });
     },
     {
-      // Limit concurrent putMapping/rollover requests to avoid overwhelming ES cluster
-      concurrency: 20,
+      concurrency: MAX_CONCURRENT_DATASTREAM_OPERATIONS,
     }
   );
 };
 
 const updateExistingDataStream = async ({
   dataStreamName,
+  currentWriteIndex,
   esClient,
   logger,
   options,
 }: {
   dataStreamName: string;
+  currentWriteIndex: string;
   esClient: ElasticsearchClient;
   logger: Logger;
   options?: {
@@ -1005,7 +1025,7 @@ const updateExistingDataStream = async ({
   };
 }) => {
   const existingDs = await esClient.indices.get({
-    index: dataStreamName,
+    index: currentWriteIndex,
   });
 
   const existingDsConfig = Object.values(existingDs);
@@ -1064,6 +1084,10 @@ const updateExistingDataStream = async ({
 
     // if update fails, rollover data stream and bail out
   } catch (err) {
+    subobjectsFieldChanged =
+      subobjectsFieldChanged ||
+      (err.body?.error?.type === 'mapper_exception' &&
+        err.body?.error?.reason?.includes('subobjects'));
     if (
       (isResponseError(err) &&
         err.statusCode === 400 &&

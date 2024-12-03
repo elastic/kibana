@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { compact, forEach, reduce } from 'lodash';
+import { compact } from 'lodash';
 import { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { EntityDefinition } from '@kbn/entities-schema';
-import { NodesIngestTotal } from '@elastic/elasticsearch/lib/api/types';
 import { SO_ENTITY_DEFINITION_TYPE } from '../../saved_objects';
 import { BUILT_IN_ID_PREFIX } from './built_in';
 import { EntityDefinitionState, EntityDefinitionWithState } from './types';
@@ -144,33 +143,14 @@ async function getIngestPipelineState({
     .filter(({ type }) => type === 'ingest_pipeline')
     .map(({ id }) => id);
 
-  const [ingestPipelines, ingestPipelinesStats] = await Promise.all([
-    esClient.ingest.getPipeline({ id: ingestPipelineIds.join(',') }, { ignore: [404] }),
-    esClient.nodes.stats({
-      metric: 'ingest',
-      filter_path: ingestPipelineIds.map((id) => `nodes.*.ingest.pipelines.${id}`),
-    }),
-  ]);
-
-  const ingestStatsByPipeline = reduce(
-    ingestPipelinesStats.nodes,
-    (pipelines, { ingest }) => {
-      forEach(ingest?.pipelines, (value: NodesIngestTotal, key: string) => {
-        if (!pipelines[key]) {
-          pipelines[key] = { count: 0, failed: 0 };
-        }
-        pipelines[key].count += value.count ?? 0;
-        pipelines[key].failed += value.failed ?? 0;
-      });
-      return pipelines;
-    },
-    {} as Record<string, { count: number; failed: number }>
+  const ingestPipelines = await esClient.ingest.getPipeline(
+    { id: ingestPipelineIds.join(',') },
+    { ignore: [404] }
   );
 
   return ingestPipelineIds.map((id) => ({
     id,
     installed: !!ingestPipelines[id],
-    stats: ingestStatsByPipeline[id],
   }));
 }
 

@@ -37,6 +37,25 @@ export const dataStreamStatRt = rt.intersection([
 
 export type DataStreamStat = rt.TypeOf<typeof dataStreamStatRt>;
 
+export const dataStreamDocsStatRt = rt.type({
+  dataset: rt.string,
+  count: rt.number,
+});
+
+export type DataStreamDocsStat = rt.TypeOf<typeof dataStreamDocsStatRt>;
+
+export const getDataStreamTotalDocsResponseRt = rt.type({
+  totalDocs: rt.array(dataStreamDocsStatRt),
+});
+
+export type DataStreamTotalDocsResponse = rt.TypeOf<typeof getDataStreamTotalDocsResponseRt>;
+
+export const getDataStreamDegradedDocsResponseRt = rt.type({
+  degradedDocs: rt.array(dataStreamDocsStatRt),
+});
+
+export type DataStreamDegradedDocsResponse = rt.TypeOf<typeof getDataStreamDegradedDocsResponseRt>;
+
 export const integrationDashboardRT = rt.type({
   id: rt.string,
   title: rt.string,
@@ -76,22 +95,24 @@ export const integrationRt = rt.intersection([
 
 export type IntegrationType = rt.TypeOf<typeof integrationRt>;
 
+export const checkAndLoadIntegrationResponseRt = rt.union([
+  rt.type({ isIntegration: rt.literal(false), areAssetsAvailable: rt.boolean }),
+  rt.type({
+    isIntegration: rt.literal(true),
+    areAssetsAvailable: rt.literal(true),
+    integration: integrationRt,
+  }),
+]);
+
+export type CheckAndLoadIntegrationResponse = rt.TypeOf<typeof checkAndLoadIntegrationResponseRt>;
+
 export const getIntegrationsResponseRt = rt.exact(
   rt.type({
     integrations: rt.array(integrationRt),
   })
 );
 
-export type IntegrationResponse = rt.TypeOf<typeof getIntegrationsResponseRt>;
-
-export const degradedDocsRt = rt.type({
-  dataset: rt.string,
-  count: rt.number,
-  docsCount: rt.number,
-  percentage: rt.number,
-});
-
-export type DegradedDocs = rt.TypeOf<typeof degradedDocsRt>;
+export type IntegrationsResponse = rt.TypeOf<typeof getIntegrationsResponseRt>;
 
 export const degradedFieldRt = rt.type({
   name: rt.string,
@@ -185,12 +206,6 @@ export const getDataStreamsStatsResponseRt = rt.exact(
   rt.type({
     datasetUserPrivileges: datasetUserPrivilegesRt,
     dataStreamsStats: rt.array(dataStreamStatRt),
-  })
-);
-
-export const getDataStreamsDegradedDocsStatsResponseRt = rt.exact(
-  rt.type({
-    degradedDocs: rt.array(degradedDocsRt),
   })
 );
 

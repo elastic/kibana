@@ -5,94 +5,87 @@
  * 2.0.
  */
 
+import { Duration, DurationUnit } from '../../domain/models';
 import { createAPMTransactionErrorRateIndicator, createSLO } from '../fixtures/slo';
 import { ApmTransactionErrorRateTransformGenerator } from './apm_transaction_error_rate';
+import { dataViewsService } from '@kbn/data-views-plugin/server/mocks';
 
-const generator = new ApmTransactionErrorRateTransformGenerator();
+const generator = new ApmTransactionErrorRateTransformGenerator('my-space-id', dataViewsService);
 
 describe('Transform Generator', () => {
-  it('builds empty runtime mappings without group by', async () => {
-    const slo = createSLO({
-      id: 'irrelevant',
-      indicator: createAPMTransactionErrorRateIndicator(),
+  describe('buildCommonGroupBy', () => {
+    it('builds empty runtime mappings without group by', async () => {
+      const slo = createSLO({
+        id: 'irrelevant',
+        indicator: createAPMTransactionErrorRateIndicator(),
+      });
+
+      const commonGroupBy = generator.buildCommonGroupBy(slo);
+      expect(commonGroupBy).toMatchSnapshot();
     });
-    const commonRuntime = generator.buildCommonRuntimeMappings(slo);
 
-    expect(commonRuntime).toEqual({});
+    it.each(['example', ['example'], ['example1', 'example2']])(
+      'builds common groupBy with single group by',
+      async (groupBy) => {
+        const indicator = createAPMTransactionErrorRateIndicator();
+        const slo = createSLO({
+          id: 'irrelevant',
+          groupBy,
+          indicator,
+        });
 
-    const commonGroupBy = generator.buildCommonGroupBy(slo);
+        const commonGroupBy = generator.buildCommonGroupBy(slo);
+        expect(commonGroupBy).toMatchSnapshot();
+      }
+    );
+  });
 
-    expect(commonGroupBy).toEqual({
-      '@timestamp': {
-        date_histogram: {
-          field: '@timestamp',
-          fixed_interval: '1m',
-        },
-      },
+  describe('buildCommonRuntimeMappings', () => {
+    it('builds empty runtime mappings without data view', async () => {
+      const runtimeMappings = generator.buildCommonRuntimeMappings();
+      expect(runtimeMappings).toEqual({});
     });
   });
 
-  it.each(['example', ['example']])(
-    'builds common runtime mappings and group by with single group by',
-    async (groupBy) => {
-      const indicator = createAPMTransactionErrorRateIndicator();
+  describe('settings', () => {
+    const defaultSettings = {
+      syncDelay: new Duration(10, DurationUnit.Minute),
+      frequency: new Duration(2, DurationUnit.Minute),
+      preventInitialBackfill: true,
+    };
+
+    it('builds the transform settings', async () => {
       const slo = createSLO({
-        id: 'irrelevant',
-        groupBy,
-        indicator,
-      });
-      const commonRuntime = generator.buildCommonRuntimeMappings(slo);
-
-      expect(commonRuntime).toEqual({});
-
-      const commonGroupBy = generator.buildCommonGroupBy(slo);
-
-      expect(commonGroupBy).toEqual({
-        '@timestamp': {
-          date_histogram: {
-            field: '@timestamp',
-            fixed_interval: '1m',
-          },
-        },
-        'slo.groupings.example': {
-          terms: {
-            field: 'example',
-          },
+        settings: {
+          ...defaultSettings,
+          syncField: 'my_timestamp_sync_field',
         },
       });
-    }
-  );
-
-  it('builds common runtime mappings without multi group by', async () => {
-    const indicator = createAPMTransactionErrorRateIndicator();
-    const slo = createSLO({
-      id: 'irrelevant',
-      groupBy: ['example1', 'example2'],
-      indicator,
+      const settings = generator.buildSettings(slo);
+      expect(settings).toMatchSnapshot();
     });
-    const commonRuntime = generator.buildCommonRuntimeMappings(slo);
 
-    expect(commonRuntime).toEqual({});
+    it('builds the transform settings using the provided settings.syncField', async () => {
+      const slo = createSLO({
+        settings: {
+          ...defaultSettings,
+          syncField: 'my_timestamp_sync_field',
+        },
+      });
+      const settings = generator.buildSettings(slo, '@timestamp');
+      expect(settings.sync_field).toEqual('my_timestamp_sync_field');
+    });
 
-    const commonGroupBy = generator.buildCommonGroupBy(slo);
+    it('builds the transform settings using provided fallback when no settings.syncField is configured', async () => {
+      const slo = createSLO({ settings: defaultSettings });
+      const settings = generator.buildSettings(slo, '@timestamp2');
+      expect(settings.sync_field).toEqual('@timestamp2');
+    });
 
-    expect(commonGroupBy).toEqual({
-      '@timestamp': {
-        date_histogram: {
-          field: '@timestamp',
-          fixed_interval: '1m',
-        },
-      },
-      'slo.groupings.example1': {
-        terms: {
-          field: 'example1',
-        },
-      },
-      'slo.groupings.example2': {
-        terms: {
-          field: 'example2',
-        },
-      },
+    it("builds the transform settings using '@timestamp' default fallback when no settings.syncField is configured", async () => {
+      const slo = createSLO({ settings: defaultSettings });
+      const settings = generator.buildSettings(slo);
+      expect(settings.sync_field).toEqual('@timestamp');
     });
   });
 });

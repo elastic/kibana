@@ -99,7 +99,7 @@ export function ChatItem({
   const [editing, setEditing] = useState<boolean>(false);
   const [expanded, setExpanded] = useState<boolean>(Boolean(element));
 
-  const actions = [canCopy, collapsed, canCopy].filter(Boolean);
+  const actions = [canCopy, collapsed].filter(Boolean);
 
   const noBodyMessageClassName = css`
     ${moreCompactHeaderClassName}
@@ -182,7 +182,7 @@ export function ChatItem({
         />
       }
       className={
-        actions.length === 0 && !content
+        actions.length === 0 && !content && !element
           ? noPanelMessageClassName
           : collapsed
           ? noBodyMessageClassName

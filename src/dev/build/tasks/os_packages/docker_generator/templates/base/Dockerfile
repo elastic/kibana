@@ -59,7 +59,7 @@ RUN set -e ; \
  make install > /dev/null ; \
  rm -rf  "/usr/share/kibana/openssl-${OPENSSL_VERSION}" ; \
  chown -R 1000:0 "${OPENSSL_PATH}";
- 
+
 {{/fips}}
 # Ensure that group permissions are the same as user permissions.
 # This will help when relying on GID-0 to run Kibana, rather than UID-1000.
@@ -156,7 +156,7 @@ RUN /bin/echo -e '\n--enable-fips' >> config/node.options
 RUN echo '--openssl-config=/usr/share/kibana/config/nodejs.cnf' >> config/node.options
 COPY --chown=1000:0 openssl/nodejs.cnf "/usr/share/kibana/config/nodejs.cnf"
 ENV OPENSSL_MODULES=/usr/share/kibana/openssl/lib/ossl-modules
-ENV XPACK_SECURITY_EXPERIMENTAL_FIPSMODE_ENABLED=true
+ENV XPACK_SECURITY_FIPSMODE_ENABLED=true
 
 {{/fips}}
 RUN ln -s /usr/share/kibana /opt/kibana

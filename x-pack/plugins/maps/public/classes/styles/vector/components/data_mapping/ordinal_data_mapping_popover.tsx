@@ -161,7 +161,7 @@ export function OrdinalDataMappingPopover<DynamicOptions>(props: Props<DynamicOp
 
     return (
       <Fragment>
-        <EuiFormRow display="columnCompressedSwitch">
+        <EuiFormRow display="columnCompressed">
           <>
             <EuiSwitch
               label={i18n.translate('xpack.maps.styles.ordinalDataMapping.isEnabledSwitchLabel', {

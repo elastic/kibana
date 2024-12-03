@@ -13,6 +13,8 @@ import {
   AGENTS_INDEX,
   AGENT_POLICY_SAVED_OBJECT_TYPE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  SO_SEARCH_LIMIT,
+  UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
 } from '../../../common/constants';
 
 import { appContextService } from '../app_context';
@@ -20,6 +22,8 @@ import { agentPolicyService } from '../agent_policy';
 import { ENROLLMENT_API_KEYS_INDEX } from '../../constants';
 import { packagePolicyService } from '../package_policy';
 import { FleetError, HostedAgentPolicyRestrictionRelatedError } from '../../errors';
+
+import type { UninstallTokenSOAttributes } from '../security/uninstall_token_service';
 
 import { isSpaceAwarenessEnabled } from './helpers';
 
@@ -112,15 +116,52 @@ export async function updateAgentPolicySpaces({
     }
   }
 
+  // Update uninstall tokens
+  const uninstallTokensRes = await soClient.find<UninstallTokenSOAttributes>({
+    perPage: SO_SEARCH_LIMIT,
+    type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
+    filter: `${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.attributes.policy_id:"${agentPolicyId}"`,
+  });
+
+  if (uninstallTokensRes.total > 0) {
+    await soClient.bulkUpdate(
+      uninstallTokensRes.saved_objects.map((so) => ({
+        id: so.id,
+        type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
+        attributes: {
+          namespaces: newSpaceIds,
+        },
+      }))
+    );
+  }
+
   // Update fleet server index agents, enrollment api keys
   await esClient.updateByQuery({
     index: ENROLLMENT_API_KEYS_INDEX,
+    query: {
+      bool: {
+        must: {
+          terms: {
+            policy_id: [agentPolicyId],
+          },
+        },
+      },
+    },
     script: `ctx._source.namespaces = [${newSpaceIds.map((spaceId) => `"${spaceId}"`).join(',')}]`,
     ignore_unavailable: true,
     refresh: true,
   });
   await esClient.updateByQuery({
     index: AGENTS_INDEX,
+    query: {
+      bool: {
+        must: {
+          terms: {
+            policy_id: [agentPolicyId],
+          },
+        },
+      },
+    },
     script: `ctx._source.namespaces = [${newSpaceIds.map((spaceId) => `"${spaceId}"`).join(',')}]`,
     ignore_unavailable: true,
     refresh: true,

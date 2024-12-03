@@ -29,6 +29,7 @@ export const _formatPrivileges = (
   privileges: CheckPrivilegesResponse['privileges']
 ): EntityAnalyticsPrivileges['privileges'] => {
   const clusterPrivilegesByPrivilege = groupPrivilegesByName(privileges.elasticsearch.cluster);
+  const kibanaPrivilegesByPrivilege = groupPrivilegesByName(privileges.kibana);
 
   const indexPrivilegesByIndex = Object.entries(privileges.elasticsearch.index).reduce<
     Record<string, Record<string, boolean>>
@@ -50,13 +51,16 @@ export const _formatPrivileges = (
           }
         : {}),
     },
+    kibana: {
+      ...(Object.keys(kibanaPrivilegesByPrivilege).length > 0 ? kibanaPrivilegesByPrivilege : {}),
+    },
   };
 };
 
 interface CheckAndFormatPrivilegesOpts {
   request: KibanaRequest;
   security: SecurityPluginStart;
-  privilegesToCheck: Pick<CheckPrivilegesPayload, 'elasticsearch'>;
+  privilegesToCheck: CheckPrivilegesPayload;
 }
 
 export async function checkAndFormatPrivileges({

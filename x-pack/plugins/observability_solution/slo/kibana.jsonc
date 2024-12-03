@@ -21,39 +21,42 @@
       "charts",
       "dashboard",
       "data",
-      "dataViews",
-      "lens",
       "dataViewEditor",
       "dataViewFieldEditor",
+      "dataViews",
+      "discoverShared",
+      "embeddable",
+      "features",
       "fieldFormats",
+      "lens",
+      "licensing",
       "observability",
       "observabilityShared",
+      "presentationUtil",
       "ruleRegistry",
+      "share",
       "taskManager",
       "triggersActionsUi",
-      "share",
-      "unifiedSearch",
       "uiActions",
-      "embeddable",
-      "presentationUtil",
-      "features",
-      "licensing",
+      "unifiedSearch",
       "usageCollection"
     ],
     "optionalPlugins": [
       "cloud",
-      "spaces",
-      "serverless",
       "discover",
-      "observabilityAIAssistant"
+      "embeddableEnhanced",
+      "observabilityAIAssistant",
+      "security",
+      "serverless",
+      "spaces"
     ],
     "requiredBundles": [
       "controls",
+      "embeddable",
+      "ingestPipelines",
       "kibanaReact",
       "kibanaUtils",
-      "unifiedSearch",
-      "embeddable",
-      "ingestPipelines"
+      "unifiedSearch"
     ]
   }
 }
