@@ -1768,6 +1768,15 @@ When you create *Lens* visualization, the default for the *Legend width* is now 
 ==== Elastic Observability solution
 
 [discrete]
+[[deprecation]]
+.The Observability > Logs > Explorer app is now deprecated in favor of Discover. (8.17)
+[%collapsible]
+====
+*Details* +
+Both the Logs Explorer and Logs Stream applications are now deprecated and will be removed in 9.0. We continue to make enhancements to Discover to offer similar functionality in 9.x.
+====
+
+[discrete]
 [[deprecation-192003]]
 .Deprecated the Observability AI Assistant specific advanced setting `observability:aiAssistantLogsIndexPattern`. (8.16)
 [%collapsible]

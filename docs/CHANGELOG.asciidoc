@@ -112,7 +112,7 @@ The `metrics:allowCheckingForFailedShards` advanced setting has been removed. Wi
 [%collapsible]
 ====
 *Details* +
-Both the Logs Explorer and the Logs Stream application in Kibana are now deprecated and will be removed in 9.0. We continue to make enhancements to Discover to offer similar functionality in 9.x. 
+Both the Logs Explorer and Logs Stream applications are now deprecated and will be removed in 9.0. We continue to make enhancements to Discover to offer similar functionality in 9.x. 
 ====
 
 
