@@ -10,35 +10,20 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { GridPanel, GridPanelProps } from './grid_panel';
-import { GridLayoutStateManager } from '../types';
-import { BehaviorSubject } from 'rxjs';
+import { gridLayoutStateManagerMock } from '../test_utils/mocks';
 
 describe('GridPanel', () => {
   const mockRenderPanelContents = jest.fn((panelId) => <div>Panel Content {panelId}</div>);
   const mockInteractionStart = jest.fn();
 
-  const mockGridLayoutStateManager = {
-    expandedPanelId$: new BehaviorSubject<string | undefined>(undefined),
-    isMobileView$: new BehaviorSubject<boolean>(false),
-    gridLayout$: {
-      getValue: jest.fn(() => [
-        {
-          panels: {
-            'panel-1': { column: 0, row: 0, width: 2, height: 2 },
-          },
-        },
-      ]),
-    },
-  } as unknown as GridLayoutStateManager;
-
   const renderGridPanel = (propsOverrides: Partial<GridPanelProps> = {}) => {
     return render(
       <GridPanel
-        panelId="panel-1"
+        panelId="panel1"
         rowIndex={0}
         renderPanelContents={mockRenderPanelContents}
         interactionStart={mockInteractionStart}
-        gridLayoutStateManager={mockGridLayoutStateManager}
+        gridLayoutStateManager={gridLayoutStateManagerMock}
         {...propsOverrides}
       />
     );
@@ -49,7 +34,7 @@ describe('GridPanel', () => {
 
   it('renders panel contents correctly', () => {
     renderGridPanel();
-    expect(screen.getByText('Panel Content panel-1')).toBeInTheDocument();
+    expect(screen.getByText('Panel Content panel1')).toBeInTheDocument();
   });
 
   describe('drag handle interaction', () => {

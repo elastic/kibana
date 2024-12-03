@@ -154,7 +154,7 @@ export const GridRow = forwardRef<HTMLDivElement, GridRowProps>(
          * - Panel IDs (adding/removing/replacing, but not reordering)
          *
          * Note: During dragging or resizing actions, the row should not re-render because panel positions are controlled via CSS styles for performance reasons.
-         * However, once the user finishes the interaction, the elements in the grid need to be displayed as read on the screen for accessibility reasons (screen readers and focus management).
+         * However, once the user finishes the interaction, the order of rendered panels need to be aligned with how they are displayed in the grid for accessibility reasons (screen readers and focus management).
          * This is handled in the syncPanelIds callback.
          */
         const rowStateSubscription = gridLayoutStateManager.gridLayout$

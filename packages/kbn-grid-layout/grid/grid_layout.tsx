@@ -21,7 +21,7 @@ import { useGridLayoutState } from './use_grid_layout_state';
 import { isLayoutEqual } from './utils/equality_checks';
 import { resolveGridRow } from './utils/resolve_grid_row';
 
-interface GridLayoutProps {
+export interface GridLayoutProps {
   layout: GridLayoutData;
   gridSettings: GridSettings;
   renderPanelContents: (panelId: string) => React.ReactNode;
