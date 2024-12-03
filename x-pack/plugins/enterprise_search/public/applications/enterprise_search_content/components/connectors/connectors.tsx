@@ -53,7 +53,7 @@ export const connectorsBreadcrumbs = [
 
 export const crawlersBreadcrumbs = [
   i18n.translate('xpack.enterpriseSearch.content.crawlers.breadcrumb', {
-    defaultMessage: 'Web crawlers',
+    defaultMessage: 'Web Crawlers',
   }),
 ];
 
