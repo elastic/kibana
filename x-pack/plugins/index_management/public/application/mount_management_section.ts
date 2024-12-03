@@ -57,6 +57,7 @@ export function getIndexManagementDependencies({
   cloud,
   startDependencies,
   uiMetricService,
+  canUseSyntheticSource,
 }: {
   core: CoreStart;
   usageCollection: UsageCollectionSetup;
@@ -68,9 +69,12 @@ export function getIndexManagementDependencies({
   cloud?: CloudSetup;
   startDependencies: StartDependencies;
   uiMetricService: UiMetricService;
+  canUseSyntheticSource: boolean;
 }): AppDependencies {
   const { docLinks, application, uiSettings, settings } = core;
   const { url } = startDependencies.share;
+  const { monitor, manageEnrich, monitorEnrich } = application.capabilities.index_management;
+
   return {
     core: {
       getUrlForApp: application.getUrlForApp,
@@ -100,6 +104,12 @@ export function getIndexManagementDependencies({
     docLinks,
     kibanaVersion,
     overlays: core.overlays,
+    canUseSyntheticSource,
+    privs: {
+      monitor: !!monitor,
+      manageEnrich: !!manageEnrich,
+      monitorEnrich: !!monitorEnrich,
+    },
   };
 }
 
@@ -112,6 +122,7 @@ export async function mountManagementSection({
   kibanaVersion,
   config,
   cloud,
+  canUseSyntheticSource,
 }: {
   coreSetup: CoreSetup<StartDependencies>;
   usageCollection: UsageCollectionSetup;
@@ -121,6 +132,7 @@ export async function mountManagementSection({
   kibanaVersion: SemVer;
   config: AppDependencies['config'];
   cloud?: CloudSetup;
+  canUseSyntheticSource: boolean;
 }) {
   const { element, setBreadcrumbs, history } = params;
   const [core, startDependencies] = await coreSetup.getStartServices();
@@ -148,6 +160,7 @@ export async function mountManagementSection({
     startDependencies,
     uiMetricService,
     usageCollection,
+    canUseSyntheticSource,
   });
 
   const unmountAppCallback = renderApp(element, { core, dependencies: appDependencies });
