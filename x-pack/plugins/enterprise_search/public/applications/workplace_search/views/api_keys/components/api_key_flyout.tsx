@@ -23,6 +23,7 @@ import {
   EuiButton,
   EuiForm,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import { CLOSE_BUTTON_LABEL, SAVE_BUTTON_LABEL } from '../../../../shared/constants';
@@ -44,12 +45,20 @@ export const ApiKeyFlyout: React.FC = () => {
     activeApiTokenRawName: rawName,
   } = useValues(ApiKeysLogic);
 
+  const flyoutTitleId = useGeneratedHtmlId();
+
   return (
     <EuiPortal>
-      <EuiFlyout onClose={hideApiKeyForm} hideCloseButton ownFocus size="s">
+      <EuiFlyout
+        onClose={hideApiKeyForm}
+        hideCloseButton
+        ownFocus
+        size="s"
+        aria-labelledby={flyoutTitleId}
+      >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
-            <h2>{API_KEY_FLYOUT_TITLE}</h2>
+            <h2 id={flyoutTitleId}>{API_KEY_FLYOUT_TITLE}</h2>
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
@@ -86,7 +95,11 @@ export const ApiKeyFlyout: React.FC = () => {
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty iconType="cross" onClick={hideApiKeyForm}>
+              <EuiButtonEmpty
+                data-test-subj="enterpriseSearchApiKeyFlyoutButton"
+                iconType="cross"
+                onClick={hideApiKeyForm}
+              >
                 {CLOSE_BUTTON_LABEL}
               </EuiButtonEmpty>
             </EuiFlexItem>
