@@ -126,7 +126,7 @@ export function ImageViewer({
       )}
       {onClear && (
         <EuiButtonIcon
-          style={{ position: 'absolute', top: '-4px', right: '-4px' }}
+          css={{ position: 'absolute', top: '-4px', right: '-4px' }}
           display="fill"
           iconType="cross"
           aria-label="Clear"
