@@ -13,20 +13,14 @@ import type {
   SetRuleFieldResolvedValueFn,
 } from '../../../../rule_management/model/prebuilt_rule_upgrade';
 import { FieldUpgradeState } from '../../../../rule_management/model/prebuilt_rule_upgrade';
-import type {
-  PartialRuleDiff,
-  RuleFieldsDiff,
-} from '../../../../../../common/api/detection_engine';
 import {
   type FieldsDiff,
   type DiffableAllFields,
-  type DiffableRule,
   type RuleUpgradeInfoForReview,
   ThreeWayDiffConflict,
   type RuleSignatureId,
   NON_UPGRADEABLE_DIFFABLE_FIELDS,
 } from '../../../../../../common/api/detection_engine';
-import { convertRuleToDiffable } from '../../../../../../common/detection_engine/prebuilt_rules/diff/convert_rule_to_diffable';
 import { assertUnreachable } from '../../../../../../common/utility_types';
 
 type RuleResolvedConflicts = Partial<DiffableAllFields>;
@@ -60,25 +54,19 @@ export function usePrebuiltRulesUpgradeState(
     const state: RulesUpgradeState = {};
 
     for (const ruleUpgradeInfo of ruleUpgradeInfos) {
-      const customizableFieldsDiff = calcCustomizableFieldsDiff(ruleUpgradeInfo.diff);
       const fieldsUpgradeState = calcFieldsState(
-        customizableFieldsDiff,
+        ruleUpgradeInfo.diff.fields,
         rulesResolvedConflicts[ruleUpgradeInfo.rule_id] ?? {}
       );
 
       state[ruleUpgradeInfo.rule_id] = {
         ...ruleUpgradeInfo,
-        customizableFieldsDiff,
-        finalRule: calcFinalDiffableRule(
-          ruleUpgradeInfo,
-          rulesResolvedConflicts[ruleUpgradeInfo.rule_id] ?? {}
-        ),
         fieldsUpgradeState,
         hasUnresolvedConflicts: isPrebuiltRulesCustomizationEnabled
           ? Object.values(fieldsUpgradeState).some(
-              (x) =>
-                x === FieldUpgradeState.SolvableConflict ||
-                x === FieldUpgradeState.NonSolvableConflict
+              ({ state: fieldState }) =>
+                fieldState === FieldUpgradeState.SolvableConflict ||
+                fieldState === FieldUpgradeState.NonSolvableConflict
             )
           : false,
       };
@@ -93,89 +81,35 @@ export function usePrebuiltRulesUpgradeState(
   };
 }
 
-function calcCustomizableFieldsDiff(ruleFieldsDiff: PartialRuleDiff): PartialRuleDiff {
-  const fieldsDiff: Partial<RuleFieldsDiff> = {};
-  let numFieldsWithUpdates = 0;
-  let numFieldsWithConflicts = 0;
-  let numFieldsWithNonSolvableConflicts = 0;
-
-  for (const [fieldName, diff] of Object.entries(ruleFieldsDiff.fields)) {
-    if (NON_UPGRADEABLE_DIFFABLE_FIELDS.includes(fieldName)) {
-      // eslint-disable-next-line no-continue
-      continue;
-    }
-
-    fieldsDiff[fieldName as keyof RuleFieldsDiff] = diff;
-
-    if (diff.has_update) {
-      numFieldsWithUpdates++;
-    }
-
-    if (diff.conflict !== ThreeWayDiffConflict.NONE) {
-      numFieldsWithConflicts++;
-    }
-
-    if (diff.conflict === ThreeWayDiffConflict.NON_SOLVABLE) {
-      numFieldsWithNonSolvableConflicts++;
-    }
-  }
-
-  return {
-    num_fields_with_updates: numFieldsWithUpdates,
-    num_fields_with_conflicts: numFieldsWithConflicts,
-    num_fields_with_non_solvable_conflicts: numFieldsWithNonSolvableConflicts,
-    fields: fieldsDiff,
-  };
-}
-
-function calcFinalDiffableRule(
-  ruleUpgradeInfo: RuleUpgradeInfoForReview,
-  ruleResolvedConflicts: RuleResolvedConflicts
-): DiffableRule {
-  return {
-    ...convertRuleToDiffable(ruleUpgradeInfo.target_rule),
-    ...convertRuleFieldsDiffToDiffable(ruleUpgradeInfo.diff.fields),
-    ...ruleResolvedConflicts,
-  } as DiffableRule;
-}
-
-/**
- * Assembles a `DiffableRule` from rule fields diff `merged_version`s.
- */
-function convertRuleFieldsDiffToDiffable(
-  ruleFieldsDiff: FieldsDiff<Record<string, unknown>>
-): Partial<DiffableRule> {
-  const mergeVersionRule: Record<string, unknown> = {};
-
-  for (const fieldName of Object.keys(ruleFieldsDiff)) {
-    mergeVersionRule[fieldName] = ruleFieldsDiff[fieldName].merged_version;
-  }
-
-  return mergeVersionRule;
-}
+const NON_UPGRADEABLE_DIFFABLE_FIELDS_SET: Readonly<Set<string>> = new Set(
+  NON_UPGRADEABLE_DIFFABLE_FIELDS
+);
 
 function calcFieldsState(
-  ruleDiff: PartialRuleDiff,
+  fieldsDiff: FieldsDiff<Record<string, unknown>>,
   ruleResolvedConflicts: RuleResolvedConflicts
 ): FieldsUpgradeState {
   const fieldsState: FieldsUpgradeState = {};
 
-  for (const fieldName of Object.keys(ruleDiff.fields)) {
-    const conflict =
-      ruleDiff.fields[fieldName as keyof typeof ruleDiff.fields]?.conflict ??
-      ThreeWayDiffConflict.NONE;
+  for (const fieldName of Object.keys(fieldsDiff)) {
+    if (NON_UPGRADEABLE_DIFFABLE_FIELDS_SET.has(fieldName)) {
+      // eslint-disable-next-line no-continue
+      continue;
+    }
+
+    const conflict = fieldsDiff[fieldName]?.conflict ?? ThreeWayDiffConflict.NONE;
 
     switch (conflict) {
       case ThreeWayDiffConflict.NONE:
-        fieldsState[fieldName] = FieldUpgradeState.NoConflict;
+        fieldsState[fieldName] = { state: FieldUpgradeState.NoConflict };
         break;
 
       case ThreeWayDiffConflict.SOLVABLE:
-        fieldsState[fieldName] = FieldUpgradeState.SolvableConflict;
+        fieldsState[fieldName] = { state: FieldUpgradeState.SolvableConflict };
         break;
 
       case ThreeWayDiffConflict.NON_SOLVABLE:
-        fieldsState[fieldName] = FieldUpgradeState.NonSolvableConflict;
+        fieldsState[fieldName] = { state: FieldUpgradeState.NonSolvableConflict };
         break;
 
       default:
@@ -183,8 +117,8 @@ function calcFieldsState(
     }
   }
 
-  for (const fieldName of Object.keys(ruleResolvedConflicts)) {
-    fieldsState[fieldName] = FieldUpgradeState.Accepted;
+  for (const [fieldName, resolvedValue] of Object.entries(ruleResolvedConflicts)) {
+    fieldsState[fieldName] = { state: FieldUpgradeState.Accepted, resolvedValue };
   }
 
   return fieldsState;

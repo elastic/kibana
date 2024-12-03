@@ -31,7 +31,6 @@ import { usePerformUpgradeSpecificRules } from '../../../../rule_management/logi
 import { usePrebuiltRulesUpgradeReview } from '../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_upgrade_review';
 import { RuleDiffTab } from '../../../../rule_management/components/rule_details/rule_diff_tab';
 import { FieldUpgradeState } from '../../../../rule_management/model/prebuilt_rule_upgrade/field_upgrade_state';
-import { isNonUpgradeableFieldName } from '../../../../rule_management/model/prebuilt_rule_upgrade/fields';
 import { useRulePreviewFlyout } from '../use_rule_preview_flyout';
 import { MlJobUpgradeModal } from './modals/ml_job_upgrade_modal';
 import { UpgradeConflictsModal } from './modals/upgrade_conflicts_modal';
@@ -468,21 +467,15 @@ export const useUpgradePrebuiltRulesTableContext = (): UpgradePrebuiltRulesConte
 };
 
 function constructRuleFieldsToUpgrade(ruleUpgradeState: RuleUpgradeState): RuleFieldsToUpgrade {
-  const finalRule = ruleUpgradeState.finalRule as Record<string, unknown>;
   const ruleFieldsToUpgrade: Record<string, unknown> = {};
 
-  for (const fieldName of Object.keys(ruleUpgradeState.fieldsUpgradeState)) {
-    const fieldUpgradeState = ruleUpgradeState.fieldsUpgradeState[fieldName];
-
-    if (!isNonUpgradeableFieldName(fieldName) && fieldUpgradeState === FieldUpgradeState.Accepted) {
-      invariant(
-        fieldName in finalRule,
-        `Ready to upgrade field "${fieldName}" is not found in final rule`
-      );
-
+  for (const [fieldName, fieldUpgradeState] of Object.entries(
+    ruleUpgradeState.fieldsUpgradeState
+  )) {
+    if (fieldUpgradeState.state === FieldUpgradeState.Accepted) {
       ruleFieldsToUpgrade[fieldName] = {
         pick_version: 'RESOLVED',
-        resolved_value: finalRule[fieldName],
+        resolved_value: fieldUpgradeState.resolvedValue,
       };
     }
   }

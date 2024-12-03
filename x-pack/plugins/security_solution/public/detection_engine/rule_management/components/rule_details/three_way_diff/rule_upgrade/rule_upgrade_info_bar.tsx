@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import { FieldUpgradeState, type RuleUpgradeState } from '../../../../model/prebuilt_rule_upgrade';
+import React from 'react';
 import {
   UtilityBar,
   UtilityBarGroup,
@@ -15,27 +14,17 @@ import {
 } from '../../../../../../common/components/utility_bar';
 import * as i18n from './translations';
 
-interface UpgradeInfoBarProps {
-  ruleUpgradeState: RuleUpgradeState;
+interface RuleUpgradeInfoBarProps {
+  numOfFieldsWithUpdates: number;
+  numOfSolvableConflicts: number;
+  numOfNonSolvableConflicts: number;
 }
 
-export function RuleUpgradeInfoBar({ ruleUpgradeState }: UpgradeInfoBarProps): JSX.Element {
-  const numOfFieldsWithUpdates = ruleUpgradeState.customizableFieldsDiff.num_fields_with_updates;
-  const numOfSolvedConflicts = useMemo(
-    () =>
-      Object.values(ruleUpgradeState.fieldsUpgradeState).filter(
-        (x) => x === FieldUpgradeState.SolvableConflict
-      ).length,
-    [ruleUpgradeState.fieldsUpgradeState]
-  );
-  const numOfUnsolvedConflicts = useMemo(
-    () =>
-      Object.values(ruleUpgradeState.fieldsUpgradeState).filter(
-        (x) => x === FieldUpgradeState.NonSolvableConflict
-      ).length,
-    [ruleUpgradeState.fieldsUpgradeState]
-  );
-
+export function RuleUpgradeInfoBar({
+  numOfFieldsWithUpdates,
+  numOfSolvableConflicts,
+  numOfNonSolvableConflicts,
+}: RuleUpgradeInfoBarProps): JSX.Element {
   return (
     <UtilityBar>
       <UtilityBarSection>
@@ -46,12 +35,12 @@ export function RuleUpgradeInfoBar({ ruleUpgradeState }: UpgradeInfoBarProps): J
         </UtilityBarGroup>
         <UtilityBarGroup>
           <UtilityBarText dataTestSubj="showingRules">
-            {i18n.NUM_OF_SOLVED_CONFLICTS(numOfSolvedConflicts)}
+            {i18n.NUM_OF_SOLVED_CONFLICTS(numOfSolvableConflicts)}
           </UtilityBarText>
         </UtilityBarGroup>
         <UtilityBarGroup>
           <UtilityBarText dataTestSubj="showingRules">
-            {i18n.NUM_OF_UNSOLVED_CONFLICTS(numOfUnsolvedConflicts)}
+            {i18n.NUM_OF_UNSOLVED_CONFLICTS(numOfNonSolvableConflicts)}
           </UtilityBarText>
         </UtilityBarGroup>
       </UtilityBarSection>

@@ -7,9 +7,11 @@
 
 import React, { memo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
-import type {
-  RuleUpgradeState,
-  SetRuleFieldResolvedValueFn,
+import type { ThreeWayDiff } from '../../../../../../../common/api/detection_engine';
+import {
+  FieldUpgradeState,
+  type RuleUpgradeState,
+  type SetRuleFieldResolvedValueFn,
 } from '../../../../model/prebuilt_rule_upgrade';
 import type { UpgradeableDiffableFields } from '../../../../model/prebuilt_rule_upgrade/fields';
 import { RuleUpgradeInfoBar } from './rule_upgrade_info_bar';
@@ -26,6 +28,9 @@ export const RuleUpgrade = memo(function RuleUpgrade({
   ruleUpgradeState,
   setRuleFieldResolvedValue,
 }: RuleUpgradeProps): JSX.Element {
+  const numOfFieldsWithUpdates = calcNumOfFieldsWithUpdates(ruleUpgradeState);
+  const numOfSolvableConflicts = calcNumOfSolvableConflicts(ruleUpgradeState);
+  const numOfNonSolvableConflicts = calcNumOfNonSolvableConflicts(ruleUpgradeState);
   const fieldNames = Object.keys(
     ruleUpgradeState.fieldsUpgradeState
   ) as UpgradeableDiffableFields[];
@@ -33,9 +38,16 @@ export const RuleUpgrade = memo(function RuleUpgrade({
   return (
     <>
       <EuiSpacer size="s" />
-      <RuleUpgradeInfoBar ruleUpgradeState={ruleUpgradeState} />
+      <RuleUpgradeInfoBar
+        numOfFieldsWithUpdates={numOfFieldsWithUpdates}
+        numOfSolvableConflicts={numOfSolvableConflicts}
+        numOfNonSolvableConflicts={numOfNonSolvableConflicts}
+      />
       <EuiSpacer size="s" />
-      <RuleUpgradeCallout ruleUpgradeState={ruleUpgradeState} />
+      <RuleUpgradeCallout
+        numOfSolvableConflicts={numOfSolvableConflicts}
+        numOfNonSolvableConflicts={numOfNonSolvableConflicts}
+      />
       <EuiSpacer size="s" />
       {fieldNames.map((fieldName) => (
         <FieldUpgradeContextProvider
@@ -50,3 +62,26 @@ export const RuleUpgrade = memo(function RuleUpgrade({
     </>
   );
 });
+
+function calcNumOfFieldsWithUpdates(ruleUpgradeState: RuleUpgradeState): number {
+  const fieldsDiffEntries: Array<[string, ThreeWayDiff<unknown>]> = Object.entries(
+    ruleUpgradeState.diff.fields
+  );
+  const fieldsUpgradeState = ruleUpgradeState.fieldsUpgradeState;
+
+  return fieldsDiffEntries.filter(
+    ([fieldName, fieldDiff]) => Boolean(fieldsUpgradeState[fieldName]) && fieldDiff.has_update
+  ).length;
+}
+
+function calcNumOfSolvableConflicts(ruleUpgradeState: RuleUpgradeState): number {
+  return Object.values(ruleUpgradeState.fieldsUpgradeState).filter(
+    ({ state }) => state === FieldUpgradeState.SolvableConflict
+  ).length;
+}
+
+function calcNumOfNonSolvableConflicts(ruleUpgradeState: RuleUpgradeState): number {
+  return Object.values(ruleUpgradeState.fieldsUpgradeState).filter(
+    ({ state }) => state === FieldUpgradeState.NonSolvableConflict
+  ).length;
+}

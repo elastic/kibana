@@ -7,8 +7,13 @@
 
 import React, { createContext, useContext, useMemo } from 'react';
 import { useBoolean } from '@kbn/react-hooks';
-import type { DiffableRule, ThreeWayDiff } from '../../../../../../../common/api/detection_engine';
+import type {
+  DiffableRule,
+  FieldsDiff,
+  ThreeWayDiff,
+} from '../../../../../../../common/api/detection_engine';
 import { invariant } from '../../../../../../../common/utils/invariant';
+import { convertRuleToDiffable } from '../../../../../../../common/detection_engine/prebuilt_rules/diff/convert_rule_to_diffable';
 import type { SetRuleFieldResolvedValueFn } from '../../../../model/prebuilt_rule_upgrade/set_rule_field_resolved_value';
 import type { UpgradeableDiffableFields } from '../../../../model/prebuilt_rule_upgrade/fields';
 import type { RuleUpgradeState } from '../../../../model/prebuilt_rule_upgrade';
@@ -69,7 +74,7 @@ export function FieldUpgradeContextProvider({
   setRuleFieldResolvedValue,
   children,
 }: FieldUpgradeContextProviderProps) {
-  const fieldUpgradeState = ruleUpgradeState.fieldsUpgradeState[fieldName];
+  const { state: fieldUpgradeState } = ruleUpgradeState.fieldsUpgradeState[fieldName];
   const fieldDiff = ruleUpgradeState.diff.fields[fieldName];
   const initialRightSideMode =
     fieldUpgradeState === FieldUpgradeState.NonSolvableConflict
@@ -89,7 +94,7 @@ export function FieldUpgradeContextProvider({
       fieldName,
       fieldUpgradeState,
       fieldDiff,
-      finalDiffableRule: ruleUpgradeState.finalRule,
+      finalDiffableRule: calcFinalDiffableRule(ruleUpgradeState),
       rightSideMode: editing ? FieldFinalSideMode.Edit : FieldFinalSideMode.Readonly,
       setRuleFieldResolvedValue,
       setReadOnlyMode,
@@ -99,7 +104,7 @@ export function FieldUpgradeContextProvider({
       fieldName,
       fieldUpgradeState,
       fieldDiff,
-      ruleUpgradeState.finalRule,
+      ruleUpgradeState,
       editing,
       setRuleFieldResolvedValue,
       setReadOnlyMode,
@@ -121,4 +126,37 @@ export function useFieldUpgradeContext() {
   );
 
   return context;
+}
+
+function calcFinalDiffableRule(ruleUpgradeState: RuleUpgradeState): DiffableRule {
+  const fieldsResolvedValues = Object.entries(ruleUpgradeState.fieldsUpgradeState).reduce<
+    Record<string, unknown>
+  >((result, [fieldName, fieldState]) => {
+    if (fieldState.state === FieldUpgradeState.Accepted && Boolean(fieldState.resolvedValue)) {
+      result[fieldName] = fieldState.resolvedValue;
+    }
+
+    return result;
+  }, {});
+
+  return {
+    ...convertRuleToDiffable(ruleUpgradeState.target_rule),
+    ...convertRuleFieldsDiffToDiffable(ruleUpgradeState.diff.fields),
+    ...fieldsResolvedValues,
+  } as DiffableRule;
+}
+
+/**
+ * Assembles a `DiffableRule` from rule fields diff `merged_version`s.
+ */
+function convertRuleFieldsDiffToDiffable(
+  ruleFieldsDiff: FieldsDiff<Record<string, unknown>>
+): Partial<DiffableRule> {
+  const mergeVersionRule: Record<string, unknown> = {};
+
+  for (const fieldName of Object.keys(ruleFieldsDiff)) {
+    mergeVersionRule[fieldName] = ruleFieldsDiff[fieldName].merged_version;
+  }
+
+  return mergeVersionRule;
 }
