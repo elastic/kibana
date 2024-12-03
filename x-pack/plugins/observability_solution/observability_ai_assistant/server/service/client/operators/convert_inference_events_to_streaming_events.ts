@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { OperatorFunction, map } from 'rxjs';
+import { Observable, OperatorFunction, map } from 'rxjs';
 import { v4 } from 'uuid';
 import {
   ChatCompletionEvent as InferenceChatCompletionEvent,
