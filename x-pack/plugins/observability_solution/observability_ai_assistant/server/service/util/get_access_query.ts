@@ -20,7 +20,17 @@ export function getAccessQuery({
               should: [
                 { term: { public: true } },
                 ...(user
-                  ? [{ term: user.id ? { 'user.id': user.id } : { 'user.name': user.name } }]
+                  ? user.id
+                    ? [
+                        { term: { 'user.id': user.id } },
+                        {
+                          bool: {
+                            must_not: { exists: { field: 'user.id' } },
+                            must: { term: { 'user.name': user.name } },
+                          },
+                        },
+                      ]
+                    : [{ term: { 'user.name': user.name } }]
                   : []),
               ],
               minimum_should_match: 1,
