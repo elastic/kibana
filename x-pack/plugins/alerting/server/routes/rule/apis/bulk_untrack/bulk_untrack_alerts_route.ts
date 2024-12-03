@@ -28,7 +28,8 @@ export const bulkUntrackAlertsRoute = (
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
-        const rulesClient = (await context.alerting).getRulesClient();
+        const alertingContext = await context.alerting;
+        const rulesClient = await alertingContext.getRulesClient();
         const body: BulkUntrackRequestBodyV1 = req.body;
         try {
           await rulesClient.bulkUntrackAlerts({
