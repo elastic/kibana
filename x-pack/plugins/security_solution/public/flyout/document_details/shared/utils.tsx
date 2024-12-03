@@ -4,6 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { i18n } from '@kbn/i18n';
+import { startCase } from 'lodash';
+import { EVENT_CATEGORY_TO_FIELD } from '../right/utils/event_utils';
+import type { GetFieldsData } from './hooks/use_get_fields_data';
 
 /**
  * Helper function to retrieve a field's value (used in combination with the custom hook useGetFieldsData (https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/public/common/hooks/use_get_fields_data.ts)
@@ -32,4 +36,46 @@ export const getFieldArray = (field: unknown | unknown[]) => {
     return field;
   }
   return [];
+};
+
+export const getAlertTitle = ({ ruleName }: { ruleName: string | undefined }) => {
+  const defaultAlertTitle = i18n.translate(
+    'xpack.securitySolution.flyout.right.header.headerTitle',
+    { defaultMessage: 'Document details' }
+  );
+  return ruleName ?? defaultAlertTitle;
+};
+
+export const getEventTitle = ({
+  eventKind,
+  eventCategory,
+  getFieldsData,
+}: {
+  eventKind: string | null;
+  eventCategory: string | null;
+  getFieldsData: GetFieldsData;
+}) => {
+  const defaultTitle = i18n.translate('xpack.securitySolution.flyout.title.eventTitle', {
+    defaultMessage: `Event details`,
+  });
+
+  if (eventKind === 'event' && eventCategory) {
+    const fieldName = EVENT_CATEGORY_TO_FIELD[eventCategory];
+    return getField(getFieldsData(fieldName)) ?? defaultTitle;
+  }
+
+  if (eventKind === 'alert') {
+    return i18n.translate('xpack.securitySolution.flyout.title.alertEventTitle', {
+      defaultMessage: 'External alert details',
+    });
+  }
+
+  return eventKind
+    ? i18n.translate('xpack.securitySolution.flyout.title.otherEventTitle', {
+        defaultMessage: '{eventKind} details',
+        values: {
+          eventKind: startCase(eventKind),
+        },
+      })
+    : defaultTitle;
 };

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { getField, getFieldArray } from './utils';
+import { getField, getFieldArray, getEventTitle, getAlertTitle } from './utils';
 
 describe('test getField', () => {
   it('should return the string value if field is a string', () => {
@@ -45,5 +45,45 @@ describe('test getFieldArray', () => {
   it('should return empty array if field is null or empty', () => {
     expect(getFieldArray(undefined)).toStrictEqual([]);
     expect(getFieldArray(null)).toStrictEqual([]);
+  });
+});
+
+describe('test getEventTitle', () => {
+  it('when event kind is event, return event title based on category', () => {
+    expect(
+      getEventTitle({
+        eventKind: 'event',
+        eventCategory: 'process',
+        getFieldsData: (field) => (field === 'process.name' ? 'process name' : ''),
+      })
+    ).toBe('process name');
+  });
+
+  it('when event kind is alert, return External alert details', () => {
+    expect(
+      getEventTitle({ eventKind: 'alert', eventCategory: null, getFieldsData: jest.fn() })
+    ).toBe('External alert details');
+  });
+
+  it('when event kind is not event or alert, return Event kind details', () => {
+    expect(
+      getEventTitle({ eventKind: 'metric', eventCategory: null, getFieldsData: jest.fn() })
+    ).toBe('Metric details');
+  });
+
+  it('when event kind is null, return Event details', () => {
+    expect(getEventTitle({ eventKind: null, eventCategory: null, getFieldsData: jest.fn() })).toBe(
+      'Event details'
+    );
+  });
+});
+
+describe('test getAlertTitle', () => {
+  it('when ruleName is undefined, return Document details', () => {
+    expect(getAlertTitle({ ruleName: undefined })).toBe('Document details');
+  });
+
+  it('when ruleName is defined, return ruleName', () => {
+    expect(getAlertTitle({ ruleName: 'test rule' })).toBe('test rule');
   });
 });

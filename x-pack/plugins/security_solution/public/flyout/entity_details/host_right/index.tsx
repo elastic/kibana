@@ -11,6 +11,7 @@ import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
+import { TableId } from '@kbn/securitysolution-data-table';
 import { useNonClosedAlerts } from '../../../cloud_security_posture/hooks/use_non_closed_alerts';
 import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../../overview/components/detection_response/alerts_by_status/types';
 import { useRefetchQueryById } from '../../../entity_analytics/api/hooks/use_refetch_query_by_id';
@@ -36,7 +37,6 @@ import { HostDetailsPanelKey } from '../host_details_left';
 import { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_panel_header';
 import { HostPreviewPanelFooter } from '../host_preview/footer';
 import { EntityEventTypes } from '../../../common/lib/telemetry';
-
 export interface HostPanelProps extends Record<string, unknown> {
   contextID: string;
   scopeId: string;
@@ -187,13 +187,14 @@ export const HostPanel = ({
           <>
             <FlyoutNavigation
               flyoutIsExpandable={
-                !isPreviewMode &&
-                (isRiskScoreExist ||
-                  hasMisconfigurationFindings ||
-                  hasVulnerabilitiesFindings ||
-                  hasNonClosedAlerts)
+                isRiskScoreExist ||
+                hasMisconfigurationFindings ||
+                hasVulnerabilitiesFindings ||
+                hasNonClosedAlerts
               }
               expandDetails={openDefaultPanel}
+              isPreviewMode={isPreviewMode}
+              isPreview={scopeId === TableId.rulePreview}
             />
             <HostPanelHeader hostName={hostName} observedHost={observedHostWithAnomalies} />
             <HostPanelContent
