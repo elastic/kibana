@@ -143,12 +143,13 @@ export const TagCloudChart = ({
           : getColor(palettesRegistry, palette, tag, values, syncColors) || 'rgba(0,0,0,0)',
       };
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     bucket,
     visData.columns,
     visData.rows,
     metric,
-    palettes,
+    // palettes, // somehow causes infinite update of RO
     isDarkMode,
     colorMapping,
     bucketFormatter,
