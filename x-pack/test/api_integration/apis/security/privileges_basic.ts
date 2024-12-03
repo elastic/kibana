@@ -14,7 +14,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('Privileges', () => {
     describe('GET /api/security/privileges', () => {
-      it.skip('should return a privilege map with all known privileges, without actions', async () => {
+      it('should return a privilege map with all known privileges, without actions', async () => {
         // If you're adding a privilege to the following, that's great!
         // If you're removing a privilege, this breaks backwards compatibility
         // Roles are associated with these privileges, and we shouldn't be removing them in a minor version.
