@@ -28,7 +28,6 @@ export interface UsageStats {
   'autocomplete:valueSuggestionMethod': string;
   'search:timeout': number;
   'visualization:visualize:legacyHeatmapChartsLibrary': boolean;
-  'doc_table:legacy': boolean;
   'discover:modifyColumnsOnSwitch': boolean;
   'discover:searchFieldsFromSource': boolean;
   'discover:showFieldStatistics': boolean;
@@ -99,7 +98,6 @@ export interface UsageStats {
   'fileUpload:maxFileSize': string;
   'ml:anomalyDetection:results:enableTimeDefaults': boolean;
   'ml:anomalyDetection:results:timeDefaults': string;
-  'truncate:maxHeight': number;
   'timepicker:timeDefaults': string;
   'timepicker:refreshIntervalDefaults': string;
   'timepicker:quickRanges': string;

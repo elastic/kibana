@@ -1306,7 +1306,7 @@ describe('when on the endpoint list page', () => {
     it('navigates to the Security Solution Host Details page', async () => {
       const hostLink = await renderResult.findByTestId('hostLink');
       expect(hostLink.getAttribute('href')).toEqual(
-        `${APP_PATH}/hosts/${hostInfo[0].metadata.host.hostname}`
+        `${APP_PATH}/hosts/${hostInfo[0].metadata.host.hostname.toLowerCase()}`
       );
     });
     it('navigates to the correct Ingest Agent Policy page', async () => {

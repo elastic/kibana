@@ -85,8 +85,6 @@ export const DISCOVER_SHOW_MULTI_FIELDS_ID = 'discover:showMultiFields';
 export const DISCOVER_SORT_DEFAULT_ORDER_ID = 'discover:sort:defaultOrder';
 export const DOC_TABLE_HIDE_TIME_COLUMNS_ID = 'doc_table:hideTimeColumn';
 export const DOC_TABLE_HIGHLIGHT_ID = 'doc_table:highlight';
-export const DOC_TABLE_LEGACY_ID = 'doc_table:legacy';
-export const TRUNCATE_MAX_HEIGHT_ID = 'truncate:maxHeight';
 
 // Machine learning settings
 export const ML_ANOMALY_DETECTION_RESULTS_ENABLE_TIME_DEFAULTS_ID =
