@@ -35,6 +35,14 @@ interface UseFormWithWarnReturn<T extends FormData = FormData, I extends FormDat
   form: FormHookWithWarn<T, I>;
 }
 
+/**
+ * In some cases business logic requires implementing functionality to allow users perform an action
+ * despite non-critical validation errors a.k.a. warnings. Usually it's also required to inform users
+ * about warnings they got before proceeding for example via a modal.
+ *
+ * Since `FormHook` returned by `useForm` lacks of such functionality. `useFormWithWarn` is here to
+ * provide warnings functionality. Besides that it it's replaceable with `useForm`.
+ */
 export function useFormWithWarn<T extends FormData = FormData, I extends FormData = T>(
   formConfig: FormWithWarnConfig<T, I>
 ): UseFormWithWarnReturn<T, I> {
