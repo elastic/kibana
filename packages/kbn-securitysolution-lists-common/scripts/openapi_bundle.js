@@ -65,7 +65,7 @@ To use these IP addresses as values for defining rule exceptions, use the Securi
 > info\n\
 > Lists cannot be added directly to rules, nor do they define the operators used to determine when exceptions are applied (`is in list`, `is not in list`). Use an exception item to define the operator and associate it with an exception container. You can then add the exception container to a rule's `exceptions_list` object.\n\n\
 ## Lists requirements\n\n\
-Before you can start using lists, you must create the `.lists` and `.items` data streams for the relevant Kibana space. To do this, use the Create list data streams endpoint. Once these data streams are created, your role needs privileges to manage rules. Refer to [Enable and access detections](https://www.elastic.co/guide/en/serverless/current/security-detections-requirements.html#enable-detections-ui) for a complete list of requirements."
+Before you can start using lists, you must create the `.lists` and `.items` data streams for the relevant Kibana space. To do this, use the Create list data streams endpoint. Once these data streams are created, your role needs privileges to manage rules. Refer to [Enable and access detections](https://www.elastic.co/guide/en/serverless/current/security-detections-requirements.html#enable-detections-ui) for a complete list of requirements.",
           },
         ],
       },
@@ -123,7 +123,7 @@ To use these IP addresses as values for defining rule exceptions, use the Securi
 > info\n\
 > Lists cannot be added directly to rules, nor do they define the operators used to determine when exceptions are applied (`is in list`, `is not in list`). Use an exception item to define the operator and associate it with an exception container. You can then add the exception container to a rule's `exceptions_list` object.\n\n\
 ## Lists requirements\n\n\
-Before you can start using lists, you must create the `.lists` and `.items` data streams for the relevant Kibana space. To do this, use the Create list data streams endpoint. Once these data streams are created, your role needs privileges to manage rules. Refer to [Enable and access detections](https://www.elastic.co/guide/en/security/master/detections-permissions-section.html#enable-detections-ui) for a complete list of requirements."
+Before you can start using lists, you must create the `.lists` and `.items` data streams for the relevant Kibana space. To do this, use the Create list data streams endpoint. Once these data streams are created, your role needs privileges to manage rules. Refer to [Enable and access detections](https://www.elastic.co/guide/en/security/master/detections-permissions-section.html#enable-detections-ui) for a complete list of requirements.",
           },
         ],
       },

@@ -43,7 +43,7 @@ For detection rules, you can also use lists to define rule exceptions. A list ho
 > info\n\
 > Only exception containers can be associated with rules. You cannot directly associate an exception item or a list container with a rule. To use list exceptions, create an exception item that references the relevant list container.\n\n\
 ## Exceptions requirements\n\n\
-Before you can start working with exceptions that use value lists, you must create the `.lists` and `.items` data streams for the relevant Kibana space. To do this, use the Create list data streams endpoint. Once these data streams are created, your role needs privileges to manage rules. For a complete list of requirements, refer to [Enable and access detections](https://www.elastic.co/guide/en/serverless/current/security-detections-requirements.html#enable-detections-ui)."
+Before you can start working with exceptions that use value lists, you must create the `.lists` and `.items` data streams for the relevant Kibana space. To do this, use the Create list data streams endpoint. Once these data streams are created, your role needs privileges to manage rules. For a complete list of requirements, refer to [Enable and access detections](https://www.elastic.co/guide/en/serverless/current/security-detections-requirements.html#enable-detections-ui).",
           },
         ],
       },
@@ -79,7 +79,7 @@ For detection rules, you can also use lists to define rule exceptions. A list ho
 > info\n\
 > Only exception containers can be associated with rules. You cannot directly associate an exception item or a list container with a rule. To use list exceptions, create an exception item that references the relevant list container.\n\n\
 ## Exceptions requirements\n\n\
-Before you can start working with exceptions that use value lists, you must create the `.lists` and `.items` data streams for the relevant Kibana space. To do this, use the Create list data streams endpoint. Once these data streams are created, your role needs privileges to manage rules. For a complete list of requirements, refer to [Enable and access detections](https://www.elastic.co/guide/en/security/master/detections-permissions-section.html#enable-detections-ui)."
+Before you can start working with exceptions that use value lists, you must create the `.lists` and `.items` data streams for the relevant Kibana space. To do this, use the Create list data streams endpoint. Once these data streams are created, your role needs privileges to manage rules. For a complete list of requirements, refer to [Enable and access detections](https://www.elastic.co/guide/en/security/master/detections-permissions-section.html#enable-detections-ui).",
           },
         ],
       },
