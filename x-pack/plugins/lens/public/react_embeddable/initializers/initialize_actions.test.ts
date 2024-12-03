@@ -6,7 +6,7 @@
  */
 
 import { pick } from 'lodash';
-import faker from 'faker';
+import { faker } from '@faker-js/faker';
 import type { LensRuntimeState, VisualizationContext } from '../types';
 import { initializeActionApi } from './initialize_actions';
 import {
@@ -42,7 +42,7 @@ function setupActionsApi(
     visOverrides: { id: 'lnsXY' },
     dataOverrides: { id: 'form_based' },
   });
-  const uuid = faker.random.uuid();
+  const uuid = faker.string.uuid();
   const runtimeState = getLensRuntimeStateMock(stateOverrides);
   const apiMock = getLensApiMock();
 
