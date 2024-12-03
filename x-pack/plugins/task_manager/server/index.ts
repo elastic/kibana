@@ -94,4 +94,13 @@ export const config: PluginConfigDescriptor<TaskManagerConfig> = {
       },
     ];
   },
+  exposeToUsage: {
+    claim_strategy: true,
+    discovery: {
+      active_nodes_lookback: true,
+    },
+    unsafe: {
+      exclude_task_types: true,
+    },
+  },
 };
