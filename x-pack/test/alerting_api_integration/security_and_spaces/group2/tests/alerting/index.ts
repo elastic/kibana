@@ -28,16 +28,12 @@ export default function alertingTests({ loadTestFile, getService }: FtrProviderC
         await setupSpacesAndUsers(getService);
       });
 
-      after(async () => {
-        await tearDown(getService);
-      });
-
-      loadTestFile(require.resolve('./mute_all'));
-      loadTestFile(require.resolve('./mute_instance'));
-      loadTestFile(require.resolve('./unmute_all'));
-      loadTestFile(require.resolve('./unmute_instance'));
-      loadTestFile(require.resolve('./update'));
-      loadTestFile(require.resolve('./update_api_key'));
-    });
+    loadTestFile(require.resolve('./aggregate'));
+    loadTestFile(require.resolve('./mute_all'));
+    loadTestFile(require.resolve('./mute_instance'));
+    loadTestFile(require.resolve('./unmute_all'));
+    loadTestFile(require.resolve('./unmute_instance'));
+    loadTestFile(require.resolve('./update'));
+    loadTestFile(require.resolve('./update_api_key'));
   });
 }
