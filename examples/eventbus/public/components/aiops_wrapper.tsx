@@ -29,13 +29,16 @@ export const AiopsWrapper: FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters]);
 
-  if (Object.keys(filters).filter((key) => !key.startsWith('aiops_')).length === 0) {
+  if (
+    Object.keys(filters).filter((key) => !key.startsWith('aiops_')).length === 0 ||
+    aiopsFieldCandidates.length === 0
+  ) {
     return null;
   }
 
   return (
     <div css={{ margin: '8px 0' }}>
-      AIOps Significant Items Analysis
+      <strong>AIOps: Significant items</strong>
       <br />
       {aiopsFieldCandidates.map((field) => {
         return <Aiops field={field} key={field} />;
