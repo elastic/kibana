@@ -6,8 +6,6 @@
  */
 
 import React from 'react';
-import { euiThemeVars } from '@kbn/ui-theme';
-import { css } from '@emotion/react';
 
 import {
   EuiFlexGroup,
@@ -30,6 +28,7 @@ import {
   summaryPanelQualityTooltipText,
 } from '../../../../common/translations';
 import { mapPercentagesToQualityCounts } from '../../quality_indicator';
+import { VerticalRule } from '../../common/vertical_rule';
 
 export function DatasetsQualityIndicators() {
   const { onPageReady } = usePerformanceContext();
@@ -71,14 +70,14 @@ export function DatasetsQualityIndicators() {
             description={summaryPanelQualityPoorText}
             isLoading={isDatasetsQualityLoading}
           />
-          <span css={verticalRule} />
+          <VerticalRule />
           <QualityIndicator
             value={qualityCounts.degraded}
             quality="warning"
             description={summaryPanelQualityDegradedText}
             isLoading={isDatasetsQualityLoading}
           />
-          <span css={verticalRule} />
+          <VerticalRule />
           <QualityIndicator
             value={qualityCounts.good + datasetsWithoutIgnoredField}
             quality="success"
@@ -125,9 +124,3 @@ const QualityIndicator = ({
     </EuiFlexGroup>
   );
 };
-
-const verticalRule = css`
-  width: 1px;
-  height: 63px;
-  background-color: ${euiThemeVars.euiColorLightShade};
-`;

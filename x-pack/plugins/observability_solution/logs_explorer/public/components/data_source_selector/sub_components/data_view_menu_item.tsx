@@ -6,9 +6,8 @@
  */
 
 import React from 'react';
-import { EuiIcon, EuiToolTip } from '@elastic/eui';
+import { EuiIcon, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { DataViewDescriptor } from '../../../../common/data_views/models/data_view_descriptor';
 import { openDiscoverLabel } from '../constants';
 
@@ -17,18 +16,22 @@ interface DataViewMenuItemProps {
   isAvailable: boolean;
 }
 
-const rightSpacing = css`
-  margin-right: ${euiThemeVars.euiSizeS};
-`;
-
 export const DataViewMenuItem = ({ dataView, isAvailable }: DataViewMenuItemProps) => {
+  const { euiTheme } = useEuiTheme();
+
   if (isAvailable) {
     return <span>{dataView.name}</span>;
   }
 
   return (
     <>
-      <span css={rightSpacing}>{dataView.name}</span>
+      <span
+        css={css`
+          margin-right: ${euiTheme.size.s};
+        `}
+      >
+        {dataView.name}
+      </span>
       <EuiToolTip content={openDiscoverLabel}>
         <EuiIcon type="popout" color="subdued" />
       </EuiToolTip>

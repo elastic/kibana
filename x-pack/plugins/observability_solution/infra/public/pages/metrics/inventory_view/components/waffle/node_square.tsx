@@ -11,8 +11,8 @@ import React, { CSSProperties } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { css } from '@emotion/react';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { UseBooleanHandlers } from '@kbn/react-hooks';
+import { useEuiTheme } from '@elastic/eui';
 
 type NodeProps<T = HTMLDivElement> = React.DetailedHTMLProps<React.HTMLAttributes<T>, T> & {
   'data-test-subj'?: string;
@@ -66,35 +66,39 @@ const NodeContainerSmall = ({ children, ...props }: NodeProps & { color: string 
     {children}
   </div>
 );
-const ValueInner = ({ children, ...props }: NodeProps) => (
-  <div
-    css={css`
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      display: flex;
-      line-height: 1.2em;
-      align-items: center;
-      align-content: center;
-      padding: 1em;
-      overflow: hidden;
-      flex-wrap: wrap;
-      width: 100%;
-      border: none;
-      &:focus {
-        outline: none !important;
-        border: ${euiThemeVars.euiFocusRingSize} solid ${euiThemeVars.euiFocusRingColor};
-        box-shadow: none;
-      }
-    `}
-    tabIndex={0}
-    {...props}
-  >
-    {children}
-  </div>
-);
+const ValueInner = ({ children, ...props }: NodeProps) => {
+  const { euiTheme } = useEuiTheme();
+
+  return (
+    <div
+      css={css`
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        display: flex;
+        line-height: 1.2em;
+        align-items: center;
+        align-content: center;
+        padding: 1em;
+        overflow: hidden;
+        flex-wrap: wrap;
+        width: 100%;
+        border: none;
+        &:focus {
+          outline: none !important;
+          border: ${euiTheme.focus.width} solid ${euiTheme.focus.color};
+          box-shadow: none;
+        }
+      `}
+      tabIndex={0}
+      {...props}
+    >
+      {children}
+    </div>
+  );
+};
 const SquareOuter = ({ children, ...props }: NodeProps & { color: string }) => (
   <div
     css={css`

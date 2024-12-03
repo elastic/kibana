@@ -8,7 +8,8 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
-    ".storybook/**/*.tsx"
+    ".storybook/**/*.tsx",
+    "emotion.d.ts",
   ],
   "kbn_references": [
     "@kbn/config-schema",

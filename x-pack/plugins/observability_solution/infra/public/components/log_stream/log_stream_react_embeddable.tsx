@@ -7,7 +7,7 @@
 
 import React, { FC, PropsWithChildren, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiCallOut, EuiLink } from '@elastic/eui';
+import { EuiCallOut, EuiLink, useEuiTheme } from '@elastic/eui';
 import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import {
   initializeTimeRange,
@@ -19,7 +19,6 @@ import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { Query } from '@kbn/es-query';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { euiThemeVars } from '@kbn/ui-theme';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { LogStreamApi, LogStreamSerializedState, Services } from './types';
@@ -112,6 +111,7 @@ const SAVED_SEARCH_DOCS_URL =
   'https://www.elastic.co/guide/en/kibana/current/save-open-search.html';
 
 const DeprecationCallout = () => {
+  const { euiTheme } = useEuiTheme();
   const [isDismissed, setDismissed] = useLocalStorage(DISMISSAL_STORAGE_KEY, false);
 
   if (isDismissed) {
@@ -125,8 +125,8 @@ const DeprecationCallout = () => {
       onDismiss={() => setDismissed(true)}
       css={{
         position: 'absolute',
-        bottom: euiThemeVars.euiSizeM,
-        right: euiThemeVars.euiSizeM,
+        bottom: euiTheme.size.m,
+        right: euiTheme.size.m,
         width: 'min(100%, 40ch)',
       }}
     >
