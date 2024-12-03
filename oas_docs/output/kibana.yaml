@@ -8968,6 +8968,7 @@ paths:
         - Security Detections API
   /api/detection_engine/signals/finalize_migration:
     post:
+      deprecated: true
       description: |
         Finalize successful migrations of detection alerts. This replaces the original index's alias with the successfully migrated index's alias.
         The endpoint is idempotent; therefore, it can safely be used to poll a given migration and, upon completion,
@@ -9022,6 +9023,7 @@ paths:
         - Security Detections API
   /api/detection_engine/signals/migration:
     delete:
+      deprecated: true
       description: |
         Migrations favor data integrity over shard size. Consequently, unused or orphaned indices are artifacts of
         the migration process. A successful migration will result in both the old and new indices being present.
@@ -9079,6 +9081,7 @@ paths:
       tags:
         - Security Detections API
     post:
+      deprecated: true
       description: |
         Initiate a migration of detection alerts.
         Migrations are initiated per index. While the process is neither destructive nor interferes with existing data, it may be resource-intensive. As such, it is recommended that you plan your migrations accordingly.
@@ -9142,6 +9145,7 @@ paths:
         - Security Detections API
   /api/detection_engine/signals/migration_status:
     post:
+      deprecated: true
       description: Retrieve indices that contain detection alerts of a particular age, along with migration information for each of those indices.
       operationId: ReadAlertsMigrationStatus
       parameters:
