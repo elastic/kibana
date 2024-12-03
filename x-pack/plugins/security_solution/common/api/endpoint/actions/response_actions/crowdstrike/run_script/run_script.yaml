@@ -22,13 +22,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '../../../model/schema/common.schema.yaml#/components/schemas/SuccessResponse'
+                $ref: '../../../../model/schema/common.schema.yaml#/components/schemas/SuccessResponse'
 
 components:
   schemas:
     RunScriptRouteRequestBody:
       allOf:
-        - $ref: '../../../model/schema/common.schema.yaml#/components/schemas/BaseActionSchema'
+        - $ref: '../../../../model/schema/common.schema.yaml#/components/schemas/BaseActionSchema'
         - type: object
           required:
             - parameters
