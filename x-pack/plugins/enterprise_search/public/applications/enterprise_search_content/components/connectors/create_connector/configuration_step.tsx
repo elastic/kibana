@@ -118,13 +118,26 @@ export const ConfigurationStep: React.FC<ConfigurationStepProps> = ({ title, set
               onClick={async () => {
                 if (isFormEditing) {
                   const confirmResponse = await overlays?.openConfirm(
-                    i18n.translate(
-                      'xpack.enterpriseSearch.createConnector.configurationStep.confirmEditableStepNext',
-                      {
-                        defaultMessage:
-                          'Connector configuration is in editable mode and there might be unsaved changes. Are you sure you want to finish configuration without saving the configuration?',
-                      }
-                    )
+                    i18n.translate('xpack.enterpriseSearch.createConnector.unsavedPrompt.body', {
+                      defaultMessage: 'Your connector is created but missing some details. You can complete the setup later in the connector configuration page, but this guided flow offers more help.',
+                    }),
+                    {
+                      title: i18n.translate('xpack.enterpriseSearch.createConnector.unsavedPrompt.title', {
+                        defaultMessage: 'Your connector is not fully configured',
+                      }),
+                      cancelButtonText: i18n.translate(
+                        'xpack.enterpriseSearch.createConnector.unsavedPrompt.cancel',
+                        {
+                          defaultMessage: 'Continue setup',
+                        }
+                      ),
+                      confirmButtonText: i18n.translate(
+                        'xpack.enterpriseSearch.createConnector.unsavedPrompt.confirm',
+                        {
+                          defaultMessage: 'Leave the page',
+                        }
+                      ),
+                    }
                   );
                   if (!confirmResponse) {
                     return;
