@@ -19,6 +19,7 @@ import { esqlVariablesService } from '@kbn/esql/common';
 import { ESQL_CONTROL_STATIC_VALUES } from '../../../common';
 import type { StaticValuesListControlState, StaticValuesListControlApi } from './types';
 import { ControlFactory } from '../types';
+import { uiActionsService } from '../../services/kibana_services';
 import { initializeDefaultControlApi } from '../initialize_default_control_api';
 import { initializeStaticValuesControlSelections } from './static_values_control_selections';
 
@@ -39,13 +40,13 @@ export const getStaticValuesListControlFactory = (): ControlFactory<
       const selectedOptions$ = new BehaviorSubject<string[]>(initialState.selectedOptions ?? []);
       const variableName$ = new BehaviorSubject<string>(initialState.variableName ?? '');
       const variableType$ = new BehaviorSubject<string>(initialState.variableType ?? '');
-      // initialize the interval variable
+      // initialize the variable
       esqlVariablesService.addVariable({
         key: initialState.variableName,
         value: initialState.selectedOptions[0],
         type: initialState.variableType,
       });
-      const defaultControl = initializeDefaultControlApi({ ...initialState, width: 'large' });
+      const defaultControl = initializeDefaultControlApi({ ...initialState });
 
       const selections = initializeStaticValuesControlSelections(initialState);
 
@@ -53,6 +54,21 @@ export const getStaticValuesListControlFactory = (): ControlFactory<
         {
           ...defaultControl.api,
           defaultPanelTitle: new BehaviorSubject<string | undefined>(initialState.variableName),
+          isEditingEnabled: () => true,
+          getTypeDisplayName: () => displayName,
+          onEdit: async () => {
+            const state = {
+              ...initialState,
+              ...defaultControl.serialize().rawState,
+            };
+            await uiActionsService.getTrigger('ESQL_CONTROL_TRIGGER').exec({
+              queryString: initialState.esqlQuery,
+              controlType: initialState.variableType,
+              dashboardApi: controlGroupApi.parentApi,
+              panelId: uuid,
+              initialState: state,
+            });
+          },
           selectedOptions$,
           serializeState: () => {
             const { rawState: defaultControlState } = defaultControl.serialize();
@@ -63,6 +79,7 @@ export const getStaticValuesListControlFactory = (): ControlFactory<
                 availableOptions: selections.availableOptions$.getValue(),
                 variableName: selections.variableName$.getValue(),
                 variableType: selections.variableType$.getValue(),
+                esqlQuery: selections.esqlQuery$.getValue(),
               },
               references: [],
             };
@@ -84,7 +101,6 @@ export const getStaticValuesListControlFactory = (): ControlFactory<
       return {
         api,
         Component: ({ className: controlPanelClassName }) => {
-          // /** Get display settings - if these are ever made editable, should be part of stateManager instead */
           const [availableOptions, selectedOptions, variableName, variableType] =
             useBatchedPublishingSubjects(
               selections.availableOptions$,

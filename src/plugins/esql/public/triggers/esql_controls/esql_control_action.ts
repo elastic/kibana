@@ -17,12 +17,25 @@ import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { monaco } from '@kbn/monaco';
 const ACTION_CREATE_ESQL_CONTROL = 'ACTION_CREATE_ESQL_CONTROL';
 
+// should move to one place
+interface ESQLControlState {
+  grow?: boolean;
+  width?: string;
+  title?: string;
+  availableOptions: string[];
+  selectedOptions: string[];
+  variableName: string;
+  variableType: string;
+  esqlQuery?: string;
+}
+
 interface Context {
   queryString: string;
   controlType: EsqlControlType;
   dashboardApi: DashboardApi;
   panelId?: string;
   cursorPosition?: monaco.Position;
+  initialState?: ESQLControlState;
 }
 
 export const getHelpersAsync = async () => await import('./esql_control_helpers');
@@ -59,6 +72,7 @@ export class CreateESQLControlAction implements Action<Context> {
     dashboardApi,
     panelId,
     cursorPosition,
+    initialState,
   }: Context) {
     const { executeAction } = await getHelpersAsync();
     return executeAction({
@@ -70,6 +84,7 @@ export class CreateESQLControlAction implements Action<Context> {
       dashboardApi,
       panelId,
       cursorPosition,
+      initialState,
     });
   }
 }

@@ -40,6 +40,17 @@ import { monaco } from '@kbn/monaco';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import { EsqlControlType, EsqlControlFlyoutType } from './types';
 
+interface ESQLControlState {
+  grow?: boolean;
+  width?: string;
+  title?: string;
+  availableOptions: string[];
+  selectedOptions: string[];
+  variableName: string;
+  variableType: string;
+  esqlQuery?: string;
+}
+
 interface ESQLControlsFlyoutProps {
   search: ISearchGeneric;
   controlType: EsqlControlType;
@@ -47,6 +58,7 @@ interface ESQLControlsFlyoutProps {
   dashboardApi: DashboardApi;
   panelId?: string;
   cursorPosition?: monaco.Position;
+  initialState?: ESQLControlState;
   closeFlyout: () => void;
   addToESQLVariablesService: (
     variable: string,
@@ -156,36 +168,52 @@ export function ESQLControlsFlyout({
   dashboardApi,
   panelId,
   cursorPosition,
+  initialState,
   addToESQLVariablesService,
   closeFlyout,
   openEditFlyout,
 }: ESQLControlsFlyoutProps) {
+  const isControlInEditMode = initialState !== undefined;
   const flyoutType = getControlFlyoutType(controlType);
   const [controlFlyoutType, setControlFlyoutType] = useState<EuiComboBoxOptionOption[]>([
     controlTypeOptions.find((option) => option.key === flyoutType)!,
   ]);
   const [formIsInvalid, setFormIsInvalid] = useState(false);
   const controlGroupApi = useStateFromPublishingSubject(dashboardApi.controlGroupApi$);
-  const children = useStateFromPublishingSubject(dashboardApi.children$);
-  const embeddable = children[panelId!];
-  const suggestedVariableName = getVariableName(controlType, queryString);
+  const dashboardPanels = useStateFromPublishingSubject(dashboardApi.children$);
+  const suggestedVariableName = initialState
+    ? `?${initialState.variableName}`
+    : getVariableName(controlType, queryString);
   const [variableName, setVariableName] = useState(suggestedVariableName);
 
   // time literal control option and values
-  const suggestedStaticValues = getSuggestedValues(controlType);
+  const suggestedStaticValues = initialState
+    ? initialState.availableOptions.join(',')
+    : getSuggestedValues(controlType);
   const [values, setValues] = useState<string | undefined>(suggestedStaticValues);
 
-  const [label, setLabel] = useState('');
-  const [minimumWidth, setMinimumWidth] = useState('medium');
+  const [label, setLabel] = useState(initialState?.title ?? '');
+  const [minimumWidth, setMinimumWidth] = useState(initialState?.width ?? 'medium');
 
   // fields control option
   const [availableFieldsOptions, setAvailableFieldsOptions] = useState<EuiComboBoxOptionOption[]>(
     []
   );
-  const [selectedFields, setSelectedFields] = useState<EuiComboBoxOptionOption[]>([]);
+
+  const [selectedFields, setSelectedFields] = useState<EuiComboBoxOptionOption[]>(
+    initialState
+      ? initialState.availableOptions.map((option) => {
+          return {
+            label: option,
+            'data-test-subj': option,
+            key: option,
+          };
+        })
+      : []
+  );
 
   // values from query control option
-  const [valuesQuery, setValuesQuery] = useState<string>('');
+  const [valuesQuery, setValuesQuery] = useState<string>(initialState?.esqlQuery ?? '');
 
   const onFlyoutTypeChange = useCallback((selectedOptions: EuiComboBoxOptionOption[]) => {
     setControlFlyoutType(selectedOptions);
@@ -230,10 +258,11 @@ export function ESQLControlsFlyout({
       title: label || varName,
       variableName: varName,
       variableType: controlType,
+      esqlQuery: valuesQuery || queryString,
       grow: false,
     };
 
-    if (panelId && cursorPosition && availableOptions.length) {
+    if (panelId && cursorPosition && availableOptions.length && !isControlInEditMode) {
       // create a new control
       controlGroupApi?.addNewPanel({
         panelType: 'esqlControlStaticValues',
@@ -252,31 +281,43 @@ export function ESQLControlsFlyout({
       ].join('');
 
       addToESQLVariablesService(varName, availableOptions[0], controlType, query);
-
+      const embeddable = dashboardPanels[panelId!];
       // open the edit flyout to continue editing
       await openEditFlyout(embeddable);
+    } else if (isControlInEditMode && panelId && availableOptions.length) {
+      // edit an existing control
+      controlGroupApi?.replacePanel(panelId, {
+        panelType: 'esqlControlStaticValues',
+        initialState: state,
+      });
+      addToESQLVariablesService(varName, availableOptions[0], controlType, '');
     }
     closeFlyout();
   }, [
+    valuesQuery,
+    controlType,
+    values,
+    selectedFields,
+    variableName,
+    minimumWidth,
+    label,
+    panelId,
+    cursorPosition,
+    isControlInEditMode,
     closeFlyout,
     controlGroupApi,
-    label,
-    minimumWidth,
-    panelId,
-    values,
-    variableName,
-    embeddable,
     queryString,
-    cursorPosition,
-    openEditFlyout,
     addToESQLVariablesService,
-    controlType,
-    selectedFields,
+    dashboardPanels,
+    openEditFlyout,
   ]);
 
   useEffect(() => {
     if (controlType === EsqlControlType.FIELDS && !availableFieldsOptions.length) {
       const indexPattern = getIndexPatternFromESQLQuery(queryString);
+      if (!indexPattern) {
+        return;
+      }
       getESQLQueryColumnsRaw({
         esqlQuery: `from ${indexPattern}`,
         search,
@@ -421,6 +462,7 @@ export function ESQLControlsFlyout({
               defaultMessage: 'Set a variable name',
             })}
             fullWidth
+            disabled={isControlInEditMode}
           />
         </EuiFormRow>
         {controlType === EsqlControlType.VALUES && (

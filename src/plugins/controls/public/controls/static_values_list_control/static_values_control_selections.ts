@@ -18,6 +18,7 @@ export function initializeStaticValuesControlSelections(
   const selectedOptions$ = new BehaviorSubject<string[]>(initialState.selectedOptions ?? []);
   const variableName$ = new BehaviorSubject<string>(initialState.variableName ?? '');
   const variableType$ = new BehaviorSubject<string>(initialState.variableType ?? '');
+  const esqlQuery$ = new BehaviorSubject<string>(initialState.esqlQuery ?? '');
 
   const selectedOptionsComparatorFunction = (a: string[], b: string[]) =>
     deepEqual(a ?? [], b ?? []);
@@ -34,10 +35,11 @@ export function initializeStaticValuesControlSelections(
       availableOptions: [availableOptions$, (next) => availableOptions$.next(next)],
       variableName: [variableName$, (next) => variableName$.next(next)],
       variableType: [variableType$, (next) => variableType$.next(next)],
+      esqlQuery: [esqlQuery$, (next) => esqlQuery$.next(next)],
     } as StateComparators<
       Pick<
         StaticValuesListControlState,
-        'selectedOptions' | 'availableOptions' | 'variableName' | 'variableType'
+        'selectedOptions' | 'availableOptions' | 'variableName' | 'variableType' | 'esqlQuery'
       >
     >,
     hasInitialSelections: initialState.selectedOptions?.length,
@@ -45,6 +47,7 @@ export function initializeStaticValuesControlSelections(
     availableOptions$: availableOptions$ as PublishingSubject<string[]>,
     variableName$: variableName$ as PublishingSubject<string>,
     variableType$: variableType$ as PublishingSubject<string>,
+    esqlQuery$: esqlQuery$ as PublishingSubject<string>,
     setSelectedOptions,
   };
 }

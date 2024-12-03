@@ -19,6 +19,7 @@ export interface StaticValuesListControlState extends DefaultControlState {
   selectedOptions: string[];
   variableName: string;
   variableType: string; // here must be the enum
+  esqlQuery: string;
 }
 
 export type StaticValuesListControlApi = DefaultControlApi &

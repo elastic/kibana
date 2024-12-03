@@ -23,6 +23,18 @@ import { untilPluginStartServicesReady } from '../../kibana_services';
 
 import './flyout.scss';
 
+// should move to one place
+interface ESQLControlState {
+  grow?: boolean;
+  width?: string;
+  title?: string;
+  availableOptions: string[];
+  selectedOptions: string[];
+  variableName: string;
+  variableType: string;
+  esqlQuery?: string;
+}
+
 interface Context {
   queryString: string;
   core: CoreStart;
@@ -32,6 +44,7 @@ interface Context {
   dashboardApi: DashboardApi;
   panelId?: string;
   cursorPosition?: monaco.Position;
+  initialState?: ESQLControlState;
 }
 
 export async function isActionCompatible(queryString: string) {
@@ -48,6 +61,7 @@ export async function executeAction({
   dashboardApi,
   panelId,
   cursorPosition,
+  initialState,
 }: Context) {
   const isCompatibleAction = await isActionCompatible(queryString);
   if (!isCompatibleAction) {
@@ -61,12 +75,16 @@ export async function executeAction({
   };
 
   const addToESQLVariablesService = (
-    variable: string,
+    variableName: string,
     variableValue: string,
     variableType: string,
     query: string
   ) => {
-    esqlVariablesService.addVariable({ key: variable, value: variableValue, type: variableType });
+    esqlVariablesService.addVariable({
+      key: variableName,
+      value: variableValue,
+      type: variableType,
+    });
     esqlVariablesService.setEsqlQueryWithVariables(query);
   };
   const deps = await untilPluginStartServicesReady();
@@ -91,6 +109,7 @@ export async function executeAction({
               cursorPosition={cursorPosition}
               openEditFlyout={openEditFlyout}
               addToESQLVariablesService={addToESQLVariablesService}
+              initialState={initialState}
             />
           </KibanaContextProvider>
         </KibanaRenderContextProvider>,

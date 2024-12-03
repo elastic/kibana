@@ -50,6 +50,9 @@ export type DefaultControlApi = PublishesDataLoading &
     // HasSerializableState types serializeState as function returning 'MaybePromise'
     // Controls serializeState is sync
     serializeState: () => SerializedPanelState<DefaultControlState>;
+    getTypeDisplayName?: () => string;
+    isEditingEnabled?: () => boolean;
+    onEdit?: () => void;
   };
 
 export type ControlApiRegistration<ControlApi extends DefaultControlApi = DefaultControlApi> = Omit<
