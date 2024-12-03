@@ -18,8 +18,6 @@ import { i18n } from '@kbn/i18n';
 import { ClientConfigType } from '../../../../../common/types';
 
 import { generateEncodedPath } from '../../../shared/encode_path_params';
-import { ErrorStatePrompt } from '../../../shared/error_state';
-import { HttpLogic } from '../../../shared/http';
 import { KibanaLogic } from '../../../shared/kibana';
 import { SEARCH_INDEX_PATH, SEARCH_INDEX_TAB_PATH } from '../../routes';
 
@@ -71,7 +69,6 @@ export const SearchIndex: React.FC = () => {
   }>();
 
   const { indexName } = useValues(IndexNameLogic);
-  const { errorConnectingMessage } = useValues(HttpLogic);
 
   /**
    * Guided Onboarding needs us to mark the add data step as complete as soon as the user has data in an index.
@@ -286,32 +283,19 @@ export const SearchIndex: React.FC = () => {
       }}
     >
       <IndexError indexName={indexName} />
-      <Content
-        index={index}
-        errorConnectingMessage={errorConnectingMessage}
-        config={config}
-        tabs={tabs}
-        tabId={tabId}
-      />
+      <Content index={index} config={config} tabs={tabs} tabId={tabId} />
     </EnterpriseSearchContentPageTemplate>
   );
 };
 
 interface ContentProps {
   config?: ClientConfigType;
-  errorConnectingMessage: string;
   index?: ElasticsearchViewIndex;
   tabId?: string;
   tabs: EuiTabbedContentTab[];
 }
 
-const Content: React.FC<ContentProps> = ({
-  config,
-  errorConnectingMessage,
-  index,
-  tabs,
-  tabId,
-}) => {
+const Content: React.FC<ContentProps> = ({ index, tabs, tabId }) => {
   const selectedTab = useMemo(() => tabs.find((tab) => tab.id === tabId), [tabId]);
 
   const onTabClick = (tab: EuiTabbedContentTab) => {
@@ -328,9 +312,6 @@ const Content: React.FC<ContentProps> = ({
 
   if (isCrawlerIndex(index) && !index.connector) {
     return <NoConnectorRecord />;
-  }
-  if (isCrawlerIndex(index) && (Boolean(errorConnectingMessage) || !config?.host)) {
-    return <ErrorStatePrompt />;
   }
   return (
     <>
