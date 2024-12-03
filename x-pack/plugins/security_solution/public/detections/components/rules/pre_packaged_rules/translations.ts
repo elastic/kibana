@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 export const PRE_BUILT_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.prePackagedRules.emptyPromptTitle',
   {
-    defaultMessage: 'Install Elastic prebuilt detection rules',
+    defaultMessage: 'Install and enable Elastic prebuilt detection rules',
   }
 );
 
