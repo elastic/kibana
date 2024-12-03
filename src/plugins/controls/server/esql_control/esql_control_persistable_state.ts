@@ -13,14 +13,14 @@ import {
 } from '@kbn/embeddable-plugin/common';
 import { SavedObjectReference } from '@kbn/core/types';
 
-export const createEsqlStaticValuesInject = (): EmbeddablePersistableStateService['inject'] => {
+export const createEsqlControlInject = (): EmbeddablePersistableStateService['inject'] => {
   return (state: EmbeddableStateWithType, references: SavedObjectReference[]) => {
     const workingState = { ...state } as EmbeddableStateWithType;
     return workingState as EmbeddableStateWithType;
   };
 };
 
-export const createEsqlStaticValuesExtract = (): EmbeddablePersistableStateService['extract'] => {
+export const createEsqlControlExtract = (): EmbeddablePersistableStateService['extract'] => {
   return (state: EmbeddableStateWithType) => {
     const workingState = { ...state } as EmbeddableStateWithType;
     const references: SavedObjectReference[] = [];

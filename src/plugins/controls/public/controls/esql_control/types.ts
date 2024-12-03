@@ -14,7 +14,7 @@ interface PublishesSelectedOptions {
   selectedOptions$: PublishingSubject<string[]>;
 }
 
-export interface StaticValuesListControlState extends DefaultControlState {
+export interface ESQLControlState extends DefaultControlState {
   availableOptions: string[];
   selectedOptions: string[];
   variableName: string;
@@ -22,6 +22,6 @@ export interface StaticValuesListControlState extends DefaultControlState {
   esqlQuery: string;
 }
 
-export type StaticValuesListControlApi = DefaultControlApi &
+export type ESQLControlApi = DefaultControlApi &
   Pick<PublishesPanelTitle, 'defaultPanelTitle'> &
   PublishesSelectedOptions;

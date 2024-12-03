@@ -8,16 +8,16 @@
  */
 
 import { EmbeddableRegistryDefinition } from '@kbn/embeddable-plugin/server';
-import { ESQL_CONTROL_STATIC_VALUES } from '../../common';
+import { ESQL_CONTROL } from '../../common';
 import {
-  createEsqlStaticValuesExtract,
-  createEsqlStaticValuesInject,
-} from './esql_static_values_persistable_state';
+  createEsqlControlInject,
+  createEsqlControlExtract,
+} from './esql_control_persistable_state';
 
 export const esqlStaticControlPersistableStateServiceFactory = (): EmbeddableRegistryDefinition => {
   return {
-    id: ESQL_CONTROL_STATIC_VALUES,
-    extract: createEsqlStaticValuesExtract(),
-    inject: createEsqlStaticValuesInject(),
+    id: ESQL_CONTROL,
+    extract: createEsqlControlExtract(),
+    inject: createEsqlControlInject(),
   };
 };

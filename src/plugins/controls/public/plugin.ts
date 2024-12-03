@@ -17,7 +17,7 @@ import { registerControlGroupEmbeddable } from './control_group/register_control
 import { registerOptionsListControl } from './controls/data_controls/options_list_control/register_options_list_control';
 import { registerRangeSliderControl } from './controls/data_controls/range_slider/register_range_slider_control';
 import { registerTimeSliderControl } from './controls/timeslider_control/register_timeslider_control';
-import { registerStaticValuesListControl } from './controls/static_values_list_control/register_static_values_list_control';
+import { registerESQLControl } from './controls/esql_control/register_esql_control';
 import { setKibanaServices, untilPluginStartServicesReady } from './services/kibana_services';
 import type { ControlsPluginSetupDeps, ControlsPluginStartDeps } from './types';
 
@@ -34,7 +34,7 @@ export class ControlsPlugin
     registerOptionsListControl();
     registerRangeSliderControl();
     registerTimeSliderControl();
-    registerStaticValuesListControl();
+    registerESQLControl();
   }
 
   public start(coreStart: CoreStart, startPlugins: ControlsPluginStartDeps) {

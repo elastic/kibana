@@ -265,7 +265,7 @@ export function ESQLControlsFlyout({
     if (panelId && cursorPosition && availableOptions.length && !isControlInEditMode) {
       // create a new control
       controlGroupApi?.addNewPanel({
-        panelType: 'esqlControlStaticValues',
+        panelType: 'esqlControl',
         initialState: {
           ...state,
           id: uuidv4(),
@@ -287,7 +287,7 @@ export function ESQLControlsFlyout({
     } else if (isControlInEditMode && panelId && availableOptions.length) {
       // edit an existing control
       controlGroupApi?.replacePanel(panelId, {
-        panelType: 'esqlControlStaticValues',
+        panelType: 'esqlControl',
         initialState: state,
       });
       addToESQLVariablesService(varName, availableOptions[0], controlType, '');
@@ -534,40 +534,40 @@ export function ESQLControlsFlyout({
             />
           </EuiFormRow>
         )}
-        {controlType === EsqlControlType.TIME_LITERAL ||
+        {(controlType === EsqlControlType.TIME_LITERAL ||
           (controlType === EsqlControlType.VALUES &&
-            controlFlyoutType[0]?.key === EsqlControlFlyoutType.STATIC_VALUES && (
-              <EuiFormRow
-                label={i18n.translate('esqlControls.flyout.values.label', {
-                  defaultMessage: 'Values',
-                })}
-                helpText={i18n.translate('esqlControls.flyout.values.helpText', {
-                  defaultMessage:
-                    'Comma separated values (e.g. 5 minutes, 1 hour, 1 day, 1 week, 1 year)',
-                })}
-                fullWidth
-                isInvalid={!values}
-                error={
-                  !values
-                    ? i18n.translate('esqlControls.flyout.values.error', {
-                        defaultMessage: 'Values are required',
-                      })
-                    : undefined
-                }
-              >
-                <EuiFieldText
-                  placeholder={i18n.translate('esqlControls.flyout.values.placeholder', {
-                    defaultMessage: 'Set the static values',
-                  })}
-                  value={values}
-                  onChange={onValuesChange}
-                  aria-label={i18n.translate('esqlControls.flyout.values.placeholder', {
-                    defaultMessage: 'Set a variable name',
-                  })}
-                  fullWidth
-                />
-              </EuiFormRow>
-            ))}
+            controlFlyoutType[0]?.key === EsqlControlFlyoutType.STATIC_VALUES)) && (
+          <EuiFormRow
+            label={i18n.translate('esqlControls.flyout.values.label', {
+              defaultMessage: 'Values',
+            })}
+            helpText={i18n.translate('esqlControls.flyout.values.helpText', {
+              defaultMessage:
+                'Comma separated values (e.g. 5 minutes, 1 hour, 1 day, 1 week, 1 year)',
+            })}
+            fullWidth
+            isInvalid={!values}
+            error={
+              !values
+                ? i18n.translate('esqlControls.flyout.values.error', {
+                    defaultMessage: 'Values are required',
+                  })
+                : undefined
+            }
+          >
+            <EuiFieldText
+              placeholder={i18n.translate('esqlControls.flyout.values.placeholder', {
+                defaultMessage: 'Set the static values',
+              })}
+              value={values}
+              onChange={onValuesChange}
+              aria-label={i18n.translate('esqlControls.flyout.values.placeholder', {
+                defaultMessage: 'Set a variable name',
+              })}
+              fullWidth
+            />
+          </EuiFormRow>
+        )}
 
         {controlType === EsqlControlType.VALUES &&
           controlFlyoutType[0]?.key === EsqlControlFlyoutType.VALUES_FROM_QUERY && (

@@ -9,11 +9,9 @@
 import deepEqual from 'react-fast-compare';
 import { BehaviorSubject } from 'rxjs';
 import { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
-import type { StaticValuesListControlState } from './types';
+import type { ESQLControlState } from './types';
 
-export function initializeStaticValuesControlSelections(
-  initialState: StaticValuesListControlState
-) {
+export function initializeESQLControlSelections(initialState: ESQLControlState) {
   const availableOptions$ = new BehaviorSubject<string[]>(initialState.availableOptions ?? []);
   const selectedOptions$ = new BehaviorSubject<string[]>(initialState.selectedOptions ?? []);
   const variableName$ = new BehaviorSubject<string>(initialState.variableName ?? '');
@@ -38,7 +36,7 @@ export function initializeStaticValuesControlSelections(
       esqlQuery: [esqlQuery$, (next) => esqlQuery$.next(next)],
     } as StateComparators<
       Pick<
-        StaticValuesListControlState,
+        ESQLControlState,
         'selectedOptions' | 'availableOptions' | 'variableName' | 'variableType' | 'esqlQuery'
       >
     >,

@@ -16,23 +16,20 @@ import {
   getUnchangingComparator,
 } from '@kbn/presentation-publishing';
 import { esqlVariablesService } from '@kbn/esql/common';
-import { ESQL_CONTROL_STATIC_VALUES } from '../../../common';
-import type { StaticValuesListControlState, StaticValuesListControlApi } from './types';
+import { ESQL_CONTROL } from '../../../common';
+import type { ESQLControlState, ESQLControlApi } from './types';
 import { ControlFactory } from '../types';
 import { uiActionsService } from '../../services/kibana_services';
 import { initializeDefaultControlApi } from '../initialize_default_control_api';
-import { initializeStaticValuesControlSelections } from './static_values_control_selections';
+import { initializeESQLControlSelections } from './esql_control_selections';
 
 const displayName = i18n.translate('controls.esqlValuesControl.displayName', {
   defaultMessage: 'Static values list',
 });
 
-export const getStaticValuesListControlFactory = (): ControlFactory<
-  StaticValuesListControlState,
-  StaticValuesListControlApi
-> => {
+export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLControlApi> => {
   return {
-    type: ESQL_CONTROL_STATIC_VALUES,
+    type: ESQL_CONTROL,
     order: 3,
     getIconType: () => 'editorChecklist',
     getDisplayName: () => displayName,
@@ -48,7 +45,7 @@ export const getStaticValuesListControlFactory = (): ControlFactory<
       });
       const defaultControl = initializeDefaultControlApi({ ...initialState });
 
-      const selections = initializeStaticValuesControlSelections(initialState);
+      const selections = initializeESQLControlSelections(initialState);
 
       const api = buildApi(
         {

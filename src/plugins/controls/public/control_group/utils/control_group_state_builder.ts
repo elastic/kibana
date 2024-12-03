@@ -13,8 +13,7 @@ import {
   OPTIONS_LIST_CONTROL,
   RANGE_SLIDER_CONTROL,
   TIME_SLIDER_CONTROL,
-  ESQL_CONTROL_STATIC_VALUES,
-  ESQL_CONTROL_VALUES_FROM_QUERY,
+  ESQL_CONTROL,
   type ControlGroupRuntimeState,
   type ControlPanelsState,
   type DefaultDataControlState,
@@ -55,7 +54,7 @@ export const controlGroupStateBuilder = {
       },
     };
   },
-  addStaticValuesListControl: (
+  addESQLControl: (
     controlGroupState: Partial<ControlGroupRuntimeState>,
     controlState: OptionsListControlState,
     controlId?: string
@@ -63,21 +62,7 @@ export const controlGroupStateBuilder = {
     controlGroupState.initialChildControlState = {
       ...(controlGroupState.initialChildControlState ?? {}),
       [controlId ?? uuidv4()]: {
-        type: ESQL_CONTROL_STATIC_VALUES,
-        order: getNextControlOrder(controlGroupState.initialChildControlState),
-        ...controlState,
-      },
-    };
-  },
-  addValuesFromQueryListControl: (
-    controlGroupState: Partial<ControlGroupRuntimeState>,
-    controlState: OptionsListControlState,
-    controlId?: string
-  ) => {
-    controlGroupState.initialChildControlState = {
-      ...(controlGroupState.initialChildControlState ?? {}),
-      [controlId ?? uuidv4()]: {
-        type: ESQL_CONTROL_VALUES_FROM_QUERY,
+        type: ESQL_CONTROL,
         order: getNextControlOrder(controlGroupState.initialChildControlState),
         ...controlState,
       },

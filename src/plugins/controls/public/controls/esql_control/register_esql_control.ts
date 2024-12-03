@@ -7,16 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ESQL_CONTROL_STATIC_VALUES } from '../../../common';
+import { ESQL_CONTROL } from '../../../common';
 import { untilPluginStartServicesReady } from '../../services/kibana_services';
 import { registerControlFactory } from '../../control_factory_registry';
 
-export function registerStaticValuesListControl() {
-  registerControlFactory(ESQL_CONTROL_STATIC_VALUES, async () => {
-    const [{ getStaticValuesListControlFactory }] = await Promise.all([
-      import('./get_static_values_list_control_factory'),
+export function registerESQLControl() {
+  registerControlFactory(ESQL_CONTROL, async () => {
+    const [{ getESQLControlFactory }] = await Promise.all([
+      import('./get_esql_control_factory'),
       untilPluginStartServicesReady(),
     ]);
-    return getStaticValuesListControlFactory();
+    return getESQLControlFactory();
   });
 }
