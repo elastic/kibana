@@ -10,6 +10,7 @@ import { Logger } from '@kbn/core/server';
 import { BACKGROUND_TASK_NODE_SO_NAME } from '../saved_objects';
 import { BackgroundTaskNode } from '../saved_objects/schemas/background_task_node';
 import { TaskManagerConfig } from '../config';
+import { isClusterBlockException } from '../lib/bulk_update_error';
 
 interface DiscoveryServiceParams {
   config: TaskManagerConfig['discovery'];
@@ -79,7 +80,7 @@ export class KibanaDiscoveryService {
             `Kibana Discovery Service couldn't update this node's last_seen timestamp. id: ${this.currentNode}, last_seen: ${lastSeen}, error:${e.message}`
           );
         }
-        if (e.message.includes('cluster_block_exception')) {
+        if (isClusterBlockException(e)) {
           retryInterval = 60000;
         }
       } finally {
