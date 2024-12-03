@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type FC } from 'react';
+import React, { useEffect, type FC } from 'react';
 
 import { useEventBusExampleState } from '../hooks/use_event_bus_example_state';
 
@@ -18,7 +18,18 @@ export const AiopsWrapper: FC = () => {
   const aiopsFieldCandidates = state.useState((s) => s.aiopsFieldCandidates);
   const filters = state.useState((s) => s.filters);
 
-  if (Object.values(filters).length === 0) {
+  useEffect(() => {
+    if (Object.keys(filters).filter((key) => !key.startsWith('aiops_')).length === 0) {
+      Object.keys(filters).forEach((key) => {
+        if (key.startsWith('aiops_')) {
+          state.actions.setCrossfilter({ id: key, filter: '' });
+        }
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filters]);
+
+  if (Object.keys(filters).filter((key) => !key.startsWith('aiops_')).length === 0) {
     return null;
   }
 
