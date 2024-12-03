@@ -289,5 +289,6 @@ function getAlertType(actionVariables: ActionVariables): RuleType {
     producer: ALERTING_FEATURE_ID,
     minimumLicenseRequired: 'basic',
     enabledInLicense: true,
+    category: 'my-category',
   };
 }

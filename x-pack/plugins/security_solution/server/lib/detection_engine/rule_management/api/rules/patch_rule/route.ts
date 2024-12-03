@@ -52,7 +52,7 @@ export const patchRuleRoute = (router: SecuritySolutionPluginRouter) => {
         }
         try {
           const params = request.body;
-          const rulesClient = (await context.alerting).getRulesClient();
+          const rulesClient = await (await context.alerting).getRulesClient();
           const detectionRulesClient = (await context.securitySolution).getDetectionRulesClient();
 
           const existingRule = await readRules({

@@ -88,6 +88,7 @@ const ruleType: RuleType = {
   producer: ALERTING_FEATURE_ID,
   authorizedConsumers,
   enabledInLicense: true,
+  category: 'my-category',
 };
 
 describe('rule_details', () => {

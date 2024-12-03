@@ -8,7 +8,10 @@
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
-import { GetViewInAppRelativeUrlFnOpts, PluginSetupContract } from '@kbn/alerting-plugin/server';
+import type {
+  GetViewInAppRelativeUrlFnOpts,
+  AlertingServerSetup,
+} from '@kbn/alerting-plugin/server';
 import { observabilityPaths } from '@kbn/observability-plugin/common';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import { LEGACY_COMPARATORS } from '@kbn/observability-plugin/common/utils/convert_legacy_outside_comparator';
@@ -46,7 +49,7 @@ import { MetricsRulesTypeAlertDefinition } from '../register_rule_types';
 import { O11Y_AAD_FIELDS } from '../../../../common/constants';
 
 export function registerMetricThresholdRuleType(
-  alertingPlugin: PluginSetupContract,
+  alertingPlugin: AlertingServerSetup,
   libs: InfraBackendLibs,
   { featureFlags }: InfraConfig,
   locators: InfraLocators

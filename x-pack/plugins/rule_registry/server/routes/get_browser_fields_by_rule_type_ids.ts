@@ -9,6 +9,7 @@ import { IRouter } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import * as t from 'io-ts';
 
+import { isSiemRuleType } from '@kbn/rule-data-utils';
 import { RacRequestHandlerContext } from '../types';
 import { BASE_RAC_ALERTS_API_PATH } from '../../common/constants';
 import { buildRouteValidation } from './utils/route_validation';
@@ -21,7 +22,7 @@ export const getBrowserFieldsByFeatureId = (router: IRouter<RacRequestHandlerCon
         query: buildRouteValidation(
           t.exact(
             t.type({
-              featureIds: t.union([t.string, t.array(t.string)]),
+              ruleTypeIds: t.union([t.string, t.array(t.string)]),
             })
           )
         ),
@@ -39,18 +40,21 @@ export const getBrowserFieldsByFeatureId = (router: IRouter<RacRequestHandlerCon
       try {
         const racContext = await context.rac;
         const alertsClient = await racContext.getAlertsClient();
-        const { featureIds = [] } = request.query;
-        const onlyO11yFeatureIds = (Array.isArray(featureIds) ? featureIds : [featureIds]).filter(
-          (fId) => fId !== 'siem'
-        );
+        const { ruleTypeIds = [] } = request.query;
+
+        const onlyO11yRuleTypeIds = (
+          Array.isArray(ruleTypeIds) ? ruleTypeIds : [ruleTypeIds]
+        ).filter((ruleTypeId) => !isSiemRuleType(ruleTypeId));
+
         const o11yIndices =
-          (onlyO11yFeatureIds
-            ? await alertsClient.getAuthorizedAlertsIndices(onlyO11yFeatureIds)
+          (onlyO11yRuleTypeIds
+            ? await alertsClient.getAuthorizedAlertsIndices(onlyO11yRuleTypeIds)
             : []) ?? [];
+
         if (o11yIndices.length === 0) {
           return response.notFound({
             body: {
-              message: `No alerts-observability indices found for featureIds [${featureIds}]`,
+              message: `No alerts-observability indices found for rule type ids [${onlyO11yRuleTypeIds}]`,
               attributes: { success: false },
             },
           });
@@ -58,10 +62,11 @@ export const getBrowserFieldsByFeatureId = (router: IRouter<RacRequestHandlerCon
 
         const fields = await alertsClient.getBrowserFields({
           indices: o11yIndices,
-          featureIds: onlyO11yFeatureIds,
+          ruleTypeIds: onlyO11yRuleTypeIds,
           metaFields: ['_id', '_index'],
           allowNoIndex: true,
         });
+
         return response.ok({
           body: fields,
         });

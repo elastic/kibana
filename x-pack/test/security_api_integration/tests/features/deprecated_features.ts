@@ -492,56 +492,88 @@ export default function ({ getService }: FtrProviderContext) {
       const ruleOneTransformed = await createRule(
         transformedUser,
         'case_2_a_transform_one',
-        'case_2_feature_b',
+        'case_2_feature_a',
         'alerting_rule_type_one'
       );
       const ruleTwoTransformed = await createRule(
         transformedUser,
         'case_2_a_transform_two',
+        'case_2_feature_a',
+        'alerting_rule_type_two'
+      );
+
+      // Create rules as user with new privileges (B).
+      const newUserB = getUserCredentials('case_2_b_new');
+      const ruleOneNewBConsumerA = await createRule(
+        newUserB,
+        'case_2_b_new_one',
+        'case_2_feature_a',
+        'alerting_rule_type_one'
+      );
+      const ruleOneNewBConsumerB = await createRule(
+        newUserB,
+        'case_2_b_new_one',
+        'case_2_feature_b',
+        'alerting_rule_type_one'
+      );
+
+      // Create cases as user with new privileges (C).
+      const newUserC = getUserCredentials('case_2_c_new');
+      const ruleTwoNewCConsumerA = await createRule(
+        newUserC,
+        'case_2_c_new_two',
+        'case_2_feature_a',
+        'alerting_rule_type_two'
+      );
+      const ruleTwoNewCConsumerC = await createRule(
+        newUserC,
+        'case_2_c_new_two',
         'case_2_feature_c',
         'alerting_rule_type_two'
       );
 
       // Users with deprecated privileges should be able to access rules created by themselves and
-      // users with new privileges.
+      // users with new privileges assuming the consumer is the same.
       for (const ruleToCheck of [
         ruleOneDeprecated,
         ruleTwoDeprecated,
         ruleOneTransformed,
         ruleTwoTransformed,
+        ruleOneNewBConsumerA,
+        ruleTwoNewCConsumerA,
       ]) {
         expect(await getRule(deprecatedUser, ruleToCheck.id)).toBeDefined();
+        expect(await getRule(transformedUser, ruleToCheck.id)).toBeDefined();
       }
 
-      // NOTE: Scenarios below require SO migrations for both alerting rules and alerts to switch to
-      // a new producer that is tied to feature ID. Presumably we won't have this requirement once
-      // https://github.com/elastic/kibana/pull/183756 is resolved.
+      // Any new consumer that is not known to the deprecated feature shouldn't be available to the
+      // users with the deprecated privileges unless deprecated features are update to explicitly
+      // support new consumers.
+      for (const ruleToCheck of [ruleOneNewBConsumerB, ruleTwoNewCConsumerC]) {
+        expect(await getRule(deprecatedUser, ruleToCheck.id)).toBeUndefined();
+        expect(await getRule(transformedUser, ruleToCheck.id)).toBeDefined();
+      }
 
-      // Create rules as user with new privileges (B).
-      // const newUserB = getUserCredentials('case_2_b_new');
-      // const caseOneNewB = await createRule(newUserB, {
-      //   title: 'case_2_b_new_one',
-      //   owner: 'cases_owner_one',
-      // });
-      //
-      // // Create cases as user with new privileges (C).
-      // const newUserC = getUserCredentials('case_2_c_new');
-      // const caseTwoNewC = await createRule(newUserC, {
-      //   title: 'case_2_c_new_two',
-      //   owner: 'cases_owner_two',
-      // });
-      //
-
-      // User B and User C should be able to access cases created by themselves and users with
-      // deprecated and transformed privileges, but only for the specific owner.
-      // for (const caseToCheck of [ruleOneDeprecated, ruleOneTransformed, caseOneNewB]) {
-      //   expect(await getRule(newUserB, caseToCheck.id)).toBeDefined();
-      //   expect(await getRule(newUserC, caseToCheck.id)).toBeUndefined();
-      // }
-      // for (const caseToCheck of [ruleTwoDeprecated, ruleTwoTransformed, caseTwoNewC]) {
-      //   expect(await getRule(newUserC, caseToCheck.id)).toBeDefined();
-      //   expect(await getRule(newUserB, caseToCheck.id)).toBeUndefined();
-      // }
+      // User B and User C should be able to access rule types created by themselves and users with
+      // deprecated and transformed privileges, but only for the specific consumer.
+      for (const ruleToCheck of [
+        ruleOneDeprecated,
+        ruleOneTransformed,
+        ruleOneNewBConsumerA,
+        ruleOneNewBConsumerB,
+      ]) {
+        expect(await getRule(newUserB, ruleToCheck.id)).toBeDefined();
+        expect(await getRule(newUserC, ruleToCheck.id)).toBeUndefined();
+      }
+      for (const ruleToCheck of [
+        ruleTwoDeprecated,
+        ruleTwoTransformed,
+        ruleTwoNewCConsumerA,
+        ruleTwoNewCConsumerC,
+      ]) {
+        expect(await getRule(newUserC, ruleToCheck.id)).toBeDefined();
+        expect(await getRule(newUserB, ruleToCheck.id)).toBeUndefined();
+      }
     });
   });
 }
