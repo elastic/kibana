@@ -17,6 +17,7 @@ import { InfraWaffleMapNode, InfraWaffleMapOptions } from '../../../../common/in
 import { fieldToName } from '../lib/field_to_display_name';
 import { NodeContextMenu } from './waffle/node_context_menu';
 import { SnapshotNode, SnapshotNodePath } from '../../../../../common/http_api/snapshot_api';
+import { useAssetDetailsFlyoutState } from '../hooks/use_asset_details_flyout_url_state';
 
 interface Props {
   nodes: SnapshotNode[];
@@ -49,6 +50,17 @@ export const TableView = (props: Props) => {
   const { nodes, options, formatter, currentTime, nodeType } = props;
 
   const [openPopoverId, setOpenPopoverId] = useState<string | null>(null);
+  const [_, setFlyoutUrlState] = useAssetDetailsFlyoutState();
+  const isFlyoutMode = nodeType === 'host' || nodeType === 'container';
+
+  const toggleAssetPopover = (uniqueID: string) => {
+    if (isFlyoutMode) {
+      const [nodeId] = uniqueID.split(':');
+      setFlyoutUrlState({ detailsItemId: nodeId, assetType: nodeType });
+    } else {
+      setOpenPopoverId(uniqueID);
+    }
+  };
 
   const closePopover = () => setOpenPopoverId(null);
 
@@ -69,14 +81,14 @@ export const TableView = (props: Props) => {
           <EuiToolTip content={tooltipText}>
             <EuiButtonEmpty
               data-test-subj="infraColumnsButton"
-              onClick={() => setOpenPopoverId(uniqueID)}
+              onClick={() => toggleAssetPopover(uniqueID)}
             >
               {value}
             </EuiButtonEmpty>
           </EuiToolTip>
         );
 
-        return (
+        return !isFlyoutMode ? (
           <EuiPopover
             button={button}
             isOpen={openPopoverId === uniqueID}
@@ -91,6 +103,8 @@ export const TableView = (props: Props) => {
               options={options}
             />
           </EuiPopover>
+        ) : (
+          button
         );
       },
     },
