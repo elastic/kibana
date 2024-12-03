@@ -62,6 +62,7 @@ describe('DataStreamStep', () => {
           integrationSettings={undefined}
           connector={mockState.connector}
           isGenerating={false}
+          celInputResult={undefined}
         />,
         { wrapper }
       );
@@ -234,6 +235,7 @@ describe('DataStreamStep', () => {
           integrationSettings={mockState.integrationSettings}
           connector={mockState.connector}
           isGenerating={true}
+          celInputResult={undefined}
         />,
         { wrapper }
       );

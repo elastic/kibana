@@ -21,7 +21,7 @@ import type { CelAuthType } from '../../common';
 /**
  * Returns the inner-most schema object for the specified path array.
  */
-const getSchemaObject = (obj: object, paths: string[]) => {
+const getSchemaObject = (obj: object, paths: string[]): any => {
   const attr = paths[0];
   const innerObj = (obj as any)[attr];
   if (paths.length > 1) {

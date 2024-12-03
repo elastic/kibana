@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Pipeline } from '../../common';
+import type { CelAuthType, Pipeline } from '../../common';
 const currentPipelineMock: Pipeline = {
   description: 'Pipeline to process mysql_enterprise audit logs',
   processors: [
@@ -56,7 +56,7 @@ export const mockedRequestWithPipeline = {
 export const mockedRequestWithCelDetails = {
   dataStreamTitle: 'audit',
   path: '/events',
-  // authType: 'basic' as CelAuthType,
+  authType: 'basic' as CelAuthType,
   openApiDetails: {},
   openApiSchema: {},
   openApiAuthSchema: {},

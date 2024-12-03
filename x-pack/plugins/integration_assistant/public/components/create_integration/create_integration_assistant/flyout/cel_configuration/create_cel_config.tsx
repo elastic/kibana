@@ -16,7 +16,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import icon from './imgs/openapis-icon.svg';
+import icon from './imgs/openapi.svg';
 import { useActions, type State } from '../../state';
 import * as i18n from './translations';
 import { CelInputStep, isCelInputStepReadyToComplete } from './steps/cel_input_step';
@@ -41,7 +41,7 @@ interface CreateCelConfigFlyoutProps {
 
 export const CreateCelConfigFlyout = React.memo<CreateCelConfigFlyoutProps>(
   ({ integrationSettings, isFlyoutGenerating, connector }) => {
-    const { setShowCelCreateFlyout, setIsFlyoutGenerating, setCelInputResult } = useActions();
+    const { setShowCelCreateFlyout, setIsFlyoutGenerating } = useActions();
 
     const [celStep, setCelStep] = useState<CelFlyoutStepName>('upload_spec');
     const [suggestedPaths, setSuggestedPaths] = useState<string[]>([]);

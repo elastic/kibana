@@ -50,7 +50,6 @@ describe('CelGraph', () => {
     // Mocked responses for each node that requires an LLM API call/response.
     const mockInvokeCelSummarizeQuery = jest.fn().mockResolvedValue(celQuerySummaryMockedResponse);
     const mockInvokeCelProgram = jest.fn().mockResolvedValue(celProgramMock);
-    // const mockInvokeAnalyzeHeaders = jest.fn().mockResolvedValue(celAnalyzeHeadersMockedResponse);
     const mockInvokeCelStateVars = jest.fn().mockResolvedValue(celStateVarsMockedResponse);
     const mockInvokeCelStateSettings = jest.fn().mockResolvedValue(celStateSettings);
     const mockInvokeCelRedactVars = jest.fn().mockResolvedValue(celRedact);
@@ -66,11 +65,6 @@ describe('CelGraph', () => {
       currentProgram: await mockInvokeCelProgram(),
       lastExecutedChain: 'buildProgram',
     }));
-
-    // (handleAnalyzeHeaders as jest.Mock).mockImplementation(async () => ({
-    //   hasProgramHeaders: await mockInvokeAnalyzeHeaders(),
-    //   lastExecutedChain: 'analyzeProgramHeaders',
-    // }));
 
     // Returns the state variable names for the CEL program, to trigger the next step.
     (handleGetStateVariables as jest.Mock).mockImplementation(async () => ({
@@ -101,7 +95,7 @@ describe('CelGraph', () => {
       const celGraph = await getCelGraph({ model });
       let response;
       try {
-        const mockRequest = { authType: 'header', ...mockedRequestWithCelDetails };
+        const mockRequest = { ...mockedRequestWithCelDetails, authType: 'header' };
         response = await celGraph.invoke(mockRequest);
       } catch (error) {
         throw Error(`getCelGraph threw an error: ${error}`);
@@ -129,7 +123,7 @@ describe('CelGraph', () => {
         const celGraph = await getCelGraph({ model });
         let response;
         try {
-          const mockRequest = { authType: 'basic', ...mockedRequestWithCelDetails };
+          const mockRequest = { ...mockedRequestWithCelDetails, authType: 'basic' };
           response = await celGraph.invoke(mockRequest);
         } catch (error) {
           throw Error(`getCelGraph threw an error: ${error}`);
@@ -149,7 +143,7 @@ describe('CelGraph', () => {
         const celGraph = await getCelGraph({ model });
         let response;
         try {
-          const mockRequest = { authType: 'digest', ...mockedRequestWithCelDetails };
+          const mockRequest = { ...mockedRequestWithCelDetails, authType: 'digest' };
           response = await celGraph.invoke(mockRequest);
         } catch (error) {
           throw Error(`getCelGraph threw an error: ${error}`);
@@ -169,7 +163,7 @@ describe('CelGraph', () => {
         const celGraph = await getCelGraph({ model });
         let response;
         try {
-          const mockRequest = { authType: 'oauth2', ...mockedRequestWithCelDetails };
+          const mockRequest = { ...mockedRequestWithCelDetails, authType: 'oauth2' };
           response = await celGraph.invoke(mockRequest);
         } catch (error) {
           throw Error(`getCelGraph threw an error: ${error}`);
@@ -200,7 +194,7 @@ describe('program without headers', () => {
     const celGraph = await getCelGraph({ model });
     let response;
     try {
-      const mockRequest = { authType: 'basic', ...mockedRequestWithCelDetails };
+      const mockRequest = { ...mockedRequestWithCelDetails, authType: 'basic' };
       response = await celGraph.invoke(mockRequest);
     } catch (error) {
       throw Error(`getCelGraph threw an error: ${error}`);
@@ -220,7 +214,7 @@ describe('program without headers', () => {
     const celGraph = await getCelGraph({ model });
     let response;
     try {
-      const mockRequest = { authType: 'digest', ...mockedRequestWithCelDetails };
+      const mockRequest = { ...mockedRequestWithCelDetails, authType: 'digest' };
       response = await celGraph.invoke(mockRequest);
     } catch (error) {
       throw Error(`getCelGraph threw an error: ${error}`);
@@ -240,7 +234,7 @@ describe('program without headers', () => {
     const celGraph = await getCelGraph({ model });
     let response;
     try {
-      const mockRequest = { authType: 'oauth2', ...mockedRequestWithCelDetails };
+      const mockRequest = { ...mockedRequestWithCelDetails, authType: 'oauth2' };
       response = await celGraph.invoke(mockRequest);
     } catch (error) {
       throw Error(`getCelGraph threw an error: ${error}`);
