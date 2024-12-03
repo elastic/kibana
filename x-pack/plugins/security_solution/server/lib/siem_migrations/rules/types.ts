@@ -22,3 +22,8 @@ export interface Integration {
   data_streams: Array<{ dataset: string; title: string; index_pattern: string }>;
   elser_embedding: string;
 }
+
+export interface PrebuiltRuleQueryResponse {
+  name: string;
+  description: string;
+}

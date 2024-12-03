@@ -5,16 +5,17 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
 import { JsonOutputParser } from '@langchain/core/output_parsers';
-import { SiemMigrationRuleTranslationResult } from '../../../../../../../../common/siem_migrations/constants';
+import type { RuleMigrationsRetriever } from '../../../retrievers';
 import type { ChatModel } from '../../../util/actions_client_chat';
-import { filterPrebuiltRules, type PrebuiltRulesMapByName } from '../../../util/prebuilt_rules';
 import type { GraphNode } from '../../types';
 import { MATCH_PREBUILT_RULE_PROMPT } from './prompts';
 
 interface GetMatchPrebuiltRuleNodeParams {
   model: ChatModel;
-  prebuiltRulesMap: PrebuiltRulesMapByName;
+  ruleMigrationsRetriever: RuleMigrationsRetriever;
+  logger: Logger;
 }
 
 interface GetMatchedRuleResponse {
@@ -22,40 +23,21 @@ interface GetMatchedRuleResponse {
 }
 
 export const getMatchPrebuiltRuleNode =
-  ({ model, prebuiltRulesMap }: GetMatchPrebuiltRuleNodeParams): GraphNode =>
+  ({ model, ruleMigrationsRetriever, logger }: GetMatchPrebuiltRuleNodeParams): GraphNode =>
   async (state) => {
-    const mitreAttackIds = state.original_rule.mitre_attack_ids;
-    if (!mitreAttackIds?.length) {
-      return {};
-    }
-
-    const filteredPrebuiltRulesMap = filterPrebuiltRules(prebuiltRulesMap, mitreAttackIds);
-    if (filteredPrebuiltRulesMap.size === 0) {
-      return {};
-    }
+    const query = state.semantic_query;
+    const prebuiltRules = await ruleMigrationsRetriever.prebuiltRules.getRules(query);
 
     const outputParser = new JsonOutputParser();
     const matchPrebuiltRule = MATCH_PREBUILT_RULE_PROMPT.pipe(model).pipe(outputParser);
 
-    const elasticSecurityRules = [...filteredPrebuiltRulesMap.keys()].join('\n');
+    const elasticSecurityRules = [...prebuiltRules.keys()].join('\n');
     const response = (await matchPrebuiltRule.invoke({
       elasticSecurityRules,
       ruleTitle: state.original_rule.title,
     })) as GetMatchedRuleResponse;
     if (response.match) {
-      const result = filteredPrebuiltRulesMap.get(response.match);
-      if (result != null) {
-        return {
-          elastic_rule: {
-            title: result.rule.name,
-            description: result.rule.description,
-            prebuilt_rule_id: result.rule.rule_id,
-            id: result.installedRuleId,
-          },
-          translation_result: SiemMigrationRuleTranslationResult.FULL,
-        };
-      }
+      logger.info(`Matched prebuilt rule: ${response.match}`);
     }
-
     return {};
   };

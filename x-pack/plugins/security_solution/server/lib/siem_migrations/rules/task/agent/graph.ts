@@ -6,7 +6,10 @@
  */
 
 import { END, START, StateGraph } from '@langchain/langgraph';
+import { getCreateSemanticQueryNode } from './nodes/create_semantic_query';
 import { getMatchPrebuiltRuleNode } from './nodes/match_prebuilt_rule';
+import { getProcessQueryNode } from './nodes/process_query';
+import { getRetrieveIntegrationsNode } from './nodes/retrieve_integrations';
 import { migrateRuleState } from './state';
 import { getTranslateRuleGraph } from './sub_graphs/translate_rule';
 import type { MigrateRuleGraphParams, MigrateRuleState } from './types';
@@ -14,29 +17,37 @@ import type { MigrateRuleGraphParams, MigrateRuleState } from './types';
 export function getRuleMigrationAgent({
   model,
   inferenceClient,
-  prebuiltRulesMap,
-  resourceRetriever,
-  integrationRetriever,
+  ruleMigrationsRetriever,
   connectorId,
   logger,
 }: MigrateRuleGraphParams) {
-  const matchPrebuiltRuleNode = getMatchPrebuiltRuleNode({ model, prebuiltRulesMap });
-  const translationSubGraph = getTranslateRuleGraph({
+  const matchPrebuiltRuleNode = getMatchPrebuiltRuleNode({
     model,
+    ruleMigrationsRetriever,
+    logger,
+  });
+  const translationSubGraph = getTranslateRuleGraph({
     inferenceClient,
-    resourceRetriever,
-    integrationRetriever,
     connectorId,
     logger,
   });
+  const createSemanticQueryNode = getCreateSemanticQueryNode({ model });
+  const processQueryNode = getProcessQueryNode({ model, ruleMigrationsRetriever });
+  const retrieveIntegrationsNode = getRetrieveIntegrationsNode({ ruleMigrationsRetriever });
 
   const siemMigrationAgentGraph = new StateGraph(migrateRuleState)
     // Nodes
+    .addNode('processQuery', processQueryNode)
+    .addNode('createSemanticQuery', createSemanticQueryNode)
+    .addNode('retrieveIntegrations', retrieveIntegrationsNode)
     .addNode('matchPrebuiltRule', matchPrebuiltRuleNode)
     .addNode('translationSubGraph', translationSubGraph)
     // Edges
-    .addEdge(START, 'matchPrebuiltRule')
+    .addEdge(START, 'processQuery')
+    .addEdge('processQuery', 'createSemanticQuery')
+    .addEdge('createSemanticQuery', 'matchPrebuiltRule')
     .addConditionalEdges('matchPrebuiltRule', matchedPrebuiltRuleConditional)
+    .addEdge('retrieveIntegrations', 'translationSubGraph')
     .addEdge('translationSubGraph', END);
 
   const graph = siemMigrationAgentGraph.compile();
@@ -48,5 +59,5 @@ const matchedPrebuiltRuleConditional = (state: MigrateRuleState) => {
   if (state.elastic_rule?.prebuilt_rule_id) {
     return END;
   }
-  return 'translationSubGraph';
+  return 'retrieveIntegrations';
 };
