@@ -75,6 +75,7 @@ import {
   deleteAgentPolicy,
   fetchAgentPolicyEnrollmentKey,
   getOrCreateDefaultAgentPolicy,
+  setAgentLoggingLevel,
 } from '../../../../scripts/endpoint/common/fleet_services';
 import { startElasticAgentWithDocker } from '../../../../scripts/endpoint/common/elastic_agent_service';
 import type { IndexedFleetEndpointPolicyResponse } from '../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
@@ -433,6 +434,7 @@ ${s1Info.status}
                   log,
                   kbnClient,
                 });
+            await setAgentLoggingLevel(kbnClient, newHost.agentId, 'debug', log);
             await waitForEndpointToStreamData(kbnClient, newHost.agentId, 360000);
             return newHost;
           } catch (err) {
