@@ -71,7 +71,7 @@ describe('ConfigureCases', () => {
 
   beforeEach(() => {
     useGetActionTypesMock.mockImplementation(() => useActionTypesResponse);
-    useLicenseMock.mockReturnValue({ isAtLeastGold: () => true });
+    useLicenseMock.mockReturnValue({ isAtLeastGold: () => true, isAtLeastPlatinum: () => false });
   });
 
   describe('rendering', () => {
@@ -1268,7 +1268,7 @@ describe('ConfigureCases', () => {
         ...usePersistConfigurationMockResponse,
         mutate: persistCaseConfigure,
       }));
-      useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => false, isAtLeastGold: () => true });
+      useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => true, isAtLeastGold: () => true });
     });
 
     it('should render observable types section', async () => {
@@ -1295,7 +1295,10 @@ describe('ConfigureCases', () => {
       useGetCaseConfigurationMock.mockImplementation(() => useCaseConfigureResponse);
 
       // Updated
-      useLicenseMock.mockReturnValue({ isAtLeastGold: () => false });
+      useLicenseMock.mockReturnValue({
+        isAtLeastGold: () => false,
+        isAtLeastPlatinum: () => false,
+      });
     });
 
     it('should not render connectors and closure options', () => {

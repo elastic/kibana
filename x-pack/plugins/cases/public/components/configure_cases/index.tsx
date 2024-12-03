@@ -118,6 +118,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
   useCasesBreadcrumbs(CasesDeepLinkId.casesConfigure);
   const license = useLicense();
   const hasMinimumLicensePermissions = license.isAtLeastGold();
+  const hasMinimumLicensePermissionsForObservables = license.isAtLeastPlatinum();
 
   const [connectorIsValid, setConnectorIsValid] = useState(true);
   const [flyOutVisibility, setFlyOutVisibility] = useState<Flyout | null>(null);
@@ -636,6 +637,9 @@ export const ConfigureCases: React.FC = React.memo(() => {
       </CommonFlyout>
     ) : null;
 
+  const observableTypesDisabled =
+    !hasMinimumLicensePermissionsForObservables || isLoadingCaseConfiguration;
+
   return (
     <EuiPageSection restrictWidth={true}>
       <HeaderPage
@@ -734,7 +738,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
               <ObservableTypes
                 observableTypes={observableTypes}
                 isLoading={isLoadingCaseConfiguration}
-                disabled={isLoadingCaseConfiguration}
+                disabled={observableTypesDisabled}
                 handleAddObservableType={() =>
                   setFlyOutVisibility({ type: 'observableTypes', visible: true })
                 }
