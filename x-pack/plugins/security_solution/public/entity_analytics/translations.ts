@@ -328,7 +328,8 @@ export const RISK_ENGINE_INCLUDE_CLOSED_ALERTS_DESCRIPTION = i18n.translate(
 
 export const RISK_ENGINE_NEXT_RUN_TIME = (timeInMinutes: string) =>
   i18n.translate('xpack.securitySolution.riskScore.engineNextRunTime', {
-    defaultMessage: `Next engine run in ${timeInMinutes}`,
+    defaultMessage: `Next engine run in {timeInMinutes}`,
+    values: { timeInMinutes },
   });
 
 export const RUN_RISK_SCORE_ENGINE = i18n.translate('xpack.securitySolution.riskScore.runEngine', {
