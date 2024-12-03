@@ -49,8 +49,6 @@ export function useFetchEvents({
         signal,
       });
     },
-    cacheTime: 600 * 1000, // 10_minutes
-    staleTime: 0,
     refetchOnWindowFocus: false,
     retry: false,
     onError: (error: Error) => {

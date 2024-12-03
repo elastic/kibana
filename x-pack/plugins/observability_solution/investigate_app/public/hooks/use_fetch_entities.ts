@@ -50,6 +50,7 @@ export function useFetchEntities({
       });
     },
     refetchOnWindowFocus: false,
+    retry: false,
     onError: (error: Error) => {
       // ignore error
     },
