@@ -5,35 +5,22 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { EuiCallOut } from '@elastic/eui';
-import { FieldUpgradeState, type RuleUpgradeState } from '../../../../model/prebuilt_rule_upgrade';
 import { ActionRequiredBadge } from '../badges/action_required';
 import { ReviewRequiredBadge } from '../badges/review_required_badge';
 import { ReadyForUpgradeBadge } from '../badges/ready_for_upgrade_badge';
 import * as i18n from './translations';
 
 interface RuleUpgradeCalloutProps {
-  ruleUpgradeState: RuleUpgradeState;
+  numOfSolvableConflicts: number;
+  numOfNonSolvableConflicts: number;
 }
 
-export function RuleUpgradeCallout({ ruleUpgradeState }: RuleUpgradeCalloutProps): JSX.Element {
-  const fieldsUpgradeState = ruleUpgradeState.fieldsUpgradeState;
-  const [numOfNonSolvableConflicts, numOfSolvableConflicts] = useMemo(() => {
-    let nonSolvableConflicts = 0;
-    let solvableConflicts = 0;
-
-    for (const state of Object.values(fieldsUpgradeState)) {
-      if (state === FieldUpgradeState.NonSolvableConflict) {
-        nonSolvableConflicts++;
-      } else if (state === FieldUpgradeState.SolvableConflict) {
-        solvableConflicts++;
-      }
-    }
-
-    return [nonSolvableConflicts, solvableConflicts];
-  }, [fieldsUpgradeState]);
-
+export function RuleUpgradeCallout({
+  numOfSolvableConflicts,
+  numOfNonSolvableConflicts,
+}: RuleUpgradeCalloutProps): JSX.Element {
   if (numOfNonSolvableConflicts > 0) {
     return (
       <EuiCallOut

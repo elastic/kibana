@@ -8,6 +8,7 @@
 import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { camelCase, startCase } from 'lodash';
+import type { FieldsDiff } from '../../../../../../common/api/detection_engine';
 import { FormattedDate } from '../../../../../common/components/formatted_date';
 import { SeverityBadge } from '../../../../../common/components/severity_badge';
 import { ModifiedBadge } from '../../../../rule_management/components/rule_details/three_way_diff/badges/modified_badge';
@@ -50,10 +51,10 @@ export const UpgradeFlyoutSubHeader = memo(function UpgradeFlyoutSubHeader({
   const customized = ruleUpgradeState.current_rule.rule_source.type === 'external' &&
     ruleUpgradeState.current_rule.rule_source.is_customized && <ModifiedBadge />;
 
-  const fieldsNamesWithUpdates = Object.entries(ruleUpgradeState.customizableFieldsDiff.fields)
-    .filter(([, diff]) => diff.has_update)
-    .map(([fieldName]) => fieldName);
-
+  const fieldsDiff: FieldsDiff<Record<string, unknown>> = ruleUpgradeState.diff.fields;
+  const fieldsNamesWithUpdates = Object.keys(ruleUpgradeState.fieldsUpgradeState).filter(
+    (fieldName) => fieldsDiff[fieldName].has_update
+  );
   const fieldUpdates = fieldsNamesWithUpdates.length > 0 && (
     <EuiText size="s">
       <strong>

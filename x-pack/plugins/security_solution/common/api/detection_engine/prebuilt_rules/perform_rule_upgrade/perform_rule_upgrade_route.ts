@@ -50,7 +50,7 @@ export const FIELDS_TO_UPGRADE_TO_TARGET_VERSION = [
 
 // Fields which are part of DiffableRule but are not upgradeable
 // and need to be omittted from the DiffableUpgradableFields
-export const NON_UPGRADEABLE_DIFFABLE_FIELDS: Readonly<string[]> = ['type', 'rule_id', 'version'];
+export const NON_UPGRADEABLE_DIFFABLE_FIELDS = ['type', 'rule_id', 'version'] as const;
 
 type NON_UPGRADEABLE_DIFFABLE_FIELDS_TO_OMIT_TYPE = {
   readonly [key in (typeof NON_UPGRADEABLE_DIFFABLE_FIELDS)[number]]: true;
