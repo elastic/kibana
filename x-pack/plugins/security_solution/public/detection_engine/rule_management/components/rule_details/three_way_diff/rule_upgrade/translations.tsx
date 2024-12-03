@@ -14,7 +14,7 @@ import { useKibana } from '../../../../../../common/lib/kibana/kibana_react';
 export const NUM_OF_FIELDS_WITH_UPDATES = (count: number) => (
   <FormattedMessage
     id="xpack.securitySolution.detectionEngine.rules.upgradeRules.diffTab.fieldsWithUpdates"
-    defaultMessage="Upgrade has {count} {count, plural, one {field} other {fields}}"
+    defaultMessage="Update has {count} {count, plural, one {field} other {fields}}"
     values={{ count: <strong>{count}</strong> }}
   />
 );

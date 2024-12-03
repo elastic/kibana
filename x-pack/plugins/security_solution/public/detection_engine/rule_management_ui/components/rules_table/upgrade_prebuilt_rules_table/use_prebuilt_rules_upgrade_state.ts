@@ -6,6 +6,7 @@
  */
 
 import { useCallback, useMemo, useState } from 'react';
+import { pick } from 'lodash';
 import { useIsPrebuiltRulesCustomizationEnabled } from '../../../../rule_management/hooks/use_is_prebuilt_rules_customization_enabled';
 import type {
   RulesUpgradeState,
@@ -13,6 +14,7 @@ import type {
   SetRuleFieldResolvedValueFn,
 } from '../../../../rule_management/model/prebuilt_rule_upgrade';
 import { FieldUpgradeState } from '../../../../rule_management/model/prebuilt_rule_upgrade';
+import type { PartialRuleDiff } from '../../../../../../common/api/detection_engine';
 import {
   type FieldsDiff,
   type DiffableAllFields,
@@ -20,8 +22,10 @@ import {
   type RuleUpgradeInfoForReview,
   ThreeWayDiffConflict,
   type RuleSignatureId,
+  NON_UPGRADEABLE_DIFFABLE_FIELDS,
 } from '../../../../../../common/api/detection_engine';
 import { convertRuleToDiffable } from '../../../../../../common/detection_engine/prebuilt_rules/diff/convert_rule_to_diffable';
+import { assertUnreachable } from '../../../../../../common/utility_types';
 
 type RuleResolvedConflicts = Partial<DiffableAllFields>;
 type RulesResolvedConflicts = Record<RuleSignatureId, RuleResolvedConflicts>;
@@ -54,14 +58,17 @@ export function usePrebuiltRulesUpgradeState(
     const state: RulesUpgradeState = {};
 
     for (const ruleUpgradeInfo of ruleUpgradeInfos) {
+      const customizableFieldsDiff = calcCustomizableFieldsDiff(ruleUpgradeInfo.diff);
+
       state[ruleUpgradeInfo.rule_id] = {
         ...ruleUpgradeInfo,
+        customizableFieldsDiff,
         finalRule: calcFinalDiffableRule(
           ruleUpgradeInfo,
           rulesResolvedConflicts[ruleUpgradeInfo.rule_id] ?? {}
         ),
         fieldsUpgradeState: calcFieldsState(
-          ruleUpgradeInfo.diff.fields,
+          customizableFieldsDiff,
           rulesResolvedConflicts[ruleUpgradeInfo.rule_id] ?? {}
         ),
         hasUnresolvedConflicts: isPrebuiltRulesCustomizationEnabled
@@ -79,6 +86,38 @@ export function usePrebuiltRulesUpgradeState(
   return {
     rulesUpgradeState,
     setRuleFieldResolvedValue,
+  };
+}
+
+function calcCustomizableFieldsDiff(ruleFieldsDiff: PartialRuleDiff): PartialRuleDiff {
+  const cutomizableFieldNames = Object.keys(ruleFieldsDiff.fields).filter(
+    (fieldName) => !NON_UPGRADEABLE_DIFFABLE_FIELDS.includes(fieldName)
+  );
+  const fieldsDiff = pick(ruleFieldsDiff.fields, cutomizableFieldNames);
+
+  let numFieldsWithUpdates = 0;
+  let numFieldsWithConflicts = 0;
+  let numFieldsWithNonSolvableConflicts = 0;
+
+  for (const fieldDiff of Object.values(fieldsDiff)) {
+    if (fieldDiff.has_update) {
+      numFieldsWithUpdates++;
+    }
+
+    if (fieldDiff.conflict !== ThreeWayDiffConflict.NONE) {
+      numFieldsWithConflicts++;
+    }
+
+    if (fieldDiff.conflict === ThreeWayDiffConflict.NON_SOLVABLE) {
+      numFieldsWithNonSolvableConflicts++;
+    }
+  }
+
+  return {
+    num_fields_with_updates: numFieldsWithUpdates,
+    num_fields_with_conflicts: numFieldsWithConflicts,
+    num_fields_with_non_solvable_conflicts: numFieldsWithNonSolvableConflicts,
+    fields: fieldsDiff,
   };
 }
 
@@ -109,13 +148,17 @@ function convertRuleFieldsDiffToDiffable(
 }
 
 function calcFieldsState(
-  ruleFieldsDiff: FieldsDiff<Record<string, unknown>>,
+  ruleDiff: PartialRuleDiff,
   ruleResolvedConflicts: RuleResolvedConflicts
 ): FieldsUpgradeState {
   const fieldsState: FieldsUpgradeState = {};
 
-  for (const fieldName of Object.keys(ruleFieldsDiff)) {
-    switch (ruleFieldsDiff[fieldName].conflict) {
+  for (const fieldName of Object.keys(ruleDiff.fields)) {
+    const conflict =
+      ruleDiff.fields[fieldName as keyof typeof ruleDiff.fields]?.conflict ??
+      ThreeWayDiffConflict.NONE;
+
+    switch (conflict) {
       case ThreeWayDiffConflict.NONE:
         fieldsState[fieldName] = FieldUpgradeState.NoConflict;
         break;
@@ -127,6 +170,9 @@ function calcFieldsState(
       case ThreeWayDiffConflict.NON_SOLVABLE:
         fieldsState[fieldName] = FieldUpgradeState.NonSolvableConflict;
         break;
+
+      default:
+        assertUnreachable(conflict);
     }
   }
 

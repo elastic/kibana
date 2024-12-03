@@ -7,11 +7,6 @@
 
 import React, { memo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
-import type { PartialRuleDiff } from '../../../../../../../common/api/detection_engine';
-import {
-  NON_UPGRADEABLE_DIFFABLE_FIELDS,
-  ThreeWayDiffConflict,
-} from '../../../../../../../common/api/detection_engine';
 import type {
   RuleUpgradeState,
   SetRuleFieldResolvedValueFn,
@@ -31,25 +26,21 @@ export const RuleUpgrade = memo(function RuleUpgrade({
   ruleUpgradeState,
   setRuleFieldResolvedValue,
 }: RuleUpgradeProps): JSX.Element {
-  const cleanedRuleUpgradeState = {
-    ...ruleUpgradeState,
-    diff: cleanupNonCustomizableFieldDiffs(ruleUpgradeState.diff),
-  };
   const fieldNames = Object.keys(
-    cleanedRuleUpgradeState.diff.fields
+    ruleUpgradeState.fieldsUpgradeState
   ) as UpgradeableDiffableFields[];
 
   return (
     <>
       <EuiSpacer size="s" />
-      <RuleUpgradeInfoBar ruleUpgradeState={cleanedRuleUpgradeState} />
+      <RuleUpgradeInfoBar ruleUpgradeState={ruleUpgradeState} />
       <EuiSpacer size="s" />
-      <RuleUpgradeCallout ruleUpgradeState={cleanedRuleUpgradeState} />
+      <RuleUpgradeCallout ruleUpgradeState={ruleUpgradeState} />
       <EuiSpacer size="s" />
       {fieldNames.map((fieldName) => (
         <FieldUpgradeContextProvider
           key={fieldName}
-          ruleUpgradeState={cleanedRuleUpgradeState}
+          ruleUpgradeState={ruleUpgradeState}
           fieldName={fieldName}
           setRuleFieldResolvedValue={setRuleFieldResolvedValue}
         >
@@ -59,36 +50,3 @@ export const RuleUpgrade = memo(function RuleUpgrade({
     </>
   );
 });
-
-/**
- * Cleans up non customizable field diffs
- */
-function cleanupNonCustomizableFieldDiffs(diff: PartialRuleDiff): PartialRuleDiff {
-  const result = {
-    ...diff,
-    fields: {
-      ...diff.fields,
-    },
-  };
-
-  for (const nonCustomizableFieldName of NON_UPGRADEABLE_DIFFABLE_FIELDS) {
-    const nonCustomizableFieldDiff = result.fields[nonCustomizableFieldName];
-
-    if (nonCustomizableFieldDiff?.conflict === ThreeWayDiffConflict.NONE) {
-      result.num_fields_with_updates--;
-    }
-
-    if (nonCustomizableFieldDiff?.conflict === ThreeWayDiffConflict.SOLVABLE) {
-      result.num_fields_with_conflicts--;
-    }
-
-    if (nonCustomizableFieldDiff?.conflict === ThreeWayDiffConflict.NON_SOLVABLE) {
-      result.num_fields_with_non_solvable_conflicts--;
-      result.num_fields_with_conflicts--;
-    }
-
-    delete result.fields[nonCustomizableFieldName];
-  }
-
-  return result;
-}
