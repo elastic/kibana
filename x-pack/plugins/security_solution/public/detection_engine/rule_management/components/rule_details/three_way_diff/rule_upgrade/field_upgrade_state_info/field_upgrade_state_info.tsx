@@ -66,11 +66,11 @@ export function FieldUpgradeStateInfo({ state }: FieldUpgradeStateInfoProps): JS
             <strong>{title}</strong>
           </EuiFlexItem>
 
-          {description ? (
+          {description && (
             <EuiFlexItem grow={false}>
-              {i18n.SEPARATOR} {i18n.NO_CONFLICT_DESCRIPTION}
+              {i18n.SEPARATOR} {description}
             </EuiFlexItem>
-          ) : null}
+          )}
         </EuiFlexGroup>
       </EuiText>
     </>
