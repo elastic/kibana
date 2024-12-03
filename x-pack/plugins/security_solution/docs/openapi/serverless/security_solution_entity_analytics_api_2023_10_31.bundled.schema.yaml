@@ -419,41 +419,6 @@ paths:
       summary: Start an Entity Engine
       tags:
         - Security Entity Analytics API
-  '/api/entity_store/engines/{entityType}/stats':
-    post:
-      operationId: GetEntityEngineStats
-      parameters:
-        - description: The entity type of the engine (either 'user' or 'host').
-          in: path
-          name: entityType
-          required: true
-          schema:
-            $ref: '#/components/schemas/EntityType'
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  indexPattern:
-                    $ref: '#/components/schemas/IndexPattern'
-                  indices:
-                    items:
-                      type: object
-                    type: array
-                  status:
-                    $ref: '#/components/schemas/EngineStatus'
-                  transforms:
-                    items:
-                      type: object
-                    type: array
-                  type:
-                    $ref: '#/components/schemas/EntityType'
-          description: Successful response
-      summary: Get Entity Engine stats
-      tags:
-        - Security Entity Analytics API
   '/api/entity_store/engines/{entityType}/stop':
     post:
       operationId: StopEntityEngine
