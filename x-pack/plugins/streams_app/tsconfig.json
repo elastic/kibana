@@ -33,5 +33,7 @@
     "@kbn/streams-plugin",
     "@kbn/share-plugin",
     "@kbn/observability-utils-server",
+    "@kbn/server-route-repository-client",
+    "@kbn/saved-objects-tagging-plugin",
   ]
 }
