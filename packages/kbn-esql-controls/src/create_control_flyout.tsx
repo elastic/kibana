@@ -435,6 +435,7 @@ export function ESQLControlsFlyout({
             selectedOptions={controlFlyoutType}
             onChange={onFlyoutTypeChange}
             fullWidth
+            isDisabled={controlType !== EsqlControlType.VALUES}
           />
         </EuiFormRow>
         <EuiFormRow
@@ -465,41 +466,42 @@ export function ESQLControlsFlyout({
             disabled={isControlInEditMode}
           />
         </EuiFormRow>
-        {controlType === EsqlControlType.VALUES && (
-          <EuiFormRow
-            label={i18n.translate('esqlControls.flyout.valuesQueryEditor.label', {
-              defaultMessage: 'Values query',
-            })}
-            fullWidth
-            isInvalid={!valuesQuery}
-            error={
-              !valuesQuery
-                ? i18n.translate('esqlControls.flyout.valuesQueryEditor.error', {
-                    defaultMessage: 'Query is required',
-                  })
-                : undefined
-            }
-          >
-            <ESQLEditor
-              query={{ esql: valuesQuery }}
-              onTextLangQueryChange={(q) => {
-                setValuesQuery(q.esql);
-              }}
-              hideTimeFilterInfo={true}
-              disableAutoFocus={true}
-              // errors={errors}
-              editorIsInline
-              hideRunQueryText
-              onTextLangQuerySubmit={async (q, a) => {
-                if (q) {
-                  await onValuesQuerySubmit(q.esql);
-                }
-              }}
-              isDisabled={false}
-              isLoading={false}
-            />
-          </EuiFormRow>
-        )}
+        {controlType === EsqlControlType.VALUES &&
+          controlFlyoutType[0]?.key === EsqlControlFlyoutType.VALUES_FROM_QUERY && (
+            <EuiFormRow
+              label={i18n.translate('esqlControls.flyout.valuesQueryEditor.label', {
+                defaultMessage: 'Values query',
+              })}
+              fullWidth
+              isInvalid={!valuesQuery}
+              error={
+                !valuesQuery
+                  ? i18n.translate('esqlControls.flyout.valuesQueryEditor.error', {
+                      defaultMessage: 'Query is required',
+                    })
+                  : undefined
+              }
+            >
+              <ESQLEditor
+                query={{ esql: valuesQuery }}
+                onTextLangQueryChange={(q) => {
+                  setValuesQuery(q.esql);
+                }}
+                hideTimeFilterInfo={true}
+                disableAutoFocus={true}
+                // errors={errors}
+                editorIsInline
+                hideRunQueryText
+                onTextLangQuerySubmit={async (q, a) => {
+                  if (q) {
+                    await onValuesQuerySubmit(q.esql);
+                  }
+                }}
+                isDisabled={false}
+                isLoading={false}
+              />
+            </EuiFormRow>
+          )}
         {controlType === EsqlControlType.FIELDS && (
           <EuiFormRow
             label={i18n.translate('esqlControls.flyout.values.label', {
@@ -532,61 +534,64 @@ export function ESQLControlsFlyout({
             />
           </EuiFormRow>
         )}
-        {controlType === EsqlControlType.TIME_LITERAL && (
-          <EuiFormRow
-            label={i18n.translate('esqlControls.flyout.values.label', {
-              defaultMessage: 'Values',
-            })}
-            helpText={i18n.translate('esqlControls.flyout.values.helpText', {
-              defaultMessage:
-                'Comma separated values (e.g. 5 minutes, 1 hour, 1 day, 1 week, 1 year)',
-            })}
-            fullWidth
-            isInvalid={!values}
-            error={
-              !values
-                ? i18n.translate('esqlControls.flyout.values.error', {
-                    defaultMessage: 'Values are required',
-                  })
-                : undefined
-            }
-          >
-            <EuiFieldText
-              placeholder={i18n.translate('esqlControls.flyout.values.placeholder', {
-                defaultMessage: 'Set the static values',
-              })}
-              value={values}
-              onChange={onValuesChange}
-              aria-label={i18n.translate('esqlControls.flyout.values.placeholder', {
-                defaultMessage: 'Set a variable name',
-              })}
-              fullWidth
-            />
-          </EuiFormRow>
-        )}
+        {controlType === EsqlControlType.TIME_LITERAL ||
+          (controlType === EsqlControlType.VALUES &&
+            controlFlyoutType[0]?.key === EsqlControlFlyoutType.STATIC_VALUES && (
+              <EuiFormRow
+                label={i18n.translate('esqlControls.flyout.values.label', {
+                  defaultMessage: 'Values',
+                })}
+                helpText={i18n.translate('esqlControls.flyout.values.helpText', {
+                  defaultMessage:
+                    'Comma separated values (e.g. 5 minutes, 1 hour, 1 day, 1 week, 1 year)',
+                })}
+                fullWidth
+                isInvalid={!values}
+                error={
+                  !values
+                    ? i18n.translate('esqlControls.flyout.values.error', {
+                        defaultMessage: 'Values are required',
+                      })
+                    : undefined
+                }
+              >
+                <EuiFieldText
+                  placeholder={i18n.translate('esqlControls.flyout.values.placeholder', {
+                    defaultMessage: 'Set the static values',
+                  })}
+                  value={values}
+                  onChange={onValuesChange}
+                  aria-label={i18n.translate('esqlControls.flyout.values.placeholder', {
+                    defaultMessage: 'Set a variable name',
+                  })}
+                  fullWidth
+                />
+              </EuiFormRow>
+            ))}
 
-        {controlType === EsqlControlType.VALUES && (
-          <EuiFormRow
-            label={i18n.translate('esqlControls.flyout.previewValues.placeholder', {
-              defaultMessage: 'Values preview',
-            })}
-            fullWidth
-          >
-            <EuiTextArea
-              placeholder={i18n.translate('esqlControls.flyout.values.placeholder', {
-                defaultMessage: 'Set the static values',
-              })}
-              value={values}
-              disabled
-              compressed
-              onChange={() => {}}
-              aria-label={i18n.translate('esqlControls.flyout.previewValues.placeholder', {
+        {controlType === EsqlControlType.VALUES &&
+          controlFlyoutType[0]?.key === EsqlControlFlyoutType.VALUES_FROM_QUERY && (
+            <EuiFormRow
+              label={i18n.translate('esqlControls.flyout.previewValues.placeholder', {
                 defaultMessage: 'Values preview',
               })}
               fullWidth
-            />
-          </EuiFormRow>
-        )}
+            >
+              <EuiTextArea
+                placeholder={i18n.translate('esqlControls.flyout.values.placeholder', {
+                  defaultMessage: 'Set the static values',
+                })}
+                value={values}
+                disabled
+                compressed
+                onChange={() => {}}
+                aria-label={i18n.translate('esqlControls.flyout.previewValues.placeholder', {
+                  defaultMessage: 'Values preview',
+                })}
+                fullWidth
+              />
+            </EuiFormRow>
+          )}
 
         <EuiFormRow
           label={i18n.translate('esqlControls.flyout.label.label', {
