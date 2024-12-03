@@ -130,16 +130,14 @@ AlertsBadge.displayName = 'AlertsBadge';
 const SimilarCasesBadge = ({
   activeTab,
   count,
-  isLoading,
   euiTheme,
 }: {
   activeTab: string;
   count?: number;
-  isLoading: boolean;
   euiTheme: EuiThemeComputed<{}>;
 }) => (
   <>
-    {!isLoading && (
+    {
       <EuiNotificationBadge
         css={css`
           margin-left: ${euiTheme.size.xs};
@@ -149,7 +147,7 @@ const SimilarCasesBadge = ({
       >
         {count ?? 0}
       </EuiNotificationBadge>
-    )}
+    }
     <ExperimentalBadge compact />
   </>
 );
@@ -171,7 +169,7 @@ export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab
   const { observables, isLoading: isLoadingObservables } = useCaseObservables(caseData);
 
   const observableStatsData = useMemo(() => ({ total: observables.length }), [observables.length]);
-  const { data: similarCasesData, isFetching: isLoadingSimilarCases } = useGetSimilarCases({
+  const { data: similarCasesData } = useGetSimilarCases({
     caseData,
     pageSize: 0,
     pageIndex: 0,
@@ -236,7 +234,6 @@ export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab
                   activeTab={activeTab}
                   euiTheme={euiTheme}
                   count={similarCasesData?.total}
-                  isLoading={isLoadingSimilarCases}
                 />
               ),
             },
@@ -255,7 +252,6 @@ export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab
       isLoadingObservables,
       observableStatsData.total,
       similarCasesData?.total,
-      isLoadingSimilarCases,
     ]
   );
 
