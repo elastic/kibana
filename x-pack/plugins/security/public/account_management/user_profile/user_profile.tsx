@@ -25,6 +25,7 @@ import {
   EuiPopover,
   EuiSpacer,
   EuiText,
+  EuiTitle,
   EuiToolTip,
   useEuiTheme,
   useGeneratedHtmlId,
@@ -70,6 +71,15 @@ const formRowCSS = css`
   .euiFormRow__label {
     flex: 1;
   }
+`;
+
+const pageHeaderCSS = css`
+  max-width: 1000px;
+  margin-inline: auto;
+`;
+
+const pageTitleCSS = css`
+  min-width: 120px;
 `;
 
 export interface UserProfileProps {
@@ -613,8 +623,8 @@ const UserRoles: FunctionComponent<UserRoleProps> = ({ user }) => {
   const onButtonClick = () => setIsPopoverOpen((isOpen) => !isOpen);
   const closePopover = () => setIsPopoverOpen(false);
 
-  const [firstRole] = user.roles;
-  const remainingRoles = user.roles.slice(1);
+  const firstThreeRoles = user.roles.slice(0, 3);
+  const remainingRoles = user.roles.slice(3);
 
   const renderMoreRoles = () => {
     const button = (
@@ -653,16 +663,18 @@ const UserRoles: FunctionComponent<UserRoleProps> = ({ user }) => {
 
   return (
     <>
-      <div
-        style={{
-          maxWidth: euiTheme.breakpoint.m / 6,
-          display: 'inline-block',
-        }}
-      >
-        <EuiBadge key={firstRole} color="hollow" data-test-subj={`role${firstRole}`}>
-          {firstRole}
-        </EuiBadge>
-      </div>
+      {firstThreeRoles.map((role) => (
+        <div
+          style={{
+            maxWidth: euiTheme.breakpoint.m / 6,
+            display: 'inline-block',
+          }}
+        >
+          <EuiBadge key={role} color="hollow" data-test-subj={`role${role}`}>
+            {role}
+          </EuiBadge>
+        </div>
+      ))}
       {remainingRoles.length ? renderMoreRoles() : null}
     </>
   );
@@ -779,47 +791,57 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
             ) : null}
 
             <KibanaPageTemplate className="eui-fullHeight" restrictWidth={1000}>
-              <KibanaPageTemplate.Header
-                pageTitle={
-                  <FormattedMessage
-                    id="xpack.security.accountManagement.userProfile.title"
-                    defaultMessage="Profile"
-                  />
-                }
-                id={titleId}
-                rightSideItems={rightSideItems.reverse().map((item) => (
-                  <EuiDescriptionList
-                    textStyle="reverse"
-                    listItems={[
-                      {
-                        title: (
-                          <EuiText color={euiTheme.colors.darkestShade} size="s">
-                            <EuiFlexGroup responsive={false} alignItems="center" gutterSize="none">
-                              <EuiFlexItem grow={false}>{item.title}</EuiFlexItem>
-                              <EuiFlexItem grow={false} style={{ marginLeft: '0.33em' }}>
-                                <EuiIconTip type="questionInCircle" content={item.helpText} />
-                              </EuiFlexItem>
-                            </EuiFlexGroup>
-                          </EuiText>
-                        ),
-                        description: (
-                          <span data-test-subj={item.testSubj}>
-                            {item.description || (
-                              <EuiText color={euiTheme.colors.disabledText} size="s">
-                                <FormattedMessage
-                                  id="xpack.security.accountManagement.userProfile.noneProvided"
-                                  defaultMessage="None provided"
-                                />
-                              </EuiText>
-                            )}
-                          </span>
-                        ),
-                      },
-                    ]}
-                    compressed
-                  />
-                ))}
-              />
+              <KibanaPageTemplate.Header id={titleId} css={pageHeaderCSS}>
+                <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+                  <EuiFlexItem grow={false}>
+                    <EuiTitle size="l" css={pageTitleCSS}>
+                      <h1>
+                        <FormattedMessage
+                          id="xpack.security.accountManagement.userProfile.title"
+                          defaultMessage="Profile"
+                        />
+                      </h1>
+                    </EuiTitle>
+                  </EuiFlexItem>
+
+                  {rightSideItems.map((item) => (
+                    <EuiDescriptionList
+                      textStyle="reverse"
+                      listItems={[
+                        {
+                          title: (
+                            <EuiText color={euiTheme.colors.darkestShade} size="s">
+                              <EuiFlexGroup
+                                responsive={false}
+                                alignItems="center"
+                                gutterSize="none"
+                              >
+                                <EuiFlexItem grow={false}>{item.title}</EuiFlexItem>
+                                <EuiFlexItem grow={false} style={{ marginLeft: '0.33em' }}>
+                                  <EuiIconTip type="questionInCircle" content={item.helpText} />
+                                </EuiFlexItem>
+                              </EuiFlexGroup>
+                            </EuiText>
+                          ),
+                          description: (
+                            <span data-test-subj={item.testSubj}>
+                              {item.description || (
+                                <EuiText color={euiTheme.colors.disabledText} size="s">
+                                  <FormattedMessage
+                                    id="xpack.security.accountManagement.userProfile.noneProvided"
+                                    defaultMessage="None provided"
+                                  />
+                                </EuiText>
+                              )}
+                            </span>
+                          ),
+                        },
+                      ]}
+                      compressed
+                    />
+                  ))}
+                </EuiFlexGroup>
+              </KibanaPageTemplate.Header>
               <KibanaPageTemplate.Section>
                 <Form aria-labelledby={titleId}>
                   <UserDetailsEditor user={user} />
