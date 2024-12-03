@@ -27,32 +27,32 @@ export enum SelectedVersions {
 export const CURRENT_OPTIONS: EuiSelectOption[] = [
   {
     value: SelectedVersions.CurrentFinal,
-    text: i18n.CURRENT_VS_FINAL,
+    text: i18n.VERSION1_VS_VERSION2(i18n.CURRENT_VERSION, i18n.FINAL_VERSION),
   },
   {
     value: SelectedVersions.CurrentTarget,
-    text: i18n.CURRENT_VS_TARGET,
+    text: i18n.VERSION1_VS_VERSION2(i18n.CURRENT_VERSION, i18n.TARGET_VERSION),
   },
 ];
 
 export const TARGET_OPTIONS: EuiSelectOption[] = [
   {
     value: SelectedVersions.TargetFinal,
-    text: i18n.TARGET_VS_FINAL,
+    text: i18n.VERSION1_VS_VERSION2(i18n.TARGET_VERSION, i18n.FINAL_VERSION),
   },
 ];
 
 export const BASE_OPTIONS: EuiSelectOption[] = [
   {
     value: SelectedVersions.BaseFinal,
-    text: i18n.BASE_VS_FINAL,
+    text: i18n.VERSION1_VS_VERSION2(i18n.BASE_VERSION, i18n.FINAL_VERSION),
   },
   {
     value: SelectedVersions.BaseTarget,
-    text: i18n.BASE_VS_TARGET,
+    text: i18n.VERSION1_VS_VERSION2(i18n.BASE_VERSION, i18n.TARGET_VERSION),
   },
   {
     value: SelectedVersions.BaseCurrent,
-    text: i18n.BASE_VS_CURRENT,
+    text: i18n.VERSION1_VS_VERSION2(i18n.BASE_VERSION, i18n.CURRENT_VERSION),
   },
 ];
