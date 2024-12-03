@@ -59,6 +59,11 @@ export const OWNER_INFO: Record<Owner, RouteInfo> = {
     label: 'Management',
     iconType: 'managementApp',
     appRoute: '/app/management/insightsAndAlerting',
-    validRuleConsumers: [AlertConsumers.ML, AlertConsumers.STACK_ALERTS, AlertConsumers.EXAMPLE],
+    validRuleConsumers: [
+      AlertConsumers.ML,
+      AlertConsumers.STACK_ALERTS,
+      AlertConsumers.EXAMPLE,
+      AlertConsumers.DISCOVER,
+    ],
   },
 } as const;
