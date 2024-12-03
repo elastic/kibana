@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import { expect, tags } from '@kbn/scout';
+import { expect } from '@kbn/scout';
 import { test, testData, assertionMessages } from '../fixtures';
 
 test.describe(
   'Discover app - value suggestions non-time based',
-  { tag: tags.DEPLOYMENT_AGNOSTIC },
+  { tag: ['@ess', '@svlSearch', '@svlOblt'] },
+  // TODO: Update to use an ES archive with an index accessible to 'viewer'
+  // for running this test against the Security serverless project.
   () => {
     test.beforeAll(async ({ esArchiver, kbnClient, uiSettings }) => {
       await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.NO_TIME_FIELD);

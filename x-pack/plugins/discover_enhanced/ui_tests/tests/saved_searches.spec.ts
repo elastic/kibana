@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expect, tags } from '@kbn/scout';
+import { expect } from '@kbn/scout';
 import { test, testData } from '../fixtures';
 import type { ExtendedScoutTestFixtures } from '../fixtures';
 
@@ -31,7 +31,9 @@ const assertDataViewIsSelected = async (page: ExtendedScoutTestFixtures['page'],
     'Incorrect data view is selected'
   ).toHaveText(name);
 
-test.describe('Discover app - saved searches', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
+test.describe('Discover app - saved searches', { tag: ['@ess', '@svlSearch', '@svlOblt'] }, () => {
+  // TODO: Update to use an ES archive with an index accessible to 'viewer'
+  // for running this test against the Security serverless project.
   const START_TIME = '2019-04-27T23:56:51.374Z';
   const END_TIME = '2019-08-23T16:18:51.821Z';
   const PANEL_NAME = 'Ecommerce Data';

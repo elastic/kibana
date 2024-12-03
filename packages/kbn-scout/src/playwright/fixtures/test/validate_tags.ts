@@ -8,7 +8,7 @@
  */
 
 import { test as base } from '@playwright/test';
-import { tags } from '../..';
+import { tags } from '../../tags';
 
 const supportedTags = tags.DEPLOYMENT_AGNOSTIC;
 
