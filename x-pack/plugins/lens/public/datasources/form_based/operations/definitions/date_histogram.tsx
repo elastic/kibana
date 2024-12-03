@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
-
+import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -164,11 +164,10 @@ export const dateHistogramOperation: OperationDefinition<
     const field = getSafeName(column.sourceField, indexPattern);
     let interval = column.params?.interval || autoInterval;
     if (dateRange && uiSettings) {
-      if (interval === 'auto') {
-        const calcAutoInterval = getCalculateAutoTimeExpression((key) => uiSettings.get(key));
-        interval =
-          calcAutoInterval({ from: dateRange.fromDate, to: dateRange.toDate }, true) || '1 hour';
-      }
+      const calcAutoInterval = getCalculateAutoTimeExpression((key) => uiSettings.get(key));
+      interval =
+        calcAutoInterval({ from: dateRange.fromDate, to: dateRange.toDate }, interval, false)
+          .description || 'hour';
       return `${field} per ${interval}`;
     }
     return field;
@@ -204,6 +203,24 @@ export const dateHistogramOperation: OperationDefinition<
       label: field.displayName,
       sourceField: field.name,
     };
+  },
+  getSerializedFormat: (column, targetColumn, indexPattern, uiSettings, dateRange) => {
+    const { interval } = getTimeZoneAndInterval(column, indexPattern);
+    const calcAutoInterval = getCalculateAutoTimeExpression((key) => uiSettings.get(key));
+    const usedInterval =
+      calcAutoInterval(
+        { from: dateRange.fromDate, to: dateRange.toDate },
+        interval,
+        false
+      ).asMilliseconds() || 3600000;
+    const rules = uiSettings?.get('dateFormat:scaled');
+    for (let i = rules.length - 1; i >= 0; i--) {
+      const rule = rules[i];
+      if (!rule[0] || (usedInterval && usedInterval >= moment.duration(rule[0]))) {
+        return { id: 'date', params: { pattern: rule[1] } };
+      }
+    }
+    return { id: 'date', params: { pattern: uiSettings?.get('dateFormat') } };
   },
   toESQL: (column, columnId, indexPattern, layer, uiSettings, dateRange) => {
     const { timeZone, interval } = getTimeZoneAndInterval(column, indexPattern);

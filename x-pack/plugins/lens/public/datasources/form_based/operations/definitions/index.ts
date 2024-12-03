@@ -275,7 +275,9 @@ interface BaseOperationDefinitionProps<
   getSerializedFormat?: (
     column: C,
     targetColumn: C,
-    indexPattern?: IndexPattern
+    indexPattern?: IndexPattern,
+    uiSettings?: IUiSettingsClient,
+    dateRange?: DateRange
   ) => Record<string, unknown>;
   /**
    * This function is called if another column in the same layer changed or got added/removed.

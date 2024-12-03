@@ -15,7 +15,11 @@ import { toAbsoluteDates } from './date_interval_utils';
 import { autoInterval } from '../buckets/_interval_options';
 
 export function getCalculateAutoTimeExpression(getConfig: (key: string) => any) {
-  return function calculateAutoTimeExpression(range: TimeRange, description: boolean = false) {
+  return function calculateAutoTimeExpression(
+    range: TimeRange,
+    interval: string = autoInterval,
+    expression: boolean = true
+  ) {
     const dates = toAbsoluteDates(range);
     if (!dates) {
       return;
@@ -28,15 +32,15 @@ export function getCalculateAutoTimeExpression(getConfig: (key: string) => any) 
       'dateFormat:scaled': getConfig('dateFormat:scaled'),
     });
 
-    buckets.setInterval(autoInterval);
+    buckets.setInterval(interval);
     buckets.setBounds({
       min: moment(dates.from),
       max: moment(dates.to),
     });
 
-    if (description) {
-      return buckets.getInterval().description;
+    if (expression) {
+      return buckets.getInterval().expression;
     }
-    return buckets.getInterval().expression;
+    return buckets.getInterval();
   };
 }

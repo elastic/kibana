@@ -38,7 +38,6 @@ export function getESQLForLayer(
   const timeZone = getUserTimeZone((key) => uiSettings.get(key), true);
   if (timeZone !== 'UTC') return;
   if (Object.values(layer.columns).find((col) => col.operationType === 'formula')) return;
-
   let esql = `FROM ${indexPattern.title} | `;
   if (indexPattern.timeFieldName) {
     esql += `WHERE ${indexPattern.timeFieldName} >= ?_tstart AND ${indexPattern.timeFieldName} <= ?_tend | `;
@@ -71,7 +70,13 @@ export function getESQLForLayer(
         : `bucket_${index}_${aggId}`;
 
       const format =
-        operationDefinitionMap[col.operationType].getSerializedFormat?.(col, col, indexPattern) ??
+        operationDefinitionMap[col.operationType].getSerializedFormat?.(
+          col,
+          col,
+          indexPattern,
+          uiSettings,
+          dateRange
+        ) ??
         ('sourceField' in col ? indexPattern.getFormatterForField(col.sourceField) : undefined);
 
       esAggsIdMap[esAggsId] = [
@@ -157,7 +162,13 @@ export function getESQLForLayer(
       if (!def.toESQL) return undefined;
 
       const format =
-        operationDefinitionMap[col.operationType].getSerializedFormat?.(col, col, indexPattern) ??
+        operationDefinitionMap[col.operationType].getSerializedFormat?.(
+          col,
+          col,
+          indexPattern,
+          uiSettings,
+          dateRange
+        ) ??
         ('sourceField' in col ? indexPattern.getFormatterForField(col.sourceField) : undefined);
 
       esAggsIdMap[esAggsId] = [
