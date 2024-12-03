@@ -15,6 +15,7 @@ type AllFields = Record<string, string>;
 interface EventBusExampleState {
   chartWidth: number;
   esql: string;
+  aiopsEnabled: boolean;
   aiopsFieldCandidates: string[];
   allFields: AllFields;
   selectedFields: string[];
@@ -30,6 +31,7 @@ function getDefaultState(): EventBusExampleState {
   return {
     chartWidth: 0,
     esql: 'FROM kibana_sample_data_logs',
+    aiopsEnabled: false,
     aiopsFieldCandidates: [],
     allFields: {},
     selectedFields: [],
@@ -46,6 +48,9 @@ export const eventBusExampleSlice = createSlice({
     },
     setESQL: (state: EventBusExampleState, action: PayloadAction<string>) => {
       state.esql = action.payload;
+    },
+    setAiopsEnabled: (state: EventBusExampleState, action: PayloadAction<boolean>) => {
+      state.aiopsEnabled = action.payload;
     },
     setAiopsFieldCandidates: (state: EventBusExampleState, action: PayloadAction<string[]>) => {
       state.aiopsFieldCandidates = action.payload;
