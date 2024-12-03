@@ -7,7 +7,6 @@
 
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import type { PrebuiltRuleAsset } from '../../../detection_engine/prebuilt_rules';
 import { createPrebuiltRuleAssetsClient } from '../../../detection_engine/prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
 import { createPrebuiltRuleObjectsClient } from '../../../detection_engine/prebuilt_rules/logic/rule_objects/prebuilt_rule_objects_client';
 import { fetchRuleVersionsTriad } from '../../../detection_engine/prebuilt_rules/logic/rule_versions/fetch_rule_versions_triad';
@@ -18,17 +17,18 @@ import { RuleMigrationsDataBaseClient } from './rule_migrations_data_base_client
 const MIN_SCORE = 40 as const;
 /* The number of integrations the RAG will return, sorted by score */
 const RETURNED_RULES = 5 as const;
-
-export interface PrebuiltRuleMapped {
-  rule: PrebuiltRuleAsset;
-  installedRuleId?: string;
-}
-
-export type PrebuiltRulesMapByName = Map<string, PrebuiltRuleMapped>;
+const BULK_MAX_SIZE = 500 as const;
 
 interface RetrievePrebuiltRulesParams {
   soClient: SavedObjectsClientContract;
   rulesClient: RulesClient;
+}
+
+interface FilteredRule {
+  rule_id: string;
+  name: string;
+  description: string;
+  elser_embedding: string;
 }
 
 /* BULK_MAX_SIZE defines the number to break down the bulk operations by.
@@ -44,37 +44,48 @@ export class RuleMigrationsDataPrebuiltRulesClient extends RuleMigrationsDataBas
       ruleAssetsClient,
       ruleObjectsClient,
     });
-    const prebuiltRulesByName: PrebuiltRulesMapByName = new Map();
+
+    const filteredRules: FilteredRule[] = [];
     rules.forEach((ruleVersions) => {
-      const rule = ruleVersions.target || ruleVersions.current;
-      if (rule) {
-        prebuiltRulesByName.set(rule.name, {
-          rule,
-          installedRuleId: ruleVersions.current?.id,
+      const currentRule = ruleVersions.target || ruleVersions.current;
+      if (currentRule) {
+        const { rule_id, name, description } = currentRule;
+        filteredRules.push({
+          rule_id,
+          name,
+          description,
+          elser_embedding: `${name} - ${description}`,
         });
       }
     });
 
     const index = await this.getIndexName();
-    await this.esClient
-      .bulk({
-        refresh: 'wait_for',
-        operations: Array.from(prebuiltRulesByName.values()).flatMap((prebuiltRule) => [
-          { update: { _index: index, _id: prebuiltRule.rule.rule_id } },
-          {
-            doc: {
-              name: prebuiltRule.rule.name,
-              description: prebuiltRule.rule.description,
-              '@timestamp': new Date().toISOString(),
+    const createdAt = new Date().toISOString();
+    let prebuiltRuleSlice: FilteredRule[];
+    let currentLength = 0;
+    const totalLength = filteredRules.length;
+    while ((prebuiltRuleSlice = filteredRules.splice(0, BULK_MAX_SIZE)).length) {
+      currentLength += prebuiltRuleSlice.length;
+      this.logger.info(`Indexing ${currentLength}/${totalLength} prebuilt rules for ELSER`);
+      await this.esClient
+        .bulk({
+          refresh: 'wait_for',
+          operations: prebuiltRuleSlice.flatMap((prebuiltRule) => [
+            { update: { _index: index, _id: prebuiltRule.rule_id } },
+            {
+              doc: {
+                ...prebuiltRule,
+                '@timestamp': createdAt,
+              },
+              doc_as_upsert: true,
             },
-            doc_as_upsert: true,
-          },
-        ]),
-      })
-      .catch((error) => {
-        this.logger.error(`Error indexing integration details for ELSER: ${error.message}`);
-        throw error;
-      });
+          ]),
+        })
+        .catch((error) => {
+          this.logger.error(`Error indexing prebuilt rules for ELSER: ${error.message}`);
+          throw error;
+        });
+    }
   }
 
   /** Based on a LLM generated semantic string, returns the 5 best results with a score above 40 */

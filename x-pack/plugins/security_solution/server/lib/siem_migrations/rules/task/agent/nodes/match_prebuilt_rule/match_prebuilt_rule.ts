@@ -31,13 +31,18 @@ export const getMatchPrebuiltRuleNode =
     const outputParser = new JsonOutputParser();
     const matchPrebuiltRule = MATCH_PREBUILT_RULE_PROMPT.pipe(model).pipe(outputParser);
 
-    const elasticSecurityRules = [...prebuiltRules.keys()].join('\n');
+    const elasticSecurityRules = prebuiltRules
+      .map((rule) => `${rule.name} ${rule.description}`)
+      .join('\n');
+
     const response = (await matchPrebuiltRule.invoke({
       elasticSecurityRules,
       ruleTitle: state.original_rule.title,
     })) as GetMatchedRuleResponse;
     if (response.match) {
       logger.info(`Matched prebuilt rule: ${response.match}`);
+      const name = response.match;
+      return { elastic_rule: { title: name, prebuilt_rule_id: name } };
     }
     return {};
   };
