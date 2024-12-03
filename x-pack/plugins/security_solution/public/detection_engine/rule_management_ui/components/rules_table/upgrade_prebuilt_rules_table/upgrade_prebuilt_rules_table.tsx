@@ -38,9 +38,6 @@ const NO_ITEMS_MESSAGE = (
  * Table Component for displaying rules that have available updates
  */
 export const UpgradePrebuiltRulesTable = React.memo(() => {
-  const upgradeRulesTableContext = useUpgradePrebuiltRulesTableContext();
-  const [selected, setSelected] = useState<RuleUpgradeState[]>([]);
-
   const {
     state: {
       rulesUpgradeState,
@@ -49,7 +46,9 @@ export const UpgradePrebuiltRulesTable = React.memo(() => {
       isRefetching,
       isUpgradingSecurityPackages,
     },
-  } = upgradeRulesTableContext;
+  } = useUpgradePrebuiltRulesTableContext();
+  const [selected, setSelected] = useState<RuleUpgradeState[]>([]);
+
   const ruleUpgradeStatesArray = useMemo(
     () => Object.values(rulesUpgradeState),
     [rulesUpgradeState]
