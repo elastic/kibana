@@ -54,6 +54,12 @@ interface GeneratedConnectorNameResult {
   indexName: string;
 }
 
+type ExpandedComboBoxOption = EuiComboBoxOptionOption<OptionData> & {
+  _append: React.ReactNode[];
+  _prepend: React.ReactNode;
+  serviceType: string;
+};
+
 export const EditServiceType: React.FC<EditServiceTypeProps> = ({ connector, isDisabled }) => {
   const { http } = useKibanaServices();
   const connectorTypes = useConnectorTypes();
@@ -169,12 +175,8 @@ export const EditServiceType: React.FC<EditServiceTypeProps> = ({ connector, isD
     searchValue: string,
     contentClassName: string
   ) => {
-    const { _append, key, label, _prepend, serviceType } =
-      option as EuiComboBoxOptionOption<OptionData> & {
-        _append: React.ReactNode[];
-        _prepend: React.ReactNode;
-        serviceType: string;
-      };
+    const expandedOption = option as ExpandedComboBoxOption;
+    const { _append, key, label, _prepend, serviceType } = expandedOption;
     return (
       <EuiFlexGroup
         className={contentClassName}
