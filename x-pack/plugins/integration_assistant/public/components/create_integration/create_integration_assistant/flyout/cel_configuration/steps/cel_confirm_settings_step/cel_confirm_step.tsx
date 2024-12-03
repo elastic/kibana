@@ -122,7 +122,7 @@ export const CelConfirmStep = React.memo<CelConfirmStepProps>(
     return (
       <EuiFlexGroup direction="column" gutterSize="l" data-test-subj="celInputStep">
         <EuiPanel hasShadow={false} hasBorder={false}>
-          <EuiFlexItem fullWidth>
+          <EuiFlexItem>
             <EuiTitle size="s">
               <h2>{i18n.CONFIRM_ENDPOINT}</h2>
             </EuiTitle>
@@ -140,7 +140,7 @@ export const CelConfirmStep = React.memo<CelConfirmStepProps>(
             />
           </EuiFlexItem>
           <EuiSpacer size="xl" />
-          <EuiFlexItem fullWidth>
+          <EuiFlexItem>
             <EuiTitle size="s">
               <h2>{i18n.CONFIRM_AUTH}</h2>
             </EuiTitle>

@@ -76,21 +76,21 @@ export const CreateIntegrationAssistant = React.memo(() => {
         <KibanaPageTemplate.Section grow paddingSize="l">
           {state.step === 1 && <ConnectorStep connector={state.connector} />}
           {state.step === 2 && <IntegrationStep integrationSettings={state.integrationSettings} />}
-          {state.step === 3 &&
-            (state.showCelCreateFlyout ? (
-              <CreateCelConfigFlyout
-                integrationSettings={state.integrationSettings}
-                isFlyoutGenerating={state.isFlyoutGenerating}
-                connector={state.connector}
-              />
-            ) : (
-              <DataStreamStep
-                integrationSettings={state.integrationSettings}
-                celInputResult={state.celInputResult}
-                connector={state.connector}
-                isGenerating={state.isGenerating}
-              />
-            ))}
+          {state.step === 3 && (
+            <DataStreamStep
+              integrationSettings={state.integrationSettings}
+              celInputResult={state.celInputResult}
+              connector={state.connector}
+              isGenerating={state.isGenerating}
+            />
+          )}
+          {state.step === 3 && state.showCelCreateFlyout && (
+            <CreateCelConfigFlyout
+              integrationSettings={state.integrationSettings}
+              isFlyoutGenerating={state.isFlyoutGenerating}
+              connector={state.connector}
+            />
+          )}
           {state.step === 4 && (
             <ReviewStep
               integrationSettings={state.integrationSettings}

@@ -60,7 +60,12 @@ export const SAMPLE_CEL_PROGRAMS = [
           "error": {
             "code": string(resp.StatusCode),
             "id": string(resp.Status),
-            "message": string(resp.Body)
+            "message": "GET:"+(
+              size(resp.Body) != 0 ?
+                string(resp.Body)
+              :
+                string(resp.Status) + ' (' + string(resp.StatusCode) + ')'
+            ),
           },
         },
         "want_more": false,
@@ -143,7 +148,12 @@ export const SAMPLE_CEL_PROGRAMS = [
           "error": {
             "code": string(resp.StatusCode),
             "id": string(resp.Status),
-            "message": string(resp.Body)
+            "message": "GET:"+(
+              size(resp.Body) != 0 ?
+                string(resp.Body)
+              :
+                string(resp.Status) + ' (' + string(resp.StatusCode) + ')'
+            ),
           },
         },
         "want_more": false,
@@ -218,11 +228,12 @@ export const SAMPLE_CEL_PROGRAMS = [
           "error": {
             "code": string(resp.StatusCode),
             "id": string(resp.Status),
-            "message": size(resp.Body) != 0 ? 
-              string(resp.Body)
-            :
-              string(resp.Status) + ' (' + string(resp.StatusCode) + ')',
-          }
+            "message": "GET:"+(
+              size(resp.Body) != 0 ?
+                string(resp.Body)
+              :
+                string(resp.Status) + ' (' + string(resp.StatusCode) + ')'
+            ),
         }],
         "want_more": false,
       }

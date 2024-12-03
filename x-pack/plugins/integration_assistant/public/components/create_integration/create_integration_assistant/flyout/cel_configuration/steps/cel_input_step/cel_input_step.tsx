@@ -64,7 +64,7 @@ export const CelInputStep = React.memo<CelInputStepProps>(
 
     return (
       <EuiFlexGroup direction="column" gutterSize="l" data-test-subj="celInputStep">
-        <EuiFlexItem fullWidth>
+        <EuiFlexItem>
           <EuiPanel hasShadow={false} hasBorder={false}>
             <EuiTitle size="s">
               <h2>{i18n.API_DEFINITION_TITLE}</h2>

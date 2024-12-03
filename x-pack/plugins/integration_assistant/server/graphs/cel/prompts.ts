@@ -55,6 +55,7 @@ Utilize the following paging summary details and sample URL for implementing pag
 </context>
 
 Each of the following criteria must be addressed in final configuration output:
+- The entire program must be wrapped with \`state.with()\`.
 - The REST verb must be specified.
 - The request URL must include the 'state.url'.
 - Any reference to 'state.url' must append \`.trim_right("/")\`.
@@ -65,6 +66,7 @@ Each of the following criteria must be addressed in final configuration output:
 - Always use the casing specified by the API spec when building the API path and query parameters.
 - There must not be configuration for authentication or authorization.
 - There must be configuration of any required headers.
+- Usage of paging tokens from the state as query parameters must be optional like \`"token": state.?cursor.token.optMap(v, [v]),\`.
 - There must be configuration for parsing the events returned from the API mapped to the 'message' field and encoded in JSON.
 - There must be configuration in the API response handling for 'want_more' based on the paging token.
 - There must be configuration for error handling. This includes setting the 'want_more' flag to false.

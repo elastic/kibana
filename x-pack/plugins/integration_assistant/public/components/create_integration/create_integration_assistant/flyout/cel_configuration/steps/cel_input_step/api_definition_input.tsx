@@ -129,7 +129,7 @@ export const ApiDefinitionInput = React.memo<ApiDefinitionInputProps>(
     );
 
     return (
-      <EuiFlexItem fullWidth>
+      <EuiFlexItem>
         <EuiText size="s">
           <p>{i18n.OPEN_API_UPLOAD_INSTRUCTIONS}</p>
         </EuiText>
