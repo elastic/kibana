@@ -54,7 +54,7 @@ export const findRuleExceptionReferencesRoute = (router: SecuritySolutionPluginR
           const { ids, namespace_types: namespaceTypes, list_ids: listIds } = request.query;
 
           const ctx = await context.resolve(['core', 'securitySolution', 'alerting']);
-          const rulesClient = ctx.alerting.getRulesClient();
+          const rulesClient = await ctx.alerting.getRulesClient();
           const listsClient = ctx.securitySolution.getExceptionListClient();
 
           if (
