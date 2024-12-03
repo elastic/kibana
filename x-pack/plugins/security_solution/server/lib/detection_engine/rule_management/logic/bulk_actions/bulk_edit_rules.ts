@@ -92,14 +92,20 @@ export const bulkEditRules = async ({
         params: modifiedParams,
       };
       const ruleResponse = convertAlertingRuleToRuleResponse(updatedRule);
+      let isCustomized = false;
+      if (ruleResponse.immutable === true) {
+        isCustomized = calculateIsCustomized({
+          baseRule: baseVersionsMap.get(ruleResponse.rule_id),
+          nextRule: ruleResponse,
+          isRuleCustomizationEnabled: experimentalFeatures.prebuiltRulesCustomizationEnabled,
+        });
+      }
+
       const ruleSource =
         ruleResponse.immutable === true
           ? {
               type: 'external' as const,
-              isCustomized: calculateIsCustomized(
-                baseVersionsMap.get(ruleResponse.rule_id),
-                ruleResponse
-              ),
+              isCustomized,
             }
           : {
               type: 'internal' as const,
