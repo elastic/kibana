@@ -16,7 +16,7 @@ import {
 
 import React, { useMemo, useState, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
+import { CaseAttachmentsWithoutOwner, CasesPublicStart } from '@kbn/cases-plugin/public';
 import { AttachmentType } from '@kbn/cases-plugin/common';
 import { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { useRouteMatch } from 'react-router-dom';
@@ -27,7 +27,6 @@ import type { EventNonEcsData } from '../../../common/typings';
 import type { GetObservabilityAlertsTableProp } from '../alerts_table/types';
 import { RULE_DETAILS_PAGE_ID } from '../../pages/rule_details/constants';
 import { paths, SLO_DETAIL_PATH } from '../../../common/locators/paths';
-import { useKibana } from '../../utils/kibana_react';
 import { parseAlert } from '../../pages/alerts/helpers/parse_alert';
 import { observabilityFeatureId } from '../..';
 import { ALERT_DETAILS_PAGE_ID } from '../../pages/alert_details/alert_details';
@@ -38,20 +37,19 @@ export const AlertActions: GetObservabilityAlertsTableProp<'renderActionsCell'> 
   observabilityRuleTypeRegistry,
   ...customActionsProps
 }) => {
+  const {
+    http: {
+      basePath: { prepend },
+    },
+  } = customActionsProps.services;
+  const {
+    helpers: { getRuleIdFromEvent, canUseCases },
+    hooks: { useCasesAddToNewCaseFlyout, useCasesAddToExistingCaseModal },
+  } = customActionsProps.services.cases! as unknown as CasesPublicStart; // Cases is guaranteed to be defined in Observability
   const { alert, refresh, id } = customActionsProps;
   const isSLODetailsPage = useRouteMatch(SLO_DETAIL_PATH);
 
   const isInApp = Boolean(id === SLO_ALERTS_TABLE_ID && isSLODetailsPage);
-  const {
-    cases: {
-      helpers: { getRuleIdFromEvent, canUseCases },
-      hooks: { useCasesAddToNewCaseFlyout, useCasesAddToExistingCaseModal },
-    },
-    http: {
-      basePath: { prepend },
-    },
-  } = useKibana().services;
-
   const data = useMemo(
     () =>
       Object.entries(alert ?? {}).reduce<EventNonEcsData[]>(
