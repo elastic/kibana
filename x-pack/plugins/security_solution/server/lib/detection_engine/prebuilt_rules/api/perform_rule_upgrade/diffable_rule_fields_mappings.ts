@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { get, has } from 'lodash';
+import moment from 'moment';
 import type {
   RuleSchedule,
   DataSourceIndexPatterns,
@@ -15,6 +16,7 @@ import type {
 } from '../../../../../../common/api/detection_engine';
 import { type AllFieldsDiff } from '../../../../../../common/api/detection_engine';
 import type { PrebuiltRuleAsset } from '../../model/rule_assets/prebuilt_rule_asset';
+import { parseInterval } from '../../../rule_types/utils/utils';
 
 /**
  * Retrieves and transforms the value for a specific field from a DiffableRule group.
@@ -201,7 +203,10 @@ export const transformDiffableFieldValues = (
   diffableFieldValue: RuleSchedule | InlineKqlQuery | unknown
 ): TransformValuesReturnType => {
   if (fieldName === 'from' && isRuleSchedule(diffableFieldValue)) {
-    return { type: 'TRANSFORMED_FIELD', value: `now-${diffableFieldValue.lookback}` };
+    const interval = parseInterval(diffableFieldValue.interval) ?? moment.duration(0);
+    const parsedFrom = parseInterval(diffableFieldValue.lookback) ?? moment.duration(0);
+    const from = parsedFrom.asSeconds() + interval.asSeconds();
+    return { type: 'TRANSFORMED_FIELD', value: `now-${from}s` };
   } else if (fieldName === 'to') {
     return { type: 'TRANSFORMED_FIELD', value: `now` };
   } else if (fieldName === 'saved_id' && isInlineQuery(diffableFieldValue)) {
