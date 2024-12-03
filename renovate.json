@@ -144,7 +144,9 @@
         "nyc",
         "oboe",
         "pixelmatch",
+        "@playwright/test",
         "playwright",
+        "playwright-chromium",
         "pngjs",
         "sharp",
         "superagent",
@@ -1327,9 +1329,7 @@
     {
       "groupName": "Security Engineering Productivity",
       "matchDepNames": [
-        "dotenv",
-        "playwright-chromium",
-        "@playwright/test"
+        "dotenv"
       ],
       "reviewers": [
         "team:security-engineering-productivity"
