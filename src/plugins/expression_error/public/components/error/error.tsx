@@ -40,14 +40,14 @@ export const Error: FC<Props> = ({ payload, onClose }) => {
 
   return (
     <EuiCallOut
-      style={{ maxWidth: 500 }}
+      css={{ maxWidth: 500 }}
       color="danger"
       iconType={CloseIconButton}
       title={strings.getTitle()}
     >
       <p>{message ? strings.getDescription() : ''}</p>
       {message && (
-        <p style={{ padding: '0 16px' }}>
+        <p css={{ padding: '0 16px' }}>
           <Markdown readOnly>{message}</Markdown>
         </p>
       )}
