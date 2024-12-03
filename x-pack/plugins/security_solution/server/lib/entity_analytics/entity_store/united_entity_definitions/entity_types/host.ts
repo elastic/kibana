@@ -6,25 +6,18 @@
  */
 
 import { collectValues as collect } from '../definition_utils';
-import type { EntityEngineInstallationDescriptor } from '../types';
+import type { EntityDescription } from '../types';
 import { getCommonUnitedFieldDefinitions } from './common';
 
 export const HOST_DEFINITION_VERSION = '1.0.0';
 export const HOST_IDENTITY_FIELD = 'host.name';
-export const hostEntityEngineDescription: EntityEngineInstallationDescriptor = {
+export const hostEntityEngineDescription: EntityDescription = {
   entityType: 'host',
   version: HOST_DEFINITION_VERSION,
-  indexPatterns: [],
   identityFields: [HOST_IDENTITY_FIELD],
   settings: {
-    syncDelay: '1m',
-    frequency: '1m',
-    lookbackPeriod: '1d',
     timestampField: '@timestamp',
   },
-  pipeline: [],
-  indexMappings: {},
-
   fields: [
     collect({ source: 'host.domain' }),
     collect({ source: 'host.hostname' }),

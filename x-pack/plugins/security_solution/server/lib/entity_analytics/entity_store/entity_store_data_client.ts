@@ -46,7 +46,7 @@ import type {
 import { EngineDescriptorClient } from './saved_object/engine_descriptor';
 import { ENGINE_STATUS, ENTITY_STORE_STATUS, MAX_SEARCH_RESPONSE_SIZE } from './constants';
 import { AssetCriticalityEcsMigrationClient } from '../asset_criticality/asset_criticality_migration_client';
-import { contextualizeEngineDescription } from './united_entity_definitions';
+import { createEngineDescription } from './united_entity_definitions';
 import {
   startEntityStoreFieldRetentionEnrichTask,
   removeEntityStoreFieldRetentionEnrichTask,
@@ -170,7 +170,7 @@ export class EntityStoreDataClient {
             ? [getEntityStoreFieldRetentionEnrichTaskStatus({ namespace, taskManager })]
             : []),
           getPlatformPipelineStatus({
-            definition,
+            engineId: definition.id,
             esClient: this.esClient,
           }),
           getFieldRetentionEnrichPolicyStatus({
@@ -235,18 +235,15 @@ export class EntityStoreDataClient {
     if (withComponents) {
       const enginesWithComponents = await Promise.all(
         engines.map(async (engine) => {
-          const entityDefinitionId = buildEntityDefinitionId(engine.type, namespace);
+          const id = buildEntityDefinitionId(engine.type, namespace);
           const {
             definitions: [definition],
           } = await this.entityClient.getEntityDefinitions({
-            id: entityDefinitionId,
+            id,
             includeState: withComponents,
           });
 
-          const definitionComponents = this.getComponentFromEntityDefinition(
-            entityDefinitionId,
-            definition
-          );
+          const definitionComponents = this.getComponentFromEntityDefinition(id, definition);
 
           const entityStoreComponents = await this.getEngineComponentsState(
             engine.type,
@@ -339,13 +336,13 @@ export class EntityStoreDataClient {
     const setupStartTime = moment().utc().toISOString();
     const { logger, namespace, appClient, dataViewsService } = this.options;
     try {
-      const indexPatterns = await buildIndexPatterns(namespace, appClient, dataViewsService);
+      const defaultIndexPatterns = await buildIndexPatterns(namespace, appClient, dataViewsService);
 
-      const description = contextualizeEngineDescription({
+      const description = createEngineDescription({
         entityType,
         namespace,
-        fieldHistoryLength,
-        indexPatterns,
+        requestParams: { indexPattern, fieldHistoryLength },
+        defaultIndexPatterns,
         config,
       });
 
@@ -582,12 +579,12 @@ export class EntityStoreDataClient {
     const { deleteData, deleteEngine } = options;
 
     const descriptor = await this.engineClient.maybeGet(entityType);
-    const indexPatterns = await buildIndexPatterns(namespace, appClient, dataViewsService);
+    const defaultIndexPatterns = await buildIndexPatterns(namespace, appClient, dataViewsService);
 
-    const description = contextualizeEngineDescription({
+    const description = createEngineDescription({
       entityType,
       namespace,
-      indexPatterns,
+      defaultIndexPatterns,
       config,
     });
 

@@ -12,6 +12,7 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { EntityDefinition } from '@kbn/entities-schema';
 import type { EntityType } from '../../../../../common/api/entity_analytics';
+import type { EntityStoreConfig } from '../types';
 
 export type MappingProperties = NonNullable<MappingTypeMapping['properties']>;
 export type EntityDefinitionMetadataElement = NonNullable<EntityDefinition['metadata']>[number];
@@ -34,10 +35,6 @@ export type EntityDescription = PickPartial<
   | 'pipeline',
   'indexPatterns' | 'indexMappings' | 'settings' | 'pipeline'
 >;
-
-const foo: EntityDescription = {
-  settings,
-};
 
 export interface EntityEngineInstallationDescriptor {
   id: string;
@@ -69,8 +66,8 @@ export interface EntityEngineInstallationDescriptor {
    * Any kibana.yml configuration will override these settings.
    */
   settings: {
-    syncDelay: string;
-    frequency: string;
+    syncDelay: EntityStoreConfig['syncDelay'];
+    frequency: EntityStoreConfig['frequency'];
     lookbackPeriod: string;
     timestampField: string;
   };

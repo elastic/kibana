@@ -7,7 +7,6 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
-import type { EntityDefinition } from '@kbn/entities-schema';
 import { EngineComponentResourceEnum } from '../../../../../common/api/entity_analytics';
 
 import {
@@ -20,9 +19,10 @@ import {
 import { getFieldRetentionEnrichPolicyName } from './enrich_policy';
 
 import type { EntityEngineInstallationDescriptor } from '../united_entity_definitions/types';
+import { fieldOperatorToIngestProcessor } from '../field_retention_definition';
 
-const getPlatformPipelineId = (description: EntityEngineInstallationDescriptor) => {
-  return `${description.id}-latest@platform`;
+const getPlatformPipelineId = (descriptionId: string) => {
+  return `${descriptionId}-latest@platform`;
 };
 
 // the field that the enrich processor writes to
@@ -161,7 +161,7 @@ export const createPlatformPipeline = async ({
   const allEntityFields = description.fields.map(({ destination }) => destination);
 
   const pipeline = {
-    id: getPlatformPipelineId(description),
+    id: getPlatformPipelineId(description.id),
     body: {
       _meta: {
         managed_by: 'entity_store',
@@ -192,7 +192,7 @@ export const deletePlatformPipeline = ({
   logger: Logger;
   esClient: ElasticsearchClient;
 }) => {
-  const pipelineId = getPlatformPipelineId(description);
+  const pipelineId = getPlatformPipelineId(description.id);
   logger.debug(`Attempting to delete pipeline: ${pipelineId}`);
   return esClient.ingest.deletePipeline(
     {
@@ -205,13 +205,13 @@ export const deletePlatformPipeline = ({
 };
 
 export const getPlatformPipelineStatus = async ({
-  definition,
+  engineId,
   esClient,
 }: {
-  definition: EntityDefinition;
+  engineId: string;
   esClient: ElasticsearchClient;
 }) => {
-  const pipelineId = getPlatformPipelineId(definition);
+  const pipelineId = getPlatformPipelineId(engineId);
   const pipeline = await esClient.ingest.getPipeline(
     {
       id: pipelineId,

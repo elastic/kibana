@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EntityEngineInstallationDescriptor } from '../types';
+import type { EntityDescription } from '../types';
 
 import { collectValues as collect } from '../definition_utils';
 export const UNIVERSAL_DEFINITION_VERSION = '1.0.0';
@@ -42,19 +42,14 @@ ctx = merged;
   },
 };
 
-export const universalEntityEngineDescription: EntityEngineInstallationDescriptor = {
+export const universalEntityEngineDescription: EntityDescription = {
   version: UNIVERSAL_DEFINITION_VERSION,
   entityType: 'universal',
   indexPatterns: ['logs-store'],
   identityFields: [UNIVERSAL_IDENTITY_FIELD],
   fields: [collect({ source: 'entities.keyword', destination: 'collected.metadata' })],
   settings: {
-    syncDelay: '1m',
-    frequency: '1m',
-    lookbackPeriod: '1d',
     timestampField: 'event.ingested',
   },
   pipeline: [entityMetadataExtractorProcessor],
-
-  indexMappings: {},
 };
