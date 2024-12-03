@@ -515,7 +515,7 @@ export default function ApiTest({ getService }: ObsFtrProviderContext) {
     }
 
     describe('security roles and access privileges', () => {
-      it('should deny access for users without the ai_assistant privilege', async () => {
+      it('is not available to unauthorized users', async () => {
         const UNAUTHORIZED_USERNAME = 'UNAUTHORIZED_USER';
         const UNAUTHORIZED_USER_PASSWORD = 'UNAUTHORIZED_USER_PASSWORD';
 
