@@ -4,13 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiTitle } from '@elastic/eui';
-import React from 'react';
 
-export function StreamsAppPageHeaderTitle({ title }: { title: React.ReactNode }) {
-  return (
-    <EuiTitle size="l">
-      <h1>{title}</h1>
-    </EuiTitle>
-  );
-}
+import { GenericFtrProviderContext } from '@kbn/test';
+
+import { services } from './services';
+
+export type FtrProviderContext = GenericFtrProviderContext<typeof services, {}>;
