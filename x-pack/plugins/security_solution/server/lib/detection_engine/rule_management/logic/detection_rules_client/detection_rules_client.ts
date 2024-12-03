@@ -35,6 +35,7 @@ interface DetectionRulesClientParams {
   rulesClient: RulesClient;
   savedObjectsClient: SavedObjectsClientContract;
   mlAuthz: MlAuthz;
+  isRuleCustomizationEnabled: boolean;
 }
 
 export const createDetectionRulesClient = ({
@@ -42,6 +43,7 @@ export const createDetectionRulesClient = ({
   rulesClient,
   mlAuthz,
   savedObjectsClient,
+  isRuleCustomizationEnabled,
 }: DetectionRulesClientParams): IDetectionRulesClient => {
   const prebuiltRuleAssetClient = createPrebuiltRuleAssetsClient(savedObjectsClient);
 
@@ -86,6 +88,7 @@ export const createDetectionRulesClient = ({
           prebuiltRuleAssetClient,
           mlAuthz,
           ruleUpdate,
+          isRuleCustomizationEnabled,
         });
       });
     },
@@ -98,6 +101,7 @@ export const createDetectionRulesClient = ({
           prebuiltRuleAssetClient,
           mlAuthz,
           rulePatch,
+          isRuleCustomizationEnabled,
         });
       });
     },
@@ -116,6 +120,7 @@ export const createDetectionRulesClient = ({
           ruleAsset,
           mlAuthz,
           prebuiltRuleAssetClient,
+          isRuleCustomizationEnabled,
         });
       });
     },
@@ -128,6 +133,7 @@ export const createDetectionRulesClient = ({
           importRulePayload: args,
           mlAuthz,
           prebuiltRuleAssetClient,
+          isRuleCustomizationEnabled,
         });
       });
     },

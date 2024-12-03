@@ -7,25 +7,21 @@
 
 import expect from 'expect';
 
+import { createRule, deleteAllRules } from '../../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 import {
+  createHistoricalPrebuiltRuleAssetSavedObjects,
+  createRuleAssetSavedObject,
+  deleteAllPrebuiltRuleAssets,
+  getCustomQueryRuleParams,
   getSimpleRule,
   getSimpleRuleOutput,
-  getCustomQueryRuleParams,
+  getSimpleRuleOutputWithoutRuleId,
+  installPrebuiltRules,
   removeServerGeneratedProperties,
   removeServerGeneratedPropertiesIncludingRuleId,
-  getSimpleRuleOutputWithoutRuleId,
   updateUsername,
-  createHistoricalPrebuiltRuleAssetSavedObjects,
-  installPrebuiltRules,
-  createRuleAssetSavedObject,
 } from '../../../utils';
-import {
-  createAlertsIndex,
-  deleteAllRules,
-  createRule,
-  deleteAllAlerts,
-} from '../../../../../../common/utils/security_solution';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
@@ -37,12 +33,8 @@ export default ({ getService }: FtrProviderContext) => {
   describe('@ess @serverless @serverlessQA patch_rules', () => {
     describe('patch rules', () => {
       beforeEach(async () => {
-        await createAlertsIndex(supertest, log);
-      });
-
-      afterEach(async () => {
-        await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
+        await deleteAllPrebuiltRuleAssets(es, log);
       });
 
       it('should patch a single rule property of name using a rule_id', async () => {
@@ -261,10 +253,6 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       describe('max signals', () => {
-        afterEach(async () => {
-          await deleteAllRules(supertest, log);
-        });
-
         it('does NOT patch a rule when max_signals is less than 1', async () => {
           await securitySolutionApi.createRule({
             body: getCustomQueryRuleParams({ rule_id: 'rule-1', max_signals: 100 }),
