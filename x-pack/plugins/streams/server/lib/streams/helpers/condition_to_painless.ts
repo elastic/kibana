@@ -78,11 +78,23 @@ function binaryToPainless(condition: BinaryFilterCondition) {
         Number(condition.value)
       )}) || ${safePainlessField(condition)} >= ${encodeValue(Number(condition.value))})`;
     case 'startsWith':
-      return `${safePainlessField(condition)}.startsWith(${encodeValue(condition.value)})`;
+      return `((${safePainlessField(condition)} instanceof Number && ${safePainlessField(
+        condition
+      )}.toString().startsWith(${encodeValue(String(condition.value))})) || ${safePainlessField(
+        condition
+      )}.startsWith(${encodeValue(String(condition.value))}))`;
     case 'endsWith':
-      return `${safePainlessField(condition)}.endsWith(${encodeValue(condition.value)})`;
+      return `((${safePainlessField(condition)} instanceof Number && ${safePainlessField(
+        condition
+      )}.toString().endsWith(${encodeValue(String(condition.value))})) || ${safePainlessField(
+        condition
+      )}.endsWith(${encodeValue(String(condition.value))}))`;
     case 'contains':
-      return `${safePainlessField(condition)}.contains(${encodeValue(condition.value)})`;
+      return `((${safePainlessField(condition)} instanceof Number && ${safePainlessField(
+        condition
+      )}.toString().contains(${encodeValue(String(condition.value))})) || ${safePainlessField(
+        condition
+      )}.contains(${encodeValue(String(condition.value))}))`;
     default:
       return `${safePainlessField(condition)} == ${encodeValue(condition.value)}`;
   }

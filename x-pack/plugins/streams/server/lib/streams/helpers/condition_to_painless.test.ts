@@ -38,15 +38,18 @@ const operatorConditionAndResults = [
   },
   {
     condition: { field: 'log.logger', operator: 'startsWith' as const, value: 'nginx' },
-    result: '(ctx.log?.logger !== null && ctx.log?.logger.startsWith("nginx"))',
+    result:
+      '(ctx.log?.logger !== null && ((ctx.log?.logger instanceof Number && ctx.log?.logger.toString().startsWith("nginx")) || ctx.log?.logger.startsWith("nginx")))',
   },
   {
     condition: { field: 'log.logger', operator: 'endsWith' as const, value: 'proxy' },
-    result: '(ctx.log?.logger !== null && ctx.log?.logger.endsWith("proxy"))',
+    result:
+      '(ctx.log?.logger !== null && ((ctx.log?.logger instanceof Number && ctx.log?.logger.toString().endsWith("proxy")) || ctx.log?.logger.endsWith("proxy")))',
   },
   {
     condition: { field: 'log.logger', operator: 'contains' as const, value: 'proxy' },
-    result: '(ctx.log?.logger !== null && ctx.log?.logger.contains("proxy"))',
+    result:
+      '(ctx.log?.logger !== null && ((ctx.log?.logger instanceof Number && ctx.log?.logger.toString().contains("proxy")) || ctx.log?.logger.contains("proxy")))',
   },
   {
     condition: { field: 'log.logger', operator: 'exists' as const },
@@ -67,7 +70,7 @@ describe('conditionToPainless', () => {
         });
       });
 
-      test('ensure string values work as numbers', () => {
+      test('ensure number comparasion works with string values', () => {
         const condition = {
           field: 'http.response.status_code',
           operator: 'gt',
@@ -75,6 +78,16 @@ describe('conditionToPainless', () => {
         };
         expect(conditionToStatement(condition)).toEqual(
           '(ctx.http?.response?.status_code !== null && ((ctx.http?.response?.status_code instanceof String && Float.parseFloat(ctx.http?.response?.status_code) > 500) || ctx.http?.response?.status_code > 500))'
+        );
+      });
+      test('ensure string comparasion works with number values', () => {
+        const condition = {
+          field: 'message',
+          operator: 'contains',
+          value: 500,
+        };
+        expect(conditionToStatement(condition)).toEqual(
+          '(ctx.message !== null && ((ctx.message instanceof Number && ctx.message.toString().contains("500")) || ctx.message.contains("500")))'
         );
       });
     });
