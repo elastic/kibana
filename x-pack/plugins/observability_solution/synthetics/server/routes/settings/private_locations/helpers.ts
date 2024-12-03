@@ -55,5 +55,6 @@ export const toSavedObjectContract = (location: PrivateLocation): PrivateLocatio
     isServiceManaged: false,
     geo: location.geo,
     namespace: location.namespace,
+    spaces: location.spaces,
   };
 };

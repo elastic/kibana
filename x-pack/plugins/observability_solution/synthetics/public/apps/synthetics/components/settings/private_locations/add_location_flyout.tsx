@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { FormProvider } from 'react-hook-form';
 import {
   EuiButtonEmpty,
@@ -19,25 +19,31 @@ import {
   EuiButton,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { SpacesContextProps } from '@kbn/spaces-plugin/public';
 import { NoPermissionsTooltip } from '../../common/components/permissions';
 import { useSyntheticsSettingsContext } from '../../../contexts';
 import { useFormWrapped } from '../../../../../hooks/use_form_wrapped';
 import { PrivateLocation } from '../../../../../../common/runtime_types';
 import { LocationForm } from './location_form';
 import { ManageEmptyState } from './manage_empty_state';
+import { ClientPluginsStart } from '../../../../../plugin';
 
 export type NewLocation = Omit<PrivateLocation, 'id'>;
+const getEmptyFunctionComponent: React.FC<SpacesContextProps> = ({ children }) => <>{children}</>;
 
 export const AddLocationFlyout = ({
   onSubmit,
   setIsOpen,
   privateLocations,
   isLoading,
+  spaceId,
 }: {
   isLoading: boolean;
   onSubmit: (val: NewLocation) => void;
   setIsOpen: (val: boolean) => void;
   privateLocations: PrivateLocation[];
+  spaceId?: string;
 }) => {
   const form = useFormWrapped({
     mode: 'onSubmit',
@@ -50,10 +56,19 @@ export const AddLocationFlyout = ({
         lat: 0,
         lon: 0,
       },
+      spaces: spaceId ? [spaceId] : [],
     },
   });
 
-  const { canSave } = useSyntheticsSettingsContext();
+  const { canSave, canManagePrivateLocations } = useSyntheticsSettingsContext();
+
+  const { spaces: spacesApi } = useKibana<ClientPluginsStart>().services;
+
+  const ContextWrapper = useMemo(
+    () =>
+      spacesApi ? spacesApi.ui.components.getSpacesContextProvider : getEmptyFunctionComponent,
+    [spacesApi]
+  );
 
   const { handleSubmit } = form;
   const closeFlyout = () => {
@@ -61,48 +76,50 @@ export const AddLocationFlyout = ({
   };
 
   return (
-    <FormProvider {...form}>
-      <EuiFlyout onClose={closeFlyout} style={{ width: 540 }}>
-        <EuiFlyoutHeader hasBorder>
-          <EuiTitle size="m">
-            <h2>{ADD_PRIVATE_LOCATION}</h2>
-          </EuiTitle>
-        </EuiFlyoutHeader>
-        <EuiFlyoutBody>
-          <ManageEmptyState privateLocations={privateLocations} showEmptyLocations={false}>
-            <LocationForm privateLocations={privateLocations} />
-          </ManageEmptyState>
-        </EuiFlyoutBody>
-        <EuiFlyoutFooter>
-          <EuiFlexGroup justifyContent="spaceBetween">
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                data-test-subj="syntheticsAddLocationFlyoutButton"
-                iconType="cross"
-                onClick={closeFlyout}
-                flush="left"
-                isLoading={isLoading}
-              >
-                {CANCEL_LABEL}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <NoPermissionsTooltip canEditSynthetics={canSave}>
-                <EuiButton
+    <ContextWrapper>
+      <FormProvider {...form}>
+        <EuiFlyout onClose={closeFlyout} style={{ width: 540 }}>
+          <EuiFlyoutHeader hasBorder>
+            <EuiTitle size="m">
+              <h2>{ADD_PRIVATE_LOCATION}</h2>
+            </EuiTitle>
+          </EuiFlyoutHeader>
+          <EuiFlyoutBody>
+            <ManageEmptyState privateLocations={privateLocations} showEmptyLocations={false}>
+              <LocationForm privateLocations={privateLocations} />
+            </ManageEmptyState>
+          </EuiFlyoutBody>
+          <EuiFlyoutFooter>
+            <EuiFlexGroup justifyContent="spaceBetween">
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
                   data-test-subj="syntheticsAddLocationFlyoutButton"
-                  fill
-                  onClick={handleSubmit(onSubmit)}
+                  iconType="cross"
+                  onClick={closeFlyout}
+                  flush="left"
                   isLoading={isLoading}
-                  isDisabled={!canSave}
                 >
-                  {SAVE_LABEL}
-                </EuiButton>
-              </NoPermissionsTooltip>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlyoutFooter>
-      </EuiFlyout>
-    </FormProvider>
+                  {CANCEL_LABEL}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <NoPermissionsTooltip canEditSynthetics={canSave}>
+                  <EuiButton
+                    data-test-subj="syntheticsAddLocationFlyoutButton"
+                    fill
+                    onClick={handleSubmit(onSubmit)}
+                    isLoading={isLoading}
+                    isDisabled={!canSave || !canManagePrivateLocations}
+                  >
+                    {SAVE_LABEL}
+                  </EuiButton>
+                </NoPermissionsTooltip>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlyoutFooter>
+        </EuiFlyout>
+      </FormProvider>
+    </ContextWrapper>
   );
 };
 
