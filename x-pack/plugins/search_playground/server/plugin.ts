@@ -62,7 +62,7 @@ export class SearchPlaygroundPlugin
       privileges: {
         all: {
           app: ['kibana', PLUGIN_ID],
-          api: [],
+          api: [PLUGIN_ID],
           catalogue: [PLUGIN_ID],
           savedObject: {
             all: [],
