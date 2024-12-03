@@ -83,6 +83,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         'Sep 20, 2015 @ 00:00:00.000',
         'Sep 22, 2015 @ 23:50:13.253'
       );
+      await PageObjects.discover.selectIndexPattern('logs-*');
       await aiops.logPatternAnalysisPage.assertDiscoverDocCount(totalDocCount);
 
       await aiops.logPatternAnalysisPage.clickPatternsTab();
