@@ -22,11 +22,6 @@ import { createTelemetryServiceMock } from '../../../../common/lib/telemetry/tel
 jest.mock('@kbn/expandable-flyout', () => ({
   useExpandableFlyoutApi: jest.fn(),
   ExpandableFlyoutProvider: ({ children }: React.PropsWithChildren<{}>) => <>{children}</>,
-  withExpandableFlyoutProvider: <T extends object>(Component: React.ComponentType<T>) => {
-    return (props: T) => {
-      return <Component {...props} />;
-    };
-  },
 }));
 
 const mockedTelemetry = createTelemetryServiceMock();

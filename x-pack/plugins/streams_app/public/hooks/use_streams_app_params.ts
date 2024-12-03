@@ -8,7 +8,8 @@ import { type PathsOf, type TypeOf, useParams } from '@kbn/typed-react-router-co
 import type { StreamsAppRoutes } from '../routes/config';
 
 export function useStreamsAppParams<TPath extends PathsOf<StreamsAppRoutes>>(
-  path: TPath
+  path: TPath,
+  optional: boolean = false
 ): TypeOf<StreamsAppRoutes, TPath> {
-  return useParams(path)! as TypeOf<StreamsAppRoutes, TPath>;
+  return useParams(path, optional)! as TypeOf<StreamsAppRoutes, TPath>;
 }

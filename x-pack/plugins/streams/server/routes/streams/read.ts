@@ -45,6 +45,13 @@ export const readStreamRoute = createServerRoute({
         id: params.path.id,
       });
 
+      if (streamEntity.definition.managed === false) {
+        return {
+          ...streamEntity.definition,
+          inheritedFields: [],
+        };
+      }
+
       const { ancestors } = await readAncestors({
         id: streamEntity.definition.id,
         scopedClusterClient,
