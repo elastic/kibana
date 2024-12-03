@@ -6,14 +6,13 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
+import { PRIVATE_LOCATION_WRITE_API } from '../../../feature';
+import { migrateLegacyPrivateLocations } from './migrate_legacy_private_locations';
 import { SyntheticsRestApiRouteFactory } from '../../types';
 import { getPrivateLocationsAndAgentPolicies } from './get_private_locations';
-import {
-  privateLocationsSavedObjectId,
-  privateLocationsSavedObjectName,
-} from '../../../../common/saved_objects/private_locations';
+import { privateLocationSavedObjectName } from '../../../../common/saved_objects/private_locations';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
-import type { SyntheticsPrivateLocationsAttributes } from '../../../runtime_types/private_locations';
+import { PrivateLocationAttributes } from '../../../runtime_types/private_locations';
 import { toClientContract, toSavedObjectContract } from './helpers';
 import { PrivateLocation } from '../../../../common/runtime_types';
 
@@ -40,7 +39,13 @@ export const addPrivateLocationRoute: SyntheticsRestApiRouteFactory<PrivateLocat
       body: PrivateLocationSchema,
     },
   },
-  handler: async ({ response, request, savedObjectsClient, syntheticsMonitorClient }) => {
+  requiredPrivileges: [PRIVATE_LOCATION_WRITE_API],
+  handler: async (routeContext) => {
+    const { response, request, savedObjectsClient, syntheticsMonitorClient, server } = routeContext;
+    const internalSOClient = server.coreStart.savedObjects.createInternalRepository();
+
+    await migrateLegacyPrivateLocations(internalSOClient, server.logger);
+
     const location = request.body as PrivateLocationObject;
 
     const { locations, agentPolicies } = await getPrivateLocationsAndAgentPolicies(
@@ -65,7 +70,6 @@ export const addPrivateLocationRoute: SyntheticsRestApiRouteFactory<PrivateLocat
       });
     }
 
-    const existingLocations = locations.filter((loc) => loc.id !== location.agentPolicyId);
     const formattedLocation = toSavedObjectContract({
       ...location,
       id: location.agentPolicyId,
@@ -80,17 +84,17 @@ export const addPrivateLocationRoute: SyntheticsRestApiRouteFactory<PrivateLocat
       });
     }
 
-    const result = await savedObjectsClient.create<SyntheticsPrivateLocationsAttributes>(
-      privateLocationsSavedObjectName,
-      { locations: [...existingLocations, formattedLocation] },
+    const soClient = routeContext.server.coreStart.savedObjects.createInternalRepository();
+
+    const result = await soClient.create<PrivateLocationAttributes>(
+      privateLocationSavedObjectName,
+      formattedLocation,
       {
-        id: privateLocationsSavedObjectId,
-        overwrite: true,
+        id: location.agentPolicyId,
+        initialNamespaces: ['*'],
       }
     );
 
-    const allLocations = toClientContract(result.attributes, agentPolicies);
-
-    return allLocations.find((loc) => loc.id === location.agentPolicyId)!;
+    return toClientContract(result.attributes, agentPolicies);
   },
 });

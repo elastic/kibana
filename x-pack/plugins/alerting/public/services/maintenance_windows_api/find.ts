@@ -32,7 +32,7 @@ export async function findMaintenanceWindows({
         per_page: perPage,
         search,
         // statuses
-      },
+      }
     }
   );
   console.log('res', res)

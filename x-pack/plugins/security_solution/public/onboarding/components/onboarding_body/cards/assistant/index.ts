@@ -25,8 +25,6 @@ export const assistantCardConfig: OnboardingCardConfig<AssistantCardMetadata> = 
       )
   ),
   checkComplete: checkAssistantCardComplete,
-  // Both capabilities are needed for this card, so we should use a double array to create an AND conditional
-  // (a single array would create an OR conditional between them)
-  capabilities: [['securitySolutionAssistant.ai-assistant', 'actions.show']],
-  licenseType: 'enterprise',
+  capabilitiesRequired: ['securitySolutionAssistant.ai-assistant'],
+  licenseTypeRequired: 'enterprise',
 };

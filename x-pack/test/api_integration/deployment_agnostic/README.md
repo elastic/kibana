@@ -108,7 +108,7 @@ Kibana provides both public and internal APIs, each requiring authentication wit
 Recommendations:
 - use `roleScopedSupertest` service to create supertest instance scoped to specific role and pre-defined request headers
 - `roleScopedSupertest.getSupertestWithRoleScope(<role>)` authenticate requests with API key by default
-- pass `withCookieHeader: true` to use Cookie header for requests authentication
+- pass `useCookieHeader: true` to use Cookie header for requests authentication
 - don't forget to invalidate API key using `destroy()` on supertest scoped instance in `after` hook
 
 Add test files to `x-pack/test/<my_own_api_integration_folder>/deployment_agnostic/apis/<my_api>`:
@@ -117,25 +117,36 @@ test example
 ```ts
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
-  let supertestWithAdminScope: SupertestWithRoleScopeType;
+  let supertestViewerWithApiKey: SupertestWithRoleScopeType;
+  let supertestEditorWithCookieCredentials: SupertestWithRoleScopeType;
 
-  describe('compression', () => {
+  describe('test suite', () => {
     before(async () => {
-      supertestWithAdminScope = await roleScopedSupertest.getSupertestWithRoleScope('admin', {
+      supertestViewerWithApiKey = await roleScopedSupertest.getSupertestWithRoleScope('viewer', {
         withInternalHeaders: true,
         withCustomHeaders: { 'accept-encoding': 'gzip' },
+      });
+      supertestEditorWithCookieCredentials = await roleScopedSupertest.getSupertestWithRoleScope('editor', {
+        withInternalHeaders: true,
+        useCookieHeader: true,
       });
     });
     after(async () => {
       // always invalidate API key for the scoped role in the end
-      await supertestWithAdminScope.destroy();
+      await supertestViewerWithApiKey.destroy();
+      // supertestEditorWithCookieCredentials.destroy() has no effect because Cookie session is cached per SAML role
+      // and valid for the whole FTR config run, no need to call it
     });
-    describe('against an application page', () => {
-      it(`uses compression when there isn't a referer`, async () => {
-        const response = await supertestWithAdminScope.get('/app/kibana');
-        expect(response.header).to.have.property('content-encoding', 'gzip');
+    it(`uses compression when there isn't a referer`, async () => {
+      const response = await supertestViewerWithApiKey.get('/app/kibana');
+      expect(response.header).to.have.property('content-encoding', 'gzip');
+    });
+
+    it(`can run rule with Editor privileges`, async () => {
+      const response = await supertestEditorWithCookieCredentials
+        .post(`/internal/alerting/rule/${ruleId}/_run_soon`)
+        .expect(204);
       });
-    });
   });
 }
 ```

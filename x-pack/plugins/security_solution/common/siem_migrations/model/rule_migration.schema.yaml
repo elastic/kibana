@@ -1,11 +1,17 @@
 openapi: 3.0.3
 info:
-  title: Common Splunk Rules Attributes
+  title: SIEM Rule Migration components
   version: 'not applicable'
 paths: {}
 components:
   x-codegen-enabled: true
   schemas:
+    OriginalRuleVendor:
+      type: string
+      description: The original rule vendor identifier.
+      enum:
+        - splunk
+
     OriginalRule:
       type: object
       description: The original rule to migrate.
@@ -18,13 +24,11 @@ components:
         - query_language
       properties:
         id:
-          type: string
           description: The original rule id.
+          $ref: './common.schema.yaml#/components/schemas/NonEmptyString'
         vendor:
-          type: string
           description: The original rule vendor identifier.
-          enum:
-            - splunk
+          $ref: '#/components/schemas/OriginalRuleVendor'
         title:
           type: string
           description: The original rule name.
@@ -48,8 +52,6 @@ components:
       description: The migrated elastic rule.
       required:
         - title
-        - query
-        - query_language
       properties:
         title:
           type: string
@@ -68,15 +70,36 @@ components:
           description: The translated elastic query language.
           enum:
             - esql
-          default: esql
         prebuilt_rule_id:
-          type: string
           description: The Elastic prebuilt rule id matched.
+          $ref: './common.schema.yaml#/components/schemas/NonEmptyString'
+        integration_ids:
+          type: array
+          items:
+            type: string
+          description: The Elastic integration IDs related to the rule.
         id:
-          type: string
           description: The Elastic rule id installed as a result.
+          $ref: './common.schema.yaml#/components/schemas/NonEmptyString'
+
+    ElasticRulePartial:
+      description: The partial version of the migrated elastic rule.
+      $ref: '#/components/schemas/ElasticRule'
+      x-modify: partial
 
     RuleMigration:
+      description: The rule migration document object.
+      allOf:
+        - type: object
+          required:
+            - id
+          properties:
+            id:
+              description: The rule migration id
+              $ref: './common.schema.yaml#/components/schemas/NonEmptyString'
+        - $ref: '#/components/schemas/RuleMigrationData'
+
+    RuleMigrationData:
       type: object
       description: The rule migration document object.
       required:
@@ -84,41 +107,167 @@ components:
         - migration_id
         - original_rule
         - status
+        - created_by
       properties:
-        "@timestamp":
+        '@timestamp':
           type: string
           description: The moment of creation
         migration_id:
-          type: string
           description: The migration id.
+          $ref: './common.schema.yaml#/components/schemas/NonEmptyString'
+        created_by:
+          description: The username of the user who created the migration.
+          $ref: './common.schema.yaml#/components/schemas/NonEmptyString'
         original_rule:
+          description: The original rule to migrate.
           $ref: '#/components/schemas/OriginalRule'
         elastic_rule:
+          description: The migrated elastic rule.
           $ref: '#/components/schemas/ElasticRule'
-        translation_state:
-          type: string
-          description: The translation state.
-          enum:
-            - complete
-            - partial
-            - untranslatable
+        translation_result:
+          description: The rule translation result.
+          $ref: '#/components/schemas/RuleMigrationTranslationResult'
         status:
-          type: string
-          description: The status of the rule migration.
-          enum: # should match SiemMigrationsStatus enum at ../constants.ts
-            - pending
-            - processing
-            - finished
-            - error
+          description: The status of the rule migration process.
+          $ref: '#/components/schemas/RuleMigrationStatus'
           default: pending
         comments:
-          type: array
           description: The comments for the migration including a summary from the LLM in markdown.
-          items:
-            type: string
+          $ref: '#/components/schemas/RuleMigrationComments'
         updated_at:
           type: string
           description: The moment of the last update
         updated_by:
           type: string
           description: The user who last updated the migration
+
+    RuleMigrationTaskStats:
+      type: object
+      description: The rule migration task stats object.
+      required:
+        - id
+        - status
+        - rules
+        - created_at
+        - last_updated_at
+      properties:
+        id:
+          description: The migration id
+          $ref: './common.schema.yaml#/components/schemas/NonEmptyString'
+        status:
+          description: Indicates if the migration task status.
+          $ref: '#/components/schemas/RuleMigrationTaskStatus'
+        rules:
+          type: object
+          description: The rules migration stats.
+          required:
+            - total
+            - pending
+            - processing
+            - completed
+            - failed
+          properties:
+            total:
+              type: integer
+              description: The total number of rules to migrate.
+            pending:
+              type: integer
+              description: The number of rules that are pending migration.
+            processing:
+              type: integer
+              description: The number of rules that are being migrated.
+            completed:
+              type: integer
+              description: The number of rules that have been migrated successfully.
+            failed:
+              type: integer
+              description: The number of rules that have failed migration.
+        created_at:
+          type: string
+          description: The moment the migration was created.
+        last_updated_at:
+          type: string
+          description: The moment of the last update.
+
+    RuleMigrationTaskStatus:
+      type: string
+      description: The status of the migration task.
+      enum: # should match SiemMigrationTaskStatus enum at ../constants.ts
+        - ready
+        - running
+        - stopped
+        - finished
+        
+    RuleMigrationTranslationResult:
+      type: string
+      description: The rule translation result.
+      enum: # should match SiemMigrationRuleTranslationResult enum at ../constants.ts
+        - full
+        - partial
+        - untranslatable
+
+    RuleMigrationStatus:
+      type: string
+      description: The status of each rule migration.
+      enum: # should match SiemMigrationsStatus enum at ../constants.ts
+        - pending
+        - processing
+        - completed
+        - failed
+
+    RuleMigrationComments:
+      type: array
+      description: The comments for the migration including a summary from the LLM in markdown.
+      items:
+        type: string
+
+    ## Rule migration resources
+
+    RuleMigrationResourceType:
+      type: string
+      description: The type of the rule migration resource.
+      enum:
+        - macro # Reusable part a query that can be customized and called from multiple rules
+        - list # A list of values that can be used inside queries reused in different rules
+
+    RuleMigrationResourceData:
+      type: object
+      description: The rule migration resource data provided by the vendor.
+      required:
+        - type
+        - name
+        - content
+      properties:
+        type:
+          $ref: '#/components/schemas/RuleMigrationResourceType'
+        name:
+          type: string
+          description: The resource name identifier.
+        content:
+          type: string
+          description: The resource content value.
+        metadata:
+          type: object
+          description: The resource arbitrary metadata.
+
+    RuleMigrationResource:
+      description: The rule migration resource document object.
+      allOf:
+        - $ref: '#/components/schemas/RuleMigrationResourceData'
+        - type: object
+          required:
+            - id
+            - migration_id
+          properties:
+            id:
+              description: The rule resource migration id
+              $ref: './common.schema.yaml#/components/schemas/NonEmptyString'
+            migration_id:
+              description: The migration id
+              $ref: './common.schema.yaml#/components/schemas/NonEmptyString'
+            updated_at:
+              type: string
+              description: The moment of the last update
+            updated_by:
+              type: string
+              description: The user who last updated the resource

@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiHorizontalRule } from '@elastic/eui';
-import { FlyoutBody } from '@kbn/security-solution-common';
+import { FlyoutBody } from '../../shared/components/flyout_body';
 import { EntityInsight } from '../../../cloud_security_posture/components/entity_insight';
 import { AssetCriticalityAccordion } from '../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
 import { FlyoutRiskSummary } from '../../../entity_analytics/components/risk_summary_flyout/risk_summary';
@@ -64,7 +64,7 @@ export const HostPanelContent = ({
         entity={{ name: hostName, type: 'host' }}
         onChange={onAssetCriticalityChange}
       />
-      <EntityInsight name={hostName} fieldName={'host.name'} isPreviewMode={isPreviewMode} />
+      <EntityInsight value={hostName} field={'host.name'} isPreviewMode={isPreviewMode} />
       <ObservedEntity
         observedData={observedHost}
         contextID={contextID}

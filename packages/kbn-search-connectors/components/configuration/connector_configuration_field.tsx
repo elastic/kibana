@@ -20,7 +20,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiButtonIcon,
-  EuiIcon,
+  EuiIconTip,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -52,7 +52,7 @@ export const ConfigInputField: React.FC<ConfigInputFieldProps> = ({
   isLoading,
   validateAndSetConfigValue,
 }) => {
-  const { isValid, required, placeholder, value } = configEntry;
+  const { isValid, required, placeholder, value, label } = configEntry;
   const [innerValue, setInnerValue] = useState(value);
   return (
     <EuiFieldText
@@ -65,6 +65,7 @@ export const ConfigInputField: React.FC<ConfigInputFieldProps> = ({
         validateAndSetConfigValue(event.target.value);
       }}
       placeholder={placeholder}
+      aria-label={label}
     />
   );
 };
@@ -74,7 +75,7 @@ export const ConfigInputTextArea: React.FC<ConfigInputFieldProps> = ({
   configEntry,
   validateAndSetConfigValue,
 }) => {
-  const { isValid, required, placeholder, value } = configEntry;
+  const { isValid, required, placeholder, value, label } = configEntry;
   const [innerValue, setInnerValue] = useState(value);
   return (
     <EuiTextArea
@@ -88,6 +89,7 @@ export const ConfigInputTextArea: React.FC<ConfigInputFieldProps> = ({
         validateAndSetConfigValue(event.target.value);
       }}
       placeholder={placeholder}
+      aria-label={label}
     />
   );
 };
@@ -108,7 +110,7 @@ export const ConfigSensitiveTextArea: React.FC<ConfigInputFieldProps> = ({
               <p>{label}</p>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiIcon type="questionInCircle" />
+              <EuiIconTip content={tooltip} />
             </EuiFlexItem>
           </EuiFlexGroup>
         ) : (
@@ -129,7 +131,7 @@ export const ConfigInputPassword: React.FC<ConfigInputFieldProps> = ({
   configEntry,
   validateAndSetConfigValue,
 }) => {
-  const { required, value } = configEntry;
+  const { required, value, label } = configEntry;
   const [innerValue, setInnerValue] = useState(value);
   return (
     <EuiFieldPassword
@@ -141,6 +143,7 @@ export const ConfigInputPassword: React.FC<ConfigInputFieldProps> = ({
         setInnerValue(event.target.value);
         validateAndSetConfigValue(event.target.value);
       }}
+      aria-label={label}
     />
   );
 };
@@ -170,6 +173,7 @@ export const ConnectorConfigurationField: React.FC<ConnectorConfigurationFieldPr
           onChange={(event) => {
             validateAndSetConfigValue(event.target.value);
           }}
+          aria-label={label}
         />
       ) : (
         <EuiRadioGroup
@@ -180,6 +184,7 @@ export const ConnectorConfigurationField: React.FC<ConnectorConfigurationFieldPr
           onChange={(id) => {
             validateAndSetConfigValue(id);
           }}
+          aria-label={label}
         />
       );
 
@@ -223,10 +228,11 @@ export const ConnectorConfigurationField: React.FC<ConnectorConfigurationFieldPr
                   <EuiSwitch
                     checked={ensureBooleanType(value)}
                     disabled={isLoading || !hasPlatinumLicense}
-                    label={<p>{label}</p>}
+                    label={label}
                     onChange={(event) => {
                       validateAndSetConfigValue(event.target.checked);
                     }}
+                    aria-label={label}
                   />
                 </EuiFlexItem>
                 {!hasPlatinumLicense && (
@@ -257,27 +263,21 @@ export const ConnectorConfigurationField: React.FC<ConnectorConfigurationFieldPr
         );
       }
       return (
-        <EuiSwitch
-          checked={ensureBooleanType(value)}
-          disabled={isLoading}
-          label={
-            tooltip ? (
-              <EuiFlexGroup gutterSize="xs">
-                <EuiFlexItem>
-                  <p>{label}</p>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiIcon type="questionInCircle" />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            ) : (
-              <p>{label}</p>
-            )
-          }
-          onChange={(event) => {
-            validateAndSetConfigValue(event.target.checked);
-          }}
-        />
+        <EuiFlexGroup direction="row" gutterSize="xs">
+          <EuiSwitch
+            checked={ensureBooleanType(value)}
+            disabled={isLoading}
+            label={label}
+            onChange={(event) => {
+              validateAndSetConfigValue(event.target.checked);
+            }}
+          />
+          {tooltip && (
+            <EuiFlexItem grow={false}>
+              <EuiIconTip content={tooltip} />
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
       );
 
     default:

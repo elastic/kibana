@@ -102,16 +102,18 @@ async function fetchAlertSummary({
   timeRange: AlertSummaryTimeRange;
   filter?: estypes.QueryDslQueryContainer;
 }): Promise<AlertSummary> {
-  const res = await http.post<AsApiContract<any>>(`${BASE_RAC_ALERTS_API_PATH}/_alert_summary`, {
-    signal,
-    body: JSON.stringify({
-      fixed_interval: fixedInterval,
-      gte: utcFrom,
-      lte: utcTo,
-      featureIds,
-      filter: [filter],
-    }),
-  });
+  const res = featureIds.length
+    ? await http.post<AsApiContract<any>>(`${BASE_RAC_ALERTS_API_PATH}/_alert_summary`, {
+        signal,
+        body: JSON.stringify({
+          fixed_interval: fixedInterval,
+          gte: utcFrom,
+          lte: utcTo,
+          featureIds,
+          filter: [filter],
+        }),
+      })
+    : {};
 
   const activeAlertCount = res?.activeAlertCount ?? 0;
   const activeAlerts = res?.activeAlerts ?? [];

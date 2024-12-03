@@ -23,6 +23,7 @@ import { downloadBlob } from '../../../../common/utils/download_blob';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import type { ValidatedFile } from '../types';
 import { buildAnnotationsFromError } from '../helpers';
+import { EntityEventTypes } from '../../../../common/lib/telemetry';
 
 export interface AssetCriticalityValidationStepProps {
   validatedFile: ValidatedFile;
@@ -42,7 +43,7 @@ export const AssetCriticalityValidationStep: React.FC<AssetCriticalityValidation
     const annotations = buildAnnotationsFromError(invalidLines.errors);
 
     const onConfirmClick = () => {
-      telemetry.reportAssetCriticalityCsvImported({
+      telemetry.reportEvent(EntityEventTypes.AssetCriticalityCsvImported, {
         file: {
           size: fileSize,
         },

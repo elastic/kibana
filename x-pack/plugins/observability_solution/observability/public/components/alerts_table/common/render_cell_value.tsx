@@ -23,7 +23,7 @@ import {
   ALERT_RULE_EXECUTION_TIMESTAMP,
 } from '@kbn/rule-data-utils';
 import { isEmpty } from 'lodash';
-import type { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
+import type { EventNonEcsData } from '../../../../common/typings';
 import type { ObservabilityRuleTypeRegistry } from '../../..';
 import { asDuration } from '../../../../common/utils/formatters';
 import { AlertSeverityBadge } from '../../alert_severity_badge';
@@ -36,7 +36,7 @@ export const getMappedNonEcsValue = ({
   data,
   fieldName,
 }: {
-  data: TimelineNonEcsData[];
+  data: EventNonEcsData[];
   fieldName: string;
 }): string[] | undefined => {
   const item = data.find((d) => d.field === fieldName);
@@ -64,23 +64,24 @@ const getRenderValue = (mappedNonEcsValue: any) => {
   return '--';
 };
 
+interface GetRenderCellValueParams {
+  columnId: string;
+  data?: EventNonEcsData[];
+  setFlyoutAlert?: (alertId: string) => void;
+  observabilityRuleTypeRegistry?: ObservabilityRuleTypeRegistry;
+}
+
 /**
  * This implementation of `EuiDataGrid`'s `renderCellValue`
  * accepts `EuiDataGridCellValueElementProps`, plus `data`
  * from the TGrid
  */
-
 export const getRenderCellValue = ({
   columnId,
   data,
   setFlyoutAlert,
   observabilityRuleTypeRegistry,
-}: {
-  columnId: string;
-  data?: Array<{ field: string; value: any }>;
-  setFlyoutAlert?: (alertId: string) => void;
-  observabilityRuleTypeRegistry?: ObservabilityRuleTypeRegistry;
-}) => {
+}: GetRenderCellValueParams) => {
   if (!data) return null;
   const mappedNonEcsValue = getMappedNonEcsValue({
     data,

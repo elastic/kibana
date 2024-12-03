@@ -233,9 +233,6 @@ function getSuggestionsForLayer({
     allowMixed,
   };
 
-  if (changeType === 'initial' && xValue?.operation.dataType === 'date') {
-    return buildSuggestion({ ...options, seriesType: 'line' });
-  }
   // handles the simplest cases, acting as a chart switcher
   if (!currentState && changeType === 'unchanged') {
     // Chart switcher needs to include every chart type

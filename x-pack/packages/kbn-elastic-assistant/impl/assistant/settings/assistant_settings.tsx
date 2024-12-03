@@ -9,14 +9,10 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiIcon,
   EuiModal,
   EuiModalFooter,
-  EuiKeyPadMenu,
-  EuiKeyPadMenuItem,
   EuiPage,
   EuiPageBody,
-  EuiPageSidebar,
   EuiSplitPanel,
 } from '@elastic/eui';
 
@@ -80,16 +76,7 @@ export const AssistantSettings: React.FC<Props> = React.memo(
     conversations,
     conversationsLoaded,
   }) => {
-    const {
-      assistantFeatures: {
-        assistantModelEvaluation: modelEvaluatorEnabled,
-        assistantKnowledgeBaseByDefault,
-      },
-      http,
-      toasts,
-      selectedSettingsTab,
-      setSelectedSettingsTab,
-    } = useAssistantContext();
+    const { http, toasts, selectedSettingsTab, setSelectedSettingsTab } = useAssistantContext();
 
     useEffect(() => {
       if (selectedSettingsTab == null) {
@@ -214,115 +201,6 @@ export const AssistantSettings: React.FC<Props> = React.memo(
     return (
       <StyledEuiModal data-test-subj={TEST_IDS.SETTINGS_MODAL} onClose={onClose}>
         <EuiPage paddingSize="none">
-          {!assistantKnowledgeBaseByDefault && (
-            <EuiPageSidebar
-              paddingSize="xs"
-              css={css`
-                min-inline-size: unset !important;
-                max-width: 104px;
-              `}
-            >
-              <EuiKeyPadMenu>
-                <EuiKeyPadMenuItem
-                  id={CONVERSATIONS_TAB}
-                  label={i18n.CONVERSATIONS_MENU_ITEM}
-                  isSelected={!selectedSettingsTab || selectedSettingsTab === CONVERSATIONS_TAB}
-                  onClick={() => setSelectedSettingsTab(CONVERSATIONS_TAB)}
-                  data-test-subj={`${CONVERSATIONS_TAB}-button`}
-                >
-                  <>
-                    <EuiIcon
-                      type="editorComment"
-                      size="xl"
-                      css={css`
-                        position: relative;
-                        top: -10px;
-                      `}
-                    />
-                    <EuiIcon
-                      type="editorComment"
-                      size="l"
-                      css={css`
-                        position: relative;
-                        transform: rotateY(180deg);
-                        top: -7px;
-                      `}
-                    />
-                  </>
-                </EuiKeyPadMenuItem>
-                <EuiKeyPadMenuItem
-                  id={QUICK_PROMPTS_TAB}
-                  label={i18n.QUICK_PROMPTS_MENU_ITEM}
-                  isSelected={selectedSettingsTab === QUICK_PROMPTS_TAB}
-                  onClick={() => setSelectedSettingsTab(QUICK_PROMPTS_TAB)}
-                  data-test-subj={`${QUICK_PROMPTS_TAB}-button`}
-                >
-                  <>
-                    <EuiIcon type="editorComment" size="xxl" />
-                    <EuiIcon
-                      type="bolt"
-                      size="s"
-                      color="warning"
-                      css={css`
-                        position: absolute;
-                        top: 11px;
-                        left: 14px;
-                      `}
-                    />
-                  </>
-                </EuiKeyPadMenuItem>
-                <EuiKeyPadMenuItem
-                  id={SYSTEM_PROMPTS_TAB}
-                  label={i18n.SYSTEM_PROMPTS_MENU_ITEM}
-                  isSelected={selectedSettingsTab === SYSTEM_PROMPTS_TAB}
-                  onClick={() => setSelectedSettingsTab(SYSTEM_PROMPTS_TAB)}
-                  data-test-subj={`${SYSTEM_PROMPTS_TAB}-button`}
-                >
-                  <EuiIcon type="editorComment" size="xxl" />
-                  <EuiIcon
-                    type="storage"
-                    size="s"
-                    color="success"
-                    css={css`
-                      position: absolute;
-                      top: 11px;
-                      left: 14px;
-                    `}
-                  />
-                </EuiKeyPadMenuItem>
-                <EuiKeyPadMenuItem
-                  id={ANONYMIZATION_TAB}
-                  label={i18n.ANONYMIZATION_MENU_ITEM}
-                  isSelected={selectedSettingsTab === ANONYMIZATION_TAB}
-                  onClick={() => setSelectedSettingsTab(ANONYMIZATION_TAB)}
-                  data-test-subj={`${ANONYMIZATION_TAB}-button`}
-                >
-                  <EuiIcon type="eyeClosed" size="l" />
-                </EuiKeyPadMenuItem>
-                <EuiKeyPadMenuItem
-                  id={KNOWLEDGE_BASE_TAB}
-                  label={i18n.KNOWLEDGE_BASE_MENU_ITEM}
-                  isSelected={selectedSettingsTab === KNOWLEDGE_BASE_TAB}
-                  onClick={() => setSelectedSettingsTab(KNOWLEDGE_BASE_TAB)}
-                  data-test-subj={`${KNOWLEDGE_BASE_TAB}-button`}
-                >
-                  <EuiIcon type="notebookApp" size="l" />
-                </EuiKeyPadMenuItem>
-                {modelEvaluatorEnabled && (
-                  <EuiKeyPadMenuItem
-                    id={EVALUATION_TAB}
-                    label={i18n.EVALUATION_MENU_ITEM}
-                    isSelected={selectedSettingsTab === EVALUATION_TAB}
-                    onClick={() => setSelectedSettingsTab(EVALUATION_TAB)}
-                    data-test-subj={`${EVALUATION_TAB}-button`}
-                  >
-                    <EuiIcon type="crossClusterReplicationApp" size="l" />
-                  </EuiKeyPadMenuItem>
-                )}
-              </EuiKeyPadMenu>
-            </EuiPageSidebar>
-          )}
-
           <EuiPageBody paddingSize="none" panelled={true}>
             <EuiSplitPanel.Outer grow={true}>
               <EuiSplitPanel.Inner
@@ -379,7 +257,6 @@ export const AssistantSettings: React.FC<Props> = React.memo(
                 )}
                 {selectedSettingsTab === ANONYMIZATION_TAB && (
                   <AnonymizationSettings
-                    defaultPageSize={5}
                     anonymizationFields={updatedAnonymizationData}
                     anonymizationFieldsBulkActions={anonymizationFieldsBulkActions}
                     setAnonymizationFieldsBulkActions={setAnonymizationFieldsBulkActions}

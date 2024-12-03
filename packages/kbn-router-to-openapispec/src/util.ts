@@ -132,7 +132,7 @@ export const assignToPaths = (
   path: string,
   pathObject: OpenAPIV3.PathItemObject
 ): void => {
-  const pathName = path.replace('?', '');
+  const pathName = path.replace(/[\?\*]/g, '');
   paths[pathName] = { ...paths[pathName], ...pathObject };
 };
 
@@ -166,10 +166,10 @@ export const getXsrfHeaderForMethod = (
   ];
 };
 
-export function setXState(
+export const setXState = (
   availability: RouteConfigOptions<RouteMethod>['availability'],
   operation: CustomOperationObject
-): void {
+): void => {
   if (availability) {
     if (availability.stability === 'experimental') {
       operation['x-state'] = 'Technical Preview';
@@ -178,4 +178,45 @@ export function setXState(
       operation['x-state'] = 'Beta';
     }
   }
-}
+};
+
+export type GetOpId = (input: { path: string; method: string }) => string;
+
+/**
+ * Best effort to generate operation IDs from route values
+ */
+export const createOpIdGenerator = (): GetOpId => {
+  const idMap = new Map<string, number>();
+  return function getOpId({ path, method }) {
+    if (!method || !path) {
+      throw new Error(
+        `Must provide method and path, received: method: "${method}", path: "${path}"`
+      );
+    }
+
+    path = path
+      .trim()
+      .replace(/^[\/]+/, '')
+      .replace(/[\/]+$/, '')
+      .toLowerCase();
+
+    const removePrefixes = ['internal/api/', 'internal/', 'api/']; // longest to shortest
+    for (const prefix of removePrefixes) {
+      if (path.startsWith(prefix)) {
+        path = path.substring(prefix.length);
+        break;
+      }
+    }
+
+    path = path
+      .replace(/[\{\}\?\*]/g, '') // remove special chars
+      .replace(/[\/_]/g, '-') // everything else to dashes
+      .replace(/[-]+/g, '-'); // single dashes
+
+    const opId = `${method.toLowerCase()}-${path}`;
+
+    const cachedCount = idMap.get(opId) ?? 0;
+    idMap.set(opId, cachedCount + 1);
+    return cachedCount > 0 ? `${opId}-${cachedCount + 1}` : opId;
+  };
+};

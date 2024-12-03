@@ -16,17 +16,7 @@ interface Props {
   contentWhenEmpty?: JSX.Element | null;
 }
 
-const texts = {
-  settings: i18n.translate('xpack.idxMgmt.templateContentIndicator.indexSettingsTooltipLabel', {
-    defaultMessage: 'Index settings',
-  }),
-  mappings: i18n.translate('xpack.idxMgmt.templateContentIndicator.mappingsTooltipLabel', {
-    defaultMessage: 'Mappings',
-  }),
-  aliases: i18n.translate('xpack.idxMgmt.templateContentIndicator.aliasesTooltipLabel', {
-    defaultMessage: 'Aliases',
-  }),
-};
+const getColor = (flag: boolean) => (flag ? 'primary' : 'hollow');
 
 export const TemplateContentIndicator = ({
   mappings,
@@ -34,28 +24,63 @@ export const TemplateContentIndicator = ({
   aliases,
   contentWhenEmpty = null,
 }: Props) => {
-  const getColor = (flag: boolean) => (flag ? 'primary' : 'hollow');
-
   if (!mappings && !settings && !aliases) {
     return contentWhenEmpty;
   }
 
+  const texts = {
+    settingsTrue: i18n.translate('xpack.idxMgmt.templateContentIndicator.indexSettingsTrueLabel', {
+      defaultMessage: 'This template contains index settings',
+    }),
+    settingsFalse: i18n.translate(
+      'xpack.idxMgmt.templateContentIndicator.indexSettingsFalseLabel',
+      {
+        defaultMessage: 'This template does not contain index settings',
+      }
+    ),
+    mappingsTrue: i18n.translate('xpack.idxMgmt.templateContentIndicator.indexMappingsTrueLabel', {
+      defaultMessage: 'This template contains index mappings',
+    }),
+    mappingsFalse: i18n.translate(
+      'xpack.idxMgmt.templateContentIndicator.indexMappingsFalseLabel',
+      {
+        defaultMessage: 'This template does not contain index mappings',
+      }
+    ),
+    aliasesTrue: i18n.translate('xpack.idxMgmt.templateContentIndicator.indexAliasesTrueLabel', {
+      defaultMessage: 'This template contains index aliases',
+    }),
+    aliasesFalse: i18n.translate('xpack.idxMgmt.templateContentIndicator.indexAliasesFalseLabel', {
+      defaultMessage: 'This template does not contain index aliases',
+    }),
+  };
+
+  const mappingsText = mappings ? texts.mappingsTrue : texts.mappingsFalse;
+  const settingsText = settings ? texts.settingsTrue : texts.settingsFalse;
+  const aliasesText = aliases ? texts.aliasesTrue : texts.aliasesFalse;
+
   return (
     <>
-      <EuiToolTip content={texts.mappings}>
+      <EuiToolTip content={mappingsText}>
         <>
-          <EuiBadge color={getColor(mappings)}>M</EuiBadge>
+          <EuiBadge color={getColor(mappings)} aria-label={mappingsText}>
+            M
+          </EuiBadge>
           &nbsp;
         </>
       </EuiToolTip>
-      <EuiToolTip content={texts.settings}>
+      <EuiToolTip content={settingsText}>
         <>
-          <EuiBadge color={getColor(settings)}>S</EuiBadge>
+          <EuiBadge color={getColor(settings)} aria-label={settingsText}>
+            S
+          </EuiBadge>
           &nbsp;
         </>
       </EuiToolTip>
-      <EuiToolTip content={texts.aliases}>
-        <EuiBadge color={getColor(aliases)}>A</EuiBadge>
+      <EuiToolTip content={aliasesText}>
+        <EuiBadge color={getColor(aliases)} aria-label={aliasesText}>
+          A
+        </EuiBadge>
       </EuiToolTip>
     </>
   );

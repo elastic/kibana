@@ -23,9 +23,13 @@ import { setupFleet } from '../../services/setup';
 import type { FleetRequestHandlerContext } from '../../types';
 import { hasFleetServers } from '../../services/fleet_server';
 import { createFleetAuthzMock } from '../../../common/mocks';
+import { withDefaultErrorHandler } from '../../services/security/fleet_router';
 
 import { fleetSetupHandler, getFleetStatusHandler } from './handlers';
 import { FleetSetupResponseSchema, GetAgentsSetupResponseSchema } from '.';
+
+const fleetSetupWithErrorHandler = withDefaultErrorHandler(fleetSetupHandler);
+const getFleetStatusWithErrorHandler = withDefaultErrorHandler(getFleetStatusHandler);
 
 jest.mock('../../services/setup', () => {
   return {
@@ -87,7 +91,11 @@ describe('FleetSetupHandler', () => {
         nonFatalErrors: [],
       })
     );
-    await fleetSetupHandler(coreMock.createCustomRequestHandlerContext(context), request, response);
+    await fleetSetupWithErrorHandler(
+      coreMock.createCustomRequestHandlerContext(context),
+      request,
+      response
+    );
 
     const expectedBody: PostFleetSetupResponse = {
       isInitialized: true,
@@ -101,7 +109,11 @@ describe('FleetSetupHandler', () => {
 
   it('POST /setup fails w/500 on custom error', async () => {
     mockSetupFleet.mockImplementation(() => Promise.reject(new Error('SO method mocked to throw')));
-    await fleetSetupHandler(coreMock.createCustomRequestHandlerContext(context), request, response);
+    await fleetSetupWithErrorHandler(
+      coreMock.createCustomRequestHandlerContext(context),
+      request,
+      response
+    );
 
     expect(response.customError).toHaveBeenCalledTimes(1);
     expect(response.customError).toHaveBeenCalledWith({
@@ -117,7 +129,11 @@ describe('FleetSetupHandler', () => {
       Promise.reject(new RegistryError('Registry method mocked to throw'))
     );
 
-    await fleetSetupHandler(coreMock.createCustomRequestHandlerContext(context), request, response);
+    await fleetSetupWithErrorHandler(
+      coreMock.createCustomRequestHandlerContext(context),
+      request,
+      response
+    );
     expect(response.customError).toHaveBeenCalledTimes(1);
     expect(response.customError).toHaveBeenCalledWith({
       statusCode: 502,
@@ -175,7 +191,7 @@ describe('FleetStatusHandler', () => {
       .mocked(appContextService.getSecurity().authc.apiKeys.areAPIKeysEnabled)
       .mockResolvedValue(true);
     jest.mocked(hasFleetServers).mockResolvedValue(true);
-    await getFleetStatusHandler(
+    await getFleetStatusWithErrorHandler(
       coreMock.createCustomRequestHandlerContext(context),
       request,
       response
@@ -197,7 +213,7 @@ describe('FleetStatusHandler', () => {
       .mocked(appContextService.getSecurity().authc.apiKeys.areAPIKeysEnabled)
       .mockResolvedValue(false);
     jest.mocked(hasFleetServers).mockResolvedValue(false);
-    await getFleetStatusHandler(
+    await getFleetStatusWithErrorHandler(
       coreMock.createCustomRequestHandlerContext(context),
       request,
       response
@@ -228,7 +244,7 @@ describe('FleetStatusHandler', () => {
     jest
       .mocked(appContextService.getSecurity().authc.apiKeys.areAPIKeysEnabled)
       .mockResolvedValue(true);
-    await getFleetStatusHandler(
+    await getFleetStatusWithErrorHandler(
       coreMock.createCustomRequestHandlerContext(context),
       request,
       response

@@ -25,7 +25,6 @@ export interface ReportingPublicPluginStartDependencies {
 
 export interface ClientConfigType {
   csv: {
-    enablePanelActionDownload: boolean;
     scroll: {
       duration: string;
       size: number;

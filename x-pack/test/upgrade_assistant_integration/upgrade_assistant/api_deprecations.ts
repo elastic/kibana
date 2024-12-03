@@ -7,21 +7,19 @@
 
 import expect from '@kbn/expect';
 import { expect as expectExpect } from 'expect';
-import type { DomainDeprecationDetails } from '@kbn/core-deprecations-common';
-import { ApiDeprecationDetails } from '@kbn/core-deprecations-common/src/types';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import { UsageCountersSavedObject } from '@kbn/usage-collection-plugin/server';
 import _ from 'lodash';
+import type {
+  ApiDeprecationDetails,
+  DomainDeprecationDetails,
+} from '@kbn/core-deprecations-common';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-
-interface DomainApiDeprecationDetails extends ApiDeprecationDetails {
-  domainId: string;
-}
 
 const getApiDeprecations = (allDeprecations: DomainDeprecationDetails[]) => {
   return allDeprecations.filter(
     (deprecation) => deprecation.deprecationType === 'api'
-  ) as unknown as DomainApiDeprecationDetails[];
+  ) as unknown as Array<DomainDeprecationDetails<ApiDeprecationDetails>>;
 };
 
 export default function ({ getService }: FtrProviderContext) {
@@ -30,7 +28,11 @@ export default function ({ getService }: FtrProviderContext) {
   const retry = getService('retry');
   const es = getService('es');
 
-  describe('Kibana API Deprecations', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/199782
+  describe.skip('Kibana API Deprecations', function () {
+    // bail on first error in this suite since cases sequentially depend on each other
+    this.bail(true);
+
     before(async () => {
       // await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.emptyKibanaIndex();
@@ -42,6 +44,9 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('returns deprecated APIs when the api is called', async () => {
+      await supertest
+        .get(`/internal/routing_example/d/internal_versioned_route?apiVersion=1`)
+        .expect(200);
       await supertest.get(`/api/routing_example/d/removed_route`).expect(200);
 
       // sleep a little until the usage counter is synced into ES
@@ -51,7 +56,7 @@ export default function ({ getService }: FtrProviderContext) {
         async () => {
           const { deprecations } = (await supertest.get(`/api/deprecations/`).expect(200)).body;
           const apiDeprecations = getApiDeprecations(deprecations);
-          expect(apiDeprecations.length).to.equal(1);
+          expect(apiDeprecations.length).to.equal(2);
 
           expectExpect(apiDeprecations[0].correctiveActions.mark_as_resolved_api).toEqual({
             routePath: '/api/routing_example/d/removed_route',
@@ -68,6 +73,23 @@ export default function ({ getService }: FtrProviderContext) {
           expectExpect(apiDeprecations[0].title).toEqual(
             'The "GET /api/routing_example/d/removed_route" route is removed'
           );
+
+          expectExpect(apiDeprecations[1].correctiveActions.mark_as_resolved_api).toEqual({
+            routePath: '/internal/routing_example/d/internal_versioned_route',
+            routeMethod: 'get',
+            routeVersion: '1',
+            apiTotalCalls: 1,
+            totalMarkedAsResolved: 0,
+            timestamp: expectExpect.any(String),
+          });
+
+          expectExpect(apiDeprecations[1].domainId).toEqual('core.api_deprecations');
+          expectExpect(apiDeprecations[1].apiId).toEqual(
+            '1|get|/internal/routing_example/d/internal_versioned_route'
+          );
+          expectExpect(apiDeprecations[1].title).toEqual(
+            'The "GET /internal/routing_example/d/internal_versioned_route" API is internal to Elastic'
+          );
         },
         undefined,
         2000
@@ -76,7 +98,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('no longer returns deprecated API when it is marked as resolved', async () => {
       await supertest
-        .post(`/api/deprecations/mark_as_resolved`)
+        .post(`/api/deprecations/mark_as_resolved?elasticInternalOrigin=true`)
         .set('kbn-xsrf', 'xxx')
         .send({
           domainId: 'core.api_deprecations',
@@ -91,7 +113,10 @@ export default function ({ getService }: FtrProviderContext) {
       await retry.tryForTime(15 * 1000, async () => {
         const { deprecations } = (await supertest.get(`/api/deprecations/`).expect(200)).body;
         const apiDeprecations = getApiDeprecations(deprecations);
-        expect(apiDeprecations.length).to.equal(0);
+        expect(apiDeprecations.length).to.equal(1);
+        expectExpect(apiDeprecations[0].apiId).toEqual(
+          '1|get|/internal/routing_example/d/internal_versioned_route'
+        );
       });
     });
 
@@ -105,7 +130,7 @@ export default function ({ getService }: FtrProviderContext) {
         async () => {
           const { deprecations } = (await supertest.get(`/api/deprecations/`).expect(200)).body;
           const apiDeprecations = getApiDeprecations(deprecations);
-          expect(apiDeprecations.length).to.equal(1);
+          expect(apiDeprecations.length).to.equal(2);
 
           expectExpect(apiDeprecations[0].correctiveActions.mark_as_resolved_api).toEqual({
             routePath: '/api/routing_example/d/removed_route',
@@ -132,31 +157,80 @@ export default function ({ getService }: FtrProviderContext) {
         },
       });
 
-      expect(hits.hits.length).to.equal(3);
+      expect(hits.hits.length).to.equal(4);
       const counters = hits.hits.map((hit) => hit._source!['usage-counter']).sort();
-      expectExpect(_.sortBy(counters, 'counterType')).toEqual([
-        {
-          count: 1,
-          counterName: 'unversioned|get|/api/routing_example/d/removed_route',
-          counterType: 'deprecated_api_call:marked_as_resolved',
-          domainId: 'core',
-          source: 'server',
-        },
-        {
-          count: 1,
-          counterName: 'unversioned|get|/api/routing_example/d/removed_route',
-          counterType: 'deprecated_api_call:resolved',
-          domainId: 'core',
-          source: 'server',
-        },
-        {
-          count: 2,
-          counterName: 'unversioned|get|/api/routing_example/d/removed_route',
-          counterType: 'deprecated_api_call:total',
-          domainId: 'core',
-          source: 'server',
-        },
-      ]);
+      expectExpect(_.sortBy(counters, 'counterType')).toEqual(expectedSuiteUsageCounters);
+    });
+
+    it('Does not increment internal origin calls', async () => {
+      await supertest
+        .get(`/api/routing_example/d/removed_route?elasticInternalOrigin=true`)
+        .expect(200);
+      // call another deprecated api to make sure that we are not verifying stale results
+      await supertest
+        .get(`/api/routing_example/d/versioned_route?apiVersion=2023-10-31`)
+        .expect(200);
+
+      // sleep a little until the usage counter is synced into ES
+      await setTimeoutAsync(3000);
+      await retry.tryForTime(15 * 1000, async () => {
+        const should = ['total', 'resolved', 'marked_as_resolved'].map((type) => ({
+          match: { 'usage-counter.counterType': `deprecated_api_call:${type}` },
+        }));
+
+        const { hits } = await es.search<{ 'usage-counter': UsageCountersSavedObject }>({
+          index: '.kibana_usage_counters',
+          body: {
+            query: { bool: { should } },
+          },
+        });
+
+        expect(hits.hits.length).to.equal(5);
+        const counters = hits.hits.map((hit) => hit._source!['usage-counter']).sort();
+        expectExpect(_.sortBy(counters, 'counterType')).toEqual(
+          [
+            ...expectedSuiteUsageCounters,
+            {
+              domainId: 'core',
+              counterName: '2023-10-31|get|/api/routing_example/d/versioned_route',
+              counterType: 'deprecated_api_call:total',
+              source: 'server',
+              count: 1,
+            },
+          ].sort()
+        );
+      });
     });
   });
 }
+
+const expectedSuiteUsageCounters = [
+  {
+    domainId: 'core',
+    counterName: 'unversioned|get|/api/routing_example/d/removed_route',
+    counterType: 'deprecated_api_call:marked_as_resolved',
+    source: 'server',
+    count: 1,
+  },
+  {
+    domainId: 'core',
+    counterName: 'unversioned|get|/api/routing_example/d/removed_route',
+    counterType: 'deprecated_api_call:resolved',
+    source: 'server',
+    count: 1,
+  },
+  {
+    domainId: 'core',
+    counterName: '1|get|/internal/routing_example/d/internal_versioned_route',
+    counterType: 'deprecated_api_call:total',
+    source: 'server',
+    count: 1,
+  },
+  {
+    domainId: 'core',
+    counterName: 'unversioned|get|/api/routing_example/d/removed_route',
+    counterType: 'deprecated_api_call:total',
+    source: 'server',
+    count: 2,
+  },
+];

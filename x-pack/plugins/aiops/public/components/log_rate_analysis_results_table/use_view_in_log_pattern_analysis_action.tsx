@@ -18,6 +18,7 @@ import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 
 import { TableActionButton } from './table_action_button';
 import { getTableItemAsKQL } from './get_table_item_as_kql';
+import { useFilterQueryUpdates } from '../../hooks/use_filters_query';
 
 const isLogPattern = (tableItem: SignificantItem | GroupTableItem) =>
   isSignificantItem(tableItem) && tableItem.type === SIGNIFICANT_ITEM_TYPE.LOG_PATTERN;
@@ -32,7 +33,11 @@ const viewInLogPatternAnalysisMessage = i18n.translate(
 export const useViewInLogPatternAnalysisAction = (dataViewId?: string): TableItemAction => {
   const { application, share, data } = useAiopsAppContext();
 
-  const mlLocator = useMemo(() => share.url.locators.get('ML_APP_LOCATOR'), [share.url.locators]);
+  const mlLocator = useMemo(() => share?.url.locators.get('ML_APP_LOCATOR'), [share?.url.locators]);
+
+  // We cannot rely on the time range from AiOps App context because it is not always in sync with the time range used for analysis.
+  // E.g. In the case of an embeddable inside cases, the time range is fixed and not coming from the time picker.
+  const { timeRange } = useFilterQueryUpdates();
 
   const generateLogPatternAnalysisUrl = async (
     groupTableItem: GroupTableItem | SignificantItem
@@ -57,7 +62,9 @@ export const useViewInLogPatternAnalysisAction = (dataViewId?: string): TableIte
         page: 'aiops/log_categorization',
         pageState: {
           index: dataViewId,
-          timeRange: data.query.timefilter.timefilter.getTime(),
+          globalState: {
+            time: timeRange,
+          },
           appState,
         },
       });
@@ -104,7 +111,7 @@ export const useViewInLogPatternAnalysisAction = (dataViewId?: string): TableIte
       return (
         <TableActionButton
           dataTestSubjPostfix="LogPatternAnalysis"
-          iconType="logstashQueue"
+          iconType="logPatternAnalysis"
           isDisabled={isDisabled}
           label={viewInLogPatternAnalysisMessage}
           tooltipText={

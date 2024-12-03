@@ -37,6 +37,7 @@
     "@kbn/field-utils",
     "@kbn/presentation-publishing",
     "@kbn/core-ui-settings-browser",
+    "@kbn/presentation-panel-plugin",
   ],
   "exclude": ["target/**/*"]
 }

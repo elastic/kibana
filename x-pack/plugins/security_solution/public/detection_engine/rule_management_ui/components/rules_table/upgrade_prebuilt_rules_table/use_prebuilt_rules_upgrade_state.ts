@@ -6,6 +6,7 @@
  */
 
 import { useCallback, useMemo, useState } from 'react';
+import { useIsPrebuiltRulesCustomizationEnabled } from '../../../../rule_management/hooks/use_is_prebuilt_rules_customization_enabled';
 import type {
   RulesUpgradeState,
   FieldsUpgradeState,
@@ -18,11 +19,12 @@ import {
   type DiffableRule,
   type RuleUpgradeInfoForReview,
   ThreeWayDiffConflict,
+  type RuleSignatureId,
 } from '../../../../../../common/api/detection_engine';
 import { convertRuleToDiffable } from '../../../../../../common/detection_engine/prebuilt_rules/diff/convert_rule_to_diffable';
 
 type RuleResolvedConflicts = Partial<DiffableAllFields>;
-type RulesResolvedConflicts = Record<string, RuleResolvedConflicts>;
+type RulesResolvedConflicts = Record<RuleSignatureId, RuleResolvedConflicts>;
 
 interface UseRulesUpgradeStateResult {
   rulesUpgradeState: RulesUpgradeState;
@@ -32,6 +34,7 @@ interface UseRulesUpgradeStateResult {
 export function usePrebuiltRulesUpgradeState(
   ruleUpgradeInfos: RuleUpgradeInfoForReview[]
 ): UseRulesUpgradeStateResult {
+  const isPrebuiltRulesCustomizationEnabled = useIsPrebuiltRulesCustomizationEnabled();
   const [rulesResolvedConflicts, setRulesResolvedConflicts] = useState<RulesResolvedConflicts>({});
 
   const setRuleFieldResolvedValue = useCallback(
@@ -61,16 +64,17 @@ export function usePrebuiltRulesUpgradeState(
           ruleUpgradeInfo.diff.fields,
           rulesResolvedConflicts[ruleUpgradeInfo.rule_id] ?? {}
         ),
-        hasUnresolvedConflicts:
-          getUnacceptedConflictsCount(
-            ruleUpgradeInfo.diff.fields,
-            rulesResolvedConflicts[ruleUpgradeInfo.rule_id] ?? {}
-          ) > 0,
+        hasUnresolvedConflicts: isPrebuiltRulesCustomizationEnabled
+          ? getUnacceptedConflictsCount(
+              ruleUpgradeInfo.diff.fields,
+              rulesResolvedConflicts[ruleUpgradeInfo.rule_id] ?? {}
+            ) > 0
+          : false,
       };
     }
 
     return state;
-  }, [ruleUpgradeInfos, rulesResolvedConflicts]);
+  }, [ruleUpgradeInfos, rulesResolvedConflicts, isPrebuiltRulesCustomizationEnabled]);
 
   return {
     rulesUpgradeState,

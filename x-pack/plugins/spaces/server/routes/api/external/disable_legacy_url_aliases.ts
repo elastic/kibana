@@ -18,6 +18,13 @@ export function initDisableLegacyUrlAliasesApi(deps: ExternalRouteDeps) {
   router.post(
     {
       path: '/api/spaces/_disable_legacy_url_aliases',
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route delegates authorization to the spaces service via a scoped spaces client',
+        },
+      },
       options: {
         access: isServerless ? 'internal' : 'public',
         summary: 'Disable legacy URL aliases',

@@ -132,8 +132,7 @@ export const useDatasetQualityTable = () => {
       const passesNamespaceFilter =
         namespaces.length === 0 || namespaces.includes(dataset.namespace);
 
-      const passesQualityFilter =
-        qualities.length === 0 || qualities.includes(dataset.degradedDocs.quality);
+      const passesQualityFilter = qualities.length === 0 || qualities.includes(dataset.quality);
 
       const passesQueryFilter = !query || dataset.rawName.includes(query);
 

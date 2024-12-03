@@ -217,11 +217,6 @@ export const AgentResponseSchema = schema.object({
 });
 
 export const GetAgentsResponseSchema = ListResponseSchema(AgentResponseSchema).extends({
-  list: schema.maybe(
-    schema.arrayOf(AgentResponseSchema, {
-      meta: { deprecated: true },
-    })
-  ),
   statusSummary: schema.maybe(schema.recordOf(AgentStatusSchema, schema.number())),
 });
 
@@ -377,15 +372,6 @@ export const PostBulkAgentUpgradeRequestSchema = {
   }),
 };
 
-export const PutAgentReassignRequestSchemaDeprecated = {
-  params: schema.object({
-    agentId: schema.string(),
-  }),
-  body: schema.object({
-    policy_id: schema.string(),
-  }),
-};
-
 export const PostAgentReassignRequestSchema = {
   params: schema.object({
     agentId: schema.string(),
@@ -518,9 +504,6 @@ export const GetAgentStatusRequestSchema = {
             return validationObj?.error;
           }
         },
-        meta: {
-          deprecated: true,
-        },
       })
     ),
   }),
@@ -529,11 +512,6 @@ export const GetAgentStatusRequestSchema = {
 export const GetAgentStatusResponseSchema = schema.object({
   results: schema.object({
     events: schema.number(),
-    total: schema.number({
-      meta: {
-        deprecated: true,
-      },
-    }),
     online: schema.number(),
     error: schema.number(),
     offline: schema.number(),
@@ -549,6 +527,8 @@ export const GetAgentStatusResponseSchema = schema.object({
 export const GetAgentDataRequestSchema = {
   query: schema.object({
     agentsIds: schema.oneOf([schema.arrayOf(schema.string()), schema.string()]),
+    pkgName: schema.maybe(schema.string()),
+    pkgVersion: schema.maybe(schema.string()),
     previewData: schema.boolean({ defaultValue: false }),
   }),
 };

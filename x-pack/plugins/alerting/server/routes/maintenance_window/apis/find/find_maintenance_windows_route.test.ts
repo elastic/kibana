@@ -62,9 +62,16 @@ describe('findMaintenanceWindowsRoute', () => {
     expect(config.options).toMatchInlineSnapshot(`
       Object {
         "access": "internal",
-        "tags": Array [
-          "access:read-maintenance-window",
-        ],
+      }
+    `);
+
+    expect(config.security).toMatchInlineSnapshot(`
+      Object {
+        "authz": Object {
+          "requiredPrivileges": Array [
+            "read-maintenance-window",
+          ],
+        },
       }
     `);
 
@@ -73,7 +80,6 @@ describe('findMaintenanceWindowsRoute', () => {
     expect(maintenanceWindowClient.find).toHaveBeenCalledWith({});
     expect(res.ok).toHaveBeenLastCalledWith({
       body: {
-        // @ts-expect-error upgrade typescript v5.1.6
         data: mockMaintenanceWindows.data.map((data) => rewriteMaintenanceWindowRes(data)),
         total: 2,
         page: 1,
@@ -104,9 +110,16 @@ describe('findMaintenanceWindowsRoute', () => {
     expect(config.options).toMatchInlineSnapshot(`
       Object {
         "access": "internal",
-        "tags": Array [
-          "access:read-maintenance-window",
-        ],
+      }
+    `);
+
+    expect(config.security).toMatchInlineSnapshot(`
+      Object {
+        "authz": Object {
+          "requiredPrivileges": Array [
+            "read-maintenance-window",
+          ],
+        },
       }
     `);
 
@@ -115,7 +128,6 @@ describe('findMaintenanceWindowsRoute', () => {
     expect(maintenanceWindowClient.find).toHaveBeenCalledWith({ page: 1, perPage: 3 });
     expect(res.ok).toHaveBeenLastCalledWith({
       body: {
-        // @ts-expect-error upgrade typescript v5.1.6
         data: mockMaintenanceWindows.data.map((data) => rewriteMaintenanceWindowRes(data)),
         total: 2,
         page: 1,
