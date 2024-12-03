@@ -229,7 +229,9 @@ export class ServiceAPIClient {
               const firstHalfMonitors = payload.monitors.slice(0, mid);
               const secondHalfMonitors = payload.monitors.slice(mid);
 
-              this.logger.debug('Payload too large, splitting and retrying');
+              this.logger.debug(
+                `Payload of ${payload.monitors.length} monitors is too large for location ${id}, splitting in half, in chunks of ${mid}`
+              );
 
               return concat(
                 sendRequest({
