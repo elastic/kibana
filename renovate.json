@@ -376,6 +376,29 @@
       "minimumReleaseAge": "7 days"
     },
     {
+      "groupName": "@elastic/kibana-data-discovery dependencies",
+      "matchDepNames": [
+        "@elastic/datemath",
+        "diff",
+        "fastest-levenshtein",
+        "usng.js",
+        "@types/diff"
+      ],
+      "reviewers": [
+        "team:kibana-data-discovery"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:DataDiscovery",
+        "release_note:skip",
+        "backport:all-open"
+      ],
+      "enabled": true,
+      "minimumReleaseAge": "7 days"
+    },
+    {
       "groupName": "@elastic/kibana-visualizations test dependencies",
       "matchDepNames": [
         "@types/faker",
