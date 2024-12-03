@@ -10,9 +10,9 @@ import { RegistryAlertTypeWithAuth } from '../../../../../../authorization';
 import type { TypesRulesResponseBodyV1 } from '../../../../../../../common/routes/rule/apis/list_types';
 
 export const transformRuleTypesResponse = (
-  ruleTypes: Set<RegistryAlertTypeWithAuth>
+  ruleTypes: RegistryAlertTypeWithAuth[]
 ): TypesRulesResponseBodyV1 => {
-  return Array.from(ruleTypes).map((ruleType: RegistryAlertTypeWithAuth) => {
+  return ruleTypes.map((ruleType: RegistryAlertTypeWithAuth) => {
     return {
       ...(ruleType.actionGroups ? { action_groups: ruleType.actionGroups } : {}),
       ...(ruleType.actionVariables ? { action_variables: ruleType.actionVariables } : {}),

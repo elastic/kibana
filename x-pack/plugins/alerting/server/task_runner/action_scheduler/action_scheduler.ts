@@ -5,13 +5,8 @@
  * 2.0.
  */
 
+import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import {
-  createTaskRunError,
-  isEphemeralTaskRejectedDueToCapacityError,
-  TaskErrorSource,
-} from '@kbn/task-manager-plugin/server';
-import {
-  ExecuteOptions as EnqueueExecutionOptions,
   ExecutionResponseItem,
   ExecutionResponseType,
 } from '@kbn/actions-plugin/server/create_execute_function';
@@ -51,8 +46,6 @@ export class ActionScheduler<
     IActionScheduler<State, Context, ActionGroupIds, RecoveryActionGroupId>
   > = [];
 
-  private ephemeralActionsToSchedule: number;
-
   constructor(
     private readonly context: ActionSchedulerOptions<
       Params,
@@ -65,7 +58,6 @@ export class ActionScheduler<
       AlertData
     >
   ) {
-    this.ephemeralActionsToSchedule = context.taskRunnerContext.maxEphemeralActionsPerRule;
     for (const [_, scheduler] of Object.entries(schedulers)) {
       this.schedulers.push(new scheduler(context));
     }
@@ -101,37 +93,28 @@ export class ActionScheduler<
       return { throttledSummaryActions };
     }
 
-    const bulkScheduleRequest: EnqueueExecutionOptions[] = [];
-
-    for (const result of allActionsToScheduleResult) {
-      await this.runActionAsEphemeralOrAddToBulkScheduleRequest({
-        enqueueOptions: result.actionToEnqueue,
-        bulkScheduleRequest,
-      });
-    }
-
     let bulkScheduleResponse: ExecutionResponseItem[] = [];
 
-    if (!!bulkScheduleRequest.length) {
-      for (const c of chunk(bulkScheduleRequest, BULK_SCHEDULE_CHUNK_SIZE)) {
-        let enqueueResponse;
-        try {
-          enqueueResponse = await withAlertingSpan('alerting:bulk-enqueue-actions', () =>
-            this.context.actionsClient!.bulkEnqueueExecution(c)
-          );
-        } catch (e) {
-          if (e.statusCode === 404) {
-            throw createTaskRunError(e, TaskErrorSource.USER);
-          }
-          throw createTaskRunError(e, TaskErrorSource.FRAMEWORK);
+    for (const c of chunk(allActionsToScheduleResult, BULK_SCHEDULE_CHUNK_SIZE)) {
+      let enqueueResponse;
+      try {
+        enqueueResponse = await withAlertingSpan('alerting:bulk-enqueue-actions', () =>
+          this.context.actionsClient!.bulkEnqueueExecution(
+            c.map((actions) => actions.actionToEnqueue)
+          )
+        );
+      } catch (e) {
+        if (e.statusCode === 404) {
+          throw createTaskRunError(e, TaskErrorSource.USER);
         }
-        if (enqueueResponse.errors) {
-          bulkScheduleResponse = bulkScheduleResponse.concat(
-            enqueueResponse.items.filter(
-              (i) => i.response === ExecutionResponseType.QUEUED_ACTIONS_LIMIT_ERROR
-            )
-          );
-        }
+        throw createTaskRunError(e, TaskErrorSource.FRAMEWORK);
+      }
+      if (enqueueResponse.errors) {
+        bulkScheduleResponse = bulkScheduleResponse.concat(
+          enqueueResponse.items.filter(
+            (i) => i.response === ExecutionResponseType.QUEUED_ACTIONS_LIMIT_ERROR
+          )
+        );
       }
     }
 
@@ -174,29 +157,5 @@ export class ActionScheduler<
     }
 
     return { throttledSummaryActions };
-  }
-
-  private async runActionAsEphemeralOrAddToBulkScheduleRequest({
-    enqueueOptions,
-    bulkScheduleRequest,
-  }: {
-    enqueueOptions: EnqueueExecutionOptions;
-    bulkScheduleRequest: EnqueueExecutionOptions[];
-  }) {
-    if (
-      this.context.taskRunnerContext.supportsEphemeralTasks &&
-      this.ephemeralActionsToSchedule > 0
-    ) {
-      this.ephemeralActionsToSchedule--;
-      try {
-        await this.context.actionsClient!.ephemeralEnqueuedExecution(enqueueOptions);
-      } catch (err) {
-        if (isEphemeralTaskRejectedDueToCapacityError(err)) {
-          bulkScheduleRequest.push(enqueueOptions);
-        }
-      }
-    } else {
-      bulkScheduleRequest.push(enqueueOptions);
-    }
   }
 }
