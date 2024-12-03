@@ -17,26 +17,14 @@ import {
 import { readTypeDefinitions, storeTypeDefinition } from './definitions/type_definition';
 import { getEntityInstancesQuery } from './queries';
 import { mergeEntitiesList } from './queries/utils';
-import { EntitySourceDefinition, EntityTypeDefinition, SortBy } from './types';
+import {
+  EntitySourceDefinition,
+  EntityTypeDefinition,
+  SearchByType,
+  SearchBySources,
+} from './types';
 import { UnknownEntityType } from './errors/unknown_entity_type';
 import { runESQLQuery } from './run_esql_query';
-
-interface SearchCommon {
-  start: string;
-  end: string;
-  sort?: SortBy;
-  metadataFields?: string[];
-  filters?: string[];
-  limit?: number;
-}
-
-export type SearchByType = SearchCommon & {
-  type: string;
-};
-
-export type SearchBySources = SearchCommon & {
-  sources: EntitySourceDefinition[];
-};
 
 export class EntityClient {
   constructor(
@@ -47,15 +35,7 @@ export class EntityClient {
     }
   ) {}
 
-  async searchEntities({
-    type,
-    start,
-    end,
-    sort,
-    metadataFields = [],
-    filters = [],
-    limit = 10,
-  }: SearchByType) {
+  async searchEntities({ type, ...options }: SearchByType) {
     const sources = await this.readSourceDefinitions({
       type,
     });
@@ -66,23 +46,18 @@ export class EntityClient {
 
     return this.searchEntitiesBySources({
       sources,
-      start,
-      end,
-      metadataFields,
-      filters,
-      sort,
-      limit,
+      ...options,
     });
   }
 
   async searchEntitiesBySources({
     sources,
+    metadata_fields: metadataFields,
+    filters,
     start,
     end,
     sort,
-    metadataFields = [],
-    filters = [],
-    limit = 10,
+    limit,
   }: SearchBySources) {
     const entities = await Promise.all(
       sources.map(async (source) => {

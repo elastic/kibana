@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
+import moment from 'moment';
 
 // Definitions
 
@@ -47,7 +48,46 @@ export interface StoredEntitySourceDefinition extends BaseEntityDefinition {
 
 // API parameters
 
-export interface SortBy {
-  field: string;
-  direction: 'ASC' | 'DESC';
-}
+const sortByRt = z.object({
+  field: z.string(),
+  direction: z.enum(['ASC', 'DESC']),
+});
+
+export type SortBy = z.TypeOf<typeof sortByRt>;
+
+const searchCommonRt = z.object({
+  start: z
+    .optional(z.string())
+    .default(() => moment().subtract(5, 'minutes').toISOString())
+    .refine((val) => moment(val).isValid(), {
+      message: '[start] should be a date in ISO format',
+    }),
+  end: z
+    .optional(z.string())
+    .default(() => moment().toISOString())
+    .refine((val) => moment(val).isValid(), {
+      message: '[end] should be a date in ISO format',
+    }),
+  sort: z.optional(sortByRt),
+  limit: z.optional(z.number()).default(10),
+  metadata_fields: z.optional(z.array(z.string())).default([]),
+  filters: z.optional(z.array(z.string())).default([]),
+});
+
+export const searchByTypeRt = z.intersection(
+  searchCommonRt,
+  z.object({
+    type: z.string(),
+  })
+);
+
+export type SearchByType = z.output<typeof searchByTypeRt>;
+
+export const searchBySourcesRt = z.intersection(
+  searchCommonRt,
+  z.object({
+    sources: z.array(entitySourceDefinitionRt),
+  })
+);
+
+export type SearchBySources = z.output<typeof searchBySourcesRt>;
