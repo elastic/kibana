@@ -15,16 +15,16 @@ import { SecuritySolutionPageWrapper } from '../../../common/components/page_wra
 import { SecurityPageName } from '../../../app/types';
 
 import * as i18n from './translations';
-import { RulesTable } from '../components/rules_table';
+import { MigrationRulesTable } from '../components/rules_table';
 import { NeedAdminForUpdateRulesCallOut } from '../../../detections/components/callouts/need_admin_for_update_callout';
 import { MissingPrivilegesCallOut } from '../../../detections/components/callouts/missing_privileges_callout';
 import { HeaderButtons } from '../components/header_buttons';
 import { UnknownMigration } from '../components/unknown_migration';
 import { useLatestStats } from '../hooks/use_latest_stats';
 
-type RulesMigrationPageProps = RouteComponentProps<{ migrationId?: string }>;
+type MigrationRulesPageProps = RouteComponentProps<{ migrationId?: string }>;
 
-export const RulesPage: React.FC<RulesMigrationPageProps> = React.memo(
+export const MigrationRulesPage: React.FC<MigrationRulesPageProps> = React.memo(
   ({
     match: {
       params: { migrationId },
@@ -68,7 +68,7 @@ export const RulesPage: React.FC<RulesMigrationPageProps> = React.memo(
       if (!migrationId || !migrationsIds.includes(migrationId)) {
         return <UnknownMigration />;
       }
-      return <RulesTable migrationId={migrationId} />;
+      return <MigrationRulesTable migrationId={migrationId} />;
     }, [migrationId, migrationsIds]);
 
     return (
@@ -99,4 +99,4 @@ export const RulesPage: React.FC<RulesMigrationPageProps> = React.memo(
     );
   }
 );
-RulesPage.displayName = 'RulesPage';
+MigrationRulesPage.displayName = 'MigrationRulesPage';
