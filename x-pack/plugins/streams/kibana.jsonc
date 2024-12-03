@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/streams-plugin",
-  "owner": "@simianhacker @flash1293 @dgieselaar",
+  "owner": "@elastic/streams-program-team",
   "description": "A manager for Streams",
   "group": "observability",
   "visibility": "private",
