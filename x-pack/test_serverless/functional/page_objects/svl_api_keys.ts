@@ -33,7 +33,7 @@ export function SvlApiKeysProvider({ getService, getPageObjects }: FtrProviderCo
     },
 
     async expectAPIKeyAvailable() {
-      await testSubjects.existOrFail('apiKeyFormAPIKey', { timeout: 1000 });
+      await testSubjects.existOrFail('apiKeyFormAPIKey');
       await retry.try(async () => {
         expect(await testSubjects.getVisibleText('apiKeyFormAPIKey')).to.be(APIKEY_MASK);
       });
@@ -106,7 +106,6 @@ export function SvlApiKeysProvider({ getService, getPageObjects }: FtrProviderCo
       await es.security.invalidateApiKey({
         ids: validKeys.map((key) => key.id),
       });
-
     },
 
     async expectCreateApiKeyAction() {
