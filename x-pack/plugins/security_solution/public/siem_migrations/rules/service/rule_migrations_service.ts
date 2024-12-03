@@ -7,9 +7,9 @@
 
 import { BehaviorSubject, type Observable } from 'rxjs';
 import type { CoreStart } from '@kbn/core/public';
+import type { RuleMigrationTaskStats } from '../../../../common/siem_migrations/model/rule_migration.gen';
 import type {
   CreateRuleMigrationRequestBody,
-  CreateRuleMigrationResponse,
   GetAllStatsRuleMigrationResponse,
   GetRuleMigrationStatsResponse,
 } from '../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
@@ -30,6 +30,7 @@ import { RuleMigrationsStorage } from './storage';
 import * as i18n from './translations';
 
 const REQUEST_POLLING_INTERVAL_MS = 5000 as const;
+const CREATE_MIGRATION_BODY_BATCH_SIZE = 50 as const;
 
 export class SiemRulesMigrationsService {
   private readonly latestStats$: BehaviorSubject<RuleMigrationStats[]>;
@@ -73,26 +74,31 @@ export class SiemRulesMigrationsService {
   public async getRuleMigrationTasksStats(
     params: GetRuleMigrationsStatsAllParams = {}
   ): Promise<RuleMigrationStats[]> {
-    const allStats = await getRuleMigrationsStatsAll(params);
+    const allStats = await this.getRuleMigrationsTaskStatsAll(params);
     const results = allStats.map(
-      (stats, index) =>
-        ({
-          ...stats,
-          number: index + 1, // the array order (by creation) is guaranteed by the API
-        } as RuleMigrationStats) // needs cast because of the `status` enum override
+      // the array order (by creation) is guaranteed by the API
+      (stats, index) => ({ ...stats, number: index + 1 } as RuleMigrationStats) // needs cast because of the `status` enum override
     );
     this.latestStats$.next(results); // Always update the latest stats
     return results;
   }
 
-  public async createRuleMigration(
-    body: CreateRuleMigrationRequestBody
-  ): Promise<CreateRuleMigrationResponse> {
+  public async createRuleMigration(body: CreateRuleMigrationRequestBody): Promise<string> {
     const connectorId = this.connectorIdStorage.get();
     if (!connectorId) {
       throw new Error(i18n.MISSING_CONNECTOR_ERROR);
     }
-    return createRuleMigration({ body });
+    if (body.length === 0) {
+      throw new Error(i18n.EMPTY_RULES_ERROR);
+    }
+    // Batching creation to avoid hitting the max payload size limit of the API
+    let migrationId: string | undefined;
+    for (let i = 0; i < body.length; i += CREATE_MIGRATION_BODY_BATCH_SIZE) {
+      const bodyBatch = body.slice(i, i + CREATE_MIGRATION_BODY_BATCH_SIZE);
+      const response = await createRuleMigration({ migrationId, body: bodyBatch });
+      migrationId = response.migration_id;
+    }
+    return migrationId as string;
   }
 
   public async getRuleMigrationsStats(migrationId: string): Promise<GetRuleMigrationStatsResponse> {
@@ -108,6 +114,28 @@ export class SiemRulesMigrationsService {
     const result = await startRuleMigration({ migrationId, connectorId });
     this.startPolling();
     return result;
+  }
+
+  public async getRuleMigrationsTaskStatsAll(
+    params: GetRuleMigrationsStatsAllParams = {},
+    sleepSecs?: number
+  ): Promise<RuleMigrationTaskStats[]> {
+    if (sleepSecs) {
+      await new Promise((resolve) => setTimeout(resolve, sleepSecs * 1000));
+    }
+
+    return getRuleMigrationsStatsAll(params).catch((e) => {
+      // Retry only on network errors and 503s, otherwise throw
+      if (e.message !== 'Failed to fetch' && e.status !== 503) {
+        throw e;
+      }
+      const nextSleepSecs = sleepSecs ? sleepSecs * 3 : 1;
+      if (nextSleepSecs > 60 * 2) {
+        // Wait for 2 minutes max for the API to be available again
+        throw e;
+      }
+      return this.getRuleMigrationsTaskStatsAll(params, nextSleepSecs);
+    });
   }
 
   private async startTaskStatsPolling(): Promise<void> {

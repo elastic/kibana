@@ -17,18 +17,27 @@
 import { z } from '@kbn/zod';
 import { ArrayFromString } from '@kbn/zod-helpers';
 
+import { NonEmptyString, ConnectorId, LangSmithOptions } from '../../common.gen';
 import {
-  OriginalRule,
   ElasticRulePartial,
   RuleMigrationTranslationResult,
   RuleMigrationComments,
   RuleMigrationTaskStats,
+  OriginalRule,
   RuleMigration,
+  RuleMigrationTranslationStats,
   RuleMigrationResourceData,
   RuleMigrationResourceType,
   RuleMigrationResource,
 } from '../../rule_migration.gen';
-import { NonEmptyString, ConnectorId, LangSmithOptions } from '../../common.gen';
+
+export type CreateRuleMigrationRequestParams = z.infer<typeof CreateRuleMigrationRequestParams>;
+export const CreateRuleMigrationRequestParams = z.object({
+  migration_id: NonEmptyString.optional(),
+});
+export type CreateRuleMigrationRequestParamsInput = z.input<
+  typeof CreateRuleMigrationRequestParams
+>;
 
 export type CreateRuleMigrationRequestBody = z.infer<typeof CreateRuleMigrationRequestBody>;
 export const CreateRuleMigrationRequestBody = z.array(OriginalRule);
@@ -44,6 +53,13 @@ export const CreateRuleMigrationResponse = z.object({
 
 export type GetAllStatsRuleMigrationResponse = z.infer<typeof GetAllStatsRuleMigrationResponse>;
 export const GetAllStatsRuleMigrationResponse = z.array(RuleMigrationTaskStats);
+export type GetRuleMigrationRequestQuery = z.infer<typeof GetRuleMigrationRequestQuery>;
+export const GetRuleMigrationRequestQuery = z.object({
+  page: z.coerce.number().optional(),
+  per_page: z.coerce.number().optional(),
+  search_term: z.string().optional(),
+});
+export type GetRuleMigrationRequestQueryInput = z.input<typeof GetRuleMigrationRequestQuery>;
 
 export type GetRuleMigrationRequestParams = z.infer<typeof GetRuleMigrationRequestParams>;
 export const GetRuleMigrationRequestParams = z.object({
@@ -52,7 +68,13 @@ export const GetRuleMigrationRequestParams = z.object({
 export type GetRuleMigrationRequestParamsInput = z.input<typeof GetRuleMigrationRequestParams>;
 
 export type GetRuleMigrationResponse = z.infer<typeof GetRuleMigrationResponse>;
-export const GetRuleMigrationResponse = z.array(RuleMigration);
+export const GetRuleMigrationResponse = z.object({
+  /**
+   * The total number of rules in migration.
+   */
+  total: z.number(),
+  data: z.array(RuleMigration),
+});
 export type GetRuleMigrationResourcesRequestQuery = z.infer<
   typeof GetRuleMigrationResourcesRequestQuery
 >;
@@ -87,6 +109,21 @@ export type GetRuleMigrationStatsRequestParamsInput = z.input<
 
 export type GetRuleMigrationStatsResponse = z.infer<typeof GetRuleMigrationStatsResponse>;
 export const GetRuleMigrationStatsResponse = RuleMigrationTaskStats;
+
+export type GetRuleMigrationTranslationStatsRequestParams = z.infer<
+  typeof GetRuleMigrationTranslationStatsRequestParams
+>;
+export const GetRuleMigrationTranslationStatsRequestParams = z.object({
+  migration_id: NonEmptyString,
+});
+export type GetRuleMigrationTranslationStatsRequestParamsInput = z.input<
+  typeof GetRuleMigrationTranslationStatsRequestParams
+>;
+
+export type GetRuleMigrationTranslationStatsResponse = z.infer<
+  typeof GetRuleMigrationTranslationStatsResponse
+>;
+export const GetRuleMigrationTranslationStatsResponse = RuleMigrationTranslationStats;
 
 export type InstallMigrationRulesRequestParams = z.infer<typeof InstallMigrationRulesRequestParams>;
 export const InstallMigrationRulesRequestParams = z.object({

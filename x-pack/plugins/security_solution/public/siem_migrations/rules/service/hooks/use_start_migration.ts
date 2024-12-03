@@ -28,9 +28,9 @@ export const useStartMigration = (onSuccess?: OnSuccess) => {
 
   const startMigration = useCallback<StartMigration>(
     (migrationId) => {
-      dispatch({ type: 'start' });
       (async () => {
         try {
+          dispatch({ type: 'start' });
           await siemMigrations.rules.startRuleMigration(migrationId);
 
           notifications.toasts.addSuccess(RULES_DATA_INPUT_START_MIGRATION_SUCCESS);

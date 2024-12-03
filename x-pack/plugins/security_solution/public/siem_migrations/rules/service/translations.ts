@@ -13,6 +13,11 @@ export const POLLING_ERROR = i18n.translate(
 );
 
 export const MISSING_CONNECTOR_ERROR = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rulesService.missingConnectorError',
+  'xpack.securitySolution.siemMigrations.rulesService.create.missingConnectorError',
   { defaultMessage: 'Connector not defined. Please set a connector ID first.' }
+);
+
+export const EMPTY_RULES_ERROR = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rulesService.create.emptyRulesError',
+  { defaultMessage: 'Can not create a migration without rules' }
 );

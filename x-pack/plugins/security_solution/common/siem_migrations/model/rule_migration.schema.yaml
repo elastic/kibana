@@ -207,7 +207,39 @@ components:
         - running
         - stopped
         - finished
-        
+
+    RuleMigrationTranslationStats:
+      type: object
+      description: The rule migration translation stats object.
+      required:
+        - id
+        - rules
+      properties:
+        id:
+          description: The migration id
+          $ref: './common.schema.yaml#/components/schemas/NonEmptyString'
+        rules:
+          type: object
+          description: The rules migration translation stats.
+          required:
+            - total
+            - prebuilt
+            - custom
+            - installable
+          properties:
+            total:
+              type: integer
+              description: The total number of rules to migrate.
+            prebuilt:
+              type: integer
+              description: The number of rules that matched Elastic prebuilt rules.
+            custom:
+              type: integer
+              description: The number of rules that did not match Elastic prebuilt rules and will be installed as custom rules.
+            installable:
+              type: integer
+              description: The number of rules that can be installed.
+
     RuleMigrationTranslationResult:
       type: string
       description: The rule translation result.

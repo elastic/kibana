@@ -256,6 +256,38 @@ export const RuleMigrationTaskStats = z.object({
 });
 
 /**
+ * The rule migration translation stats object.
+ */
+export type RuleMigrationTranslationStats = z.infer<typeof RuleMigrationTranslationStats>;
+export const RuleMigrationTranslationStats = z.object({
+  /**
+   * The migration id
+   */
+  id: NonEmptyString,
+  /**
+   * The rules migration translation stats.
+   */
+  rules: z.object({
+    /**
+     * The total number of rules to migrate.
+     */
+    total: z.number().int(),
+    /**
+     * The number of rules that matched Elastic prebuilt rules.
+     */
+    prebuilt: z.number().int(),
+    /**
+     * The number of rules that did not match Elastic prebuilt rules and will be installed as custom rules.
+     */
+    custom: z.number().int(),
+    /**
+     * The number of rules that can be installed.
+     */
+    installable: z.number().int(),
+  }),
+});
+
+/**
  * The type of the rule migration resource.
  */
 export type RuleMigrationResourceType = z.infer<typeof RuleMigrationResourceType>;

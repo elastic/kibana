@@ -9,26 +9,41 @@ import type { UseQueryOptions } from '@tanstack/react-query';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { replaceParams } from '@kbn/openapi-common/shared';
 import { useCallback } from 'react';
+import type { RuleMigration } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { DEFAULT_QUERY_OPTIONS } from './constants';
-import { getRuleMigrations } from '../api';
-import type { GetRuleMigrationResponse } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
+import { getRuleMigrations, type GetRuleMigrationParams } from '../api';
 import { SIEM_RULE_MIGRATION_PATH } from '../../../../../common/siem_migrations/constants';
 
+type UseGetMigrationRulesQueryProps = Omit<GetRuleMigrationParams, 'signal'>;
+
+export interface MigrationRulesQueryResponse {
+  ruleMigrations: RuleMigration[];
+  total: number;
+}
+
 export const useGetMigrationRulesQuery = (
-  migrationId: string,
-  options?: UseQueryOptions<GetRuleMigrationResponse>
+  queryArgs: UseGetMigrationRulesQueryProps,
+  queryOptions?: UseQueryOptions<
+    MigrationRulesQueryResponse,
+    Error,
+    MigrationRulesQueryResponse,
+    [...string[], UseGetMigrationRulesQueryProps]
+  >
 ) => {
+  const { migrationId } = queryArgs;
   const SPECIFIC_MIGRATION_PATH = replaceParams(SIEM_RULE_MIGRATION_PATH, {
     migration_id: migrationId,
   });
-  return useQuery<GetRuleMigrationResponse>(
-    ['GET', SPECIFIC_MIGRATION_PATH],
+  return useQuery(
+    ['GET', SPECIFIC_MIGRATION_PATH, queryArgs],
     async ({ signal }) => {
-      return getRuleMigrations({ migrationId, signal });
+      const response = await getRuleMigrations({ signal, ...queryArgs });
+
+      return { ruleMigrations: response.data, total: response.total };
     },
     {
       ...DEFAULT_QUERY_OPTIONS,
-      ...options,
+      ...queryOptions,
     }
   );
 };
@@ -47,6 +62,10 @@ export const useInvalidateGetMigrationRulesQuery = (migrationId: string) => {
   });
 
   return useCallback(() => {
+    /**
+     * Invalidate all queries that start with SPECIFIC_MIGRATION_PATH. This
+     * includes the in-memory query cache and paged query cache.
+     */
     queryClient.invalidateQueries(['GET', SPECIFIC_MIGRATION_PATH], {
       refetchType: 'active',
     });
