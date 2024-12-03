@@ -14,11 +14,33 @@ import type { EntityDefinition } from '@kbn/entities-schema';
 import type { EntityType } from '../../../../../common/api/entity_analytics';
 
 export type MappingProperties = NonNullable<MappingTypeMapping['properties']>;
-
 export type EntityDefinitionMetadataElement = NonNullable<EntityDefinition['metadata']>[number];
 
+type PickPartial<T, K extends keyof T, Optional extends K = never> = {
+  [P in K as P extends Optional ? never : P]: T[P];
+} & {
+  [P in K as P extends Optional ? P : never]?: Partial<T[P]>;
+};
+
+export type EntityDescription = PickPartial<
+  EntityEngineInstallationDescriptor,
+  | 'version'
+  | 'entityType'
+  | 'fields'
+  | 'identityFields'
+  | 'indexPatterns'
+  | 'indexMappings'
+  | 'settings'
+  | 'pipeline',
+  'indexPatterns' | 'indexMappings' | 'settings' | 'pipeline'
+>;
+
+const foo: EntityDescription = {
+  settings,
+};
+
 export interface EntityEngineInstallationDescriptor {
-  id?: string;
+  id: string;
   version: string;
   entityType: EntityType;
 
