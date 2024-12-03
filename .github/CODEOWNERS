@@ -1183,6 +1183,8 @@ x-pack/test_serverless/**/test_suites/observability/ai_assistant @elastic/obs-ai
 /x-pack/plugins/observability_solution/infra/server/services @elastic/obs-ux-infra_services-team
 /x-pack/plugins/observability_solution/infra/server/usage @elastic/obs-ux-infra_services-team
 /x-pack/plugins/observability_solution/infra/server/utils @elastic/obs-ux-infra_services-team
+/x-pack/test_serverless/functional/test_suites/observability/infra @elastic/obs-ux-infra_services-team
+/x-pack/test/api_integration/services/infraops_source_configuration.ts @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team # Assigned per https://github.com/elastic/kibana/pull/34916
 
 ## Logs UI code exceptions -> @elastic/obs-ux-logs-team
 /x-pack/test_serverless/functional/page_objects/svl_oblt_onboarding_stream_log_file.ts @elastic/obs-ux-logs-team
