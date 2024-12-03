@@ -22,9 +22,7 @@ export function FieldUpgrade(): JSX.Element {
   const hasConflict = fieldDiff.conflict !== ThreeWayDiffConflict.NONE;
   const isFieldCustomized = useMemo(
     () =>
-      fieldDiff.has_base_version
-        ? !isEqual(fieldDiff.base_version, fieldDiff.current_version)
-        : false,
+      fieldDiff.base_version ? !isEqual(fieldDiff.base_version, fieldDiff.current_version) : false,
     [fieldDiff]
   );
 

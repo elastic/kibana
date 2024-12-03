@@ -76,7 +76,9 @@ export function usePrebuiltRulesUpgradeState(
         fieldsUpgradeState,
         hasUnresolvedConflicts: isPrebuiltRulesCustomizationEnabled
           ? Object.values(fieldsUpgradeState).some(
-              (x) => x !== FieldUpgradeState.NoConflict && x !== FieldUpgradeState.Accepted
+              (x) =>
+                x === FieldUpgradeState.SolvableConflict ||
+                x === FieldUpgradeState.NonSolvableConflict
             )
           : false,
       };
