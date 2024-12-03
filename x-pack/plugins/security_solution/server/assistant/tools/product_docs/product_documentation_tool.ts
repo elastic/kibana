@@ -21,14 +21,14 @@ export const PRODUCT_DOCUMENTATION_TOOL: AssistantTool = {
   ...toolDetails,
   sourceRegister: APP_UI_ID,
   isSupported: (params: AssistantToolParams): params is AssistantToolParams => {
-    return params.kbDataClient != null;
+    return params.llmTasks != null && params.connectorId != null;
   },
   getTool(params: AssistantToolParams) {
     if (!this.isSupported(params)) return null;
 
     const { connectorId, llmTasks, request } = params as AssistantToolParams;
 
-    // This check is here and not in isSupported in order to satisfy TypeScript
+    // This check is here in order to satisfy TypeScript
     if (llmTasks == null || connectorId == null) return null;
 
     return new DynamicStructuredTool({
@@ -55,7 +55,7 @@ export const PRODUCT_DOCUMENTATION_TOOL: AssistantTool = {
           )
           .optional(),
       }),
-      func: async ({ query, product }, _, cbManager) => {
+      func: async ({ query, product }) => {
         const response = await llmTasks.retrieveDocumentation({
           searchTerm: query,
           products: product ? [product] : undefined,
