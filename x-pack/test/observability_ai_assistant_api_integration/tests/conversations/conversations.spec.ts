@@ -325,7 +325,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               .set('kbn-xsrf', 'true');
 
             if (payload?.body) {
-              request.send(payload.body);
+              await request.send(payload.body);
             }
 
             await request.expect(403);
