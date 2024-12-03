@@ -4687,7 +4687,7 @@
               },
               {
                 "plugin": "infra",
-                "path": "x-pack/plugins/observability_solution/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
+                "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
                 "plugin": "monitoring",
@@ -7289,7 +7289,7 @@
               },
               {
                 "plugin": "infra",
-                "path": "x-pack/plugins/observability_solution/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
+                "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
                 "plugin": "monitoring",
@@ -9047,7 +9047,7 @@
               },
               {
                 "plugin": "infra",
-                "path": "x-pack/plugins/observability_solution/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
+                "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
                 "plugin": "monitoring",
@@ -9473,7 +9473,7 @@
               },
               {
                 "plugin": "infra",
-                "path": "x-pack/plugins/observability_solution/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
+                "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
                 "plugin": "@kbn/test-suites-xpack",
@@ -9967,7 +9967,7 @@
               },
               {
                 "plugin": "infra",
-                "path": "x-pack/plugins/observability_solution/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
+                "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
                 "plugin": "reporting",
@@ -15399,7 +15399,7 @@
               },
               {
                 "plugin": "fieldsMetadata",
-                "path": "x-pack/plugins/fields_metadata/server/routes/fields_metadata/find_fields_metadata.ts"
+                "path": "x-pack/platform/plugins/shared/fields_metadata/server/routes/fields_metadata/find_fields_metadata.ts"
               },
               {
                 "plugin": "fleet",
@@ -15855,7 +15855,7 @@
               },
               {
                 "plugin": "infra",
-                "path": "x-pack/plugins/observability_solution/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
+                "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -16586,7 +16586,7 @@
               },
               {
                 "plugin": "infra",
-                "path": "x-pack/plugins/observability_solution/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
+                "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
                 "plugin": "osquery",
@@ -17429,7 +17429,7 @@
               },
               {
                 "plugin": "infra",
-                "path": "x-pack/plugins/observability_solution/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
+                "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -17968,7 +17968,7 @@
               },
               {
                 "plugin": "infra",
-                "path": "x-pack/plugins/observability_solution/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
+                "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -18219,7 +18219,7 @@
               },
               {
                 "plugin": "infra",
-                "path": "x-pack/plugins/observability_solution/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
+                "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
                 "plugin": "osquery",

@@ -809,7 +809,7 @@
             },
             {
               "plugin": "datasetQuality",
-              "path": "x-pack/plugins/observability_solution/dataset_quality/server/services/data_telemetry/data_telemetry_service.ts"
+              "path": "x-pack/solutions/observability/solutions/observability/plugins/observability_solution/dataset_quality/server/services/data_telemetry/data_telemetry_service.ts"
             },
             {
               "plugin": "securitySolution",

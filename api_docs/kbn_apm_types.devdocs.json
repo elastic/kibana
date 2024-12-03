@@ -2698,7 +2698,7 @@
         "signature": [
           "\"java\" | \"ruby\" | \"opentelemetry\" | \"dotnet\" | \"go\" | \"iOS/swift\" | \"js-base\" | \"nodejs\" | \"php\" | \"python\" | \"rum-js\" | \"android/java\" | \"otlp\" | `opentelemetry/${string}` | `otlp/${string}` | \"ios/swift\""
         ],
-        "path": "packages/kbn-elastic-agent-utils/src/agent_names.ts",
+        "path": "src/platform/packages/shared/kbn-elastic-agent-utils/src/agent_names.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3090,7 +3090,7 @@
         "signature": [
           "\"java\" | \"ruby\" | \"dotnet\" | \"go\" | \"iOS/swift\" | \"js-base\" | \"nodejs\" | \"php\" | \"python\" | \"rum-js\" | \"android/java\""
         ],
-        "path": "packages/kbn-elastic-agent-utils/src/agent_names.ts",
+        "path": "src/platform/packages/shared/kbn-elastic-agent-utils/src/agent_names.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4336,7 +4336,7 @@
         "signature": [
           "\"opentelemetry\" | \"otlp\" | `opentelemetry/${string}` | `otlp/${string}`"
         ],
-        "path": "packages/kbn-elastic-agent-utils/src/agent_names.ts",
+        "path": "src/platform/packages/shared/kbn-elastic-agent-utils/src/agent_names.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
