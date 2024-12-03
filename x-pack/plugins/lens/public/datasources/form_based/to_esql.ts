@@ -38,6 +38,8 @@ export function getESQLForLayer(
   const timeZone = getUserTimeZone((key) => uiSettings.get(key), true);
   if (timeZone !== 'UTC') return;
   if (Object.values(layer.columns).find((col) => col.operationType === 'formula')) return;
+  if (Object.values(layer.columns).find((col) => col.timeShift)) return;
+
   let esql = `FROM ${indexPattern.title} | `;
   if (indexPattern.timeFieldName) {
     esql += `WHERE ${indexPattern.timeFieldName} >= ?_tstart AND ${indexPattern.timeFieldName} <= ?_tend | `;
