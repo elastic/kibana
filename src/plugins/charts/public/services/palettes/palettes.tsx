@@ -21,7 +21,8 @@ import { workoutColorForValue } from './helpers';
 function buildRoundRobinCategoricalWithMappedColors(
   id: string,
   colors: string[],
-  behindTextColors?: string[]
+  behindTextColors?: string[],
+  isNewTheme?: boolean
 ): Omit<PaletteDefinition, 'title'> {
   const behindTextColorMap: Record<string, string> = Object.fromEntries(
     zip(colors, behindTextColors)
@@ -40,7 +41,7 @@ function buildRoundRobinCategoricalWithMappedColors(
       const mappedColor = mappedColors.get(colorKey);
       outputColor = chartConfiguration.behindText ? behindTextColorMap[mappedColor] : mappedColor;
     } else {
-      if (id === KbnPalette.Default) {
+      if (isNewTheme && id === KbnPalette.Default) {
         // no behind color for new default palette
         outputColor = colors[series[0].rankAtDepth % 10];
       } else {
@@ -228,7 +229,8 @@ export const buildPalettes = (theme: CoreTheme): Record<string, PaletteDefinitio
       ...buildRoundRobinCategoricalWithMappedColors(
         'default', // needs to match key of palette definition
         defaultPalette.colors(),
-        kbnPalettes.query(KbnPalette.Kibana7BehindText)?.colors()
+        kbnPalettes.query(KbnPalette.Kibana7BehindText)?.colors(),
+        theme.name !== 'amsterdam'
       ),
     },
     status: buildGradient('status', kbnPalettes.get('status')),

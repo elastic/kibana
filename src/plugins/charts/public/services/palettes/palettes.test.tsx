@@ -7,12 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createCoreSetupMock } from '@kbn/core-lifecycle-browser-mocks/src/core_setup.mock';
 import { buildPalettes } from './palettes';
 import { euiPaletteColorBlind, euiPaletteColorBlindBehindText } from '@elastic/eui';
 
 describe('palettes', () => {
-  const palettes = buildPalettes(createCoreSetupMock().theme.getTheme());
+  const palettes = buildPalettes({ name: 'amsterdam', darkMode: false });
 
   describe('default palette', () => {
     describe('syncColors: false', () => {
