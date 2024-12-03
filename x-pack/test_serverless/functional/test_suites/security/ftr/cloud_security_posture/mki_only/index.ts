@@ -9,7 +9,9 @@ import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('cloud_security_posture', function () {
-    this.tags(['failsOnMKI', 'cloud_security_posture']);
-    loadTestFile(require.resolve('./create_agent'));
+    this.tags(['cloud_security_posture']);
+
+    // do not resolve files which are ending with `.essentials.ts`
+    loadTestFile(require.resolve('./agentless/mki_create_agent'));
   });
 }
