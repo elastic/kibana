@@ -1545,9 +1545,9 @@ describe('Response actions history', () => {
       await user.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
       const filterList = getByTestId(`${testPrefix}-${filterPrefix}-popoverList`);
       expect(filterList).toBeTruthy();
-      expect(getAllByTestId(`${filterPrefix}-option`).length).toEqual(
-        RESPONSE_ACTION_API_COMMANDS_NAMES.length
-      );
+      // TODO: RUNSCRIPT does not have a corresponding action in the API yet
+      const TEMPORARY_LENGTH = RESPONSE_ACTION_API_COMMANDS_NAMES.length - 1;
+      expect(getAllByTestId(`${filterPrefix}-option`).length).toEqual(TEMPORARY_LENGTH);
       expect(getAllByTestId(`${filterPrefix}-option`).map((option) => option.textContent)).toEqual([
         'isolate. To check this option, press Enter.',
         'release. To check this option, press Enter.',
@@ -1558,7 +1558,6 @@ describe('Response actions history', () => {
         'execute. To check this option, press Enter.',
         'upload. To check this option, press Enter.',
         'scan. To check this option, press Enter.',
-        'runscript. To check this option, press Enter.',
       ]);
     });
 
