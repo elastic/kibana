@@ -58,7 +58,7 @@ export const forkStreamsRoute = createServerRoute({
         id: params.path.id,
       });
 
-      const childDefinition = { ...params.body.stream, children: [] };
+      const childDefinition = { ...params.body.stream, children: [], managed: true };
 
       // check whether root stream has a child of the given name already
       if (rootDefinition.children.some((child) => child.id === childDefinition.id)) {

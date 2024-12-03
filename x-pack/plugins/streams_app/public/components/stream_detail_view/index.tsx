@@ -65,5 +65,12 @@ export function StreamDetailView() {
     },
   ];
 
-  return <EntityDetailViewWithoutParams tabs={tabs} entity={entity} selectedTab={tab} />;
+  return (
+    <EntityDetailViewWithoutParams
+      tabs={tabs}
+      entity={entity}
+      definition={streamEntity}
+      selectedTab={tab}
+    />
+  );
 }

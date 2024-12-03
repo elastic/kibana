@@ -77,6 +77,7 @@ export const editStreamRoute = createServerRoute({
           children: [],
           fields: [],
           processing: [],
+          managed: true,
         };
 
         await syncStream({
@@ -88,7 +89,7 @@ export const editStreamRoute = createServerRoute({
 
       await syncStream({
         scopedClusterClient,
-        definition: streamDefinition,
+        definition: { ...streamDefinition, id: params.path.id, managed: true },
         rootDefinition: parentDefinition,
         logger,
       });
