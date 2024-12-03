@@ -17,6 +17,7 @@ import {
 } from './helpers';
 import { resolveEndpoint } from '../../common/resolve_endpoint';
 import { unauthorizedUser } from '../../common/users/users';
+import { ApiErrorResponse } from '../../common/config';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const ml = getService('ml');
@@ -278,7 +279,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               await request.query(payload.query);
             }
 
-            await request.expect(403).then(({ body }) => {
+            await request.expect(403).then(({ body }: { body: ApiErrorResponse }) => {
               expect(body).to.eql({
                 statusCode: 403,
                 error: 'Forbidden',

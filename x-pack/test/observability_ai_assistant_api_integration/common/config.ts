@@ -33,6 +33,12 @@ export type ObservabilityAIAssistantAPIClient = Awaited<
 
 export type ObservabilityAIAssistantServices = Awaited<ReturnType<CreateTestConfig>>['services'];
 
+export interface ApiErrorResponse {
+  statusCode: number;
+  error: string;
+  message: string;
+}
+
 export function createObservabilityAIAssistantAPIConfig({
   config,
   license,
