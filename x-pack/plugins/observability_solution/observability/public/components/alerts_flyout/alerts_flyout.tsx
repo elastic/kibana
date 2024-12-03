@@ -45,12 +45,10 @@ export function AlertsFlyout({
       </EuiFlyoutHeader>
       <AlertsFlyoutBody
         alert={selectedAlert}
-        tableId={''}
         observabilityRuleTypeRegistry={observabilityRuleTypeRegistry}
       />
       <AlertsFlyoutFooter
         alert={selectedAlert}
-        tableId={''}
         observabilityRuleTypeRegistry={observabilityRuleTypeRegistry}
       />
     </EuiFlyout>
