@@ -81,7 +81,6 @@ export interface ExecuteOptions<Source = unknown> {
   actionId: string;
   consumer?: string;
   executionId?: string;
-  isEphemeral?: boolean;
   params: Record<string, unknown>;
   relatedSavedObjects?: RelatedSavedObjects;
   request: KibanaRequest;
@@ -132,7 +131,6 @@ export class ActionExecutor {
     actionId,
     consumer,
     executionId,
-    isEphemeral,
     request,
     params,
     relatedSavedObjects,
@@ -175,7 +173,6 @@ export class ActionExecutor {
       },
       executeLabel: `execute_action`,
       executionId,
-      isEphemeral,
       namespace,
       params,
       relatedSavedObjects,
@@ -367,7 +364,6 @@ export class ActionExecutor {
     checkCanExecuteFn,
     executeLabel,
     executionId,
-    isEphemeral,
     namespace,
     params,
     relatedSavedObjects,
@@ -512,7 +508,6 @@ export class ActionExecutor {
             params: validatedParams,
             config: validatedConfig,
             secrets: validatedSecrets,
-            isEphemeral,
             taskInfo,
             configurationUtilities,
             logger,

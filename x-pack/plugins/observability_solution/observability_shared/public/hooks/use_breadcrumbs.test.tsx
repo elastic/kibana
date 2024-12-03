@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
-import React, { ReactNode } from 'react';
+import { renderHook } from '@testing-library/react';
+import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
@@ -28,7 +28,7 @@ const kibanaServices = {
 } as unknown as Partial<CoreStart>;
 const KibanaContext = createKibanaReactContext(kibanaServices);
 
-function Wrapper({ children }: { children?: ReactNode }) {
+function Wrapper({ children }: React.PropsWithChildren) {
   return (
     <MemoryRouter>
       <KibanaContext.Provider>{children}</KibanaContext.Provider>
@@ -38,18 +38,20 @@ function Wrapper({ children }: { children?: ReactNode }) {
 
 describe('useBreadcrumbs', () => {
   afterEach(() => {
-    setBreadcrumbs.mockClear();
-    setTitle.mockClear();
+    jest.clearAllMocks();
   });
 
   describe('when setBreadcrumbs and setTitle are not defined', () => {
     it('does not set breadcrumbs or the title', () => {
       renderHook(() => useBreadcrumbs([]), {
-        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+        wrapper: ({ children }: React.PropsWithChildren) => (
           <MemoryRouter>
             <KibanaContext.Provider
               services={
-                { ...kibanaServices, chrome: { docTitle: {} } } as unknown as Partial<CoreStart>
+                {
+                  ...kibanaServices,
+                  chrome: { ...kibanaServices.chrome, docTitle: {}, setBreadcrumbs: null },
+                } as unknown as Partial<CoreStart>
               }
             >
               {children}

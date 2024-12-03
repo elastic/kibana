@@ -470,6 +470,10 @@ The plugin exposes the static DefaultEditorController class to consume.
 |WARNING: Missing README.
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/asset_inventory/README.md[assetInventory]
+|Centralized asset inventory experience within the Elastic Security solution. A central place for users to view and manage all their assets from different environments.
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/banners/README.md[banners]
 |Allow to add a header banner that will be displayed on every page of the Kibana application
 
@@ -577,6 +581,10 @@ security and spaces filtering.
 
 |{kib-repo}blob/{branch}/x-pack/plugins/entity_manager/README.md[entityManager]
 |This plugin provides access to observed entity data, such as information about hosts, pods, containers, services, and more.
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/entity_manager_app/README.md[entityManagerApp]
+|This plugin provides a user interface to interact with the Entity Manager.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/event_log/README.md[eventLog]
@@ -832,6 +840,10 @@ It uses Chromium and Puppeteer underneath to run the browser in headless mode.
 |The Inference Endpoints is a tool used to manage inference endpoints
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/search_solution/search_navigation/README.mdx[searchNavigation]
+|The Search Navigation plugin is used to handle navigation for search solution plugins across both stack and serverless.
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/search_notebooks/README.mdx[searchNotebooks]
 |This plugin contains endpoints and components for rendering search python notebooks in the persistent dev console.
 
@@ -907,6 +919,10 @@ routes, etc.
 
 |{kib-repo}blob/{branch}/x-pack/plugins/streams/README.md[streams]
 |This plugin provides an interface to manage streams
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/streams_app/README.md[streamsApp]
+|Home of the Streams app plugin, which allows users to manage Streams via the UI.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/synthetics/README.md[synthetics]

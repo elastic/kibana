@@ -22,11 +22,11 @@ export const useLoadConnectorTypes = (props: UseLoadConnectorTypesProps) => {
   const { http, includeSystemActions, enabled = true, featureId } = props;
 
   const queryFn = () => {
-    return fetchConnectorTypes({ http, includeSystemActions, featureId });
+    return fetchConnectorTypes({ http, featureId, includeSystemActions });
   };
 
   const { data, isLoading, isFetching, isInitialLoading } = useQuery({
-    queryKey: ['useLoadConnectorTypes', includeSystemActions],
+    queryKey: ['useLoadConnectorTypes', includeSystemActions, featureId],
     queryFn,
     refetchOnWindowFocus: false,
     enabled,

@@ -69,7 +69,7 @@ export function IncreaseFieldMappingLimit({ totalFieldLimit }: { totalFieldLimit
       <EuiFlexItem grow={false}>
         <EuiFormRow hasEmptyLabelSpace>
           <EuiButton
-            data-test-subj="datasetQualityIncreaseFieldMappingLimitButtonButton"
+            data-test-subj="datasetQualityIncreaseFieldMappingLimitButton"
             disabled={isInvalid}
             onClick={() => updateNewFieldLimit(newFieldLimit)}
             isLoading={isMitigationInProgress}

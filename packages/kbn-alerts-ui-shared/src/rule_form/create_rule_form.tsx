@@ -36,6 +36,7 @@ export interface CreateRuleFormProps {
   ruleTypeId: string;
   plugins: RuleFormPlugins;
   consumer?: string;
+  connectorFeatureId?: string;
   multiConsumerSelection?: RuleCreationValidConsumer | null;
   hideInterval?: boolean;
   validConsumers?: RuleCreationValidConsumer[];
@@ -53,6 +54,7 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
     ruleTypeId,
     plugins,
     consumer = 'alerts',
+    connectorFeatureId = 'alerting',
     multiConsumerSelection,
     validConsumers = DEFAULT_VALID_CONSUMERS,
     filteredRuleTypes = [],
@@ -195,6 +197,7 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
             multiConsumerSelection,
             validConsumers,
             ruleType,
+            ruleTypes,
           }),
         }}
       >

@@ -6,42 +6,40 @@
  */
 
 export const mockAutoOpsResponse = {
-  metrics: {
-    ingest_rate: [
-      {
-        name: 'metrics-system.cpu-default',
-        error: null,
-        data: [
-          [1726858530000, 13756849],
-          [1726862130000, 14657904],
-        ],
-      },
-      {
-        name: 'logs-nginx.access-default',
-        error: null,
-        data: [
-          [1726858530000, 12894623],
-          [1726862130000, 14436905],
-        ],
-      },
-    ],
-    storage_retained: [
-      {
-        name: 'metrics-system.cpu-default',
-        error: null,
-        data: [
-          [1726858530000, 12576413],
-          [1726862130000, 13956423],
-        ],
-      },
-      {
-        name: 'logs-nginx.access-default',
-        error: null,
-        data: [
-          [1726858530000, 12894623],
-          [1726862130000, 14436905],
-        ],
-      },
-    ],
-  },
+  ingest_rate: [
+    {
+      name: 'metrics-system.cpu-default',
+      error: null,
+      data: [
+        [1726858530000, 13756849],
+        [1726862130000, 14657904],
+      ],
+    },
+    {
+      name: 'logs-nginx.access-default',
+      error: null,
+      data: [
+        [1726858530000, 12894623],
+        [1726862130000, 14436905],
+      ],
+    },
+  ],
+  storage_retained: [
+    {
+      name: 'metrics-system.cpu-default',
+      error: null,
+      data: [
+        [1726858530000, 12576413],
+        [1726862130000, 13956423],
+      ],
+    },
+    {
+      name: 'logs-nginx.access-default',
+      error: null,
+      data: [
+        [1726858530000, 12894623],
+        [1726862130000, 14436905],
+      ],
+    },
+  ],
 };

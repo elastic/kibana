@@ -67,6 +67,7 @@ describe('When using isolate action from response actions console', () => {
                     loading: false,
                     canIsolateHost: true,
                   },
+                  platform: 'linux',
                 }),
               },
             };

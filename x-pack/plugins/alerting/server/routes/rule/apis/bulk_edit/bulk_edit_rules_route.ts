@@ -41,7 +41,8 @@ const buildBulkEditRulesRoute = ({ licenseState, path, router }: BuildBulkEditRu
     handleDisabledApiKeysError(
       router.handleLegacyErrors(
         verifyAccessAndContext(licenseState, async function (context, req, res) {
-          const rulesClient = (await context.alerting).getRulesClient();
+          const alertingContext = await context.alerting;
+          const rulesClient = await alertingContext.getRulesClient();
           const actionsClient = (await context.actions).getActionsClient();
 
           const bulkEditData: BulkEditRulesRequestBodyV1 = req.body;

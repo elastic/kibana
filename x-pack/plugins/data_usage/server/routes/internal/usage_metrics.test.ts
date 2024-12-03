@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import type { MockedKeys } from '@kbn/utility-types-jest';
 import type { CoreSetup } from '@kbn/core/server';
 import { registerUsageMetricsRoute } from './usage_metrics';
@@ -20,6 +19,16 @@ import { DATA_USAGE_METRICS_API_ROUTE } from '../../../common';
 import { createMockedDataUsageContext } from '../../mocks';
 import { CustomHttpRequestError } from '../../utils';
 import { AutoOpsError } from '../../services/errors';
+import { transformToUTCtime } from '../../../common/utils';
+
+const timeRange = {
+  start: 'now-15m',
+  end: 'now',
+};
+const utcTimeRange = transformToUTCtime({
+  ...timeRange,
+  isISOString: true,
+});
 
 describe('registerUsageMetricsRoute', () => {
   let mockCore: MockedKeys<CoreSetup<{}, DataUsageServerStart>>;
@@ -56,8 +65,8 @@ describe('registerUsageMetricsRoute', () => {
 
     const mockRequest = httpServerMock.createKibanaRequest({
       body: {
-        from: 'now-15m',
-        to: 'now',
+        from: utcTimeRange.start,
+        to: utcTimeRange.end,
         metricTypes: ['ingest_rate'],
         dataStreams: [],
       },
@@ -123,8 +132,8 @@ describe('registerUsageMetricsRoute', () => {
 
     const mockRequest = httpServerMock.createKibanaRequest({
       body: {
-        from: 'now-15m',
-        to: 'now',
+        from: utcTimeRange.start,
+        to: utcTimeRange.end,
         metricTypes: ['ingest_rate', 'storage_retained'],
         dataStreams: ['.ds-1', '.ds-2'],
       },
@@ -191,8 +200,8 @@ describe('registerUsageMetricsRoute', () => {
 
     const mockRequest = httpServerMock.createKibanaRequest({
       body: {
-        from: 'now-15m',
-        to: 'now',
+        from: utcTimeRange.start,
+        to: utcTimeRange.end,
         metricTypes: ['ingest_rate'],
         dataStreams: ['.ds-1', '.ds-2'],
       },
