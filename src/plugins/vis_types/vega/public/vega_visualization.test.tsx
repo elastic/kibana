@@ -25,7 +25,6 @@ import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { VegaVisualizationDependencies } from './plugin';
 import React from 'react';
 import { TimeCache } from './data_model/time_cache';
-import { euiPaletteColorBlind } from '@elastic/eui';
 import { scheme } from 'vega';
 
 jest.mock('./default_spec', () => ({
